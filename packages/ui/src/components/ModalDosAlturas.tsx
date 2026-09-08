@@ -63,6 +63,20 @@ export interface ModalDosAlturasProps {
   children: ReactNode
   /** Voz del asa (a11y). */
   etiquetaAsa: string
+  /**
+   * 🔴 EL ENCABEZADO — y **arrastra igual que el asa** (S114-B).
+   *
+   * `DIRECCION_ARTE_VIDEOCONSULTA` §3 lo pide con todas las letras: *«Se
+   * arrastra por el asa **o por cualquier parte de su encabezado**»*. **Estaba
+   * en la letra firmada y no estaba construido** — el gesto vivía sólo sobre
+   * los 28 px del asa. *Un asa de 28 px es un blanco chico para el pulgar, y
+   * la mitad que lo arreglaba ya estaba escrita.*
+   *
+   * Va DENTRO del mismo `GestureDetector`, así que no hay un segundo gesto que
+   * competir. **Los toques siguen pasando**: `Pan` activa recién con
+   * movimiento, así que un botón o un chip acá adentro se toca normal.
+   */
+  encabezado?: ReactNode
   /** Si hay texto sin guardar, bajar a `cerrado` pide confirmación. */
   hayCambiosSinGuardar?: boolean
   /** Lo llama en vez de cerrar cuando hay cambios. El consumidor decide cómo pregunta. */
@@ -91,6 +105,7 @@ export function ModalDosAlturas({
   altoPantalla,
   children,
   etiquetaAsa,
+  encabezado,
   hayCambiosSinGuardar = false,
   onPedirConfirmacion,
   altoTeclado = 0,
@@ -189,15 +204,19 @@ export function ModalDosAlturas({
         estilo,
       ]}
     >
-      {/* ── EL ASA. Nunca se esconde: es la única pista de que hay algo abajo. */}
+      {/* ── EL ASA **Y SU ENCABEZADO**: los dos arrastran (§3). El asa nunca se
+             esconde — es la única pista de que hay algo abajo. */}
       <GestureDetector gesture={arrastre}>
-        <View
-          accessibilityRole="adjustable"
-          accessibilityLabel={etiquetaAsa}
-          accessibilityValue={{ text: altura }}
-          style={{ height: ASA_ALTO, alignItems: 'center', justifyContent: 'center' }}
-        >
-          <View style={{ width: 40, height: 4, borderRadius: radius.full, backgroundColor: theme.border.default }} />
+        <View>
+          <View
+            accessibilityRole="adjustable"
+            accessibilityLabel={etiquetaAsa}
+            accessibilityValue={{ text: altura }}
+            style={{ height: ASA_ALTO, alignItems: 'center', justifyContent: 'center' }}
+          >
+            <View style={{ width: 40, height: 4, borderRadius: radius.full, backgroundColor: theme.border.default }} />
+          </View>
+          {encabezado}
         </View>
       </GestureDetector>
 
@@ -275,7 +294,30 @@ export function ModalDosAlturas({
  * **No se agranda para verse.** *El defecto nunca fue el tamaño — 40×4 es la
  * convención, y engordar la barra sólo habría dado una línea más gorda.*
  */
-export function AsaModal({ etiqueta, onPress }: { etiqueta: string; onPress: () => void }) {
+export function AsaModal({
+  etiqueta,
+  onPress,
+  sobre = 'video',
+}: {
+  etiqueta: string
+  onPress: () => void
+  /**
+   * 🔴 SOBRE QUÉ SE APOYA (S114-B). `'video'` es el default y **no mueve un
+   * píxel de la videoconsulta**.
+   *
+   * Nació cableada a los tokens `sobreVideo` porque su único consumidor era
+   * una llamada. **Esos tokens miden su contraste CONTRA VIDEO** —fondo no
+   * controlado— y sobre una superficie de la app son **la respuesta a otra
+   * pregunta**: una banda semitransparente pensada para sobrevivir a un
+   * fotograma cualquiera, apoyada sobre papel.
+   *
+   * *No es que se vería mal: es que su contraste estaría medido contra algo
+   * que no está en la pantalla.*
+   */
+  sobre?: 'video' | 'superficie'
+}) {
+  const { theme } = useTheme()
+  const enVideo = sobre === 'video'
   return (
     <View style={{ alignItems: 'center' }}>
       <Pressable
@@ -289,16 +331,24 @@ export function AsaModal({ etiqueta, onPress }: { etiqueta: string; onPress: () 
           gap: spacing[1],
           paddingHorizontal: spacing[4],
           borderRadius: radius.full,
-          backgroundColor: sobreVideo.banda,
+          backgroundColor: enVideo ? sobreVideo.banda : theme.bg.card,
+          /* Sobre papel la banda no se separa sola: la separa la elevación de
+             reposo, como toda superficie de la casa. Sobre video NO — ahí la
+             sombra no separa (§1.2 de la dirección, la enmienda del anillo). */
+          ...(enVideo ? null : { boxShadow: theme.elevacion.reposo }),
         }}
       >
         {/* El rótulo dice QUÉ sube. La barra sola nunca pudo decirlo — y eso
             era la mitad cara del reporte: no «no la veo», sino «no sé que hay
             algo». */}
-        <Texto variante="apoyo" color="sobreVideo">
+        <Texto variante="apoyo" color={enVideo ? 'sobreVideo' : 'secondary'}>
           {etiqueta}
         </Texto>
-        <Chevron direccion="arriba" color={sobreVideo.contenido} lado={16} />
+        <Chevron
+          direccion="arriba"
+          color={enVideo ? sobreVideo.contenido : theme.text.secondary}
+          lado={16}
+        />
       </Pressable>
     </View>
   )

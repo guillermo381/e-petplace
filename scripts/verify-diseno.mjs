@@ -2166,6 +2166,20 @@ const FIXTURES = {
      un wrapper que exporta una función y un index que no la nombra. Con uno
      solo la regla saldría por «corpus incompleto», que no es verde pero
      tampoco prueba que sepa decir que no. */
+  /* R81 · el brazo ⑵, que es el que ya falló en campo: un montaje sin
+     `altoTeclado`. El corpus trae la pieza intacta para que ⑴ no sea lo que
+     enrojezca — un fixture que enciende el brazo equivocado no prueba el que
+     dice probar. */
+  R81: [
+    {
+      path: 'packages/ui/src/components/ModalDosAlturas.tsx',
+      src: '  const arrastre = Gesture.Pan()\n    .onEnd((e) => {\n      runOnJS(resolver)(h.value, -e.velocityY)\n    })\n',
+    },
+    {
+      path: 'apps/prestador/src/app/videollamada/[citaId].tsx',
+      src: '      <ModalDosAlturas\n        altura={altura}\n        onAltura={setAltura}\n        altoPantalla={alto}\n      >\n',
+    },
+  ],
   /* R80 · el caso REAL, verbatim de `20260909840000_s113a_contanos.sql:141`,
      bajo un nombre que la lápida NO tiene — que es el modo de falla exacto:
      **voz de producto nueva, en voseo, saliendo a una familia desde el motor**.
@@ -5776,6 +5790,96 @@ function r66(archivos) {
 }
 
 /**
+ * ═══ R81 · LA HOJA ARRASTRABLE NO QUEDA A MEDIAS NI LA EMPUJA EL TECLADO ═══
+ *
+ * **Los dos rojos que el founder nombró al pedirla para postventa** — y la
+ * pieza ya existía (`ModalDosAlturas`, S106-B), así que esto no la construye:
+ * **la vigila**.
+ *
+ * ── ⑴ NO QUEDA ENTRE DOS POSICIONES ───────────────────────────────────────
+ * Las tres alturas tienen imán: al soltar va a la más cercana, con la
+ * velocidad contando. **Si el `onEnd` del gesto deja de resolver, la hoja se
+ * queda DONDE LA SOLTASTE** — y eso no falla, no tira error y no lo ve ningún
+ * typecheck: *se ve como una hoja a media altura, que es una posición legal.*
+ * ⇒ se mide que el gesto **asiente al soltar**.
+ *
+ * ── ⑵ EL TECLADO NO LA EMPUJA: CRECE POR DENTRO ───────────────────────────
+ * 🔴 **Y ésta NO es una propiedad de la pieza: es del MONTAJE.** La pieza
+ * acepta `altoTeclado` y reserva ese alto por dentro; **si el consumidor no se
+ * lo pasa, el teclado empuja el panel entero y el video salta.**
+ *
+ * **Ya pasó, y está escrito por quien lo pagó**, en el propio consumidor vivo:
+ * *«`ModalDosAlturas` acepta `altoTeclado` y **yo no se lo pasaba**»*. *Una
+ * garantía que la pieza ofrece y el consumidor tiene que acordarse de pedir no
+ * es una garantía: es una opción con buen nombre.*
+ * ⇒ **todo montaje declara `altoTeclado`**, y quien no lo quiera pasa `0`
+ * explícito — que es una decisión, no un olvido.
+ *
+ * ── ⚠️ EL TECHO DE LA VENTANA, DECLARADO (`L-501`) ────────────────────────
+ * El brazo ⑵ mira **40 renglones desde la apertura de la etiqueta**, y no
+ * busca el `>` que la cierra **porque ese `>` aparece adentro de las props**
+ * (`altoTeclado={alto > 0 ? … }`). *El delimitador vive adentro de lo que uno
+ * quiere capturar* — cuarta vez en esta sesión. **Un montaje repartido en más
+ * de 40 renglones sale como si le faltara**, y eso es un falso positivo
+ * DECLARADO: se cura subiendo el techo a la vista, jamás buscando un
+ * delimitador mejor.
+ */
+const TECHO_R81 = 40
+
+function r81(archivos) {
+  const fallos = []
+
+  /* ⑴ la pieza asienta al soltar */
+  const pieza = archivos.find((a) => a.path.endsWith('components/ModalDosAlturas.tsx'))
+  if (pieza === undefined) {
+    fallos.push(...ancla('R81', 0, 1, 'la pieza `ModalDosAlturas.tsx` en el corpus'))
+  } else {
+    const cuerpo = sinComentarios(pieza.src ?? '')
+    const asienta = /\.onEnd\(\s*\([^)]*\)\s*=>\s*\{[^}]*runOnJS\(\s*resolver\s*\)/.test(cuerpo)
+    if (!asienta) {
+      fallos.push(
+        'R81 **`ModalDosAlturas` ya no resuelve la altura al soltar.** Sin eso la hoja **queda donde la soltaste** — y eso no falla ni tira error: *se ve como una hoja a media altura, que es una posición legal.* El imán a las tres es lo que la vuelve física en vez de obediente.',
+      )
+    }
+  }
+
+  /* ⑵ todo montaje pasa `altoTeclado`.
+     ⚠️ DEDUPLICADO POR RUTA: el corpus llega como `apps` + `appsCodigo` y cada
+     `.tsx` entra dos veces — el contador decía 2 con UN montaje vivo. */
+  let montajes = 0
+  const vistos = new Set()
+  for (const { path, src } of archivos) {
+    if (!/^apps\//.test(path)) continue
+    if (vistos.has(path)) continue
+    vistos.add(path)
+    const lineas = (src ?? '').split('\n')
+    for (let i = 0; i < lineas.length; i++) {
+      /* 🔴 `[\s/>]` exigía un carácter DESPUÉS, y el montaje real termina la
+         línea justo ahí (`      <ModalDosAlturas` + salto): tras el `split('\n')`
+         no queda nada que casar y la regla medía CERO montajes con uno vivo.
+         **Quinta aparición de `L-501` en la sesión** — una frontera que supone
+         que hay algo del otro lado. Se mira que NO siga un identificador. */
+      if (!/<ModalDosAlturas(?![A-Za-z0-9_])/.test(lineas[i])) continue
+      montajes++
+      const ventana = lineas.slice(i, i + TECHO_R81).join('\n')
+      if (/\baltoTeclado\s*=/.test(ventana)) continue
+      fallos.push(
+        `R81 **${path}:${i + 1} monta \`ModalDosAlturas\` sin \`altoTeclado\`.** La pieza crece POR DENTRO sólo si el consumidor le pasa ese alto; sin él **el teclado empuja el panel entero**. *Ya pasó una vez y lo escribió quien lo pagó: «acepta \`altoTeclado\` y yo no se lo pasaba».* Si de verdad no hay teclado en esa pantalla, pasá \`altoTeclado={0}\` — **una decisión se ve; un olvido no.**`,
+      )
+    }
+  }
+  fallos.push(...ancla('R81', montajes, 1, 'montaje(s) de `<ModalDosAlturas` en `apps/` (0 = la regla perdió su sujeto)'))
+
+  return {
+    fallos,
+    info:
+      `${montajes} montaje(s) de la hoja arrastrable · imán a 3 posiciones vigilado en la pieza · ` +
+      `ventana de ${TECHO_R81} renglones DECLARADA (el \`>\` de cierre vive adentro de las props — \`L-501\`) · ` +
+      `⚠️ su verde dice «asienta y nadie la empuja», jamás «la hoja se siente bien»: eso se mira en aparato`,
+  }
+}
+
+/**
  * ═══ R80 · LA VOZ QUE NACE EN EL MOTOR (S114-B) ════════════════════════════
  *
  * **Lo midió C y la deuda es de B:** *«la voz de producto del caso nace en SQL
@@ -7572,7 +7676,7 @@ function r69(archivos) {
   return { fallos, info: `${ofensores} absoluto(s) después del montaje · ${declarados} declarado(s)` }
 }
 
-const REGLAS = { R80: r80, R79: r79, R78: r78, R77: r77, R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R81: r81, R80: r80, R79: r79, R78: r78, R77: r77, R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -8052,6 +8156,7 @@ corridas.push(['R68 (nada del componente dentro de un worklet de gesto)', r68([.
 const migraciones = existsSync('supabase/migrations')
   ? leer(readdirSync('supabase/migrations').filter((f) => f.endsWith('.sql')).map((f) => `supabase/migrations/${f}`))
   : [];
+corridas.push(['R81 (la hoja no queda a medias ni la empuja el teclado)', r81([...ui, ...apps, ...appsCodigo, ...leer(archivosCodigo('packages/ui/src'))])]);
 corridas.push(['R80 (la voz que nace en el motor)', r80(migraciones)]);
 corridas.push(['R66 (la voz no vuelve al voseo)', r66([...appsCodigo, ...leer(archivosCodigo('packages/ui/src')), ...leer(archivosCodigo('packages/api/src')), ...galeria])]);
 corridas.push(['R65 (el area de reserva de una marca ajena sigue entrando)', r65(apps)]);
