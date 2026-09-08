@@ -2007,8 +2007,9 @@ export {
   leerMensajesDeCaso, enviarMensajeDeCaso, leerOpcionesDeDevolucion,
   elegirDestinoDevolucion, obtenerCasosDelPrestador, obtenerMisCasos, responderCaso,
   reconocerYResolver, pedirACasa,
-  type EtapaCaso, type AsientoCaso, type MensajeCaso, type CasoEnBandeja,
-  type CodigoAbrirCaso,
+  ETAPAS_EN_ESCALERA,
+  type EtapaCaso, type FinalAlterno, type AsientoCaso, type MensajeCaso,
+  type CasoEnBandeja, type CodigoAbrirCaso, type CasoDetalle,
 } from './wrappers/postventa-casos';
 
 // S114 · A4 · el saldo e-PetPlace (F6). Un lector; acreditar/consumir son del

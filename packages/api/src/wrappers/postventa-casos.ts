@@ -16,9 +16,27 @@ import type { ObjetoPostventa } from './postventa-motivos';
 
 const ERR = 'No pudimos completar la acción. Prueba de nuevo.';
 
+// 🔴 FUENTE ÚNICA de las etapas del caso — son los CÓDIGOS del motor
+// (`cat_estados_caso`), y la DB manda (regla de la casa). `packages/ui` NO
+// define su propio EtapaCaso: importa éste, y sus etiquetas humanas
+// («e-PetPlace», «entre ustedes») viven en sus VOCES de display, no en el tipo.
+// Unificado en S114-A (tanda de tipos ratificada) — antes B tenía un tipo
+// paralelo con `con_epetplace`/`resuelto_entre_ustedes`, que son voces, no
+// valores. Dos tipos del mismo nombre y distinto contenido es lo que el
+// compilador cazó y esta unificación cierra.
 export type EtapaCaso =
   | 'recibido' | 'con_prestador' | 'con_casa' | 'resuelto' | 'cerrado'
   | 'resuelto_entre_partes' | 'retirado' | 'sin_lugar';
+
+/** Las cinco etapas que dibuja la escalera (§3.1). Los otros tres son finales
+ *  alternos: reemplazan la línea, no son un paso. Se deriva del motor
+ *  (`cat_estados_caso.en_escalera`) — se expone acá para que la UI no lo
+ *  reinvente. */
+export const ETAPAS_EN_ESCALERA = [
+  'recibido', 'con_prestador', 'con_casa', 'resuelto', 'cerrado',
+] as const satisfies readonly EtapaCaso[];
+
+export type FinalAlterno = 'resuelto_entre_partes' | 'retirado' | 'sin_lugar';
 
 export type AsientoCaso = 'familia' | 'prestador' | 'casa';
 
@@ -122,12 +140,63 @@ export async function abrirCaso(p: {
   } };
 }
 
-export async function leerCaso(casoId: string): Promise<ResultadoWrapper<Record<string, unknown>, 'no_existe' | 'no_es_tuyo'>> {
+/** La forma tipada del caso que devuelve el motor (§3 de la dirección). El
+ *  retorno dejó de ser `Record<string, unknown>` para que el compilador vea
+ *  un campo que el motor renombre — antes un rename dibujaba un hueco en
+ *  silencio (observación ④ de C). */
+export interface CasoDetalle {
+  casoId: string;
+  etapa: EtapaCaso;
+  clase: 1 | 2 | 3;
+  motivo: string;
+  enEscalera: boolean;
+  /** El paso que la escalera dibuja: la etapa actual, o —si el caso cayó a un
+   *  final alterno— el paso previo congelado (C1bis · C②). */
+  etapaEnEscalera: EtapaCaso | null;
+  final: FinalAlterno | null;
+  cerrado: boolean;
+  plazoHasta: string | null;
+  objeto: { tipo: ObjetoPostventa; id: string; titulo: string | null; fecha: string | null };
+  resolucion: {
+    alcance: 'total' | 'parcial' | 'sin_devolucion' | null;
+    monto: number | null;
+    camino: 'aplicar_reembolso' | 'declarado_sobre_pago' | null;
+    destino: 'banco' | 'saldo' | null;
+    destinoEstado: 'aplicado' | 'en_camino_manual' | null;
+  };
+  accionPendiente: 'elegir_devolucion' | null;
+}
+
+export async function leerCaso(casoId: string): Promise<ResultadoWrapper<CasoDetalle, 'no_existe' | 'no_es_tuyo'>> {
   const { data, error } = await getClient().rpc('leer_caso', { p_caso_id: casoId });
   if (error) return { ok: false, codigo: 'no_existe', mensaje: ERR };
   const d = (data ?? {}) as Record<string, unknown>;
   if (d.ok !== true) return { ok: false, codigo: (d.codigo as 'no_existe' | 'no_es_tuyo') ?? 'no_existe', mensaje: ERR };
-  return { ok: true, data: d };
+  const o = (d.objeto ?? {}) as Record<string, unknown>;
+  const r = (d.resolucion ?? {}) as Record<string, unknown>;
+  return { ok: true, data: {
+    casoId: d.caso_id as string,
+    etapa: d.etapa as EtapaCaso,
+    clase: d.clase as 1 | 2 | 3,
+    motivo: d.motivo as string,
+    enEscalera: d.en_escalera === true,
+    etapaEnEscalera: (d.etapa_en_escalera as EtapaCaso | null) ?? null,
+    final: (d.final as FinalAlterno | null) ?? null,
+    cerrado: d.cerrado === true,
+    plazoHasta: (d.plazo_hasta as string | null) ?? null,
+    objeto: {
+      tipo: o.tipo as ObjetoPostventa, id: o.id as string,
+      titulo: (o.titulo as string | null) ?? null, fecha: (o.fecha as string | null) ?? null,
+    },
+    resolucion: {
+      alcance: (r.alcance as CasoDetalle['resolucion']['alcance']) ?? null,
+      monto: (r.monto as number | null) ?? null,
+      camino: (r.camino as CasoDetalle['resolucion']['camino']) ?? null,
+      destino: (r.destino as 'banco' | 'saldo' | null) ?? null,
+      destinoEstado: (r.destino_estado as 'aplicado' | 'en_camino_manual' | null) ?? null,
+    },
+    accionPendiente: (d.accion_pendiente as 'elegir_devolucion' | null) ?? null,
+  } };
 }
 
 /**
