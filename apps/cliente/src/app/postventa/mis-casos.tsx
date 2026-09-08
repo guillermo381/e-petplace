@@ -134,9 +134,16 @@ export default function MisCasos() {
       .filter((c) => {
         if (filtroEstado === 'abiertos' && TERMINADAS.has(c.etapa)) return false;
         if (filtroEstado === 'cerrados' && !TERMINADAS.has(c.etapa)) return false;
-        /* Por CUÁNDO SE ABRIÓ el caso, no por la fecha del servicio: la
-           familia busca «el reclamo que hice la semana pasada», y el servicio
-           puede ser bastante anterior al reclamo. */
+        /* 🔴 **POR CUÁNDO SE ABRIÓ EL CASO — firmado por la mesa, 8-sep**, y
+           el argumento que la firma es el tercero, que es medido:
+
+           ① la pantalla se llama «Mis casos» y lista CASOS; la fecha propia de
+              un caso es cuándo se abrió · ② el título de la fila ya dice la
+              fecha del servicio, así que ubicarlo se hace mirando · ③ **
+              `creadoEn` SIEMPRE existe y la fecha del objeto NO** —medido:
+              `objetoFecha` llega `null` para un pedido— y *un caso que
+              desaparece de la lista por no tener fecha es peor que un filtro
+              impreciso*. */
         if (desde !== null && c.creadoEn < desde) return false;
         return true;
       })
@@ -206,6 +213,29 @@ export default function MisCasos() {
                 «lo que buscás no está con estos filtros», que se resuelve
                 tocando una pastilla. *Un solo texto para los dos le diría a
                 una familia que no tiene casos cuando tiene seis.* */}
+            {/* ⚠️ **ESTA RAMA NO ESTÁ EJERCIDA EN APARATO, y no es un olvido.**
+                Firmado por la mesa el 8-sep: se declara y **no se fuerza**.
+
+                Por qué no se puede hoy: el filtro de período mira
+                `creadoEn` DEL CASO (firmado con su razón — ver abajo), y **los
+                ocho casos de esta familia se abrieron esta semana**, así que
+                ninguna combinación de los dos ejes da cero. Medido contra la
+                base: la única fecha vieja del sujeto que se sembró
+                (`b630e1ce`) es `pedidos.created_at` = 16-ago, **y no la lee
+                nadie** — el caso se creó hoy y su objeto se tocó hoy.
+
+                🔴 **QUÉ HARÍA FALTA PARA EJERCERLA**, para que el día que
+                alguien vuelva acá no tenga que re-deducirlo:
+                  · **un caso ABIERTO hace más de 7 días** — o sea
+                    `casos_postventa.creado_en` viejo de verdad;
+                  · **no se siembra tocando el objeto**: retroceder esa fecha
+                    exige un `UPDATE` sobre la tabla, que ninguna RPC hace y
+                    que la mesa decidió NO ejecutar;
+                  · ⇒ **el sujeto natural llega en octubre**, cuando existan
+                    casos con semanas encima. Ahí se camina y se captura.
+
+                *Fabricar el dato para ver esta rama en verde sería el verde
+                por conveniencia que esta casa castiga.* */}
             {filas.length === 0 ? <EstadoVacio titulo={t('postventa.filtroSinNada')} /> : null}
             {filas.map((f) => (
               <FilaBandejaCaso

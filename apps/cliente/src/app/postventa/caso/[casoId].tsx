@@ -145,21 +145,17 @@ export default function PantallaDelCaso() {
   const [altoTeclado, setAltoTeclado] = useState(0);
   const insets = useSafeAreaInsets();
 
-  /* 🔴 **CON EL TECLADO ABIERTO, LA HOJA SUBE A `completo`. Lo encontré
-     caminando y es ARITMÉTICA, no un defecto de la pieza.**
+  /* ⏪ **ACÁ VIVÍA LA SUBIDA A `completo` CON EL TECLADO ABIERTO, y se fue a
+     la pieza — decisión de B, con su propia `R81` como argumento.** Yo la había
+     puesto acá razonando que era una decisión de ESTA pantalla; su corrección
+     es mejor y usa mi propia frase: *«la hoja hace lo correcto y aun así la
+     barra queda tapada; es aritmética, no defecto»* ⇒ **el consumidor no puede
+     saber que su barra no entra; la hoja sí**, y le pasa a cualquiera que
+     ponga un campo en `medio`.
 
-     En `medio` el panel ocupa el 50 % de la pantalla y el teclado se lleva
-     ~47 %. La hoja hace lo correcto —reserva `altoTeclado` por dentro y **no
-     se mueve**, que es el rojo firmado del founder y quedó verde— pero lo que
-     sobra no alcanza para la barra: la vi **tapada a la mitad**.
-
-     Subir es además lo que uno quiere: *si estoy escribiendo, quiero ver lo
-     que escribo*. Y se dispara con el teclado y no con un `onFocus` porque el
-     único campo alcanzable con la hoja arriba es el suyo — cero prop nueva
-     que alguien tenga que acordarse de pasar. */
-  useEffect(() => {
-    if (altoTeclado > 0 && altura === 'medio') setAltura('completo');
-  }, [altoTeclado, altura]);
+     *Una garantía que la pieza ofrece y el consumidor tiene que acordarse de
+     pedir no es una garantía: es una opción con buen nombre.* Hoy no hay nada
+     que montar acá — la hoja sube su geometría sola y vuelve al cerrar. */
   useEffect(() => {
     const sube = Keyboard.addListener('keyboardDidShow', (e) => setAltoTeclado(e.endCoordinates.height));
     const baja = Keyboard.addListener('keyboardDidHide', () => setAltoTeclado(0));
