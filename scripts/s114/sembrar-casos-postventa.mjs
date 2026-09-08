@@ -316,6 +316,77 @@ else if (abierto2.turnos >= 3 && abierto2.del_prestador > 0) {
   }
 }
 
+// ══ ⑥ UN CASO CON FECHA VIEJA — el sujeto del VACÍO de C ═════════════════
+/* C construyó el vacío honesto de «Mis casos»: la rama que distingue
+   «no tuviste que reclamar nada» de «no hay con esos filtros». **No la puede
+   ejercer** porque todos los casos de esa familia son de esta semana, así que
+   ninguna combinación de los dos ejes da cero. *Y no fabricó un dato para
+   verlo en verde, que fue lo correcto.*
+
+   🔴 **`creado_en` NO se puede retroceder por ninguna RPC** — lo pone la puerta
+   con `now()`. Lo que SÍ se puede hacer viejo es **`objeto_fecha`**, que es la
+   otra fecha que devuelve `obtener_mis_casos` y la que una familia piensa como
+   «la fecha»: la del servicio, no la del reclamo.
+
+   Para eso hace falta un objeto con fecha vieja que **igual pase la ventana de
+   7 días** — y la ventana cuelga del CIERRE, no de la fecha. Un pedido de
+   agosto parado en `liberado_preparacion` no pasa (su cierre es su
+   `created_at`); **cancelado hoy por su puerta real, sí**: el cierre pasa a ser
+   hoy y `entrega_fecha_objetivo` sigue siendo de agosto. */
+decir('\n── ⑥ un caso con OBJETO viejo (el vacío de C) ──');
+const yaViejo = dbQuery(`
+  select k.id from casos_postventa k
+   join pedidos p on p.id = k.objeto_id and k.objeto_tipo = 'pedido'
+  where k.relato like '${MARCA}%' and p.entrega_fecha_objetivo < (now() - interval '20 days')::date
+  limit 1`)[0]?.id;
+
+if (yaViejo) decir(`   ↻ ya existe un caso con objeto viejo: ${yaViejo}`);
+else {
+  /* Se elige el pedido MÁS BARATO y sin envío: nada en tránsito, mínimo
+     impacto. Cancelar libera inventario — efecto real y declarado. */
+  const viejo = dbQuery(`
+    select p.id, p.total, p.entrega_fecha_objetivo,
+           (select u.email from cuentas_comerciales cc join auth.users u on u.id = cc.owner_profile_id
+             where cc.id = p.cuenta_comercial_id) as vendedor
+      from pedidos p
+     where p.user_id = '${uid}' and p.estado = 'liberado_preparacion'
+       and p.entrega_fecha_objetivo < (now() - interval '20 days')::date
+       and not exists (select 1 from envios e where e.pedido_id = p.id)
+       and not exists (select 1 from casos_postventa k
+                        where k.objeto_tipo = 'pedido' and k.objeto_id = p.id)
+     order by p.total asc limit 1`)[0];
+  if (!viejo) decir('   🟠 no hay pedido viejo sin envío al que darle cierre');
+  else {
+    /* 🔴 CANCELA EL VENDEDOR, NO LA FAMILIA. El catálogo declara que desde
+       `liberado_preparacion` el único terminal es `cancelado_vendedor` con
+       actor `vendedor` — probado: como `cliente` la puerta rebota
+       `transicion_no_permitida`. *La puerta funcionando; y el motivo del caso
+       queda coherente con la historia en vez de contradecirla.* */
+    let sVen = null;
+    try { sVen = await sesion(viejo.vendedor, cl('epetplace-siembra-s97', 'siembra')); }
+    catch (e) { decir(`   🟠 no abre la sesión del vendedor (${viejo.vendedor}): ${e.message}`); }
+    const can = sVen ? await sVen.rpc('cancelar_pedido_despensa', {
+      p_pedido_id: viejo.id, p_actor: 'vendedor',
+      p_motivo: `${MARCA} sin stock — cancelado para dar cierre a un objeto viejo (siembra)`,
+    }) : { error: { message: 'sin sesión de vendedor' } };
+    if (can.error || can.data?.ok === false) {
+      decir(`   🟠 cancelar rebotó: ${can.error?.message ?? JSON.stringify(can.data)}`);
+    } else {
+      decir(`   ✅ pedido ${viejo.id} (${viejo.entrega_fecha_objetivo}, $${viejo.total}) cerrado hoy`);
+      const { data, error } = await sFam.rpc('abrir_caso', {
+        p_objeto_tipo: 'pedido', p_objeto_id: viejo.id, p_motivo: 'cancelado_vendedor',
+        p_relato: `${MARCA} Me cancelaron este pedido de agosto y sigo esperando la plata.`,
+        p_procedencia: 'familia', p_modo: 'texto',
+      });
+      if (error || data?.ok !== true) decir(`   🟠 abrir_caso rebotó: ${error?.message ?? JSON.stringify(data)}`);
+      else {
+        const v = dbQuery(`select etapa, clase from casos_postventa where id = '${data.caso_id}'`)[0];
+        decir(`   ✅ caso ${data.caso_id} → clase ${v.clase} · \`${v.etapa}\` · objeto_fecha ${viejo.entrega_fecha_objetivo}`);
+      }
+    }
+  }
+}
+
 // ══ CENSO FINAL ══════════════════════════════════════════════════════════
 const censo = dbQuery(`
   select clase, etapa, count(*)::int n from casos_postventa
