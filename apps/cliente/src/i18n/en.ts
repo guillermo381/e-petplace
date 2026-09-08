@@ -556,6 +556,17 @@ export const clienteEn = {
     descargarCarnet: 'Download the card',
     descargarHistoria: 'Download the medical record',
     documentos: 'Documents',
+    laVida: 'Their life',
+    sePerdio: 'Went missing',
+    perdidaQuePasa: "We will help you look. Their passport will show your details so whoever finds them can call you.",
+    perdidaConfirmar: 'Mark as missing',
+    perdidaListo: 'Done. Their passport now shows your details.',
+    perdidaYaEstaba: 'They were already marked as missing.',
+    perdidaRevisarContacto: 'Check what their passport shows',
+    aparecio: 'Found',
+    aparecioCuerpo: "That is great. We will set everything back the way it was.",
+    aparecioConfirmar: 'Found',
+    aparecioListo: '{{nombre}} is home.',
     // S96-D · the pantry door from the record (§5.1)
     suAlimento: "{{nombre}}'s food",
     // S91-C — mirror of es.ts.

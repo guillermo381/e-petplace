@@ -81,6 +81,7 @@ import {
   leerTimelineMascota,
   obtenerEstadoHogar,
   obtenerPaseosConTrack,
+  marcarPerdida,
   obtenerPerfilMascota,
   resolverUrlFoto,
   listarPapelesDeMascota,
@@ -247,7 +248,7 @@ import { useTraduccion } from '@/i18n';
    ⏪ Las tres derivaciones que vivían acá decían `!== null && !== 'activa'` y
    metían a `perdida` adentro: al perfil de una mascota que la familia está
    BUSCANDO le apagaban el producto. */
-import { esMemorial as mascotaEnMemorial } from '@/lib/memorial';
+import { esMemorial as mascotaEnMemorial, estaPerdida } from '@/lib/memorial';
 
 type TraductorPerfil = ReturnType<typeof useTraduccion>['t'];
 
@@ -574,6 +575,9 @@ export default function PerfilDeMascota() {
   const [porCoordinar, setPorCoordinar] = useState<{ mascotaId: string | null }[]>([]);
   // r5: vacunas agrupadas-colapsadas + historia colapsada con filtros
   const [historiaRevelada, setHistoriaRevelada] = useState(false);
+  /* La hoja de la vida del animal: `null` cerrada. Ver la zona, abajo. */
+  const [hojaVida, setHojaVida] = useState<'perdida' | 'aparecio' | null>(null);
+  const [marcando, setMarcando] = useState(false);
   const [identidadAbierta, setIdentidadAbierta] = useState(false);
   const [vitalesAbiertos, setVitalesAbiertos] = useState(false);
   /** S91 · P2 — la SERIE de peso. El perfil mostraba el número del snapshot y
@@ -2560,12 +2564,124 @@ export default function PerfilDeMascota() {
             en el peor lugar posible.* La sonda sigue viva porque su medición
             sigue haciendo falta; lo que se corrige es a quién se la mostramos.
             No se retira acá: su retiro es de `D-726`, que tiene dueño. */}
+        {/* ═══ LA VIDA DEL ANIMAL — firma del founder, 8-sep ═══════════════
+            **Acá abajo y discreta, NO en la `FilaAcciones`.** Esa fila es para
+            lo que se hace seguido; esto es lo contrario: *nadie entra al perfil
+            a marcar que su perro se perdió — entra a otra cosa y un día
+            necesita esto.*
+
+            🔴 **La puerta de «Se perdió» MIGRÓ desde Pasaporte**, donde vivía
+            como un toggle. *Marcar que tu perro se perdió no es una perilla de
+            configuración: es un hecho de la vida del animal.* En Pasaporte
+            queda lo que sí es suyo —la visibilidad del contacto—, que es la
+            promesa que esta hoja hace y que allá se cumple.
+
+            ⚠️ **En memorial no se dibuja**: de quien ya no está no se marca
+            nada. Y con la mascota perdida, lo único que se ofrece es
+            «Apareció». */}
+        {!esMemorial ? (
+          <View style={{ paddingHorizontal: spacing[5], marginTop: spacing[6], gap: spacing[2] }}>
+            <Texto variante="seccion">{t('perfil.laVida')}</Texto>
+            <Tarjeta relleno="ninguno" elevacion="reposo">
+              <CeldaNavegacion
+                icono="ubicacion"
+                titulo={estaPerdida(mascota.estado_vida) ? t('perfil.aparecio') : t('perfil.sePerdio')}
+                onPress={() => setHojaVida(estaPerdida(mascota.estado_vida) ? 'aparecio' : 'perdida')}
+              />
+            </Tarjeta>
+          </View>
+        ) : null}
+
         {__DEV__ ? (
         <Texto variante="dato">
           {`p0c · esta pantalla pidió todo ${vecesFoco} vez/veces`}
         </Texto>
         ) : null}
       </ScrollView>
+
+      {/* ═══ LA HOJA DE «SE PERDIÓ» — la voz es de AYUDA, no de trámite ═════
+          Dice qué va a pasar en dos líneas, y la segunda es una promesa que la
+          app CUMPLE: el pasaporte lee `estado_vida === 'perdida'` y tiene la
+          visibilidad del contacto (medido antes de escribirla — *una promesa
+          que el producto no cumple es peor que no hacerla*).
+
+          🔴 **Y en el mismo acto se ofrece revisar el contacto**, que es lo
+          único que sirve de verdad en ese momento.
+
+          Confirmación SIMPLE, sin doble paso: no es irreversible — y el botón
+          de volver («Apareció») queda visible mientras esté perdida. */}
+      <Hoja visible={hojaVida === 'perdida'} onCerrar={() => setHojaVida(null)} titulo={t('perfil.sePerdio')}>
+        <View style={{ gap: spacing[4], paddingBottom: spacing[4] }}>
+          <Texto variante="cuerpo">{t('perfil.perdidaQuePasa', { nombre: mascota.nombre })}</Texto>
+          <Boton
+            etiqueta={t('perfil.perdidaConfirmar')}
+            cargando={marcando}
+            onPress={() => {
+              setMarcando(true);
+              void marcarPerdida(mascota.id, true).then((r) => {
+                setMarcando(false);
+                setHojaVida(null);
+                if (!r.ok) {
+                  mostrar({ variante: 'error', texto: r.mensaje });
+                  return;
+                }
+                /* `yaEstaba` distingue «lo marcaste vos» de «ya estaba así», y
+                   a una familia NO se le dicen igual: la primera es un acto
+                   suyo, la segunda es la app diciéndole que llegó tarde a algo
+                   que ya pasó. */
+                mostrar({
+                  variante: r.data.yaEstaba ? 'neutro' : 'exito',
+                  texto: r.data.yaEstaba ? t('perfil.perdidaYaEstaba') : t('perfil.perdidaListo'),
+                });
+                /* Releer el perfil: `estado_vida` viene de ahí y la zona de
+                   abajo cambia de botón con él. */
+                void obtenerPerfilMascota(mascota.id).then((p2) => {
+                  if (p2.ok) setPerfil(p2.data);
+                });
+              });
+            }}
+          />
+          {/* Lo único que sirve de verdad ahora. Va DESPUÉS del acto porque el
+              acto es lo urgente; esto es lo que lo hace útil. */}
+          <CeldaNavegacion
+            icono="carnet"
+            titulo={t('perfil.perdidaRevisarContacto')}
+            onPress={() => {
+              setHojaVida(null);
+              router.push({ pathname: '/hogar/mascota/pasaporte', params: { mascotaId: mascota.id } });
+            }}
+          />
+        </View>
+      </Hoja>
+
+      {/* «APARECIÓ» — breve y alegre, sin ceremonia y **sin preguntar qué
+          pasó**: la familia ya vivió eso y no se lo vamos a hacer contar. */}
+      <Hoja visible={hojaVida === 'aparecio'} onCerrar={() => setHojaVida(null)} titulo={t('perfil.aparecio')}>
+        <View style={{ gap: spacing[4], paddingBottom: spacing[4] }}>
+          <Texto variante="cuerpo">{t('perfil.aparecioCuerpo', { nombre: mascota.nombre })}</Texto>
+          <Boton
+            etiqueta={t('perfil.aparecioConfirmar')}
+            cargando={marcando}
+            onPress={() => {
+              setMarcando(true);
+              void marcarPerdida(mascota.id, false).then((r) => {
+                setMarcando(false);
+                setHojaVida(null);
+                if (!r.ok) {
+                  mostrar({ variante: 'error', texto: r.mensaje });
+                  return;
+                }
+                mostrar({ variante: 'exito', texto: t('perfil.aparecioListo', { nombre: mascota.nombre }) });
+                /* Releer el perfil: `estado_vida` viene de ahí y la zona de
+                   abajo cambia de botón con él. */
+                void obtenerPerfilMascota(mascota.id).then((p2) => {
+                  if (p2.ok) setPerfil(p2.data);
+                });
+              });
+            }}
+          />
+        </View>
+      </Hoja>
 
       <PaseoSocialHoja
         visible={socialHojaAbierta}

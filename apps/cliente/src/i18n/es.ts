@@ -736,6 +736,17 @@ export const clienteEs = {
     descargarCarnet: 'Descargar el carnet',
     descargarHistoria: 'Descargar la historia clínica',
     documentos: 'Documentos',
+    laVida: 'Su vida',
+    sePerdio: 'Se perdió',
+    perdidaQuePasa: 'Vamos a ayudarte a buscarlo. Su pasaporte va a mostrar tus datos para que quien lo encuentre te llame.',
+    perdidaConfirmar: 'Marcar que se perdió',
+    perdidaListo: 'Listo. Su pasaporte ya muestra tus datos.',
+    perdidaYaEstaba: 'Ya estaba marcado como perdido.',
+    perdidaRevisarContacto: 'Revisar qué muestra su pasaporte',
+    aparecio: 'Apareció',
+    aparecioCuerpo: 'Qué bueno. Volvemos a dejar todo como estaba.',
+    aparecioConfirmar: 'Apareció',
+    aparecioListo: '{{nombre}} está en casa.',
     // S96-D · la puerta de la despensa desde el expediente (§5.1)
     suAlimento: 'El alimento de {{nombre}}',
     // S91-C — la entrada a la bitácora desde el perfil. La voz habla de
