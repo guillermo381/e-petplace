@@ -867,8 +867,8 @@ export default function DespensaPedido() {
                     así que la regla de memorial no aplica y elegir una para
                     aplicársela sería inventarle un sujeto. */}
                 <LineaAlgoSalioDistinto
+                  sujeto="hogar"
                   estado={puerta.estado}
-                  enMemorial={false}
                   onPress={abrirLaPuerta}
                 />
               </View>

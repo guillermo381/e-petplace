@@ -710,6 +710,7 @@ export default function DuranteGuarderia() {
                     llamador se acuerde es el guard que esta tanda vino a
                     curar. */}
             <LineaAlgoSalioDistinto
+              sujeto="mascota"
               estado={puerta.estado}
               enMemorial={esMemorial(estadoVida)}
               onPress={abrirLaPuerta}
