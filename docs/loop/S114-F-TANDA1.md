@@ -1085,3 +1085,55 @@ separar al crear el proyecto productivo.
 *El founder tiene razón en que un subdominio de la marca devolviendo un error de
 Vercel es peor que uno que no existe. **Pero servir staging desde él es peor que
 las dos cosas**, porque deja de avisar.*
+
+---
+
+# ADENDA 8 · MI SONDEO DISPARÓ EL ANTI-BOT DE VERCEL
+
+**Sondeé `admin.epetplace.com` cada 45-60 s durante ~15 min esperando el deploy.
+A las 22:02 empezó a devolver HTTP 403 · «Vercel Security Checkpoint».**
+
+```
+admin.epetplace.com          → 403  (Vercel Security Checkpoint)
+e-petplace-admin.vercel.app  → 200  ← MISMO PROYECTO, sin bloqueo
+```
+
+⇒ **El sitio está bien: lo bloqueado era mi acceso.** El control por el otro
+dominio del mismo proyecto lo separa sin ambigüedad.
+
+## Un usuario real NO se ve afectado — medido, no supuesto
+
+Abrí el dominio en el navegador conectado: apareció *«Estamos verificando tu
+navegador»* y **se resolvió solo en menos de 8 segundos** — título
+`e-petplace-admin`, URL `/login`. **El checkpoint es contra clientes sin JS
+(`curl`), no contra personas.**
+
+## 🔴 Dos defectos propios, los dos declarados
+
+**① Mi watcher dio un falso positivo.** La condición era
+`if [ "$H" != "index-fK9Opg5L.js" ]`, y **una cadena VACÍA también es distinta**:
+cuando el 403 hizo que no hubiera bundle que extraer, el watcher anunció
+**«✅ DEPLOY NUEVO ·  · 22:02:00»** — con el hash vacío en el mensaje.
+
+> *Un comparador de desigualdad trata «cambió» y «no pude leerlo» como la misma
+> cosa.* La forma correcta es exigir el valor esperado (`= "index-B4k1WxEH.js"`)
+> **o** validar que la lectura no vino vacía antes de compararla. **Lo cazó que
+> el propio mensaje imprimiera el hash y saliera en blanco** — si sólo hubiera
+> dicho «DEPLOY NUEVO», me lo creía.
+
+**② Medir muy seguido cambió lo medido.** No es una anécdota de Vercel: **todo
+sondeo agresivo sobre un servicio con protección puede alterar su respuesta**, y
+entonces el instrumento deja de medir el sujeto y empieza a medir su reacción a
+ser medido. ⇒ **el sondeo de un deploy se espacia** (2-5 min, no 45 s) **y, si
+hay dos dominios sobre el mismo proyecto, se sondea el que NO es el que
+importa** — así el que importa queda limpio para la verificación final.
+
+*(Y lo que lo vuelve barato de curar: había un control disponible todo el tiempo
+—el otro dominio— y sirvió tanto para diagnosticar como para seguir midiendo.)*
+
+## Estado del deploy
+
+**`8934a30` sigue sin salir**, medido por el dominio no bloqueado:
+`e-petplace-admin.vercel.app` → `index-fK9Opg5L.js`, 23 min después del push.
+El anterior había tardado ~50 min. **Sigue esperando, y desde ahora se sondea
+espaciado y por el otro dominio.**
