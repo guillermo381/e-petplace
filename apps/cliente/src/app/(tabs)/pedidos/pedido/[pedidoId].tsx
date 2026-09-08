@@ -867,6 +867,12 @@ export default function DespensaPedido() {
                     así que la regla de memorial no aplica y elegir una para
                     aplicársela sería inventarle un sujeto. */}
                 <LineaAlgoSalioDistinto
+                  /* 🔴 `hogar` y SIN `enMemorial`: firma del founder — el
+                     pedido es del HOGAR, tiene N destinos por línea y puede
+                     tener donación, así que «la mascota» en singular no existe
+                     acá. La unión de B lo vuelve inexpresable: con `hogar`, la
+                     prop de memorial es `never`. ⏪ Antes acá iba un `false`
+                     suelto, que decía lo mismo por casualidad y no por ley. */
                   sujeto="hogar"
                   estado={puerta.estado}
                   onPress={abrirLaPuerta}

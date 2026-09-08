@@ -29,8 +29,9 @@
  * la máquina puede tapar esa puerta*.
  */
 
-import { useCallback, useMemo, useRef, useState } from 'react';
-import { View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Keyboard, ScrollView, View, useWindowDimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   BarraEscribir,
@@ -44,7 +45,10 @@ import {
   EstadoVacio,
   EventoDelHilo,
   Icono,
+  AsaModal,
+  ModalDosAlturas,
   SuperficieChat,
+  type AlturaModal,
   Texto,
   spacing,
   useTheme,
@@ -62,7 +66,9 @@ import {
 import { fechaLargaHumana, horaCortaDeMensaje } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
+import { useSinLeer } from '@/lib/postventa/useSinLeer';
 import { traducirCaso, type CasoParaLaPantalla } from '@/lib/postventa/caso';
+import { lineaDeEstadoParaFamilia, vocesDeLaEscalera, vozDeEtapa } from '@/lib/postventa/voz-de-etapa';
 import { CartaDeDevolucion } from '@/components/postventa/CartaDeDevolucion';
 import { PermisoWhatsApp } from '@/components/postventa/PermisoWhatsApp';
 import { vozServicio } from '@/lib/voz-servicio';
@@ -121,6 +127,43 @@ export default function PantallaDelCaso() {
      hilo desde el motor hay que conservarlas, y leerlas del estado adentro de
      un callback traería la copia del render viejo. */
   const optimistasRef = useRef<Fila[]>([]);
+
+  /* ═══ §3 (enmienda firmada) · LA HOJA DEL CHAT ══════════════════════════
+     *«Al entrar veo el seguimiento del caso, entero y sin nada encima; el chat
+     vive abajo, en una hoja que subo cuando quiero hablar.»*
+
+     Arranca CERRADA: lo primero que la familia ve es en qué quedó su caso, no
+     una conversación. La escalera queda detrás y se ve o no según la altura. */
+  const [altura, setAltura] = useState<AlturaModal>('cerrado');
+  const { height: altoPantalla } = useWindowDimensions();
+
+  /* 🔴 `altoTeclado` es lo ÚNICO que hay que pasarle a la hoja (R81), y es
+     obligatorio: sin él el teclado empuja el panel entero. Ya le pasó al
+     consumidor vivo y lo dejó escrito quien lo pagó. **El resto lo resuelve el
+     contexto**: la hoja declara que el teclado está resuelto y `SuperficieChat`
+     lo lee — no hay prop que olvidar (contrato de B, `47b20a4c`). */
+  const [altoTeclado, setAltoTeclado] = useState(0);
+  const insets = useSafeAreaInsets();
+
+  /* ⏪ **ACÁ VIVÍA LA SUBIDA A `completo` CON EL TECLADO ABIERTO, y se fue a
+     la pieza — decisión de B, con su propia `R81` como argumento.** Yo la había
+     puesto acá razonando que era una decisión de ESTA pantalla; su corrección
+     es mejor y usa mi propia frase: *«la hoja hace lo correcto y aun así la
+     barra queda tapada; es aritmética, no defecto»* ⇒ **el consumidor no puede
+     saber que su barra no entra; la hoja sí**, y le pasa a cualquiera que
+     ponga un campo en `medio`.
+
+     *Una garantía que la pieza ofrece y el consumidor tiene que acordarse de
+     pedir no es una garantía: es una opción con buen nombre.* Hoy no hay nada
+     que montar acá — la hoja sube su geometría sola y vuelve al cerrar. */
+  useEffect(() => {
+    const sube = Keyboard.addListener('keyboardDidShow', (e) => setAltoTeclado(e.endCoordinates.height));
+    const baja = Keyboard.addListener('keyboardDidHide', () => setAltoTeclado(0));
+    return () => {
+      sube.remove();
+      baja.remove();
+    };
+  }, []);
 
   const cargar = useCallback(async () => {
     if (typeof casoId !== 'string' || casoId.length === 0) return;
@@ -295,6 +338,22 @@ export default function PantallaDelCaso() {
      memoización por item que exige el contrato N16 de B. */
   const filas = useMemo(() => [...hilo].reverse(), [hilo]);
 
+  /* Los AJENOS del hilo, para el número de la barra. `autor !== 'familia'` y
+     no «los del prestador»: la casa también escribe, y un mensaje de
+     e-PetPlace sin leer es tan sin leer como el otro. */
+  const ajenos = useMemo(
+    () => hilo.filter((f) => f.mensaje.autor !== 'familia').map((f) => ({ creadoEn: f.mensaje.creadoEn })),
+    [hilo],
+  );
+  const { sinLeer, marcarLeido } = useSinLeer(typeof casoId === 'string' ? casoId : null, ajenos);
+
+  /* Se marca leído al SUBIR la hoja, no al montar la pantalla: el founder
+     entra a ver el seguimiento y puede irse sin abrir el chat — dar por leído
+     lo que nadie miró es justo lo que el número existe para evitar. */
+  useEffect(() => {
+    if (altura !== 'cerrado') marcarLeido();
+  }, [altura, marcarLeido]);
+
   if (caso === 'cargando') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -319,31 +378,42 @@ export default function PantallaDelCaso() {
     );
   }
 
-  const VOZ_ETAPA: Record<EtapaDeLaEscalera, string> = {
-    recibido: t('postventa.etapaRecibido'),
-    con_prestador: t('postventa.etapaConPrestador'),
-    con_epetplace: t('postventa.etapaConCasa'),
-    resuelto: t('postventa.etapaResuelto'),
-    cerrado: t('postventa.etapaCerrado'),
-  };
 
   /* §3.1 · la línea de abajo, ENTERA. **El plazo lo compone la pantalla**: A
      manda `plazoHasta` crudo a propósito, porque el formato de fecha es i18n. */
-  const nombreEtapa = caso.etapaDeLaFila !== null ? VOZ_ETAPA[caso.etapaDeLaFila] : '';
-  const vozEstado =
-    caso.plazoHasta !== null
-      ? t('postventa.estasEnConPlazo', {
-          etapa: nombreEtapa,
-          cuando: new Date(caso.plazoHasta).toLocaleString(),
-        })
-      : t('postventa.estasEn', { etapa: nombreEtapa });
+  /* 🔴 **LA LÍNEA DE ESTADO SALE DE LA FUENTE ÚNICA**, y el plazo es
+     INEXPRESABLE desde acá: `lineaDeEstadoParaFamilia` no recibe `plazoHasta`
+     y no puede recibirlo. Ver `voz-de-etapa.ts` para el porqué —lo escribí de
+     dos maneras distintas en dos pantallas del mismo arco, y ningún gate lo
+     vio—. *Dos lugares que coinciden hoy son dos lugares que pueden dejar de
+     coincidir, y el que se desvíe no falla: dice otra cosa.* */
+  const nombreEtapa = caso.etapaDeLaFila !== null ? vozDeEtapa(t, caso.etapaDeLaFila) : '';
+  const vozEstado = lineaDeEstadoParaFamilia(t, caso.etapaDeLaFila) ?? ''
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('postventa.tituloCaso')} atras onAtras={() => router.back()} />
-      <SuperficieChat<Fila>
-        encabezado={
-          <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[3], gap: spacing[3] }}>
+      {/* ═══ §3 · EL SEGUIMIENTO, ENTERO Y SIN NADA ENCIMA ═══════════════════
+          ⏪ **Todo esto vivía adentro del `encabezado` de `SuperficieChat`**, o
+          sea dentro de una lista invertida: el seguimiento scrolleaba con la
+          conversación y quedaba por debajo de ella. *Al entrar, lo primero que
+          la familia veía era un chat.*
+
+          Ahora es el contenido de la pantalla y el chat vive en la hoja —
+          enmienda firmada de §3: *«al entrar veo el seguimiento del caso,
+          entero y sin nada encima; el chat vive abajo, en una hoja que subo
+          cuando quiero hablar»*. */}
+      {/* `flex: 1` para que el seguimiento tome la pantalla y la barra quede
+          abajo: sin él, el ScrollView crece con su contenido y empuja la barra
+          fuera de vista. **Lo vi caminando** — la barra asomaba cortada. */}
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          paddingBottom: spacing[6],
+          gap: spacing[3],
+        }}
+      >
+        <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[3], gap: spacing[3] }}>
             <CabeceraCaso
               objeto={{
                 /* La voz de familia del comprable, por el riel de la casa —
@@ -376,7 +446,7 @@ export default function PantallaDelCaso() {
                       },
                     }
                   : null)}
-                voces={VOZ_ETAPA}
+                voces={vocesDeLaEscalera(t)}
                 vozEstado={vozEstado}
                 abierta={escaleraAbierta}
                 onAlternar={() => setEscaleraAbierta((v) => !v)}
@@ -404,8 +474,46 @@ export default function PantallaDelCaso() {
             {/* §3.4 · siempre alcanzable, jamás en un menú. Va en el
                 encabezado FIJO: en la lista se iría con el scroll. */}
             <Texto variante="apoyo">{t('postventa.hablarConAlguien')}</Texto>
+        </View>
+      </ScrollView>
+
+      {/* LA BARRA que sube la hoja — `AsaModal sobre="superficie"`, la enmienda
+          de B: sus tokens por defecto están medidos CONTRA VIDEO, y acá no hay
+          video. **El rótulo dice QUÉ sube**; una barra sola nunca pudo decirlo.
+          Y con mensajes sin ver, lo dice con su número. */}
+      {/* `AsaModal` no se posiciona sola (es un `View` centrado), así que el
+          borde inferior lo paga la pantalla — y con la hoja cerrada el panel
+          mide 0, o sea que acá abajo no hay nada más. */}
+      {altura === 'cerrado' ? (
+        <View style={{ paddingBottom: insets.bottom + spacing[2] }}>
+        <AsaModal
+          etiqueta={sinLeer > 0 ? t('postventa.abrirHiloConCuenta', { n: sinLeer }) : t('postventa.abrirHilo')}
+          onPress={() => setAltura('medio')}
+          sobre="superficie"
+        />
+        </View>
+      ) : null}
+
+      <ModalDosAlturas
+        altura={altura}
+        onAltura={setAltura}
+        altoPantalla={altoPantalla}
+        etiquetaAsa={t('postventa.asaHilo')}
+        /* 🔴 R81: obligatorio. Sin esto el teclado empuja el panel entero. */
+        altoTeclado={altoTeclado}
+        insetBottom={insets.bottom}
+        /* El encabezado arrastra igual que el asa — la letra firmada lo pedía
+           («por el asa o por cualquier parte de su encabezado») y el gesto
+           vivía sólo sobre los 28 px del asa hasta que B lo construyó. */
+        encabezado={
+          <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[2] }}>
+            <Texto variante="titulo">{t('postventa.asaHilo')}</Texto>
           </View>
         }
+        hayCambiosSinGuardar={borrador.trim().length > 0}
+        onPedirConfirmacion={() => setAltura('medio')}
+      >
+      <SuperficieChat<Fila>
         datosDelMasNuevoAlMasViejo={filas}
         claveDe={(f) => f.clave}
         renderMensaje={renderFila}
@@ -435,6 +543,7 @@ export default function PantallaDelCaso() {
           )
         }
       />
+      </ModalDosAlturas>
     </View>
   );
 }

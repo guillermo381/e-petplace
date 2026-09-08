@@ -80,7 +80,7 @@ export type EntradaDeLaPuerta = {
 };
 
 export type VeredictoDeLaPuerta =
-  | { hay: false; porque: 'memorial' | 'sin_cerrar' }
+  | { hay: false; porque: 'memorial' | 'sin_cerrar' | 'sin_ventana' }
   | { hay: true; estado: EstadoDeLaPuerta; casoId: string | null };
 
 /**
@@ -128,8 +128,39 @@ export function veredictoDeLaPuerta(e: EntradaDeLaPuerta): VeredictoDeLaPuerta {
     return { hay: true, casoId: null, estado: { tipo: 'fueraDeVentana', voz: e.voces.fueraDeVentana } };
   }
 
-  /* Sin el número del motor no se decide: ver `diasDeVentana`. */
-  if (e.diasDeVentana === undefined) return { hay: false, porque: 'sin_cerrar' };
+  /* 🔴 SIN EL NÚMERO DEL MOTOR NO SE DECIDE — y **su razón es PROPIA**.
+     ⏪ Acá devolvía `porque: 'sin_cerrar'`, y eso era un apagado que MENTÍA
+     sobre su causa: un objeto perfectamente cerrado, con su ventana viva,
+     quedaba sin puerta reportando *«todavía no cerró»*. Si `caso_ventana_dias`
+     rebota —red mala, permiso, RPC caída—, **la puerta desaparece de las TRES
+     pantallas a la vez y ninguna lo dice**.
+
+     *Es exactamente la clase que acabamos de pagar tres horas: un apagado sin
+     declarar se busca en el lugar equivocado.* Ahora tiene nombre propio, así
+     que quien lea el veredicto puede distinguir «no hay nada que reclamar» de
+     «no pude saber si se puede». **El silencio de la pantalla no cambia
+     —seguimos sin ofrecer un reclamo que el motor va a rebotar— lo que cambia
+     es que ahora es AUDITABLE.** */
+  if (e.diasDeVentana === undefined) {
+    /* Y la otra mitad de la cura: **que se note**. Nombrar la razón la vuelve
+       auditable para el código; esto la vuelve visible para quien desarrolla,
+       que es quien puede arreglarla. Mismo molde que el rojo de i18n: sólo en
+       `__DEV__`, jamás ruido para una familia. */
+    const enDesarrollo =
+      typeof (globalThis as { __DEV__?: boolean }).__DEV__ === 'boolean'
+        ? (globalThis as { __DEV__?: boolean }).__DEV__ === true
+        : false;
+    if (enDesarrollo) {
+      console.error(
+        '🔴 postventa · LA PUERTA NO SE DIBUJA: no llegó la ventana del motor ' +
+          '(`obtenerVentanaCasoDias`). No es que el objeto no haya cerrado — es ' +
+          'que no se pudo saber si está dentro de plazo, y sin eso no se ofrece ' +
+          'un reclamo que el motor va a rebotar. Si esto se repite, la puerta ' +
+          'está apagada en las TRES pantallas a la vez.',
+      );
+    }
+    return { hay: false, porque: 'sin_ventana' };
+  }
 
   const ahora = (e.ahora ?? new Date()).getTime();
   const dentro = ahora - cierre <= e.diasDeVentana * MS_POR_DIA;

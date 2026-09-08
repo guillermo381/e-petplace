@@ -18,7 +18,7 @@
 
 ---
 
-## 🔴 POR QUÉ ME EQUIVOQUÉ — **`L-515`**
+## 🔴 POR QUÉ ME EQUIVOQUÉ — **`L-500`**
 
 **Medí contra `69065369`, que es ANTERIOR a A4.** Mi repo tenía A3, donde `saldo` rebota con
 `saldo_todavia_no_existe` — y de ahí salió mi premisa de que el motor de saldo no existía. **Ya
