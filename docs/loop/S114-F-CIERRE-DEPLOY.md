@@ -163,6 +163,31 @@ se probó a mano antes de cablearlo, y después la ejerció sola sobre `f3171cc`
 
 ---
 
+> # 🔴 LOS NÚMEROS DE ESTE PARTE SON LOS DE MI RAMA, NO LOS AUTORITATIVOS
+>
+> **La numeración que rige es la del candidato / `main`.** Esta rama queda como
+> **registro**, y sus números **no se alinean a propósito**: alinearlos sin que la rama
+> se re-mergee sólo agregaría un lugar más donde pueden divergir.
+>
+> | lección | acá | **en el candidato** |
+> |---|---|---|
+> | Medir una RAMA y concluir sobre la otra | `L-500` | **`L-511`** |
+> | El instrumento detrás de un caché | `L-501` | **`L-512`** |
+> | La espera que deja de discriminar | `L-502` | **`L-518`** |
+> | Una respuesta de éxito ≠ trabajo hecho | `L-503` | **`L-519`** |
+> | El texto de una interfaz · la sonda · la prosa | `L-504` `L-505` `L-506` | **iguales** |
+> | La racha con ventana propia | `L-516` | **`L-516`** |
+> | El hedge no viaja | `L-517` | **`L-517`** |
+>
+> **Por qué se movieron:** `L-500`–`L-503` chocaban con lecciones de B que **se citan en
+> código** en 10 lugares (`verify-diseno.mjs`, `lib-voz.mjs`, `verify-contador-piezas.mjs`)
+> ⇒ **B es inamovible y yo el movible.** Las mías eran doc-only: cero citas en `.mjs`,
+> `.ts`, `.tsx` o `.yml`.
+>
+> *(Y esta tabla existe por `L-517`, que nació de este mismo hilo: **si la marca no está
+> pegada a lo que alguien va a copiar, no está.** Un lector de este parte se lleva el
+> número, no el contexto donde vivía.)*
+
 ## Las cuatro lecciones
 
 | | |
