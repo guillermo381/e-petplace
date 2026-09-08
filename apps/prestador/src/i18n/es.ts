@@ -4736,4 +4736,44 @@ export const prestadorEs = {
     errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
     reintentar: 'Probar de nuevo',
   },
+  /* ── S114-C · LA POSTVENTA DEL PRESTADOR (§5) ──────────────────────────
+     🔴 TUTEO neutro. **El aviso NO es un ticket frío**: dice que hay algo que
+     resolver, con la voz de la casa. Y el reloj se ve **sin drama**. */
+  postventa: {
+    casosTitulo: 'Casos',
+    casosIntro: 'Hay familias esperando una respuesta tuya.',
+    casosVacio: 'No tienes casos abiertos.',
+    casosNoSePudo: 'No pudimos cargar tus casos. Prueba de nuevo.',
+    objeto_cita: 'Una cita',
+    objeto_estadia: 'Una estadía',
+    objeto_pedido: 'Un pedido',
+    laFamilia: 'La familia',
+    /* Sin countdown y sin rojo: dice cuánto queda, no lo hace latir. */
+    teQuedan: 'Te quedan {{horas}} horas para responder',
+    puntero: 'Casos',
+    punteroDetalle: 'Lo que una familia te pide resolver',
+    punteroPendientes: '{{n}} esperando tu respuesta',
+    /* C8 · pide, sin drama. El número va porque decir «tenés servicios sin
+       cerrar» sin cuántos obliga a ir a contarlos. */
+    sinCerrar: 'Tienes {{n}} servicios sin cerrar. Ciérralos para cobrarlos.',
+    /* Y a las 48 h la verdad, sin adorno: ya pasó. */
+    sinCerrarVencidos: '{{n}} quedaron sin cerrar: no se cobran y la familia recibió su devolución.',
+    casoTitulo: 'El caso',
+    asientoCasa: 'e-PetPlace',
+    asientoFamilia: 'La familia',
+    asientoYo: 'Tú',
+    escribirPlaceholder: 'Escribe tu respuesta',
+    conversacionCerrada: 'Esta conversación quedó en lectura',
+    noSeEnvio: 'No se envió · Reintentar',
+    enviarMensaje: 'Enviar',
+    /* §5 · cuando vence, SE LE DICE. No se le oculta. */
+    laCasaTomoElCaso: 'e-PetPlace tomó el caso',
+    reconocerYResolver: 'Reconocer y resolver',
+    pedirALaCasa: 'Pedir a e-PetPlace que entre',
+    reconocerTitulo: '¿Cómo lo resuelves?',
+    reconocerCuerpo: 'La familia elige después a dónde va la plata.',
+    devolverTodo: 'Devolver todo',
+    devolverParte: 'Devolver una parte',
+  },
+
 } as const;

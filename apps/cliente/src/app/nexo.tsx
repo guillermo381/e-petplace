@@ -66,6 +66,8 @@ import {
 } from '@epetplace/api';
 import { fechaCortaMono, type IdiomaSoportado } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
+import { esMemorial } from '@/lib/memorial';
+import { useEstadoVida } from '@/lib/postventa/useEstadoVida';
 
 /** Un turno dibujado. El hilo mezcla **lo que se guardó** (viene del servidor)
  *  con **lo que acaba de pasar**, y por eso el id es local: dos fuentes en una
@@ -90,6 +92,17 @@ export default function Nexo() {
   const router = useRouter();
   const aviso = useAviso();
   const { mascotaId, nombre } = useLocalSearchParams<{ mascotaId: string; nombre?: string }>();
+
+  /* 🔴 S114-C · EL PISO DE MEMORIAL DE LAS CINCO PIEZAS DE ESTA PANTALLA.
+     Sus guards colgaban de `theme.mode === 'memorial'`, **que no se enciende
+     nunca** (`D-1021`), así que Nexo le hablaba igual a quien perdió a su
+     animal. La señal real es `estado_vida`, y `mascotaId` ya viaja por la URL.
+     ⚠️ Mientras no se sabe, `esMemorial(undefined)` da `false` y las piezas se
+     dibujan: es la ventana de un instante entre el montaje y la respuesta, y
+     **la salida contraria —esconder Nexo hasta saber— dejaría la pantalla en
+     blanco en el caso normal**, que es el de casi todas las mascotas. */
+  const estadoVida = useEstadoVida(mascotaId);
+  const enMemorial = esMemorial(estadoVida);
 
   const [contexto, setContexto] = useState<ContextoCoach | null | 'error'>(null);
   const [lineas, setLineas] = useState<Linea[]>([]);
@@ -261,6 +274,31 @@ export default function Nexo() {
             : null,
           { id: 'etapa', texto: t('nexo.sugEtapa'), onPress: () => void enviar(t('nexo.sugEtapa')) },
         ].filter((x) => x !== null) as SugerenciaNexo[]);
+
+  /* ══ S114-C · EL COACH NO EXISTE EN MEMORIAL ══════════════════════════
+     Las cinco piezas del Coach que se montan acá —`AvisoAnticipacion`,
+     `PresentacionNexo`, `RespuestaNexo`, `ChipsSugerencia`, `PanelMemoria`—
+     traen su guard escrito **y colgado de `theme.mode === 'memorial'`, que no
+     se enciende nunca** (`D-1021`). *La protección estaba escrita, se leía
+     como protección, y Nexo igual le hablaba a quien perdió a su animal.*
+
+     🔴 **SE CURA ACÁ Y NO CON UNA PROP EN CADA UNA, y es el contrato de B:**
+     las cinco se montan en ESTA pantalla y la señal es *la mascota EN FOCO*,
+     que es un dato de la pantalla y no de cada pieza. **Cinco props para un
+     solo punto de montaje es cinco veces la misma decisión** — y quien monte
+     la sexta tendría que acordarse.
+
+     ⚠️ Y por eso se corta la PANTALLA entera y no pieza por pieza: en
+     memorial Nexo no tiene nada que decir. *Dejar el encabezado y vaciar el
+     cuerpo sería ofrecer una conversación que no va a existir.* */
+  if (enMemorial) {
+    return (
+      <View style={{ flex: 1 }}>
+        <Encabezado variante="navegacion" titulo={nombreVivo ?? t('nexo.titulo')} />
+        <EstadoVacio titulo={t('nexo.enMemorial')} />
+      </View>
+    );
+  }
 
   return (
     <EvitaTeclado>

@@ -108,6 +108,7 @@ import {
   type BloqueoPrestador,
   type CitaAgendaPaseo,
   type CitaPorCoordinar,
+  obtenerServiciosSinCerrar,
 } from '@epetplace/api';
 import { diaSemanaCorto, fechaDiaSemanaHumana, type IdiomaSoportado, horaCortaDeMensaje, obtenerIdiomaActual } from '@epetplace/i18n';
 
@@ -1029,6 +1030,15 @@ export default function Hoy() {
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const insets = useSafeAreaInsets();
+  /* ══ C8 · LOS SERVICIOS SIN CERRAR (§5 de `DIRECCION_POSTVENTA`) ══════
+     «Tenés 3 servicios sin cerrar. Cerralos para cobrarlos» — con el número,
+     **sin drama y sin countdown**. *No es castigo: es la consecuencia dicha a
+     tiempo, dos veces, antes de que ocurra.* */
+  const [sinCerrar, setSinCerrar] = useState<{ cantidad: number; vencidos: number }>({
+    cantidad: 0,
+    vencidos: 0,
+  });
+
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   const [refrescando, setRefrescando] = useState(false);
   /* ⭐ S113-A · EL CONTEO DE LA SEMANA, EN SU PROPIO ESTADO Y A PROPÓSITO.
@@ -1064,6 +1074,23 @@ export default function Hoy() {
      recién depositada se relee y la huella se apaga. Un fallo de lectura
      deja `false`: la huella marca presencia solo con verdad medida. */
   const [novedades, setNovedades] = useState(false);
+  useFocusEffect(
+    useCallback(() => {
+      let vigente = true;
+      void (async () => {
+        const r = await obtenerServiciosSinCerrar();
+        if (!vigente || !r.ok) return;
+        setSinCerrar({
+          cantidad: r.data.cantidad,
+          vencidos: r.data.items.filter((i) => i.vencido).length,
+        });
+      })();
+      return () => {
+        vigente = false;
+      };
+    }, []),
+  );
+
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
@@ -2462,6 +2489,35 @@ export default function Hoy() {
             abierta de un día anterior no aparece en la jornada de hoy**, y
             una atención sin cerrar es PLATA SIN DEVENGAR. Llegó (A46), la
             fila existe, y el texto se mueve con su porqué (L-198). */}
+        {/* ══ C8 · LA LÍNEA DE LOS SERVICIOS SIN CERRAR ══════════════════
+            §5: *«Tenés 3 servicios sin cerrar. Cerralos para cobrarlos»*, con
+            el número, **sin drama y sin countdown**.
+
+            🔴 **DOS VOCES Y NO UNA, porque son dos momentos distintos:**
+            mientras se puede cerrar, la línea PIDE; a las 48 h **dice la
+            verdad** — quedó sin cerrar, no se cobra, la familia recibió su
+            devolución. *La segunda no es una amenaza cumplida: es la única
+            forma honesta de contar algo que ya pasó.*
+
+            ⚠️ **Sin tinte de alarma y sin reloj vivo.** No pasó nada malo
+            todavía; lo que hay es trabajo pendiente que además es plata.
+
+            ⚠️ **Y el cero no se dice**: sin servicios sin cerrar la línea no
+            existe — un «0 sin cerrar» es ruido, y la ausencia ya es la buena
+            noticia. */}
+        {pantalla.estado === 'listo' && sinCerrar.cantidad > 0 && (
+          <View style={{ gap: spacing[2] }}>
+            <Texto variante="cuerpo">
+              {t('postventa.sinCerrar', { n: sinCerrar.cantidad })}
+            </Texto>
+            {sinCerrar.vencidos > 0 && (
+              <Texto variante="apoyo">
+                {t('postventa.sinCerrarVencidos', { n: sinCerrar.vencidos })}
+              </Texto>
+            )}
+          </View>
+        )}
+
         {pantalla.estado === 'listo' && (atencionItems.length > 0) && (
           <View style={{ gap: spacing[3] }}>
             <Texto variante="seccion">{t('atencion.titulo')}</Texto>

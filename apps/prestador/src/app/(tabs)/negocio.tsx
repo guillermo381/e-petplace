@@ -75,6 +75,7 @@ import {
   type OfertaGroomingPropia,
   type OfertaPaseoPropia,
   type ResumenPendienteLiquidar,
+  obtenerCasosDelPrestador,
 } from '@epetplace/api';
 import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 
@@ -159,6 +160,9 @@ export default function Negocio() {
   // el estado real de los cobros — null mientras carga o si falla la
   // lectura: la fila degrada a su detalle por hito, jamás inventa
   const [pendientes, setPendientes] = useState<ResumenPendienteLiquidar | null>(null);
+  /* S114-C · cuántos casos esperan una respuesta mía. **Un viaje, en foco.**
+     Si falla queda en 0 y la celda dice qué es en vez de un número mentido. */
+  const [casosAbiertos, setCasosAbiertos] = useState(0);
   // B1a: el resumen VIVO del mundo Paseo — null mientras carga/falla:
   // la tarjeta degrada a su invitación, jamás inventa
   const [ofertas, setOfertas] = useState<OfertaPaseoPropia[] | null>(null);
@@ -223,6 +227,19 @@ export default function Negocio() {
      El wrapper ya distinguía los dos casos con su código `sin_prestador`;
      lo que faltaba era leerlo. */
   const [sinPrestador, setSinPrestador] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      let vigente = true;
+      void (async () => {
+        const r = await obtenerCasosDelPrestador();
+        if (vigente && r.ok) setCasosAbiertos(r.data.length);
+      })();
+      return () => {
+        vigente = false;
+      };
+    }, []),
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -833,6 +850,36 @@ export default function Negocio() {
                 titulo={t('negocio.equipoPuntero')}
                 detalle={t('negocio.equipoPunteroDetalle')}
                 onPress={() => router.push('/negocio/equipo')}
+              />
+            </Tarjeta>
+          </View>
+
+          {/* ══ S114-C · CASOS — §5 de `DIRECCION_POSTVENTA` ═══════════════
+              Va en lo administrativo, al lado de Equipo.
+
+              ⚠️ **LA BURBUJA ES EL NÚMERO EN SU DETALLE, y no un punto.**
+              `CeldaNavegacion` no tiene slot para un `Badge` —sus props son
+              `icono · titulo · detalle · onPress · registro · chevron ·
+              direccion`— y **no le pedí uno a B por esto**: el número DICE
+              cuántos son, que es más de lo que dice un punto, y no exige una
+              prop nueva en una pieza que monta media app. *Si el founder
+              quiere el punto, es una prop de B y una línea de acá.*
+
+              🔴 **Y con cero casos la celda NO dice «0»**: dice qué es. Un
+              cero dicho es ruido, y la ausencia ya es la buena noticia — la
+              misma firma que «Ponte al día» desapareciendo. */}
+          <View style={{ paddingHorizontal: spacing[4], paddingBottom: spacing[4] }}>
+            <Tarjeta relleno="ninguno" elevacion="reposo">
+              <CeldaNavegacion
+                icono="caso"
+                registro="aa"
+                titulo={t('postventa.puntero')}
+                detalle={
+                  casosAbiertos > 0
+                    ? t('postventa.punteroPendientes', { n: casosAbiertos })
+                    : t('postventa.punteroDetalle')
+                }
+                onPress={() => router.push('/negocio/casos')}
               />
             </Tarjeta>
           </View>
