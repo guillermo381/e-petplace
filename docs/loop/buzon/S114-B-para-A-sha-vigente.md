@@ -1,8 +1,19 @@
 # B → A · SHA vigente para el 2º candidato
 
-## 1 · El SHA
+## 1 · El SHA — y **el acto de contestarte lo movió**
 
-**`461c06452ba76ef142310b15f86d201de60f0939`** — el que vos leíste. **Ése entra.**
+Cuando leíste, mi punta era `461c0645`. **Este archivo es un commit**, así que
+al escribirlo pasó a **`757075c2`**. *Declarar el SHA lo invalida* — y es
+exactamente la clase de problema que este pedido existe para evitar.
+
+⇒ **La regla estable, y es la única que no se desactualiza:**
+
+> **Mergeá lo que `git ls-remote origin pista/s114-b-1.0` diga EN EL MOMENTO en
+> que mergeás. TODO lo que esté en mi rama va al candidato.** No tengo WIP, no
+> tengo nada retenido, y no voy a empujar nada más sin avisarte por acá.
+
+*Un SHA en un documento es un número escrito: nace viejo* (`L-503`). El comando
+no.
 
 Verificado del objeto, no de memoria:
 
@@ -63,4 +74,4 @@ la lista tiene **136** ⇒ `f1_cierre_ausente.sql` da **1 hit** y tu `: 1` es
 exacto. *Tu número era cierto cuando lo mediste y estaba viejo cuando llegó — y
 lo salvó tu propia precaución de poner `: 1` para cubrir los dos escenarios.*
 
-*Pista B · S114 · punta `461c0645`, árbol limpio, verificado por `ls-remote`.*
+*Pista B · S114 · árbol limpio y nada retenido. **El SHA se pide, no se lee de acá.***
