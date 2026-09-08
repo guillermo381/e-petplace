@@ -145,7 +145,26 @@ export default async function correr({ entrar, llamar, reVoseo, reUsted, N }) {
      Por eso cada caso se corre en DOS variantes: con su etapa real (honesto) y
      sin la etapa (lo que la casa ve cuando abre el caso). **No se inventa una
      etapa abierta**: se omite el campo y se dice que se omitió. */
-  const sujetos = [casos.find((x) => x.clase === 2 && x.turnos >= 3), casos.find((x) => x.clase === 3)]
+  /* 🔴 SE PREFIERE EL CASO ABIERTO, Y SI NO HAY SE DICE — NO SE MIDE Y SE
+     LLAMA «camino principal».
+     La hoja existe para un caso que la casa TIENE QUE RESOLVER. Sobre uno
+     cerrado el modelo contesta bien («ya está resuelto») y eso mide que lee el
+     material, no que sabe proponer. *Reportar ese número como si fuera el
+     camino principal sería un verde por la razón equivocada.* */
+  const ABIERTAS = ['recibido', 'con_prestador', 'con_casa']
+  const abierto = (x) => ABIERTAS.includes(x.etapa)
+  const elegir = (clase) =>
+    casos.filter((x) => x.clase === clase).sort((a, b) =>
+      (abierto(b) - abierto(a)) || (b.turnos - a.turnos))[0]
+  const sujetos = [elegir(2), elegir(3)]
+
+  const hayAbierto = sujetos.some((c) => c && abierto(c))
+  if (!hayAbierto) {
+    console.log(`\n  🔴 NO CONCLUYENTE PARA EL CAMINO PRINCIPAL — no hay ningún caso abierto.`)
+    console.log(`     Los ${casos.length} casos de la base están en \`${[...new Set(casos.map((c) => c.etapa))].join('`, `')}\`.`)
+    console.log(`     Lo que sigue mide que la hoja LEE el material, no que sabe PROPONER.`)
+    console.log(`     Falta el sujeto, no la pieza: pedido a E en \`docs/loop/S114-D.md\`.`)
+  }
   for (const c of sujetos) {
     if (!c) { console.log('  ⚠️ falta un sujeto para esta clase'); continue }
    for (const variante of ['con etapa real', 'sin etapa']) {
@@ -173,7 +192,8 @@ export default async function correr({ entrar, llamar, reVoseo, reUsted, N }) {
       if (reUsted.test(prosa)) a.usted += 1
       a.quees.push(j.propuesta?.que ?? '')
     }
-    console.log(`\n  clase ${c.clase} · ${c.objeto_tipo} · ${c.motivo_codigo} · ${hilo.length} turnos · [${variante}${variante === 'con etapa real' ? ` = ${c.etapa}` : ''}]`)
+    const marca = abierto(c) ? '🟢 ABIERTO — camino principal' : '⚠️ cerrado — mide lectura, no propuesta'
+    console.log(`\n  clase ${c.clase} · ${c.objeto_tipo} · ${c.motivo_codigo} · ${hilo.length} turnos · [${variante}${variante === 'con etapa real' ? ` = ${c.etapa}` : ''}] · ${marca}`)
     console.log(`     hojas: ${a.ok}/${N}${a.sin ? ` · sin hoja: ${a.sin}` : ''}`)
     console.log(`     marcada \`es_propuesta\`: ${a.marcada}/${a.ok}`)
     console.log(`     con campo de estado/monto/transición: ${a.prohibidos}/${a.ok}  (tiene que ser 0)`)
