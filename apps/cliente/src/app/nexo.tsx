@@ -66,6 +66,8 @@ import {
 } from '@epetplace/api';
 import { fechaCortaMono, type IdiomaSoportado } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
+import { esMemorial } from '@/lib/memorial';
+import { useEstadoVida } from '@/lib/postventa/useEstadoVida';
 
 /** Un turno dibujado. El hilo mezcla **lo que se guardó** (viene del servidor)
  *  con **lo que acaba de pasar**, y por eso el id es local: dos fuentes en una
@@ -90,6 +92,17 @@ export default function Nexo() {
   const router = useRouter();
   const aviso = useAviso();
   const { mascotaId, nombre } = useLocalSearchParams<{ mascotaId: string; nombre?: string }>();
+
+  /* 🔴 S114-C · EL PISO DE MEMORIAL DE LAS CINCO PIEZAS DE ESTA PANTALLA.
+     Sus guards colgaban de `theme.mode === 'memorial'`, **que no se enciende
+     nunca** (`D-1021`), así que Nexo le hablaba igual a quien perdió a su
+     animal. La señal real es `estado_vida`, y `mascotaId` ya viaja por la URL.
+     ⚠️ Mientras no se sabe, `esMemorial(undefined)` da `false` y las piezas se
+     dibujan: es la ventana de un instante entre el montaje y la respuesta, y
+     **la salida contraria —esconder Nexo hasta saber— dejaría la pantalla en
+     blanco en el caso normal**, que es el de casi todas las mascotas. */
+  const estadoVida = useEstadoVida(mascotaId);
+  const enMemorial = esMemorial(estadoVida);
 
   const [contexto, setContexto] = useState<ContextoCoach | null | 'error'>(null);
   const [lineas, setLineas] = useState<Linea[]>([]);
@@ -279,7 +292,7 @@ export default function Nexo() {
               siguiente detrás de otro toque es hacer que la familia lo busque
               (la pieza lo dice y tiene razón). */}
           {avisos.map((a) => (
-            <AvisoAnticipacion
+            <AvisoAnticipacion enMemorial={enMemorial}
               key={a.id}
               forma="tarjeta"
               contexto={String(a.detalle.contexto ?? '')}
@@ -299,7 +312,7 @@ export default function Nexo() {
               presentamos* — un flag aparte se desincroniza del hilo el día que
               alguien borra la conversación. */}
           {lineas.length === 0 && grupos === null && typeof contexto === 'object' ? (
-            <PresentacionNexo
+            <PresentacionNexo enMemorial={enMemorial}
               autor={t('nexo.autor')}
               hora={hora()}
               burbujas={[
@@ -334,7 +347,7 @@ export default function Nexo() {
                 estado="enviado"
               />
             ) : l.primera === true ? (
-              <RespuestaNexo
+              <RespuestaNexo enMemorial={enMemorial}
                 key={l.id}
                 primera
                 notaIA={t('nexo.avisoIa')}
@@ -350,7 +363,7 @@ export default function Nexo() {
                 vozVerVet={l.escalarAVet === true ? t('nexo.verVet') : undefined}
               />
             ) : (
-              <RespuestaNexo
+              <RespuestaNexo enMemorial={enMemorial}
                 key={l.id}
                 texto={l.texto}
                 hora={l.hora}
@@ -379,13 +392,13 @@ export default function Nexo() {
           ) : null}
 
           {sugerencias.length > 0 && lineas.length === 0 ? (
-            <ChipsSugerencia sugerencias={sugerencias} />
+            <ChipsSugerencia enMemorial={enMemorial} sugerencias={sugerencias} />
           ) : null}
 
           {/* «Lo que sé de {{mascota}}» — editable, porque **la memoria es de la
               familia**: lo que no puede corregirse deja de ser memoria y pasa a
               ser una afirmación nuestra sobre su mascota. */}
-          <PanelMemoria
+          <PanelMemoria enMemorial={enMemorial}
             titulo={
               nombreVivo !== null
                 ? t('nexo.memoriaTitulo', { nombre: nombreVivo })

@@ -56,6 +56,26 @@ import { memoriaVacia, saneadoParaGuardar, type HechoDeMemoria } from './nexo-me
 export type { HechoDeMemoria, OrigenMemoria } from './nexo-memoria'
 
 export interface PanelMemoriaProps {
+  /**
+   * 🔴 LA SEÑAL REAL, OBLIGATORIA SIN DEFAULT: `estado_vida === 'fallecida'`,
+   * resuelta por la pantalla contra el perfil que ya tiene cargado.
+   *
+   * ⏪ **El piso de esta pieza colgaba SÓLO de `theme.mode === 'memorial'`, y
+   * ése es un interruptor que nadie aprieta.** Medido en `D-1021`: **nadie
+   * monta `<ThemeProvider memorial>` en ninguna de las dos apps** — el único
+   * provider vivo es el raíz, con `mode={light|dark}`. *La protección estaba
+   * escrita, se leía como protección, y la app igual le pedía algo a quien
+   * perdió a su animal.*
+   *
+   * **`perdida` NO es memorial** (firma del founder, 7-sep): la familia que
+   * busca a su mascota conserva la app entera. Por eso la prop se llama por
+   * lo que la letra nombra y no por el estado.
+   *
+   * *No es un default que se pueda omitir: un `false` por omisión sería
+   * exactamente el guard apagado que esta prop viene a curar.*
+   */
+  enMemorial: boolean
+
   /** *«Lo que sé de Thor»* — con el nombre adentro, ya compuesto. */
   titulo: string
   hechos: readonly HechoDeMemoria[]
@@ -83,7 +103,7 @@ export interface PanelMemoriaProps {
   }
 }
 
-export function PanelMemoria({ titulo, hechos, vozVacia, onAgregar, voz }: PanelMemoriaProps) {
+export function PanelMemoria({ enMemorial, titulo, hechos, vozVacia, onAgregar, voz }: PanelMemoriaProps) {
   const { theme } = useTheme()
   /* Cuál se está editando y con qué texto. **Uno por vez**: dos filas
      abiertas a la vez dejan dos borradores compitiendo por la misma memoria. */
@@ -91,7 +111,11 @@ export function PanelMemoria({ titulo, hechos, vozVacia, onAgregar, voz }: Panel
 
   /* ⛔ El Coach no existe en memorial. Ver la cabecera del archivo.
      ⚠️ Va DESPUÉS del hook: salir antes cambiaría el orden entre renders. */
-  if (theme.mode === 'memorial') return null
+    /* 🔴 **EL DATO MANDA, Y `theme.mode` SE CONSERVA EN EL `OR`** — misma cura
+     que `LineaAlgoSalioDistinto`: la galería SÍ monta el sub-tema y ahí el
+     guard tiene que seguir valiendo. *Lo que estaba mal no era mirar el tema:
+     era mirar SÓLO el tema.* */
+  if (enMemorial || theme.mode === 'memorial') return null
 
   return (
     <View style={{ gap: spacing[3] }}>

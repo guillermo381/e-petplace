@@ -1597,7 +1597,7 @@ export default function PerfilDeMascota() {
                     str('nombre') ??
                     fechaCortaMono(hoyMascota.fecha, idioma);
                   return (
-                    <TarjetaHoy
+                    <TarjetaHoy enMemorial={esMemorial}
                       clase="anticipacion"
                       /* 🔴 EL TEMA EN EL TÍTULO (firma founder, 6-sep). «Algo para
                          mirar» servía para cualquier aviso; ahora dice «Su cadera,
@@ -1632,7 +1632,7 @@ export default function PerfilDeMascota() {
                 }
                 case 'cita':
                   return (
-                    <TarjetaHoy
+                    <TarjetaHoy enMemorial={esMemorial}
                       clase="cita"
                       titulo={t('perfil.hoyCita', { servicio: hoyMascota.servicio, cuando: enDias(hoyMascota.faltan_dias) })}
                       detalle={`${hoyMascota.servicio} · ${enDias(hoyMascota.faltan_dias)}`}
@@ -1642,7 +1642,7 @@ export default function PerfilDeMascota() {
                   );
                 case 'vacuna':
                   return (
-                    <TarjetaHoy
+                    <TarjetaHoy enMemorial={esMemorial}
                       clase="vence"
                       titulo={t('perfil.hoyVacuna', { vacuna: hoyMascota.vacuna })}
                       detalle={`${hoyMascota.vacuna} · ${enDias(hoyMascota.dias)}${hoyMascota.derivada ? ` · ${t('perfil.tableroEstimada')}` : ''}`}
@@ -1652,7 +1652,7 @@ export default function PerfilDeMascota() {
                   );
                 case 'antiparasitario':
                   return (
-                    <TarjetaHoy
+                    <TarjetaHoy enMemorial={esMemorial}
                       clase="vence"
                       titulo={hoyMascota.tema
                         ? t('perfil.hoyAntiparasitario', { tema: hoyMascota.tema })
@@ -1664,7 +1664,7 @@ export default function PerfilDeMascota() {
                   );
                 case 'tip':
                   return (
-                    <TarjetaHoy
+                    <TarjetaHoy enMemorial={esMemorial}
                       clase="anticipacion"
                       titulo={t('perfil.hoyTip', { tema: hoyMascota.nombre.toLowerCase() })}
                       detalle={hoyMascota.descripcion}
@@ -1773,24 +1773,24 @@ export default function PerfilDeMascota() {
               {/* El estado completo llega cuando las CINCO están: la pieza
                   felicita en vez de pedir (ojo del founder, 2.2.2 · ⑤). */}
               {cuantas === total ? (
-                <TarjetaConociendolo
+                <TarjetaConociendolo enMemorial={esMemorial}
                   dimensiones={dimensiones}
                   voz={t('perfil.conociendoloVoz', { n: cuantas, total, nombre: mascota.nombre })}
                   completo
                   vozFelicitacion={t('perfil.conociendoloCompleto', { nombre: mascota.nombre })}
                   masSobre={
-                    <BotonContanos
+                    <BotonContanos enMemorial={esMemorial}
                       etiqueta={t('perfil.conociendoloMas', { nombre: mascota.nombre })}
                       onPress={contanos.abrir}
                     />
                   }
                 />
               ) : (
-                <TarjetaConociendolo
+                <TarjetaConociendolo enMemorial={esMemorial}
                   dimensiones={dimensiones}
                   voz={t('perfil.conociendoloVoz', { n: cuantas, total, nombre: mascota.nombre })}
                   invitacion={
-                    <BotonContanos
+                    <BotonContanos enMemorial={esMemorial}
                       etiqueta={t('perfil.conociendoloInvita', { nombre: mascota.nombre })}
                       onPress={contanos.abrir}
                     />
@@ -2623,7 +2623,7 @@ export default function PerfilDeMascota() {
           abre ya cuelga del guard; la Hoja también, porque *un texto
           inalcanzable hoy es alcanzable mañana*. */}
       {!esMemorial ? (
-      <HojaContanos
+      <HojaContanos enMemorial={esMemorial}
         visible={contanos.visible}
         onCerrar={contanos.cerrar}
         titulo={t('contanos.titulo', { nombre: mascota.nombre })}

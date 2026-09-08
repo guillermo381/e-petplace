@@ -49,6 +49,20 @@ import { spacing } from '../tokens/spacing'
 import { useTheme } from '../ThemeProvider'
 
 interface Comun {
+  /**
+   * 🔴 LA SEÑAL REAL, OBLIGATORIA SIN DEFAULT: `estado_vida === 'fallecida'`,
+   * resuelta por la pantalla contra el perfil que ya tiene cargado.
+   *
+   * ⏪ **El piso de esta pieza colgaba SÓLO de `theme.mode === 'memorial'`, y
+   * ése es un interruptor que nadie aprieta** (`D-1021`: nadie monta
+   * `<ThemeProvider memorial>` en ninguna de las dos apps). *La protección
+   * estaba escrita, se leía como protección, y la app igual le pedía algo a
+   * quien perdió a su animal.*
+   *
+   * **`perdida` NO es memorial** (firma del founder, 7-sep).
+   */
+  enMemorial: boolean
+
   /** *«Thor entra a senior en marzo»* — ya redactada. */
   contexto: string
   /** *«Los Bulldog inglés suelen tener displasia de cadera: vale la pena
@@ -80,7 +94,10 @@ export function AvisoAnticipacion(props: AvisoAnticipacionProps) {
   const { contexto, sugerencia } = props
 
   /* ⛔ Nada que adelantar cuando ya no hay mañana. Ver la cabecera. */
-  if (theme.mode === 'memorial') return null
+    /* 🔴 **EL DATO MANDA, Y `theme.mode` SE CONSERVA EN EL `OR`** — misma cura
+     que `LineaAlgoSalioDistinto`: la galería SÍ monta el sub-tema. *Lo que
+     estaba mal no era mirar el tema: era mirar SÓLO el tema.* */
+  if (props.enMemorial || theme.mode === 'memorial') return null
 
   /* 🔴 TINTE, NO RELLENO. El borde ocre y el fondo de la casa: se distingue
      sin gritar, y no compite con el CTA (`R20`). */

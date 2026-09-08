@@ -44,6 +44,26 @@ export type { ClaseHoy } from './tablero-metrica'
 export { elDeHoy } from './tablero-metrica'
 
 export interface TarjetaHoyProps {
+  /**
+   * 🔴 LA SEÑAL REAL, OBLIGATORIA SIN DEFAULT: `estado_vida === 'fallecida'`,
+   * resuelta por la pantalla contra el perfil que ya tiene cargado.
+   *
+   * ⏪ **El piso de esta pieza colgaba SÓLO de `theme.mode === 'memorial'`, y
+   * ése es un interruptor que nadie aprieta.** Medido en `D-1021`: **nadie
+   * monta `<ThemeProvider memorial>` en ninguna de las dos apps** — el único
+   * provider vivo es el raíz, con `mode={light|dark}`. *La protección estaba
+   * escrita, se leía como protección, y la app igual le pedía algo a quien
+   * perdió a su animal.*
+   *
+   * **`perdida` NO es memorial** (firma del founder, 7-sep): la familia que
+   * busca a su mascota conserva la app entera. Por eso la prop se llama por
+   * lo que la letra nombra y no por el estado.
+   *
+   * *No es un default que se pueda omitir: un `false` por omisión sería
+   * exactamente el guard apagado que esta prop viene a curar.*
+   */
+  enMemorial: boolean
+
   /** Qué clase de cosa es. Decide el tinte, **no la importancia**. */
   clase: ClaseHoy
   /**
@@ -68,11 +88,15 @@ export interface TarjetaHoyProps {
   vozActo: string
 }
 
-export function TarjetaHoy({ clase, titulo, detalle, onActo, vozActo }: TarjetaHoyProps) {
+export function TarjetaHoy({ enMemorial, clase, titulo, detalle, onActo, vozActo }: TarjetaHoyProps) {
   const { theme } = useTheme()
 
   /* ⛔ No hay un «hoy» que resolver. */
-  if (theme.mode === 'memorial') return null
+    /* 🔴 **EL DATO MANDA, Y `theme.mode` SE CONSERVA EN EL `OR`** — misma cura
+     que `LineaAlgoSalioDistinto`: la galería SÍ monta el sub-tema y ahí el
+     guard tiene que seguir valiendo. *Lo que estaba mal no era mirar el tema:
+     era mirar SÓLO el tema.* */
+  if (enMemorial || theme.mode === 'memorial') return null
 
   /* 🔴 **SIN TEXTO NO HAY TARJETA.** Ver la cabecera de `titulo`. Se mide
      `.trim()` y no `.length`, porque *un espacio no es un texto*: una plantilla
