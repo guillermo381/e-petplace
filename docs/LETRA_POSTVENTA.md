@@ -193,11 +193,12 @@ descontar una devolución.
 **Los cuatro productores que faltan** (firmados F10), sobre el chasis probado de los tres que
 funcionan — `crear_evento_economico()`, como todo:
 
-| servicio | el acto que devenga |
-|---|---|
-| **veterinaria** y **telemedicina** | el cierre de la atención (mismo patrón que grooming) |
-| **guardería** día y paquete | el acta de `entregar` |
-| **guardería** mensualidad | **por día ejecutado**, no por mes cobrado |
+| servicio | el acto que devenga | 🔴 `origen_tipo` · `origen_id` |
+|---|---|---|
+| **veterinaria** y **telemedicina** | el cierre de la atención (mismo patrón que grooming) | `cita` · la cita |
+| **guardería** día y paquete | el acta de `entregar` | **`estadia` · la ESTADÍA** *(enmienda ②)* |
+| **guardería** mensualidad | **por día ejecutado**, no por mes cobrado | **`estadia` · la ESTADÍA** *(enmienda ②)* |
+| **despensa** | el cuarto escalón, `entregado` | `pedido` · el pedido |
 
 > ### 🔴 ENMIENDA ② (founder, 7-sep-2026) — **el evento de guardería ANCLA EN LA ESTADÍA**
 > ~~*(la letra original no lo decía, y con la cita y la estadía existiendo las dos, el ancla
@@ -213,7 +214,15 @@ funcionan — `crear_evento_economico()`, como todo:
 >
 > ⚠️ **Consecuencia para E:** su permisividad declarada sobre el ancla de guardería **queda
 > cerrada** — el rojo de §8 se mide contra la estadía y sólo contra ella.
-| **despensa** | el cuarto escalón, `entregado` |
+>
+> ⚠️ **Y esta enmienda casi no llega a quien la necesitaba.** Al depositarla, A la
+> puso ENTRE dos filas de la tabla de arriba — con dos efectos: **la fila de
+> despensa quedó fuera de la tabla** (en Markdown una fila después de un bloque
+> ya no es tabla) **y el ancla no quedó donde se escanea.** E leyó las filas, no
+> vio el ancla, y citó la mesa en vez del documento: *hizo lo correcto.*
+> **Por eso el ancla vive ahora EN LA COLUMNA, no en un párrafo al lado** —
+> *una enmienda depositada junto a lo que enmienda no enmienda nada si lo que
+> la gente lee es lo de al lado.*
 
 *La mensualidad devenga por día porque el principio no cambia con la modalidad: el evento
 económico nace de lo ejecutado. Devengar el mes al cobrar sería fabricar un evento sobre servicios
