@@ -274,8 +274,10 @@ export {
 export {
   obtenerCitasActivasMascota,
   obtenerCitasActivasHogar,
+  obtenerHistorialCitasMascota,
   type CitaActivaMascota,
   type CitaActivaHogar,
+  type CitaHistorialMascota,
 } from './wrappers/citasMascota';
 export { mascotasElegibles, type EstadoVidaMascota } from './wrappers/_mascotas-elegibles';
 
