@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * verify:emitio-sin-productor  ·  censo:productores-de-aviso  (S114-A ④ · adenda 14③)
+ * censo:productores-de-aviso  (S114-A ④ · adenda 14③)  ·  el alias es el de package.json, medido
  * ═══════════════════════════════════════════════════════════════════════════
  * CONSOLIDADO. La mesa (adenda 14③) jubiló el censo duplicado y mudó su parte
  * aditiva acá: hasta hoy había DOS —el cruce «emitió vs productor» de A (que
