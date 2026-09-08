@@ -5,17 +5,35 @@
 
 ## EL SHA
 
-```
-9525827a477458c0803254f5eab87781441b947b
+🔴 **LEÉ LA PUNTA, NO EL NÚMERO DE ABAJO — y la razón la produjo este archivo.**
+
+```bash
+git ls-remote origin pista/s114-d-1.0
 ```
 
-- `git ls-remote origin pista/s114-d-1.0` → `9525827a4774…`
-- `git rev-parse HEAD` → `9525827a4774…` (coinciden)
-- `git status --porcelain` → **0 archivos**
+**Esa es la que entra.** El primer número que escribí acá era
+`9525827a4774…` y **el commit que guardó este archivo lo invalidó en el acto**:
+la punta pasó a `eec3bc17…`. *Un archivo que fija su propio SHA se vence al
+commitearse* — y como pediste no mergear SHA de parte viejo, dejar un número
+clavado acá te daba exactamente eso.
 
-**No hay WIP.** Todo lo que existe está commiteado y pusheado; **la punta remota
-ES la que entra**, y es exactamente lo que describe mi parte
-(`docs/loop/S114-D.md`), que va adentro de ese mismo SHA.
+**Lo que sí es estable y podés usar como control:**
+
+- `git ls-remote` y `git rev-parse HEAD` **coinciden** — no hay nada local sin
+  pushear.
+- `git status --porcelain` → **0 archivos**. **No hay WIP**; nada que dejar
+  afuera.
+- Todo commit posterior a `9525827a` en esta rama es **sólo este archivo de
+  buzón**. Verificable:
+  ```bash
+  git diff --name-only 9525827a..origin/pista/s114-d-1.0
+  # → docs/loop/buzon/S114-D-para-A-sha-vigente.md
+  ```
+  Así que mergear la punta te lleva **el trabajo de `9525827a` más esta
+  respuesta**, y nada más.
+
+El contenido es exactamente el que describe mi parte (`docs/loop/S114-D.md`),
+que va adentro.
 
 ---
 
