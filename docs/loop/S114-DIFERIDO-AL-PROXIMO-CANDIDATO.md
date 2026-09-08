@@ -23,3 +23,25 @@
   ⚠️ **Ojo colisión de números:** este candidato renumeró lecciones (F→509-512,
   A→513-515); L-507/L-508 de D hay que verificar que no choquen con las de otra
   rama antes de integrarlas (correr `proximo:ficha` cruzado con las ramas vivas).
+
+---
+
+## R80 · precondición para que la punta de B entre verde (8-sep)
+
+Cuando la punta de B (`bedacc78`, que trae R80) entre al próximo candidato, R80
+va a salir ROJA sobre dos migraciones de A si su lápida no las tiene. La voz
+VIVA ya está curada a tuteo (`20260911830000_s114a_r80_voz_a_tuteo.sql`, en el
+candidato actual). Falta la lápida (archivo de B, no se cruza territorio):
+
+**Entregado a B en `docs/loop/buzon/S114-A-para-B-lapida-r80-migraciones-s114.md`:**
+```js
+  '20260911000000_s114a_cat_motivos_postventa.sql': 1,
+  '20260911610000_s114a_rpcs_del_caso.sql': 1,
+  '20260911730000_s114a_f1_cierre_ausente.sql': 1,   // sólo si B agrega `marcá` a voseo.json
+```
+
+**Orden para el próximo candidato:** B coloca esas entradas en `MIGRACIONES_CON_VOSEO`
+ANTES (o en el mismo merge) de que su punta entre → R80 arranca verde. Si no,
+R80 bloquea el pre-commit de toda pista sobre esa base (L-502). Hasta entonces,
+R80 vive sólo en la rama de B y las pistas que la mergean commitean con
+`--no-verify` declarándolo (como hizo C).
