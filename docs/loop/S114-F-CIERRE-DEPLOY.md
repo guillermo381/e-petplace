@@ -28,7 +28,7 @@ encuentra las otras tres cosas. Y la única ocurrencia está donde tiene que est
 signInWithOAuth({ provider:`google`, options:{ redirectTo:`https://admin.epetplace.com` } })
 ```
 
-### El clic — PARCIAL, y la parte que falta se declara
+### El clic — VERDE, y hicieron falta DOS mediciones distintas
 
 Sonda al endpoint de OAuth de Supabase con la URL canónica:
 
@@ -39,7 +39,7 @@ location: https://accounts.google.com/o/oauth2/v2/auth?…
           &redirect_uri=https%3A%2F%2Fauth.epetplace.com%2Fauth%2Fv1%2Fcallback
 ```
 
-🔴 **Pero el discriminador dice que esa sonda NO prueba lo que parece:**
+🔴 **Esa sonda sola no alcanzaba, y el discriminador lo probó:**
 
 ```
 ① canónica  admin.epetplace.com   → accounts.google.com  ✅
@@ -47,21 +47,20 @@ location: https://accounts.google.com/o/oauth2/v2/auth?…
 ③ la URL vieja que rompía           → accounts.google.com  ✅
 ```
 
-Las tres pasan ⇒ la sonda mide **que el endpoint despacha**, no **que la URL esté
-permitida**. La allow-list se evalúa en el *callback*, un eslabón más adelante.
-Queda como `L-505`.
+Las tres pasan ⇒ **la sonda mide el DESPACHO, no la vuelta.** La allow-list se evalúa en
+el *callback*, un eslabón más adelante, y ahí mi instrumento no llegaba (`L-505`).
 
-**Lo que queda SIN medir, y con quién:**
+✅ **La vuelta la midió el founder, por camino real en el navegador:** «Entrar con Google»
+desde `admin.epetplace.com` **vuelve a `admin.epetplace.com/login`**.
 
-| pendiente | por qué | dueño |
-|---|---|---|
-| el clic real en el navegador | la extensión de Chrome no respondió en 4 intentos | reintentar, o el founder en su teléfono |
-| la vuelta desde Google | exige credenciales del founder — **no se usan** | founder |
+> ***Fueron dos mediciones distintas y las dos hacían falta.*** El bundle y la sonda
+> prueban que lo publicado es correcto y que el despacho sale bien; **sólo el camino real
+> prueba que la vuelta aterriza en el dominio propio**. Ninguna de las dos, sola, cerraba
+> el defecto.
 
-*Lo que sí está probado: el código publicado es correcto y literal, y el endpoint
-despacha hacia Google con esa URL intacta.*
-
----
+**El defecto que originó el hilo queda CERRADO:** la URL canónica es el dominio propio, la
+sesión de Supabase queda en el dominio correcto, y **nadie vuelve a encontrarse el login de
+Vercel** donde esperaba entrar.
 
 ## ② La causa, y por qué costó tanto
 
@@ -90,30 +89,47 @@ típico, no el contrato** (`L-504`).
 
 ---
 
-## ③ La cura, y el ciclo que costó afinarla
+## ③ La cura — PENDIENTE CON MEDICIÓN, no firma cumplida
 
-**Firmada:** la decisión vive en el repo, no en el dashboard.
+**Firmada:** en un proyecto donde cada push es intencional no se deja una heurística
+ajena decidiendo si construir.
 
-```json
-{ "rewrites": [ … ], "ignoreCommand": "exit 1" }
+🔴 **Hoy eso vive SÓLO en el dashboard.** Bajarlo a `vercel.json` con `ignoreCommand`
+se intentó **en dos formas y se retiró**:
+
+```
+commit    vercel.json                push        deployment
+c0aee5e   sin campo                  00:55:43Z   ✅  33 s
+73b275c   sin campo                  01:54:54Z   ✅  24 s
+bf6bf9b   sin campo                  04:54:23Z   ✅  2 m 21 s   ← lo produjo el HOOK
+f3171cc   con  echo '…"…"…'; exit 1      —       🔴  ninguno
+b5716d1   con  "exit 1" pelado       05:13:04Z   🔴  ninguno en 5 min
+66cf314   sin campo (retirado)           —       🔴  ninguno en 5 min
 ```
 
-*(En Vercel el código está invertido: `exit 0` SALTEA, `exit 1` CONSTRUYE.)*
+**El último renglón absuelve al campo:** sin él tampoco construye. Y mi primera
+hipótesis —las comillas dobles rompiendo el comando— **la falsó su propio
+experimento**: la forma pelada tampoco funcionó (`L-506`).
 
-🔴 **Y el primer intento no funcionó — por mi culpa.** Le puse una explicación
-adentro del comando; las comillas dobles lo rompen al ejecutarse y un comando roto
-puede salir con `0`, o sea *saltear*. **La cura escrita para garantizar el build
-fue lo único que lo impidió** (`L-506`).
+Se descartó el schema antes de tocar nada: `ignoreCommand` existe, `type string|null`,
+`maxLength 256`, mi valor 92, `additionalProperties: false` limpio ⇒ **el archivo nunca
+fue inválido**.
 
-Se descartó el schema antes de tocar nada: `ignoreCommand` existe, `maxLength 256`,
-mi valor 92, `additionalProperties: false` limpio ⇒ **la forma era válida y la
-causa era el contenido.**
+### 🔴 Y lo que aparece en su lugar es más grande: son DOS caminos
 
-**Lo que quedó escrito, y dónde se lee sin ejecutarse:**
-- `README.md` → sección «Por qué este repo construye siempre», con lo que costó.
-- `CLAUDE.md` → la advertencia arriba de todo, con **«no lo saques»**.
+| camino | estado | evidencia |
+|---|---|---|
+| **Deploy Hook** → build | ✅ curado | con `Automatic` daba `PENDING` para siempre; con construir-siempre salió en 20 s |
+| **push a `main`** → deployment | 🔴 **roto** | tres pushes seguidos sin deployment **en ningún estado** |
 
----
+⚠️ **`bf6bf9b` desplegó por el HOOK, no por su push.** Concluir «la GitHub App
+funciona porque el push siguiente construyó» **es inválido** — es medir una rama y
+concluir sobre la otra (`L-500`). *Ese error se cometió en este mismo hilo.*
+
+**Dónde quedó escrito, para que el próximo no repita el ciclo:** `DEPLOY.md` del legado
+(nuevo, y es lo que hay que leer **antes** de tocar settings), el README que lo enlaza,
+la cabecera del `CLAUDE.md`, y el mensaje del gate — que ahora dice **qué valor tiene
+que tener** el setting, no sólo dónde mirar.
 
 ## ④ El gate que avisa si vuelve a pasar
 
@@ -165,6 +181,33 @@ estaba en la lista*.
 
 ## Lo que queda vivo, con dueño
 
-- **El proyecto Vercel del monorepo falla TODOS sus builds, producción incluida** —
-  no es de esta pista. Avisado en `docs/loop/buzon/S114-F-para-TODAS-y-FOUNDER-el-monorepo-no-despliega.md`.
-- **El clic real en el navegador** y **la vuelta desde Google** (tabla de ①).
+### 🔴 El push → deployment del legado sigue roto — riesgo vivo
+
+Tres commits (`f3171cc`, `b5716d1`, `66cf314`) con ✗ roja de la Action. **El sitio
+responde 200 y sirve contenido correcto**, así que no hay síntoma; lo que no llega es
+lo nuevo. Los seis candidatos descartados y lo que falta mirar están en `DEPLOY.md`.
+
+### El proyecto Vercel del monorepo — medido, y no es de esta pista
+
+**No construye desde el 6-sep**, producción incluida (46 muestreados de una ventana de
+100, cero verdes). **La causa: `@epetplace/pagos-web` aborta por tres variables de
+entorno faltantes** —`NUVEI_APP_CODE_CLIENT`, `NUVEI_APP_KEY_CLIENT`, `PAGOS_API_ALTA`—
+y su guard es fail-closed **a propósito y bien puesto**: *«una página de pago con config
+incompleta se ve bien y no cobra»*. **No se toca.**
+
+🔴 **Pero el dato que cambia la decisión es otro: ese proyecto no le sirve a nadie.**
+`e-petplace.vercel.app` sirve **una página de juguete de 2 476 bytes** («Dar Premio 🦴»),
+resto del último build que salió bien. Y **`cliente` y `prestador` no tienen script
+`build`**: nunca se desplegaron a web porque **nunca estuvieron en el build**, no porque
+fallaran. ⇒ *La cura no es cargar variables en un proyecto sin destino — es acotar qué
+construye o retirarlo, y eso lo firma el founder.*
+
+Todo en `docs/loop/buzon/S114-F-para-TODAS-y-FOUNDER-el-monorepo-no-despliega.md`.
+
+### Sin reproducir, declarado
+
+**Por qué falla `tsc -b` de `@epetplace/admin` en ese run.** En mi rama sale `exit 0`
+con turbo (199,89 kB), con el `tsc` del paquete y con el de la raíz. `pista/s114-d-1.0`
+**no tiene** `apps/admin` **y su preview falla igual** ⇒ pagos-web solo alcanza para
+tumbar el build. *Hipótesis no medida: podría ser una tarea cancelada por el fallo de
+pagos-web, no un fallo propio — se distingue mirando si el log trae errores `TS####`.*
