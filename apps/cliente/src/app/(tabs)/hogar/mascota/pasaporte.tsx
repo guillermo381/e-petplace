@@ -42,7 +42,6 @@ import {
 import {
   configurarPasaporte,
   emitirPasaporte,
-  marcarPerdida,
   obtenerPerfilMascota,
   resolverUrlFoto,
   revocarPasaporte,
@@ -107,24 +106,22 @@ export default function Pasaporte() {
     };
   }, [mascotaId, aviso]);
 
-  const cambiarPerdida = useCallback(
-    (v: boolean) => {
-      if (mascotaId === undefined || trabajando) return;
-      setTrabajando(true);
-      void marcarPerdida(mascotaId, v).then((r) => {
-        setTrabajando(false);
-        if (!r.ok) {
-          aviso.mostrar({ variante: 'error', texto: r.mensaje });
-          return;
-        }
-        setPerdida(v);
-        /* `yaEstaba` distingue «lo marcaste vos» de «ya estaba así». Sin eso,
-           tocar dos veces se ve igual que no haber tocado. */
-        if (r.data.yaEstaba) aviso.mostrar({ variante: 'neutro', texto: t('pasaporte.yaEstaba') });
-      });
-    },
-    [mascotaId, trabajando, aviso, t],
-  );
+  /* ☠️ S114-B · ACÁ VIVÍA `cambiarPerdida`, y murió con el toggle (Ley 37).
+     **Firma del founder: la puerta de `perdida` vive en el PERFIL y no queda
+     ninguna en Pasaporte** — *marcar que tu perro se perdió no es una perilla
+     de configuración.* Había DOS puertas al mismo hecho y estaba declarado.
+
+     ⚠️ **Lo que SÍ se queda es `perdida` como LECTURA**: la tarjeta de abajo se
+     dibuja en modo «se perdió» con ese estado. *Leer el estado no es ofrecer
+     cambiarlo.*
+
+     🔑 **Para quien construya la puerta en el perfil:** el wrapper es
+     `marcarPerdida(mascotaId, v)` de `@epetplace/api` —sigue vivo, sólo dejó
+     de importarse acá— y trae `yaEstaba`, que **distingue «lo marcaste vos» de
+     «ya estaba así»**: sin eso, tocar dos veces se ve igual que no haber
+     tocado. Y las dos reglas del acto están en la lápida de
+     `AccionesPasaporte`: **el segundo toque nombra a la mascota; desmarcar NO
+     confirma.** */
 
   const guardarVisibilidad = useCallback(
     (v: VisibilidadPasaporte) => {
@@ -268,10 +265,6 @@ export default function Pasaporte() {
               onDescargarQr={() =>
                 void Share.share({ message: urlQrPng(token), url: urlQrPng(token) })
               }
-              perdida={perdida}
-              vozPerdida={perdida ? t('pasaporte.yaAparecio') : t('pasaporte.sePerdio')}
-              vozConfirmarPerdida={perdida ? t('pasaporte.confirmarAparecio') : t('pasaporte.confirmarPerdida')}
-              onCambiarPerdida={cambiarPerdida}
             />
 
             <ConfiguracionPasaporte
@@ -314,10 +307,6 @@ export default function Pasaporte() {
                     } else aviso.mostrar({ variante: 'error', texto: e.mensaje });
                   });
                 }}
-                perdida={perdida}
-                vozPerdida={perdida ? t('pasaporte.yaAparecio') : t('pasaporte.sePerdio')}
-                vozConfirmarPerdida={perdida ? t('pasaporte.confirmarAparecio') : t('pasaporte.confirmarPerdida')}
-                onCambiarPerdida={cambiarPerdida}
               />
             </View>
           </>
