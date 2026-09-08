@@ -28770,10 +28770,87 @@ cuenta.
 se testea y no se supone.* Un trinquete cuyo sujeto no existe fuera de su
 corpus no se congela por ampliarlo.
 
-② 🔴 **La ampliación de `R77` cuesta TRES sitios, no una tanda** — y estaba
-diferida a *«una tanda propia después de S114»* justo por suponer que era cara.
-**Nadie la había medido.** *El diferimiento no lo produjo el costo: lo produjo
-no conocerlo* — que es la misma ley un piso más arriba.
+② 🔴 **La ampliación de `R77` estaba diferida a *«una tanda propia»* por
+suponer que era cara y NADIE la había medido.** *El diferimiento no lo produjo
+el costo: lo produjo no conocerlo* — que es la misma ley un piso más arriba.
+**Se ejecutó el 8-sep** (13 sitios → 31), **y del otro lado había un defecto de
+producto**: dos de las TRES copias del guard de especie del mostrador tenían
+**9 de las 11** — *un caballo llegaba al mostrador y el guard decía que su
+especie no existe*, y `readonly AvatarMascotaEspecie[]` **compila con nueve**.
+**Ése es el precio real de diferir por un costo que nadie midió.**
+
+## ② EL EJEMPLO CANÓNICO — y son DOS autocorrecciones en direcciones OPUESTAS
+
+**Firma del founder (8-sep-2026).** El censo de arriba se hizo dos veces, y la
+primera falló *de la misma manera que la ley describe*:
+
+| lo que publiqué | lo que midió el detector de verdad |
+|---|---|
+| ampliar `R77` a `apps/` cuesta **3 sitios** | **18** — mi patrón no tenía la puerta de arrays anotados ni la de `push` |
+| «hay un hallazgo real esperando: `ClaveEscalon` incompleto 4/5» | **no lo era** — son dos caminos deliberados y la cabecera del archivo lo explica |
+
+> **Un censo hecho con un instrumento más débil que el que va a correr no mide
+> el trabajo: mide su propio alcance.**
+
+🔴 **Y que los dos errores apunten en direcciones OPUESTAS es la evidencia de
+que no había sesgo, sino falta de medición.** *Un sesgo empuja siempre para el
+mismo lado —a favor de lo que uno quiere concluir—; esto subestimó el costo y
+sobreestimó el hallazgo a la vez.* **Eso sólo lo produce no haber mirado.**
+
+⇒ **la regla operativa que sale:** el número con el que se decide si una
+ampliación es cara **se mide con el detector que va a correr**, jamás con una
+aproximación escrita para el censo. *Si medir con el detector real es caro, el
+censo declara que su número es una cota y de qué lado.*
+
+## ③ CURAR UNA VOZ SIN AGREGAR SU VERBO DEJA LA CURA SIN GUARD
+
+**Ratificado por la mesa (8-sep-2026)**, y es la otra mitad de ④: *ampliar
+después de curar no es sólo más barato — es lo único que sostiene la cura.*
+
+Las cuatro voces de `packages/api` **sobrevivieron a una barrida entera** porque
+la lista no tenía sus verbos. Curarlas sin agregar `operás` y `registrá` habría
+sido **la quinta barrida sin guard**, que es exactamente el estado del que `R66`
+nació para sacarnos. **El discriminador, corrido en las dos direcciones:**
+
+```
+lista NUEVA + el voseo reintroducido …… ROJO   ✅ el guard sostiene la cura
+lista VIEJA + el MISMO voseo ………………… exit 0  🔴 habría pasado invisible
+```
+
+⇒ **una cura de voz incluye el verbo que la vigila**, o es una barrida con otro
+nombre.
+
+### ⚠️ Y CÓMO SE TOCA UNA LISTA QUE NO ES DE UNO
+
+La lista vive en territorio ajeno. **El primer intento la reformateó entera —
+552 líneas por un cambio de 4— y se revirtió.** *Un diff irrevisable en
+territorio ajeno esconde el cambio que uno vino a hacer*, y el dueño no tiene
+cómo saber qué se le tocó. **Inserción quirúrgica: 16 líneas, cero borrados**,
+respetando el formato existente al carácter.
+
+## ④ LA PARTE PRÁCTICA — CURAR PRIMERO VUELVE GRATIS LA AMPLIACIÓN
+
+**Firma del founder (8-sep-2026): «es lo que la vuelve accionable en vez de una
+advertencia».**
+
+El mismo día se ejecutó el ciclo entero y el orden importó:
+
+```
+1 · curar las 4 voces …………………… packages/api a tuteo
+2 · ampliar la lista 132 → 136 …… marcá · firmá · operás · registrá
+3 · correr el gate ………………………… VERDE. La ampliación destapó CERO.
+```
+
+**Al revés, el paso 2 habría enrojecido cuatro archivos que nadie tocó hoy** —
+que es la ley cobrándose. ⇒ **ampliar el alcance DESPUÉS de curar lo que la
+ampliación va a destapar convierte el rojo en nada**, y el trabajo de subir
+baselines desaparece porque no hay nada que subir.
+
+⚠️ **Con su límite, que es donde la ley sigue mordiendo:** funciona **si la
+deuda es curable**. En `R80` —una lápida sobre migraciones aplicadas— **no lo
+es**, y por eso `pasá` y `hablá` siguen fuera de la lista con su costo escrito:
+enrojecerían **5 migraciones que no se pueden curar en su lugar**. *Ahí la única
+puerta es la de la cura: subir la lápida en el mismo commit, con su razón.*
 
 ## ⚠️ EL ALCANCE DE ESTE CENSO, declarado
 
