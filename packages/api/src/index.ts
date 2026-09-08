@@ -2016,5 +2016,5 @@ export {
 
 // S114 · A4 · el saldo e-PetPlace (F6). Un lector; acreditar/consumir son del
 // motor, sin EXECUTE para authenticated (D-314).
-export { obtenerMiSaldo, pagarPedidoConSaldo } from './wrappers/postventa-saldo';
-export type { PagoConSaldo } from './wrappers/postventa-saldo';
+export { obtenerMiSaldo, pagarCompraConSaldo } from './wrappers/postventa-saldo';
+export type { PagoConSaldo, CodigoPagoSaldo, ErrorPagoSaldo } from './wrappers/postventa-saldo';
