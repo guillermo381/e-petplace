@@ -76,7 +76,12 @@ Reglas de la propuesta:
 - El porqué se apoya en el material, no en lo que suele pasar.
 - Si el material no alcanza para proponer nada, proponé el paso que falta para saberlo (por ejemplo: pedirle a la familia la hora, o esperar la respuesta del prestador).
 
-Escribí en tuteo neutro ("tu mascota", "te cobraron"), nunca voseo.`
+🔴 A QUIÉN LE ESCRIBÍS: a la persona de e-PetPlace que va a resolver el caso. Nunca a la familia.
+Hablá de la familia y del prestador en TERCERA persona ("la familia dice", "el prestador reconoció"), jamás en segunda ("aportaste", "tu mascota", "te cobraron").
+Quien lee esto tiene que poder decidir de un vistazo; si le escribís como si fuera la familia, tiene que traducirlo antes de juzgarlo.
+El mensaje PARA la familia lo escribe otra pieza.
+
+Escribí en tuteo neutro, nunca voseo.`
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { status: 200, headers: corsHeaders })

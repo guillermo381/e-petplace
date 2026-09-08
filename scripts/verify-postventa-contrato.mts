@@ -24,6 +24,7 @@
  * un fixture copiado de una tabla viva se vuelve falso solo, sin que nada falle.
  */
 import { execFileSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
 import {
   CAMPOS_DE_CONFIRMACION,
   CAMPOS_QUE_DECIDEN,
@@ -209,6 +210,62 @@ debeRechazar('② motivo que no está en el conjunto recibido',
 
 if (divergencias.length > 0) {
   fallas.push(...divergencias.map((d) => `✗ FIXTURE VENCIDO · ${d}`))
+}
+
+// ── ⑤ EL PROMPT DE LA HOJA NO INVITA A LO QUE LA MESA PROHIBIÓ ─────────────
+// Decisión de mesa (8-sep): «el `porque` de la Hoja le habla SIEMPRE a la casa,
+// nunca a la familia».
+//
+// 🔴 POR QUÉ EL GATE VA SOBRE EL PROMPT Y NO SOBRE LA SALIDA, Y ESTO SE MIDIÓ:
+// la tasa del defecto es **1 en 15 corridas (~7 %)**. Con esa base, un 0/20
+// después de la cura es indistinguible del 0/10 que ya daba ANTES de tocar
+// nada. *Medir la salida no puede probar esta cura: no tiene poder.* Lo que sí
+// es exacto es que el prompt deje de OFRECER la forma — y eso lo hace cumplir
+// el código, en cada commit, sin depender del modelo.
+//
+// ⚠️ Y LA TRAMPA QUE ESTE GATE TUVO QUE ESQUIVAR: el prompt CURADO cita
+// «tu mascota» y «te cobraron»… como ejemplos de lo PROHIBIDO. Un gate que
+// buscara esas formas daría rojo sobre el texto correcto — el detector romo de
+// siempre. Por eso mide la PROPIEDAD: toda forma de segunda persona en el
+// `system` tiene que estar bajo una negación en su misma línea. Aparecer sin
+// negación es presentarla como modelo a seguir, que es exactamente lo que la
+// vieja hacía con `tuteo neutro ("tu mascota", "te cobraron")`.
+{
+  const HOJA = readFileSync(new URL('../supabase/functions/postventa-hoja/index.ts', import.meta.url), 'utf8')
+  const m = HOJA.match(/const SISTEMA = `([\s\S]*?)`\n/)
+  if (m === null) {
+    fallas.push('✗ NO CONCLUYENTE: no encontré el `SISTEMA` de `postventa-hoja` — cambió de forma')
+  } else {
+    const sistema = m[1]
+    const SEGUNDA = /(?<![\p{L}\p{N}])(aportaste|pagaste|reservaste|contrataste|dijiste|te cobraron|te avisaron|tu mascota|tu perro|tu caso|tu reclamo|tu pedido|tu cita)(?![\p{L}\p{N}])/giu
+    const NIEGA = /(jam[aá]s|nunca|\bno\b|prohib|evit)/i
+    /* 🔴 LA NEGACIÓN TIENE QUE VENIR ANTES DE LA FORMA, Y ESTO LO ENCONTRÓ EL
+       CONTROL NEGATIVO DE ESTE MISMO GATE.
+       Mi primera versión preguntaba «¿hay una negación en la línea?». Con eso,
+       la línea VIEJA —`tuteo neutro ("tu mascota", "te cobraron"), nunca
+       voseo.`— pasaba: **tiene un «nunca», pero es de otra cosa**, del voseo, y
+       viene DESPUÉS. El gate la dejaba pasar y caía por el otro chequeo, o sea
+       **daba rojo por la razón equivocada** — que está tan roto como un verde
+       por la razón equivocada, porque el mensaje manda a arreglar lo que no es.
+       El discriminador es la POSICIÓN: una forma citada como ejemplo de lo
+       prohibido va después de su negación; una ofrecida como modelo, no. */
+    const sueltas: string[] = []
+    for (const linea of sistema.split('\n')) {
+      for (const x of linea.matchAll(SEGUNDA)) {
+        const antes = linea.slice(0, x.index)
+        if (!NIEGA.test(antes)) {
+          sueltas.push(`«${x[0]}» ofrecida sin negación previa en: ${linea.trim().slice(0, 68)}`)
+        }
+      }
+    }
+    if (sueltas.length > 0) {
+      fallas.push(`✗ el \`system\` de la Hoja OFRECE formas dirigidas a la familia: ${sueltas[0]}`)
+    } else if (!/tercera persona/i.test(sistema)) {
+      // Sin la instrucción positiva, «no le hables a la familia» es una
+      // prohibición sin alternativa, y el modelo tiene que adivinar la forma.
+      fallas.push('✗ el `system` de la Hoja no dice en qué persona hablar de las partes')
+    } else verdes++
+  }
 }
 
 console.log(`  ataques rechazados: ${rojos}`)

@@ -47,12 +47,27 @@ const ANCLAS = [
    juntos son lo que separa «leyó» de «propuso», y ninguno solo alcanza. */
 const ACTO = /devolv|reembols|acredit|saldo|compensa|reintegr|descuent|cr[eé]dito|repetir|repone|nueva salida|otra salida/i
 
+/* 🔴 EL DESTINATARIO — decisión de mesa del 8-sep: «el `porque` de la Hoja le
+   habla SIEMPRE a la casa, nunca a la familia. La Hoja existe para que el
+   founder lea y decida en un toque; un porqué dirigido a la familia lo obliga a
+   traducirlo antes de juzgarlo, e invita a copiarlo al hilo sin revisar a quién
+   se lo manda.» El borrador para la familia es otra cosa y vive en D3.
+
+   ⚠️ ESTO NO ES UN DETECTOR DE CALIDAD —la mesa fue explícita en que no se
+   construya uno—: es de **a quién le habla el texto**, que es exacto. Se probó
+   antes de existir su verde, contra las cinco salidas reales de la corrida
+   anterior: marcó 1 —la que la mesa señaló— y **0 falsos positivos** sobre
+   cuatro `porque` que CITAN a la familia en tercera persona. *Un detector que
+   marcara «la familia aporta el GPS» sería romo y produciría rojos sobre el
+   texto correcto, que es peor que no tener detector.* */
+const A_LA_FAMILIA = /(?<![\p{L}\p{N}])(aportaste|pagaste|reservaste|contrataste|dijiste|mencionaste|escribiste|indicaste|nos contaste|te cobraron|te avisaron|te lo|tu mascota|tu perro|tu gato|tu caso|tu reclamo|tu pedido|tu cita|tu servicio|vos)(?![\p{L}\p{N}])/iu
+
 const familia = await entrar('epetplace-cuenta-casa-prueba')
 console.log(`\n  caso ${CASO}`)
 console.log(`  clase ${c.clase} · ${c.objeto_tipo} · ${c.motivo_codigo} · ${c.etapa} · ${hilo.length} turnos`)
 console.log(`  ${N} corridas — el sujeto es un modelo, así que esto es tendencia\n`)
 
-const marca = { anclas: [], acto: 0, ok: 0, voz: 0 }
+const marca = { anclas: [], acto: 0, ok: 0, voz: 0, aFamilia: 0, formas: [] }
 for (let i = 1; i <= N; i++) {
   const r = await llamar('postventa-hoja', familia.token, {
     caso: { motivo: c.motivo_codigo, clase: c.clase, objeto: c.objeto_tipo, etapa: c.etapa },
@@ -70,7 +85,10 @@ for (let i = 1; i <= N; i++) {
   const tieneActo = ACTO.test(texto)
   if (tieneActo) marca.acto += 1
   if (reVoseo.test(texto) || reUsted.test(`${j.resumen_hilo} ${texto}`)) marca.voz += 1
-  console.log(`  [${i}] anclajes ${cita.length}/4${tieneActo ? ' · ACTO ✅' : ' · sin acto ⚠️'}`)
+  // El destinatario se mide SOBRE EL `porque`, que es lo que la mesa decidió.
+  const dest = A_LA_FAMILIA.exec(j.propuesta.porque)
+  if (dest) { marca.aFamilia += 1; marca.formas.push(dest[0]) }
+  console.log(`  [${i}] anclajes ${cita.length}/4${tieneActo ? ' · ACTO ✅' : ' · sin acto ⚠️'}${dest ? ` · 🔴 le habla a la familia («${dest[0]}»)` : ''}`)
   console.log(`      qué: ${j.propuesta.que}`)
   console.log(`      por qué: ${j.propuesta.porque}\n`)
 }
@@ -81,5 +99,7 @@ console.log(`  hojas: ${marca.ok}/${N}`)
 console.log(`  anclada en el hilo: ${med(marca.anclas)} de 4 anclajes  (rango ${Math.min(...marca.anclas)}–${Math.max(...marca.anclas)})`)
 console.log(`  propone un ACTO de resolución: ${marca.acto}/${marca.ok}`)
 console.log(`  voseo o usted: ${marca.voz}/${marca.ok}`)
+console.log(`  🔴 el \`porque\` le habla a la FAMILIA: ${marca.aFamilia}/${marca.ok}` +
+  (marca.formas.length ? `   → ${[...new Set(marca.formas)].join(', ')}` : '   (tiene que ser 0 — decisión de mesa 8-sep)'))
 console.log(`\n  ⚠️ Esto NO dice si la propuesta es BUENA — eso lo lee la casa.`)
 console.log(`     Dice si está anclada en ESTE caso o si flotaría en cualquiera.\n`)
