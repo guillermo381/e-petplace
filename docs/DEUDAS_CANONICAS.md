@@ -28703,6 +28703,53 @@ lo construye y la otra lo mide **sobre el objeto que ya existe**.
 ---
 
 
+### `L-502` — Cuando la espera deja de discriminar entre las hipótesis, la espera terminó
+
+**S114-F.** Un deploy no salía. Sondeé **1 h 21 min**. El deploy anterior había
+tardado ~50, así que «todavía puede estar en cola» seguía siendo razonable —
+y era falso: **el deployment no existía**. El webhook de GitHub nunca llegó a
+Vercel.
+
+🔴 **Lo que lo hizo durar no fue el tiempo: fue que las dos hipótesis producían
+el mismo hecho.**
+
+```
+cola larga        → producción sirve el commit anterior
+webhook perdido   → producción sirve el commit anterior
+```
+
+**No hay diferencia observable** — ni en el status, ni en los headers, ni en el
+bundle, ni en el reloj. *Un deploy en cola y un deploy que no existe son
+indistinguibles desde el lado del que espera.*
+
+> ***Y la trampa es que esperar es la respuesta CORRECTA para una de las dos.***
+> Cada minuto sin cambio confirma la hipótesis equivocada **exactamente igual
+> que la correcta**. La espera se siente como diligencia y no aporta un bit.
+
+⇒ **La pregunta no es «¿cuánto llevo esperando?» sino «¿lo que estoy viendo
+distingue entre mis hipótesis?».** Si la respuesta es no, **esperar dejó de ser
+medir** — y lo que sigue no es esperar más: es **pedir el dato que sólo existe
+del otro lado**. Acá era la lista de deployments, que vive en el dashboard, o
+sea **fuera de todo instrumento propio**.
+
+**El corolario operativo, para no depender del juicio en el momento:** un
+proceso asíncrono que no aparece en **2× su tiempo observado** se mira en su
+panel, no se sigue sondeando. *El anterior tardó ~50 min; a los ~100 ya había
+que preguntar.*
+
+⚠️ **Y el costo de no tener la regla, medido:** el sondeo agresivo de esa espera
+**disparó el anti-bot de Vercel** y me dejó el dominio en 403 — o sea que
+esperar mal no fue neutro: **degradó el sujeto que estaba midiendo.**
+
+*(Cierra la familia del día con [[L-499]], [[L-500]] y [[L-501]]: las cuatro son
+sobre medir bien lo que uno cree que mide — **la capa**, **la rama**, **el
+momento**, y ahora **si la observación discrimina algo**. Las tres primeras dan
+un dato falso; ésta da un dato verdadero que no sirve para decidir, que es la
+forma más cara porque no se siente como un error.)*
+
+---
+
+
 ### `L-501` — Un instrumento que mide detrás de un caché declara su TTL o invalida
 
 **S114-F, ensayo de la placa.** Configuré el pasaporte (`configurar_pasaporte`

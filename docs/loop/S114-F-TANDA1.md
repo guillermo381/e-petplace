@@ -1764,3 +1764,75 @@ vez de fabricar uno.
 
 *(Lo pongo segundo y no primero porque exige entrar a la config del repo, y el
 commit vacío no.)*
+
+---
+
+# ADENDA 16 · EL COMMIT VACÍO, Y EL PLAN B CON SU INSTRUCCIÓN EXACTA
+
+## Ejecutado — legado `61de31a`, 23:14:55
+
+```
+git commit --allow-empty -m "chore: re-disparar el deploy de 8934a30 (webhook perdido)"
+git push origin main
+  → 8934a30..61de31a  main -> main
+  → local == origin  ✅ verificado por SHA
+```
+
+**El mensaje del commit lleva adentro el diagnóstico completo** —qué se midió,
+por qué vacío y qué hacer si no dispara— *porque un commit vacío sin explicación
+es exactamente el tipo de cosa que dentro de tres sesiones nadie sabe por qué
+existe.*
+
+⚠️ **Dato para el sondeo: el bundle esperado sigue siendo `index-B4k1WxEH.js`.**
+Un commit vacío **no cambia el contenido**, así que el build produce **el mismo
+hash** que el de `8934a30`. *Si apareciera un hash distinto, algo más cambió y
+habría que mirar qué.*
+
+## ② Si NO dispara — la instrucción exacta, para el founder
+
+**Primero el discriminador, que decide si hace falta:** si a los ~100 min
+(2× el tiempo observado) `e-petplace-admin.vercel.app` **sigue sirviendo
+`index-fK9Opg5L.js`**, entonces **el webhook está ROTO, no perdido** — y son
+cosas distintas: una se cura reintentando, la otra no. *Dos pushes seguidos sin
+deployment no es mala suerte.*
+
+### Dónde mirar
+
+```
+GitHub → github.com/guillermo381/e-petplace-admin
+       → Settings → Webhooks
+       → el webhook de Vercel  (URL tipo api.vercel.com/v1/integrations/deploy/…
+                                o vercel.com/api/integrations/github/…)
+       → pestaña «Recent Deliveries»
+```
+
+### Qué buscar, y qué dice cada cosa
+
+| lo que se ve | qué significa |
+|---|---|
+| **No hay entregas recientes** | GitHub **no está emitiendo** al webhook ⇒ el hook está desconectado o el repo perdió la integración. **La cura no es Redeliver: es reconectar el proyecto al repo en Vercel.** |
+| **Entregas con ✅ verde** | GitHub entregó y Vercel respondió OK ⇒ **el problema es del lado de Vercel**, no del hook. *Y entonces el commit vacío tendría que haber funcionado.* |
+| **Entregas con ❌ rojo** | El envío falló. **Ésa es la que se reenvía** — ver abajo. |
+
+### Cuál evento reenviar
+
+**El `push` cuyo payload mencione `8934a30`** (o el de `61de31a`, el vacío — los
+dos sirven: **cualquiera de los dos construye el mismo contenido**, porque el
+vacío no cambió nada).
+
+En la entrega, pestaña **«Request»** → buscar `"after": "8934a30…"` o
+`"head_commit"`. Y el botón es **«Redeliver»**, arriba a la derecha de esa
+entrega.
+
+🔴 **Por qué Redeliver y no otro commit:** *replica el evento original* en vez
+de fabricar uno nuevo. Si el problema fue una entrega puntual que falló, ésta es
+la cura exacta; **y si vuelve a fallar, el error queda registrado en esa misma
+entrega**, que es un dato que un commit nuevo no produce.
+
+## Lo que sigue en pie mientras tanto
+
+**Nada de lo verificado hoy depende de este deploy** — la URL canónica ya está
+en el repo y pusheada. **Y las dos verificaciones de ③ siguen sin poder
+correrse**: contra el bundle actual darían un **falso verde**, porque el
+`redirectTo` de `73b275c` apunta a `e-petplace-admin.vercel.app`, **una URL que
+funciona**. *El verde saldría de medir el artefacto equivocado.*
