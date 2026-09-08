@@ -75,6 +75,7 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { dbQuery } from './lib-db.mjs';
+import { arbolAlDia, lineaDeArbol } from './lib-arbol.mjs';
 
 /* ═══════════════════════════════════════════════════════════════════════════
  * ANTES / DESPUÉS — la medición que prueba que el ledger dejó de estar mudo
@@ -185,13 +186,19 @@ const reales = filas.filter((f) => !f.sintetico);
 // ── INSTANTÁNEA ──────────────────────────────────────────────────────────
 if (RUTA_GUARDAR) {
   const sha = (() => { try { return execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(); } catch { return null; } })();
+  /* La instantánea guarda TAMBIÉN si el árbol estaba al día: un «antes» tomado
+     desde un árbol viejo compara supuestos viejos con actuales, y el delta
+     resultante mezcla la cura con el cambio de instrumento. */
+  const arbolSnap = arbolAlDia();
   writeFileSync(RUTA_GUARDAR, JSON.stringify({
+    arbol_al_dia: arbolSnap.ok, commits_ajenos: arbolSnap.ajenos,
     tomada_en: new Date().toISOString(),
     tomada_en_local: new Date().toLocaleString('es-EC', { timeZone: 'America/Guayaquil' }),
     sha, filas: reales,
   }, null, 1));
   console.log(`instantánea guardada en ${RUTA_GUARDAR}`);
   console.log(`   ${new Date().toLocaleString('es-EC', { timeZone: 'America/Guayaquil' })} Guayaquil · sha ${sha?.slice(0, 8)}`);
+  console.log(`   ${lineaDeArbol(arbolSnap)}`);
 }
 
 // ── COMPARACIÓN ──────────────────────────────────────────────────────────
@@ -207,8 +214,10 @@ if (RUTA_CONTRA) {
   const todas = [...new Set([...mapA.keys(), ...mapD.keys()])].sort();
 
   console.log('\n═══ ANTES / DESPUÉS ═══');
-  console.log(`  ANTES   ${antes.tomada_en_local} Guayaquil · sha ${String(antes.sha).slice(0, 8)}`);
+  console.log(`  ANTES   ${antes.tomada_en_local} Guayaquil · sha ${String(antes.sha).slice(0, 8)}` +
+              (antes.arbol_al_dia === false ? '  🔴 tomada desde un ÁRBOL VIEJO' : ''));
   console.log(`  DESPUÉS ${new Date().toLocaleString('es-EC', { timeZone: 'America/Guayaquil' })} Guayaquil · sha ${(() => { try { return execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim().slice(0, 8); } catch { return '?'; } })()}`);
+  console.log(`          ${lineaDeArbol()}`);
   console.log('\n  vía                            n antes→después   sin evento antes→después');
   for (const k of todas) {
     const a = mapA.get(k), d = mapD.get(k);
