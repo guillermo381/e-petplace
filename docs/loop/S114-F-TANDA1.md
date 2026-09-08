@@ -713,3 +713,65 @@ bundle en producción: index-fK9Opg5L.js
 *Predije el hash de un commit intermedio y esperé un hash que nunca iba a
 existir. La medición del deploy era correcta; el salto fue mío* — misma clase
 que `L-487`.
+
+---
+
+# RATIFICACIÓN DE MESA (7-sep-2026) — lo que queda esperando, con su bloqueante
+
+*Se escribe con el bloqueante NOMBRADO, no como «pendiente»: una deuda con su
+bloqueante escrito alguien la destraba; una «pendiente» espera para siempre.*
+
+## ① La URL canónica — ESPERANDO EL CNAME
+
+**El «todavía no» quedó ratificado por el founder.** Cambiar el `redirectTo`
+hoy dejaría el login con Google **peor que ahora**.
+
+| | |
+|---|---|
+| **Bloqueante** | `CNAME admin → cname.vercel-dns.com` en **Hostinger** (idéntico al de `www`) |
+| **Dueño** | founder |
+| **Verificado al escribir esto** | `dig @1.1.1.1 admin.epetplace.com` → **sin registro** · control `www` → `cname.vercel-dns.com.` ✅ |
+| **Qué se hace cuando resuelva** | cambiar en los **dos** lugares (`Login.tsx` y `CLAUDE.md`) y **verificar por contenido del bundle publicado**, igual que esta vez |
+| **Cómo saber que ya se puede** | el DNS resuelve **y** `https://admin.epetplace.com` responde 200 con certificado (hoy el TLS falla *como consecuencia* del DNS, no aparte) |
+
+**Y la razón de fondo, que es del founder y es correcta:** un dominio propio
+sobrevive a un cambio de proveedor; una URL `.vercel.app` no.
+
+## ③ El rojo del gate de resolver — ESPERANDO CASOS
+
+```
+✅ PROBADO      INSERT directo a casos_postventa → 403 · 42501
+🔴 NO PROBADO   que un no-admin no pueda RESOLVER un caso
+```
+
+**Por qué no se pudo:** el gate de actor de `caso_resolver` está **después** de
+buscar el caso, así que con un uuid inventado corta en `caso_no_existe` y
+**nunca se llega a evaluarlo**. Con `casos_postventa` en **0 filas**, no había
+contra qué medirlo.
+
+| | |
+|---|---|
+| **Bloqueante** | el **asiento de prueba de la casa** que entrega A (adenda 13) + **casos sembrados por E** |
+| **Qué se corre** | `caso_resolver` sobre un caso REAL con sesión no-admin ⇒ tiene que rebotar **`no_podes_resolver`**, no `caso_no_existe` |
+| **Por qué importa el discriminador** | *`caso_no_existe` y `no_podes_resolver` son dos rebotes distintos, y sólo el segundo prueba el gate.* Un rebote no es una medición si no se sabe cuál rebote es |
+
+**Leí el gate en el cuerpo y está bien escrito** —`is_admin()`→casa,
+`es_mi_prestador`→prestador, si no `no_podes_resolver`— **pero leerlo no es
+probarlo** (`L-321`).
+
+## ② La lección — `L-499`
+
+Depositada en `docs/DEUDAS_CANONICAS.md`. Número **pedido** con
+`pnpm proximo:ficha` (`tope L-498 · próximo libre L-499`), verificado que
+aparece una sola vez.
+
+> ***Medir sólo la capa que falla da un diagnóstico verdadero e inútil.***
+> «No resuelve» y «existe en el proveedor y no en el DNS» son diagnósticos
+> distintos que llevan a acciones distintas.
+
+**Lo que la hace peligrosa y no sólo incompleta:** un diagnóstico verdadero **no
+se siente como un error**, así que nadie lo verifica. *Un diagnóstico falso se
+choca contra la realidad; uno verdadero-e-inútil se archiva.* Su regla: ante una
+capa que falla, se mide la de arriba y la de abajo **antes de nombrar la causa**
+— y en red la técnica que las separa es pedirle al servidor con el `Host`
+correcto **salteando el DNS**.

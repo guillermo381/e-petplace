@@ -28703,6 +28703,53 @@ lo construye y la otra lo mide **sobre el objeto que ya existe**.
 ---
 
 
+### `L-499` — Medir sólo la capa que falla da un diagnóstico VERDADERO E INÚTIL
+
+**S114-F.** `admin.epetplace.com` no respondía. Lo medí con un `curl`, dio
+`HTTP 000`, y reporté **«el dominio no resuelve»**. Era **cierto**. El founder
+miró el dashboard y vio el dominio **asignado al proyecto y sirviendo**.
+
+Las dos cosas eran verdad al mismo tiempo, y la diferencia decide qué se hace:
+
+```
+DNS   → NXDOMAIN en 8.8.8.8, 1.1.1.1 y 9.9.9.9
+TLS   → SSL_ERROR_SYSCALL (no hay certificado)
+HTTP  → vía la IP del proveedor, con Host: admin.epetplace.com
+        200 · 466 bytes · ERA LA APP
+```
+
+⇒ El diagnóstico correcto no era «no existe» sino **«existe en el proveedor y no
+en el DNS»**, y la cura es **un registro CNAME en el registrador** —que ni
+siquiera está del lado que yo estaba mirando—.
+
+> ***«No responde» describe el síntoma en la capa donde uno lo tocó. La acción
+> vive en la capa donde está la causa, y no tienen por qué ser la misma.***
+
+**Por qué es peligroso y no sólo incompleto:** un diagnóstico verdadero **no se
+siente como un error**. Nadie lo va a verificar. *«No resuelve» habría mandado a
+revisar el proveedor —donde todo estaba bien— o a dar el dominio por perdido,
+cuando faltaba una línea en otro lado.* Un diagnóstico falso se choca contra la
+realidad; **uno verdadero-e-inútil se archiva.**
+
+⇒ **La regla: ante una capa que falla, se mide la de arriba y la de abajo antes
+de nombrar la causa.** En red eso es DNS · TLS · HTTP, y la técnica que lo
+separa es **pedirle al servidor con el `Host` correcto salteando el DNS**
+(`curl --resolve`, o HTTP plano cuando el TLS es justamente lo que falta). *Si
+la capa de abajo contesta bien, el problema no está donde uno miró.*
+
+**Corolario que no es de red:** vale para toda pila donde un síntoma puede nacer
+en varios pisos — una RPC que «no existe» (¿no está, o no tiene permiso, o el
+esquema no la expone?), una pantalla vacía (¿no hay datos, o la RLS los filtra,
+o el lector falló?), un deploy que «no sale» (¿no disparó, falló, o está en
+cola?). **En todos, la respuesta de una sola capa es verdadera y no alcanza.**
+
+*(Emparenta con `L-321` —«el permiso está revocado» es una lectura, «rebotó con
+42501» es un hecho— pero mira al otro lado: ahí el problema era **no medir**;
+acá el problema es **medir una sola capa y creer que se midió el sistema**.)*
+
+---
+
+
 ### `L-498` — Un tipo declarado sobre un `jsonb` es cierto para el compilador y falso para la pantalla
 
 **S114-F, hallazgo al medir un commit ajeno antes de empujarlo.** `Placas.tsx`
