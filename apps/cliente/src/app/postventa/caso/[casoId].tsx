@@ -63,6 +63,7 @@ import { horaCortaDeMensaje } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
 import { darFormaAlCaso, type CasoLeido } from '@/lib/postventa/caso';
 import { CartaDeDevolucion } from '@/components/postventa/CartaDeDevolucion';
+import { PermisoWhatsApp } from '@/components/postventa/PermisoWhatsApp';
 
 type Fase<T> = T | 'cargando' | 'error' | 'noEsTuyo';
 
@@ -329,6 +330,12 @@ export default function PantallaDelCaso() {
             {caso.accionPendiente === 'elegir_devolucion' && (
               <CartaDeDevolucion casoId={caso.casoId} onElegido={() => void cargar()} />
             )}
+
+            {/* ⓶ EL PERMISO DE WHATSAPP — firma del founder: **una vez, en
+                contexto, en el caso recién creado**. Va antes del pie porque
+                pertenece a este caso; el pie es de la casa. Con el caso
+                cerrado no se pregunta: no hay avisos que mandar. */}
+            {!caso.cerrado && <PermisoWhatsApp casoId={caso.casoId} />}
 
             {/* §3.4 · siempre alcanzable, jamás en un menú. Va en el
                 encabezado FIJO: en la lista se iría con el scroll. */}

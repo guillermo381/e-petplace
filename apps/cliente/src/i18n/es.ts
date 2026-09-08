@@ -4521,6 +4521,12 @@ export const clienteEs = {
     asientoFamilia: 'Tú',
     escribirPlaceholder: 'Escribe tu mensaje',
     conversacionCerrada: 'Esta conversación quedó en lectura',
+    /* ⓶ El permiso, en contexto. **Este texto ES la evidencia**: se guarda
+       tal cual, así que cambiarlo no reescribe lo que leyó quien ya dijo sí. */
+    whatsappPregunta: '¿Quieres que te avisemos por WhatsApp de este caso?',
+    whatsappSi: 'Sí',
+    whatsappAhoraNo: 'Ahora no',
+    whatsappListo: 'Listo: te avisamos por WhatsApp. Puedes cambiarlo en Preferencias.',
     noSeEnvio: 'No se envió · Reintentar',
     enviarMensaje: 'Enviar',
     reintentar: 'Reintentar',
