@@ -922,3 +922,57 @@ va a usar. Asignarlo al proyecto de `pagos-web` es un acto del dashboard.
 > sobrescribe se lee como si fuera de ahora.* Se repitió borrando el archivo
 > antes, y ahí apareció el `DEPLOYMENT_NOT_FOUND`. Misma clase que el volcado de
 > `uiautomator` que la casa ya tiene medido.
+
+---
+
+# ADENDA 6 · EL CERTIFICADO SALIÓ Y LA URL CANÓNICA ES EL DOMINIO PROPIO
+
+**El dashboard cerró el diagnóstico:** `admin.epetplace.com` estaba en
+**«Generating SSL Certificate»** con la configuración correcta — no *Invalid*,
+sin backoff, nada que forzar. **Las tres capas que medí eran exactas y sólo
+faltaba esperar.**
+
+## Las tres capas, verdes
+
+```
+DNS   1.1.1.1 → cname.vercel-dns.com                                    ✅
+TLS   subject=CN=admin.epetplace.com
+      issuer=C=US, O=Let's Encrypt, CN=YR2
+      notBefore Sep 8 01:46:04 2026  ·  notAfter Dec 7 01:46:03 2026    ✅
+HTTP  200 · 466 bytes · nuestra app                                     ✅
+```
+
+**Y verificado en un navegador real, no sólo con `curl`:** `https://admin.epetplace.com`
+carga, el router redirige a `/login`, y se ve el portal con sus dos caminos de
+entrada (email/contraseña y «Entrar con Google»).
+
+## ② Ejecutado — legado `8934a30`
+
+La URL canónica pasa a **`https://admin.epetplace.com`**, y es su **tercera y
+última forma**:
+
+| | |
+|---|---|
+| ~~`…-git-main-…vercel.app`~~ | URL de rama **con Deployment Protection** — devolvía el login de Vercel y **rompía el login con Google** |
+| ~~`e-petplace-admin.vercel.app`~~ | URL del proyecto: funcionaba, pero muere con el proveedor |
+| **`admin.epetplace.com`** | **dominio propio — sobrevive a un cambio de proveedor** |
+
+Cambiada en los dos lugares reales (el `redirectTo` de `signInWithOAuth` en
+`Login.tsx`, y la línea `Deploy` de `CLAUDE.md`). La anterior queda **sólo como
+nota** diciendo que también responde, para que nadie la crea rota.
+
+🔴 **El script del cambio llevaba una guarda que abortaba si el certificado no
+existía.** No hizo falta que disparara — pero estaba, y ésa es la razón de
+ponerla: *la orden de no tocar antes de tiempo no puede depender de que yo me
+acuerde en el momento.*
+
+## Pendiente inmediato
+
+**El deploy de `8934a30` todavía no salió** (producción sirve
+`index-fK9Opg5L.js`; se espera `index-B4k1WxEH.js`). Hasta que salga:
+
+- la verificación por bundle —cero ocurrencias de la URL vieja— **no se puede
+  correr todavía**;
+- y **③ tampoco**: probar «Entrar con Google» **ahora** mediría el bundle
+  anterior, cuyo `redirectTo` es `e-petplace-admin.vercel.app`. *Eso daría verde
+  y no probaría lo que hay que probar.* Se corre contra el bundle nuevo.
