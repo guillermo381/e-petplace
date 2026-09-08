@@ -16,6 +16,13 @@
 > el tiempo del banco es la frase larga, y atenuarla esconde justo el dato que esta dirección puso
 > ahí para que la opción lenta no quede escondida. *La letra vieja queda en §4 y la enmienda va
 > debajo, para que se lea qué se firmó y qué se corrigió.*
+>
+> ### 📌 ENMIENDA (founder, recorrido de S114) — **§3 · el chat es una HOJA ARRASTRABLE, no va debajo de la escalera**
+> El hilo debajo de la escalera en una sola pantalla quedaba completamente tapado. El chat pasa a
+> una hoja arrastrable desde abajo con TRES posiciones e imán (igual que el modal del profesional
+> en `DIRECCION_ARTE_VIDEOCONSULTA` §3). Muere el «la escalera se colapsa sola al escribir». **§3.1
+> gana dos filtros («Mis casos» por estado y por fecha, la pieza del prestador).** La letra vieja
+> queda TACHADA en §3, no borrada.
 
 ---
 
@@ -69,10 +76,32 @@ uno. Si quiero, abajo cuento con mis palabras o hablando; si no quiero, no cuent
 
 ---
 
-## §3 · LA PANTALLA DEL CASO — la escalera de la casa y el hilo de la casa
+## §3 · LA PANTALLA DEL CASO — la escalera manda, el chat sube cuando lo necesito
 
-«Arriba veo **en qué paso estoy** y **de qué servicio hablamos**. Abajo, la conversación. Es la
-misma escalera del pedido de la despensa y el mismo chat de la adopción — no aprendo nada nuevo.»
+«Al entrar veo el seguimiento del caso, entero y sin nada encima. El chat vive abajo, en una
+hoja que subo cuando quiero hablar.»
+
+~~## §3 · LA PANTALLA DEL CASO — la escalera de la casa y el hilo de la casa~~
+~~«Arriba veo en qué paso estoy y de qué servicio hablamos. Abajo, la conversación. Es la misma escalera del pedido de la despensa y el mismo chat de la adopción — no aprendo nada nuevo.»~~
+
+~~Arriba la escalera, abajo la conversación~~ **ENMIENDA (founder, recorrido de S114): el
+hilo NO va debajo de la escalera en una sola pantalla — quedaba completamente tapado. El
+chat es una hoja arrastrable desde abajo, con TRES posiciones e imán, igual que el modal del
+profesional en `DIRECCION_ARTE_VIDEOCONSULTA` §3:**
+
+| altura | qué se ve | para qué |
+|---|---|---|
+| **cerrada** | una barra al pie que dice **«Abrir chat»** | ver el seguimiento del caso limpio |
+| **media (~50 %)** | la escalera sigue visible arriba | hablar sin perder de vista en qué paso estoy |
+| **completa** | el hilo entero | leer la conversación de corrido |
+
+- Se arrastra por el asa **o por cualquier parte de su encabezado**, con imán a las tres
+  posiciones. Resorte suave, jamás rebote.
+- El teclado **no empuja la hoja**: crece por dentro.
+- **Al entrar al caso, la hoja arranca CERRADA.** Si hay mensajes sin leer, la barra lo dice
+  con su número.
+- ~~La escalera se colapsa sola cuando empiezo a escribir~~ **derogado: con la hoja no hace
+  falta — la escalera queda detrás y se ve o no según la altura.**
 
 ### 3.1 La escalera
 **La pieza del seguimiento de pedidos, reusada.** Etapas: **Recibido → Con el prestador → Con
@@ -82,11 +111,13 @@ jueves a las 14:00»*.
 
 - **Finales alternos** (no son etapas: reemplazan la línea de abajo con una etiqueta de clase):
   *Resuelto entre ustedes* · *Lo retiraste* · *Sin lugar · 12 sep*.
-- **Colapsable**, igual que en adopción: abierta muestra la fila, colapsada sólo la línea. **Se
-  colapsa sola cuando empiezo a escribir.**
+- ~~**Colapsable**, igual que en adopción: abierta muestra la fila, colapsada sólo la línea. **Se colapsa sola cuando empiezo a escribir.**~~ **(derogado por la enmienda de §3, recorrido S114: la escalera queda DETRÁS de la hoja del chat y se ve según la altura; no se colapsa por escribir.)**
 - **Nada magenta, nada fuera de paleta, un glifo por etapa, sin texto adentro.**
 - **Si el caso se resolvió solo** (falla del prestador medida), la escalera **nace en Resuelto** y
   lo único que falta es que yo elija cómo me devuelven.
+
+- **«Mis casos» lleva dos filtros: por estado y por fecha**, los mismos que el prestador ya
+  usa para buscar citas. Misma pieza, mismo comportamiento — la familia no aprende nada nuevo.
 
 ### 3.2 La cabecera
 El **objeto** con su foto chica, su nombre y su fecha (*«Paseo de Thor · martes 9, 16:00»*) y la
