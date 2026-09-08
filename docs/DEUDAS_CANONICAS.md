@@ -29515,3 +29515,54 @@ tokens que van a quedar sin objeto.
 lote, así que **el gate no puede distinguir** un lote hecho desde el portal de
 uno hecho con `service_role`. *Se declara en vez de fingir que se mide* — la
 constancia de que fue por la pantalla la deja quien lo hace, en el parte.
+
+
+---
+
+### `L-498` 🔴 · UN PIPE SE COME EL CÓDIGO DE SALIDA, Y EL `&&` DE ATRÁS PREMIA AL QUE FALLÓ
+
+**S114-A, 7-sep-2026. Error propio, cazado en la corrida siguiente.**
+
+Escribí, para ver el typecheck sin ahogarme en salida:
+
+```bash
+pnpm typecheck 2>&1 | tail -8 && echo "  ✅ verde"
+```
+
+**Imprimió `✅ verde` sobre ocho errores de TypeScript.** El código de salida de
+un pipe es el del **último** comando, y `tail` sale 0 siempre. El `&&` no
+estaba leyendo al typecheck: estaba leyendo a `tail`.
+
+> ### **El `&&` no premia al que hizo el trabajo: premia al último de la fila.**
+
+**Es la misma clase que `L-490`** (el `set -e` que mataba el shell antes de que
+un gate pudiera decir «no concluyente») y que **`L-191`** (*el exit code se lee
+del comando, jamás del pipe*, S81). ⇒ **`L-191` ya existía y la rompí igual**,
+que es el dato que hace a esta ficha algo más que una repetición: *una lección
+escrita no protege del atajo que uno escribe con las manos mientras piensa en
+otra cosa.* La forma peligrosa no es el pipe solo —eso se nota— sino **el pipe
+con un `&&` que imprime un veredicto**, porque produce una salida que se lee
+exactamente como la verdad.
+
+**La cura, y es de una línea:**
+
+```bash
+pnpm typecheck > /tmp/tc.log 2>&1; echo "EXIT=$?"    # el código es del comando
+```
+
+O `set -o pipefail` cuando el pipe es necesario. **Y la regla de forma que se
+lleva de acá: un veredicto impreso por un `echo` encadenado no es un veredicto
+— es una cadena de texto que sale siempre.** Si el veredicto importa, lo dice
+el `$?` del comando que midió.
+
+⚠️ **Su pariente del mismo día, y es peor porque el defecto vivía en un arnés de
+SEGURIDAD:** el rojo de `otorgar_puntos` leyó `HTTP >= 400` como «rebotó por
+permiso» y archivó el agujero como cerrado. El 400 era `23514` —un CHECK que
+rebota **después** de que la función corrió—, o sea que el permiso ya había
+pasado. Sólo un `42501`/`403` prueba una puerta cerrada. **Las dos son la misma
+familia: un instrumento que lee la señal equivocada y produce una salida
+creíble.** *Un rojo por la razón equivocada está tan roto como un verde por la
+razón equivocada* (L-321).
+
+**☠️ Condición de muerte:** ninguna — es de método. Su recordatorio útil es que
+`L-191` estaba escrita, firmada y no alcanzó.

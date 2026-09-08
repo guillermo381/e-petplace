@@ -1847,6 +1847,194 @@ export type Database = {
           },
         ]
       }
+      caso_mensajes: {
+        Row: {
+          autor: string
+          autor_user_id: string | null
+          caso_id: string
+          creado_en: string
+          cuerpo: string
+          id: string
+          tipo: string
+        }
+        Insert: {
+          autor: string
+          autor_user_id?: string | null
+          caso_id: string
+          creado_en?: string
+          cuerpo: string
+          id?: string
+          tipo?: string
+        }
+        Update: {
+          autor?: string
+          autor_user_id?: string | null
+          caso_id?: string
+          creado_en?: string
+          cuerpo?: string
+          id?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "caso_mensajes_caso_id_fkey"
+            columns: ["caso_id"]
+            isOneToOne: false
+            referencedRelation: "casos_postventa"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      casos_postventa: {
+        Row: {
+          actualizado_en: string
+          camino: string | null
+          cerrado_en: string | null
+          clase: number
+          confirmado_por: string | null
+          creado_en: string
+          cuenta_comercial_id: string | null
+          decidido_por: string | null
+          destino: string | null
+          destino_estado: string | null
+          estado_final: string | null
+          etapa: string
+          evento_reembolso_id: string | null
+          familia_user_id: string
+          foto_url: string | null
+          id: string
+          modo: string | null
+          monto_devuelto: number | null
+          motivo_codigo: string
+          objeto_id: string
+          objeto_tipo: string
+          plazo_prestador_hasta: string | null
+          prestador_id: string | null
+          procedencia: string
+          relato: string | null
+          resolucion_alcance: string | null
+          resuelto_en: string | null
+          resumen_confirmado: string | null
+        }
+        Insert: {
+          actualizado_en?: string
+          camino?: string | null
+          cerrado_en?: string | null
+          clase: number
+          confirmado_por?: string | null
+          creado_en?: string
+          cuenta_comercial_id?: string | null
+          decidido_por?: string | null
+          destino?: string | null
+          destino_estado?: string | null
+          estado_final?: string | null
+          etapa?: string
+          evento_reembolso_id?: string | null
+          familia_user_id: string
+          foto_url?: string | null
+          id?: string
+          modo?: string | null
+          monto_devuelto?: number | null
+          motivo_codigo: string
+          objeto_id: string
+          objeto_tipo: string
+          plazo_prestador_hasta?: string | null
+          prestador_id?: string | null
+          procedencia?: string
+          relato?: string | null
+          resolucion_alcance?: string | null
+          resuelto_en?: string | null
+          resumen_confirmado?: string | null
+        }
+        Update: {
+          actualizado_en?: string
+          camino?: string | null
+          cerrado_en?: string | null
+          clase?: number
+          confirmado_por?: string | null
+          creado_en?: string
+          cuenta_comercial_id?: string | null
+          decidido_por?: string | null
+          destino?: string | null
+          destino_estado?: string | null
+          estado_final?: string | null
+          etapa?: string
+          evento_reembolso_id?: string | null
+          familia_user_id?: string
+          foto_url?: string | null
+          id?: string
+          modo?: string | null
+          monto_devuelto?: number | null
+          motivo_codigo?: string
+          objeto_id?: string
+          objeto_tipo?: string
+          plazo_prestador_hasta?: string | null
+          prestador_id?: string | null
+          procedencia?: string
+          relato?: string | null
+          resolucion_alcance?: string | null
+          resuelto_en?: string | null
+          resumen_confirmado?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "casos_postventa_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "cuentas_comerciales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "casos_postventa_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "casos_postventa_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_eventos_resumen_cuenta"
+            referencedColumns: ["cuenta_comercial_id"]
+          },
+          {
+            foreignKeyName: "casos_postventa_etapa_fkey"
+            columns: ["etapa"]
+            isOneToOne: false
+            referencedRelation: "cat_estados_caso"
+            referencedColumns: ["etapa"]
+          },
+          {
+            foreignKeyName: "casos_postventa_evento_reembolso_id_fkey"
+            columns: ["evento_reembolso_id"]
+            isOneToOne: false
+            referencedRelation: "eventos_economicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "casos_postventa_evento_reembolso_id_fkey"
+            columns: ["evento_reembolso_id"]
+            isOneToOne: false
+            referencedRelation: "v_eventos_con_origen"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "casos_postventa_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "casos_postventa_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cat_alergeno_relaciones: {
         Row: {
           alergeno_codigo: string
@@ -2337,6 +2525,27 @@ export type Database = {
         }
         Relationships: []
       }
+      cat_estados_caso: {
+        Row: {
+          en_escalera: boolean
+          es_final: boolean
+          etapa: string
+          orden: number
+        }
+        Insert: {
+          en_escalera?: boolean
+          es_final?: boolean
+          etapa: string
+          orden: number
+        }
+        Update: {
+          en_escalera?: boolean
+          es_final?: boolean
+          etapa?: string
+          orden?: number
+        }
+        Relationships: []
+      }
       cat_estados_pedido: {
         Row: {
           activo: boolean
@@ -2818,6 +3027,8 @@ export type Database = {
           descripcion: string
           en_sombra: boolean
           ignora_techo: boolean
+          plantilla_idioma: string
+          plantilla_whatsapp: string | null
         }
         Insert: {
           activo?: boolean
@@ -2828,6 +3039,8 @@ export type Database = {
           descripcion: string
           en_sombra?: boolean
           ignora_techo?: boolean
+          plantilla_idioma?: string
+          plantilla_whatsapp?: string | null
         }
         Update: {
           activo?: boolean
@@ -2838,6 +3051,8 @@ export type Database = {
           descripcion?: string
           en_sombra?: boolean
           ignora_techo?: boolean
+          plantilla_idioma?: string
+          plantilla_whatsapp?: string | null
         }
         Relationships: [
           {
@@ -3599,6 +3814,45 @@ export type Database = {
           nombre?: string
         }
         Relationships: []
+      }
+      cat_transiciones_caso: {
+        Row: {
+          activo: boolean
+          actor: string
+          desde: string
+          exige_motivo: boolean
+          hasta: string
+        }
+        Insert: {
+          activo?: boolean
+          actor: string
+          desde: string
+          exige_motivo?: boolean
+          hasta: string
+        }
+        Update: {
+          activo?: boolean
+          actor?: string
+          desde?: string
+          exige_motivo?: boolean
+          hasta?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cat_transiciones_caso_desde_fkey"
+            columns: ["desde"]
+            isOneToOne: false
+            referencedRelation: "cat_estados_caso"
+            referencedColumns: ["etapa"]
+          },
+          {
+            foreignKeyName: "cat_transiciones_caso_hasta_fkey"
+            columns: ["hasta"]
+            isOneToOne: false
+            referencedRelation: "cat_estados_caso"
+            referencedColumns: ["etapa"]
+          },
+        ]
       }
       cat_transiciones_pedido: {
         Row: {
@@ -23265,6 +23519,31 @@ export type Database = {
         Args: { p_solicitud_id: string }
         Returns: Json
       }
+      _caso_dueno_del_objeto: {
+        Args: { p_id: string; p_tipo: string }
+        Returns: {
+          cerrado_en: string
+          cuenta_comercial_id: string
+          familia_user_id: string
+          mascota_id: string
+          prestador_id: string
+          titulo: string
+        }[]
+      }
+      _caso_mover: {
+        Args: {
+          p_actor: string
+          p_actor_user: string
+          p_caso_id: string
+          p_hasta: string
+          p_motivo?: string
+        }
+        Returns: Json
+      }
+      _caso_tiene_devengo: {
+        Args: { p_id: string; p_tipo: string }
+        Returns: string
+      }
       _categoria_es_apagable: {
         Args: { p_categoria: string }
         Returns: boolean
@@ -23397,6 +23676,10 @@ export type Database = {
           p_periodo_inicio: string
         }
         Returns: string[]
+      }
+      _fee_pct_vigente: {
+        Args: { p_country_code: string; p_fecha: string; p_tipo_actor: string }
+        Returns: number
       }
       _generar_citas_plan: {
         Args: {
@@ -23699,6 +23982,20 @@ export type Database = {
           zona_radio_m: number
         }[]
       }
+      abrir_caso: {
+        Args: {
+          p_confirmado_por?: string
+          p_foto_url?: string
+          p_modo?: string
+          p_motivo: string
+          p_objeto_id: string
+          p_objeto_tipo: string
+          p_procedencia?: string
+          p_relato?: string
+          p_resumen_confirmado?: string
+        }
+        Returns: Json
+      }
       abrir_caso_clinico: {
         Args: {
           p_condicion: string
@@ -23839,6 +24136,15 @@ export type Database = {
       adjuntar_fotos_producto: {
         Args: { p_imagenes: Json; p_producto_id: string }
         Returns: Json
+      }
+      admin_generar_liquidacion: {
+        Args: {
+          p_country_code: string
+          p_cuenta_comercial_id: string
+          p_periodo_fin: string
+          p_periodo_inicio: string
+        }
+        Returns: string
       }
       agregar_foto_adoptable: {
         Args: { p_path: string; p_publicacion_id: string }
@@ -24052,6 +24358,34 @@ export type Database = {
         }
         Returns: undefined
       }
+      caso_elegir_destino: {
+        Args: { p_caso_id: string; p_destino: string }
+        Returns: Json
+      }
+      caso_pedir_casa: { Args: { p_caso_id: string }; Returns: Json }
+      caso_reconocer_y_resolver: {
+        Args: {
+          p_alcance: string
+          p_caso_id: string
+          p_destino?: string
+          p_monto?: number
+        }
+        Returns: Json
+      }
+      caso_resolver: {
+        Args: {
+          p_alcance: string
+          p_caso_id: string
+          p_monto?: number
+          p_motivo?: string
+        }
+        Returns: Json
+      }
+      caso_responder: {
+        Args: { p_caso_id: string; p_texto: string }
+        Returns: Json
+      }
+      caso_ventana_dias: { Args: never; Returns: number }
       cerrar_atencion_adiestramiento: {
         Args: {
           p_adiestramiento_id: string
@@ -25128,10 +25462,21 @@ export type Database = {
       }
       is_admin: { Args: never; Returns: boolean }
       leer_borrador_nota: { Args: { p_cita_id: string }; Returns: Json }
+      leer_caso: { Args: { p_caso_id: string }; Returns: Json }
       leer_hilo_coach: {
         Args: { p_limite?: number; p_mascota_id: string }
         Returns: Json
       }
+      leer_mensajes_caso: {
+        Args: {
+          p_caso_id: string
+          p_cursor_id?: string
+          p_cursor_ts?: string
+          p_limite?: number
+        }
+        Returns: Json
+      }
+      leer_opciones_devolucion: { Args: { p_caso_id: string }; Returns: Json }
       leer_pasaporte: { Args: { p_token: string }; Returns: Json }
       leer_sombra_notificaciones: {
         Args: { p_desde?: string; p_hasta?: string }
@@ -25366,6 +25711,10 @@ export type Database = {
           texto: string
         }[]
       }
+      obtener_caso_de_objeto: {
+        Args: { p_id: string; p_tipo: string }
+        Returns: Json
+      }
       obtener_casos_activos_mascota: {
         Args: { p_cuenta_comercial_id: string; p_mascota_id: string }
         Returns: {
@@ -25377,6 +25726,7 @@ export type Database = {
           horizonte_proximo_evento: string
         }[]
       }
+      obtener_casos_del_prestador: { Args: never; Returns: Json }
       obtener_certificados_mascota: {
         Args: { p_mascota_id: string }
         Returns: {
@@ -26930,6 +27280,7 @@ export type Database = {
         Args: { p_especie: string; p_raza_declarada: string }
         Returns: Json
       }
+      resolver_plantilla_whatsapp: { Args: { p_tipo: string }; Returns: Json }
       responder_socializacion_paseo: {
         Args: { p_mascota_id: string; p_ok: boolean }
         Returns: Json
