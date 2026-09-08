@@ -28685,6 +28685,102 @@ rojo: no corre, y su silencio se lee como salud.**
 
 ---
 
+### `L-503` — UN NÚMERO PUBLICADO SE MIDE, NO SE ESCRIBE: LA CURA NO ES CORREGIRLO, ES RETIRARLO Y DECLARAR SU COMANDO
+
+> **Firma del founder (S114-B, 8-sep-2026):** *«Siete veces no es una
+> coincidencia, es una regla que nadie enunció.»*
+>
+> ### **Un ordinal escrito de a uno no es un conteo: es una sucesión de estimaciones, y la segunda ya no sabe qué contó la primera.**
+
+## LA FORMA, Y POR QUÉ ES INVISIBLE
+
+Un número derivado —cuántas piezas, cuántas migraciones, cuál es el próximo
+libre, la enésima aparición de algo— **se escribe una vez y el mundo sigue su
+vida**. Tres cosas lo vuelven la clase de error que más dura en esta casa:
+
+**① No gatea nada, así que nadie lo verifica.** *Un número que no rompe nada se
+lee sin verificarse.* Un typecheck no lo mira, un lint no lo mira, y el lector
+lo usa para decidir.
+
+**② Decae en UNA SOLA dirección.** El mundo crece y el número no ⇒ el error es
+siempre **hacia abajo**, y *en un lint un número más chico se lee como progreso*
+(`L-226`). **Nunca se ve como error: se ve como buena noticia.**
+
+**③ 🔴 Y LA NOTA QUE PARECE CUIDADO LO EMPEORA.** «RE-MEDIDO S85», «(S46)»,
+«medido contra el objeto» **se leen como dato ya verificado**, no como dato que
+caducó. **Es `L-498` en su forma numérica:** *lo que parece cuidado es lo que
+impide que alguien mire.* Un número con su constancia al lado **es más difícil
+de dudar que uno desnudo**.
+
+## LOS OCHO SUJETOS, con su medición
+
+*El founder contó siete; al enumerarlos apareció un octavo **en mi propio
+parte**. Se dice: no se ajusta la lista para que cierre con el número de quien
+la pidió.*
+
+| sujeto | publicado | real | cuánto vivió |
+|---|---|---|---|
+| **migraciones** | cayó **cuatro veces** — 9 → 77 → 138 → 186 | **722** | cada re-medición ya venía vieja al escribirse |
+| **fichas `D-`/`L-`** | cayó **seis veces** | tope real | el número se tomaba dos veces el mismo día |
+| **piezas de `packages/ui`** | 53 · y **cuatro números conviviendo** | **179** | **28 sesiones** |
+| **wrappers de `packages/api`** | 26 «(S46)» | **122** | **~67 sesiones** — el más vencido del canon |
+| **pares de voseo** (`lib-voz`) | «hoy son 138» | **136** (eran 132 al medirlo) | la prosa se escribió una vez |
+| **cadenas de galería** (`R66`) | «134» | **67** — contadas dos veces | informativo, y por eso nadie lo miró |
+| **ordinales de `L-501`** | dos «cuartas» y una «quinta» que salteaba | **7**, en cuatro mecanismos | cada uno numerado contra el recuerdo del anterior |
+| **reglas de `verify:diseno`** | «66» en el pie de mi parte | **71** | *lo escribí yo, en el documento donde denunciaba la clase* |
+
+**Precedente ajeno, y prueba que la clase no nació conmigo:** en **S82** el
+re-censo de los consumidores de `Texto.cuerpo` dio **71** donde la ficha decía
+**3**, con la nota *«el conteo venció»* — **registrado, y nunca generalizado.**
+
+🔴 **El número que la vuelve ley:** hay **28 menciones de re-medición** en el
+canon y sus documentos vecinos *(medido: `grep -rn "RE-MEDIDO\|re-medido\|el
+conteo venció" docs/DEUDAS_CANONICAS.md CLAUDE.md .claude/skills/… packages/ui/CLAUDE.md
+| wc -l`)*. **Veintiocho anotaciones del mismo hecho y ninguna regla.** *Una
+casa que anota veintiocho veces lo mismo no tiene un problema de disciplina:
+tiene una ley sin escribir.*
+
+## LA CURA — tres cláusulas, y ninguna es «acordate de actualizarlo»
+
+**① EL NÚMERO SALE DEL TEXTO Y EN SU LUGAR VA SU COMANDO.** *La prosa decae; el
+objeto no* (`L-141`). El canon declara **cómo se pide**, jamás cuánto da:
+`ls supabase/migrations/*.sql | wc -l` · `pnpm proximo:ficha` ·
+`node scripts/verify-contador-piezas.mjs`.
+
+**② EL GATE FALLA SI ALGUIEN VUELVE A ESCRIBIR EL NÚMERO, aunque ese día
+coincida.** *Un contador correcto hoy es falso en tres sesiones*, y un gate que
+sólo compara valores bendice al que lo escribió bien por casualidad. Lo que se
+prohíbe es **publicarlo**, no equivocarlo.
+
+⚠️ **Y su trampa, medida:** la línea ya curada **cita** el número viejo, y un
+patrón que busca «N piezas» **no distingue una CITA de una PUBLICACIÓN** — el
+gate se cazó a sí mismo. Se resuelve por **semántica** (una línea que declara el
+comando ya no publica: es historia), *jamás* atándolo a un detalle de formato,
+que dura hasta el próximo que escriba distinto.
+
+**③ SI HAY VARIAS ESCALAS, SE NOMBRAN.** Los cuatro números de «piezas» no eran
+cuatro errores: eran **tres escalas sin nombre y un error** —piezas en disco ·
+filas del índice de la skill · número de nacimiento de la serie—. *Sin nombrar
+las escalas, corregir una vuelve falsas a las otras.*
+
+### El corolario del ORDINAL, que es la variante temporal
+
+Un ordinal —«la cuarta vez que…»— **se numera contra el recuerdo del anterior**,
+y por eso es la forma más frágil: no hay objeto que contar, sólo memoria. **La
+cura tiene la misma forma:** una **tabla** como única fuente, y **cada caso
+nombra su MECANISMO y apunta a la tabla en vez de afirmar su número**. *Un
+ordinal escrito al lado de un caso decae en cuanto aparece el siguiente; la
+tabla es el único lugar donde se puede recontar.*
+
+## ⚠️ LO QUE ESTA LEY **NO** DICE
+
+**No prohíbe escribir números.** Un número **medido, fechado y con el comando
+que lo produce** es una medición y vale exactamente por eso. Lo que se prohíbe
+es **publicar un número derivado sin su forma de re-derivarlo** — porque ése,
+el día que caduca, **no avisa**.
+
+---
+
 ### `L-502` — UN TRINQUETE CASTIGA A QUIEN LO MEJORA: AMPLIAR EL ALCANCE LO ENROJECE SOBRE DEUDA VIEJA, Y ASÍ NADIE LO AMPLÍA
 
 > **Firma del founder (S114-B, 8-sep-2026).** *«El instrumento se queda como
@@ -28899,19 +28995,39 @@ R79                   enRiel: `[^;]{0,80}?` sobre la sentencia
 
 ### ⚠️ EL CONTEO, EXACTO Y SIN INFLAR (`L-499` el mismo día)
 
-| | |
-|---|---|
-| **del mecanismo exacto** —un delimitador que aparece adentro del sujeto— | **TRES**: `[^)]*` en `R78` · el `{` de la anotación de tipo · `[^;]{0,80}?` en `R79` |
-| **de su familia** —no hay delimitador: falta el techo— | **UNA**: la ventana de 286 líneas |
-| **de la clase, en total** | **CUATRO**, en cuatro instrumentos distintos, **todos escritos por el mismo autor el mismo día** |
+> ⏪ **ACÁ DECÍA CUATRO Y SON SIETE** (re-contado el 8-sep). No es que
+> aparecieran tres más y ya: **al sumarlas encontré que el árbol tenía DOS
+> «cuartas» y una «quinta» que salteaba un número** — cada aparición se numeró
+> contra el recuerdo de la anterior, no contra una taxonomía. *Un ordinal
+> escrito de a uno no es un conteo: es una sucesión de estimaciones, y la
+> segunda ya no sabe qué contó la primera.* Se re-contaron **las siete desde el
+> objeto**, con la tabla de abajo como única fuente.
 
-*Decir «cuatro iguales» habría sido más contundente y menos cierto: la del
-techo no comparte mecanismo, comparte consecuencia.*
+| mecanismo | cuántas | cuáles |
+|---|---|---|
+| **① LECTURA** — el patrón corta en un delimitador **que está adentro del contenido** | **3** | `[^)]*` en `R78` · el `{` de la anotación de tipo en `verify:memorial-derivado` · `[^;]{0,80}?` en `R79` |
+| **② ESCRITURA** — el contenido **contiene el terminador de la región donde lo escribo** | **1** | `` `apps/*/src` `` adentro de un JSDoc: el `*/` **cierra el comentario** y voltea el archivo entero |
+| **③ FRONTERA que no coincide con el borde del token** | **2** | falta la izquierda ⇒ **captura de MÁS** (`airedale` ⊃ «dale») · exige una derecha que el caso no tiene ⇒ **captura de MENOS** (`[\s/>]` en `R81`, y el montaje real **termina la línea justo ahí**) |
+| **④ FALTA EL TECHO** — no hay delimitador involucrado | **1** | la ventana de 286 líneas |
+| **de la clase, en total** | **7** | **siete instrumentos distintos, todos del mismo autor y de la misma sesión** |
+
+**Por qué no se dice «siete iguales», que sería más contundente y menos cierto:**
+① y ② son el mismo choque —*contenido ⊃ delimitador*— **en direcciones
+opuestas**, leer y escribir. ③ **no es un delimitador adentro**: es una frontera
+mal puesta, *y sus dos casos tienen signo contrario* —uno captura de más y el
+otro de menos—. ④ **no tiene delimitador**: comparte la consecuencia y no el
+mecanismo.
+
+🔴 **Y la que más enseña de las siete es la de `R81`, por CÓMO se supo:** la
+regla informaba **CERO montajes con uno vivo**, y no lo dijo el rojo — **lo dijo
+el ANCLA**. *Un patrón que captura de menos no falla: da un número más chico, y
+en un lint un número más chico se lee como progreso* (`L-226`). **Sin ancla, esa
+regla habría nacido verde, decorativa y con cara de sana.**
 
 ⚠️ **Y una distinción con su hermana, para que no se mezclen los números:** las
-cuatro de acá son **instrumentos míos de una sesión**. La que **cruzó de
+siete de acá son **instrumentos míos de una sesión**. La que **cruzó de
 subsistema** es `L-499` —SQL · git · JSX · SVG—, y *esa* es su propiedad
-distintiva. **Las dos tienen cuatro y no son el mismo cuatro.**
+distintiva. **Los dos números miden cosas distintas.**
 
 ## ② 🔴 LA PEOR ES LA CURA SIN TECHO, Y ES LA QUE ACUSA A OTRO
 

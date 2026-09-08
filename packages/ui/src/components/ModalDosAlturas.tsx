@@ -51,6 +51,7 @@ import { spacing } from '../tokens/spacing'
 import { sobreVideo } from '../tokens/sobreVideo'
 import { useTheme } from '../ThemeProvider'
 import { Chevron } from './chevron'
+import { TecladoResueltoArriba } from './teclado-resuelto'
 import { Texto } from './Texto'
 
 export type AlturaModal = 'cerrado' | 'medio' | 'completo'
@@ -223,7 +224,13 @@ export function ModalDosAlturas({
       {/* ── El contenido. El teclado se compensa ACÁ ADENTRO: el panel reserva
              su alto y el video de arriba no se entera. */}
       <View style={{ flex: 1, paddingBottom: altoTeclado > 0 ? altoTeclado : insetBottom, paddingHorizontal: spacing[4] }}>
-        {children}
+        {/* 🔴 ACÁ SE DECLARA QUIÉN PAGA EL TECLADO (S114-B). El panel acaba de
+            reservarlo arriba, así que **todo lo que caiga adentro NO debe
+            resolverlo otra vez** — `SuperficieChat` lo lee y no monta su
+            `EvitaTeclado`. *No hay prop que pasar, así que no hay prop que
+            olvidar: es mi propia `R81` aplicada a esta frontera.*
+            Ver `teclado-resuelto.tsx`. */}
+        <TecladoResueltoArriba>{children}</TecladoResueltoArriba>
       </View>
     </Animated.View>
   )
