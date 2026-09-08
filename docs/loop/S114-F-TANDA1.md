@@ -1489,3 +1489,112 @@ sitio público.
 
 *Es la misma lección de hoy, y por eso se anota: **medí las dos ramas que tenía
 a mano y no las dos que faltaban**.*
+
+---
+
+# ADENDA 13 · 🟢 EL ENSAYO DE LA PLACA — el circuito entero, por primera vez
+
+**Autorizado por el founder. Es el primer lote de la historia del producto.**
+
+## La marca del ensayo, para que no se lea mañana como producción
+
+```
+lote      : "ENSAYO S114-F · NO ES PRODUCCION"   (id 81a84ece)
+proveedor : "ensayo-interno-no-imprimir"
+contacto  : "ENSAYO S114-F" · "Placa de ENSAYO - no es una mascota perdida"
+mascota   : Zeus de la CUENTA DE PRUEBA (familia de300000) — no el del founder
+```
+
+*El mensaje de contacto lo lee cualquiera que abra la URL: por eso la marca no
+está sólo en el nombre del lote, está también en lo que la página muestra.*
+
+## Los seis pasos, medidos
+
+```
+① crear_lote_placas("ENSAYO…", 1, "ensayo-interno-no-imprimir")
+     → ok · lote 81a84ece · cantidad 1      ← ESTRENO de /placas: 0 lotes en la historia
+
+② listar_placas_de_lote(81a84ece)
+     → { serie: 1, token: <22 chars>, activada: false }
+
+③ GET /p/<token>  ANTES de activar          ← 🔴 LA RAMA `placa_libre`, NUNCA EJERCIDA
+     → 200 · cache-control: no-store
+     → «Esta placa espera a su mascota. Todavía nadie la activó. Si es tuya,
+        abre e-PetPlace y escanea el código…»
+     ✅ y CUMPLE SU LEY: no nombra mascota, ni familia, ni ciudad
+
+④ estado_de_placa  → "libre"
+   activar_placa(<token>, Zeus)
+     → ok · pasaporte 3698df63
+   estado_de_placa  → "activada"            ← discriminador antes/después
+
+⑤ GET /p/<token>  DESPUÉS
+     → 200 · cache-control: public, max-age=60   ← cambió de no-store a cacheado
+     → request 1 MISS · request 2 HIT (age 3)
+     → muestra «Zeus»
+
+⑥ configurar_pasaporte(Zeus, contacto+salud, sin chip)
+     → ok
+   GET /p/<token>  → «Zeus · Llamar a … · Escribir por WhatsApp · <mensaje>»
+     ✅ tel: y wa.me presentes
+```
+
+## 🔴 El hallazgo del ensayo — y su corrección, que es la mitad importante
+
+**Entre ⑤ y ⑥ el pasaporte estaba ACTIVO Y MUDO:** mostraba sólo el nombre. Sin
+foto, sin contacto, sin botón de llamar. *El propósito entero del pasaporte es
+que alguien pueda llamar, y no se podía.*
+
+**La causa, medida:** `activar_placa` **no crea la fila de `pasaporte_config`**
+(grep en su cuerpo: 0). Y aunque esa tabla tiene `mostrar_contacto DEFAULT true`,
+**un default de columna no se aplica si nadie inserta la fila** — sólo hay **1
+config en toda la base**.
+
+⚠️ **PERO lo perseguí antes de reportarlo como defecto del producto, y no lo es:**
+`apps/cliente/src/app/placa/[token].tsx:135` hace
+`router.replace('/hogar/mascota/pasaporte')` **inmediatamente después de
+activar**. **El circuito de la app SÍ lleva a configurarlo.**
+
+> ***El pasaporte quedó mudo porque YO llamé la RPC directo y me salteé la
+> pantalla.*** No era un hueco del producto: era un hueco de mi ensayo.
+
+**Lo que sí queda como observación honesta:** el **motor** permite el estado
+mudo —activo sin config— y el que lo evita es **el front**. Si algún día se
+activa por otra vía (un script, otra superficie), el pasaporte nace sin
+contacto y **nada avisa**. *No propongo cambiarlo: lo anoto porque el default
+`true` de la tabla hace parecer que está cubierto, y no lo está.*
+
+## Un detalle del método que casi me hace concluir mal
+
+Tras ⑥ pedí `/p/` **y esperé 62 segundos a propósito**. Sin esperar habría leído
+la respuesta cacheada de ⑤ —la del pasaporte mudo, con `max-age=60`— y habría
+concluido que `configurar_pasaporte` no funcionó.
+
+*Es `L-500` esquivada a tiempo: el caché que verifiqué como una virtud es, para
+la siguiente medición, una trampa.* **Todo lo que se mida sobre una página
+cacheada se mide después de su TTL, o no se mide.**
+
+## `limite` (429) — DECLARADO SIN EJERCER, con su razón
+
+De los **cuatro** estados de `/p/`, el ensayo cubrió **tres**:
+
+| estado | ejercido |
+|---|---|
+| `placa_libre` | ✅ ③ — **primera vez en la historia** |
+| `activo` | ✅ ⑤ y ⑥ |
+| `no_disponible` | ✅ (token inventado, adenda 10) |
+| **`limite` (429)** | 🔴 **NO** |
+
+**Por qué no:** exige una ráfaga, y **la ráfaga contra el sitio público está
+prohibida** — con razón: dispararía la mitigación automática sobre el dominio
+que en octubre va a recibir a los lectores reales. *La medición cuesta
+exactamente el daño que evita.* Si alguna vez se quiere, va contra un dominio de
+preview y se declara.
+
+## Estado que queda en la base
+
+**El lote, la placa y el pasaporte de ensayo QUEDAN.** Son el único sujeto vivo
+del circuito y sirven de fixture para el próximo que lo toque —igual que la
+cita `cfce1d43` de S56—. Están marcados en el nombre del lote, en el proveedor y
+**en el texto que la página muestra**. Se revocan con `revocar_pasaporte(Zeus)`
+el día que estorben.
