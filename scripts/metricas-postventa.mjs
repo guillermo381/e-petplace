@@ -115,8 +115,24 @@ medir(11, 'plata devuelta · por causa',
 medir(12, 'casos por familia',
   `select familia_id, count(*) from <tabla_caso> group by 1`, () => null, sinCaso);
 
+/* ═══ LA TARIFA, CON SU PROCEDENCIA — y la procedencia es parte del número ═══
+   🔴 **Ecuador NO tiene línea propia en el rate card de Meta.** El código 593
+   cae en el bucket **«Resto de Latinoamérica»**, y de ahí sale este precio.
+   *Publicarlo como si fuera una tarifa-país sería exacto en la cifra y falso en
+   lo que la cifra es* — y el día que Meta desagregue Ecuador, nadie sabría que
+   este número venía de un promedio regional.
+   · **UTILITY = USD 0,0113 por mensaje ENTREGADO** (no por enviado)
+   · hojas **vigentes desde el 1-jul-2026** · doc **actualizado el 5-ago-2026**
+   · **leído de la calculadora oficial de Meta**, porque **el CSV del CDN
+     devuelve 403** ⇒ la fuente es la calculadora, no el archivo. Se dice. */
+const TARIFA_UTILITY_RESTO_LATAM = 0.0113;
+const TARIFA_PROCEDENCIA = 'bucket «Resto de Latinoamérica» (EC no tiene línea propia) · ' +
+  'hojas vigentes 1-jul-2026 · doc actualizado 5-ago-2026 · calculadora oficial de Meta ' +
+  '(el CSV del CDN devuelve 403)';
+const MENSAJES_POR_CASO = 2;   // §10: sólo ACTUAR y PLATA MOVIDA
+
 medir(13, 'costo de WhatsApp por caso',
-  "2 mensajes × tarifa utility EC × familias con opt-in — ver el desglose en la salida",
+  `${MENSAJES_POR_CASO} × USD ${TARIFA_UTILITY_RESTO_LATAM} × familias con opt-in`,
   () => {
     const c = dbQuery(`select
         (select count(*)::int from notificacion_intencion
@@ -127,22 +143,20 @@ medir(13, 'costo de WhatsApp por caso',
           where canal = 'whatsapp' and not habilitada) as optin_no,
         (select exige_evidencia from cat_notificacion_canales where codigo='whatsapp') as exige_evidencia,
         (select transporte_vivo from cat_notificacion_canales where codigo='whatsapp') as transporte_vivo`)[0];
-    /* 🔴 EL «fila ausente = habilitada» de la casa (S54-B4) NO puede aplicar a
+    /* 🔴 El «fila ausente = habilitada» de la casa (S54-B4) NO puede aplicar a
        WhatsApp: el canal tiene `exige_evidencia = true`, y **la ausencia de una
-       fila no es evidencia de nada**. Por eso el opt-in se cuenta por filas
-       `habilitada = true` y no por descarte. */
+       fila no es evidencia de nada**. Se cuenta por filas en `true`. */
     const optin = c.exige_evidencia ? c.optin_si : null;
+    const porCaso = MENSAJES_POR_CASO * TARIFA_UTILITY_RESTO_LATAM;
     return [
-      `mensajes por caso: 2 (§10 — sólo actuar y plata movida)`,
-      `tarifa utility EC: NULL — ver nota`,
+      `POR CASO: ${MENSAJES_POR_CASO} mensajes × USD ${TARIFA_UTILITY_RESTO_LATAM} = **USD ${porCaso.toFixed(4)}**`,
+      `tarifa: ${TARIFA_PROCEDENCIA}`,
       `familias con opt-in: ${optin} (filas whatsapp: ${c.optin_si} sí / ${c.optin_no} no · exige_evidencia=${c.exige_evidencia})`,
-      `⇒ TECHO HOY: 2 × tarifa × ${optin} = US$ 0,00 — exacto, no estimado`,
-      `canal transporte_vivo=${c.transporte_vivo} · mensajes enviados: ${c.enviados}`,
-      `NOTA de la tarifa: Ecuador NO tiene línea propia en el rate card de Meta —`,
-      `  el código 593 cae en «Rest of Latin America»; los rate cards rigen desde`,
-      `  el 1-jul-2026 y son archivos descargables que este arnés no abre. No se`,
-      `  publica cifra: §11bis existe para no tener un número inventado.`,
-      `NO se estima el volumen (casos por familia): ese dato no existe.`,
+      `⇒ TECHO HOY: ${MENSAJES_POR_CASO} × ${TARIFA_UTILITY_RESTO_LATAM} × ${optin} = USD ${(porCaso * (optin ?? 0)).toFixed(4)} — exacto, no estimado`,
+      `canal transporte_vivo=${c.transporte_vivo} · mensajes por WhatsApp enviados: ${c.enviados}`,
+      `NO se estima el VOLUMEN (casos por familia): ese dato no existe, y §11bis`,
+      `  existe para no tenerlo inventado. Lo de arriba es costo POR CASO y su techo,`,
+      `  jamás un gasto proyectado.`,
     ].join('\n      ');
   });
 

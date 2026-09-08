@@ -42,6 +42,31 @@
  * · no existe `cat_notificacion_tipos.plantilla_whatsapp` ⇒ no se puede saber
  *   qué está cableado
  *
+ * ── 🔴 ④ CONTRA QUÉ WABA MIDIÓ — Y POR QUÉ HOY NO PUEDE DECIRLO ──────────
+ * **Hay DOS WABAs con el mismo nombre en el portafolio.** ⇒ *una medición de
+ * WhatsApp que no nombra su `WABA_ID` no es interpretable: un identificador
+ * correcto y uno equivocado se leen igual*, y las diez plantillas que este
+ * gate lee podrían ser las de la cuenta que el producto **no** usa. Con eso,
+ * una deriva a `marketing` en la cuenta buena **pasaría invisible**.
+ *
+ * **Medido:** `?verificar=1` **no devuelve el `waba_id`**. La edge sabe
+ * marcarlo (`es_el_configurado`) pero lo deriva de `granular_scopes`, que para
+ * este token **vuelve vacío** (`waba_alcanzables: []`) — el ciego que A ya
+ * había declarado. ⇒ **el gate sale 2 y nombra el bloqueante**, en vez de dar
+ * un verde que no puede sostener.
+ *
+ * 🔴 **Y hay un riesgo peor, que este gate tampoco puede descartar:** la edge
+ * LEE plantillas de `META_WABA_ID` y ENVÍA desde `META_PHONE_NUMBER_ID`. **Si
+ * esos dos secretos apuntaran a WABAs distintos** —que es exactamente lo que
+ * dos cuentas homónimas hacen fácil— *el gate leería las plantillas de una
+ * cuenta y el producto mandaría desde la otra, y las dos lecturas serían
+ * creíbles.* **La coherencia entre los dos secretos no se puede medir desde
+ * afuera de la edge.**
+ *
+ * **CURA, de una línea y en territorio de la edge:** que `?verificar=1`
+ * devuelva `waba_id` y si `/{waba}/phone_numbers` contiene el número
+ * configurado.
+ *
  * ── ¿PERDONA ALGO QUE EL PRODUCTO NO PERDONA? ────────────────────────────
  * **Sí, una cosa y se declara: no mira el IDIOMA.** Una plantilla cableada en
  * `es` que en Meta sólo existe en `en` pasa este gate y falla al enviar. Ese
@@ -81,6 +106,17 @@ try {
 }
 
 const enCuenta = Array.isArray(vivo.plantillas) ? vivo.plantillas : [];
+
+// ── ④ IDENTIDAD DE LA MEDICIÓN — contra qué se midió ─────────────────────
+const numero = vivo.numero ?? {};
+const huella = [...enCuenta.map((p) => p.name)].sort().join('|');
+const huellaCorta = [...huella].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7).toString(16);
+console.log('  ── IDENTIDAD DE LA MEDICIÓN ──');
+console.log(`   waba_id ................. ${vivo.waba_id ?? '🔴 NO LO DEVUELVE `?verificar=1`'}`);
+console.log(`   waba_alcanzables ........ ${JSON.stringify(vivo.waba_alcanzables ?? null)}`);
+console.log(`   número que ENVÍA ........ ${numero.display_phone_number ?? '?'} · ${numero.verified_name ?? '?'}`);
+console.log(`   huella de plantillas .... ${huellaCorta} (${enCuenta.length} nombres)`);
+console.log('');
 if (enCuenta.length === 0) {
   console.error('🟠 NO CONCLUYENTE · la cuenta devolvió CERO plantillas.');
   console.error(`   http_plantillas=${vivo.http_plantillas} · error=${vivo.error_plantillas ?? '—'}`);
@@ -115,13 +151,19 @@ const fallos = [];
 console.log('verify:plantillas-categoria · la deriva silenciosa de Meta');
 console.log(`  esperada: ${ESPERADA} · leída de Meta (categoría APROBADA, no la declarada)\n`);
 console.log('  plantilla                        idioma  categoría   estado      cableada por');
+let pendientes = 0;
 for (const p of enCuenta) {
   const cab = cableadas.filter((c) => c.plantilla === p.name).map((c) => c.codigo);
   const exenta = p.name in EXCEPCIONES;
+  /* 🔴 UNA PLANTILLA EN REVISIÓN TRAE SU CATEGORÍA **DECLARADA**, NO LA APROBADA.
+     Meta todavía no falló, y con `allow_category_change` puede aprobarla en otra.
+     ⇒ su `UTILITY` **no confirma nada**: se cuenta aparte y jamás como verde. */
+  const enRevision = p.status !== 'APPROVED';
+  if (enRevision) pendientes += 1;
   const mal = p.category !== ESPERADA && !exenta;
   console.log(
-    `  ${mal ? '🔴' : '  '} ${String(p.name).padEnd(30)} ${String(p.language).padEnd(6)} ` +
-    `${String(p.category).padEnd(11)} ${String(p.status).padEnd(11)} ${cab.join(', ') || '—'}` +
+    `  ${mal ? '🔴' : enRevision ? '⏳' : '  '} ${String(p.name).padEnd(30)} ${String(p.language).padEnd(6)} ` +
+    `${(String(p.category) + (enRevision ? '*' : '')).padEnd(11)} ${String(p.status).padEnd(11)} ${cab.join(', ') || '—'}` +
     (exenta ? `  (excepción: ${EXCEPCIONES[p.name]})` : ''),
   );
   if (mal) {
@@ -141,8 +183,13 @@ for (const c of cableadas) {
   }
 }
 
-console.log(`\n  en la cuenta: ${enCuenta.length} · cableadas: ${nombresCableados.size}` +
+console.log(`\n  en la cuenta: ${enCuenta.length} · aprobadas: ${enCuenta.length - pendientes}` +
+            ` · en revisión: ${pendientes} · cableadas: ${nombresCableados.size}` +
             ` (${cableadas.map((c) => c.codigo).join(', ') || 'ninguna'})`);
+if (pendientes) {
+  console.log(`  ⏳ las marcadas con * están EN REVISIÓN: su categoría es la DECLARADA al`);
+  console.log('     enviarlas, no la que Meta aprobó. No confirman nada todavía.');
+}
 if (nombresCableados.size === 0) {
   console.log('  ⚠️ NOTA: hoy no hay ninguna plantilla cableada, así que el nivel ① no tiene');
   console.log('     sujeto. El nivel ② sí lo tiene y por eso el gate igual mide.');
@@ -155,5 +202,17 @@ if (fallos.length) {
   console.error('   consola de Meta, no editando este gate.');
   process.exit(1);
 }
-console.log(`\n🟢 VERDE · las ${enCuenta.length} plantillas de la cuenta están en ${ESPERADA}.`);
+if (!vivo.waba_id) {
+  console.error(`\n🟠 NO CONCLUYENTE · ninguna plantilla está fuera de ${ESPERADA}, **pero el gate`);
+  console.error('   no puede decir contra qué WABA midió** y hay DOS homónimos en el portafolio.');
+  console.error('   Un identificador correcto y uno equivocado se leen igual: sin el `waba_id`,');
+  console.error('   estas diez podrían ser las de la cuenta que el producto NO usa, y una deriva');
+  console.error('   a marketing en la buena pasaría invisible.');
+  console.error('   BLOQUEANTE NOMBRADO: que `?verificar=1` devuelva `waba_id`, y si');
+  console.error('   `/{waba}/phone_numbers` contiene el número configurado — porque la edge LEE');
+  console.error('   de META_WABA_ID y ENVÍA desde META_PHONE_NUMBER_ID, y que apunten a WABAs');
+  console.error('   distintos es justo lo que dos cuentas homónimas vuelven fácil.');
+  process.exit(2);
+}
+console.log(`\n🟢 VERDE · las ${enCuenta.length} plantillas del WABA ${vivo.waba_id} están en ${ESPERADA}.`);
 console.log('   (Vale para AHORA: la deriva de Meta es silenciosa — se vuelve a correr.)');
