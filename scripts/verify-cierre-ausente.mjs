@@ -59,8 +59,15 @@ import { dbQuery } from './lib-db.mjs';
 
 const FIN_CITA = "(c.fecha + c.hora + make_interval(mins => coalesce(c.duracion_minutos, 0))) at time zone 'America/Guayaquil'";
 
-let existeEstado, sujeto;
+let existeEstado, sujeto, corte;
 try {
+  /* 🔴 EL CORTE ES UN DATO, Y SIN ÉL EL RELOJ NO CORRE A CIEGAS.
+     `expirar_objetos_sin_cierre()` sale `sin_corte_configurado` si falta. Si
+     este arnés no lo encuentra, **eso es configuración faltante, no «cero
+     incumplimientos»** — y la diferencia es todo: un cero por falta de config
+     se lee igual de bien que un cero por salud. */
+  corte = dbQuery(
+    "select valor from app_config where clave = 'f1_corte_cierre_ausente'")[0]?.valor ?? null;
   /* 🔴 `no_ejecutado` EXISTE COMO MOTIVO Y NO COMO ESTADO — y esa colisión de
      nombre es una trampa. Quien haga `grep no_ejecutado` lo encuentra en
      `cat_motivos_postventa` (objeto `cita`, clase 1: «No vino / no me
@@ -99,6 +106,16 @@ try {
              (c.estado = 'no_ejecutado') as marcado
         from evento_cita_servicio c
        where c.estado_reserva = 'pagada' and c.hora is not null
+         and not exists (select 1 from guarderia_estadias g where g.cita_id = c.id)
+      union all
+      -- La estadía se mide por SU cierre (el acta), no por el de su cita.
+      select 'estadia', g.id,
+             coalesce(g.entregada_en, g.no_recogida_en, (c2.fecha + coalesce(c2.hora, '23:59'))::timestamptz),
+             (g.estado in ('entregada','cancelada','no_recogida')),
+             (g.estado = 'no_ejecutado')
+        from guarderia_estadias g
+        join evento_cita_servicio c2 on c2.id = g.cita_id
+       where c2.estado_reserva = 'pagada'
       union all
       select 'pedido', p.id, e.promesa_entrega_hasta,
              (p.estado in ('entregado','cancelado_cliente','cancelado_sistema','cancelado_vendedor')
@@ -116,7 +133,17 @@ try {
            count(*)::int as n,
            count(*) filter (where resuelto)::int as cerrados,
            count(*) filter (where marcado)::int as ya_marcados,
-           count(*) filter (where not resuelto and not marcado)::int as sin_resolver
+           /* 🔴 LOS TRES ESTADOS, SEPARADOS. «fuera de alcance por corte» NO es
+              «el reloj no lo vio»: es una decisión de mesa, y confundirlas
+              convierte una firma en un falso ciego. */
+           count(*) filter (where not resuelto and not marcado
+                              and fin < ${corte ? `'${corte}'::date` : 'null::date'})::int as fuera_por_corte,
+           count(*) filter (where not resuelto and not marcado
+                              and fin >= ${corte ? `'${corte}'::date` : 'null::date'})::int as sin_resolver,
+           /* EN ALCANCE = lo que el reloj SÍ puede tocar. Sin esto, «cero sin
+              resolver» sería verdad sobre un conjunto vacío — la trampa de
+              siempre: un verde vacuo se lee igual que uno ganado. */
+           count(*) filter (where fin >= ${corte ? `'${corte}'::date` : 'null::date'})::int as en_alcance
       from objetos
      group by 1, 2 order by 1, 2`);
 } catch (e) {
@@ -128,12 +155,17 @@ try {
 const pasaron48 = sujeto.filter((f) => f.ventana.startsWith('c ·'));
 const total48 = pasaron48.reduce((a, f) => a + f.n, 0);
 const sinResolver = pasaron48.reduce((a, f) => a + f.sin_resolver, 0);
+const fueraPorCorte = pasaron48.reduce((a, f) => a + f.fuera_por_corte, 0);
+const enAlcance = pasaron48.reduce((a, f) => a + f.en_alcance, 0);
+const marcados = pasaron48.reduce((a, f) => a + f.ya_marcados, 0);
 
 console.log('verify:cierre-ausente · §2 (F1) de LETRA_POSTVENTA\n');
-console.log('  obj      ventana desde el fin declarado      n  cerrados  no_ejec  SIN RESOLVER');
+console.log(`  corte de F1 (dato, \`app_config.f1_corte_cierre_ausente\`): ${corte ?? '🔴 SIN CONFIGURAR'}\n`);
+console.log('  obj      ventana desde el fin declarado    n  cerrados no_ejec  x corte  SIN RESOLVER');
 for (const f of sujeto) {
   console.log(`  ${f.obj.padEnd(8)} ${f.ventana.padEnd(28)} ${String(f.n).padStart(4)}` +
-              ` ${String(f.cerrados).padStart(8)} ${String(f.ya_marcados).padStart(8)} ${String(f.sin_resolver).padStart(12)}`);
+              ` ${String(f.cerrados).padStart(8)} ${String(f.ya_marcados).padStart(7)}` +
+              ` ${String(f.fuera_por_corte).padStart(8)} ${String(f.sin_resolver).padStart(12)}`);
 }
 
 // ── ① CONTROL POSITIVO DEL SUJETO — antes de medir nada (orden de §2) ─────
@@ -147,6 +179,20 @@ if (total48 === 0) {
 }
 console.log(`\n  control positivo del sujeto: ${total48} objetos pasaron las 48 h ✅`);
 console.log('  (incluye los cerrados: el sujeto es el paso del tiempo, que no se arregla)');
+
+// ── ①bis EL CORTE — sin él, el reloj no corre y un cero no significa salud ─
+if (!corte) {
+  console.error('\n🟠 NO CONCLUYENTE · `app_config.f1_corte_cierre_ausente` NO ESTÁ.');
+  console.error('   `expirar_objetos_sin_cierre()` sale `sin_corte_configurado` y no corre.');
+  console.error('   ⚠️ Eso es CONFIGURACIÓN FALTANTE, no «cero incumplimientos» — y los dos');
+  console.error('   se ven igual desde afuera. El gate NO dice verde.');
+  process.exit(2);
+}
+console.log(`\n  fuera de alcance POR CORTE (fin < ${corte}): ${fueraPorCorte}`);
+console.log('  ⚠️ Es una DECISIÓN de mesa, no una ceguera del reloj ni un incumplimiento');
+console.log('     sin detectar. Son ruido de construcción y procesarlos habría creado');
+console.log('     ~128 casos y ~128 devoluciones sobre datos que no son reales.');
+console.log(`  en alcance del reloj (fin >= ${corte}), pasados de 48 h: ${enAlcance}`);
 
 // ── ② ¿EXISTE EL ESTADO AL QUE HABÍA QUE MOVER? ──────────────────────────
 if (existeEstado === 0) {
@@ -168,12 +214,33 @@ if (existeEstado === 0) {
   process.exit(2);
 }
 
+// ── ②bis SIN SUJETO EN ALCANCE, EL VERDE SERÍA VACUO ─────────────────────
+if (enAlcance === 0) {
+  console.error('\n🟠 NO CONCLUYENTE · CERO objetos en alcance del reloj pasados de 48 h.');
+  console.error(`   El corte es ${corte} y todavía no hay objetos de esa fecha en adelante`);
+  console.error('   que hayan cumplido 48 h. **«Ninguno quedó sin resolver» es verdad sobre');
+  console.error('   un conjunto VACÍO** — y un verde vacuo se lee igual que uno ganado.');
+  console.error('   No es un rojo: es que el reloj todavía no tuvo a quién tocar.');
+  const destraba = new Date(new Date(`${corte}T00:00:00Z`).getTime() + 48 * 3600_000)
+    .toISOString().slice(0, 10);
+  console.error(`   BLOQUEANTE NOMBRADO, y se destraba SOLO: el ${destraba} los primeros`);
+  console.error(`   objetos con fin >= ${corte} cumplen 48 h. Nadie tiene que hacer nada.`);
+  console.error(`   (Lo que ya hizo bien: dejó ${fueraPorCorte} fuera por corte, y eso es`);
+  console.error('   decisión, no ceguera.)');
+  process.exit(2);
+}
+
 // ── ③ EL ROJO REAL ───────────────────────────────────────────────────────
 if (sinResolver > 0) {
-  console.error(`\n🔴 ROJO · ${sinResolver} objetos pasaron las 48 h SIN cerrarse y SIN quedar en \`no_ejecutado\`.`);
+  console.error(`\n🔴 ROJO · ${sinResolver} objetos EN ALCANCE del corte pasaron las 48 h`);
+  console.error('   SIN cerrarse y SIN quedar en `no_ejecutado`.');
   console.error('   El reloj de §2 no corrió sobre ellos: siguen pudiendo devengar.');
   console.error('   (F1: dispara «nada marcado», cualquiera sea la causa — es ausencia');
   console.error('   de cierre, no un índice de prestadores que fallaron.)');
   process.exit(1);
 }
-console.log('\n🟢 VERDE · todo objeto pasado de 48 h se cerró o quedó en `no_ejecutado`.');
+console.log(`\n🟢 VERDE · de los ${enAlcance} objetos EN ALCANCE pasados de 48 h, todos se`);
+console.log(`   cerraron o quedaron en \`no_ejecutado\` (${marcados} por el reloj).`);
+console.log(`   ⚠️ Y ${fueraPorCorte} quedaron FUERA POR CORTE — decisión de mesa, no ceguera.`);
+console.log('   Este verde NO dice «se procesó todo»: dice «se procesó todo lo que el');
+console.log('   corte deja tocar».');

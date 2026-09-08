@@ -190,26 +190,54 @@ const FAMILIA = 'guillo381+8@gmail.com', TERCERO_FAM = 'guillo381+2@gmail.com';
 const OTRO_PRESTADOR = 'guillo381+paseo1@gmail.com';
 const PRESTADOR_ID = 'de300000-0000-4000-8000-0000000000e5';   // Paseos Andres
 
-const objeto = dbQuery(`
+/* 🔴 PRIMERO SE BUSCA UN CASO QUE YA EXISTA: un arnés que no necesita escribir
+   es estrictamente mejor que uno que siembra y limpia. Y el caso tiene que ser
+   de ESTA familia y de ESTE prestador, o los asientos de abajo medirían otra
+   cosa que la que dicen.
+   ⚠️ La primera versión creaba SIEMPRE, eligiendo «la cita más nueva» — y el
+   día que esa cita ya tenía un caso, la puerta devolvió `caso_ya_abierto`, el
+   fixture chocó contra `uq_caso_abierto_por_objeto` y **el arnés se puso mudo
+   sin declarar nada**. *Lo cazó correr todos después de sembrar; mirando sólo
+   lo que había tocado, se quedaba mudo con el tablero en verde.* */
+const casoExistente = dbQuery(`
+  select k.id from casos_postventa k
+   join auth.users u on u.id = k.familia_user_id
+  where u.email = '${FAMILIA}' and k.prestador_id = '${PRESTADOR_ID}'
+  order by k.creado_en desc limit 1`)[0]?.id ?? null;
+
+const objeto = casoExistente ? null : dbQuery(`
   select c.id, c.user_id from evento_cita_servicio c
    join auth.users u on u.id = c.user_id
   where u.email = '${FAMILIA}' and c.prestador_id = '${PRESTADOR_ID}'
+    and not exists (select 1 from casos_postventa k
+                     where k.objeto_tipo = 'cita' and k.objeto_id = c.id)
   order by c.fecha desc limit 1`)[0];
-if (!objeto) { console.error('   🟠 no hay objeto para el fixture.'); process.exit(2); }
+if (!casoExistente && !objeto) {
+  console.error('   🟠 NO CONCLUYENTE · ni hay un caso de esta familia+prestador para reusar,');
+  console.error('      ni una cita libre sobre la que abrir uno. Sin sujeto no se miden asientos.');
+  process.exit(2);
+}
 
-// La PUERTA REAL primero — su rechazo también es medición.
 const sFam = await sesion(FAMILIA, siembra);
 if (sFam.err) { console.error(`   🟠 la familia no abre sesión: ${sFam.err}`); process.exit(2); }
-const { data: puerta } = await sFam.c.rpc('abrir_caso', {
+
+let casoId = casoExistente;
+let creadoAcá = false;
+if (casoId) console.log(`   ↻ se REUSA un caso existente (${casoId}): el arnés NO escribe nada.`);
+
+// La PUERTA REAL primero — su rechazo también es medición.
+const { data: puerta } = casoId ? { data: null } : await sFam.c.rpc('abrir_caso', {
   p_objeto_tipo: 'cita', p_objeto_id: objeto.id, p_motivo: 'calidad',
   p_relato: `${MARCA} control de asientos`, p_procedencia: 'familia', p_modo: 'texto',
 });
 const abrioPorLaPuerta = puerta?.ok === true;
-console.log(`   puerta real \`abrir_caso\`: ${abrioPorLaPuerta ? '✅ abrió' : `rebotó · ${puerta?.codigo ?? '(sin código)'}`}` +
-            (abrioPorLaPuerta ? '' : '  ← la puerta funcionando; se siembra por fixture'));
-
-let casoId = abrioPorLaPuerta ? (puerta.caso_id ?? puerta.id) : null;
+if (!casoExistente) {
+  console.log(`   puerta real \`abrir_caso\`: ${abrioPorLaPuerta ? '✅ abrió' : `rebotó · ${puerta?.codigo ?? '(sin código)'}`}` +
+              (abrioPorLaPuerta ? '' : '  ← la puerta funcionando; se siembra por fixture'));
+}
+if (!casoId && abrioPorLaPuerta) { casoId = puerta.caso_id ?? puerta.id; creadoAcá = true; }
 if (!casoId) {
+  creadoAcá = true;
   const { data, error } = await admin.from('casos_postventa').insert({
     objeto_tipo: 'cita', objeto_id: objeto.id, motivo_codigo: 'calidad', clase: 2,
     familia_user_id: objeto.user_id, prestador_id: PRESTADOR_ID,
@@ -295,10 +323,15 @@ try {
     notas.push('«casa ve todos» no discrimina hoy: no existe un caso de otra familia');
   }
 } finally {
-  // ── RESIDUO CERO ──
-  await admin.from('caso_mensajes').delete().eq('caso_id', casoId);
-  await admin.from('casos_postventa').delete().eq('id', casoId);
-  const quedan = dbQuery(`select count(*)::int n from casos_postventa where relato like '%${MARCA}%'`)[0].n;
+  // ── RESIDUO CERO — sólo se borra lo que ESTE arnés creó ──
+  if (creadoAcá) {
+    await admin.from('caso_mensajes').delete().eq('caso_id', casoId);
+    await admin.from('casos_postventa').delete().eq('id', casoId);
+  } else {
+    console.log('   ✅ no se creó nada: no hay residuo que borrar');
+  }
+  const quedan = creadoAcá
+    ? dbQuery(`select count(*)::int n from casos_postventa where relato like '%${MARCA}%'`)[0].n : 0;
   if (quedan > 0) {
     console.error(`\n🟠 NO CONCLUYENTE · quedaron ${quedan} filas del fixture sin borrar.`);
     console.error('   Una sonda que deja residuo contamina la medición ajena.');
