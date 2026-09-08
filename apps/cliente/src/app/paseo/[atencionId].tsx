@@ -386,9 +386,35 @@ export default function DetallePaseo() {
   /* Los tres estados llevan a lados distintos (B lo dejó en una sola
      función a propósito): el motivo · la conversación con la casa · el caso
      que ya existe. */
+  /**
+   * 🔴 `false` hasta que `DetalleAtencion` traiga `cita_id`. Tipada `boolean`
+   * a propósito: con el literal, TypeScript deja de estrechar `puerta.hay` y
+   * el bloque de abajo no compila — *la bandera apaga la pieza, no el tipo.*
+   */
+  const PUERTA_ALCANZABLE_ACA: boolean = false;
+
   const abrirLaPuerta = () => {
-    const destino = destinoDeLaPuerta(puerta, 'cita', detalle.atencion_id);
-    if (destino !== null) router.push(destino);
+    /* 🔴 **ACÁ HABÍA UN DEFECTO MÍO, MEDIDO CONTRA EL MOTOR.** Esta línea
+       pasaba `detalle.atencion_id` como el id de una `'cita'`, y el motor
+       resuelve `'cita'` con `evento_cita_servicio WHERE c.id = p_id`
+       (`_caso_dueno_del_objeto`, `20260911610000:17-25`) ⇒ **le mandaba el id
+       de la ATENCIÓN donde espera el de la CITA**, y la familia habría
+       recibido «ese objeto no existe» sobre una cita que sí existe.
+
+       Nadie lo vio porque para tocar esta puerta hay que LLEGAR a esta
+       pantalla, y el censo del 8-sep midió que una cita pasada casi nunca
+       llega: es la misma ley que la mesa acaba de firmar —*una puerta no está
+       entregada hasta que se camina el camino que lleva a ella*.
+
+       ⚠️ **`DetalleAtencion` NO trae `cita_id`** (medido: el tipo tiene
+       `atencion_id` y `evento_id`, no la cita), así que **acá no hay con qué
+       armar el destino correcto**. Pedido a A: una columna más en el select
+       —`evento_atencion.cita_id` ya existe en la tabla—. Hasta que llegue, la
+       puerta de ESTA pantalla no se dibuja: **la puerta viva es la de la fila
+       del hub**, que sí tiene el id bueno, y es donde la familia la busca.
+
+       *Un botón que rebota con «tu cita no existe» es peor que no tenerlo.* */
+    void puerta;
   };
 
   // §7.4 — la etiqueta de frescura dice la verdad (envejece si el
@@ -900,7 +926,21 @@ export default function DetallePaseo() {
             es la salida, no la entrada»*. Y por eso NO se dibuja mientras el
             paseo está en vivo — no se reclama algo que está ocurriendo: el
             veredicto lo resuelve con `cerrada_en === null`. */}
-        {puerta.hay && (
+        {/* 🔴 **APAGADA A PROPÓSITO, con su razón y su fecha de vencimiento.**
+            El destino que esta pantalla puede armar es equivocado —le manda
+            al motor el id de la ATENCIÓN donde espera el de la CITA, ver
+            `abrirLaPuerta`— y un botón que rebota con «tu cita no existe» es
+            peor que ninguno.
+
+            **No se pierde la puerta: se mudó al lugar donde funciona y donde
+            la familia la busca** — la fila del hub de citas, que tiene el
+            `cita_id` bueno. *Nadie entra a ver el recorrido de un paseo para
+            avisar que el paseador no vino.*
+
+            ⏳ **Se vuelve a encender sola el día que `DetalleAtencion` traiga
+            `cita_id`**: se cambia este `false` por `puerta.hay` y el `void`
+            de `abrirLaPuerta` por el destino con la cita. Está pedido a A. */}
+        {PUERTA_ALCANZABLE_ACA && puerta.hay && (
           <View style={{ marginTop: spacing[2] }}>
                 {/* `enMemorial` es el PISO de la pieza y no su decisión: el
                     veredicto ya devolvió `hay: false` en memorial, así que
