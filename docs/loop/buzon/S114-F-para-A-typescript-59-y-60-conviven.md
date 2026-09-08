@@ -81,16 +81,49 @@ que este tipo de cosa espera.*
 
 ---
 
-## Lo que NO se midió, y por qué importa antes de decidir
+## 🔴 De dónde viene — MEDIDO, y NO es deliberada
 
-- **Si es deliberado.** Expo SDK 57 puede exigir TS 6 en las apps — **es la explicación más
-  probable** y encaja con que el corte sea exactamente «apps Expo vs. todo lo demás».
-  *Si es deliberado, lo que falta no es una cura: es la línea que lo declare*, para que
-  nadie lo «unifique» por prolijidad y rompa las dos apps.
-- **Qué construcciones difieren entre 5.9 y 6.0.** No lo medí: exige compilar el mismo
-  corpus con las dos y diffear los errores.
+> **CORRECCIÓN de este mismo aviso.** Una versión anterior decía que ser deliberada era
+> *«la explicación más probable (Expo SDK 57)»*. **Se midió y NO se sostiene.**
 
----
+**① Expo 57.0.4 no exige TypeScript 6.** No declara `typescript` en `peerDependencies`
+ni en `devDependencies` — ni `expo` ni `expo-router`. *No hay tal requisito.*
+
+**② Las cuatro versiones vienen del MISMO commit — el scaffold original:**
+
+```
+98e14c97 · 2026-07-05 · chore: scaffold monorepo — apps Expo, packages, tipos, skills (S43-B0)
+
+apps/cliente     ~6.0.3        packages/*       ~5.9.0
+apps/prestador   ~6.0.3        package.json     ~5.9.0
+```
+
+Y la línea de `apps/cliente` **nunca se tocó desde entonces** — `git log -L` sobre esa
+línea devuelve **un solo commit**, el scaffold.
+
+⇒ ***No es una decisión: es lo que dejó `create-expo-app` hace dos meses, y nadie la
+miró.*** El corte «apps Expo vs. todo lo demás» es limpio **porque el generador de Expo
+puso una versión y el resto del scaffold puso otra**, no porque alguien lo eligiera.
+
+⚠️ **Y por eso NO se escribe «es deliberada»:** sería una razón inventada con autoridad
+de canon, en un archivo que existe para que nadie vuelva a medir. *El próximo que la lea
+no la va a re-verificar — y el día que alguien necesite unificar, va a encontrar una
+prohibición fundada en un requisito que no existe.*
+
+**Lo que sí corresponde escribir:** que viene del scaffold `98e14c97`, que **nadie la
+decidió**, que **Expo no la exige**, y que **unificar es una decisión abierta** — con el
+dato de que hoy no rompe nada (los cuatro typechecks en 0) y de que los mismos `.ts` se
+compilan con las dos versiones.
+
+*Nota de método: la hipótesis la ofrecí yo, con «puede» y «más probable». **Que una
+inferencia esté bien marcada no la vuelve inocua** — otra pista estaba por escribirla
+como hecho, y el hedge no viaja: viaja la conclusión.*
+
+## Lo que NO se midió
+
+- **Qué construcciones difieren entre 5.9 y 6.0.** Exige compilar el mismo corpus con las
+  dos y diffear los errores. *Hoy los cuatro typechecks están en 0, así que ninguna
+  diferencia se manifiesta con el código actual.*
 
 ## Cómo verificarlo en un comando
 
