@@ -186,7 +186,7 @@ estaba en la lista*.
 > 🔴 **CORRECCIÓN.** Una versión anterior de este parte decía que el push → deployment
 > del legado **seguía roto**. **Falso.** `2b777e3` construyó en **26 segundos** y
 > producción sirve el bundle correcto. La conclusión salió de **tres observaciones con
-> una ventana que elegí yo**, y el cuarto commit la desmintió (`L-507`).
+> una ventana que elegí yo**, y el cuarto commit la desmintió (`L-516`).
 
 **Lo que sobrevive:** los tres commits del medio efectivamente no tienen deployment.
 *Era una **intermitencia**, no un corte* — y las dos producen las mismas observaciones.
@@ -245,9 +245,15 @@ bf6bf9b ✅   f3171cc 🔴   b5716d1 🔴   66cf314 🔴   2b777e3 ✅   ec79bb7
 
 ### Esperando de A, por el buzón
 
-**El SHA del candidato con la renumeración.** Medido: **la colisión es sólo `L-507`**
-—D la usa para otra lección— y **el candidato no puede cubrirla**, porque A renumeró F
-a 509-512 (cuatro) y `L-507` nació después. **No se renumera hasta tener el SHA.**
+~~**El SHA del candidato con la renumeración.**~~ ✅ **RESUELTO.** A confirmó por el
+buzón: la punta era `a28585ac`, el tope `L-515`, y **la colisión era sólo `L-507`** —D la
+usa para otra lección y los dos huecos del candidato (`L-507`/`L-508`) eran suyos—.
+⇒ **mi racha pasó a `L-516`**, y el resto de mi trabajo ya estaba adentro **idéntico por
+md5** (`L-503`–`L-506` y la enmienda a `L-502`).
+
+*Se conserva el texto tachado y no se borra: **el número viajó a 13 lugares en DOS repos**
+—el canon, el parte, el README del legado, el script del gate y el YAML de la Action— y
+quien encuentre un `L-507` viejo en algún lado necesita saber que hubo un corrimiento.*
 
 ### Anotado para cuando el founder firme
 

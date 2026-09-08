@@ -28703,7 +28703,7 @@ lo construye y la otra lo mide **sobre el objeto que ya existe**.
 ---
 
 
-### `L-507` — Una racha de observaciones no prueba una regla si la ventana la elegí yo
+### `L-516` — Una racha de observaciones no prueba una regla si la ventana la elegí yo
 
 **S114-F.** Tres commits seguidos no produjeron deployment. Sondeé cada uno **5 minutos**
 —un número que no era arbitrario: **5× el peor caso medido**, 26 s · 33 s · ~60 s— y con
