@@ -168,7 +168,7 @@ const CON_FRONTERA = [...CON_TILDE, ...PRON];
  * sube y el verde de ayer deja de ser comparable con el de hoy, que es
  * exactamente lo que uno quiere saber.
  *
- * ── ⚠️ Y EL INCENTIVO PERVERSO, QUE HAY QUE DECIR EN VOZ ALTA ─────────────
+ * ── ⚠️ EL INCENTIVO PERVERSO — hoy es `L-502`, con su censo ───────────────
  * `R66` es un **trinquete solo-baja**. ⇒ **agregar una forma a esta lista
  * puede poner el gate en ROJO** sobre voseo que ya estaba y que nadie
  * introdujo hoy. *Un instrumento que castiga a quien lo mejora se queda como
@@ -186,6 +186,28 @@ export const ALCANCE_VOZ = {
    *  prueba de que la lista es una lista. */
   huecosMedidos: ['marcá', 'firmá'],
 };
+
+/**
+ * ═══ CÓMO SE AMPLÍA ESTA LISTA SIN QUE EL TRINQUETE TE CASTIGUE — `L-502` ══
+ *
+ * **Medido, no supuesto:** sumar `marcá` + `firmá` hoy **no pone rojo a nadie**;
+ * una tanda realista de **17 formas** halladas censando el corpus pone en rojo
+ * **9 archivos** —entre ellos tres `«No operás este negocio.»` de
+ * `packages/api`—, *voz vieja que nadie escribió hoy.*
+ *
+ * ⇒ **el costo del buen acto lo paga el que lo hace, así que nadie lo hace** —
+ * y la omisión no se ve como una decisión: un instrumento congelado se lee
+ * igual que uno completo.
+ *
+ * **La cura es una línea y por eso es exigible:** quien amplía **sube en el
+ * mismo commit los baselines que la ampliación destape y declara el número
+ * viejo al lado del nuevo**. *Un trinquete mide voz NUEVA, no cobertura nueva.*
+ * ⚠️ Y la deuda destapada **es real y hay que verla**: la ley no dice «no
+ * amplíes», dice que **el rojo no caiga sobre el que amplió**.
+ */
+export const VOZ_COMO_AMPLIAR =
+  'si ampliás la lista, subí los baselines que destape EN EL MISMO COMMIT y' +
+  ' declará el número viejo: el trinquete mide voz NUEVA, no cobertura nueva (`L-502`)';
 
 /** La línea que todo consumidor pega en su salida. **Una sola redacción para
  *  los dos** —el CLI de C y `R66`— porque *dos textos que dicen el alcance se

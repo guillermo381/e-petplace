@@ -33,7 +33,7 @@ import { construirArbol, hitSlopsVecinos, autoPruebaArbol } from './lib-arbol-mo
 /* R66 · la lógica de voz vive en UN solo lugar: es el instrumento de la pista C
    movido a biblioteca. Importar en vez de reimplementar es la regla, no una
    preferencia — una copia del matcher divergiría sin avisar. */
-import { hitsDeVoseo, VOZ_LO_QUE_NO_VE } from './lib-voz.mjs';
+import { hitsDeVoseo, VOZ_LO_QUE_NO_VE, VOZ_COMO_AMPLIAR } from './lib-voz.mjs';
 import { decodificar as decodificarPng, cuerpo as cuerpoPng, puntoRedondo as puntoRedondoPng } from './medir-png.mjs';
 
 /** El sha256 del isotipo de Deuna **sobre el que se hizo la cuenta de R65**.
@@ -5767,6 +5767,7 @@ function r66(archivos) {
       (enCero.length ? ` · ${enCero.length} baseline(s) YA EN 0` : '') +
       ` · ${VOZ_LO_QUE_NO_VE}` +
       ` · CORPUS: apps + ui + api (la voz que nace en SQL la mide R80; \`supabase/functions\` NO la mira NADIE — 18 hits medidos S114-B)` +
+      ` · ${VOZ_COMO_AMPLIAR}` +
       ` · ⚠️ su verde dice «no creció», jamás «la voz está bien»`,
   };
 }
@@ -5869,6 +5870,7 @@ function r80(archivos) {
       (idas.length ? ` · ⚠️ ${idas.length} de la lápida ya no están en el corpus (una migración no se borra: revisar)` : '') +
       ` · ${VOZ_LO_QUE_NO_VE}` +
       ` · ⚠️ mide lo que una migración ESCRIBE, jamás lo VIVO (eso está en \`pg_proc\`)` +
+      ` · ${VOZ_COMO_AMPLIAR}` +
       ` · ⚠️ \`supabase/functions\` queda AFUERA y sin dueño: 18 hits medidos S114-B`,
   };
 }

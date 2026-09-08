@@ -28685,6 +28685,107 @@ rojo: no corre, y su silencio se lee como salud.**
 
 ---
 
+### `L-502` — UN TRINQUETE CASTIGA A QUIEN LO MEJORA: AMPLIAR EL ALCANCE LO ENROJECE SOBRE DEUDA VIEJA, Y ASÍ NADIE LO AMPLÍA
+
+> **Firma del founder (S114-B, 8-sep-2026).** *«El instrumento se queda como
+> está, y nadie tomó esa decisión: la tomó su forma.»*
+
+## LA FORMA
+
+Un **trinquete** (baseline solo-baja) promete: *lo que ya está se cura cuando se
+toca; lo nuevo no entra.* La promesa se cumple mientras el **alcance** no se
+mueva.
+
+**Pero el alcance de casi todo trinquete vive en un dato editable** — una lista
+de términos, una tabla de baselines por archivo, un conjunto de rutas — y **es
+más angosto que el fenómeno que el trinquete nombra**. ⇒ el día que alguien lo
+enriquece —que es exactamente lo que uno quiere que pase— **aparece deuda vieja
+que nadie introdujo hoy, y el gate se pone rojo sobre quien mejoró el
+instrumento, no sobre quien escribió el defecto.**
+
+**El costo del buen acto lo paga el que lo hace. ⇒ nadie lo hace.** Y lo peor
+no es la fricción: es que **la omisión no se ve como una decisión**. Nadie
+escribió «no ampliemos la lista»; simplemente nunca hubo un momento cómodo, y
+el resultado —un instrumento congelado— **se lee igual que un instrumento
+completo**.
+
+## LA EVIDENCIA, MEDIDA — y corrige mi propia afirmación
+
+`R66` mide la voz con una **lista de 132 formas**. C midió que `marcá` no está;
+B verificó y encontró que `firmá` tampoco. **La lista lleva meses sin crecer, y
+nadie decidió no agregarlos.**
+
+**Lo que costaría agregarlos, medido en vez de supuesto:**
+
+| ampliación | archivos que se pondrían en rojo |
+|---|---|
+| sólo `marcá` + `firmá` (+2 enclíticos) | **0** |
+| una tanda realista de **17 formas** halladas censando el corpus | **9** — 4 en `R66`, 5 en `R80` |
+
+🔴 **La primera fila corrige lo que yo había afirmado sin medir:** dije que
+agregarlos «puede poner el gate en rojo» y **para esos dos verbos no pasa
+nada**. *La ley es cierta; mi ejemplo no la probaba.* **La prueba es la segunda
+fila** — y su contenido es lo que la vuelve seria: entre los 9 aparecen **tres
+`«No operás este negocio.»` en `packages/api`** y un **`«Registrá el parte del
+perro»`**, o sea *voz que le llega a una persona en el peor momento*, en el
+paquete cuyo baseline el founder firmó porque **«A curó 160 voseos acá y nada lo
+sostenía»**. **Sobrevivieron a la barrida porque la lista no tenía los verbos**,
+y siguen ahí porque enriquecerla enrojece a quien la enriquece.
+
+## LA CURA, Y ES EXIGIBLE PORQUE ES UNA LÍNEA
+
+**Quien amplía el alcance sube en el mismo commit los baselines que la
+ampliación destape, y declara el número viejo al lado del nuevo.**
+
+*No es hacer trampa:* **un trinquete mide voz nueva, no cobertura nueva.** Subir
+un baseline porque el instrumento ahora ve más **no es lo mismo** que subirlo
+porque alguien escribió más — y confundirlos es lo que hace que nadie se anime a
+tocar el instrumento. El commit que amplía **dice cuál de las dos cosas está
+haciendo**, y con eso el trinquete vuelve a medir lo que dice medir.
+
+⚠️ **Y la mitad que no se olvida:** la deuda que la ampliación destapa **es
+real y hay que verla**. La ley no dice «no amplíes»: dice **que el rojo no caiga
+sobre el que amplió**. *Lo que estaba mal escrito sigue estando mal escrito, y
+ahora además tiene número.*
+
+## ① EL CENSO DE LA CLASE — cuáles la tienen, cuáles no, y qué costaría
+
+**El test, en tres condiciones que se cumplen JUNTAS:** ① el alcance vive en un
+dato editable (lista · tabla · conjunto de rutas) · ② ampliarlo **sólo puede
+sumar** hits · ③ ampliarlo es un **acto deseable** que alguien haría por su
+cuenta.
+
+| trinquete | alcance hoy | ampliación previsible | costo **medido** |
+|---|---|---|---|
+| **`R66`** · la voz | lista de 132 formas · `apps`+`ui`+`api` | sumar verbos | **+4 archivos** (17 formas) · **0** (2 formas) |
+| **`R80`** · la voz en SQL | la misma lista · 722 migraciones | sumar verbos | **+5 archivos**, y **ninguno curable en su lugar**: es lápida |
+| **`R66`/`R80`** · corpus | dejan afuera `supabase/functions` | mirarlo | **18 hits / 10 archivos** |
+| **`R77`** · uniones enumeradas a mano | `packages/ui/src` · 13 sitios | a `apps/` | **3 sitios**, y **uno está incompleto** — un hallazgo real |
+| **`R78`** · memorial por tema | `packages/ui/src` · base 11 | a `apps/` | **0 · NO tiene la propiedad**: hay 5 usos de `mode === 'memorial'` en `apps/` y **ningún gate de existencia** |
+| **`verify:memorial-derivado`** | base 9 · **exime `packages/domain`** | quitar la exención | **2 menciones** — y la exención existe **para que la deuda se pague ahí**, no para esconderla |
+
+**Dos resultados que valen más que la lista:**
+
+① **`R78` no la tiene**, y eso importa: *la propiedad no es universal, así que
+se testea y no se supone.* Un trinquete cuyo sujeto no existe fuera de su
+corpus no se congela por ampliarlo.
+
+② 🔴 **La ampliación de `R77` cuesta TRES sitios, no una tanda** — y estaba
+diferida a *«una tanda propia después de S114»* justo por suponer que era cara.
+**Nadie la había medido.** *El diferimiento no lo produjo el costo: lo produjo
+no conocerlo* — que es la misma ley un piso más arriba.
+
+## ⚠️ EL ALCANCE DE ESTE CENSO, declarado
+
+**Se midieron 6 trinquetes de los 48 que hay en la casa** (43 baselines en
+`verify:diseno` + 5 gates con baseline propio). De ésos, **13 tienen baseline
+> 0** y **15 tienen su alcance en una tabla, un conjunto o una lista** — que es
+la población donde el test de arriba puede dar positivo. **Los otros 42 no se
+testearon**, y se dice: *un censo que no declara su denominador se lee como
+completo.*
+
+---
+
 ### `L-501` — EL DELIMITADOR APARECE ADENTRO DE LO QUE QUERÉS CAPTURAR, Y UN INSTRUMENTO QUE ACUSA A OTRO NECESITA TECHO ANTES QUE PATRÓN
 
 > **Firma del founder (S114-B, 7-sep-2026).** Sale de dos defectos propios en
