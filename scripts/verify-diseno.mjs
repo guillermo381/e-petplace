@@ -2117,6 +2117,23 @@ const FIXTURES = {
         ⚠️ El `path` importa: los cinco guards buscan SU pieza y sin ella
         salen por «ancla rota», que es otro rojo — un fixture que enrojece
         por el ancla no prueba el brazo que dice probar. ══════════════════ */
+  /* R79 · los DOS casos REALES de C, verbatim de sus commits anteriores
+     (`6982e17e~1` y `f65ca58c~1`) — jamás un caso que yo escribiera. El corpus
+     lleva 10 archivos para pasar el ancla. */
+  R79: [
+    ...Array.from({ length: 10 }, (_, i) => ({
+      path: `apps/cliente/src/app/relleno${i}.tsx`,
+      src: 'const x = 1\n',
+    })),
+    {
+      path: 'apps/cliente/src/app/postventa/caso/[casoId].tsx',
+      src: "                nombre: caso.objeto.titulo ?? t('postventa.objetoSinNombre'),\n",
+    },
+    {
+      path: 'apps/prestador/src/app/negocio/casos.tsx',
+      src: '        motivo: c.motivo,\n',
+    },
+  ],
   /* R78 · la pieza número doce: el tema decidiendo existencia, solo. El corpus
      trae 20 archivos para pasar el ancla, y 12 guards para superar el baseline
      de 11 — con menos, la regla saldría verde y no probaría nada. */
@@ -6411,6 +6428,198 @@ function piezaDe(archivos, nombre) {
  *  Mide los TRES conjuntos —unión, orden y glifos— y exige que coincidan.
  *  ⚠️ Su verde dice «las cinco etapas están las tres veces», jamás «la
  *  escalera cuenta bien la historia». */
+/** R79 · UN CÓDIGO DEL MOTOR NO SE RENDERIZA SIN PASAR POR SU RIEL (S114-B).
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 🔴 **EL SUJETO NO ES EL STRING: ES EL CAMPO.** Lo dijo C midiendo, y decide
+ * todo el patrón: *«`paseo` no se distingue de un nombre propio mirando el
+ * texto; se distingue sabiendo que sale de `objeto.titulo`, que es un código
+ * del motor»*.
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * **Un patrón por FORMA del texto** —«palabras en minúscula sin espacios»—
+ * **marcaría apellidos y perdería «Baño y corte».** Por eso la regla mira la
+ * PROCEDENCIA: un campo declarado como código del motor, montado sin riel.
+ *
+ * ── LOS DOS CASOS REALES, y son de C (no de un fixture mío) ─────────────
+ * ```
+ * ① apps/cliente/…/postventa/caso/[casoId].tsx  · 6982e17e~1
+ *      nombre: caso.objeto.titulo ?? t('postventa.objetoSinNombre')
+ *      se veía `paseo` · debía verse `Paseo`  ⇒ faltaba `vozServicio`
+ * ③ apps/prestador/…/negocio/casos.tsx         · f65ca58c~1
+ *      motivo: c.motivo
+ *      se veía `calidad` · debía verse la voz del catálogo
+ * ```
+ * *Su rojo se probó contra ESOS commits, no contra un caso que yo escribiera*
+ * (`L-459`: un fixture del mismo autor comparte sus supuestos).
+ *
+ * ── 🔴 EL FALLBACK DECLARADO NO ES UNA VIOLACIÓN, y C avisó a tiempo ────
+ * La cura de ③ es `vozDeMotivo[c.motivo] ?? c.motivo` — **deja el código como
+ * fallback a propósito**: *si el catálogo no llegó, se muestra el código antes
+ * que un hueco.* ⇒ **si el campo aparece AL MENOS UNA VEZ dentro de un riel en
+ * la misma sentencia, la sentencia está curada** y su ocurrencia desnuda es la
+ * salida honesta. *Sin esta cláusula el gate daría rojo sobre la línea ya
+ * curada — me lo dijo C antes de que lo escribiera.*
+ *
+ * ── QUÉ CUENTA COMO «PASAR POR UN RIEL» ────────────────────────────────
+ * Que el campo sea **argumento de una llamada** (`vozServicio(t, X)`) o
+ * **índice de un mapa** (`vozDeMotivo[X]`). *No se lista qué rieles existen: se
+ * mira la FORMA de la resolución* — un `Record` nuevo o un helper nuevo cuentan
+ * sin tocar esta regla.
+ *
+ * ── ⚠️ LO QUE NO VE, declarado ─────────────────────────────────────────
+ * · **la llave de i18n construida en ejecución** (`t(\`x_${v}\` as '…')`) —
+ *   compila y el `as` la vuelve indistinguible de los **64 usos interpolados
+ *   legítimos** que C censó. **Ésa la caza su `missingKeyHandler` de runtime**,
+ *   que ya existe y ya la cazó. *Los dos instrumentos conviven y no se
+ *   duplican: el mío no ve una llave armada en ejecución, el suyo no corre en
+ *   CI.*
+ * · campos del motor que nadie declaró en la tabla de abajo;
+ * · el valor que pasa por una variable intermedia antes de renderizarse.
+ *
+ * **Su verde dice «ningún campo DECLARADO se monta sin riel», jamás «no hay
+ * códigos en pantalla».** */
+/* La tabla se DECLARA, no se deriva (mismo criterio que `R77`): un campo es
+   código del motor porque alguien lo sabe, no porque se parezca. */
+/* 🔴 SE DECLARA LA RUTA **Y SU ÁMBITO**, y las dos hacen falta. Medido antes
+   de escribirlo: el NOMBRE del campo no sirve de ancla en esta casa —
+   `\.titulo` da **50 ocurrencias** (casi todas llaves de i18n adentro de un
+   `t('avisos.titulo')`) y **38 aun despojando los literales de string**
+   (`carnet.titulo`, `parte.motivo`, `direccion.titulo`…). *Un patrón por
+   nombre de campo mediría la ortografía del árbol, no la procedencia del
+   dato* — que es exactamente contra lo que C avisó, un piso más adentro de lo
+   que ella nombró. */
+const CAMPOS_DEL_MOTOR_R79 = [
+  {
+    ruta: /\bobjeto\.titulo\b/g,
+    que: 'el `tipo_servicio` crudo — su voz vive en `vozServicio` (S61)',
+    ambito: /./,
+  },
+  {
+    ruta: /\b[A-Za-z_$][\w$]*\.motivo\b/g,
+    que: 'el `codigo` del catálogo — su voz vive en `v_motivos_resueltos`',
+    /* ÁMBITO declarado: donde vive el catálogo de motivos. Sin él, `.motivo`
+       marca el parte del paseo y la reserva de guardería, que hablan de otra
+       cosa con la misma palabra. */
+    ambito: /(postventa|casos)/,
+  },
+]
+const BASE_R79 = 0
+const TECHO_R79 = 4 // líneas de la sentencia — `L-501`: toda ventana declara su tope
+
+function r79(archivos) {
+  const apps = archivos.filter((a) => /^apps\/[^/]+\/src\/.*\.tsx?$/.test(a.path))
+  const fallos = [...ancla('R79', apps.length, 10, 'archivo(s) de `apps/*/src` en el corpus')]
+  if (fallos.length > 0) return { fallos, info: 'ancla rota' }
+
+  let mirados = 0
+  /* 🔴 EL FALLBACK DECLARADO SE EXIME POR RENGLÓN, y el renglón es el borde
+     exacto — ni menos ni más.
+     · **Menos** (por ocurrencia) daría rojo sobre `vozDeMotivo[c.motivo] ?? c.motivo`,
+       que es **la línea YA CURADA**: C me avisó de esto antes de que lo
+       escribiera, y su rojo lo confirmó.
+     · **Más** (por sentencia de 4 líneas) daba verde sobre el caso real de ③,
+       porque el `t(` del renglón de arriba entraba en la ventana.
+     ⇒ si el campo pasa por un riel **en su propio renglón**, lo desnudo de al
+     lado es la salida honesta; si no, es el defecto. */
+  const conRiel = new Set()
+  const crudos = []
+  const blanquear = (x) => x.replace(/[^\n]/g, ' ')
+  for (const { path, src } of apps) {
+    /* 🔴 SE DESPOJAN TAMBIÉN LOS LITERALES DE STRING, **sin colapsar líneas**:
+       las llaves de i18n viven adentro de `t('avisos.titulo')` y el 76 % del
+       ruido medido salía de ahí. *Un censo por texto lee una llave como si
+       fuera un acceso.* */
+    /* 🔴 Y SE DESPOJA **SIN COLAPSAR LÍNEAS**: el `sinComentarios` compartido
+       borra los bloques enteros y **corre la numeración** — su propio rojo lo
+       destapó acá, señalando la línea 259 de un defecto que vive en la 300.
+       *Un guard que apunta mal manda a buscar a otro lado* (la misma cura que
+       `R70` ya lleva escrita). */
+    const t = (src ?? '')
+      .replace(/\/\*[\s\S]*?\*\//g, blanquear)
+      .replace(/(^|[^:/'"`])(\/\/(?!\/)[^\n]*)/g, (_, pre, com) => pre + blanquear(com))
+      .replace(/'[^'\n]*'|"[^"\n]*"|`[^`]*`/g, blanquear)
+    const lineas = t.split('\n')
+    for (const { ruta, ambito } of CAMPOS_DEL_MOTOR_R79) {
+      if (!ambito.test(path)) continue
+      for (const m of t.matchAll(new RegExp(ruta.source, 'g'))) {
+        mirados++
+        const iLinea = t.slice(0, m.index).split('\n').length - 1
+        /* La sentencia, CON TECHO y con la línea en blanco como borde
+           (`L-501`): sin tope, una ventana dentro de un JSX camina cientos de
+           líneas y acusa por lo que encuentra de paso. */
+        let ini = iLinea
+        while (
+          ini > 0 &&
+          iLinea - ini < TECHO_R79 &&
+          lineas[ini].trim() !== '' &&
+          !/^\s*(const|let|var|return|if|function|export)\b/.test(lineas[ini])
+        ) ini--
+        const sentencia = lineas.slice(ini, iLinea + 1).join(' ')
+        /* ¿Aparece ALGUNA vez dentro de un riel? Entonces el desnudo de al
+           lado es el fallback declarado — ver la nota del encabezado. */
+        /* 🔴 ¿ESTA ocurrencia está dentro de un riel? Se mira **hacia atrás
+           desde ELLA y sobre SU renglón**, contando aperturas sin cerrar.
+
+           ⏪ Era un regex `[^;]{0,80}?` sobre la sentencia entera, **y su rojo
+           lo destapó**: en
+           ```
+           objeto: t(`postventa.objeto_${c.objetoTipo}`…),
+           motivo: c.motivo,
+           ```
+           el `t(` del renglón de ARRIBA quedaba a menos de 80 caracteres del
+           `c.motivo` de abajo ⇒ **el gate lo daba por curado y el caso real de
+           C salía VERDE.** *`L-501` en su forma exacta, tercera vez: el
+           delimitador —acá el paréntesis de otra sentencia— aparece adentro de
+           la ventana.* ⇒ balance acotado al renglón, que no puede cruzar. */
+        const renglon = lineas[iLinea]
+        const hasta = m.index - t.lastIndexOf('\n', m.index - 1) - 1
+        let prof = 0
+        let enRiel = false
+        for (let k = hasta - 1; k >= 0; k--) {
+          const ch = renglon[k]
+          if (ch === ')' || ch === ']') prof++
+          else if (ch === '(' || ch === '[') {
+            if (prof > 0) { prof--; continue }
+            // apertura SIN cerrar: ¿la abrió un identificador? entonces es
+            // llamada o índice — o sea, un riel.
+            enRiel = /[\w$]/.test(renglon.slice(0, k).trimEnd().slice(-1))
+            break
+          }
+        }
+        if (enRiel) { conRiel.add(`${path}:${iLinea}`); continue }
+        crudos.push({ clave: `${path}:${iLinea}`, texto: `${path}:${iLinea + 1} · ${m[0]}` })
+      }
+    }
+  }
+  const sueltos = crudos.filter((c) => !conRiel.has(c.clave)).map((c) => c.texto)
+  if (sueltos.length > BASE_R79) {
+    fallos.push(
+      `R79 **${sueltos.length} campo(s) del motor se renderizan sin pasar por su riel** (baseline ${BASE_R79}). ` +
+      `*El sujeto no es el string: es el CAMPO* — \`paseo\` no se distingue de un apellido mirando el texto. ` +
+      `**Pasalo por su riel de voz**; si el riel puede no resolver, dejá el código como \`?? campo\` y esta regla lo acepta.`,
+    )
+    for (const c of sueltos) fallos.push(`R79   · ${c}`)
+  }
+  /* 🔴 CERO OCURRENCIAS NO ES VERDE: ES «NO ESTOY MIDIENDO», y lo dice en cada
+     corrida. **Hoy las dos rutas declaradas viven en la rama de C** —las
+     pantallas de postventa no están en `main` todavía— así que este número
+     arranca en 0 y **pasa a N el día que su lote merge**. *Ese salto es la
+     señal (`L-500`): un contador que se mueve solo delata que la regla empezó —
+     o dejó— de mirar. No frena el commit: frenar por un corpus que todavía no
+     llegó bloquearía a todos por algo que nadie rompió.* */
+  const midiendo = mirados > 0
+  return {
+    fallos,
+    info:
+      (midiendo ? '' : '🔴 NO ESTÁ MIDIENDO (0 ocurrencias de las rutas declaradas: la postventa vive en la rama de C) · ') +
+      `${sueltos.length} campo(s) crudo(s) · baseline ${BASE_R79} · ` +
+      `alcance: ${mirados} ocurrencia(s) de ${CAMPOS_DEL_MOTOR_R79.length} ruta(s) declarada(s) en ${apps.length} archivo(s) · ` +
+      `⚠️ NO ve la llave de i18n armada en ejecución (ésa la caza el \`missingKeyHandler\` de C, que no corre en CI) · ` +
+      `su verde dice «ningún campo DECLARADO se monta sin riel», jamás «no hay códigos en pantalla»`,
+  }
+}
+
 /** R78 · EL TEMA MEMORIAL NO PUEDE SER LA ÚNICA SEÑAL (S114-B · adenda).
  *
  * ═══════════════════════════════════════════════════════════════════════════
@@ -7082,7 +7291,7 @@ function r69(archivos) {
   return { fallos, info: `${ofensores} absoluto(s) después del montaje · ${declarados} declarado(s)` }
 }
 
-const REGLAS = { R78: r78, R77: r77, R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R79: r79, R78: r78, R77: r77, R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -7540,6 +7749,7 @@ corridas.push(['R70 (un path svg no va en posicion de texto)', r70([...leer(RAIC
 /* S114-B · LAS CINCO DE LA POSTVENTA. Corren sobre `packages/ui/src` entero:
    cada guard busca SU pieza y sale por «ancla rota» si no la encuentra — así
    un rename de archivo no las deja mudas. */
+corridas.push(['R79 (un código del motor no se renderiza sin su riel)', r79([...apps, ...appsCodigo])])
 corridas.push(['R78 (el tema memorial no puede ser la única señal)', r78([...ui, ...leer(archivosCodigo('packages/ui/src'))])])
 corridas.push(['R77 (lo que enumera una unión a mano se declara)', r77([...ui, ...leer(archivosCodigo('packages/ui/src'))])])
 corridas.push(['R72 (ninguna etapa del caso se pierde del orden)', r72(ui)])
