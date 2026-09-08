@@ -73,3 +73,56 @@ todas formas (viaja al cliente en el alta de tarjeta). *Lo que este censo
 aporta es que hoy están, además, en un listado que su digest no protege — y que
 ese listado lo lee quien tenga acceso de dashboard.* La decisión de si eso
 importa, con esos dos hechos sobre la mesa, es de él.
+
+
+---
+
+## ⚠️ ESTE CENSO ESPERA FIRMA — NO ESTÁ CERRADO (adenda 11 ①)
+
+Los tres de baja entropía y sensibles —**`NUVEI_APP_CODE_CLIENT`,
+`NUVEI_APP_CODE_SERVER`, `DEUNA_POINT_OF_SALE`**— están **efectivamente
+publicados para quien tenga acceso al dashboard**. La decisión de rotarlos es
+del **founder**, con **fecha límite antes de octubre**. No se rotó nada.
+
+## EL COSTO DE ROTARLOS, medido (para firmar con el número delante)
+
+### `NUVEI_APP_CODE_CLIENT` — el más barato, y probablemente innecesario
+- **Lo lee UN lugar:** `apps/pagos-web/build.mjs:45`, que lo **hornea en el
+  bundle** que se sirve al navegador (junto a `NUVEI_APP_KEY_CLIENT`).
+- 🔴 **Ya es público por diseño**: viaja al navegador en cada alta de tarjeta.
+  *El digest no lo expone más de lo que el bundle ya lo expone.* Rotarlo por el
+  digest no cambia su exposición real.
+- **Costo del lado nuestro:** cambiar el secret **+ rebuild de `pagos-web`** (no
+  es OTA: es el deploy de esa web). **+ alta del código nuevo en Nuvei.**
+
+### `NUVEI_APP_CODE_SERVER` — el más caro de tocar
+- **Lo leen OCHO edges:** `pagos-alta-tarjeta`, `pagos-cobro`,
+  `pagos-cobro-recurrente`, `pagos-reverso`, `pagos-tarjetas`, `pagos-conciliar`,
+  `pagos-borrar-tarjeta`, `pagos-webhook-stg` — todas por `Deno.env.get`, así que
+  **rotar el secret las alcanza a las ocho sin re-desplegar** (leen el env vivo).
+- 🟡 **NO viaja al cliente**: entra dentro de un MD5 de firma
+  (`MD5(token_'_app_code_'_uid_'_app_key)`, `pagos-alta-tarjeta:222`). *No es
+  observable en el tráfico como el client code — su única exposición hoy es el
+  digest del listado.*
+- **Costo del lado nuestro:** cambiar el secret, y nada más de código (las ocho
+  lo releen). **PERO el `app_code` es la identidad de la cuenta ante Nuvei**, así
+  que **rotarlo EXIGE acción de Nuvei** —dar de alta el código nuevo y su
+  `app_key` pareja— y **es un cambio coordinado con el proveedor, no un
+  UPDATE unilateral.** Si se cambia el code sin el key nuevo, la firma MD5 deja
+  de validar y **todo cobro se cae.**
+
+### `DEUNA_POINT_OF_SALE` — intermedio
+- **Lo lee UN lugar:** `pagos-deuna-solicitud:37`, por env. Rotar el secret lo
+  alcanza sin re-desplegar.
+- **Costo del lado nuestro:** cambiar el secret. **Pero el POS lo asigna DeUna**
+  — un POS nuevo es alta del lado del proveedor, no un valor que elijamos.
+
+## La lectura para la firma, en una línea
+
+**Ninguno de los tres se rota con un `UPDATE` solo.** Los dos que importan
+—`APP_CODE_SERVER` y `DEUNA_POINT_OF_SALE`— **exigen acción del proveedor**
+(Nuvei / DeUna), así que rotarlos es coordinar un cambio de credencial con
+ellos, no una operación nuestra. Y el `CLIENT` code **ya es público por el
+bundle**, así que su rotación por el digest no compra nada. *El costo real no
+es técnico de nuestro lado —es una gestión con el proveedor— y ese es el número
+que faltaba para decidir.*
