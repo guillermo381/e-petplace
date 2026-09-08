@@ -28692,7 +28692,8 @@ rojo: no corre, y su silencio se lee como salud.**
 
 ## ① LA FORMA: `[^X]*` supone que `X` no está adentro. En código real, siempre puede estar.
 
-**Los dos casos, de la misma sesión y del mismo autor:**
+**Los TRES casos, de la misma sesión y del mismo autor** — y el conteo va
+exacto abajo, en su propia sección.
 
 ```
 R78                   \(([^)]*mode === 'memorial'[^)]*)\)
@@ -28710,9 +28711,29 @@ defecto sin ser una clase de caracteres. *No es un problema de expresiones
 regulares: es suponer que el símbolo que uso para delimitar no aparece adentro
 del sujeto.* **En código anidado —JSX, genéricos, tipos inline— siempre aparece.**
 
-⚠️ **Y el conteo va sin inflar** (`L-499` el mismo día): **dos son de esta forma
-exacta**; la tercera —abajo— es de su familia y no del mismo mecanismo. *Decir
-«tres iguales» habría sido más contundente y menos cierto.*
+```
+R79                   enRiel: `[^;]{0,80}?` sobre la sentencia
+  el caso real de C …… objeto: t(`postventa.objeto_${…}`),
+                       motivo: c.motivo,
+  ⇒ el `t(` del renglón de ARRIBA queda a <80 caracteres del `c.motivo` de
+    abajo ⇒ **el defecto que la regla existe para cazar salía VERDE**
+```
+
+### ⚠️ EL CONTEO, EXACTO Y SIN INFLAR (`L-499` el mismo día)
+
+| | |
+|---|---|
+| **del mecanismo exacto** —un delimitador que aparece adentro del sujeto— | **TRES**: `[^)]*` en `R78` · el `{` de la anotación de tipo · `[^;]{0,80}?` en `R79` |
+| **de su familia** —no hay delimitador: falta el techo— | **UNA**: la ventana de 286 líneas |
+| **de la clase, en total** | **CUATRO**, en cuatro instrumentos distintos, **todos escritos por el mismo autor el mismo día** |
+
+*Decir «cuatro iguales» habría sido más contundente y menos cierto: la del
+techo no comparte mecanismo, comparte consecuencia.*
+
+⚠️ **Y una distinción con su hermana, para que no se mezclen los números:** las
+cuatro de acá son **instrumentos míos de una sesión**. La que **cruzó de
+subsistema** es `L-499` —SQL · git · JSX · SVG—, y *esa* es su propiedad
+distintiva. **Las dos tienen cuatro y no son el mismo cuatro.**
 
 ## ② 🔴 LA PEOR ES LA CURA SIN TECHO, Y ES LA QUE ACUSA A OTRO
 

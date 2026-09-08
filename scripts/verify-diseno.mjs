@@ -6606,8 +6606,19 @@ function r79(archivos) {
      pantallas de postventa no están en `main` todavía— así que este número
      arranca en 0 y **pasa a N el día que su lote merge**. *Ese salto es la
      señal (`L-500`): un contador que se mueve solo delata que la regla empezó —
-     o dejó— de mirar. No frena el commit: frenar por un corpus que todavía no
-     llegó bloquearía a todos por algo que nadie rompió.* */
+     o dejó— de mirar.
+
+     🔴 **NO FRENA EL COMMIT, y es FIRMA DEL FOUNDER (7-sep-2026):** *bloquear
+     por un corpus que todavía no llegó castiga a todos por algo que nadie
+     rompió.*
+
+     ⚠️ **Y LA OTRA MITAD DE LA FIRMA, que es la que hay que leer después del
+     merge: SI EL SALTO DE 0 A N NO OCURRE CUANDO EL LOTE DE C ENTRE A `main`,
+     LA REGLA DEJÓ DE MIRAR.** No es que no haya defectos: es que **las rutas
+     declaradas dejaron de existir con ese nombre** —un rename, una pantalla
+     que se movió, un campo que cambió— y su `0` volvió a significar «no vi».
+     *El día del merge este número es lo único que hay que mirar acá: si sigue
+     en 0, lo roto es la regla y no el código.* */
   const midiendo = mirados > 0
   return {
     fallos,
