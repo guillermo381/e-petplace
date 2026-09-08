@@ -1,6 +1,8 @@
 # S114-F · TANDA 1 — LA FRONTERA Y LA PRIMERA PUERTA
 
-**Rama:** `pista/s114-f-1.0` · worktree `e-petplace-s114-f` · nace de `main` @ `c72ea582`
+**Rama:** `pista/s114-f-1.0` @ **`4bf796d4`** (verificado por SHA contra origin)
+**Worktree:** `e-petplace-s114-f` · nace de `main` @ `c72ea582`
+**Legado:** `e-petplace-admin` @ **`79a6cbb`** — *commiteado y **sin pushear**: el push es del founder*
 **Fecha:** 7-sep-2026. Alcance firmado: `docs/LETRA_PORTAL_ADMIN.md` v1.0.
 Piso medido: `docs/loop/S114-F-RELEVAMIENTO.md`.
 
