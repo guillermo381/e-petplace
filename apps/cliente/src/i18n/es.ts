@@ -2938,6 +2938,8 @@ export const clienteEs = {
     // motor devuelve lo que pasó, no lo que quedó afuera.
     criterioPara: 'Para {{nombre}}',
     criterioSinAlergenos: 'Dejamos fuera lo que lleva {{lista}}, porque su expediente lo registra.',
+    criterioSinAlergenosRecortado: 'Dejamos fuera lo que lleva {{lista}} y {{n}} alérgenos más, porque su expediente lo registra.',
+    criterioListaCompleta: 'Todo lo que dejamos fuera',
     criterioSinAlergias: 'Su expediente dice que no tiene alergias conocidas.',
     criterioCondicion: 'Incluimos dietas de prescripción por la condición que tiene registrada.',
     elegiMascota: 'Elige una mascota y te mostramos solo lo que puede comer.',

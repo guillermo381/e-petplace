@@ -19,7 +19,8 @@
  * habría sido inventar teniendo la pieza.
  */
 
-import { View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, View } from 'react-native';
 import { Image } from 'expo-image';
 import {
   AvatarMascota,
@@ -176,6 +177,8 @@ export function CriterioMascota({
   fotoUrl,
   linea,
   razon,
+  alergenosCompletos,
+  vozLista,
 }: {
   nombre: string;
   /** Ya resuelta por `caraDeMascotaPorRuta` — la MISMA escalera que el
@@ -191,7 +194,21 @@ export function CriterioMascota({
    *  no hay nada verdadero que decir todavía, y entonces NO se dice:
    *  un hueco del expediente no se rellena con una frase amable. */
   razon: string | null;
+  /** ⭐ **LA LISTA ENTERA, para el toque** (firma del founder, 9-sep).
+   *  `null` = no hay nada más que mostrar y **la línea NO se vuelve
+   *  tocable**: *un control que se abre sobre lo mismo que ya se ve enseña
+   *  a no tocarlo.* Sólo llega poblada cuando la frase recortó. */
+  alergenosCompletos?: readonly string[] | null;
+  /** El rótulo de la lista desplegada, ya redactado (Ley 3). */
+  vozLista?: string;
 }) {
+  /* La frase se despliega EN SU LUGAR — el patrón de la ficha de la mascota,
+     que ya resolvió esto mismo con su contador. *No es una Hoja: la lista es
+     el detalle de la frase que se está leyendo, y sacarla a otra superficie
+     obliga a volver para seguir leyendo.* */
+  const [abierto, setAbierto] = useState(false);
+  const hayMas = alergenosCompletos != null && alergenosCompletos.length > 0;
+
   return (
     <View style={{ gap: spacing[2], paddingHorizontal: spacing[5] }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
@@ -204,7 +221,33 @@ export function CriterioMascota({
           <Texto variante="titulo">{linea}</Texto>
         </View>
       </View>
-      {razon !== null ? <Texto variante="apoyo">{razon}</Texto> : null}
+      {razon !== null ? (
+        hayMas ? (
+          /* 🔴 **LA FRASE ENTERA ES EL CONTROL, y por eso no lleva un pie con
+             su propio número.** La frase ya dice «y 4 alérgenos más»: repetirlo
+             abajo como «Ver 4 más» sería contar dos veces lo mismo, que es
+             exactamente lo que la firma vino a evitar. */
+          <Pressable
+            onPress={() => setAbierto((v) => !v)}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: abierto }}
+            accessibilityLabel={razon}
+            style={{ gap: spacing[2] }}
+          >
+            <Texto variante="apoyo">{razon}</Texto>
+            {abierto ? (
+              <View style={{ gap: spacing[0.5] }}>
+                {vozLista !== undefined ? <Texto variante="dato">{vozLista}</Texto> : null}
+                {alergenosCompletos.map((a) => (
+                  <Texto key={a} variante="apoyo">{`· ${a}`}</Texto>
+                ))}
+              </View>
+            ) : null}
+          </Pressable>
+        ) : (
+          <Texto variante="apoyo">{razon}</Texto>
+        )
+      ) : null}
     </View>
   );
 }
