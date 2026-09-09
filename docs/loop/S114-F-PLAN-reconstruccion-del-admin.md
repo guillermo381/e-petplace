@@ -82,6 +82,31 @@ Vercel. **Apagar no es borrar.***
 
 ---
 
+## ⚫ GRUPO 3bis · Lo que no es una pantalla y también se retira: **el chrome muerto**
+
+**`Layout.tsx` — el marco que envuelve las 27 — cuenta mensajes no leídos de una tabla que
+NO EXISTE**, y además **abre una suscripción realtime a esa tabla.**
+
+```js
+supabase.from('mensajes_admin_seller').select('id', {count:'exact', head:true})…
+supabase.channel('layout-badge-mensajes').on('postgres_changes', {table:'mensajes_admin_seller'}…)
+```
+
+**El alcance, medido — y es MENOS de lo que parecía:** `Layout` se monta **una sola vez**
+(`App.tsx:161`, con `<Outlet/>`) y su `useEffect` tiene deps `[]`. ⇒ **no son 27 llamadas: es
+UN 404 por sesión**, más **una suscripción realtime muerta que queda abierta todo el rato**.
+
+⚠️ **Y su falla es de la familia del día:** `setMsgNoLeidos(count ?? 0)` ⇒ **el badge muestra
+0 siempre**, que se lee como *«no hay mensajes»*. *No avisa que está roto: avisa que no hay
+nada.*
+
+> ***No es una «pantalla rota»: es una lectura muerta en el chrome.*** Se retira, no se
+> reconstruye — **nadie pidió un badge de mensajes de sellers**, y su pantalla (`Mensajes`)
+> ya está en el grupo que se retira.
+
+*Ya estaba censado en la tanda 0 como «1 rotura transversal silenciosa». **Hoy tiene número
+de línea y alcance medido.***
+
 ## Las tandas, y el costo relativo
 
 | | qué | costo | por qué en ese orden |

@@ -28848,6 +28848,25 @@ venía de un `jsonb`, tipado a mano ([[L-498]])— y el build salió en verde. *
 quien cambió el motor avisó al consumidor.** *En una casa con seis pistas eso no es cortesía:
 es el único mecanismo que existe para esta clase.*
 
+> 🔴 **ENMIENDA (mismo día, con el caso en producción): esta lección decía de MENOS, y el
+> error es factual.** Escribí que *«el `.map` no encuentra filas y la pantalla muestra
+> vacío»*. **Falso:** `.map` **no existe** sobre un objeto, así que **tira
+> `TypeError: e.map is not a function` y la pantalla queda EN NEGRO.** Medido en producción,
+> `Placas.tsx:159`.
+>
+> **Y la corrección hace la clase MÁS grande, no más chica: el mismo cambio de contrato
+> produce los DOS desenlaces, y cuál toca depende de una casualidad de la forma.**
+>
+> ```
+> array → objeto,  y el consumidor hace .map()       → TypeError · pantalla en negro
+> array → objeto,  y el consumidor hace .length / [] → 0 filas   · vacío silencioso
+> ```
+>
+> ⇒ ***El silencioso es el peligroso, y el ruidoso es el afortunado.*** Que este caso haya
+> reventado **fue suerte**: si `Placas` hubiera leído `data?.length` en vez de `.map`, hoy
+> seguiría diciendo «no hay lotes» y nadie lo sabría. **La lección no es «rompe» ni «muestra
+> vacío»: es que el autor del cambio no puede saber cuál de los dos le toca al consumidor.**
+
 *(Familia de [[L-318]] —motor sin puerta— y su reverso: allá la pieza no llega a usarse;
 acá **se usa con la forma vieja y produce un resultado plausible**. Y de [[L-521]]: las dos
 son sobre un verde que no dice nada del contenido.)*
