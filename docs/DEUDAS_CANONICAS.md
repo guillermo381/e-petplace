@@ -29382,6 +29382,31 @@ lo construye y la otra lo mide **sobre el objeto que ya existe**.
 ---
 
 
+### `L-528` — Dibujar no es exigir: una pantalla más estricta que su motor también es un defecto — uno que nadie reporta porque parece prudencia
+
+F corrigió mi alcance sobre el campo de motivo del parcial, y la distinción vale
+más que la cura. Medido del CUERPO de `caso_resolver` (no del reporte): la razón
+es obligatoria en `parcial` y `sin_devolucion`, **en `total` NO**. ⇒ el campo se
+**dibuja en los tres** (explicar una devolución total también le sirve a la
+familia) y se **bloquea sólo en los dos donde el motor bloquea**. Son **dos
+decisiones distintas** y por eso no se resuelven con una condición sola. Exigir la
+razón en `total` habría bloqueado un camino que el motor acepta.
+
+**El modo de falla, que es lo que la vuelve ley:** una pantalla más estricta que
+su motor **no produce error, ni rebote, ni log** — sólo se niega, en silencio, a
+algo que el sistema habría aceptado, y **nadie reporta ese defecto porque una
+negativa parece prudencia.** Es el espejo de `L-318` (motor sin puerta): ahí el
+motor puede hacer algo que la pantalla nunca ofrece; acá la pantalla prohíbe algo
+que el motor permite. **Los dos son mudos.**
+
+**Cura exigible:** cuando una pantalla impone una precondición, se mide contra el
+CUERPO del motor —no contra la clase, ni contra un reporte— y **«dibujar» y
+«exigir» se deciden por separado.** Un campo puede pedirse siempre y bloquear sólo
+donde el motor bloquea.
+
+---
+
+
 ### `L-527` — En una configuración por capas, la de arriba VACÍA no significa «heredá»: significa «hacé nada»
 
 **S114-F, firma del founder.** El caso que cerró dos días de diagnóstico:
@@ -31000,6 +31025,32 @@ Antes no: cerrar el hint sin haber cerrado las policies sería esconder el mapa
 dejando las puertas.
 
 ---
+
+### `D-1050` 🟡 · `scripts/censo-voseo.mjs` sólo ve texto entrecomillado: es ciego a la app del admin (React web sin i18n) y su 0 se lee como salud
+
+Hallazgo de F, medido con discriminador (mismo texto en los dos casos):
+
+| forma | censo |
+|---|---|
+| `const t = 'Decidís vos y elegí bien'` | **1** |
+| `<p>Decidís vos y elegí bien</p>` | **0** |
+
+En las apps móviles **todo** el texto va por i18n (o sea en literales), así que el
+ciego no tenía dónde manifestarse. **El admin es React web sin i18n: su texto
+visible vive suelto en JSX** ⇒ el gate de voz de la casa está **estructuralmente
+ciego a la app del admin entera**, y su 0 se lee como salud. Es la clase de
+`L-459`/`L-490`: *un instrumento que da 0 sobre algo que no puede ver es peor que
+no tener instrumento, porque el 0 ya está publicado.*
+
+**Estado:** F curó a mano los 5 voseos que había — el censo da 0 **y** el barrido
+manual también, así que **hoy no hay daño**, sólo un instrumento ciego. **Dueño: A**
+(`scripts/` es territorio de conducción). **Disparo de cura:** que el censo aprenda
+a leer nodos de texto de JSX (no sólo literales entrecomillados), **o** que el
+admin gane i18n y su texto vuelva a vivir en literales. Hasta entonces, el 0 del
+censo sobre el admin **no dice nada** y la vigilancia de voz de esa app es manual.
+
+---
+
 
 ### `D-1047` 🟡 · `extract-papel` sólo está medido contra papeles SINTÉTICOS: el número que hay es un piso, no una exactitud
 
