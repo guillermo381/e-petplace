@@ -2156,6 +2156,7 @@ export const clienteEn = {
     biometricoRechazado: 'We couldn’t confirm it. Try again.',
   },
   despensa: {
+    usarMiSaldo: 'Use my {{saldo}} balance on this order',
     saldoCubreTodo: 'Your balance covers it all: {{saldo}}.',
     saldoMixto: '{{saldo}} from your balance and {{resto}} from your card.',
     usarSaldo: 'Use your balance ({{saldo}}) and pay the rest',

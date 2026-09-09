@@ -51,6 +51,7 @@ import { Linking, Pressable, View } from 'react-native';
 import { router, useNavigation } from 'expo-router';
 import {
   Boton,
+  Casilla,
   Campo,
   CeldaNavegacion,
   Encabezado,
@@ -269,6 +270,9 @@ export default function DespensaCheckout() {
      `null` = todavía no se sabe ⇒ no se ofrece. *Ante la duda, la app no
      promete un medio de pago.* */
   const [saldo, setSaldo] = useState<number | null>(null);
+  /* 🔴 **El check NO reserva nada.** Es una intención, no un acto: el saldo se
+     aplica dentro del acto de pagar. Ver la nota del bloque, abajo. */
+  const [usarSaldo, setUsarSaldo] = useState(false);
   /** F6 · qué tienda prepara cada pedido. Sin entrada = no se pudo leer,
    *  y la línea NO se dibuja: jamás «Lo prepara: —». */
   const [tiendas, setTiendas] = useState<Record<string, string>>({});
@@ -610,6 +614,52 @@ export default function DespensaCheckout() {
     if (trabajando || compraId === null) return;
     setTrabajando(true);
 
+    /* ═══ ⓪ EL SALDO SE APLICA ACÁ, DENTRO DEL ACTO DE PAGAR ═════════════
+       Firma del founder (8-sep-2026): **el saldo es un CHECK, no un botón.**
+       El check no reserva nada — es una intención. La reserva y el cobro pasan
+       acá, consecutivos, en el mismo toque.
+
+       🔴 **Y el orden importa, confirmado por A:** `aplicarSaldoACompra` va
+       PRIMERO y el riel DESPUÉS. `crearIntentoPago` **congela el desglose**, y
+       el riel cobra sobre lo congelado ⇒ aplicar el saldo después dejaría al
+       riel cobrando el total sin descontar.
+
+       *Lo que cura la causa no es el orden —ése ya era el mismo con el botón—:
+       es que los dos llamados sean CONSECUTIVOS. Con el botón separado, entre
+       reservar y pagar había una ventana de minutos en la que la familia podía
+       irse con el saldo comprometido y nada pagado; acá esa ventana dura lo que
+       tarda una respuesta.* Y si el riel rebota, `pagos-cobro` suelta la
+       reserva en el acto (cableado por A el mismo día, por este incidente). */
+    if (usarSaldo && saldo !== null && saldo > 0) {
+      const rs = await aplicarSaldoACompra(compraId);
+      if (!rs.ok) {
+        setTrabajando(false);
+        mostrar({ texto: rs.mensaje, variante: 'error' });
+        return;
+      }
+      setSaldo(rs.data.saldoRestante);
+      if (rs.data.modo === 'pagado') {
+        /* El saldo cubrió todo: **no se llama al riel**. No hay tarjeta que
+           tocar ni monto que cobrar — la compra ya está paga. */
+        setTrabajando(false);
+        setFase('exito');
+        return;
+      }
+      /* `mixto` y `sin_saldo`: sigue el riel, que lee `saldo_aplicado` y cobra
+         el resto. */
+    } else {
+      /* 🔴 EL CHECK APAGADO TIENE QUE SOLTAR, NO SÓLO NO PEDIR.
+         *No es simetría estética: es que una reserva puede haber quedado viva
+         de un intento anterior* —se aplicó el saldo y el paso siguiente falló—,
+         y en ese estado el riel cobraría MENOS de lo que esta pantalla está
+         mostrando, sin que nada avise. **Un cobro de menos no tiene síntoma
+         para quien paga**, que es lo que lo vuelve caro.
+         Cuesta un viaje por pago; si no hay nada reservado devuelve
+         `sin_saldo` y no pasa nada. */
+      const rs = await aplicarSaldoACompra(compraId, 0);
+      if (rs.ok) setSaldo(rs.data.saldoRestante);
+    }
+
     // ① Preparar la compra. NO cobra: aparta y congela (lápida vigente).
     const r = await crearIntentoPago(compraId);
     if (!r.ok) {
@@ -859,67 +909,43 @@ export default function DespensaCheckout() {
             exigir que alcance. *Quien lea esto después de la firma podría
             leerla como un residuo del diseño viejo y borrarla; queda escrito
             para que no.* El contrato lo está midiendo A. */}
-        {/* ═══ EL SALDO ES PAGO MIXTO — firma del founder, 8-sep ═══════════
-            ⏪ **Acá el botón exigía `saldo >= compraTotal`**, y esa condición
-            murió con la firma: *si no alcanza, se aplica lo que hay y el resto
-            va por el riel.* Mi corrección anterior —decir el saldo aunque no
-            alcance— iba bien **y se quedaba corta**: el problema no era
-            mostrarlo, era que no se pudiera usar.
+        {/* ═══ EL SALDO ES UN CHECK, NO UN BOTÓN — firma del founder ═══════
+            ⏪ **Acá había un botón «usar saldo» que competía con el de pagar y,
+            al tocarlo, COMPROMETÍA el saldo antes de que se pagara nada.** Si
+            después no se pagaba, la familia quedaba con plata reservada en una
+            compra que nunca ocurrió. *A construyó el reloj que suelta esas
+            reservas, pero la cura de raíz es no reservar hasta que se pague.*
 
-            🔴 **Y la línea DICE DE DÓNDE SALE CADA PESO antes de confirmar.**
-            No es un detalle de copy: *una familia que ve un total y aprieta
-            pagar tiene derecho a saber cuánto salió de su saldo y cuánto de su
-            tarjeta* — y a decidir con eso a la vista, no después.
+            🔴 **El check no ejecuta nada.** Enciende una intención: el total
+            del riel baja en pantalla y se ve de dónde sale cada peso. **El
+            saldo se aplica en el momento de pagar, dentro del mismo acto.**
 
-            ⚠️ **`aplicarSaldoACompra` NO cobra el resto**: aplica el saldo y
-            deja la compra lista para que el riel cobre la diferencia
-            (`pagos-cobro` lee `compras.saldo_aplicado`). Por eso el mixto
-            **sigue por el botón de siempre**, y no hay dos caminos de pago
-            compitiendo. */}
+            Y **un solo botón de pago, siempre** — dos sólidos compitiendo es lo
+            que G-12 ya corrigió en esta pantalla.
+
+            Parcial o total **sin que la familia elija**: si cubre todo, cubre
+            todo; si no, cubre lo que puede. *Preguntarle cuánto de su propio
+            saldo quiere usar es darle una decisión que no tiene por qué tomar.* */}
         {saldo !== null && saldo > 0 && compraTotal !== null ? (
-          <Texto variante="apoyo">
-            {saldo >= compraTotal
-              ? t('despensa.saldoCubreTodo', { saldo: dinero(compraTotal) ?? '' })
-              : t('despensa.saldoMixto', {
-                  saldo: dinero(saldo) ?? '',
-                  resto: dinero(compraTotal - saldo) ?? '',
-                })}
-          </Texto>
-        ) : null}
-        {saldo !== null && saldo > 0 && compraTotal !== null ? (
-          <Boton
-            variante="apoyada"
-            bloque
-            etiqueta={
-              saldo >= compraTotal
-                ? t('despensa.pagarConSaldo', { saldo: dinero(compraTotal) ?? '' })
-                : t('despensa.usarSaldo', { saldo: dinero(saldo) ?? '' })
-            }
-            cargando={trabajando}
-            onPress={() => {
-              if (compraId === null || trabajando) return;
-              setTrabajando(true);
-              void aplicarSaldoACompra(compraId).then((r) => {
-                setTrabajando(false);
-                if (!r.ok) {
-                  mostrar({ variante: 'error', texto: r.mensaje });
-                  return;
-                }
-                setSaldo(r.data.saldoRestante);
-                if (r.data.modo === 'pagado') {
-                  /* Cubrió todo: no hay nada que cobrar. `duplicado` —ya estaba
-                     pagada— no se celebra dos veces ni se trata como error. */
-                  setFase('exito');
-                  return;
-                }
-                /* 🔴 **MIXTO Y `sin_saldo` NO TERMINAN ACÁ**: el saldo quedó
-                   aplicado y **el resto lo cobra el riel de siempre**. Se sigue
-                   por `pagar()`, que es el camino que ya existe — *dos caminos
-                   de cobro compitiendo es lo que este contrato vino a evitar.* */
-                void pagar();
-              });
-            }}
-          />
+          <View style={{ gap: spacing[2] }}>
+            <Casilla
+              marcada={usarSaldo}
+              onCambio={setUsarSaldo}
+              etiquetaAccesible={t('despensa.usarMiSaldo', { saldo: dinero(saldo) ?? '' })}
+            >
+              <Texto variante="cuerpo">{t('despensa.usarMiSaldo', { saldo: dinero(saldo) ?? '' })}</Texto>
+            </Casilla>
+            {usarSaldo ? (
+              <Texto variante="apoyo">
+                {saldo >= compraTotal
+                  ? t('despensa.saldoCubreTodo', { saldo: dinero(compraTotal) ?? '' })
+                  : t('despensa.saldoMixto', {
+                      saldo: dinero(saldo) ?? '',
+                      resto: dinero(compraTotal - saldo) ?? '',
+                    })}
+              </Texto>
+            ) : null}
+          </View>
         ) : null}
         <BotonPagar
           medio={medio}
