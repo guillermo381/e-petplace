@@ -339,23 +339,79 @@ function _sinComentariosSql(src) {
 const RE_TEXTO_JSX = />([^<>{}]*[a-záéíóúñü][^<>{}]*)</gi
 
 /**
- * Las cadenas candidatas de UNA línea. Las entrecomilladas siempre; el texto
- * suelto de JSX sólo cuando el consumidor lo pide (`.tsx`).
+ * ⚠️ EL TECHO DEL NODO, DECLARADO (`L-501`). Un nodo de texto que abarque más
+ * de esto **no se mira**: a esa altura ya no es una frase, es el regex
+ * caminando entre dos etiquetas lejanas. *Se sube a la vista, jamás se busca un
+ * delimitador mejor.*
+ */
+const TECHO_NODO_JSX = 6
+
+/** Blanquea comentarios JS **sin mover renglones** — los números de línea son
+ *  parte del resultado, así que no se pueden perder. */
+function _blanquearComentariosJs(src) {
+  return src
+    .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+    .replace(/\/\/[^\n]*/g, (m) => ' '.repeat(m.length))
+}
+
+/**
+ * 🔴 ⑰ · LOS NODOS DE TEXTO **MULTILÍNEA** — S114-B (lo halló A verificando).
+ *
+ * La primera versión de ⑯ extraía el JSX **línea por línea**, así que sólo veía
+ * el texto INLINE —`<div>Hola</div>`, con sus dos etiquetas en el mismo
+ * renglón—. **Un nodo de texto en su propia línea era invisible:**
+ *
+ * ```
+ *   41  <p style={…}>
+ *   42      Primero lo que te pidieron a vos.     ← nunca entró al matcher
+ *   43  </p>
+ * ```
+ *
+ * **Es EXACTAMENTE la clase que ⑯ acababa de cerrar, un piso más abajo:** antes
+ * era *entrecomillado vs JSX*; ahora *JSX inline vs JSX en su propia línea*.
+ * *Cerrar un ciego no cierra su familia — y el que queda se parece tanto al
+ * curado que uno lo da por cubierto.*
+ *
+ * ⇒ el barrido pasa a ser **sobre el archivo entero**, con la línea calculada
+ * del índice. El regex no puede cruzar `<`, `>`, `{` ni `}`, así que sigue sin
+ * poder salirse de su nodo; lo que gana es poder cruzar un salto de renglón.
+ *
+ * @returns {Map<number, string[]>} línea → textos que empiezan ahí
+ */
+function _nodosJsx(src) {
+  const limpio = _blanquearComentariosJs(src)
+  const por = new Map()
+  for (const m of limpio.matchAll(RE_TEXTO_JSX)) {
+    const bruto = m[1]
+    const t = bruto.trim()
+    /* Nada de sintaxis adentro: si tiene `=`, `;`, paréntesis, backtick o `$`,
+       no es un nodo de texto — es una comparación o una expresión partida. */
+    if (t.length < 4 || /[=;`$\\()]/.test(t)) continue
+    /* El techo, declarado arriba. */
+    if ((bruto.match(/\n/g) ?? []).length + 1 > TECHO_NODO_JSX) continue
+    const desde = m.index + 1
+    const n = (limpio.slice(0, desde).match(/\n/g) ?? []).length + 1
+    /* La línea que se reporta es la del PRIMER carácter del texto, no la del
+       `>`: en un nodo multilínea el `>` está en el renglón de la etiqueta y lo
+       que uno va a ir a leer es la frase. */
+    const antesDelTexto = bruto.length - bruto.replace(/^\s+/, '').length
+    const nTexto = n + (bruto.slice(0, antesDelTexto).match(/\n/g) ?? []).length
+    por.set(nTexto, [...(por.get(nTexto) ?? []), t])
+  }
+  return por
+}
+
+/**
+ * Las cadenas candidatas de UNA línea: las entrecomilladas de esa línea, más
+ * los nodos de JSX que **empiezan** ahí (ya extraídos del archivo entero).
  * @returns {{v:string, deJsx:boolean}[]}
  */
-function _candidatas(linea, jsx) {
+function _candidatas(linea, jsxDeLaLinea) {
   const out = []
   for (const m of linea.matchAll(/'([^'\\]{4,})'|"([^"\\]{4,})"/g)) {
     out.push({ v: m[1] ?? m[2], deJsx: false })
   }
-  if (!jsx) return out
-  for (const m of linea.matchAll(RE_TEXTO_JSX)) {
-    const t = m[1].trim()
-    /* Nada de sintaxis adentro: si tiene `=`, `;`, backtick o `$`, no es un
-       nodo de texto — es una comparación o una interpolación partida. */
-    if (t.length < 4 || /[=;`$\\]/.test(t)) continue
-    out.push({ v: t, deJsx: true })
-  }
+  for (const v of jsxDeLaLinea) out.push({ v, deJsx: true })
   return out
 }
 
@@ -371,6 +427,9 @@ function _arrancaPalabra(b, x) {
 
 export function hitsDeVoseo(src, { lenguaje = 'js', jsx = false } = {}) {
   const lineas = (lenguaje === 'sql' ? _sinComentariosSql(src) : src).split('\n');
+  /* ⑰ · los nodos de JSX se extraen del archivo ENTERO (multilínea) y se
+     reparten por la línea donde empieza su texto. Ver `_nodosJsx`. */
+  const nodos = jsx ? _nodosJsx(src) : new Map();
   let enBloque = false;
   const hits = [];
 
@@ -387,7 +446,7 @@ export function hitsDeVoseo(src, { lenguaje = 'js', jsx = false } = {}) {
        comería media línea. Ver `_sinComentariosSql`. */
     if (lenguaje !== 'sql') l = l.replace(/\/\/.*$/, '');
 
-    for (const { v, deJsx } of _candidatas(l, jsx)) {
+    for (const { v, deJsx } of _candidatas(l, nodos.get(i + 1) ?? [])) {
       /* ⑩ — UN IDENTIFICADOR NO ES UNA FRASE. `no_sos_del_equipo` es un código
          de error tipado, no voz: cambiarlo rompe el matching y no le habla a
          nadie. Se descarta por FORMA (snake_case puro), que es inequívoco —
