@@ -64,7 +64,7 @@ import {
   type ResultadoBusqueda,
   type TurnoCoach,
 } from '@epetplace/api';
-import { fechaCortaMono, type IdiomaSoportado } from '@epetplace/i18n';
+import { fechaCortaMono, horaCortaDeMensaje, type IdiomaSoportado } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
 import { esMemorial } from '@/lib/memorial';
 import { useEstadoVida } from '@/lib/postventa/useEstadoVida';
@@ -84,8 +84,15 @@ type Linea = {
   deDondeVoz?: string;
 };
 
-const hora = () =>
-  new Date().toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit' });
+/* 🔴 **LA HORA LA DICE EL RIEL, Y ACÁ ESTABA REIMPLEMENTADA MAL.**
+   ⏪ Decía `toLocaleTimeString('es-EC', …)`: **idioma clavado** —la app en
+   inglés mostraba «9:42 p. m.»— y **formato de 12 horas con sufijo**, que es
+   exactamente lo que `horaCortaDeMensaje` descartó por medición (§2.3 pide
+   «14:32»; el sufijo ocupa el doble de ancho bajo cada burbuja y no se parece
+   a ninguna otra hora de la casa).
+   *El vecino ya lo tenía resuelto —la pantalla del caso del prestador lo usa—
+   y esta pantalla escribió el suyo.* Se copia al vecino. */
+const hora = (idioma: IdiomaSoportado) => horaCortaDeMensaje(new Date().toISOString(), idioma);
 
 export default function Nexo() {
   const { t, idioma } = useTraduccion();
@@ -179,11 +186,19 @@ export default function Nexo() {
       setContexto(c.ok ? c.data : 'error');
       if (h.ok) {
         setLineas(
-          h.data.map((x: TurnoCoach) => ({
-            id: `s${x.turno}`,
+          h.data.map((x: TurnoCoach, i: number) => ({
+            /* 🔴 **`turno` NO ES ÚNICO, y el error salía en el aparato**:
+               «Encountered two children with the same key `s3`». La pregunta y
+               la respuesta **comparten número de turno**, así que cada turno
+               producía dos filas con la misma clave. *React puede duplicar u
+               omitir hijos con claves repetidas — el defecto no es el warning:
+               es que un mensaje puede desaparecer del hilo.*
+               El índice alcanza para que sea única; el turno y el rol quedan
+               para que la clave siga diciendo de qué fila es. */
+            id: `s${i}-${x.turno}-${x.rol}`,
             rol: x.rol,
             texto: x.texto,
-            hora: new Date(x.creado_en).toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit' }),
+            hora: horaCortaDeMensaje(x.creado_en, idioma),
           })),
         );
       }
@@ -200,7 +215,7 @@ export default function Nexo() {
       if (mascotaId === undefined || q === '' || pensando) return;
       setTexto('');
       setGrupos(null);
-      const mio: Linea = { id: `l${Date.now()}`, rol: 'familia', texto: q, hora: hora() };
+      const mio: Linea = { id: `l${Date.now()}`, rol: 'familia', texto: q, hora: hora(idioma) };
       setLineas((xs) => [...xs, mio]);
       setPensando(true);
 
@@ -241,7 +256,7 @@ export default function Nexo() {
           id: `n${Date.now()}`,
           rol: 'nexo',
           texto: dijo,
-          hora: hora(),
+          hora: hora(idioma),
           /* 🔴 El aviso de IA lo decide **el servidor** (`aviso_ia`), no la
              pantalla: si lo contara la app, cambiar de dispositivo lo volvería
              a mostrar o —peor— dejaría de mostrarlo cuando corresponde. */
@@ -255,7 +270,7 @@ export default function Nexo() {
       ]);
       void guardarTurnoCoach(mascotaId, 'nexo', dijo);
     },
-    [mascotaId, pensando, aviso, router, t],
+    [mascotaId, pensando, aviso, router, t, idioma],
   );
 
   if (contexto === 'error') {
@@ -352,7 +367,7 @@ export default function Nexo() {
           {lineas.length === 0 && grupos === null && typeof contexto === 'object' ? (
             <PresentacionNexo
               autor={t('nexo.autor')}
-              hora={hora()}
+              hora={hora(idioma)}
               burbujas={[
                 t('nexo.presenta1', { nombre: nombreVivo ?? '' }),
                 t('nexo.presenta2', { nombre: nombreVivo ?? '' }),

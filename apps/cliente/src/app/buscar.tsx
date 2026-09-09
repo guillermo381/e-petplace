@@ -141,6 +141,13 @@ export default function PantallaBuscar() {
         /* Al arrastrar la lista el teclado se va: *la familia ya escribió y
            ahora está mirando.* */
         keyboardDismissMode="on-drag"
+        /* 🔴 **Y AL TOCAR, EL TOQUE LLEGA.** Medido en aparato: con el teclado
+           arriba, el primer toque sobre «Preguntarle a Nexo» **sólo cerraba el
+           teclado** y se lo tragaba — había que tocar dos veces. *Un control
+           que necesita dos toques se lee como roto en el primero*, y es
+           justamente el chip de la salida que esta pantalla acaba de curar.
+           `"handled"` deja pasar el toque a quien lo maneja. */
+        keyboardShouldPersistTaps="handled"
       >
         {busqueda.termino.trim().length >= 2 ? (
           <ResultadosBusqueda
