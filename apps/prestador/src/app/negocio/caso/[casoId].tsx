@@ -189,7 +189,7 @@ export default function CasoDelPrestador() {
           texto:
             r.codigo === 'monto_requerido_en_parcial'
               ? t('postventa.parcialNecesitaMonto')
-              : r.codigo === 'razon_requerida_en_parcial'
+              : r.codigo === 'razon_requerida'
                 ? t('postventa.parcialNecesitaRazon')
                 : r.codigo === 'monto_supera_total'
                   ? /* 🔴 **EL NÚMERO DEL REBOTE GANA AL DE LA PANTALLA.** Es la
@@ -458,15 +458,17 @@ export default function CasoDelPrestador() {
               cargando={obrando}
               /* El botón se apaga **con lo que se puede saber acá**: que haya un
                  número usable y una razón escrita. El tope y la razón vacía los
-                 valida el motor igual — *el `disabled` es cortesía, la defensa
-                 está del otro lado* (`monto_supera_total`,
-                 `razon_requerida_en_parcial`). */
-              /* 🔴 **La razón es obligatoria en las DOS**, y en `sin_devolucion`
-                 el motor **todavía no la exige** (su código es
-                 `razon_requerida_en_parcial`). ⇒ acá el guard es lo único que
-                 hay, y **se declara como lo que es: cortesía, no defensa** —
-                 pedido a A por buzón. *Un guard de pantalla que se cree defensa
-                 es peor que ninguno: nadie va a poner la de verdad.* */
+                 valida el motor igual — *el `disabled` no es la defensa: la
+                 defensa está del otro lado* (`monto_supera_total`,
+                 `razon_requerida`).
+                 ✅ **La razón es obligatoria en las DOS, y ahora del lado del
+                 motor también.** ⏪ Acá decía que este guard era *«cortesía, no
+                 defensa»* porque el código se llamaba `razon_requerida_en_parcial`
+                 y no cubría `sin_devolucion`. **A lo renombró a `razon_requerida`
+                 y lo extendió** (`b7fc0beb`), así que la defensa existe y esto
+                 volvió a ser lo que debe: que el botón no deje tocar algo que
+                 va a rebotar. *La nota se retira en el mismo acto en que deja
+                 de ser cierta* (Ley 37). */
               deshabilitado={(modo === 'parcial' && montoNumero === null) || razon.trim() === ''}
               /* 🔴 **Y DICE POR QUÉ ESTÁ APAGADO.** Es la lección de la jornada:
                  tres controles distintos devolvían silencio, y el silencio se
