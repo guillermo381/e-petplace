@@ -53,7 +53,21 @@ import { vozServicio } from '@/lib/voz-servicio';
 
 type Fase<T> = T | 'cargando' | 'error';
 
-/** Las etapas en las que el caso ya terminó. Ordenan la lista (§: abiertos arriba). */
+/** Las etapas en las que el caso ya terminó. Ordenan la lista (§: abiertos arriba).
+ *
+ * 🔴 **SU CHIP SE LLAMABA «Cerrados», Y ÉSE ERA EL DEFECTO** que el founder
+ * reportó como *«el caso cerrado se ve Resuelto»*.
+ *
+ * Medido caminando, sobre un caso real: la pantalla del caso **dibujaba bien**
+ * —fila en «Resuelto», «Cerrado» apagado, porque su `etapa` ES `resuelto`—.
+ * Lo que mentía era **el chip que lo agrupaba**: este conjunto tiene CINCO
+ * etapas y el rótulo nombraba a UNA de ellas. *Un rótulo que nombra a un
+ * miembro del conjunto hace que los otros cuatro se lean como un error* — y
+ * eso es exactamente lo que pasó: un resuelto bajo «Cerrados» parece un caso
+ * cerrado mal dibujado.
+ *
+ * ⇒ el chip pasa a **«Terminados»**, que es lo que el conjunto es. *La cura no
+ * era el filtro ni la pantalla: era el nombre.* */
 const TERMINADAS: ReadonlySet<string> = new Set([
   'resuelto', 'cerrado', 'resuelto_entre_partes', 'retirado', 'sin_lugar',
 ]);

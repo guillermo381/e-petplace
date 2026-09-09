@@ -655,52 +655,75 @@ export default function CitasDeMascota() {
               <PieRevelar n={otras.length} revelado={desplegado} onPress={() => setDesplegado((d) => !d)} />
             ) : null}
 
-            {/* ═══ ① LO QUE YA PASÓ — la sección que faltaba ════════════════
-                Va DESPUÉS de lo que viene, y ése es el orden correcto: la
-                familia entra a esta pantalla por su próxima cita. *Lo pasado
-                se lee después, no compite con lo que hay que hacer.*
-
-                🔴 **Y no es sólo para reclamar.** Acá vive el parte, las
-                fotos y el acta de un servicio que ocurrió — el reclamo es UNO
-                de los motivos y el menos frecuente. Que no existiera es lo que
-                el founder encontró caminando. */}
-            {fasePasadas === 'error' ? (
-              /* Ley 13: el error del historial NO se disfraza de «no hay
-                 historial», y no se lleva puesto lo de arriba. */
-              <EstadoVacio titulo={t('citasMascota.historialNoSePudo')} registro="seccion" />
-            ) : pasadas.length > 0 ? (
-              <View style={{ gap: spacing[3] }}>
-                <Texto variante="seccion">{t('citasMascota.yaPasaron')}</Texto>
-                {pasadas.map((c) => (
-                  <View key={c.cita_id}>{detalleHero(c)}</View>
-                ))}
-                {/* El paginado es por CURSOR y lo dice el motor: `cursor:
-                    null` = no hay más, así que el pie DESAPARECE en vez de
-                    ofrecer una carga que no trae nada. */}
-                {cursorPasadas !== null ? (
-                  <Boton
-                    variante="apoyada"
-                    etiqueta={t('citasMascota.verMasPasadas')}
-                    cargando={trayendoMas}
-                    onPress={() => {
-                      if (typeof mascotaId !== 'string') return;
-                      setTrayendoMas(true);
-                      void obtenerHistorialCitasMascota(mascotaId, { cursor: cursorPasadas }).then((r) => {
-                        setTrayendoMas(false);
-                        if (!r.ok) return;
-                        /* Se AGREGA al final: el motor entrega de más nuevo a
-                           más viejo, así que la página siguiente es más
-                           vieja y va abajo. */
-                        setPasadas((prev) => [...prev, ...r.data.citas]);
-                        setCursorPasadas(r.data.cursor);
-                      });
-                    }}
-                  />
-                ) : null}
-              </View>
-            ) : null}
           </>
         )}
+
+        {/* ═══ 🔴 EL HISTORIAL VIVÍA DENTRO DE LA RAMA DEL HERO ═══════════════
+            **Medido con el discriminador que sirvió el founder** —«con Thor
+            sólo futuras, con Zeus todas»— y los conteos que trajo A:
+
+            · **Thor: CERO citas activas futuras** (0 confirmadas, 0 pendientes,
+              0 en curso) y **154 pasadas**.
+            · **Zeus: 5 confirmadas futuras** y 58 pasadas.
+
+            Con Thor, `hero === undefined` ⇒ la pantalla caía en el vacío
+            honesto **y el historial —que estaba en la rama `else`— no se
+            dibujaba nunca**. Con Zeus había hero ⇒ se dibujaban las dos.
+
+            *O sea: la sección que se construyó para las 265 citas pasadas
+            quedaba escondida exactamente en el caso donde es LO ÚNICO que hay.*
+            Y el síntoma se lee al revés de lo que es —parece que a Thor le
+            faltan las pasadas por un filtro— cuando lo que pasa es que **la
+            pantalla entera se cortó antes de llegar a ellas**.
+
+            ⇒ el historial sale de la rama y se dibuja **siempre que la carga
+            terminó**, con o sin citas por venir. La voz de arriba ya lo
+            permitía sin tocarla: dice *«Sin citas por venir»*, que sigue siendo
+            verdad con el historial debajo. */}
+          {/* ═══ ① LO QUE YA PASÓ — la sección que faltaba ════════════════
+              Va DESPUÉS de lo que viene, y ése es el orden correcto: la
+              familia entra a esta pantalla por su próxima cita. *Lo pasado
+              se lee después, no compite con lo que hay que hacer.*
+
+              🔴 **Y no es sólo para reclamar.** Acá vive el parte, las
+              fotos y el acta de un servicio que ocurrió — el reclamo es UNO
+              de los motivos y el menos frecuente. Que no existiera es lo que
+              el founder encontró caminando. */}
+          {fasePasadas === 'error' ? (
+            /* Ley 13: el error del historial NO se disfraza de «no hay
+               historial», y no se lleva puesto lo de arriba. */
+            <EstadoVacio titulo={t('citasMascota.historialNoSePudo')} registro="seccion" />
+          ) : pasadas.length > 0 ? (
+            <View style={{ gap: spacing[3] }}>
+              <Texto variante="seccion">{t('citasMascota.yaPasaron')}</Texto>
+              {pasadas.map((c) => (
+                <View key={c.cita_id}>{detalleHero(c)}</View>
+              ))}
+              {/* El paginado es por CURSOR y lo dice el motor: `cursor:
+                  null` = no hay más, así que el pie DESAPARECE en vez de
+                  ofrecer una carga que no trae nada. */}
+              {cursorPasadas !== null ? (
+                <Boton
+                  variante="apoyada"
+                  etiqueta={t('citasMascota.verMasPasadas')}
+                  cargando={trayendoMas}
+                  onPress={() => {
+                    if (typeof mascotaId !== 'string') return;
+                    setTrayendoMas(true);
+                    void obtenerHistorialCitasMascota(mascotaId, { cursor: cursorPasadas }).then((r) => {
+                      setTrayendoMas(false);
+                      if (!r.ok) return;
+                      /* Se AGREGA al final: el motor entrega de más nuevo a
+                         más viejo, así que la página siguiente es más
+                         vieja y va abajo. */
+                      setPasadas((prev) => [...prev, ...r.data.citas]);
+                      setCursorPasadas(r.data.cursor);
+                    });
+                  }}
+                />
+              ) : null}
+            </View>
+          ) : null}
       </ScrollView>
     </SafeAreaView>
   );
