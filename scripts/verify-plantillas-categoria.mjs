@@ -261,6 +261,13 @@ if (!waba.id) {
 }
 console.log(`\n🟢 VERDE · las ${enCuenta.length} plantillas del WABA ${waba.id} están en ${ESPERADA}.`);
 console.log('   ⚠️ QUEDA SIN MEDIR, y es pedido a A: que `META_WABA_ID` y `META_PHONE_NUMBER_ID`');
-console.log('      sean el MISMO par. Exige `/{waba}/phone_numbers` con el token, y desde');
-console.log('      afuera de la edge no se puede. Con dos homónimas eso no se supone.');
+console.log('      sean el MISMO par. Con dos WABA homónimas eso no se supone.');
+console.log('      🔴 CORREGIDO 8-sep: esta nota decía «desde afuera de la edge no se puede»,');
+console.log('      y era falso — la edge YA consulta `/{waba}/phone_numbers` y devuelve las');
+console.log('      dos mitades. Lo que pasa es otra cosa: `waba_alcanzables` vuelve VACÍO y');
+console.log('      `waba_configurado_alcanzable` dice `false` **con token válido, ambos');
+console.log('      permisos y `http_plantillas: 200` trayendo las 10 de ese mismo WABA**.');
+console.log('      ⇒ ese `false` es del INSTRUMENTO, no del objeto: si el WABA no fuera');
+console.log('      alcanzable, esa llamada no habría respondido. Cruzar contra una lista');
+console.log('      vacía da «no coincide» y se lee como una cuenta mal apuntada.');
 console.log('   (Vale para AHORA: la deriva de Meta es silenciosa — se vuelve a correr.)');
