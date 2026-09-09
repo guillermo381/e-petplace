@@ -31042,12 +31042,19 @@ ciego a la app del admin entera**, y su 0 se lee como salud. Es la clase de
 `L-459`/`L-490`: *un instrumento que da 0 sobre algo que no puede ver es peor que
 no tener instrumento, porque el 0 ya está publicado.*
 
-**Estado:** F curó a mano los 5 voseos que había — el censo da 0 **y** el barrido
-manual también, así que **hoy no hay daño**, sólo un instrumento ciego. **Dueño: A**
-(`scripts/` es territorio de conducción). **Disparo de cura:** que el censo aprenda
-a leer nodos de texto de JSX (no sólo literales entrecomillados), **o** que el
-admin gane i18n y su texto vuelva a vivir en literales. Hasta entonces, el 0 del
-censo sobre el admin **no dice nada** y la vigilancia de voz de esa app es manual.
+**Estado (enmendado S114 con dato): el instrumento LO CURÓ B** en `pista/s114-b-1.0`
+(`3cf8d6e6`) — `censo-voseo` gana lectura de JSX (extrae el texto entre etiquetas y
+lo pasa por el mismo matcher) y R66 gana `apps/admin` en su corpus. La cura vive en
+la punta de B, **no en main todavía**. Y al ver por primera vez, R66 **revela DOS
+voseos REALES** que el instrumento ciego no podía ver y que **YA están en main**
+(entraron con el merge de F, `apps/admin`): `Casos.tsx` «lo que te pidieron a vos» y
+`HojaCaso.tsx:245` «Es información para vos». **La cura de esos dos es de F, SIN
+baseline** — un baseline ahí congelaría voseo en la única app sin diccionario que lo
+contenga. 🔴 **Consecuencia de orden de merge (dueño A, conducción):** B NO entra a
+main verde hasta que la cura de F de los dos voseos esté en main primero (o con ella).
+Mergear B antes pone `verify:diseno` en rojo. **Cierra cuando** la cura de F + el
+instrumento de B lleguen a main. Es la prueba viva de esta misma ficha: el 0 del
+censo se leía como salud y escondía dos voseos reales.
 
 ---
 
