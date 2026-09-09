@@ -846,7 +846,19 @@ export default function DespensaCheckout() {
               · **el botón se OFRECE sólo si alcanza.**
 
             Y cuando no alcanza, la línea dice cuánto falta — el mismo dato que
-            le pedí a A para el rebote, aplicado antes de que lo intente. */}
+            le pedí a A para el rebote, aplicado antes de que lo intente.
+
+            ⏳ **ESA LÍNEA NO ES UN CONSUELO: ES LA ANTESALA DEL PAGO MIXTO.**
+            Firma del founder (8-sep): *si el saldo no alcanza, se usa lo que
+            hay y el resto va por el riel.* Mi corrección —decir el saldo
+            aunque no alcance— iba en la dirección correcta **y se quedaba
+            corta**: el problema no era mostrarlo, era que no se pudiera usar.
+
+            🔴 **Por eso esta línea NO se retira cuando llegue el mixto**: pasa
+            a ser el paso previo —«tenés esto, falta esto»— y el botón deja de
+            exigir que alcance. *Quien lea esto después de la firma podría
+            leerla como un residuo del diseño viejo y borrarla; queda escrito
+            para que no.* El contrato lo está midiendo A. */}
         {saldo !== null && saldo > 0 && compraTotal !== null && saldo < compraTotal ? (
           <Texto variante="apoyo">
             {t('despensa.saldoNoAlcanzaAun', {
