@@ -87,6 +87,35 @@ type ConsultaCruda = {
 } & PromiseLike<{ data: FilaCasoCruda[] | null; error: unknown; count?: number | null }>;
 
 /** `.from()` sobre una tabla que los tipos generados todavía no conocen. */
+/**
+ * 🔴 LLAMAR UNA RPC SIN PERDER EL `this` — y no es estilo: es el defecto que
+ * colgó la Hoja del caso en producción.
+ *
+ * Lo que había en cada wrapper era **extraer el método del cliente**:
+ *
+ * ```ts
+ * const rpc = getClient().rpc as unknown as (…);   // ← lo DESLIGA de su objeto
+ * await rpc('leer_caso', {…});                      // ← this === undefined
+ * ```
+ *
+ * `SupabaseClient.rpc()` usa `this` adentro, así que desligado lanza
+ * **`TypeError: Cannot read properties of undefined (reading 'rest')`** — y el
+ * error aparece **dentro de la librería minificada**, a varios cuadros de donde
+ * está la causa. *Nada en el tipo lo advierte: el cast a función es válido y el
+ * typecheck da 0.*
+ *
+ * Acá el cliente se resuelve y se llama **en la misma expresión**, así que el
+ * método nunca viaja solo.
+ */
+async function llamarRpc(
+  fn: string, args: Record<string, unknown>,
+): Promise<{ data: unknown; error: { message?: string } | null }> {
+  const c = getClient() as unknown as {
+    rpc: (f: string, a: Record<string, unknown>) => Promise<{ data: unknown; error: { message?: string } | null }>;
+  };
+  return c.rpc(fn, args);
+}
+
 function tablaCasos(): ConsultaCruda {
   return (getClient().from as unknown as (t: string) => ConsultaCruda)('casos_postventa');
 }
@@ -242,10 +271,7 @@ export interface HojaDelCaso {
 export async function obtenerHojaDelCaso(
   casoId: string,
 ): Promise<ResultadoWrapper<HojaDelCaso, CodigoErrorPostventa>> {
-  const c = getClient();
-  const rpc = c.rpc as unknown as (
-    fn: string, args: Record<string, unknown>,
-  ) => Promise<{ data: unknown; error: { message?: string } | null }>;
+  const rpc = llamarRpc;
 
   // ① El caso. Su gate de tres asientos vive DENTRO de la función.
   const { data: crudo, error: eCaso } = await rpc('leer_caso', { p_caso_id: casoId });
@@ -440,9 +466,7 @@ export type AlcanceResolucion = 'total' | 'parcial' | 'sin_devolucion';
 export async function tomarCaso(
   casoId: string,
 ): Promise<ResultadoWrapper<{ etapa: string | null }, CodigoErrorResolver>> {
-  const rpc = getClient().rpc as unknown as (
-    fn: string, args: Record<string, unknown>,
-  ) => Promise<{ data: unknown; error: { message?: string } | null }>;
+  const rpc = llamarRpc;
 
   const { data, error } = await rpc('caso_pedir_casa', { p_caso_id: casoId });
   if (error) {
@@ -479,9 +503,7 @@ export async function resolverCaso(params: {
   monto?: number | null;
   motivo?: string | null;
 }): Promise<ResultadoWrapper<{ etapa: string | null }, CodigoErrorResolver>> {
-  const rpc = getClient().rpc as unknown as (
-    fn: string, args: Record<string, unknown>,
-  ) => Promise<{ data: unknown; error: { message?: string } | null }>;
+  const rpc = llamarRpc;
 
   const { data, error } = await rpc('caso_resolver', {
     p_caso_id: params.casoId,
@@ -513,9 +535,7 @@ export async function resolverCaso(params: {
 export async function responderEnCaso(
   casoId: string, texto: string,
 ): Promise<ResultadoWrapper<true, CodigoErrorResolver>> {
-  const rpc = getClient().rpc as unknown as (
-    fn: string, args: Record<string, unknown>,
-  ) => Promise<{ data: unknown; error: { message?: string } | null }>;
+  const rpc = llamarRpc;
 
   const { data, error } = await rpc('caso_responder', { p_caso_id: casoId, p_texto: texto });
   if (error) return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES_RES.error_desconocido };

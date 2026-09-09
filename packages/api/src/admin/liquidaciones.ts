@@ -319,10 +319,14 @@ export async function generarLiquidacion(params: {
      pedido por nombre en `docs/loop/S114-F-PEDIDOS-A.md`.
      *Se deja anotado acá y no sólo en el pedido: quien lea este archivo dentro
      de dos sesiones tiene que poder ver por qué hay un cast y cuándo se va.* */
-  const rpc = getClient().rpc as unknown as (
-    fn: string,
-    args: Record<string, unknown>,
-  ) => Promise<{ data: unknown; error: { message?: string } | null }>;
+  /* 🔴 En la MISMA expresión, sin extraer el método: `SupabaseClient.rpc()`
+     usa `this` adentro, y desligado lanza «Cannot read properties of undefined
+     (reading 'rest')» dentro de la librería minificada. Colgó la Hoja del caso
+     en producción; acá estaba la misma forma esperando su turno. */
+  const c = getClient() as unknown as {
+    rpc: (f: string, a: Record<string, unknown>) => Promise<{ data: unknown; error: { message?: string } | null }>;
+  };
+  const rpc = (f: string, a: Record<string, unknown>) => c.rpc(f, a);
 
   const { data, error } = await rpc('admin_generar_liquidacion', {
     p_cuenta_comercial_id: params.cuentaComercialId,
