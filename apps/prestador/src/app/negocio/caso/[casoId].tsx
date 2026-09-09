@@ -83,7 +83,7 @@ export default function CasoDelPrestador() {
      elegir el alcance, y —si es parcial— decir **cuánto** y **por qué**.
      `null` = todavía no eligió; entrar al segundo momento es una decisión y no
      un formulario que estaba ahí desde el principio. */
-  const [modo, setModo] = useState<null | 'parcial'>(null);
+  const [modo, setModo] = useState<null | 'parcial' | 'sin_devolucion'>(null);
   const [montoTexto, setMontoTexto] = useState('');
   const [razon, setRazon] = useState('');
   const [obrando, setObrando] = useState(false);
@@ -382,9 +382,27 @@ export default function CasoDelPrestador() {
               bloque
               onPress={() => setModo('parcial')}
             />
+            {/* ⭐ **LA TERCERA, firmada el 9-sep.** *«Reconozco que pasó y no
+                devuelvo plata» es una resolución legítima* —el paseador llegó
+                tarde, lo reconoce, explica y no compensa—. Lo que la firma
+                agrega es que **acá la razón importa más que en ninguna**: un
+                cero sin porqué es lo que más se parece a que nadie miró el
+                caso. Por eso también abre en vez de resolver.
+                ☠️ Y con ésta muere «dar saldo» del dictado original: **el
+                prestador decide CUÁNTO y la familia decide DÓNDE** — ofrecerle
+                saldo desde acá le quitaría a la familia la elección que la
+                letra le garantiza (corrección de la mesa, con A4 vivo). */}
+            <Boton
+              variante="secundario"
+              etiqueta={t('postventa.noDevolver')}
+              bloque
+              onPress={() => setModo('sin_devolucion')}
+            />
           </View>
         ) : (
           <View style={{ gap: spacing[3] }}>
+            {modo === 'parcial' ? (
+            <>
             {/* ⭐ **EL TOTAL A LA VISTA, Y CUÁNTO QUEDA SI NO SON LO MISMO.**
                 El tope no es el total pelado: es **el total menos lo ya
                 devuelto** en otros casos del mismo objeto (`disponibleDevolver`,
@@ -416,6 +434,12 @@ export default function CasoDelPrestador() {
               keyboardType="decimal-pad"
               placeholder="0,00"
             />
+            </>
+            ) : (
+              /* Sin monto: lo único que se pide es el porqué. *La misma Hoja,
+                 un campo menos — no una pantalla nueva para una variante.* */
+              <Texto variante="apoyo">{t('postventa.noDevolverCuerpo')}</Texto>
+            )}
             <Campo
               label={t('postventa.parcialRazon')}
               value={razon}
@@ -427,7 +451,9 @@ export default function CasoDelPrestador() {
               ayuda={t('postventa.parcialRazonAyuda')}
             />
             <Boton
-              etiqueta={t('postventa.parcialConfirmar')}
+              etiqueta={
+                modo === 'parcial' ? t('postventa.parcialConfirmar') : t('postventa.noDevolverConfirmar')
+              }
               bloque
               cargando={obrando}
               /* El botón se apaga **con lo que se puede saber acá**: que haya un
@@ -435,18 +461,28 @@ export default function CasoDelPrestador() {
                  valida el motor igual — *el `disabled` es cortesía, la defensa
                  está del otro lado* (`monto_supera_total`,
                  `razon_requerida_en_parcial`). */
-              deshabilitado={montoNumero === null || razon.trim() === ''}
+              /* 🔴 **La razón es obligatoria en las DOS**, y en `sin_devolucion`
+                 el motor **todavía no la exige** (su código es
+                 `razon_requerida_en_parcial`). ⇒ acá el guard es lo único que
+                 hay, y **se declara como lo que es: cortesía, no defensa** —
+                 pedido a A por buzón. *Un guard de pantalla que se cree defensa
+                 es peor que ninguno: nadie va a poner la de verdad.* */
+              deshabilitado={(modo === 'parcial' && montoNumero === null) || razon.trim() === ''}
               /* 🔴 **Y DICE POR QUÉ ESTÁ APAGADO.** Es la lección de la jornada:
                  tres controles distintos devolvían silencio, y el silencio se
                  lee como app rota. `razonDeshabilitado` existe para esto. */
               razonDeshabilitado={
-                montoNumero === null
+                modo === 'parcial' && montoNumero === null
                   ? t('postventa.parcialNecesitaMonto')
                   : t('postventa.parcialNecesitaRazon')
               }
               onPress={() => {
-                if (montoNumero === null) return;
-                void resolver('parcial', montoNumero, razon.trim());
+                if (modo === 'parcial') {
+                  if (montoNumero === null) return;
+                  void resolver('parcial', montoNumero, razon.trim());
+                  return;
+                }
+                void resolver('sin_devolucion', undefined, razon.trim());
               }}
             />
             <Boton

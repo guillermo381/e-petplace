@@ -4800,6 +4800,9 @@ export const prestadorEs = {
     parcialNecesitaRazon: 'Escribe una línea diciendo por qué.',
     parcialSeVaDeRango: 'Es más de lo que queda por devolver de este servicio.',
     parcialSeVaDeRangoConCifra: 'Ya sólo quedan {{queda}} por devolver de este servicio.',
+    noDevolver: 'No devolver, y explicar por qué',
+    noDevolverCuerpo: 'La familia va a ver que reconociste lo que pasó y tu explicación. Si no le alcanza, puede pedir que intervengamos.',
+    noDevolverConfirmar: 'Reconocer sin devolver',
   },
 
 } as const;

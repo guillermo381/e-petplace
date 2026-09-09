@@ -3289,6 +3289,7 @@ export const clienteEn = {
     reboteSinSesion: 'Sign in again and try once more.',
     reboteGenerico: "We couldn't open the case. Try again.",
     hablarConAlguien: 'Would you rather a person helped you?',
+    pedirLaCasa: 'Ask e-PetPlace to step in',
     misCasosTitulo: 'My cases',
     misCasosIntro: 'What you opened and how it ended.',
     misCasosVacio: 'You have no cases.',

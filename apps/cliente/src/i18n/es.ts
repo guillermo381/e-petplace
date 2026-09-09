@@ -4527,6 +4527,7 @@ export const clienteEs = {
     reboteSinSesion: 'Vuelve a entrar a tu cuenta y prueba de nuevo.',
     reboteGenerico: 'No pudimos abrir el caso. Prueba de nuevo.',
     hablarConAlguien: '¿Prefieres que te atienda una persona?',
+    pedirLaCasa: 'Pedir que intervenga e-PetPlace',
     misCasosTitulo: 'Mis casos',
     misCasosIntro: 'Lo que abriste y en qué quedó.',
     misCasosVacio: 'No tienes casos.',

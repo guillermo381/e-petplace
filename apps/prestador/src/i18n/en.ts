@@ -3780,6 +3780,9 @@ export const prestadorEn = {
     parcialNecesitaRazon: 'Write one line saying why.',
     parcialSeVaDeRango: 'That is more than what is left to refund on this service.',
     parcialSeVaDeRangoConCifra: 'Only {{queda}} is left to refund on this service.',
+    noDevolver: 'Don’t refund, and explain why',
+    noDevolverCuerpo: 'The family will see that you acknowledged what happened, along with your explanation. If that isn’t enough for them, they can ask us to step in.',
+    noDevolverConfirmar: 'Acknowledge without refunding',
   },
 
 } as const satisfies Espejo<typeof prestadorEs>;
