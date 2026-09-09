@@ -31026,7 +31026,7 @@ dejando las puertas.
 
 ---
 
-### `D-1050` 🟡 · `scripts/censo-voseo.mjs` sólo ve texto entrecomillado: es ciego a la app del admin (React web sin i18n) y su 0 se lee como salud
+### `D-1050` ☠️ RESUELTA (S114, main `127922e7`) · `scripts/censo-voseo.mjs` era ciego a la app del admin (React web sin i18n) y su 0 se leía como salud
 
 Hallazgo de F, medido con discriminador (mismo texto en los dos casos):
 
@@ -31055,6 +31055,21 @@ main verde hasta que la cura de F de los dos voseos esté en main primero (o con
 Mergear B antes pone `verify:diseno` en rojo. **Cierra cuando** la cura de F + el
 instrumento de B lleguen a main. Es la prueba viva de esta misma ficha: el 0 del
 censo se leía como salud y escondía dos voseos reales.
+
+**CIERRE (S114, main `127922e7`):** B curó el instrumento en DOS pisos —de leer sólo
+texto entrecomillado a leer JSX, y de leer JSX inline a leer nodos de texto en su
+propia línea (techo 6 renglones, L-501)— y, con cruce de territorio declarado, curó
+los voseos de apps/admin. **Eran CUATRO, no dos** — el freno de A (verificación
+independiente, condición 3) los destapó de a uno: `Casos.tsx:42` y `:48`,
+`HojaCaso.tsx:245`, y el que nadie había visto, `App.tsx:93` (la pantalla del admin
+SIN permisos, el peor momento, con tres formas: figurás/creés/pedí →
+figuras/crees/pide). **La verificación de A no fue el matcher de B ni un grep crudo,
+y ninguno de los dos habría bastado:** el grep marca «motiVOS» y «pedía» como falsos
+positivos, y el matcher de B era justo el que no veía su propio ciego. A inspeccionó
+**a ojo cada candidato** — la única vara que ve el ciego y descarta el falso positivo
+a la vez. Cero voseo real en apps/admin. *Un instrumento que certifica su propio
+territorio limpio es exactamente el que no puede ver su propio ciego; el segundo par
+de ojos lo encontró dos veces (D-1050 y el cuarto voseo).*
 
 ---
 
