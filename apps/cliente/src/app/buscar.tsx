@@ -22,6 +22,7 @@
  * salida a él cuando no hay nada: *lo que el texto no encuentra puede ser una
  * pregunta, y ahí sí la IA aporta.*
  */
+import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -31,16 +32,73 @@ import {
   PieDeCampo,
   ResultadosBusqueda,
   spacing,
+  useAviso,
 } from '@epetplace/ui';
 
 import { useBusqueda } from '@/components/busqueda';
+import { ElegirMascotaHoja } from '@/components/nexo/elegir-mascota-hoja';
 import { useTraduccion } from '@/i18n';
+import { focoNexo } from '@/lib/nexo/atajos';
+import { useHogarVivo } from '@/lib/nexo/hogar-vivo';
 
 export default function PantallaBuscar() {
   const { t } = useTraduccion();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const busqueda = useBusqueda();
+  const aviso = useAviso();
+
+  /* ═══ 🔴 LA SALIDA A NEXO NECESITA UNA MASCOTA, Y NO LA LLEVABA ═══════════
+     **El founder lo caminó: la caja dejaba escribir y el envío no hacía nada.**
+     Medido, y son dos defectos encadenados, los dos míos:
+
+     ① esta pantalla empujaba `/nexo` **sólo con `semilla`** — sin `mascotaId`;
+     ② `nexo.tsx` **exige** mascota: su `enviar` abre con
+        `if (mascotaId === undefined … ) return`, y su botón sigue habilitado
+        porque su `disabled` sólo mira el texto.
+
+     ⇒ la familia llegaba, escribía, tocaba enviar **y el guard salía en
+     silencio**. *No es «la superficie falla»: es que esta puerta nunca tuvo
+     camino — invitaba y no abría, y del otro lado un botón encendido devolvía
+     nada.*
+
+     La cura reusa lo que la casa ya resolvió para la burbuja: `focoNexo` —una
+     sola mascota entra directo, varias abren la hoja corta, **ninguna activa y
+     la salida no se ofrece**—. *Nexo le habla a una mascota; ofrecer preguntar
+     sin poder decirle de quién es la misma puerta rota con otra cara.* */
+  const mascotas = useHogarVivo();
+  const foco = focoNexo({ mascotaIdEnRuta: undefined, mascotas });
+  const [eligiendo, setEligiendo] = useState(false);
+
+  const irANexo = (m: { id: string; nombre: string }) => {
+    setEligiendo(false);
+    router.push({
+      pathname: '/nexo',
+      /* La `semilla` viaja **y Nexo ahora la lee**: hasta hoy la mandaba y del
+         otro lado nadie la recibía, así que la familia reescribía lo que la
+         pantalla acababa de leerle. */
+      params: { mascotaId: m.id, nombre: m.nombre, semilla: busqueda.termino.trim() },
+    });
+  };
+
+  /* 🔴 **El chip SIEMPRE tiene acto, y eso no es mío: lo exige la pieza.**
+     `ResultadosBusqueda` pide voz **y** salida — *«un buscador que dice que no
+     y no ofrece nada enseña a no volver a buscar»*—, y el criterio es correcto.
+     Así que donde no hay mascota a la que preguntarle **no se apaga el chip:
+     se contesta por qué**. *Callar acá sería el callejón que la pieza existe
+     para impedir; llevarla a una pantalla que no puede responder sería la
+     puerta rota que esta cura vino a cerrar. Decirlo es lo único honesto.* */
+  const abrirNexo =
+    foco.modo === 'directa'
+      ? () => irANexo(foco.mascota)
+      : foco.modo === 'elegir'
+        ? () => setEligiendo(true)
+        : () =>
+            aviso.mostrar({
+              variante: 'neutro',
+              texto:
+                foco.modo === 'cargando' ? t('busqueda.nexoCargando') : t('busqueda.nexoSinMascota'),
+            });
 
   return (
     <View style={{ flex: 1 }}>
@@ -83,6 +141,13 @@ export default function PantallaBuscar() {
         /* Al arrastrar la lista el teclado se va: *la familia ya escribió y
            ahora está mirando.* */
         keyboardDismissMode="on-drag"
+        /* 🔴 **Y AL TOCAR, EL TOQUE LLEGA.** Medido en aparato: con el teclado
+           arriba, el primer toque sobre «Preguntarle a Nexo» **sólo cerraba el
+           teclado** y se lo tragaba — había que tocar dos veces. *Un control
+           que necesita dos toques se lee como roto en el primero*, y es
+           justamente el chip de la salida que esta pantalla acaba de curar.
+           `"handled"` deja pasar el toque a quien lo maneja. */
+        keyboardShouldPersistTaps="handled"
       >
         {busqueda.termino.trim().length >= 2 ? (
           <ResultadosBusqueda
@@ -94,12 +159,18 @@ export default function PantallaBuscar() {
               /* 🔴 **La salida a Nexo, con la pregunta puesta.** *Hacer que la
                  familia la escriba de nuevo es pedirle que repita lo que la
                  pantalla acaba de leer.* */
-              onPreguntar: () =>
-                router.push({ pathname: '/nexo', params: { semilla: busqueda.termino.trim() } }),
+              onPreguntar: abrirNexo,
             }}
           />
         ) : null}
       </ScrollView>
+      <ElegirMascotaHoja
+        visible={eligiendo}
+        titulo={t('nexo.elegirMascota')}
+        mascotas={foco.modo === 'elegir' ? foco.entre : []}
+        onElegir={irANexo}
+        onCerrar={() => setEligiendo(false)}
+      />
     </View>
   );
 }

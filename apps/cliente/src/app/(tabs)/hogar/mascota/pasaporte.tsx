@@ -48,6 +48,7 @@ import {
   type PerfilMascota,
 } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
+import { esMemorial as mascotaEnMemorial } from '@/lib/memorial';
 
 const BASE = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
 /** 🔴 **LA PÁGINA VIVE EN EL SITIO, no en la edge.** La edge quedó con
@@ -94,7 +95,13 @@ export default function Pasaporte() {
       /* 🔴 **En memorial NO se emite.** El motor lo rebota
          (`mascota_en_memorial`), pero pedirlo igual sería mandar a la familia
          un error que nosotros provocamos. */
-      const enMemoria = p.data.mascota.estado_vida !== null && p.data.mascota.estado_vida !== 'activa' && p.data.mascota.estado_vida !== 'perdida';
+      /* ⑤ **LA QUINTA DERIVACIÓN DE MEMORIAL, curada.** Acá decía
+         `!== null && !== 'activa' && !== 'perdida'` — escrita a mano, con la
+         regla de `perdida` embebida por casualidad. B censó CUATRO copias de
+         esta lógica; ésta era la quinta y su censo quedó corto (avisado).
+         *Una regla escrita cinco veces es cinco lugares donde puede cambiar
+         una sola.* */
+      const enMemoria = mascotaEnMemorial(p.data.mascota.estado_vida);
       if (enMemoria) return;
       const e = await emitirPasaporte(mascotaId);
       if (!vivo) return;
@@ -156,7 +163,7 @@ export default function Pasaporte() {
   }
 
   const m = perfil.mascota;
-  const enMemoria = m.estado_vida !== null && m.estado_vida !== 'activa' && m.estado_vida !== 'perdida';
+  const enMemoria = mascotaEnMemorial(m.estado_vida);
 
   /* 🔴 **En memorial la pantalla NO SE DIBUJA**, y lo dice con la voz serena de
      la casa en vez de un error: la familia llegó acá por un camino que ya no

@@ -1,0 +1,3 @@
+-- REVERSA de 20260912040000: caso_resolver / caso_reconocer_y_resolver vuelven a
+-- su versión de 20260912030000 (razón obligatoria SÓLO en parcial, código
+-- razon_requerida_en_parcial). Recuperable por git.

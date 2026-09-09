@@ -3392,10 +3392,10 @@ function ContanosDemo() {
   return (
     <>
       <PastillaConociendolo n={3} voz="Conociéndolo · 3 por resolver" onPress={() => setAbierta(true)} />
-      <BotonContanos etiqueta="Contanos lo que hace único a Thor" onPress={() => setAbierta(true)} />
+      <BotonContanos enMemorial={false} etiqueta="Contanos lo que hace único a Thor" onPress={() => setAbierta(true)} />
       <Texto variante="apoyo">Con cero pendientes la pastilla no se dibuja:</Texto>
       <PastillaConociendolo n={0} voz="Conociéndolo · 0 por resolver" onPress={() => {}} />
-      <HojaContanos
+      <HojaContanos enMemorial={false}
         visible={abierta}
         onCerrar={() => { setAbierta(false); setPropuesta(false) }}
         titulo="Contanos lo que hace único a Thor"
@@ -9273,7 +9273,7 @@ function GaleriaInterna() {
                 { etiqueta: 'Documentos', glifo: 'documentos', onPress: () => {} },
               ]}
             />
-            <TarjetaHoy
+            <TarjetaHoy enMemorial={false}
               clase="anticipacion"
               titulo="Thor entra a senior en marzo"
               detalle="Los Bulldog inglés suelen tener displasia de cadera"
@@ -9330,20 +9330,20 @@ function GaleriaInterna() {
               <HuellaDelVinculo dimensiones={{ identidad: true, salud: true, cuerpo: true, caracter: true, diaADia: true }} />
             </View>
             <Texto variante="apoyo">Conociéndolo, INCOMPLETO: la huella, la voz y UNA invitación.</Texto>
-            <TarjetaConociendolo
+            <TarjetaConociendolo enMemorial={false}
               dimensiones={{ identidad: true, salud: true, cuerpo: true, caracter: false, diaADia: false }}
               voz="Sabemos quién es Thor, cómo está de salud y cómo es su cuerpo. Nos falta conocer su carácter y su día a día."
-              invitacion={<BotonContanos etiqueta="Contanos lo que hace único a Thor" onPress={() => {}} />}
+              invitacion={<BotonContanos enMemorial={false} etiqueta="Contanos lo que hace único a Thor" onPress={() => {}} />}
             />
             <Texto variante="apoyo">
               COMPLETO: felicita en una línea y ofrece más sin urgencia. Nunca pide lo que ya está.
             </Texto>
-            <TarjetaConociendolo
+            <TarjetaConociendolo enMemorial={false}
               completo
               dimensiones={{ identidad: true, salud: true, cuerpo: true, caracter: true, diaADia: true }}
               voz="Conocemos a Thor tan bien como vos: quién es, su salud, su cuerpo, su carácter y su día a día."
               vozFelicitacion="No falta nada por contarnos."
-              masSobre={<BotonContanos etiqueta="Cuéntanos más de Thor" onPress={() => {}} />}
+              masSobre={<BotonContanos enMemorial={false} etiqueta="Cuéntanos más de Thor" onPress={() => {}} />}
             />
             <Texto variante="apoyo">El detalle del peso: punto lleno = la clínica, hueco = en casa.</Texto>
             <DetallePeso

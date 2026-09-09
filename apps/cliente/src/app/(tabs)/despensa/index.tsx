@@ -346,12 +346,38 @@ export default function DespensaDescubrir() {
     [reco],
   );
 
+  /** ⭐ **HASTA TRES, Y DESPUÉS CUÁNTOS MÁS** — firma del founder, 9-sep.
+   *
+   *  🔴 **El dato es correcto y no se toca:** «polen 94062» es lo que el
+   *  expediente registra, y decir la verdad es lo correcto. Lo que estaba mal
+   *  era la FORMA: *siete códigos en una frase no se leen, se saltean — y
+   *  entonces la familia no se entera de por qué se fue la mitad de la
+   *  vitrina.* La razón existe para que entienda, no para ser exhaustiva.
+   *
+   *  ⚠️ **El corte va acá y no en el motor**: el criterio completo lo sigue
+   *  necesitando la lista desplegada, y un lector que devuelva tres deja sin
+   *  fuente al toque. *Recortar donde se dibuja se puede deshacer; recortar en
+   *  el dato, no.* */
+  const TOPE_ALERGENOS = 3;
+
+  const alergenosRecortados = useMemo(() => {
+    if (reco === null || reco === 'cargando' || 'fallo' in reco) return null;
+    const todos = reco.criterio.alergenos_excluidos;
+    return todos.length > TOPE_ALERGENOS ? todos : null;
+  }, [reco]);
+
   const razon = useMemo(() => {
     if (reco === null || reco === 'cargando' || 'fallo' in reco) return null;
     const c = reco.criterio;
     const partes: string[] = [];
     if (c.alergenos_excluidos.length > 0) {
-      partes.push(t('despensa.criterioSinAlergenos', { lista: c.alergenos_excluidos.join(', ') }));
+      const primeros = c.alergenos_excluidos.slice(0, TOPE_ALERGENOS).join(', ');
+      const resto = c.alergenos_excluidos.length - TOPE_ALERGENOS;
+      partes.push(
+        resto > 0
+          ? t('despensa.criterioSinAlergenosRecortado', { lista: primeros, n: resto })
+          : t('despensa.criterioSinAlergenos', { lista: primeros }),
+      );
     } else if (c.sin_alergias_declarado) {
       partes.push(t('despensa.criterioSinAlergias'));
     }
@@ -1137,6 +1163,10 @@ export default function DespensaDescubrir() {
                 })}
                 linea={t('despensa.criterioPara', { nombre: mascota.nombre })}
                 razon={razon}
+                /* Sólo cuando la frase recortó: sin recorte no hay nada que
+                   abrir, y la pieza deja de ser tocable sola. */
+                alergenosCompletos={alergenosRecortados}
+                vozLista={t('despensa.criterioListaCompleta')}
               />
             ) : null}
 

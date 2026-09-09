@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       _test_resultado_d242: {
@@ -1847,6 +1872,204 @@ export type Database = {
           },
         ]
       }
+      caso_mensajes: {
+        Row: {
+          autor: string
+          autor_user_id: string | null
+          caso_id: string
+          creado_en: string
+          cuerpo: string
+          id: string
+          tipo: string
+        }
+        Insert: {
+          autor: string
+          autor_user_id?: string | null
+          caso_id: string
+          creado_en?: string
+          cuerpo: string
+          id?: string
+          tipo?: string
+        }
+        Update: {
+          autor?: string
+          autor_user_id?: string | null
+          caso_id?: string
+          creado_en?: string
+          cuerpo?: string
+          id?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "caso_mensajes_caso_id_fkey"
+            columns: ["caso_id"]
+            isOneToOne: false
+            referencedRelation: "casos_postventa"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      casos_postventa: {
+        Row: {
+          actualizado_en: string
+          camino: string | null
+          cerrado_en: string | null
+          clase: number
+          confirmado_por: string | null
+          creado_en: string
+          cuenta_comercial_id: string | null
+          decidido_por: string | null
+          destino: string | null
+          destino_estado: string | null
+          estado_final: string | null
+          etapa: string
+          etapa_previa: string | null
+          evento_reembolso_id: string | null
+          familia_user_id: string
+          foto_url: string | null
+          id: string
+          modo: string | null
+          monto_devuelto: number | null
+          motivo_codigo: string
+          objeto_id: string
+          objeto_tipo: string
+          plazo_prestador_hasta: string | null
+          prestador_id: string | null
+          procedencia: string
+          relato: string | null
+          resolucion_alcance: string | null
+          resuelto_en: string | null
+          resumen_confirmado: string | null
+        }
+        Insert: {
+          actualizado_en?: string
+          camino?: string | null
+          cerrado_en?: string | null
+          clase: number
+          confirmado_por?: string | null
+          creado_en?: string
+          cuenta_comercial_id?: string | null
+          decidido_por?: string | null
+          destino?: string | null
+          destino_estado?: string | null
+          estado_final?: string | null
+          etapa?: string
+          etapa_previa?: string | null
+          evento_reembolso_id?: string | null
+          familia_user_id: string
+          foto_url?: string | null
+          id?: string
+          modo?: string | null
+          monto_devuelto?: number | null
+          motivo_codigo: string
+          objeto_id: string
+          objeto_tipo: string
+          plazo_prestador_hasta?: string | null
+          prestador_id?: string | null
+          procedencia?: string
+          relato?: string | null
+          resolucion_alcance?: string | null
+          resuelto_en?: string | null
+          resumen_confirmado?: string | null
+        }
+        Update: {
+          actualizado_en?: string
+          camino?: string | null
+          cerrado_en?: string | null
+          clase?: number
+          confirmado_por?: string | null
+          creado_en?: string
+          cuenta_comercial_id?: string | null
+          decidido_por?: string | null
+          destino?: string | null
+          destino_estado?: string | null
+          estado_final?: string | null
+          etapa?: string
+          etapa_previa?: string | null
+          evento_reembolso_id?: string | null
+          familia_user_id?: string
+          foto_url?: string | null
+          id?: string
+          modo?: string | null
+          monto_devuelto?: number | null
+          motivo_codigo?: string
+          objeto_id?: string
+          objeto_tipo?: string
+          plazo_prestador_hasta?: string | null
+          prestador_id?: string | null
+          procedencia?: string
+          relato?: string | null
+          resolucion_alcance?: string | null
+          resuelto_en?: string | null
+          resumen_confirmado?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "casos_postventa_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "cuentas_comerciales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "casos_postventa_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "casos_postventa_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_eventos_resumen_cuenta"
+            referencedColumns: ["cuenta_comercial_id"]
+          },
+          {
+            foreignKeyName: "casos_postventa_etapa_fkey"
+            columns: ["etapa"]
+            isOneToOne: false
+            referencedRelation: "cat_estados_caso"
+            referencedColumns: ["etapa"]
+          },
+          {
+            foreignKeyName: "casos_postventa_etapa_previa_fkey"
+            columns: ["etapa_previa"]
+            isOneToOne: false
+            referencedRelation: "cat_estados_caso"
+            referencedColumns: ["etapa"]
+          },
+          {
+            foreignKeyName: "casos_postventa_evento_reembolso_id_fkey"
+            columns: ["evento_reembolso_id"]
+            isOneToOne: false
+            referencedRelation: "eventos_economicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "casos_postventa_evento_reembolso_id_fkey"
+            columns: ["evento_reembolso_id"]
+            isOneToOne: false
+            referencedRelation: "v_eventos_con_origen"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "casos_postventa_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "casos_postventa_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cat_alergeno_relaciones: {
         Row: {
           alergeno_codigo: string
@@ -2337,6 +2560,27 @@ export type Database = {
         }
         Relationships: []
       }
+      cat_estados_caso: {
+        Row: {
+          en_escalera: boolean
+          es_final: boolean
+          etapa: string
+          orden: number
+        }
+        Insert: {
+          en_escalera?: boolean
+          es_final?: boolean
+          etapa: string
+          orden: number
+        }
+        Update: {
+          en_escalera?: boolean
+          es_final?: boolean
+          etapa?: string
+          orden?: number
+        }
+        Relationships: []
+      }
       cat_estados_pedido: {
         Row: {
           activo: boolean
@@ -2673,6 +2917,51 @@ export type Database = {
         }
         Relationships: []
       }
+      cat_motivos_herencia: {
+        Row: {
+          hereda_de: string
+          objeto: string
+        }
+        Insert: {
+          hereda_de: string
+          objeto: string
+        }
+        Update: {
+          hereda_de?: string
+          objeto?: string
+        }
+        Relationships: []
+      }
+      cat_motivos_postventa: {
+        Row: {
+          activo: boolean
+          clase: number
+          codigo: string
+          objeto: string
+          pide_foto: boolean
+          urgente: boolean
+          voz: string
+        }
+        Insert: {
+          activo?: boolean
+          clase: number
+          codigo: string
+          objeto: string
+          pide_foto?: boolean
+          urgente?: boolean
+          voz: string
+        }
+        Update: {
+          activo?: boolean
+          clase?: number
+          codigo?: string
+          objeto?: string
+          pide_foto?: boolean
+          urgente?: boolean
+          voz?: string
+        }
+        Relationships: []
+      }
       cat_narrativas_pedido: {
         Row: {
           codigo: string
@@ -2773,6 +3062,8 @@ export type Database = {
           descripcion: string
           en_sombra: boolean
           ignora_techo: boolean
+          plantilla_idioma: string
+          plantilla_whatsapp: string | null
         }
         Insert: {
           activo?: boolean
@@ -2783,6 +3074,8 @@ export type Database = {
           descripcion: string
           en_sombra?: boolean
           ignora_techo?: boolean
+          plantilla_idioma?: string
+          plantilla_whatsapp?: string | null
         }
         Update: {
           activo?: boolean
@@ -2793,6 +3086,8 @@ export type Database = {
           descripcion?: string
           en_sombra?: boolean
           ignora_techo?: boolean
+          plantilla_idioma?: string
+          plantilla_whatsapp?: string | null
         }
         Relationships: [
           {
@@ -3554,6 +3849,45 @@ export type Database = {
           nombre?: string
         }
         Relationships: []
+      }
+      cat_transiciones_caso: {
+        Row: {
+          activo: boolean
+          actor: string
+          desde: string
+          exige_motivo: boolean
+          hasta: string
+        }
+        Insert: {
+          activo?: boolean
+          actor: string
+          desde: string
+          exige_motivo?: boolean
+          hasta: string
+        }
+        Update: {
+          activo?: boolean
+          actor?: string
+          desde?: string
+          exige_motivo?: boolean
+          hasta?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cat_transiciones_caso_desde_fkey"
+            columns: ["desde"]
+            isOneToOne: false
+            referencedRelation: "cat_estados_caso"
+            referencedColumns: ["etapa"]
+          },
+          {
+            foreignKeyName: "cat_transiciones_caso_hasta_fkey"
+            columns: ["hasta"]
+            isOneToOne: false
+            referencedRelation: "cat_estados_caso"
+            referencedColumns: ["etapa"]
+          },
+        ]
       }
       cat_transiciones_pedido: {
         Row: {
@@ -4360,6 +4694,8 @@ export type Database = {
           id: string
           impuesto_total: number
           moneda: string
+          saldo_aplicado: number
+          saldo_reservado_hasta: string | null
           subtotal: number
           total: number
           updated_at: string
@@ -4373,6 +4709,8 @@ export type Database = {
           id?: string
           impuesto_total?: number
           moneda?: string
+          saldo_aplicado?: number
+          saldo_reservado_hasta?: string | null
           subtotal?: number
           total?: number
           updated_at?: string
@@ -4386,6 +4724,8 @@ export type Database = {
           id?: string
           impuesto_total?: number
           moneda?: string
+          saldo_aplicado?: number
+          saldo_reservado_hasta?: string | null
           subtotal?: number
           total?: number
           updated_at?: string
@@ -11853,6 +12193,7 @@ export type Database = {
           no_recogida_detalle: string | null
           no_recogida_en: string | null
           no_recogida_motivo: string | null
+          nota_siembra: string | null
           retorno_en: string | null
           tramo_devolucion_id: string | null
           tramo_recogida_id: string | null
@@ -11870,6 +12211,7 @@ export type Database = {
           no_recogida_detalle?: string | null
           no_recogida_en?: string | null
           no_recogida_motivo?: string | null
+          nota_siembra?: string | null
           retorno_en?: string | null
           tramo_devolucion_id?: string | null
           tramo_recogida_id?: string | null
@@ -11887,6 +12229,7 @@ export type Database = {
           no_recogida_detalle?: string | null
           no_recogida_en?: string | null
           no_recogida_motivo?: string | null
+          nota_siembra?: string | null
           retorno_en?: string | null
           tramo_devolucion_id?: string | null
           tramo_recogida_id?: string | null
@@ -13688,6 +14031,7 @@ export type Database = {
       }
       mascotas: {
         Row: {
+          bienvenida_regreso_pendiente: boolean
           country_code: string
           creado_por_sistema: string | null
           created_at: string
@@ -13724,6 +14068,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          bienvenida_regreso_pendiente?: boolean
           country_code?: string
           creado_por_sistema?: string | null
           created_at?: string
@@ -13760,6 +14105,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          bienvenida_regreso_pendiente?: boolean
           country_code?: string
           creado_por_sistema?: string | null
           created_at?: string
@@ -14845,6 +15191,7 @@ export type Database = {
       }
       papeles_familia: {
         Row: {
+          archivo_estado: string
           archivo_path: string
           clase: string
           confirmado_en: string | null
@@ -14861,6 +15208,7 @@ export type Database = {
           titulo: string | null
         }
         Insert: {
+          archivo_estado?: string
           archivo_path: string
           clase: string
           confirmado_en?: string | null
@@ -14877,6 +15225,7 @@ export type Database = {
           titulo?: string | null
         }
         Update: {
+          archivo_estado?: string
           archivo_path?: string
           clase?: string
           confirmado_en?: string | null
@@ -19245,6 +19594,60 @@ export type Database = {
           },
         ]
       }
+      saldo_hogar_movimientos: {
+        Row: {
+          clave_idempotencia: string
+          creado_en: string
+          creado_por: string | null
+          descripcion: string | null
+          familia_id: string
+          id: string
+          lote_id: string | null
+          monto: number
+          origen_id: string | null
+          origen_tipo: string
+        }
+        Insert: {
+          clave_idempotencia: string
+          creado_en?: string
+          creado_por?: string | null
+          descripcion?: string | null
+          familia_id: string
+          id?: string
+          lote_id?: string | null
+          monto: number
+          origen_id?: string | null
+          origen_tipo: string
+        }
+        Update: {
+          clave_idempotencia?: string
+          creado_en?: string
+          creado_por?: string | null
+          descripcion?: string | null
+          familia_id?: string
+          id?: string
+          lote_id?: string | null
+          monto?: number
+          origen_id?: string | null
+          origen_tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saldo_hogar_movimientos_familia_id_fkey"
+            columns: ["familia_id"]
+            isOneToOne: false
+            referencedRelation: "familia"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saldo_hogar_movimientos_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "saldo_hogar_movimientos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       seguidores: {
         Row: {
           created_at: string
@@ -22709,16 +23112,31 @@ export type Database = {
         Row: {
           calculado_en: string | null
           citas_mes: number | null
+          cobrado_sin_devengar: number | null
           gmv_crecimiento_pct: number | null
           gmv_hoy: number | null
           gmv_mes: number | null
           mascotas_total: number | null
           mau: number | null
+          objetos_sin_ejecutar: number | null
           pedidos_hoy: number | null
           pedidos_mes: number | null
           revenue_mes: number | null
           ticket_promedio: number | null
           usuarios_nuevos_mes: number | null
+        }
+        Relationships: []
+      }
+      v_motivos_resueltos: {
+        Row: {
+          clase: number | null
+          codigo: string | null
+          objeto_origen: string | null
+          objeto_resuelto: string | null
+          pide_foto: boolean | null
+          procedencia: string | null
+          urgente: boolean | null
+          voz: string | null
         }
         Relationships: []
       }
@@ -23115,6 +23533,10 @@ export type Database = {
       }
     }
     Functions: {
+      _abrir_caso_no_ejecutado: {
+        Args: { p_id: string; p_tipo: string }
+        Returns: string
+      }
       _adiestramiento_atencion_terminada: {
         Args: { p_adiestramiento_id: string }
         Returns: Record<string, unknown>
@@ -23203,6 +23625,39 @@ export type Database = {
       _avisar_adopcion_vida_nueva: {
         Args: { p_solicitud_id: string }
         Returns: Json
+      }
+      _caso_dueno_del_objeto: {
+        Args: { p_id: string; p_tipo: string }
+        Returns: {
+          cerrado_en: string
+          cuenta_comercial_id: string
+          familia_user_id: string
+          mascota_id: string
+          prestador_id: string
+          titulo: string
+        }[]
+      }
+      _caso_monto_objeto: {
+        Args: { p_id: string; p_tipo: string }
+        Returns: number
+      }
+      _caso_mover: {
+        Args: {
+          p_actor: string
+          p_actor_user: string
+          p_caso_id: string
+          p_hasta: string
+          p_motivo?: string
+        }
+        Returns: Json
+      }
+      _caso_tiene_devengo: {
+        Args: { p_id: string; p_tipo: string }
+        Returns: string
+      }
+      _caso_ya_devuelto: {
+        Args: { p_excluir: string; p_id: string; p_tipo: string }
+        Returns: number
       }
       _categoria_es_apagable: {
         Args: { p_categoria: string }
@@ -23308,6 +23763,12 @@ export type Database = {
         }[]
       }
       _deuna_base36: { Args: { p_n: number }; Returns: string }
+      _devengar_cita: {
+        Args: { p_cita_id: string; p_via: string }
+        Returns: string
+      }
+      _devengar_estadia: { Args: { p_estadia_id: string }; Returns: string }
+      _devengar_pedido: { Args: { p_pedido_id: string }; Returns: string }
       _dias_sin_repetidos: { Args: { p_dias: number[] }; Returns: boolean }
       _direccion_hogar_snapshot: { Args: { p_user_id: string }; Returns: Json }
       _empleado_matricula_ok: {
@@ -23325,6 +23786,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      _familia_del_user: { Args: { p_user: string }; Returns: string }
       _familia_tiene_miembros_vigentes: {
         Args: { p_familia_id: string }
         Returns: boolean
@@ -23336,6 +23798,10 @@ export type Database = {
           p_periodo_inicio: string
         }
         Returns: string[]
+      }
+      _fee_pct_vigente: {
+        Args: { p_country_code: string; p_fecha: string; p_tipo_actor: string }
+        Returns: number
       }
       _generar_citas_plan: {
         Args: {
@@ -23455,6 +23921,10 @@ export type Database = {
           opera: boolean
         }[]
       }
+      _motivo_pertenece_al_objeto: {
+        Args: { p_codigo: string; p_objeto: string }
+        Returns: boolean
+      }
       _mover_estado_pedido: {
         Args: {
           p_actor: string
@@ -23484,6 +23954,10 @@ export type Database = {
         Returns: boolean
       }
       _pago_aprobado: { Args: { p_crudo: Json }; Returns: boolean }
+      _pago_del_objeto: {
+        Args: { p_id: string; p_tipo: string }
+        Returns: number
+      }
       _path_es_de_mi_publicacion: {
         Args: { p_nombre: string }
         Returns: boolean
@@ -23499,6 +23973,10 @@ export type Database = {
       }
       _puede_operar_pedido: { Args: { p_pedido_id: string }; Returns: boolean }
       _renderizar_acta: { Args: { p_solicitud_id: string }; Returns: Json }
+      _resolver_caso_clase1: {
+        Args: { p_actor?: string; p_caso_id: string }
+        Returns: undefined
+      }
       _resolver_fee_aplicable: {
         Args: {
           p_categoria_origen?: string
@@ -23634,6 +24112,20 @@ export type Database = {
           zona_radio_m: number
         }[]
       }
+      abrir_caso: {
+        Args: {
+          p_confirmado_por?: string
+          p_foto_url?: string
+          p_modo?: string
+          p_motivo: string
+          p_objeto_id: string
+          p_objeto_tipo: string
+          p_procedencia?: string
+          p_relato?: string
+          p_resumen_confirmado?: string
+        }
+        Returns: Json
+      }
       abrir_caso_clinico: {
         Args: {
           p_condicion: string
@@ -23687,6 +24179,16 @@ export type Database = {
         Returns: Json
       }
       aceptar_vinculo_repartidor: { Args: never; Returns: Json }
+      acreditar_saldo_hogar: {
+        Args: {
+          p_clave: string
+          p_familia: string
+          p_monto: number
+          p_origen_id?: string
+          p_origen_tipo: string
+        }
+        Returns: Json
+      }
       activar_avisos_nexo: {
         Args: { p_activar?: boolean; p_familia_id: string }
         Returns: Json
@@ -23774,6 +24276,15 @@ export type Database = {
       adjuntar_fotos_producto: {
         Args: { p_imagenes: Json; p_producto_id: string }
         Returns: Json
+      }
+      admin_generar_liquidacion: {
+        Args: {
+          p_country_code: string
+          p_cuenta_comercial_id: string
+          p_periodo_fin: string
+          p_periodo_inicio: string
+        }
+        Returns: string
       }
       agregar_foto_adoptable: {
         Args: { p_path: string; p_publicacion_id: string }
@@ -23884,6 +24395,10 @@ export type Database = {
         }
         Returns: string
       }
+      aplicar_saldo_a_compra: {
+        Args: { p_compra_id: string; p_monto_saldo?: number }
+        Returns: Json
+      }
       aprobar_presupuesto_familia: {
         Args: { p_presupuesto_id: string }
         Returns: Json
@@ -23987,6 +24502,34 @@ export type Database = {
         }
         Returns: undefined
       }
+      caso_elegir_destino: {
+        Args: { p_caso_id: string; p_destino: string }
+        Returns: Json
+      }
+      caso_pedir_casa: { Args: { p_caso_id: string }; Returns: Json }
+      caso_reconocer_y_resolver: {
+        Args: {
+          p_alcance: string
+          p_caso_id: string
+          p_monto?: number
+          p_motivo?: string
+        }
+        Returns: Json
+      }
+      caso_resolver: {
+        Args: {
+          p_alcance: string
+          p_caso_id: string
+          p_monto?: number
+          p_motivo?: string
+        }
+        Returns: Json
+      }
+      caso_responder: {
+        Args: { p_caso_id: string; p_texto: string }
+        Returns: Json
+      }
+      caso_ventana_dias: { Args: never; Returns: number }
       cerrar_atencion_adiestramiento: {
         Args: {
           p_adiestramiento_id: string
@@ -24159,6 +24702,15 @@ export type Database = {
       confirmar_propuesta_memoria: { Args: { p_id: string }; Returns: Json }
       congelar_desglose_mensualidad_guarderia: {
         Args: { p_periodo: string; p_suscripcion_id: string }
+        Returns: Json
+      }
+      consumir_saldo_hogar: {
+        Args: {
+          p_clave: string
+          p_compra_id?: string
+          p_familia: string
+          p_monto: number
+        }
         Returns: Json
       }
       contar_citas_despegables: {
@@ -24792,6 +25344,7 @@ export type Database = {
       expirar_bonos_sin_pago: { Args: never; Returns: number }
       expirar_citas_pendientes: { Args: never; Returns: undefined }
       expirar_mensualidades_sin_pago: { Args: never; Returns: number }
+      expirar_objetos_sin_cierre: { Args: never; Returns: Json }
       expirar_pedidos_sin_pago: { Args: never; Returns: Json }
       expirar_planes_sin_pago: { Args: never; Returns: number }
       expirar_programas_sin_pago: { Args: never; Returns: number }
@@ -25063,10 +25616,21 @@ export type Database = {
       }
       is_admin: { Args: never; Returns: boolean }
       leer_borrador_nota: { Args: { p_cita_id: string }; Returns: Json }
+      leer_caso: { Args: { p_caso_id: string }; Returns: Json }
       leer_hilo_coach: {
         Args: { p_limite?: number; p_mascota_id: string }
         Returns: Json
       }
+      leer_mensajes_caso: {
+        Args: {
+          p_caso_id: string
+          p_cursor_id?: string
+          p_cursor_ts?: string
+          p_limite?: number
+        }
+        Returns: Json
+      }
+      leer_opciones_devolucion: { Args: { p_caso_id: string }; Returns: Json }
       leer_pasaporte: { Args: { p_token: string }; Returns: Json }
       leer_sombra_notificaciones: {
         Args: { p_desde?: string; p_hasta?: string }
@@ -25094,6 +25658,12 @@ export type Database = {
         }
         Returns: Json
       }
+      liberar_reserva_saldo_compra: {
+        Args: { p_compra_id: string }
+        Returns: Json
+      }
+      liberar_reservas_saldo_vencidas: { Args: never; Returns: number }
+      listar_lotes: { Args: never; Returns: Json }
       listar_memoria_coach: { Args: { p_mascota_id: string }; Returns: Json }
       listar_placas_de_lote: { Args: { p_lote_id: string }; Returns: Json }
       listar_propuestas_memoria: {
@@ -25301,6 +25871,10 @@ export type Database = {
           texto: string
         }[]
       }
+      obtener_caso_de_objeto: {
+        Args: { p_id: string; p_tipo: string }
+        Returns: Json
+      }
       obtener_casos_activos_mascota: {
         Args: { p_cuenta_comercial_id: string; p_mascota_id: string }
         Returns: {
@@ -25312,6 +25886,7 @@ export type Database = {
           horizonte_proximo_evento: string
         }[]
       }
+      obtener_casos_del_prestador: { Args: never; Returns: Json }
       obtener_certificados_mascota: {
         Args: { p_mascota_id: string }
         Returns: {
@@ -25773,6 +26348,7 @@ export type Database = {
           titulo: string
         }[]
       }
+      obtener_mis_casos: { Args: never; Returns: Json }
       obtener_mis_estadias_guarderia: {
         Args: { p_mascota_id?: string }
         Returns: {
@@ -26098,6 +26674,7 @@ export type Database = {
         }[]
       }
       obtener_serie_recurrente: { Args: { p_serie_id: string }; Returns: Json }
+      obtener_servicios_sin_cerrar: { Args: never; Returns: Json }
       obtener_slots_disponibles: {
         Args: {
           p_desde: string
@@ -26226,6 +26803,7 @@ export type Database = {
         Args: { p_cuenta_comercial_id: string; p_motivo?: string }
         Returns: Json
       }
+      pagar_compra_con_saldo: { Args: { p_compra_id: string }; Returns: Json }
       pagos_aprobados_sin_sujeto_movido: { Args: never; Returns: Json }
       pagos_conciliacion_cobertura: { Args: never; Returns: Json }
       pagos_huerfanos_por_sujeto: {
@@ -26865,6 +27443,7 @@ export type Database = {
         Args: { p_especie: string; p_raza_declarada: string }
         Returns: Json
       }
+      resolver_plantilla_whatsapp: { Args: { p_tipo: string }; Returns: Json }
       responder_socializacion_paseo: {
         Args: { p_mascota_id: string; p_ok: boolean }
         Returns: Json
@@ -26905,6 +27484,7 @@ export type Database = {
         Args: { p_cuenta_comercial_id: string; p_motivo?: string }
         Returns: Json
       }
+      saldo_hogar_disponible: { Args: { p_familia: string }; Returns: number }
       saltar_cita_plan: {
         Args: { p_cita_id: string; p_nueva_fecha: string; p_nueva_hora: string }
         Returns: Json
@@ -27105,6 +27685,7 @@ export type Database = {
         Args: { p_email?: string; p_invite_code?: string }
         Returns: Json
       }
+      vencer_casos_sin_respuesta: { Args: never; Returns: Json }
       vencer_links_mensuales: { Args: never; Returns: Json }
       vencer_paquetes_salidas: { Args: never; Returns: Json }
       vencer_programas_adiestramiento: { Args: never; Returns: Json }
@@ -27405,6 +27986,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       estado_cuenta_comercial_enum: [

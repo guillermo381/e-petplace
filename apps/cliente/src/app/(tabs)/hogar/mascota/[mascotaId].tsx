@@ -70,7 +70,6 @@ import {
   TarjetaMetrica,
   FranjaSeguridad,
   BotonContanos,
-  PastillaConociendolo,
   CeldasHoy,
   FiltrosLineaDeVida,
   type TipoLineaDeVida,
@@ -82,6 +81,7 @@ import {
   leerTimelineMascota,
   obtenerEstadoHogar,
   obtenerPaseosConTrack,
+  marcarPerdida,
   obtenerPerfilMascota,
   resolverUrlFoto,
   listarPapelesDeMascota,
@@ -242,6 +242,13 @@ function FilaIdentidad({ etiqueta, valor, mono, accion }: { etiqueta: string; va
 import { fechaCortaMono } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
+/* 🔴 LA DEFINICIÓN ÚNICA (firma founder 7-sep: **perdida NO es memorial**).
+   Alias porque esta pantalla ya tiene su `esMemorial`, que es el OR del dato
+   con el tema — dos cosas distintas y por eso dos nombres.
+   ⏪ Las tres derivaciones que vivían acá decían `!== null && !== 'activa'` y
+   metían a `perdida` adentro: al perfil de una mascota que la familia está
+   BUSCANDO le apagaban el producto. */
+import { esMemorial as mascotaEnMemorial, estaPerdida } from '@/lib/memorial';
 
 type TraductorPerfil = ReturnType<typeof useTraduccion>['t'];
 
@@ -364,9 +371,7 @@ export default function PerfilDeMascota() {
            acá el compilador lo dice — en otros lados no.* Misma regla, misma
            fuente (`estado_vida`), sin el brazo del tema, que acá no aplica. */
         memorial:
-          typeof perfil === 'object' &&
-          perfil.mascota.estado_vida !== null &&
-          perfil.mascota.estado_vida !== 'activa'
+          typeof perfil === 'object' && mascotaEnMemorial(perfil.mascota.estado_vida)
             ? '1'
             : '0',
       },
@@ -541,9 +546,7 @@ export default function PerfilDeMascota() {
      valiendo. */
   const esMemorial =
     theme.mode === 'memorial' ||
-    (typeof perfil === 'object' &&
-      perfil.mascota.estado_vida !== null &&
-      perfil.mascota.estado_vida !== 'activa');
+    (typeof perfil === 'object' && mascotaEnMemorial(perfil.mascota.estado_vida));
   // r10-1: el techo pinta bajo la barra de estado → íconos CLAROS
   // mientras la pantalla tiene foco; al salir se restaura la voz del
   // tema (patrón BarraTabs/Hogar — packages/ui no conoce el foco).
@@ -572,6 +575,9 @@ export default function PerfilDeMascota() {
   const [porCoordinar, setPorCoordinar] = useState<{ mascotaId: string | null }[]>([]);
   // r5: vacunas agrupadas-colapsadas + historia colapsada con filtros
   const [historiaRevelada, setHistoriaRevelada] = useState(false);
+  /* La hoja de la vida del animal: `null` cerrada. Ver la zona, abajo. */
+  const [hojaVida, setHojaVida] = useState<'perdida' | 'aparecio' | null>(null);
+  const [marcando, setMarcando] = useState(false);
   const [identidadAbierta, setIdentidadAbierta] = useState(false);
   const [vitalesAbiertos, setVitalesAbiertos] = useState(false);
   /** S91 · P2 — la SERIE de peso. El perfil mostraba el número del snapshot y
@@ -988,7 +994,7 @@ export default function PerfilDeMascota() {
       ? calcularMomentoVital({
           edadMeses: meses,
           tieneCondicionCronica: tiene_condicion_cronica,
-          esMemorial: mascota.estado_vida !== null && mascota.estado_vida !== 'activa',
+          esMemorial: mascotaEnMemorial(mascota.estado_vida),
           umbrales,
         })
       : null;
@@ -1569,6 +1575,20 @@ export default function PerfilDeMascota() {
 
             ⚠️ **En memorial no se monta**: las cinco ramas apuntan a algo por
             venir (`A3.9`, `LOYALTY §8`). */}
+        {/* ⚠️ **ESTE CONDICIONAL NO ES REDUNDANTE, Y SE MIDIÓ** (S114-C).
+            `TarjetaHoy` ya trae su propio piso por `enMemorial`, así que la
+            tentación es quitarlo «porque la pieza guarda». **Medido en el
+            aparato con Sombra, neutralizando este `!esMemorial`: las piezas
+            NO se dibujan —el piso funciona— pero el `<View>` y el encabezado
+            de sección SÍ**, y queda un título sobre una mascota en memorial
+            con nada abajo.
+
+            *La pieza se protege a sí misma; no puede proteger a la sección que
+            la contiene, porque no sabe que tiene hermanas ni que hay un título
+            arriba.* **Son dos capas anidadas y las dos hacen falta.**
+
+            (La nota gemela vive en el guard de `TarjetaConociendolo`, con su
+            propia medición: **cada una se sostiene sola**.) */}
         {!esMemorial && hoyMascota !== null ? (
           <View style={{ marginTop: spacing[6], paddingHorizontal: spacing[5] }}>
             {(() => {
@@ -1594,7 +1614,7 @@ export default function PerfilDeMascota() {
                     str('nombre') ??
                     fechaCortaMono(hoyMascota.fecha, idioma);
                   return (
-                    <TarjetaHoy
+                    <TarjetaHoy enMemorial={esMemorial}
                       clase="anticipacion"
                       /* 🔴 EL TEMA EN EL TÍTULO (firma founder, 6-sep). «Algo para
                          mirar» servía para cualquier aviso; ahora dice «Su cadera,
@@ -1629,7 +1649,7 @@ export default function PerfilDeMascota() {
                 }
                 case 'cita':
                   return (
-                    <TarjetaHoy
+                    <TarjetaHoy enMemorial={esMemorial}
                       clase="cita"
                       titulo={t('perfil.hoyCita', { servicio: hoyMascota.servicio, cuando: enDias(hoyMascota.faltan_dias) })}
                       detalle={`${hoyMascota.servicio} · ${enDias(hoyMascota.faltan_dias)}`}
@@ -1639,7 +1659,7 @@ export default function PerfilDeMascota() {
                   );
                 case 'vacuna':
                   return (
-                    <TarjetaHoy
+                    <TarjetaHoy enMemorial={esMemorial}
                       clase="vence"
                       titulo={t('perfil.hoyVacuna', { vacuna: hoyMascota.vacuna })}
                       detalle={`${hoyMascota.vacuna} · ${enDias(hoyMascota.dias)}${hoyMascota.derivada ? ` · ${t('perfil.tableroEstimada')}` : ''}`}
@@ -1649,7 +1669,7 @@ export default function PerfilDeMascota() {
                   );
                 case 'antiparasitario':
                   return (
-                    <TarjetaHoy
+                    <TarjetaHoy enMemorial={esMemorial}
                       clase="vence"
                       titulo={hoyMascota.tema
                         ? t('perfil.hoyAntiparasitario', { tema: hoyMascota.tema })
@@ -1661,7 +1681,7 @@ export default function PerfilDeMascota() {
                   );
                 case 'tip':
                   return (
-                    <TarjetaHoy
+                    <TarjetaHoy enMemorial={esMemorial}
                       clase="anticipacion"
                       titulo={t('perfil.hoyTip', { tema: hoyMascota.nombre.toLowerCase() })}
                       detalle={hoyMascota.descripcion}
@@ -1734,6 +1754,21 @@ export default function PerfilDeMascota() {
             mudó acá**: era esto mismo dicho en prosa. *Nada se pierde.*
 
             ⛔ En memorial no se monta: pide (`A3.9`). */}
+        {/* ⚠️ **ESTE CONDICIONAL NO ES REDUNDANTE, Y SE MIDIÓ** (S114-C).
+            `TarjetaConociendolo` y `BotonContanos` ya traen su propio piso por
+            `enMemorial`, así que la tentación es quitarlo «porque la pieza ya
+            guarda». **Medido en el aparato con Sombra, neutralizando este
+            `!esMemorial`: las dos piezas NO se dibujan —el piso funciona— pero
+            el encabezado «Conociéndolo» SÍ**, y queda un título sobre una
+            mascota en memorial con nada abajo.
+
+            *La pieza se protege a sí misma; no puede proteger a la sección que
+            la contiene, porque no sabe que tiene hermanas ni que hay un título
+            arriba.* **Son dos capas anidadas y las dos hacen falta.**
+
+            (La nota gemela vive en el guard de `TarjetaHoy`, con su propia
+            medición: **cada una se sostiene sola** — si alguien las separa,
+            ninguna pierde su evidencia.) */}
         {!esMemorial ? (() => {
           /* ⭐ **LAS CINCO DIMENSIONES DEL VÍNCULO** (S113-B · 2.2.3 → C 2.2.4).
              B cambió `fraccion: number` por **cinco booleanos** —*cero
@@ -1770,24 +1805,24 @@ export default function PerfilDeMascota() {
               {/* El estado completo llega cuando las CINCO están: la pieza
                   felicita en vez de pedir (ojo del founder, 2.2.2 · ⑤). */}
               {cuantas === total ? (
-                <TarjetaConociendolo
+                <TarjetaConociendolo enMemorial={esMemorial}
                   dimensiones={dimensiones}
                   voz={t('perfil.conociendoloVoz', { n: cuantas, total, nombre: mascota.nombre })}
                   completo
                   vozFelicitacion={t('perfil.conociendoloCompleto', { nombre: mascota.nombre })}
                   masSobre={
-                    <BotonContanos
+                    <BotonContanos enMemorial={esMemorial}
                       etiqueta={t('perfil.conociendoloMas', { nombre: mascota.nombre })}
                       onPress={contanos.abrir}
                     />
                   }
                 />
               ) : (
-                <TarjetaConociendolo
+                <TarjetaConociendolo enMemorial={esMemorial}
                   dimensiones={dimensiones}
                   voz={t('perfil.conociendoloVoz', { n: cuantas, total, nombre: mascota.nombre })}
                   invitacion={
-                    <BotonContanos
+                    <BotonContanos enMemorial={esMemorial}
                       etiqueta={t('perfil.conociendoloInvita', { nombre: mascota.nombre })}
                       onPress={contanos.abrir}
                     />
@@ -2529,12 +2564,149 @@ export default function PerfilDeMascota() {
             en el peor lugar posible.* La sonda sigue viva porque su medición
             sigue haciendo falta; lo que se corrige es a quién se la mostramos.
             No se retira acá: su retiro es de `D-726`, que tiene dueño. */}
+        {/* ═══ LA VIDA DEL ANIMAL — firma del founder, 8-sep ═══════════════
+            **Acá abajo y discreta, NO en la `FilaAcciones`.** Esa fila es para
+            lo que se hace seguido; esto es lo contrario: *nadie entra al perfil
+            a marcar que su perro se perdió — entra a otra cosa y un día
+            necesita esto.*
+
+            🔴 **La puerta de «Se perdió» MIGRÓ desde Pasaporte**, donde vivía
+            como un toggle. *Marcar que tu perro se perdió no es una perilla de
+            configuración: es un hecho de la vida del animal.* En Pasaporte
+            queda lo que sí es suyo —la visibilidad del contacto—, que es la
+            promesa que esta hoja hace y que allá se cumple.
+
+            ⚠️ **En memorial no se dibuja**: de quien ya no está no se marca
+            nada. Y con la mascota perdida, lo único que se ofrece es
+            «Apareció». */}
+        {!esMemorial ? (
+          <View style={{ paddingHorizontal: spacing[5], marginTop: spacing[6], gap: spacing[2] }}>
+            <Texto variante="seccion">{t('perfil.laVida')}</Texto>
+            <Tarjeta relleno="ninguno" elevacion="reposo">
+              <CeldaNavegacion
+                icono="ubicacion"
+                titulo={estaPerdida(mascota.estado_vida) ? t('perfil.aparecio') : t('perfil.sePerdio')}
+                onPress={() => setHojaVida(estaPerdida(mascota.estado_vida) ? 'aparecio' : 'perdida')}
+              />
+              <Separador />
+              {/* ⏪ **LA DESPEDIDA VIVÍA DETRÁS DEL LÁPIZ DE EDITAR** —perfil →
+                  icono de edición → menú → última opción tras un separador— y
+                  **el founder no la encontró**, igual que no encontró la de
+                  perdida.
+
+                  El argumento de quien la puso ahí era bueno y está escrito:
+                  *«un acto grave no cuelga de un botón suelto en una ficha que
+                  se abre todos los días»*. **Lo que falló no es el cuidado: es
+                  el lugar** — un menú de EDICIÓN es donde se cambia una foto o
+                  una raza, y *nadie busca «mi perro murió» debajo de un lápiz*.
+
+                  Acá está igual de discreta —abajo, sin color de alarma, sin
+                  presidir nada— pero en la zona que habla de la vida del
+                  animal, que es donde una familia la va a buscar. */}
+              {/* **SIN GLIFO, y es una decisión**: ninguno del registry dice
+                  «despedida» —lo censé— e inventarle uno sería ruido (Ley 12).
+                  Además la distingue de la de arriba, que sí lleva `ubicacion`
+                  porque hablar de buscar es exactamente lo que hace. */}
+              <CeldaNavegacion
+                titulo={t('perfil.menuDespedir', { nombre: mascota.nombre })}
+                onPress={() =>
+                  router.push({ pathname: '/hogar/mascota/despedida', params: { mascotaId: mascota.id, nombre: mascota.nombre } })
+                }
+              />
+            </Tarjeta>
+          </View>
+        ) : null}
+
         {__DEV__ ? (
         <Texto variante="dato">
           {`p0c · esta pantalla pidió todo ${vecesFoco} vez/veces`}
         </Texto>
         ) : null}
       </ScrollView>
+
+      {/* ═══ LA HOJA DE «SE PERDIÓ» — la voz es de AYUDA, no de trámite ═════
+          Dice qué va a pasar en dos líneas, y la segunda es una promesa que la
+          app CUMPLE: el pasaporte lee `estado_vida === 'perdida'` y tiene la
+          visibilidad del contacto (medido antes de escribirla — *una promesa
+          que el producto no cumple es peor que no hacerla*).
+
+          🔴 **Y en el mismo acto se ofrece revisar el contacto**, que es lo
+          único que sirve de verdad en ese momento.
+
+          Confirmación SIMPLE, sin doble paso: no es irreversible — y el botón
+          de volver («Apareció») queda visible mientras esté perdida. */}
+      <Hoja visible={hojaVida === 'perdida'} onCerrar={() => setHojaVida(null)} titulo={t('perfil.sePerdio')}>
+        <View style={{ gap: spacing[4], paddingBottom: spacing[4] }}>
+          <Texto variante="cuerpo">{t('perfil.perdidaQuePasa', { nombre: mascota.nombre })}</Texto>
+          <Boton
+            etiqueta={t('perfil.perdidaConfirmar')}
+            cargando={marcando}
+            onPress={() => {
+              setMarcando(true);
+              void marcarPerdida(mascota.id, true).then((r) => {
+                setMarcando(false);
+                setHojaVida(null);
+                if (!r.ok) {
+                  mostrar({ variante: 'error', texto: r.mensaje });
+                  return;
+                }
+                /* `yaEstaba` distingue «lo marcaste vos» de «ya estaba así», y
+                   a una familia NO se le dicen igual: la primera es un acto
+                   suyo, la segunda es la app diciéndole que llegó tarde a algo
+                   que ya pasó. */
+                mostrar({
+                  variante: r.data.yaEstaba ? 'neutro' : 'exito',
+                  texto: r.data.yaEstaba ? t('perfil.perdidaYaEstaba') : t('perfil.perdidaListo'),
+                });
+                /* Releer el perfil: `estado_vida` viene de ahí y la zona de
+                   abajo cambia de botón con él. */
+                void obtenerPerfilMascota(mascota.id).then((p2) => {
+                  if (p2.ok) setPerfil(p2.data);
+                });
+              });
+            }}
+          />
+          {/* Lo único que sirve de verdad ahora. Va DESPUÉS del acto porque el
+              acto es lo urgente; esto es lo que lo hace útil. */}
+          <CeldaNavegacion
+            icono="carnet"
+            titulo={t('perfil.perdidaRevisarContacto')}
+            onPress={() => {
+              setHojaVida(null);
+              router.push({ pathname: '/hogar/mascota/pasaporte', params: { mascotaId: mascota.id } });
+            }}
+          />
+        </View>
+      </Hoja>
+
+      {/* «APARECIÓ» — breve y alegre, sin ceremonia y **sin preguntar qué
+          pasó**: la familia ya vivió eso y no se lo vamos a hacer contar. */}
+      <Hoja visible={hojaVida === 'aparecio'} onCerrar={() => setHojaVida(null)} titulo={t('perfil.aparecio')}>
+        <View style={{ gap: spacing[4], paddingBottom: spacing[4] }}>
+          <Texto variante="cuerpo">{t('perfil.aparecioCuerpo', { nombre: mascota.nombre })}</Texto>
+          <Boton
+            etiqueta={t('perfil.aparecioConfirmar')}
+            cargando={marcando}
+            onPress={() => {
+              setMarcando(true);
+              void marcarPerdida(mascota.id, false).then((r) => {
+                setMarcando(false);
+                setHojaVida(null);
+                if (!r.ok) {
+                  mostrar({ variante: 'error', texto: r.mensaje });
+                  return;
+                }
+                mostrar({ variante: 'exito', texto: t('perfil.aparecioListo', { nombre: mascota.nombre }) });
+                /* Releer el perfil: `estado_vida` viene de ahí y la zona de
+                   abajo cambia de botón con él. */
+                void obtenerPerfilMascota(mascota.id).then((p2) => {
+                  if (p2.ok) setPerfil(p2.data);
+                });
+              });
+            }}
+          />
+        </View>
+      </Hoja>
 
       <PaseoSocialHoja
         visible={socialHojaAbierta}
@@ -2594,19 +2766,16 @@ export default function PerfilDeMascota() {
               setRazaHoja(true);
             }}
           />
-          <Separador />
-          {/* Sola, al final y después del separador. **Sin color de alarma**:
-              el memorial es sereno, y pintar la despedida de rojo la trata como
-              un borrado. No lo es: es el expediente que sigue, en otra clave. */}
-          <Celda
-            interactiva
-            accessibilityRole="button"
-            titulo={t('perfil.menuDespedir', { nombre: mascota.nombre })}
-            onPress={() => {
-              setMenuEdicion(false);
-              router.push({ pathname: '/hogar/mascota/despedida', params: { mascotaId: mascota.id, nombre: mascota.nombre } });
-            }}
-          />
+          {/* ☠️ **ACÁ VIVÍA LA DESPEDIDA Y SE MUDÓ** a la zona «Su vida», abajo
+              en esta misma pantalla. **No queda una copia**: dos puertas al
+              mismo acto es lo que esta casa castiga, y con un acto de esta
+              gravedad sería peor —la familia no tiene que descubrir cuál de
+              las dos es la buena.
+
+              *Lo que se conserva del original es su forma: sola, discreta, sin
+              color de alarma.* El memorial es sereno, y pintarlo de rojo lo
+              trataría como un borrado; no lo es: es el expediente que sigue,
+              en otra clave. */}
         </Hoja>
       ) : null}
 
@@ -2619,8 +2788,17 @@ export default function PerfilDeMascota() {
           quien ya no está se lee, no se pide nada (`A3.9`). El botón que la
           abre ya cuelga del guard; la Hoja también, porque *un texto
           inalcanzable hoy es alcanzable mañana*. */}
-      {!esMemorial ? (
-      <HojaContanos
+      {/* ⏪ **ACÁ ENVOLVÍA UN `{!esMemorial ? …}` Y SE RETIRA EN EL MISMO ACTO
+          QUE DEJÓ DE HACER FALTA** (Ley 37). Envolvía **exactamente y sólo**
+          esta pieza, y desde que `HojaContanos` recibe `enMemorial` el guard
+          vive ADENTRO: dos guards para la misma regla es uno que alguien va a
+          mover sin mover el otro.
+
+          🔴 **Y es lo que vuelve MEDIBLE la cura:** mientras el condicional
+          estuviera, la Hoja no aparecía en memorial **por el condicional**, y
+          no se podía saber si la prop hacía algo. Sin él, que no aparezca es
+          la señal. *Un guard que no puede producir su rojo no está midiendo.* */}
+      <HojaContanos enMemorial={esMemorial}
         visible={contanos.visible}
         onCerrar={contanos.cerrar}
         titulo={t('contanos.titulo', { nombre: mascota.nombre })}
@@ -2654,7 +2832,6 @@ export default function PerfilDeMascota() {
         }}
         propuesta={contanos.propuestaUi}
       />
-      ) : null}
 
       {/* ⛔ Bajo el mismo guard que el resto del «cuéntanos»: pide. */}
       {!esMemorial ? chips.hoja : null}

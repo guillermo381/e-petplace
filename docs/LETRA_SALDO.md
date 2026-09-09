@@ -94,9 +94,26 @@ clientes), nunca ingreso. Ver §7.
     S101-B toma de acá es **la costura** — el monto a debitar entra como dato del
     desglose y jamás como total hardcodeado, para que el día que el saldo exista se
     enchufe sin reformar el cobro (`PLAN_S101B_SUPERFICIE_PAGO` §8).
-- **Reverso de una compra mixta**: cada porción vuelve por donde vino — la porción saldo
-  vuelve como crédito nuevo (movimiento, no edición), la porción tarjeta sigue la
-  política de reembolsos vigente.
+  - ✅ **CONSTRUIDO — S114-A (8-sep-2026), con la mecánica firmada por el founder.**
+    La familia con $13 y un pedido de $20 aplica $13 de saldo y el riel cobra $7.
+    · **`compras.saldo_aplicado`** guarda cuánto del total cubre el saldo; el riel cobra
+      `total − saldo_aplicado` (`pagos-cobro` lo recorta server-side, jamás desde el
+      cliente). · **`aplicar_saldo_a_compra`** RESERVA el saldo (o lo aplica entero si
+      cubre todo) y deja la compra en `esperando_pago`; mientras está reservado,
+      `saldo_hogar_disponible` lo RESTA (no se puede gastar dos veces entre reservar y
+      confirmar). · 🔴 **El saldo se CONSUME después de que el riel confirma** — el
+      movimiento de consumo lo escribe `confirmar_pago_compra` al confirmar el webhook;
+      si el riel rebota, el saldo queda intacto (la familia no pierde nada). ·
+      **Atomicidad todo-o-nada** sobre los N pedidos de la compra, igual que el riel.
+      *«Primero el saldo» es orden de APLICACIÓN (cubre lo suyo, la tarjeta el resto);
+      «se consume después de confirmar» es la TIMING de la escritura — no se contradicen.*
+- **Reverso / devolución de una compra mixta**: cada porción vuelve por donde vino, **a
+  prorrata de `saldo_aplicado / total`** — la porción saldo vuelve como crédito nuevo al
+  hogar (movimiento, no edición: `acreditar_saldo_hogar`, idempotente por el caso), la
+  porción tarjeta sigue la política de reembolsos vigente (el ledger se reversa
+  proporcional, §7.14 de `MODELO_FINANCIERO`). **El reembolso PARCIAL usa el mismo
+  factor**: si se devuelve la mitad, vuelve la mitad de cada porción. *(S114-A ④:
+  `caso_resolver` reparte cuando el caso es sobre un pedido cuya compra tuvo saldo.)*
 
 ## §6 · SI SE PUEDE RETIRAR
 

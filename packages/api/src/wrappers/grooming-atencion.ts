@@ -394,7 +394,7 @@ export async function obtenerFichaAntesGrooming(
       tiene_condicion_cronica: Array.isArray(condiciones) && condiciones.length > 0,
       tiene_emergencia_activa: perfil.data?.tiene_emergencia_activa ?? false,
       fecha_nacimiento: mascota.data.fecha_nacimiento,
-      es_memorial: mascota.data.estado_vida !== null && mascota.data.estado_vida !== 'activa',
+      es_memorial: mascota.data.estado_vida === 'fallecida',   // S114-A ②: memorial = fallecida; perdida NO es memorial (elegibilidad sigue en mascotasElegibles)
       umbrales: catalogo.error ? null : parsearUmbralesFicha(catalogo.data?.momentos_vitales_jsonb),
     },
   };

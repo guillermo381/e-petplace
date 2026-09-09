@@ -1,0 +1,286 @@
+#!/usr/bin/env node
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * verify:pase-de-lista — S114-E · un gate que no pudo mirar no está en verde
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * **EL DEFECTO QUE CURA.** Un gate del pre-commit que sale **2** («no pude
+ * medir») imprime una línea, **no frena**, y el commit sigue. Esa línea aparece
+ * en la terminal de quien commiteó — *una pista cualquiera* — y de ahí, si
+ * llega a algún lado, llega **al parte de otra pista**. ⇒ **el estado «mudo»
+ * no tiene superficie ni dueño**, y un gate mudo que corre en cada commit
+ * **tiene exactamente el mismo aspecto que uno sano**: silencio.
+ *
+ * *Un gate que no pudo mirar no es un gate en verde.* Este pase de lista le da
+ * a ese estado un lugar donde verse y un nombre que responda.
+ *
+ * ── DOS ESTADOS DISTINTOS, Y EL SEGUNDO ES PEOR ──────────────────────────
+ * · **MUDO** — corrió y no pudo medir (exit 2). Se lee como salud.
+ * · **AUSENTE DEL HOOK** — el canon dice que está cableado y **el hook vivo no
+ *   lo tiene**. *Peor que mudo: no corre, y todos creen que sí.*
+ *
+ * ── DE DÓNDE SALE CADA COSA (y qué se deriva vs qué se declara) ──────────
+ * · **El conjunto se MIDE del hook VIVO**, resuelto por `git config
+ *   core.hooksPath` — **no del `.githooks` de este worktree**. `L-490`: esa
+ *   ruta es ABSOLUTA al árbol principal y no obedece a ninguna rama, así que
+ *   el hook que corre para todos es el que tenga en disco quien conduce `main`.
+ *   *Leer la copia versionada mediría otra cosa.*
+ * · **El dueño se DERIVA donde el hook lo declara** (`── verify:x ── S112-D,
+ *   cableado por A`) y **se declara en `DUENOS` donde el hook no lo dice**. La
+ *   salida marca cuál es cuál: *un dueño derivado envejece con el objeto; uno
+ *   escrito a mano envejece solo.*
+ *
+ * ── ANTI-ROT: LA TABLA NO PUEDE QUEDARSE ATRÁS DEL HOOK ─────────────────
+ * Si el hook corre un gate que este archivo no conoce, **sale 2**. *Una lista
+ * de control que no cubre todo lo que hay no es un control: es una muestra.*
+ *
+ * ── ¿PERDONA ALGO QUE EL PRODUCTO NO PERDONA? ────────────────────────────
+ * **Sí, dos cosas:** ① corre cada gate **una vez y desde este árbol** — un gate
+ * que sea mudo sólo en OTRO worktree (por una fuente que allá falta) sale verde
+ * acá. *Ésa es justamente la clase que originó este arnés*, así que se dice
+ * fuerte: **este pase de lista prueba que el gate PUEDE medir, no que mida en
+ * la máquina de todos.** ② No mide el hook `prepare-commit-msg`.
+ *
+ * ── `--todos` · DESPUÉS DE UNA CURA AJENA, SE CORREN TODOS ──────────────
+ * **Regla de la casa (founder, 7-sep):** *después de una cura ajena, corrés
+ * todos.* No es prolijidad: **el peor defecto de esta sesión sólo apareció así.**
+ * `verify:postventa-plata` se quedó mudo cuando A6 llevó los 19 objetos sin
+ * devengo a 0 — *se apagó justo cuando el sistema se puso sano*, sin rojo y con
+ * todo el tablero en verde. **Mirando sólo el gate que uno tocó, seguía mudo.**
+ *
+ * Por eso `--todos` suma los gates de esta pista, que **no están en el hook a
+ * propósito** (pegan a la base), y **avisa cuando `main` se movió**:
+ * 🔴 **`main` ES EL LOCAL, Y NO ES `origin/main` — medido el 8-sep: 47 commits de
+ * diferencia.** En esta casa la conducción (A) mergea en el árbol principal y
+ * empuja después, así que **el `main` local ve el trabajo ajeno ANTES que el
+ * remoto** ⇒ como referencia de «¿estoy al día?» es la más EXIGENTE de las dos,
+ * que es la que corresponde. *Lo que no corresponde es decir «main» a secas:
+ * quien lea va a entender `origin/main`, y las dos afirmaciones son verdaderas
+ * y distintas.* Por eso la salida lo NOMBRA.
+ *
+ * `git rev-list --count HEAD..main` dice cuántos commits ajenos hay sin
+ * mezclar — *sin archivo de estado que se pueda quedar viejo, que es el mismo
+ * defecto una capa más arriba.*
+ *
+ * ⚠️ **NO corre los gates de base de OTRAS pistas.** Se listan y se dice que no
+ * se corren: *algunos escriben sondas, y correr a ciegas lo que no es tuyo no
+ * es diligencia — es efecto colateral.*
+ *
+ * ⚠️ **No va al hook**: corre otros gates, y un pase de lista adentro del
+ * pre-commit sería recursivo y caro. Va al paso ⓪ y al cierre.
+ *
+ * Salidas: 0 verde · 1 hay mudos o ausentes · 2 no concluyente.
+ */
+import { execFileSync, spawnSync } from 'node:child_process';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
+
+const TODOS = process.argv.includes('--todos');
+
+/** Los gates de ESTA pista. No están en el hook a propósito: pegan a la base.
+ *  Se declaran acá porque `--todos` no puede derivarlos del hook. */
+const MIS_GATES = [
+  'verify-devengo-por-sujeto.mjs',
+  'verify-cierre-ausente.mjs',
+  'verify-postventa-plata.mjs',
+  'verify-asientos-caso.mjs',
+  'verify-plantillas-categoria.mjs',
+];
+
+/** Dueño declarado, SÓLO para los gates cuyo hook no lo dice. */
+const DUENOS = {
+  'verify-diseno.mjs':           { dueno: 'B', nota: 'design system' },
+  'verify-jornada-completa.mjs': { dueno: 'A', nota: 'S109, al pre-commit' },
+  'verify-sin-byte-nul.mjs':     { dueno: 'A', nota: 'higiene de árbol' },
+};
+
+/** Lo que el canon afirma cableado en el hook. Si el hook no lo tiene: ROJO. */
+const CANON_DICE_CABLEADO = [
+  { script: '_censo-hoisting-nativo.mjs', gate: 'verify:hoisting-nativo', dueno: 'A' },
+  { script: 'verify-ref-antes-de-uso.mjs', gate: 'verify:ref-antes-de-uso', dueno: 'A' },
+  { script: 'verify-rutas-de-aviso.mjs',  gate: 'verify:rutas-de-aviso',  dueno: 'D' },
+  { script: 'verify-vio-todo.mjs',        gate: 'verify:vio-todo',        dueno: 'B' },
+  { script: 'verify-fila-memoizada.mjs',  gate: 'verify:fila-memoizada',  dueno: 'B' },
+];
+
+// ── ① EL HOOK VIVO ───────────────────────────────────────────────────────
+let hookTexto, hookRuta;
+try {
+  const base = execFileSync('git', ['config', 'core.hooksPath'], { encoding: 'utf8' }).trim();
+  hookRuta = join(base, 'pre-commit');
+  if (!existsSync(hookRuta)) throw new Error(`no existe ${hookRuta}`);
+  hookTexto = readFileSync(hookRuta, 'utf8');
+} catch (e) {
+  console.error('🟠 NO CONCLUYENTE · no se pudo leer el hook vivo.');
+  console.error(`   ${String(e.message).slice(0, 200)}`);
+  console.error('   Sin el hook no hay conjunto que pasar lista: el gate NO dice verde.');
+  process.exit(2);
+}
+
+const enElHook = [...new Set(
+  (hookTexto.match(/scripts\/(?:verify-|_censo-)[a-z0-9-]+\.mjs/g) ?? []).map((m) => m.split('/')[1]),
+)].sort();
+
+if (enElHook.length === 0) {
+  console.error('🟠 NO CONCLUYENTE · el hook vivo no invoca ningún gate reconocible.');
+  console.error(`   ${hookRuta}`);
+  process.exit(2);
+}
+
+// Dueño derivado de las cabeceras del hook: "── verify:x ── S112-D, cableado por A"
+const derivado = new Map();
+for (const l of hookTexto.split('\n')) {
+  const m = l.match(/──\s*(verify:[a-z0-9-]+|[a-z0-9-]+)\s*[─(]+.*?S\d+-([A-Z])/);
+  if (m) derivado.set(m[1].replace(/^verify:/, ''), m[2]);
+}
+const duenoDe = (script) => {
+  const corto = script.replace(/^(verify-|_censo-)/, '').replace(/\.mjs$/, '');
+  if (derivado.has(corto)) return { dueno: derivado.get(corto), fuente: 'derivado del hook' };
+  if (DUENOS[script]) return { dueno: DUENOS[script].dueno, fuente: `declarado · ${DUENOS[script].nota}` };
+  return null;
+};
+
+// ── ② ANTI-ROT ───────────────────────────────────────────────────────────
+const sinDueno = enElHook.filter((s) => !duenoDe(s));
+if (sinDueno.length) {
+  console.error('🟠 NO CONCLUYENTE · el hook corre gates que este pase de lista no conoce:');
+  for (const s of sinDueno) console.error(`   · ${s}`);
+  console.error('   Una lista de control que no cubre todo lo que hay no es un control:');
+  console.error('   es una muestra. Agregalos a DUENOS y volvé a correr.');
+  process.exit(2);
+}
+
+// ── ②bis ¿SE MOVIÓ `main` DESDE ESTA RAMA? ───────────────────────────────
+let ajenos = null;
+try {
+  ajenos = Number(execFileSync('git', ['rev-list', '--count', 'HEAD..main'], { encoding: 'utf8' }).trim());
+} catch { /* sin main local, se declara abajo */ }
+
+// ── ③ PASE DE LISTA ──────────────────────────────────────────────────────
+console.log('verify:pase-de-lista · los gates del hook, uno por uno');
+console.log(`  hook vivo: ${hookRuta}`);
+console.log(`  (L-490: ruta ABSOLUTA al árbol principal — no es el .githooks de este worktree)\n`);
+
+const mudos = [], rojos = [];
+const aCorrer = TODOS
+  ? [...enElHook, ...MIS_GATES.filter((g) => !enElHook.includes(g))]
+  : enElHook;
+if (TODOS) {
+  const faltantes = MIS_GATES.filter((g) => !existsSync(`scripts/${g}`));
+  if (faltantes.length) {
+    console.error(`🟠 NO CONCLUYENTE · gates declarados que no existen: ${faltantes.join(', ')}`);
+    process.exit(2);
+  }
+}
+console.log('  estado   gate                             dueño   fuente del dueño');
+for (const script of aCorrer) {
+  const d = duenoDe(script) ?? { dueno: 'E', fuente: 'de esta pista (no está en el hook: pega a la base)' };
+  const r = spawnSync('node', [`scripts/${script}`], { encoding: 'utf8' });
+  const cod = r.status;
+  const est = cod === 0 ? '🟢 verde ' : cod === 1 ? '🔴 ROJO  ' : `🟠 MUDO(${cod})`;
+  console.log(`  ${est} ${script.replace(/\.mjs$/, '').padEnd(32)} ${d.dueno.padEnd(7)} ${d.fuente}`);
+  if (cod === 2) {
+    /* ⚠️ La razón se busca por el MARCADOR de no-concluyente, no por palabras
+       sueltas. La primera versión buscaba /falta|ausente/ y matcheaba el TÍTULO
+       de `verify:cierre-ausente` — el nombre del gate contenía la palabra que
+       el patrón cazaba, así que imprimía su encabezado como si fuera la causa.
+       *Un extractor por palabra suelta encuentra la palabra, no el hecho.* */
+    const lineas = `${r.stdout}${r.stderr}`.split('\n').map((l) => l.trim()).filter(Boolean);
+    const razon = (lineas.find((l) => /^🟠|NO CONCLUYENTE/.test(l))
+                ?? lineas.find((l) => /no se pudo|no existe|no puede/i.test(l))
+                ?? '(sin razón impresa)').slice(0, 150);
+    /* 🔴 DOS MUDOS DISTINTOS, Y TRATARLOS IGUAL DULA LA ALARMA.
+       · **Mudo DECLARADO** — el gate imprime `BLOQUEANTE NOMBRADO`: sabe por
+         qué no puede medir y a quién le toca. Se MUESTRA, no frena. *Un exit 1
+         permanente por un estado conocido entrena a saltear el pase de lista, y
+         entonces deja de avisar del que sí importa.*
+       · **Mudo SIN DECLARAR** — no pudo medir y no sabe por qué: sorpresa, y
+         ésos frenan.
+       ⚠️ El criterio sale del gate, no de una lista acá — *una lista de
+         excepciones envejece; la declaración vive al lado del bloqueante.*
+       ⚠️ Y su costo: un gate puede acallarse imprimiendo esa frase. Es
+         deliberado — **exige que su autor NOMBRE el bloqueante**, que es la
+         conducta que se quiere, y el pase de lista lo sigue mostrando igual. */
+    const declarado = /BLOQUEANTE NOMBRADO/i.test(`${r.stdout}${r.stderr}`);
+    mudos.push({ script, dueno: d.dueno, razon, declarado });
+  } else if (cod !== 0) {
+    rojos.push({ script, dueno: d.dueno });
+  }
+}
+
+// ── ④ LO QUE EL CANON DICE CABLEADO Y EL HOOK NO TIENE ───────────────────
+const ausentes = CANON_DICE_CABLEADO.filter((c) => !enElHook.includes(c.script));
+if (ausentes.length) {
+  console.log('\n  ── EL CANON LOS DA POR CABLEADOS Y EL HOOK VIVO NO LOS TIENE ──');
+  for (const a of ausentes) {
+    const hay = existsSync(`scripts/${a.script}`);
+    console.log(`   🔴 ${a.gate.padEnd(30)} dueño ${a.dueno} · el script ${hay ? 'EXISTE' : 'no existe'} y no corre en ningún commit`);
+  }
+}
+
+// ── LOS DE BASE DE OTRAS PISTAS: se listan, NO se corren ─────────────────
+if (TODOS) {
+  const conBase = readdirSync('scripts')
+    .filter((f) => /^verify-.*\.mjs$/.test(f))
+    .filter((f) => { try { return readFileSync(`scripts/${f}`, 'utf8').includes("from './lib-db.mjs'"); } catch { return false; } })
+    .filter((f) => !aCorrer.includes(f) && f !== 'verify-pase-de-lista.mjs');
+  if (conBase.length) {
+    console.log(`\n  ── ${conBase.length} gates de base de OTRAS pistas: se listan, NO se corren ──`);
+    console.log(`     ${conBase.join(' · ')}`);
+    console.log('     (algunos escriben sondas; correr a ciegas lo ajeno no es diligencia,');
+    console.log('      es efecto colateral. Su dueño los corre.)');
+  }
+}
+
+// ── VEREDICTO ────────────────────────────────────────────────────────────
+console.log('');
+if (ajenos === null) {
+  console.log('⚠️ no se pudo comparar contra `main` (¿sin main local?): no sé si hubo curas ajenas.');
+} else if (ajenos > 0) {
+  console.log(`⚠️ \`main\` tiene ${ajenos} commit(s) que esta rama no tiene.`);
+  console.log('   Si alguno es una CURA, este pase de lista corrió contra un árbol viejo:');
+  console.log('   traé main y volvé a correr. *Después de una cura ajena, se corren todos —');
+  console.log('   el peor defecto de S114 sólo apareció así.*');
+} else {
+  /* Se nombra CUÁL main, y se dice si el local va adelante del remoto: sin eso,
+     «al día» es cierto para mí y ambiguo para el que lo lee. */
+  let adelanto = null;
+  try {
+    adelanto = Number(execFileSync('git', ['rev-list', '--count', 'origin/main..main'],
+      { encoding: 'utf8' }).trim());
+  } catch { /* sin origin/main a mano: se dice lo que se sabe y nada más */ }
+  const detalle = adelanto === null
+    ? ' (no se pudo comparar con `origin/main`)'
+    : adelanto === 0
+      ? ' (y `main` local == `origin/main`)'
+      : ` (⚠️ \`main\` local va ${adelanto} commit(s) ADELANTE de \`origin/main\`: ` +
+        'la referencia es la local, que es la más exigente)';
+  console.log(`✅ esta rama tiene todo lo de \`main\` LOCAL${detalle}: el pase de lista corrió contra el árbol al día.`);
+}
+const mudosSorpresa = mudos.filter((m) => !m.declarado);
+if (mudos.length) {
+  console.error('🟠 GATES MUDOS — corrieron y NO pudieron medir:');
+  for (const m of mudos) {
+    console.error(`   · ${m.script}  ·  DUEÑO: ${m.dueno}  ${m.declarado ? '· bloqueante DECLARADO' : '🔴 SIN DECLARAR'}`);
+    console.error(`     ${m.razon}`);
+  }
+  console.error('   Un gate mudo en el hook se ve igual que uno sano: silencio.');
+  if (!mudosSorpresa.length) {
+    console.error('   Los de arriba NOMBRAN su bloqueante: se muestran y no frenan.');
+  }
+}
+if (ausentes.length) {
+  console.error(`\n🔴 ${ausentes.length} gate(s) que el canon da por cableados NO están en el hook vivo:`);
+  for (const a of ausentes) console.error(`   · ${a.gate} · DUEÑO: ${a.dueno}`);
+  console.error('   Peor que mudo: no corren, y todos creen que sí.');
+}
+if (rojos.length) {
+  console.error(`\n🔴 ${rojos.length} gate(s) en rojo (eso SÍ frena commits, y está bien):`);
+  for (const r of rojos) console.error(`   · ${r.script} · dueño ${r.dueno}`);
+}
+if (mudosSorpresa.length || ausentes.length) process.exit(1);
+if (rojos.length) {
+  console.log('🟢 ningún gate mudo ni ausente. Los rojos de arriba son gates funcionando.');
+  process.exit(0);
+}
+console.log(`🟢 VERDE · los ${enElHook.length} gates del hook corrieron y pudieron medir.`);

@@ -1,0 +1,555 @@
+/**
+ * S114-C · NEGOCIOS · EL CASO — §5 de `DIRECCION_POSTVENTA`.
+ *
+ * TESIS (Ley 14): *la tensión se comunica con humanidad, no con un ticket.*
+ *
+ * FIRMA (Ley 15): **tres acciones y nada más** (§5). Responder va al hilo;
+ * las otras dos mueven el caso. La lista está cerrada por la letra, así que
+ * acá no hay un menú «…» ni una cuarta.
+ *
+ * CHANEL (Ley 16): **el reloj se ve y no es rojo** — `BannerPlazo` no acepta
+ * `danger` ni reloj adentro. Y **cuando vence se le DICE**: *«e-PetPlace tomó
+ * el caso»*, no se le oculta.
+ *
+ * 🔴 **SIN PUNTAJE** (§5): esta pantalla no cuenta nada sobre cómo le fue al
+ * prestador en sus casos. *Un número sobre eso es una calificación.*
+ *
+ * ⚠️ **«Reconocer y resolver» abre las tres formas de la letra** —devolver
+ * todo, una parte, o saldo—. Acá van las dos que el motor acepta hoy: el
+ * saldo es del lado de la FAMILIA (ella elige destino, §4) y el prestador
+ * elige el ALCANCE. *No es una simplificación mía: es que el destino no es
+ * suyo.*
+ */
+
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { View } from 'react-native';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import {
+  BannerPlazo,
+  BarraEscribir,
+  Boton,
+  BurbujaMensaje,
+  CARA_EN_HILO,
+  Campo,
+  Encabezado,
+  Esqueleto,
+  EsqueletoGrupo,
+  EstadoVacio,
+  EventoDelHilo,
+  Hoja,
+  Icono,
+  SuperficieChat,
+  Texto,
+  spacing,
+  useAviso,
+  useTheme,
+} from '@epetplace/ui';
+import {
+  enviarMensajeDeCaso,
+  leerCaso,
+  leerMensajesDeCaso,
+  pedirACasa,
+  reconocerYResolver,
+  type AsientoCaso,
+  type CasoDetalle,
+  type MensajeCaso,
+} from '@epetplace/api';
+import { horaCortaDeMensaje } from '@epetplace/i18n';
+
+import { useTraduccion } from '@/i18n';
+
+type Fase<T> = T | 'cargando' | 'error';
+type Fila = { clave: string; mensaje: MensajeCaso; estado?: 'enviando' | 'no_se_envio'; textoCrudo?: string };
+
+const VOZ_ASIENTO: Record<AsientoCaso, 'postventa.asientoCasa' | 'postventa.asientoFamilia' | 'postventa.asientoYo'> = {
+  casa: 'postventa.asientoCasa',
+  familia: 'postventa.asientoFamilia',
+  prestador: 'postventa.asientoYo',
+};
+
+export default function CasoDelPrestador() {
+  const { theme } = useTheme();
+  const { t, idioma } = useTraduccion();
+  const aviso = useAviso();
+  const { casoId } = useLocalSearchParams<{ casoId?: string }>();
+
+  const [caso, setCaso] = useState<Fase<CasoDetalle>>('cargando');
+  const [hilo, setHilo] = useState<Fila[]>([]);
+  const [borrador, setBorrador] = useState('');
+  const [hojaResolver, setHojaResolver] = useState(false);
+  /* ═══ EL PARCIAL, QUE ANTES ERA UN BOTÓN QUE NO SE PODÍA COMPLETAR ════════
+     Firma del founder (8-sep), caminada en aparato: *«devolver una parte» no
+     permite decir de cuánto es la parte.* Ahora la Hoja tiene **dos momentos**:
+     elegir el alcance, y —si es parcial— decir **cuánto** y **por qué**.
+     `null` = todavía no eligió; entrar al segundo momento es una decisión y no
+     un formulario que estaba ahí desde el principio. */
+  const [modo, setModo] = useState<null | 'parcial' | 'sin_devolucion'>(null);
+  const [montoTexto, setMontoTexto] = useState('');
+  const [razon, setRazon] = useState('');
+  const [obrando, setObrando] = useState(false);
+  const optimistasRef = useRef<Fila[]>([]);
+  /* Ver la nota de `cargar`: los dos refs curan la carrera del sondeo. */
+  const secuenciaRef = useRef(0);
+  const enVueloRef = useRef(false);
+
+  /** Plata en texto. **Local a propósito**: la casa no tiene un `dinero()`
+   *  compartido y **inventarlo desde acá sería fijar el formato de toda la app
+   *  desde una pantalla de postventa** — el día que exista, esto se borra. */
+  const dinero = (v: number) => `$ ${v.toFixed(2)}`;
+
+  const detalle = caso === 'cargando' || caso === 'error' ? null : caso;
+  const totalObjeto = detalle?.objeto.total ?? null;
+  /** El tope real: lo que QUEDA. Si el motor no lo sabe, cae al total; si
+   *  tampoco, no hay referencia y la Hoja lo dice. */
+  const disponible = detalle?.objeto.disponibleDevolver ?? totalObjeto;
+
+  /** El monto tipeado, ya usable. **`null` cuando no se puede usar** —vacío,
+   *  no numérico, cero o negativo—, que es distinto de «0». *La coma se
+   *  normaliza porque medio Ecuador escribe «12,50», y un `parseFloat` sobre
+   *  eso devuelve 12 sin quejarse: **doce dólares en vez de doce cincuenta**,
+   *  silencioso y con la coma a la vista.* */
+  const montoNumero = (() => {
+    const n = Number.parseFloat(montoTexto.replace(',', '.'));
+    return Number.isFinite(n) && n > 0 ? Math.round(n * 100) / 100 : null;
+  })();
+
+  /* ═══ 🔴 LOS TRES DEFECTOS QUE ESTA PANTALLA TENÍA IGUAL QUE LA DE LA FAMILIA
+     Los curé en el cliente y **no acá**, que es la regla de la casa cobrándose:
+     *una regla duplicada por copia se cura dos veces o no se cura.* Las dos
+     pantallas nacieron de la misma forma y las tres cosas estaban clonadas.
+
+     ① **EL GUARD IMPOSIBLE.** ⏪ Decía `ids.has(f.clave)` — pero la clave de
+        una optimista es `local-<timestamp>` y la del motor es un UUID:
+        **jamás coinciden**, así que el filtro devolvía siempre `true` y la
+        optimista sobrevivía al lado de la fila real. *No falla: acumula.* Es
+        el mismo mensaje duplicado que el founder vio del lado de la familia.
+        Se pregunta lo correcto: si el envío salió y el motor ya devolvió el
+        hilo, **toda optimista que estaba `enviando` YA ESTÁ ahí**; sobreviven
+        sólo las que fallaron, cuyo texto no se puede perder.
+
+     ② **EL ORDEN.** Las optimistas iban al PRINCIPIO de un array que el motor
+        entrega ascendente. Son **lo más nuevo**: van al final.
+
+     ③ **NO HABÍA SONDEO.** El prestador no veía llegar el mensaje de la
+        familia sin salir y entrar — *un chat en el que uno de los dos lados
+        tiene que salir para enterarse no es un chat.* Va con la misma cura de
+        carrera que el cliente: una respuesta atrasada **no escribe**, y el
+        tick se saltea si la anterior sigue en vuelo. */
+  const cargar = useCallback(async () => {
+    if (typeof casoId !== 'string' || casoId.length === 0) return;
+    const mia = ++secuenciaRef.current;
+    enVueloRef.current = true;
+    const [c, m] = await Promise.all([leerCaso(casoId), leerMensajesDeCaso(casoId)]);
+    if (mia === secuenciaRef.current) enVueloRef.current = false;
+    if (mia !== secuenciaRef.current) return;
+
+    setCaso(c.ok ? c.data : 'error');
+    if (m.ok) {
+      const delMotor: Fila[] = m.data.mensajes.map((x) => ({ clave: x.id, mensaje: x }));
+      optimistasRef.current = optimistasRef.current.filter((f) => f.estado === 'no_se_envio');
+      setHilo([...delMotor, ...optimistasRef.current]);
+    }
+  }, [casoId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      let vigente = true;
+      void cargar();
+      const cada5s = setInterval(() => {
+        if (vigente && !enVueloRef.current) void cargar();
+      }, 5000);
+      return () => {
+        vigente = false;
+        clearInterval(cada5s);
+        secuenciaRef.current += 1;
+        enVueloRef.current = false;
+      };
+    }, [cargar]),
+  );
+
+  const responder = useCallback(
+    async (texto: string) => {
+      if (typeof casoId !== 'string') return;
+      const clave = `local-${Date.now()}`;
+      const opt: Fila = {
+        clave,
+        estado: 'enviando',
+        textoCrudo: texto,
+        mensaje: { id: clave, autor: 'prestador', tipo: 'mensaje', cuerpo: texto, creadoEn: new Date().toISOString() },
+      };
+      /* Al final: es lo más nuevo, y el hilo va ascendente (② de arriba). */
+      optimistasRef.current = [...optimistasRef.current, opt];
+      /* Al FINAL, igual que en el ref: la lista va ascendente y la
+         inversión para la pieza ocurre en un solo lugar. */
+      setHilo((p) => [...p, opt]);
+      setBorrador('');
+      const r = await enviarMensajeDeCaso(casoId, texto);
+      if (r.ok) {
+        await cargar();
+        return;
+      }
+      const mal: Fila = { ...opt, estado: 'no_se_envio' };
+      optimistasRef.current = optimistasRef.current.map((f) => (f.clave === clave ? mal : f));
+      setHilo((p) => p.map((f) => (f.clave === clave ? mal : f)));
+    },
+    [casoId, cargar],
+  );
+
+  /** Cerrar la Hoja **deja el segundo momento en cero**: si vuelve a abrirla,
+   *  vuelve a elegir. *Un monto que sobrevive a cerrar la hoja es un número que
+   *  alguien va a confirmar sin haberlo escrito esta vez.* */
+  const cerrarHoja = useCallback(() => {
+    setHojaResolver(false);
+    setModo(null);
+    setMontoTexto('');
+    setRazon('');
+  }, []);
+
+  const resolver = useCallback(
+    async (alcance: 'total' | 'parcial' | 'sin_devolucion', monto?: number, motivo?: string) => {
+      if (typeof casoId !== 'string') return;
+      setObrando(true);
+      const r = await reconocerYResolver(casoId, { alcance, monto, motivo });
+      setObrando(false);
+      /* 🔴 **EL RESULTADO SE LEE, Y ANTES SE TIRABA.** ⏪ Acá decía
+         `await reconocerYResolver(…)` a secas: cuando el motor rebotaba
+         —y con `parcial` rebota SIEMPRE, porque le falta el monto— la Hoja se
+         cerraba, la pantalla recargaba **y no pasaba nada**. *Un control que
+         devuelve silencio no informa de un problema: informa de que la app
+         está rota.* El founder lo caminó desde el prestador.
+         El monto es la otra mitad y **es de A** (buzón
+         `S114-C-para-A-el-parcial-no-puede-decir-cuanto`): sin el total del
+         objeto no hay tope que poner, y una caja con tope que no sabe cuál es
+         su tope es este mismo defecto con otra cara. */
+      if (!r.ok) {
+        /* 🔴 **Los tres códigos del parcial tienen voz propia.** *Un rebote que
+           dice «revisá los datos» sobre un formulario de dos campos hace que la
+           persona tenga que adivinar cuál de los dos.* Los tres los nombra el
+           motor y los tres se pueden corregir sin salir de la Hoja. */
+        aviso.mostrar({
+          variante: 'error',
+          texto:
+            r.codigo === 'monto_requerido_en_parcial'
+              ? t('postventa.parcialNecesitaMonto')
+              : r.codigo === 'razon_requerida'
+                ? t('postventa.parcialNecesitaRazon')
+                : r.codigo === 'monto_supera_total'
+                  ? /* 🔴 **EL NÚMERO DEL REBOTE GANA AL DE LA PANTALLA.** Es la
+                       carrera: alguien devolvió sobre este mismo objeto
+                       mientras la Hoja estaba abierta, y `disponibleDevolver`
+                       —que se leyó al entrar— quedó viejo. *Repetir el número
+                       viejo en el mensaje del rebote sería decirle al prestador
+                       que se pasó de una cifra contra la que, según su
+                       pantalla, no se pasó.* El motor manda el fresco; se usa
+                       ése. Cuando no viene, se dice sin cifra. */
+                    r.disponible !== null
+                    ? t('postventa.parcialSeVaDeRangoConCifra', { queda: dinero(r.disponible) })
+                    : t('postventa.parcialSeVaDeRango')
+                  : r.mensaje,
+        });
+        return;
+      }
+      cerrarHoja();
+      await cargar();
+    },
+    [casoId, cargar, aviso, t, cerrarHoja],
+  );
+
+  const aLaCasa = useCallback(async () => {
+    if (typeof casoId !== 'string') return;
+    setObrando(true);
+    await pedirACasa(casoId);
+    setObrando(false);
+    await cargar();
+  }, [casoId, cargar]);
+
+  const renderFila = useCallback(
+    (f: Fila) => {
+      if (f.mensaje.tipo === 'hecho') return <EventoDelHilo etiqueta={f.mensaje.cuerpo} />;
+      const hora = horaCortaDeMensaje(f.mensaje.creadoEn, idioma);
+      if (f.mensaje.autor === 'prestador') {
+        if (f.estado === 'no_se_envio' && f.textoCrudo !== undefined) {
+          const texto = f.textoCrudo;
+          return (
+            <BurbujaMensaje
+              mio
+              texto={f.mensaje.cuerpo}
+              hora={hora}
+              estado="no_se_envio"
+              onReintentar={() => {
+                void responder(texto);
+              }}
+              vozReintentar={t('postventa.noSeEnvio')}
+            />
+          );
+        }
+        return (
+          <BurbujaMensaje mio texto={f.mensaje.cuerpo} hora={hora} estado={f.estado === 'enviando' ? 'enviando' : 'enviado'} />
+        );
+      }
+      return (
+        <BurbujaMensaje
+          mio={false}
+          texto={f.mensaje.cuerpo}
+          hora={hora}
+          autor={t(VOZ_ASIENTO[f.mensaje.autor])}
+          cara={
+            <View
+              style={{
+                width: CARA_EN_HILO,
+                height: CARA_EN_HILO,
+                borderRadius: CARA_EN_HILO / 2,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: theme.bg.overlay,
+              }}
+            >
+              <Icono nombre={f.mensaje.autor === 'casa' ? 'ayuda' : 'familia'} tamano={16} />
+            </View>
+          }
+        />
+      );
+    },
+    [idioma, responder, t, theme.bg.overlay],
+  );
+
+  /* 🔴 **EL HILO DEL PRESTADOR ESTABA AL REVÉS, y nadie lo había mirado.**
+     `datosDelMasNuevoAlMasViejo` **es el contrato: el nombre lo dice**. El
+     motor entrega ASCENDENTE (`ORDER BY creado_en, id`, medido) y acá se le
+     pasaba tal cual ⇒ la pieza dibujaba el hilo dado vuelta.
+     *Lo tapaba el defecto de al lado:* la optimista se insertaba al principio,
+     así que **el mensaje recién escrito caía en el lugar correcto por
+     accidente** y el resto quedaba invertido — el error se veía como «el
+     historial está raro», no como «esto está al revés».
+     La cura es la del vecino ya gateado (la pantalla de la familia, y antes
+     `armarHilo` en `packages/domain`): **un solo `reverse`, acá**. Invertir un
+     arreglo no rompe la memoización por item de N16: los objetos son los
+     mismos. */
+  const filas = useMemo(() => [...hilo].reverse(), [hilo]);
+
+  if (caso === 'cargando') {
+    return (
+      <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+        <Encabezado variante="navegacion" titulo={t('postventa.casoTitulo')} atras onAtras={() => router.back()} />
+        <View style={{ padding: spacing[5] }}>
+          <EsqueletoGrupo>
+            <Esqueleto alto={56} />
+            <Esqueleto alto={120} />
+          </EsqueletoGrupo>
+        </View>
+      </View>
+    );
+  }
+  if (caso === 'error') {
+    return (
+      <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+        <Encabezado variante="navegacion" titulo={t('postventa.casoTitulo')} atras onAtras={() => router.back()} />
+        <EstadoVacio titulo={t('postventa.casosNoSePudo')} />
+      </View>
+    );
+  }
+
+  const cerrado = caso.cerrado;
+  const plazo = caso.plazoHasta;
+  const horas = plazo !== null ? Math.round((new Date(plazo).getTime() - Date.now()) / 3_600_000) : null;
+  const conLaCasa = caso.etapa === 'con_casa';
+
+  return (
+    <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <Encabezado variante="navegacion" titulo={t('postventa.casoTitulo')} atras onAtras={() => router.back()} />
+      <SuperficieChat<Fila>
+        encabezado={
+          <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[3], gap: spacing[3] }}>
+            {/* §5 · EL RELOJ SE VE Y NO ES ROJO. **Y cuando vence se le
+                DICE** — no se le oculta que la casa tomó el caso. */}
+            {/* 🔴 Con el caso CERRADO no se dice ningún plazo: la barra ya
+                pasó a lectura y un «te quedan N horas para responder» encima
+                promete una acción que la misma pantalla acaba de cerrar.
+                *Lo vi en el aparato — los dos son correctos por separado.* */}
+            {cerrado ? null : conLaCasa ? (
+              <BannerPlazo voz={t('postventa.laCasaTomoElCaso')} />
+            ) : horas !== null && horas > 0 ? (
+              <BannerPlazo voz={t('postventa.teQuedan', { horas })} />
+            ) : null}
+
+            {!cerrado && (
+              /* §5 · LAS TRES, y la lista está cerrada por la letra. */
+              <View style={{ gap: spacing[2] }}>
+                <Boton
+                  etiqueta={t('postventa.reconocerYResolver')}
+                  bloque
+                  onPress={() => setHojaResolver(true)}
+                />
+                {!conLaCasa && (
+                  <Boton
+                    variante="secundario"
+                    etiqueta={t('postventa.pedirALaCasa')}
+                    bloque
+                    cargando={obrando}
+                    onPress={() => void aLaCasa()}
+                  />
+                )}
+              </View>
+            )}
+          </View>
+        }
+        datosDelMasNuevoAlMasViejo={filas}
+        claveDe={(f) => f.clave}
+        renderMensaje={renderFila}
+        barra={
+          cerrado ? (
+            <BarraEscribir enLectura={t('postventa.conversacionCerrada')} />
+          ) : (
+            <BarraEscribir
+              valor={borrador}
+              onCambio={setBorrador}
+              onEnviar={(texto) => {
+                void responder(texto);
+              }}
+              placeholder={t('postventa.escribirPlaceholder')}
+              glifoEnviar={<Icono nombre="enviar" tamano={20} />}
+              etiquetaEnviar={t('postventa.enviarMensaje')}
+            />
+          )
+        }
+      />
+
+      {/* «Reconocer y resolver» — una decisión con consecuencias viste de
+          Hoja, no de toque accidental (patrón de la casa). */}
+      <Hoja visible={hojaResolver} onCerrar={cerrarHoja} titulo={t('postventa.reconocerTitulo')}>
+        {modo === null ? (
+          <View style={{ gap: spacing[3] }}>
+            <Texto variante="apoyo">{t('postventa.reconocerCuerpo')}</Texto>
+            <Boton
+              etiqueta={t('postventa.devolverTodo')}
+              bloque
+              cargando={obrando}
+              onPress={() => void resolver('total')}
+            />
+            {/* 🔴 **No resuelve: ABRE.** ⏪ Antes este botón llamaba a resolver
+                con `parcial` y sin monto, y el motor rebotaba siempre. *Un
+                botón que no se puede completar no es un botón: es una promesa
+                rota en el único lugar donde el prestador quiere arreglar algo.* */}
+            <Boton
+              variante="secundario"
+              etiqueta={t('postventa.devolverParte')}
+              bloque
+              onPress={() => setModo('parcial')}
+            />
+            {/* ⭐ **LA TERCERA, firmada el 9-sep.** *«Reconozco que pasó y no
+                devuelvo plata» es una resolución legítima* —el paseador llegó
+                tarde, lo reconoce, explica y no compensa—. Lo que la firma
+                agrega es que **acá la razón importa más que en ninguna**: un
+                cero sin porqué es lo que más se parece a que nadie miró el
+                caso. Por eso también abre en vez de resolver.
+                ☠️ Y con ésta muere «dar saldo» del dictado original: **el
+                prestador decide CUÁNTO y la familia decide DÓNDE** — ofrecerle
+                saldo desde acá le quitaría a la familia la elección que la
+                letra le garantiza (corrección de la mesa, con A4 vivo). */}
+            <Boton
+              variante="secundario"
+              etiqueta={t('postventa.noDevolver')}
+              bloque
+              onPress={() => setModo('sin_devolucion')}
+            />
+          </View>
+        ) : (
+          <View style={{ gap: spacing[3] }}>
+            {modo === 'parcial' ? (
+            <>
+            {/* ⭐ **EL TOTAL A LA VISTA, Y CUÁNTO QUEDA SI NO SON LO MISMO.**
+                El tope no es el total pelado: es **el total menos lo ya
+                devuelto** en otros casos del mismo objeto (`disponibleDevolver`,
+                de A). *Dos parciales que suman más que el servicio son plata que
+                nadie cobró.* Cuando los dos coinciden se dice uno solo — repetir
+                el mismo número con dos rótulos hace dudar de los dos. */}
+            {totalObjeto !== null ? (
+              <Texto variante="apoyo">
+                {disponible !== null && disponible < totalObjeto
+                  ? t('postventa.parcialTotalYQueda', {
+                      total: dinero(totalObjeto),
+                      queda: dinero(disponible),
+                    })
+                  : t('postventa.parcialTotal', { total: dinero(totalObjeto) })}
+              </Texto>
+            ) : (
+              /* 🔴 **Sin total NO se calla: se dice.** *Un campo de monto sin
+                 referencia deja al prestador adivinando contra qué se compara,
+                 y su rebote llegaría recién al confirmar.* El motor sigue
+                 topeando del otro lado — acá lo que falta es la referencia. */
+              <Texto variante="apoyo">{t('postventa.parcialSinTotal')}</Texto>
+            )}
+            <Campo
+              label={t('postventa.parcialMonto')}
+              value={montoTexto}
+              onChangeText={setMontoTexto}
+              /* `decimal-pad`: la coma la escribe medio Ecuador y se normaliza
+                 al leer — el teclado no tiene por qué pelearse con eso. */
+              keyboardType="decimal-pad"
+              placeholder="0,00"
+            />
+            </>
+            ) : (
+              /* Sin monto: lo único que se pide es el porqué. *La misma Hoja,
+                 un campo menos — no una pantalla nueva para una variante.* */
+              <Texto variante="apoyo">{t('postventa.noDevolverCuerpo')}</Texto>
+            )}
+            <Campo
+              label={t('postventa.parcialRazon')}
+              value={razon}
+              onChangeText={setRazon}
+              placeholder={t('postventa.parcialRazonEjemplo')}
+              /* ⚠️ **Una línea, y por eso no es `multiline`.** La firma pide
+                 «corta»: *lo que la familia tiene que leer al lado de un número
+                 es una razón, no un descargo.* */
+              ayuda={t('postventa.parcialRazonAyuda')}
+            />
+            <Boton
+              etiqueta={
+                modo === 'parcial' ? t('postventa.parcialConfirmar') : t('postventa.noDevolverConfirmar')
+              }
+              bloque
+              cargando={obrando}
+              /* El botón se apaga **con lo que se puede saber acá**: que haya un
+                 número usable y una razón escrita. El tope y la razón vacía los
+                 valida el motor igual — *el `disabled` no es la defensa: la
+                 defensa está del otro lado* (`monto_supera_total`,
+                 `razon_requerida`).
+                 ✅ **La razón es obligatoria en las DOS, y ahora del lado del
+                 motor también.** ⏪ Acá decía que este guard era *«cortesía, no
+                 defensa»* porque el código se llamaba `razon_requerida_en_parcial`
+                 y no cubría `sin_devolucion`. **A lo renombró a `razon_requerida`
+                 y lo extendió** (`b7fc0beb`), así que la defensa existe y esto
+                 volvió a ser lo que debe: que el botón no deje tocar algo que
+                 va a rebotar. *La nota se retira en el mismo acto en que deja
+                 de ser cierta* (Ley 37). */
+              deshabilitado={(modo === 'parcial' && montoNumero === null) || razon.trim() === ''}
+              /* 🔴 **Y DICE POR QUÉ ESTÁ APAGADO.** Es la lección de la jornada:
+                 tres controles distintos devolvían silencio, y el silencio se
+                 lee como app rota. `razonDeshabilitado` existe para esto. */
+              razonDeshabilitado={
+                modo === 'parcial' && montoNumero === null
+                  ? t('postventa.parcialNecesitaMonto')
+                  : t('postventa.parcialNecesitaRazon')
+              }
+              onPress={() => {
+                if (modo === 'parcial') {
+                  if (montoNumero === null) return;
+                  void resolver('parcial', montoNumero, razon.trim());
+                  return;
+                }
+                void resolver('sin_devolucion', undefined, razon.trim());
+              }}
+            />
+            <Boton
+              variante="secundario"
+              etiqueta={t('postventa.parcialVolver')}
+              bloque
+              onPress={() => setModo(null)}
+            />
+          </View>
+        )}
+      </Hoja>
+    </View>
+  );
+}

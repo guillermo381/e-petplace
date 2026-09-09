@@ -4736,4 +4736,73 @@ export const prestadorEs = {
     errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
     reintentar: 'Probar de nuevo',
   },
+  /* ── S114-C · LA POSTVENTA DEL PRESTADOR (§5) ──────────────────────────
+     🔴 TUTEO neutro. **El aviso NO es un ticket frío**: dice que hay algo que
+     resolver, con la voz de la casa. Y el reloj se ve **sin drama**. */
+  postventa: {
+    casosTitulo: 'Casos',
+    casosIntro: 'Hay familias esperando una respuesta tuya.',
+    casosVacio: 'No tienes casos abiertos.',
+    casosNoSePudo: 'No pudimos cargar tus casos. Prueba de nuevo.',
+    objeto_cita: 'Una cita',
+    objeto_estadia: 'Una estadía',
+    objeto_pedido: 'Un pedido',
+    laFamilia: 'La familia',
+    /* Sin countdown y sin rojo: dice cuánto queda, no lo hace latir. */
+    teQuedan: 'Te quedan {{horas}} horas para responder',
+    puntero: 'Casos',
+    punteroDetalle: 'Lo que una familia te pide resolver',
+    punteroPendientes: '{{n}} esperando tu respuesta',
+    /* C8 · pide, sin drama. El número va porque decir «tenés servicios sin
+       cerrar» sin cuántos obliga a ir a contarlos. */
+    sinCerrar: 'Tienes {{n}} servicios sin cerrar. Ciérralos para cobrarlos.',
+    /* 🔴 **LA SEGUNDA LÍNEA AFIRMABA ALGO QUE LA PANTALLA NO PUEDE SABER.**
+       ⏪ Decía «…no se cobran **y la familia recibió su devolución**». E lo
+       midió: de los 62 que la línea mostraba, sólo 6 son cobrables, y sobre los
+       otros 56 **no hay ni un caso ni un evento económico** — o sea que ninguna
+       familia recibió nada.
+
+       *No era una exageración de copy: era la pantalla contando como hecho
+       consumado algo que ocurre en otro subsistema y que acá no se consulta.*
+       Y su modo de falla es el peor para un prestador: le dice que su plata ya
+       se fue, con un número inflado diez veces.
+
+       Ahora dice **sólo lo que el motor sabe de ese objeto**: pasó su plazo y
+       ya no se cobra. Lo que pase con la plata de la familia lo dirá quien lo
+       sepa, en su lugar. */
+    sinCerrarVencidos: '{{n}} quedaron sin cerrar y ya no se pueden cobrar.',
+    casoTitulo: 'El caso',
+    asientoCasa: 'e-PetPlace',
+    asientoFamilia: 'La familia',
+    asientoYo: 'Tú',
+    escribirPlaceholder: 'Escribe tu respuesta',
+    conversacionCerrada: 'Esta conversación quedó en lectura',
+    noSeEnvio: 'No se envió · Reintentar',
+    enviarMensaje: 'Enviar',
+    /* §5 · cuando vence, SE LE DICE. No se le oculta. */
+    laCasaTomoElCaso: 'e-PetPlace tomó el caso',
+    reconocerYResolver: 'Reconocer y resolver',
+    pedirALaCasa: 'Pedir a e-PetPlace que entre',
+    reconocerTitulo: '¿Cómo lo resuelves?',
+    reconocerCuerpo: 'La familia elige después a dónde va la plata.',
+    devolverTodo: 'Devolver todo',
+    devolverParte: 'Devolver una parte',
+    parcialNecesitaMonto: 'Para devolver una parte hay que decir de cuánto es.',
+    parcialTotal: 'El servicio fue de {{total}}.',
+    parcialTotalYQueda: 'El servicio fue de {{total}}. Puedes devolver hasta {{queda}}.',
+    parcialSinTotal: 'No pudimos leer el monto de este servicio. Si te pasas, el sistema te lo dice al confirmar.',
+    parcialMonto: 'Cuánto vas a devolver',
+    parcialRazon: 'Por qué',
+    parcialRazonEjemplo: 'Llegué tarde y el paseo fue más corto',
+    parcialRazonAyuda: 'La familia va a leer esto junto al monto.',
+    parcialConfirmar: 'Devolver esta parte',
+    parcialVolver: 'Volver',
+    parcialNecesitaRazon: 'Escribe una línea diciendo por qué.',
+    parcialSeVaDeRango: 'Es más de lo que queda por devolver de este servicio.',
+    parcialSeVaDeRangoConCifra: 'Ya sólo quedan {{queda}} por devolver de este servicio.',
+    noDevolver: 'No devolver, y explicar por qué',
+    noDevolverCuerpo: 'La familia va a ver que reconociste lo que pasó y tu explicación. Si no le alcanza, puede pedir que intervengamos.',
+    noDevolverConfirmar: 'Reconocer sin devolver',
+  },
+
 } as const;

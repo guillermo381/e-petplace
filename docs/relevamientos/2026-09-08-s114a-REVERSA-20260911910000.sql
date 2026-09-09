@@ -1,0 +1,3 @@
+-- REVERSA de 20260911910000_s114a_lector_conoce_el_corte.sql — escrita ANTES.
+-- Re-aplicar obtener_servicios_sin_cerrar de 20260911770000 (sin filtro de corte).
+-- NO revierte datos: es sólo la definición de una función de lectura.

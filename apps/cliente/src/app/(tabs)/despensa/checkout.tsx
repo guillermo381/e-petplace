@@ -51,6 +51,7 @@ import { Linking, Pressable, View } from 'react-native';
 import { router, useNavigation } from 'expo-router';
 import {
   Boton,
+  Casilla,
   Campo,
   CeldaNavegacion,
   Encabezado,
@@ -79,6 +80,8 @@ import {
   cancelarPedidoDespensa,
   configurarRecurrencia,
   crearPedidoDespensa,
+  obtenerMiSaldo,
+  aplicarSaldoACompra,
   crearCompraDesdePedidos,
   crearIntentoPago,
   verificarCompuertas,
@@ -257,6 +260,19 @@ export default function DespensaCheckout() {
    *  no lo suma: sumar acá sería el segundo lugar donde se calcula una
    *  plata, y el día que discrepe es en una factura. */
   const [compraTotal, setCompraTotal] = useState<number | null>(null);
+
+  /* ═══ EL SALDO — se lee al llegar al resumen, no antes ════════════════════
+     🔴 **Y se OFRECE sólo si alcanza.** Enseñarle a una familia un saldo que no
+     le da para pagar es ofrecerle algo que va a rebotar; el número que igual
+     necesita ver —cuánto tiene y cuánto le falta— se lo dice el rebote, que
+     ahora trae `saldo` y `total` (se los pedí a A y los devolvió).
+
+     `null` = todavía no se sabe ⇒ no se ofrece. *Ante la duda, la app no
+     promete un medio de pago.* */
+  const [saldo, setSaldo] = useState<number | null>(null);
+  /* 🔴 **El check NO reserva nada.** Es una intención, no un acto: el saldo se
+     aplica dentro del acto de pagar. Ver la nota del bloque, abajo. */
+  const [usarSaldo, setUsarSaldo] = useState(false);
   /** F6 · qué tienda prepara cada pedido. Sin entrada = no se pudo leer,
    *  y la línea NO se dibuja: jamás «Lo prepara: —». */
   const [tiendas, setTiendas] = useState<Record<string, string>>({});
@@ -512,6 +528,15 @@ export default function DespensaCheckout() {
     setPedidos(okIds);
     setCompraId(c.data.compra_id);
     setCompraTotal(c.data.total);
+    /* En la misma ola que el nombre de la tienda: el saldo es un dato del
+       resumen, y pedirlo aparte sería otro viaje del peaje de `L-223`. */
+    void obtenerMiSaldo().then((rs) => {
+      /* 🔴 **`0` NO ES `null`.** Si la lectura falla, el saldo queda `null` y no
+         se ofrece nada — que es lo conservador— pero **`0` es una respuesta**:
+         la familia no tiene saldo, y eso se sabe. *Meter las dos cosas en el
+         mismo valor haría indistinguible «no tiene» de «no pudimos leer».* */
+      setSaldo(rs.ok ? rs.data : null);
+    });
     // F6: el nombre de la tienda, en UN viaje para los N pedidos.
     const nom = await obtenerNombresTiendaPorPedido(okIds.map((p) => p.pedido_id));
     if (nom.ok) setTiendas(nom.data);
@@ -588,6 +613,52 @@ export default function DespensaCheckout() {
   async function pagar() {
     if (trabajando || compraId === null) return;
     setTrabajando(true);
+
+    /* ═══ ⓪ EL SALDO SE APLICA ACÁ, DENTRO DEL ACTO DE PAGAR ═════════════
+       Firma del founder (8-sep-2026): **el saldo es un CHECK, no un botón.**
+       El check no reserva nada — es una intención. La reserva y el cobro pasan
+       acá, consecutivos, en el mismo toque.
+
+       🔴 **Y el orden importa, confirmado por A:** `aplicarSaldoACompra` va
+       PRIMERO y el riel DESPUÉS. `crearIntentoPago` **congela el desglose**, y
+       el riel cobra sobre lo congelado ⇒ aplicar el saldo después dejaría al
+       riel cobrando el total sin descontar.
+
+       *Lo que cura la causa no es el orden —ése ya era el mismo con el botón—:
+       es que los dos llamados sean CONSECUTIVOS. Con el botón separado, entre
+       reservar y pagar había una ventana de minutos en la que la familia podía
+       irse con el saldo comprometido y nada pagado; acá esa ventana dura lo que
+       tarda una respuesta.* Y si el riel rebota, `pagos-cobro` suelta la
+       reserva en el acto (cableado por A el mismo día, por este incidente). */
+    if (usarSaldo && saldo !== null && saldo > 0) {
+      const rs = await aplicarSaldoACompra(compraId);
+      if (!rs.ok) {
+        setTrabajando(false);
+        mostrar({ texto: rs.mensaje, variante: 'error' });
+        return;
+      }
+      setSaldo(rs.data.saldoRestante);
+      if (rs.data.modo === 'pagado') {
+        /* El saldo cubrió todo: **no se llama al riel**. No hay tarjeta que
+           tocar ni monto que cobrar — la compra ya está paga. */
+        setTrabajando(false);
+        setFase('exito');
+        return;
+      }
+      /* `mixto` y `sin_saldo`: sigue el riel, que lee `saldo_aplicado` y cobra
+         el resto. */
+    } else {
+      /* 🔴 EL CHECK APAGADO TIENE QUE SOLTAR, NO SÓLO NO PEDIR.
+         *No es simetría estética: es que una reserva puede haber quedado viva
+         de un intento anterior* —se aplicó el saldo y el paso siguiente falló—,
+         y en ese estado el riel cobraría MENOS de lo que esta pantalla está
+         mostrando, sin que nada avise. **Un cobro de menos no tiene síntoma
+         para quien paga**, que es lo que lo vuelve caro.
+         Cuesta un viaje por pago; si no hay nada reservado devuelve
+         `sin_saldo` y no pasa nada. */
+      const rs = await aplicarSaldoACompra(compraId, 0);
+      if (rs.ok) setSaldo(rs.data.saldoRestante);
+    }
 
     // ① Preparar la compra. NO cobra: aparta y congela (lápida vigente).
     const r = await crearIntentoPago(compraId);
@@ -801,6 +872,81 @@ export default function DespensaCheckout() {
          Ley 19.7 / 22c: EJECUTA (cancela el pedido y vuelve a armado) ⇒
          label sin chevron. */
       <>
+        {/* ═══ PAGAR CON SALDO — sólo si alcanza ═══════════════════════════
+            🔴 **Va ARRIBA del pago con tarjeta y sin competirle**: si la
+            familia tiene plata a favor, usarla es lo obvio, y hacerla elegir
+            entre dos sólidos sería el defecto que G-12 ya corrigió acá —*dos
+            bloques del mismo peso significan que nadie decidió cuál importa*.
+            Éste es `apoyada`; el sólido sigue siendo el de siempre.
+
+            **Un solo llamado por COMPRA, no por pedido.** Lo frené cuando medí
+            que el checkout agrupa N pedidos en una compra y el wrapper cobraba
+            por pedido: con dos tiendas, un rebote en la segunda dejaba la
+            primera ya cobrada. A lo hizo atómico por compra. *El saldo es
+            plata: un cobro parcial no es un caso borde.* */}
+        {/* 🔴 **ACÁ JUNTÉ DOS COSAS DISTINTAS Y EL FOUNDER LO ENCONTRÓ.**
+            ⏪ La condición era `saldo >= compraTotal` **para todo**, así que con
+            $13 y un pedido más caro la pantalla ocultaba **las dos cosas: el
+            botón Y el número**. La familia sabe que tiene saldo y no lo veía
+            por ningún lado.
+
+            *No ofrecer lo que no se puede usar es correcto; ocultar que existe
+            es otra cosa.* Ahora son dos decisiones separadas:
+              · **el saldo se DICE siempre que exista** (abajo, como dato);
+              · **el botón se OFRECE sólo si alcanza.**
+
+            Y cuando no alcanza, la línea dice cuánto falta — el mismo dato que
+            le pedí a A para el rebote, aplicado antes de que lo intente.
+
+            ⏳ **ESA LÍNEA NO ES UN CONSUELO: ES LA ANTESALA DEL PAGO MIXTO.**
+            Firma del founder (8-sep): *si el saldo no alcanza, se usa lo que
+            hay y el resto va por el riel.* Mi corrección —decir el saldo
+            aunque no alcance— iba en la dirección correcta **y se quedaba
+            corta**: el problema no era mostrarlo, era que no se pudiera usar.
+
+            🔴 **Por eso esta línea NO se retira cuando llegue el mixto**: pasa
+            a ser el paso previo —«tenés esto, falta esto»— y el botón deja de
+            exigir que alcance. *Quien lea esto después de la firma podría
+            leerla como un residuo del diseño viejo y borrarla; queda escrito
+            para que no.* El contrato lo está midiendo A. */}
+        {/* ═══ EL SALDO ES UN CHECK, NO UN BOTÓN — firma del founder ═══════
+            ⏪ **Acá había un botón «usar saldo» que competía con el de pagar y,
+            al tocarlo, COMPROMETÍA el saldo antes de que se pagara nada.** Si
+            después no se pagaba, la familia quedaba con plata reservada en una
+            compra que nunca ocurrió. *A construyó el reloj que suelta esas
+            reservas, pero la cura de raíz es no reservar hasta que se pague.*
+
+            🔴 **El check no ejecuta nada.** Enciende una intención: el total
+            del riel baja en pantalla y se ve de dónde sale cada peso. **El
+            saldo se aplica en el momento de pagar, dentro del mismo acto.**
+
+            Y **un solo botón de pago, siempre** — dos sólidos compitiendo es lo
+            que G-12 ya corrigió en esta pantalla.
+
+            Parcial o total **sin que la familia elija**: si cubre todo, cubre
+            todo; si no, cubre lo que puede. *Preguntarle cuánto de su propio
+            saldo quiere usar es darle una decisión que no tiene por qué tomar.* */}
+        {saldo !== null && saldo > 0 && compraTotal !== null ? (
+          <View style={{ gap: spacing[2] }}>
+            <Casilla
+              marcada={usarSaldo}
+              onCambio={setUsarSaldo}
+              etiquetaAccesible={t('despensa.usarMiSaldo', { saldo: dinero(saldo) ?? '' })}
+            >
+              <Texto variante="cuerpo">{t('despensa.usarMiSaldo', { saldo: dinero(saldo) ?? '' })}</Texto>
+            </Casilla>
+            {usarSaldo ? (
+              <Texto variante="apoyo">
+                {saldo >= compraTotal
+                  ? t('despensa.saldoCubreTodo', { saldo: dinero(compraTotal) ?? '' })
+                  : t('despensa.saldoMixto', {
+                      saldo: dinero(saldo) ?? '',
+                      resto: dinero(compraTotal - saldo) ?? '',
+                    })}
+              </Texto>
+            ) : null}
+          </View>
+        ) : null}
         <BotonPagar
           medio={medio}
           trabajando={trabajando}
@@ -1034,33 +1180,6 @@ export default function DespensaCheckout() {
                     )}
                   </View>
 
-                  {/* 3 · QUIÉN RECIBE — SE MUESTRA, NO SE EDITA ACÁ (G-11).
-                      ═══════════════════════════════════════════════════════
-                      Eran DOS campos de edición abiertos en la pantalla donde
-                      la familia REVISA antes de pagar. El gate pidió que se
-                      muestren fijos: *editar es otro momento.* Un campo abierto
-                      invita a escribir; acá el trabajo es leer y confirmar.
-
-                      LO QUE NO SE PIERDE: se sigue pudiendo cambiar —el dato
-                      del perfil no siempre es quien recibe— pero por un toque
-                      explícito, no por tener el cursor a mano.
-
-                      Y CUANDO FALTA EL DATO, la línea lo DICE y el toque lo
-                      resuelve: mostrar fijo un vacío sería un callejón, que es
-                      peor que el campo que se sacó. */}
-                  <View style={{ gap: spacing[2] }}>
-                    <View style={{ paddingHorizontal: spacing[3] }}>
-                      <Texto variante="seccion">{t('despensa.quienRecibe')}</Texto>
-                    </View>
-                    <CeldaNavegacion
-                      titulo={receptor.trim() === '' ? t('despensa.faltaReceptor') : receptor}
-                      detalle={
-                        telefono.trim() === '' ? t('despensa.faltaTelefono') : telefono
-                      }
-                      onPress={() => setHojaReceptor(true)}
-                    />
-                  </View>
-
                   {/* 4 · LA INSTRUCCIÓN QUE DECIDE (§9.3) — EL ÚNICO CAMPO de
                       la pantalla, tal como pidió el gate. Y es justo el que
                       quedaba tapado por el CTA (medición de B, solape ③). */}
@@ -1196,6 +1315,51 @@ export default function DespensaCheckout() {
                 </Tarjeta>
                 </View>
               )}
+              {/* ═══ 🔴 QUIÉN RECIBE VALE PARA LOS DOS MÉTODOS ═════════════
+                  **Medido caminando: con «Retiro en tienda» este bloque no se
+                  dibujaba** —vivía dentro de la rama de despacho— **y el CTA
+                  igual exigía receptor y teléfono** (`falta`, rama `else`).
+                  ⇒ la pantalla pedía dos datos y **no daba por dónde ponerlos**:
+                  el retiro era un callejón, y la única salida era cambiar a
+                  domicilio, cargarlos ahí y volver.
+
+                  *Y tiene sentido que los pida en los dos:* quien retira en el
+                  mostrador también es alguien con un nombre, y el vendedor
+                  necesita un teléfono para avisarle que ya está listo.
+                  ⇒ el bloque sale de la rama y queda **común a los dos**, que
+                  es donde la condición del CTA siempre lo dio por hecho. */}
+                {/* 3 · QUIÉN RECIBE — SE MUESTRA, NO SE EDITA ACÁ (G-11).
+                    ═══════════════════════════════════════════════════════
+                    Eran DOS campos de edición abiertos en la pantalla donde
+                    la familia REVISA antes de pagar. El gate pidió que se
+                    muestren fijos: *editar es otro momento.* Un campo abierto
+                    invita a escribir; acá el trabajo es leer y confirmar.
+
+                    LO QUE NO SE PIERDE: se sigue pudiendo cambiar —el dato
+                    del perfil no siempre es quien recibe— pero por un toque
+                    explícito, no por tener el cursor a mano.
+
+                    Y CUANDO FALTA EL DATO, la línea lo DICE y el toque lo
+                    resuelve: mostrar fijo un vacío sería un callejón, que es
+                    peor que el campo que se sacó. */}
+                {/* El aire lateral lo paga el bloque: **adentro de la Tarjeta
+                    de despacho lo ponía el contenedor**, y al salir de ahí el
+                    rótulo quedaba pegado al borde. `spacing[5]` es el mismo
+                    margen que usa el explicativo de arriba — *lo que cambió de
+                    lugar tiene que seguir alineado con sus vecinos.* */}
+                <View style={{ gap: spacing[2], paddingHorizontal: spacing[5] }}>
+                  <View style={{ paddingHorizontal: spacing[3] }}>
+                    <Texto variante="seccion">{t('despensa.quienRecibe')}</Texto>
+                  </View>
+                  <CeldaNavegacion
+                    titulo={receptor.trim() === '' ? t('despensa.faltaReceptor') : receptor}
+                    detalle={
+                      telefono.trim() === '' ? t('despensa.faltaTelefono') : telefono
+                    }
+                    onPress={() => setHojaReceptor(true)}
+                  />
+                </View>
+
             </>
           )
         ) : fase === 'resumen' && pedidos.length > 0 ? (

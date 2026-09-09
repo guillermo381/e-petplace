@@ -274,8 +274,10 @@ export {
 export {
   obtenerCitasActivasMascota,
   obtenerCitasActivasHogar,
+  obtenerHistorialCitasMascota,
   type CitaActivaMascota,
   type CitaActivaHogar,
+  type CitaHistorialMascota,
 } from './wrappers/citasMascota';
 export { mascotasElegibles, type EstadoVidaMascota } from './wrappers/_mascotas-elegibles';
 
@@ -1989,3 +1991,31 @@ export {
   type IntencionDeBusqueda,
   type TipoBuscado,
 } from './wrappers/busqueda-intencion';
+
+// S114 · postventa — LA única puerta a los motivos (A10). Nadie escribe su
+// propio SELECT sobre `cat_motivos_postventa`.
+export {
+  obtenerMotivosDeObjeto,
+  motivoPerteneceAlObjeto,
+  type MotivoPostventa,
+  type ObjetoPostventa,
+  type ProcedenciaMotivo,
+} from './wrappers/postventa-motivos';
+
+// S114 · postventa — el motor del caso (A3). Las tablas tienen la escritura
+// revocada a `authenticated`: SOLO estas RPCs escriben.
+export {
+  obtenerCasoDeObjeto, obtenerVentanaCasoDias, abrirCaso, leerCaso,
+  leerMensajesDeCaso, enviarMensajeDeCaso, leerOpcionesDeDevolucion,
+  elegirDestinoDevolucion, obtenerCasosDelPrestador, obtenerMisCasos, obtenerServiciosSinCerrar, responderCaso,
+  reconocerYResolver, pedirACasa,
+  ETAPAS_EN_ESCALERA,
+  type EtapaCaso, type FinalAlterno, type AsientoCaso, type MensajeCaso,
+  type CasoEnBandeja, type CodigoAbrirCaso, type CasoDetalle, type ServicioSinCerrar,
+  type CodigoReconocer, type ErrorReconocer,
+} from './wrappers/postventa-casos';
+
+// S114 · A4 · el saldo e-PetPlace (F6). Un lector; acreditar/consumir son del
+// motor, sin EXECUTE para authenticated (D-314).
+export { obtenerMiSaldo, aplicarSaldoACompra } from './wrappers/postventa-saldo';
+export type { ResultadoSaldoACompra, CodigoSaldoACompra } from './wrappers/postventa-saldo';

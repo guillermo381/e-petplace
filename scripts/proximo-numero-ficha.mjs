@@ -81,6 +81,19 @@ function ocurrencias(etiqueta) {
 const CONTROL = process.argv.includes('--control');
 let salida = 0;
 
+// 🔴 ALCANCE DECLARADO (S114-A · orden de mesa). Este instrumento mide el tope
+// en ESTE árbol (docs/DEUDAS_CANONICAS.md local), NO en el conjunto de ramas
+// vivas. Con pistas en paralelo, el «próximo libre» de acá NO es el libre del
+// conjunto: en S114, seis ramas tomaron L-496→L-506 mientras cada árbol veía
+// «libre L-498». Tomar el número que entrega este comando sin cruzarlo con las
+// otras ramas pisa fichas ajenas (la clase de D-998, que mordió dos veces).
+di('⚠️  ALCANCE: mide el tope en ESTE árbol, no en el conjunto de ramas vivas.');
+di('    Con pistas en paralelo, ANTES de tomar el número, cruzalo con las otras');
+di('    ramas:  for b in $(git ls-remote --heads origin "pista/*" | awk \'{print $2}\');');
+di('    do git show "$b:docs/DEUDAS_CANONICAS.md" | grep -oE "^#+ [^A-Za-z]*\\`[DL]-[0-9]+\\`"; done');
+di('    ...o coordiná el número por la mesa. El número de abajo es de ESTE árbol.');
+di('');
+
 for (const prefijo of ['D', 'L']) {
   const tope = topeDe(prefijo);
   if (tope === 0) {
@@ -97,7 +110,7 @@ for (const prefijo of ['D', 'L']) {
     di(`     numero esta mencionado como "proximo libre". NO tomes ${propuesto}.`);
     salida = 2;
   } else {
-    di(`${prefijo}-: tope ${prefijo}-${tope}  ·  PROXIMO LIBRE ${propuesto}`);
+    di(`${prefijo}-: tope ${prefijo}-${tope}  ·  PROXIMO LIBRE ${propuesto}  (en ESTE árbol — cruzá con las ramas vivas)`);
   }
 }
 
