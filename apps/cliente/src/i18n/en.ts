@@ -2156,6 +2156,7 @@ export const clienteEn = {
     biometricoRechazado: 'We couldn’t confirm it. Try again.',
   },
   despensa: {
+    saldoNoAlcanzaAun: 'You have {{saldo}} in balance. You need {{falta}} more to cover this.',
     pagarConSaldo: 'Pay with your balance ({{saldo}})',
     saldoNoAlcanza: 'Your balance is short by {{falta}}.',
     titulo: 'Pantry',
