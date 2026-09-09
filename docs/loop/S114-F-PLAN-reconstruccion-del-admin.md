@@ -5,6 +5,16 @@
 > **De las 27 pantallas del legado, sólo 9 hacen falta para operar en octubre. De ésas, 2 ya
 > existen en la mesa nueva y 3 las cubre el monorepo desde las apps. Quedan CUATRO por
 > construir.**
+>
+> ### 🔴 Y el número que ordena todo lo demás
+>
+> **~11 000 líneas que NO se reconstruyen porque nadie las usa.**
+>
+> *`Gamificacion` son **1 005 líneas para administrar dos logros**, y `MODELO_LOYALTY` ya
+> firmó **moneda invisible**: no hay puntos que administrar. `PlanesPrime` son 858 líneas
+> para 3 filas. `Promociones`, 920 para un cupón. `Logistica`, 1 956 para cinco envíos.*
+>
+> ⇒ **Lo que decide qué se retira no es que esté roto: es que su tabla está vacía.**
 
 **8-sep-2026 · S114-F.** Medido, sin construir. Ordenado por **necesidad de operación**, no
 por estado — *una pantalla rota que nadie usa no se reconstruye: se retira.*

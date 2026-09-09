@@ -28703,6 +28703,60 @@ lo construye y la otra lo mide **sobre el objeto que ya existe**.
 ---
 
 
+### `L-524` — Para saber si algo se usa, no se lee el código: se cuentan sus filas
+
+**S114-F, firma del founder.** Había que decidir cuáles de las **27 pantallas** de un portal
+viejo valía reconstruir. **El instinto es clasificarlas por estado** —anda / rota / sin
+permiso— y eso fue lo primero que hice: **12 andan, 10 están rotas, 5 dan `permission
+denied`.**
+
+🔴 **Esa tabla no servía para decidir nada.** Ordena por *qué tan sano está el código*, y la
+pregunta era otra: ***¿alguien la usa?***
+
+**Lo que sí decidió fue contar filas:**
+
+```
+Gamificacion   1 005 líneas  →  puntos_usuario 1 fila · logros_usuario 2
+PlanesPrime      858 líneas  →  planes_prime 3 filas
+Promociones      920 líneas  →  cupones 1 · campanas 1
+Logistica      1 956 líneas  →  envios 5 filas
+BetaUsers        676 líneas  →  beta_users 2 filas
+```
+
+⇒ **~11 000 líneas de pantalla para administrar unas pocas decenas de filas.** *Ninguna de
+esas cinco estaba «rota»: tres de ellas **andan perfectamente**.*
+
+> ***Una pantalla sana que administra una tabla vacía es más cara de mantener que una rota
+> que nadie abre — porque la sana invita a seguir manteniéndola.***
+
+## Por qué el estado del código engaña
+
+**«Anda» y «se usa» son hechos distintos, y sólo uno se puede leer en el repo.** El código
+dice si compila y si sus tablas existen; **no dice si alguien entró alguna vez.** Y como es
+lo único visible desde el editor, **se convierte en el criterio por defecto** — y ordena la
+lista exactamente al revés de lo que hace falta.
+
+⇒ **Antes de estimar qué cuesta reconstruir algo, se cuenta cuánto se usa.** Un `count(*)`
+por tabla es más barato que leer una pantalla, y **reordena la lista entera**.
+
+⚠️ **Y el corolario incómodo, que es el que ahorra el trabajo:** *lo que hay que justificar
+no es retirar una pantalla — es CONSERVARLA.* Con la carga de la prueba al revés, once mil
+líneas se sostienen solas porque están escritas, y **cada una vuelve a costar el día que
+alguien cambia el modelo debajo.**
+
+**El límite, declarado:** contar filas mide **volumen**, no **importancia**. Una tabla de
+dos filas puede ser crítica —`country_config` son 2 y define la moneda de un país— así que
+**el número abre la pregunta, no la cierra.** *Lo que cierra es cruzarlo con qué hace falta
+para operar: `country_config` se difiere porque **casi nunca se toca**, no porque tenga
+pocas filas.*
+
+*(Familia de [[L-521]] y [[L-523]] del mismo arco: las tres son sobre **medir el hecho y no
+su señal adyacente**. El peso de un bundle, el `exit 0`, y ahora el estado del código —
+todas se leen como si dijeran algo que no dicen.)*
+
+---
+
+
 ### `L-523` — Un cambio de contrato del motor no rompe al consumidor con un error: lo deja mostrando VACÍO
 
 **S114-F.** A curó `listar_lotes()` sobre un hallazgo mío: el gate era `WHERE is_admin()`
