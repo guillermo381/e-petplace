@@ -33,6 +33,9 @@ export {
   tomarCaso,
   resolverCaso,
   responderEnCaso,
+  /* La propuesta de Nexo. Mismo motivo que `tomarCaso`: sin esta línea la
+     capacidad existe y la pantalla no la alcanza. */
+  pedirPropuestaDelCaso,
   ETAPAS_ABIERTAS,
   ETAPAS_FINALES,
 } from './postventa';
@@ -44,6 +47,8 @@ export type {
   AlcanceResolucion,
   CodigoErrorPostventa,
   CodigoErrorResolver,
+  PropuestaDelCaso,
+  ResultadoPropuesta,
 } from './postventa';
 
 export { initApi, getClient, uidActual } from '../client';

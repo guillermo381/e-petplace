@@ -18,7 +18,7 @@ export default function Login() {
        resetear una clave que estaba bien (D-719/D-720, curadas en S92-bis). */
     if (err) {
       const esRed = /network|fetch|failed to fetch/i.test(err.message ?? '')
-      setError(esRed ? 'No pudimos conectarnos. Revisá tu conexión.' : 'Email o contraseña incorrectos.')
+      setError(esRed ? 'No pudimos conectarnos. Revisa tu conexión.' : 'Email o contraseña incorrectos.')
     }
     setCargando(false)
   }
@@ -54,7 +54,7 @@ export default function Login() {
        proveedor: no se apaga `cargando` — dejarlo encendido evita el segundo
        toque sobre un botón que ya disparó. */
     if (err) {
-      setError('No pudimos abrir el acceso con Google. Probá de nuevo.')
+      setError('No pudimos abrir el acceso con Google. Prueba de nuevo.')
       setCargando(false)
     }
   }
