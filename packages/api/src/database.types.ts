@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       _test_resultado_d242: {
@@ -4669,6 +4694,7 @@ export type Database = {
           id: string
           impuesto_total: number
           moneda: string
+          saldo_aplicado: number
           subtotal: number
           total: number
           updated_at: string
@@ -4682,6 +4708,7 @@ export type Database = {
           id?: string
           impuesto_total?: number
           moneda?: string
+          saldo_aplicado?: number
           subtotal?: number
           total?: number
           updated_at?: string
@@ -4695,6 +4722,7 @@ export type Database = {
           id?: string
           impuesto_total?: number
           moneda?: string
+          saldo_aplicado?: number
           subtotal?: number
           total?: number
           updated_at?: string
@@ -24356,6 +24384,10 @@ export type Database = {
         }
         Returns: string
       }
+      aplicar_saldo_a_compra: {
+        Args: { p_compra_id: string; p_monto_saldo?: number }
+        Returns: Json
+      }
       aprobar_presupuesto_familia: {
         Args: { p_presupuesto_id: string }
         Returns: Json
@@ -25615,6 +25647,7 @@ export type Database = {
         }
         Returns: Json
       }
+      listar_lotes: { Args: never; Returns: Json }
       listar_memoria_coach: { Args: { p_mascota_id: string }; Returns: Json }
       listar_placas_de_lote: { Args: { p_lote_id: string }; Returns: Json }
       listar_propuestas_memoria: {
@@ -27937,6 +27970,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       estado_cuenta_comercial_enum: [
