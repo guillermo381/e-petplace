@@ -90,8 +90,8 @@ export default function App() {
           Esta cuenta no tiene acceso a operaciones.
         </h1>
         <p style={{ color: color.texto2, fontSize: 14, margin: `0 0 ${sp[5]}px`, lineHeight: 1.5 }}>
-          Tu sesión es válida, pero no figurás como administrador de plataforma.
-          Si creés que es un error, pedí que te den de alta en <code>admin_users</code>.
+          Tu sesión es válida, pero no figuras como administrador de plataforma.
+          Si crees que es un error, pide que te den de alta en <code>admin_users</code>.
         </p>
         <Boton variante="secundario" onClick={() => supabase.auth.signOut()}>Cerrar sesión</Boton>
       </Pantalla>
