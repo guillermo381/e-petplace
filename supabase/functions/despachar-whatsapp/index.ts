@@ -321,16 +321,35 @@ Deno.serve(async (req) => {
                    pudieron enumerar sus números): NO afirmar incoherencia.
          · true  → el número configurado ESTÁ entre los del WABA configurado.
          · false → se enumeraron números y el configurado NO está: cuentas distintas. */
-    const entradaConfig = wabaAlcanzables.find((w) => w.es_el_configurado);
+    /* 🔴 EL WABA CONFIGURADO, DIRECTO — NO por el `for` sobre waba_alcanzables
+       (L-318, corrección de E): un token de usuario de sistema puede no listar
+       `target_ids` en sus scopes granulares, así que ese array vuelve VACÍO y
+       todo lo que colgaba del bucle no corría nunca. Pero el configurado SÍ es
+       alcanzable directo: `/{waba}/message_templates` responde 200 con las 10
+       plantillas (http_plantillas abajo). De ACÁ salen el techo y el par. */
+    const rWConf = await fetch(
+      `https://graph.facebook.com/v21.0/${waba}?fields=name,messaging_limit_tier`, { headers: cab });
+    const cWConf = await rWConf.json().catch(() => ({})) as Record<string, unknown>;
+    const messagingLimitTier = cWConf?.messaging_limit_tier ?? null;
+
+    const rNConf = await fetch(
+      `https://graph.facebook.com/v21.0/${waba}/phone_numbers` +
+        `?fields=id,display_phone_number,verified_name&limit=10`, { headers: cab });
+    const cNConf = await rNConf.json().catch(() => ({}));
+    const numerosConfOk = rNConf.ok && Array.isArray((cNConf as { data?: unknown })?.data);
+    const numeroIdsConf: string[] = numerosConfOk
+      ? ((cNConf as { data: Record<string, unknown>[] }).data).map((n) => String(n.id ?? '')).filter(Boolean)
+      : [];
+
+    // El par, computado sobre el fetch DIRECTO (no el bucle vacío). Tristate:
+    // null = no se puede concluir · true/false = enumeré y (está / no está).
     let parCoherente: boolean | null;
     let parMotivo: string;
-    if (!entradaConfig) {
-      parCoherente = null; parMotivo = 'waba_configurado_no_alcanzable';
-    } else if (!entradaConfig.numeros_enumerados_ok) {
+    if (!numerosConfOk) {
       parCoherente = null; parMotivo = 'no_se_pudieron_enumerar_los_numeros';
-    } else if (entradaConfig.numero_ids.length === 0) {
+    } else if (numeroIdsConf.length === 0) {
       parCoherente = null; parMotivo = 'el_waba_no_declara_numeros';
-    } else if (entradaConfig.numero_ids.includes(phoneId)) {
+    } else if (numeroIdsConf.includes(phoneId)) {
       parCoherente = true; parMotivo = 'el_numero_pertenece_al_waba_configurado';
     } else {
       parCoherente = false; parMotivo = 'el_numero_no_esta_en_el_waba_configurado';
@@ -350,11 +369,16 @@ Deno.serve(async (req) => {
          `false` con token válido, el problema NO es el token: es a qué
          apunta. *Es la diferencia entre «no puedo» y «estoy mirando otra
          cosa», y hasta ahora no se podía distinguir.* */
-      waba_configurado_alcanzable: idsWaba.includes(waba),
+      // 🔴 alcanzable = el fetch DIRECTO al WABA configurado respondió (o sus
+      // plantillas: rT). El idsWaba del bucle puede estar vacío por scopes.
+      waba_configurado_alcanzable: rWConf.ok || rT.status === 200,
       /* 🔴 EL PAR, para el gate de E: true/false SÓLO cuando se pudo enumerar;
          null cuando no se puede concluir (lista vacía ≠ no coincide). */
       par_coherente: parCoherente,
       par_coherente_motivo: parMotivo,
+      /* 🔴 EL TECHO del WABA configurado, leído directo (pedido de E; antes
+         colgaba del bucle vacío y nunca corría). 1K vs 2K = ~USD 22,60/día. */
+      messaging_limit_tier: messagingLimitTier,
       http_debug_token: rD.status,
       http_plantillas: rT.status,
       http_numero: rP.status,
