@@ -39,13 +39,13 @@ export default function Casos() {
         Casos
       </h1>
       <p style={{ color: color.texto2, fontSize: 14, margin: `0 0 ${sp[6]}px` }}>
-        Lo que las familias reclamaron. Primero lo que te pidieron a vos.
+        Lo que las familias reclamaron. Primero lo que te pidieron a ti.
       </p>
 
       {abiertos.length > 0 ? (
         <div style={{ display: 'flex', gap: sp[6], marginBottom: sp[6] }}>
           <Carta style={{ flex: 1 }}>
-            <div style={{ color: color.texto2, fontSize: 12, fontWeight: 700 }}>TE PIDIERON A VOS</div>
+            <div style={{ color: color.texto2, fontSize: 12, fontWeight: 700 }}>TE PIDIERON A TI</div>
             <div style={{ fontSize: 24, fontFamily: fuente.mono, color: conLaCasa ? color.acento : color.texto }}>
               {conLaCasa}
             </div>
