@@ -260,14 +260,56 @@ if (!waba.id) {
   process.exit(2);
 }
 console.log(`\n🟢 VERDE · las ${enCuenta.length} plantillas del WABA ${waba.id} están en ${ESPERADA}.`);
-console.log('   ⚠️ QUEDA SIN MEDIR, y es pedido a A: que `META_WABA_ID` y `META_PHONE_NUMBER_ID`');
-console.log('      sean el MISMO par. Con dos WABA homónimas eso no se supone.');
-console.log('      🔴 CORREGIDO 8-sep: esta nota decía «desde afuera de la edge no se puede»,');
-console.log('      y era falso — la edge YA consulta `/{waba}/phone_numbers` y devuelve las');
-console.log('      dos mitades. Lo que pasa es otra cosa: `waba_alcanzables` vuelve VACÍO y');
-console.log('      `waba_configurado_alcanzable` dice `false` **con token válido, ambos');
-console.log('      permisos y `http_plantillas: 200` trayendo las 10 de ese mismo WABA**.');
-console.log('      ⇒ ese `false` es del INSTRUMENTO, no del objeto: si el WABA no fuera');
-console.log('      alcanzable, esa llamada no habría respondido. Cruzar contra una lista');
-console.log('      vacía da «no coincide» y se lee como una cuenta mal apuntada.');
+/* ═══ EL PAR waba ↔ número — TRISTATE, y los tres estados se ramifican ═════
+   S114-A lo construyó y desplegó (`866df2cd`) después de que midiéramos que un
+   `includes()` sobre una lista VACÍA da `false` SIEMPRE. **Yo casi publico
+   «apuntan a cuentas distintas» sobre una lista que nunca se llenó** — de ahí
+   que el campo sea tristate y no booleano.
+
+   🔴 **`null` NO ES `false`, y tratarlos igual reintroduce el defecto exacto
+   que el tristate vino a curar.** Por eso acá hay TRES ramas, no dos:
+     · `true`  → medido y coherente.
+     · `false` → se enumeraron números y el configurado NO está ⇒ cuentas
+                 distintas. **Ahí sí se afirma incoherencia**, y va a ROJO.
+     · `null`  → no se pudo concluir. Se dice el motivo y **no se afirma nada**.
+
+   ⚠️ Y el gate NO se pone rojo con `null` **a propósito**: no saber si el par
+   coincide no es lo mismo que saber que no coincide. *Un gate que grita ante la
+   ignorancia enseña a ignorarlo.* Se muestra, con dueño. */
+/* 🔴 EL CONTROL DE ESTA RAMA, porque un rojo que nunca se produjo no es un rojo.
+   `PAR_FORZADO=false|true|null` inyecta el veredicto **sin tocar la edge**, para
+   probar que las tres ramas hacen lo que dicen. *El resto del gate sigue midiendo
+   de verdad: lo único que se fuerza es este campo.* Se declara en la salida para
+   que ninguna corrida forzada se confunda con una medición. */
+const forzado = process.env.PAR_FORZADO;
+const par = forzado === undefined
+  ? (vivo.par_coherente ?? null)
+  : (forzado === 'true' ? true : forzado === 'false' ? false : null);
+const parMotivo = forzado === undefined
+  ? (vivo.par_coherente_motivo ?? 'sin motivo declarado')
+  : `CONTROL FORZADO (PAR_FORZADO=${forzado}) — NO es una medición`;
+if (forzado !== undefined) console.log(`\n   ⚠️ CORRIDA DE CONTROL: par_coherente forzado a ${forzado}`);
+
+if (par === false) {
+  console.error('\n🔴 ROJO · `META_WABA_ID` y `META_PHONE_NUMBER_ID` apuntan a CUENTAS DISTINTAS.');
+  console.error(`   la edge enumeró los números del WABA configurado y el configurado NO está.`);
+  console.error(`   motivo: ${parMotivo}`);
+  console.error('   Con dos WABA homónimas en el portafolio, esto manda mensajes desde la otra.');
+  process.exit(1);
+}
+if (par === true) {
+  console.log(`   ✅ el par waba↔número es COHERENTE (medido por la edge: ${parMotivo}).`);
+} else {
+  console.log('   ⚠️ EL PAR waba↔número SIGUE SIN PODERSE CONCLUIR, y el gate NO lo llama rojo:');
+  console.log(`      \`par_coherente = null\` · motivo: \`${parMotivo}\``);
+  console.log('      *No saber si coincide no es saber que no coincide.*');
+  console.log('      🔴 Y la causa de fondo sigue viva: `waba_alcanzables` vuelve VACÍO y');
+  console.log('      `waba_configurado_alcanzable` dice `false` **con token válido, los dos');
+  console.log('      permisos y `http_plantillas: 200` trayendo las 10 de ese mismo WABA** ⇒');
+  console.log('      si no fuera alcanzable, esa llamada no habría respondido. **El tristate');
+  console.log('      convirtió un falso rojo en un `null` honesto —que es una mejora real—');
+  console.log('      pero la pregunta sigue abierta: se cierra cuando la enumeración funcione.**');
+  console.log('      (dueño: A · la enumeración sale de los scopes granulares del debug_token,');
+  console.log('       que para un token de usuario de sistema puede no listar `target_ids`.)');
+}
 console.log('   (Vale para AHORA: la deriva de Meta es silenciosa — se vuelve a correr.)');
