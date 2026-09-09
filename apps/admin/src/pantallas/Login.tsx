@@ -23,6 +23,42 @@ export default function Login() {
     setCargando(false)
   }
 
+  /**
+   * ENTRAR CON GOOGLE.
+   *
+   * 🔴 **El `redirectTo` NO va hardcodeado, y eso es la lección de `L-525`
+   * puesta desde el principio.** En el legado era una URL literal, y cuando la
+   * canónica cambió —de la URL de rama al dominio propio— **el código se curó y
+   * la allow-list de Supabase quedó con la vieja**: el login «funcionaba» y
+   * dejaba al founder en el sitio público, sin un solo error.
+   *
+   * `window.location.origin` elimina esa mitad del problema: **la URL deja de
+   * vivir en dos lugares del código.** Sirve igual desde la URL de Vercel y
+   * desde el dominio propio el día que se mueva, **sin tocar este archivo.**
+   *
+   * ⚠️ **Lo que NO elimina, y hay que saberlo:** la otra mitad sigue viviendo
+   * fuera del repo. **Cada origen desde el que se entre tiene que estar en
+   * Supabase → Authentication → Redirect URLs**, o Supabase descarta el
+   * `redirect_to` al volver del proveedor y cae al Site URL. *Hoy son dos:*
+   *
+   *     https://e-petplace-operaciones.vercel.app/**
+   *     https://admin.epetplace.com/**
+   */
+  async function entrarConGoogle() {
+    setCargando(true); setError(null)
+    const { error: err } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin },
+    })
+    /* Si `signInWithOAuth` devuelve sin error, el navegador ya se está yendo al
+       proveedor: no se apaga `cargando` — dejarlo encendido evita el segundo
+       toque sobre un botón que ya disparó. */
+    if (err) {
+      setError('No pudimos abrir el acceso con Google. Probá de nuevo.')
+      setCargando(false)
+    }
+  }
+
   const input: React.CSSProperties = {
     width: '100%', padding: `${sp[3]}px ${sp[4]}px`, borderRadius: radio.suave,
     border: `1px solid ${color.borde}`, background: color.carta, color: color.texto,
@@ -52,6 +88,20 @@ export default function Login() {
             {cargando ? 'Entrando…' : 'Entrar'}
           </Boton>
         </form>
+
+        {/* El separador dice QUÉ separa, no decora: son dos caminos a lo mismo. */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: sp[3],
+          margin: `${sp[5]}px 0`, color: color.texto3, fontSize: 12,
+        }}>
+          <div style={{ flex: 1, height: 1, background: color.borde }} />
+          o
+          <div style={{ flex: 1, height: 1, background: color.borde }} />
+        </div>
+
+        <Boton variante="secundario" onClick={entrarConGoogle} disabled={cargando}>
+          Entrar con Google
+        </Boton>
       </div>
     </div>
   )
