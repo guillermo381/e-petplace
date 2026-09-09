@@ -28703,6 +28703,62 @@ lo construye y la otra lo mide **sobre el objeto que ya existe**.
 ---
 
 
+### `L-526` — Una configuración con DOS CAPAS donde una parece la otra: leerla es verdadero sobre una y falso sobre la que manda
+
+**S114-F, firma del founder.** Dos días persiguiendo por qué un proyecto de Vercel dejaba de
+crear deployments. La causa no era ninguna de las que se persiguieron.
+
+🔴 **El `Ignored Build Step` existe en DOS capas:** un **Production Override** ligado a *un
+deployment concreto* —congelado con él— y el **Project Settings**, que es el que rige lo
+nuevo. **Se cambió una y se leyó la otra.**
+
+```
+día 1   se cambia una capa  →  el hook construye  →  «resuelto»
+día 2   se lee la otra capa →  dice «Automatic»   →  «volvió solo: es una REGRESIÓN»
+```
+
+> ***Las dos lecturas eran verdaderas. Ninguna era la que decidía.***
+
+## Lo que esta clase le hizo al diagnóstico — tres conclusiones falsas, todas «bien medidas»
+
+| conclusión | por qué se cayó |
+|---|---|
+| *«el `ignoreCommand` queda absuelto»* | el control —un commit **sin** el campo que tampoco construyó— **estaba dentro del mismo bloque de la causa real**. Un control que comparte la variable confusora **no controla nada** |
+| *«la heurística decide por tamaño del diff»* | falsada por un commit de **60 líneas reales** que no construyó, después de que uno de 122 sí |
+| *«es una intermitencia sin explicar»* y luego *«es una regresión»* | **ninguna de las dos**: la configuración nunca cambió sola — *cambió de capa el que la miraba* |
+
+**Las tres salieron de medir mientras una variable no controlada actuaba sobre todos los
+brazos.** *El error no fue medir mal: fue **no saber que había una segunda capa prendida**.*
+
+## Por qué esta clase resiste al método
+
+**Medir más no ayuda.** Se puede leer la pantalla diez veces, con captura, y **las diez
+dicen lo mismo y las diez son verdaderas** — sobre la capa que se está mirando. **El dato
+que falta no es un valor: es que existe otro lugar donde vive el mismo valor.**
+
+⇒ **Ante una configuración que no se comporta como dice, la primera pregunta no es «¿qué
+dice?» sino «¿DÓNDE MÁS vive esto?».** Un override por deployment, un `.env` de proyecto vs
+uno de entorno, un archivo del repo que pisa el dashboard, una policy y un grant.
+
+⚠️ **Y la señal que la delata, que es lo único accionable:** *cuando un cambio de
+configuración «funciona» y después «se revierte solo», casi nunca se revirtió — casi
+siempre se aplicó a una capa que no era la que rige.* **Un ajuste no vuelve solo; lo que
+vuelve es la lectura al lugar equivocado.**
+
+**Y de ahí sale la cura estructural, que no depende de acordarse:** *lo que se puede
+versionar en el repo se versiona* — un archivo tiene una sola capa, se revisa en un diff y
+sobrevive a que alguien mire la pantalla equivocada.
+
+*(Familia directa de [[L-525]] —una URL canónica vive en dos lugares— con la vuelta de
+tuerca de que **acá las dos capas se llaman igual y se ven iguales**. Y cierra el arco de
+[[L-521]] y [[L-524]]: cuatro formas de leer una señal adyacente como si fuera el hecho.)*
+
+⏳ **Pendiente de la confirmación del founder:** cuál de las dos capas se cambió cada vez.
+Con eso se enmienda `L-516`, que hoy dice «intermitencia sin explicar» y **ya no rige**.
+
+---
+
+
 ### `L-525` — Una URL canónica vive en DOS lugares, y cambiar uno solo no rompe nada: desvía
 
 **S114-F, firma del founder.** Curé el `redirectTo` del admin: la URL de rama pasó a
