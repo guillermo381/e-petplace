@@ -195,7 +195,7 @@ Deno.serve(async (req) => {
     const wabaAlcanzables = [];
     for (const id of idsWaba) {
       const rW = await fetch(
-        `https://graph.facebook.com/v21.0/${id}?fields=name,timezone_id`, { headers: cab });
+        `https://graph.facebook.com/v21.0/${id}?fields=name,timezone_id,messaging_limit_tier`, { headers: cab });
       const cW = await rW.json().catch(() => ({}));
       const rN = await fetch(
         `https://graph.facebook.com/v21.0/${id}/phone_numbers` +
@@ -212,6 +212,10 @@ Deno.serve(async (req) => {
       wabaAlcanzables.push({
         id,
         name: cW?.name ?? null,
+        /* 🔴 S114-A (pedido de E): el TECHO de mensajería del WABA. Entre 1K y 2K
+           hay ~USD 22,60/día de diferencia, y 2.000 no es un tier estándar de
+           Meta — hay que LEERLO, no suponerlo. Se lee del WABA configurado. */
+        messaging_limit_tier: (cW as Record<string, unknown>)?.messaging_limit_tier ?? null,
         numeros_enumerados_ok: numerosEnumeradosOk,
         numero_ids: numeroIds,
         /* 🔴 El discriminador que el founder pidió, y sale del DATO:
