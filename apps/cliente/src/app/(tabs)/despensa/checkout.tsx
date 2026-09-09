@@ -1180,33 +1180,6 @@ export default function DespensaCheckout() {
                     )}
                   </View>
 
-                  {/* 3 · QUIÉN RECIBE — SE MUESTRA, NO SE EDITA ACÁ (G-11).
-                      ═══════════════════════════════════════════════════════
-                      Eran DOS campos de edición abiertos en la pantalla donde
-                      la familia REVISA antes de pagar. El gate pidió que se
-                      muestren fijos: *editar es otro momento.* Un campo abierto
-                      invita a escribir; acá el trabajo es leer y confirmar.
-
-                      LO QUE NO SE PIERDE: se sigue pudiendo cambiar —el dato
-                      del perfil no siempre es quien recibe— pero por un toque
-                      explícito, no por tener el cursor a mano.
-
-                      Y CUANDO FALTA EL DATO, la línea lo DICE y el toque lo
-                      resuelve: mostrar fijo un vacío sería un callejón, que es
-                      peor que el campo que se sacó. */}
-                  <View style={{ gap: spacing[2] }}>
-                    <View style={{ paddingHorizontal: spacing[3] }}>
-                      <Texto variante="seccion">{t('despensa.quienRecibe')}</Texto>
-                    </View>
-                    <CeldaNavegacion
-                      titulo={receptor.trim() === '' ? t('despensa.faltaReceptor') : receptor}
-                      detalle={
-                        telefono.trim() === '' ? t('despensa.faltaTelefono') : telefono
-                      }
-                      onPress={() => setHojaReceptor(true)}
-                    />
-                  </View>
-
                   {/* 4 · LA INSTRUCCIÓN QUE DECIDE (§9.3) — EL ÚNICO CAMPO de
                       la pantalla, tal como pidió el gate. Y es justo el que
                       quedaba tapado por el CTA (medición de B, solape ③). */}
@@ -1342,6 +1315,51 @@ export default function DespensaCheckout() {
                 </Tarjeta>
                 </View>
               )}
+              {/* ═══ 🔴 QUIÉN RECIBE VALE PARA LOS DOS MÉTODOS ═════════════
+                  **Medido caminando: con «Retiro en tienda» este bloque no se
+                  dibujaba** —vivía dentro de la rama de despacho— **y el CTA
+                  igual exigía receptor y teléfono** (`falta`, rama `else`).
+                  ⇒ la pantalla pedía dos datos y **no daba por dónde ponerlos**:
+                  el retiro era un callejón, y la única salida era cambiar a
+                  domicilio, cargarlos ahí y volver.
+
+                  *Y tiene sentido que los pida en los dos:* quien retira en el
+                  mostrador también es alguien con un nombre, y el vendedor
+                  necesita un teléfono para avisarle que ya está listo.
+                  ⇒ el bloque sale de la rama y queda **común a los dos**, que
+                  es donde la condición del CTA siempre lo dio por hecho. */}
+                {/* 3 · QUIÉN RECIBE — SE MUESTRA, NO SE EDITA ACÁ (G-11).
+                    ═══════════════════════════════════════════════════════
+                    Eran DOS campos de edición abiertos en la pantalla donde
+                    la familia REVISA antes de pagar. El gate pidió que se
+                    muestren fijos: *editar es otro momento.* Un campo abierto
+                    invita a escribir; acá el trabajo es leer y confirmar.
+
+                    LO QUE NO SE PIERDE: se sigue pudiendo cambiar —el dato
+                    del perfil no siempre es quien recibe— pero por un toque
+                    explícito, no por tener el cursor a mano.
+
+                    Y CUANDO FALTA EL DATO, la línea lo DICE y el toque lo
+                    resuelve: mostrar fijo un vacío sería un callejón, que es
+                    peor que el campo que se sacó. */}
+                {/* El aire lateral lo paga el bloque: **adentro de la Tarjeta
+                    de despacho lo ponía el contenedor**, y al salir de ahí el
+                    rótulo quedaba pegado al borde. `spacing[5]` es el mismo
+                    margen que usa el explicativo de arriba — *lo que cambió de
+                    lugar tiene que seguir alineado con sus vecinos.* */}
+                <View style={{ gap: spacing[2], paddingHorizontal: spacing[5] }}>
+                  <View style={{ paddingHorizontal: spacing[3] }}>
+                    <Texto variante="seccion">{t('despensa.quienRecibe')}</Texto>
+                  </View>
+                  <CeldaNavegacion
+                    titulo={receptor.trim() === '' ? t('despensa.faltaReceptor') : receptor}
+                    detalle={
+                      telefono.trim() === '' ? t('despensa.faltaTelefono') : telefono
+                    }
+                    onPress={() => setHojaReceptor(true)}
+                  />
+                </View>
+
             </>
           )
         ) : fase === 'resumen' && pedidos.length > 0 ? (
