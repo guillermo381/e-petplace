@@ -4695,6 +4695,7 @@ export type Database = {
           impuesto_total: number
           moneda: string
           saldo_aplicado: number
+          saldo_reservado_hasta: string | null
           subtotal: number
           total: number
           updated_at: string
@@ -4709,6 +4710,7 @@ export type Database = {
           impuesto_total?: number
           moneda?: string
           saldo_aplicado?: number
+          saldo_reservado_hasta?: string | null
           subtotal?: number
           total?: number
           updated_at?: string
@@ -4723,6 +4725,7 @@ export type Database = {
           impuesto_total?: number
           moneda?: string
           saldo_aplicado?: number
+          saldo_reservado_hasta?: string | null
           subtotal?: number
           total?: number
           updated_at?: string
@@ -25647,6 +25650,11 @@ export type Database = {
         }
         Returns: Json
       }
+      liberar_reserva_saldo_compra: {
+        Args: { p_compra_id: string }
+        Returns: Json
+      }
+      liberar_reservas_saldo_vencidas: { Args: never; Returns: number }
       listar_lotes: { Args: never; Returns: Json }
       listar_memoria_coach: { Args: { p_mascota_id: string }; Returns: Json }
       listar_placas_de_lote: { Args: { p_lote_id: string }; Returns: Json }

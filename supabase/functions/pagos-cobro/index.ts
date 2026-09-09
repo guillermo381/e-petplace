@@ -852,6 +852,17 @@ Deno.serve(async (req) => {
      dice el webhook, o el barrido. El estado del intento queda `pendiente`
      justamente por eso. */
   if (!aprobado) {
+    /* 🔴 EL RIEL REBOTÓ — SUELTA LA RESERVA DE SALDO EN EL ACTO (S114-A, incidente
+       del founder 9-sep). Un cobro mixto que rebota síncrono dejaba el saldo
+       RESERVADO (saldo_aplicado sobre esperando_pago) restando del disponible —
+       la familia veía «tu saldo no está» y nada lo soltaba hasta que otro cobrara
+       o alguien cancelara. El reloj (liberar_reservas_saldo_vencidas, cada 15 min)
+       cubre el rebote ASÍNCRONO / abandonado; acá se suelta YA, para que la
+       familia que sigue en la pantalla vea su saldo volver. Idempotente: si no
+       había reserva, no hace nada; nunca des-consume una pagada. */
+    if (hayCompra && saldoAplicado > 0) {
+      await db.rpc('liberar_reserva_saldo_compra', { p_compra_id: compraId });
+    }
     return json({
       ok: false,
       /* `rechazado` = el emisor dijo que no. `defecto_nuestro` = falló algo de
