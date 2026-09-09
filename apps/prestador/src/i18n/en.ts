@@ -3768,6 +3768,17 @@ export const prestadorEn = {
     devolverTodo: 'Return everything',
     devolverParte: 'Return a part',
     parcialNecesitaMonto: 'To refund part of it, you need to say how much.',
+    parcialTotal: 'The service was {{total}}.',
+    parcialTotalYQueda: 'The service was {{total}}. You can refund up to {{queda}}.',
+    parcialSinTotal: 'We couldn’t read this service’s amount. If you go over, the system will tell you when you confirm.',
+    parcialMonto: 'How much you’re refunding',
+    parcialRazon: 'Why',
+    parcialRazonEjemplo: 'I ran late and the walk was shorter',
+    parcialRazonAyuda: 'The family will read this next to the amount.',
+    parcialConfirmar: 'Refund this part',
+    parcialVolver: 'Back',
+    parcialNecesitaRazon: 'Write one line saying why.',
+    parcialSeVaDeRango: 'That is more than what is left to refund on this service.',
   },
 
 } as const satisfies Espejo<typeof prestadorEs>;

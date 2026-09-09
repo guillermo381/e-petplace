@@ -4788,6 +4788,17 @@ export const prestadorEs = {
     devolverTodo: 'Devolver todo',
     devolverParte: 'Devolver una parte',
     parcialNecesitaMonto: 'Para devolver una parte hay que decir de cuánto es.',
+    parcialTotal: 'El servicio fue de {{total}}.',
+    parcialTotalYQueda: 'El servicio fue de {{total}}. Puedes devolver hasta {{queda}}.',
+    parcialSinTotal: 'No pudimos leer el monto de este servicio. Si te pasas, el sistema te lo dice al confirmar.',
+    parcialMonto: 'Cuánto vas a devolver',
+    parcialRazon: 'Por qué',
+    parcialRazonEjemplo: 'Llegué tarde y el paseo fue más corto',
+    parcialRazonAyuda: 'La familia va a leer esto junto al monto.',
+    parcialConfirmar: 'Devolver esta parte',
+    parcialVolver: 'Volver',
+    parcialNecesitaRazon: 'Escribe una línea diciendo por qué.',
+    parcialSeVaDeRango: 'Es más de lo que queda por devolver de este servicio.',
   },
 
 } as const;

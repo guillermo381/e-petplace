@@ -30,6 +30,7 @@ import {
   Boton,
   BurbujaMensaje,
   CARA_EN_HILO,
+  Campo,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
@@ -76,8 +77,38 @@ export default function CasoDelPrestador() {
   const [hilo, setHilo] = useState<Fila[]>([]);
   const [borrador, setBorrador] = useState('');
   const [hojaResolver, setHojaResolver] = useState(false);
+  /* ═══ EL PARCIAL, QUE ANTES ERA UN BOTÓN QUE NO SE PODÍA COMPLETAR ════════
+     Firma del founder (8-sep), caminada en aparato: *«devolver una parte» no
+     permite decir de cuánto es la parte.* Ahora la Hoja tiene **dos momentos**:
+     elegir el alcance, y —si es parcial— decir **cuánto** y **por qué**.
+     `null` = todavía no eligió; entrar al segundo momento es una decisión y no
+     un formulario que estaba ahí desde el principio. */
+  const [modo, setModo] = useState<null | 'parcial'>(null);
+  const [montoTexto, setMontoTexto] = useState('');
+  const [razon, setRazon] = useState('');
   const [obrando, setObrando] = useState(false);
   const optimistasRef = useRef<Fila[]>([]);
+
+  /** Plata en texto. **Local a propósito**: la casa no tiene un `dinero()`
+   *  compartido y **inventarlo desde acá sería fijar el formato de toda la app
+   *  desde una pantalla de postventa** — el día que exista, esto se borra. */
+  const dinero = (v: number) => `$ ${v.toFixed(2)}`;
+
+  const detalle = caso === 'cargando' || caso === 'error' ? null : caso;
+  const totalObjeto = detalle?.objeto.total ?? null;
+  /** El tope real: lo que QUEDA. Si el motor no lo sabe, cae al total; si
+   *  tampoco, no hay referencia y la Hoja lo dice. */
+  const disponible = detalle?.objeto.disponibleDevolver ?? totalObjeto;
+
+  /** El monto tipeado, ya usable. **`null` cuando no se puede usar** —vacío,
+   *  no numérico, cero o negativo—, que es distinto de «0». *La coma se
+   *  normaliza porque medio Ecuador escribe «12,50», y un `parseFloat` sobre
+   *  eso devuelve 12 sin quejarse: **doce dólares en vez de doce cincuenta**,
+   *  silencioso y con la coma a la vista.* */
+  const montoNumero = (() => {
+    const n = Number.parseFloat(montoTexto.replace(',', '.'));
+    return Number.isFinite(n) && n > 0 ? Math.round(n * 100) / 100 : null;
+  })();
 
   const cargar = useCallback(async () => {
     if (typeof casoId !== 'string' || casoId.length === 0) return;
@@ -122,11 +153,21 @@ export default function CasoDelPrestador() {
     [casoId, cargar],
   );
 
+  /** Cerrar la Hoja **deja el segundo momento en cero**: si vuelve a abrirla,
+   *  vuelve a elegir. *Un monto que sobrevive a cerrar la hoja es un número que
+   *  alguien va a confirmar sin haberlo escrito esta vez.* */
+  const cerrarHoja = useCallback(() => {
+    setHojaResolver(false);
+    setModo(null);
+    setMontoTexto('');
+    setRazon('');
+  }, []);
+
   const resolver = useCallback(
-    async (alcance: 'total' | 'parcial' | 'sin_devolucion') => {
+    async (alcance: 'total' | 'parcial' | 'sin_devolucion', monto?: number, motivo?: string) => {
       if (typeof casoId !== 'string') return;
       setObrando(true);
-      const r = await reconocerYResolver(casoId, { alcance });
+      const r = await reconocerYResolver(casoId, { alcance, monto, motivo });
       setObrando(false);
       /* 🔴 **EL RESULTADO SE LEE, Y ANTES SE TIRABA.** ⏪ Acá decía
          `await reconocerYResolver(…)` a secas: cuando el motor rebotaba
@@ -139,19 +180,27 @@ export default function CasoDelPrestador() {
          objeto no hay tope que poner, y una caja con tope que no sabe cuál es
          su tope es este mismo defecto con otra cara. */
       if (!r.ok) {
+        /* 🔴 **Los tres códigos del parcial tienen voz propia.** *Un rebote que
+           dice «revisá los datos» sobre un formulario de dos campos hace que la
+           persona tenga que adivinar cuál de los dos.* Los tres los nombra el
+           motor y los tres se pueden corregir sin salir de la Hoja. */
         aviso.mostrar({
           variante: 'error',
           texto:
             r.codigo === 'monto_requerido_en_parcial'
               ? t('postventa.parcialNecesitaMonto')
-              : r.mensaje,
+              : r.codigo === 'razon_requerida_en_parcial'
+                ? t('postventa.parcialNecesitaRazon')
+                : r.codigo === 'monto_supera_total'
+                  ? t('postventa.parcialSeVaDeRango')
+                  : r.mensaje,
         });
         return;
       }
-      setHojaResolver(false);
+      cerrarHoja();
       await cargar();
     },
-    [casoId, cargar, aviso, t],
+    [casoId, cargar, aviso, t, cerrarHoja],
   );
 
   const aLaCasa = useCallback(async () => {
@@ -303,18 +352,101 @@ export default function CasoDelPrestador() {
 
       {/* «Reconocer y resolver» — una decisión con consecuencias viste de
           Hoja, no de toque accidental (patrón de la casa). */}
-      <Hoja visible={hojaResolver} onCerrar={() => setHojaResolver(false)} titulo={t('postventa.reconocerTitulo')}>
-        <View style={{ gap: spacing[3] }}>
-          <Texto variante="apoyo">{t('postventa.reconocerCuerpo')}</Texto>
-          <Boton etiqueta={t('postventa.devolverTodo')} bloque cargando={obrando} onPress={() => void resolver('total')} />
-          <Boton
-            variante="secundario"
-            etiqueta={t('postventa.devolverParte')}
-            bloque
-            cargando={obrando}
-            onPress={() => void resolver('parcial')}
-          />
-        </View>
+      <Hoja visible={hojaResolver} onCerrar={cerrarHoja} titulo={t('postventa.reconocerTitulo')}>
+        {modo === null ? (
+          <View style={{ gap: spacing[3] }}>
+            <Texto variante="apoyo">{t('postventa.reconocerCuerpo')}</Texto>
+            <Boton
+              etiqueta={t('postventa.devolverTodo')}
+              bloque
+              cargando={obrando}
+              onPress={() => void resolver('total')}
+            />
+            {/* 🔴 **No resuelve: ABRE.** ⏪ Antes este botón llamaba a resolver
+                con `parcial` y sin monto, y el motor rebotaba siempre. *Un
+                botón que no se puede completar no es un botón: es una promesa
+                rota en el único lugar donde el prestador quiere arreglar algo.* */}
+            <Boton
+              variante="secundario"
+              etiqueta={t('postventa.devolverParte')}
+              bloque
+              onPress={() => setModo('parcial')}
+            />
+          </View>
+        ) : (
+          <View style={{ gap: spacing[3] }}>
+            {/* ⭐ **EL TOTAL A LA VISTA, Y CUÁNTO QUEDA SI NO SON LO MISMO.**
+                El tope no es el total pelado: es **el total menos lo ya
+                devuelto** en otros casos del mismo objeto (`disponibleDevolver`,
+                de A). *Dos parciales que suman más que el servicio son plata que
+                nadie cobró.* Cuando los dos coinciden se dice uno solo — repetir
+                el mismo número con dos rótulos hace dudar de los dos. */}
+            {totalObjeto !== null ? (
+              <Texto variante="apoyo">
+                {disponible !== null && disponible < totalObjeto
+                  ? t('postventa.parcialTotalYQueda', {
+                      total: dinero(totalObjeto),
+                      queda: dinero(disponible),
+                    })
+                  : t('postventa.parcialTotal', { total: dinero(totalObjeto) })}
+              </Texto>
+            ) : (
+              /* 🔴 **Sin total NO se calla: se dice.** *Un campo de monto sin
+                 referencia deja al prestador adivinando contra qué se compara,
+                 y su rebote llegaría recién al confirmar.* El motor sigue
+                 topeando del otro lado — acá lo que falta es la referencia. */
+              <Texto variante="apoyo">{t('postventa.parcialSinTotal')}</Texto>
+            )}
+            <Campo
+              label={t('postventa.parcialMonto')}
+              value={montoTexto}
+              onChangeText={setMontoTexto}
+              /* `decimal-pad`: la coma la escribe medio Ecuador y se normaliza
+                 al leer — el teclado no tiene por qué pelearse con eso. */
+              keyboardType="decimal-pad"
+              placeholder="0,00"
+            />
+            <Campo
+              label={t('postventa.parcialRazon')}
+              value={razon}
+              onChangeText={setRazon}
+              placeholder={t('postventa.parcialRazonEjemplo')}
+              /* ⚠️ **Una línea, y por eso no es `multiline`.** La firma pide
+                 «corta»: *lo que la familia tiene que leer al lado de un número
+                 es una razón, no un descargo.* */
+              ayuda={t('postventa.parcialRazonAyuda')}
+            />
+            <Boton
+              etiqueta={t('postventa.parcialConfirmar')}
+              bloque
+              cargando={obrando}
+              /* El botón se apaga **con lo que se puede saber acá**: que haya un
+                 número usable y una razón escrita. El tope y la razón vacía los
+                 valida el motor igual — *el `disabled` es cortesía, la defensa
+                 está del otro lado* (`monto_supera_total`,
+                 `razon_requerida_en_parcial`). */
+              deshabilitado={montoNumero === null || razon.trim() === ''}
+              /* 🔴 **Y DICE POR QUÉ ESTÁ APAGADO.** Es la lección de la jornada:
+                 tres controles distintos devolvían silencio, y el silencio se
+                 lee como app rota. `razonDeshabilitado` existe para esto. */
+              razonDeshabilitado={
+                montoNumero === null
+                  ? t('postventa.parcialNecesitaMonto')
+                  : t('postventa.parcialNecesitaRazon')
+              }
+              onPress={() => {
+                if (montoNumero === null) return;
+                void resolver('parcial', montoNumero, razon.trim());
+              }}
+            />
+            <Boton
+              variante="secundario"
+              etiqueta={t('postventa.parcialVolver')}
+              bloque
+              onPress={() => setModo(null)}
+            />
+          </View>
+        )}
       </Hoja>
     </View>
   );
