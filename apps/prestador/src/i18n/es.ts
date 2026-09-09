@@ -4799,6 +4799,7 @@ export const prestadorEs = {
     parcialVolver: 'Volver',
     parcialNecesitaRazon: 'Escribe una línea diciendo por qué.',
     parcialSeVaDeRango: 'Es más de lo que queda por devolver de este servicio.',
+    parcialSeVaDeRangoConCifra: 'Ya sólo quedan {{queda}} por devolver de este servicio.',
   },
 
 } as const;

@@ -192,7 +192,17 @@ export default function CasoDelPrestador() {
               : r.codigo === 'razon_requerida_en_parcial'
                 ? t('postventa.parcialNecesitaRazon')
                 : r.codigo === 'monto_supera_total'
-                  ? t('postventa.parcialSeVaDeRango')
+                  ? /* 🔴 **EL NÚMERO DEL REBOTE GANA AL DE LA PANTALLA.** Es la
+                       carrera: alguien devolvió sobre este mismo objeto
+                       mientras la Hoja estaba abierta, y `disponibleDevolver`
+                       —que se leyó al entrar— quedó viejo. *Repetir el número
+                       viejo en el mensaje del rebote sería decirle al prestador
+                       que se pasó de una cifra contra la que, según su
+                       pantalla, no se pasó.* El motor manda el fresco; se usa
+                       ése. Cuando no viene, se dice sin cifra. */
+                    r.disponible !== null
+                    ? t('postventa.parcialSeVaDeRangoConCifra', { queda: dinero(r.disponible) })
+                    : t('postventa.parcialSeVaDeRango')
                   : r.mensaje,
         });
         return;

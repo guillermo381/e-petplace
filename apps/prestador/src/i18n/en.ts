@@ -3779,6 +3779,7 @@ export const prestadorEn = {
     parcialVolver: 'Back',
     parcialNecesitaRazon: 'Write one line saying why.',
     parcialSeVaDeRango: 'That is more than what is left to refund on this service.',
+    parcialSeVaDeRangoConCifra: 'Only {{queda}} is left to refund on this service.',
   },
 
 } as const satisfies Espejo<typeof prestadorEs>;
