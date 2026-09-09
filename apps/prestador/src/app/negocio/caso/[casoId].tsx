@@ -88,6 +88,9 @@ export default function CasoDelPrestador() {
   const [razon, setRazon] = useState('');
   const [obrando, setObrando] = useState(false);
   const optimistasRef = useRef<Fila[]>([]);
+  /* Ver la nota de `cargar`: los dos refs curan la carrera del sondeo. */
+  const secuenciaRef = useRef(0);
+  const enVueloRef = useRef(false);
 
   /** Plata en texto. **Local a propósito**: la casa no tiene un `dinero()`
    *  compartido y **inventarlo desde acá sería fijar el formato de toda la app
@@ -110,21 +113,57 @@ export default function CasoDelPrestador() {
     return Number.isFinite(n) && n > 0 ? Math.round(n * 100) / 100 : null;
   })();
 
+  /* ═══ 🔴 LOS TRES DEFECTOS QUE ESTA PANTALLA TENÍA IGUAL QUE LA DE LA FAMILIA
+     Los curé en el cliente y **no acá**, que es la regla de la casa cobrándose:
+     *una regla duplicada por copia se cura dos veces o no se cura.* Las dos
+     pantallas nacieron de la misma forma y las tres cosas estaban clonadas.
+
+     ① **EL GUARD IMPOSIBLE.** ⏪ Decía `ids.has(f.clave)` — pero la clave de
+        una optimista es `local-<timestamp>` y la del motor es un UUID:
+        **jamás coinciden**, así que el filtro devolvía siempre `true` y la
+        optimista sobrevivía al lado de la fila real. *No falla: acumula.* Es
+        el mismo mensaje duplicado que el founder vio del lado de la familia.
+        Se pregunta lo correcto: si el envío salió y el motor ya devolvió el
+        hilo, **toda optimista que estaba `enviando` YA ESTÁ ahí**; sobreviven
+        sólo las que fallaron, cuyo texto no se puede perder.
+
+     ② **EL ORDEN.** Las optimistas iban al PRINCIPIO de un array que el motor
+        entrega ascendente. Son **lo más nuevo**: van al final.
+
+     ③ **NO HABÍA SONDEO.** El prestador no veía llegar el mensaje de la
+        familia sin salir y entrar — *un chat en el que uno de los dos lados
+        tiene que salir para enterarse no es un chat.* Va con la misma cura de
+        carrera que el cliente: una respuesta atrasada **no escribe**, y el
+        tick se saltea si la anterior sigue en vuelo. */
   const cargar = useCallback(async () => {
     if (typeof casoId !== 'string' || casoId.length === 0) return;
+    const mia = ++secuenciaRef.current;
+    enVueloRef.current = true;
     const [c, m] = await Promise.all([leerCaso(casoId), leerMensajesDeCaso(casoId)]);
+    if (mia === secuenciaRef.current) enVueloRef.current = false;
+    if (mia !== secuenciaRef.current) return;
+
     setCaso(c.ok ? c.data : 'error');
     if (m.ok) {
       const delMotor: Fila[] = m.data.mensajes.map((x) => ({ clave: x.id, mensaje: x }));
-      const ids = new Set(delMotor.map((f) => f.clave));
-      optimistasRef.current = optimistasRef.current.filter((f) => !ids.has(f.clave));
-      setHilo([...optimistasRef.current, ...delMotor]);
+      optimistasRef.current = optimistasRef.current.filter((f) => f.estado === 'no_se_envio');
+      setHilo([...delMotor, ...optimistasRef.current]);
     }
   }, [casoId]);
 
   useFocusEffect(
     useCallback(() => {
+      let vigente = true;
       void cargar();
+      const cada5s = setInterval(() => {
+        if (vigente && !enVueloRef.current) void cargar();
+      }, 5000);
+      return () => {
+        vigente = false;
+        clearInterval(cada5s);
+        secuenciaRef.current += 1;
+        enVueloRef.current = false;
+      };
     }, [cargar]),
   );
 
@@ -138,8 +177,11 @@ export default function CasoDelPrestador() {
         textoCrudo: texto,
         mensaje: { id: clave, autor: 'prestador', tipo: 'mensaje', cuerpo: texto, creadoEn: new Date().toISOString() },
       };
-      optimistasRef.current = [opt, ...optimistasRef.current];
-      setHilo((p) => [opt, ...p]);
+      /* Al final: es lo más nuevo, y el hilo va ascendente (② de arriba). */
+      optimistasRef.current = [...optimistasRef.current, opt];
+      /* Al FINAL, igual que en el ref: la lista va ascendente y la
+         inversión para la pieza ocurre en un solo lugar. */
+      setHilo((p) => [...p, opt]);
       setBorrador('');
       const r = await enviarMensajeDeCaso(casoId, texto);
       if (r.ok) {
@@ -271,7 +313,19 @@ export default function CasoDelPrestador() {
     [idioma, responder, t, theme.bg.overlay],
   );
 
-  const filas = useMemo(() => hilo, [hilo]);
+  /* 🔴 **EL HILO DEL PRESTADOR ESTABA AL REVÉS, y nadie lo había mirado.**
+     `datosDelMasNuevoAlMasViejo` **es el contrato: el nombre lo dice**. El
+     motor entrega ASCENDENTE (`ORDER BY creado_en, id`, medido) y acá se le
+     pasaba tal cual ⇒ la pieza dibujaba el hilo dado vuelta.
+     *Lo tapaba el defecto de al lado:* la optimista se insertaba al principio,
+     así que **el mensaje recién escrito caía en el lugar correcto por
+     accidente** y el resto quedaba invertido — el error se veía como «el
+     historial está raro», no como «esto está al revés».
+     La cura es la del vecino ya gateado (la pantalla de la familia, y antes
+     `armarHilo` en `packages/domain`): **un solo `reverse`, acá**. Invertir un
+     arreglo no rompe la memoización por item de N16: los objetos son los
+     mismos. */
+  const filas = useMemo(() => [...hilo].reverse(), [hilo]);
 
   if (caso === 'cargando') {
     return (

@@ -130,6 +130,28 @@ export default function PantallaDelCaso() {
      hilo desde el motor hay que conservarlas, y leerlas del estado adentro de
      un callback traería la copia del render viejo. */
   const optimistasRef = useRef<Fila[]>([]);
+  /* ═══ 🔴 EL SONDEO NECESITA SABER CUÁL DE SUS CORRIDAS ES LA ÚLTIMA ═══════
+     **Reporte del founder: la mensajería «a veces llega, a veces tarda».**
+     Medido en el código: `cargar()` se dispara cada 5 s **y no cancelaba la
+     anterior**. Con la red lenta —o con el emulador quedándose sin DNS a mitad,
+     que me pasó hoy— **dos corridas quedan en vuelo a la vez, y la que responde
+     segunda no es la que salió última**. Cuando la vieja llega tarde, escribe
+     un hilo SIN el mensaje que la nueva ya había traído ⇒ *el mensaje aparece,
+     desaparece, y vuelve cinco segundos después.*
+
+     🔴 **Y no era sólo el hilo:** la misma corrida vieja pisaba
+     `optimistasRef`, o sea la lista de lo que la familia escribió y todavía no
+     salió. *Un mensaje propio puede volver a la pantalla como si no se hubiera
+     enviado, y eso es peor que tardar.*
+
+     Dos refs, y hacen cosas distintas:
+     · `secuenciaRef` numera cada corrida; **al volver, la que no es la última
+       NO ESCRIBE**. Es la cura de la carrera.
+     · `enVueloRef` deja que el tick del reloj **se saltee** si la anterior no
+       volvió. *Sin esto, con la red lenta el sondeo se apila contra sí mismo:
+       cada 5 s una petición más, todas pidiendo lo mismo.* */
+  const secuenciaRef = useRef(0);
+  const enVueloRef = useRef(false);
 
   /**
    * 🔴 **LA FUSIÓN, y sin ella el sondeo sería peor que el problema.**
@@ -202,7 +224,16 @@ export default function PantallaDelCaso() {
 
   const cargar = useCallback(async () => {
     if (typeof casoId !== 'string' || casoId.length === 0) return;
+    const mia = ++secuenciaRef.current;
+    enVueloRef.current = true;
     const [c, m] = await Promise.all([leerCaso(casoId), leerMensajesDeCaso(casoId)]);
+    if (mia === secuenciaRef.current) enVueloRef.current = false;
+
+    /* 🔴 **LA RESPUESTA VIEJA NO ESCRIBE — sale acá y no toca nada.** *Una
+       respuesta atrasada no es un error: es información correcta de hace un
+       rato, y pisar lo nuevo con ella es la única forma de perder un mensaje
+       que ya había llegado.* */
+    if (mia !== secuenciaRef.current) return;
 
     if (!c.ok) {
       setCaso(c.codigo === 'no_es_tuyo' ? 'noEsTuyo' : 'error');
@@ -284,12 +315,20 @@ export default function PantallaDelCaso() {
          hilo del caso, donde no había suscripción— así que **no lo doy por
          resuelto ni por inexistente**. Si el sondeo lo destapa, se ve acá. */
       const cada5s = setInterval(() => {
-        if (vigente) void cargar();
+        /* Se saltea el tick si la corrida anterior no volvió: *pedir de nuevo
+           lo mismo que todavía está en vuelo no acelera nada y apila.* */
+        if (vigente && !enVueloRef.current) void cargar();
       }, 5000);
 
       return () => {
         vigente = false;
         clearInterval(cada5s);
+        /* Al salir del foco, **lo que esté en vuelo queda invalidado**: mover
+           la secuencia hace que su respuesta no escriba. *Sin esto, una carga
+           lenta aterriza sobre la pantalla siguiente y deja el hilo del caso
+           anterior escrito en el estado.* */
+        secuenciaRef.current += 1;
+        enVueloRef.current = false;
       };
     }, [cargar]),
   );
