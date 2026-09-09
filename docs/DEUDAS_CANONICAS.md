@@ -28703,6 +28703,53 @@ lo construye y la otra lo mide **sobre el objeto que ya existe**.
 ---
 
 
+### `L-525` — Una URL canónica vive en DOS lugares, y cambiar uno solo no rompe nada: desvía
+
+**S114-F, firma del founder.** Curé el `redirectTo` del admin: la URL de rama pasó a
+`https://admin.epetplace.com`. **Lo verifiqué de tres formas y las tres dieron verde:**
+
+```
+el bundle publicado    la URL vieja 0 · la canónica 1, dentro del signInWithOAuth
+el dominio             /  /login  /placas  →  200, cero redirects
+la sonda de OAuth      302 → accounts.google.com con redirect_to intacto
+```
+
+🔴 **Y al loguearse, el founder terminaba en el sitio público.**
+
+**La causa: `https://admin.epetplace.com` NO estaba en las *Redirect URLs* de Supabase.** Lo
+que estaba era **la URL de rama vieja** — la que el código había dejado de usar. Al volver
+del proveedor, Supabase **descarta el `redirect_to` que no reconoce y cae al Site URL**.
+
+> ***Una URL canónica vive en DOS lugares: el código y la allow-list del proveedor de auth.***
+> **Cambiar uno solo no rompe nada — desvía.** Y el desvío ocurre *después* de que el
+> usuario se autenticó, así que **el login “funciona”: te deja adentro de otro lado.**
+
+## Por qué ninguna medición del bundle podía verlo
+
+**El código publicado era correcto**, y eso es lo que engaña. La mitad que faltaba **no vive
+en el repo**: vive en la configuración del proveedor, donde **ningún gate, typecheck ni
+grep llega**.
+
+⚠️ **Y mi sonda tampoco: medía el DESPACHO, no la vuelta** ([[L-505]]). El `302` hacia
+Google sale igual con una URL permitida y con una que no — *la validación ocurre en el
+callback*. **Su discriminador ya me había avisado que no distinguía**, y aun así el
+diagnóstico completo tardó porque *el eslabón que faltaba no era medible desde afuera.*
+
+⇒ **Toda URL canónica que cambie se cambia en los DOS lugares, EN EL MISMO ACTO.** Y una
+URL nueva **entra a la allow-list ANTES del primer login**, no después — *porque el primer
+síntoma no es un error: es alguien que entra y aparece en otro sitio.*
+
+**El rastro que lo hace diagnosticable, para la próxima:** *si el login funciona y te deja
+en otro lado, la falla está del lado del proveedor, no del código* — **cuando la app está
+mal, no llegás a autenticarte; cuando la allow-list está mal, te autenticás y viajás.**
+
+*(Familia de [[L-521]] y [[L-524]]: las tres son sobre medir la señal adyacente. Acá el
+bundle era correcto y el hecho vivía **fuera del repo** — el único de los tres donde ni
+siquiera había artefacto que abrir.)*
+
+---
+
+
 ### `L-524` — Para saber si algo se usa, no se lee el código: se cuentan sus filas
 
 **S114-F, firma del founder.** Había que decidir cuáles de las **27 pantallas** de un portal

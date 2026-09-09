@@ -68,7 +68,26 @@ Debería tardar **~1-2 min**. **Cómo saber que salió bien de verdad** — no a
 | la URL de Vercel abre | la pantalla de **login** con «e-PetPlace · Operaciones» en la pestaña |
 | entrás y ves | **Casos** y **Liquidaciones** en el menú |
 
-## ⑤ El dominio — recién cuando ④ esté verde
+## ⑤ 🔴 LA ALLOW-LIST DE SUPABASE — antes del primer login, no después
+
+**Supabase → Authentication → URL Configuration → Redirect URLs → Add:**
+
+```
+https://<la-url-del-proyecto-nuevo>.vercel.app/**     ← para probar YA
+https://admin.epetplace.com/**                        ← cuando el dominio se mueva
+```
+
+⚠️ **Este paso no es opcional y su falla no se parece a una falla:** si la URL no está en la
+lista, el login **funciona** —te autenticás— y Supabase, al volver del proveedor, **descarta
+el `redirect_to` que no reconoce y te manda al Site URL.** *Terminás en el sitio público,
+logueado, sin un solo error.*
+
+**Ya pasó (8-sep-2026, `L-525`):** el `redirectTo` del legado se curó en el código a
+`admin.epetplace.com` y **nadie lo agregó acá** — la allow-list seguía con la URL de rama
+vieja. El bundle era correcto, el dominio no redirigía, y la sonda de OAuth salía bien:
+***ninguna medición del repo podía verlo, porque la mitad que faltaba no vive en el repo.***
+
+## ⑥ El dominio — recién cuando ④ esté verde
 
 **Settings → Domains → Add** → `admin.epetplace.com`
 

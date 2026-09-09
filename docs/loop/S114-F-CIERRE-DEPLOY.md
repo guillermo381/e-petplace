@@ -188,6 +188,35 @@ se probó a mano antes de cablearlo, y después la ejerció sola sobre `f3171cc`
 > pegada a lo que alguien va a copiar, no está.** Un lector de este parte se lleva el
 > número, no el contexto donde vivía.)*
 
+## El cierre del hilo del login — la mitad que no vive en el repo
+
+**8-sep-2026.** El bundle quedó verde y el clic verificado, y **aun así el founder terminaba
+en el sitio público al loguearse.**
+
+**Lo que medí, y las tres señales daban bien:**
+
+```
+el bundle publicado    URL vieja 0 · canónica 1, dentro del signInWithOAuth
+el dominio             /  /login  /placas  →  200, cero redirects, mismo host
+la sonda de OAuth      302 → accounts.google.com con redirect_to intacto
+```
+
+🔴 **La causa: `https://admin.epetplace.com` no estaba en las *Redirect URLs* de Supabase.**
+Lo que estaba era **la URL de rama vieja** — la que el código había dejado de usar. Al
+volver del proveedor, Supabase descartaba el `redirect_to` y caía al Site URL.
+
+> ***Una URL canónica vive en DOS lugares: el código y la allow-list del proveedor de auth.
+> Cambiar uno solo no rompe nada — desvía.*** Y el desvío ocurre **después** de autenticar,
+> así que el login «funciona»: te deja adentro de otro lado.
+
+**Por qué ninguna medición del bundle podía verlo:** *la mitad que faltaba no vive en el
+repo.* Y mi sonda tampoco alcanzaba — **medía el despacho, no la vuelta** (`L-505`): su
+propio discriminador ya me había avisado que no distinguía. **Resuelto por el founder**
+agregando `https://admin.epetplace.com/**`; el login con Google entra al portal.
+
+**Queda como `L-525`, y como paso obligatorio del proyecto nuevo:** *la URL de `apps/admin`
+entra a la allow-list ANTES del primer login.*
+
 ## La tanda del asiento — lo anotado
 
 | | |
