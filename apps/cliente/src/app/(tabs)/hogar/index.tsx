@@ -65,7 +65,6 @@ import {
   motion,
   radius,
   spacing,
-  ResultadosBusqueda,
   Campo,
   typography,
   useAviso,
@@ -113,7 +112,6 @@ import { diaSemanaCorto, fechaCortaMono, fechaLargaHumana } from '@epetplace/i18
 
 import { InvitacionAvisos } from '@/components/invitacion-avisos';
 import { ventanaVencida } from '@/lib/despensa/ventana';
-import { useBusqueda } from '@/components/busqueda';
 import { useTraduccion } from '@/i18n';
 import { ADOPCION_ALCANZABLE } from '@/lib/gate-adopcion';
 import { vozServicio } from '@/lib/voz-servicio';
@@ -428,7 +426,6 @@ function DetalleNodoHogar({
 function DetalleVacunaVida({ eventoId, onVerCarnet }: { eventoId: string; onVerCarnet: (path: string) => void }) {
   const { theme } = useTheme();
   const { t } = useTraduccion();
-  const busqueda = useBusqueda();
   const idioma = useTraduccion().idioma;
   const [vacuna, setVacuna] = useState<VacunaDeEvento | 'cargando' | 'error'>('cargando');
 
@@ -653,7 +650,6 @@ function FilaCampanaTecho({
 
 export default function Hogar() {
   const router = useRouter();
-  const busqueda = useBusqueda();
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const insets = useSafeAreaInsets();
