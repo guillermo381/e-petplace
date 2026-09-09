@@ -235,6 +235,12 @@ const BASELINE_VOSEO = {
 const shaDe = (p) => createHash('sha256').update(readFileSync(p)).digest('hex');
 
 const RAICES = ['apps/cliente/src', 'apps/prestador/src'];
+/** 🔴 S114-B · `apps/admin` — la app que el gate de voz no miraba. Va APARTE de
+ *  `RAICES` a propósito: las reglas de UI móvil no le aplican (es React web),
+ *  y sólo la consume `R66`. Con `existsSync` porque **puede no estar en el
+ *  árbol de una pista**, y ahí su ausencia se DECLARA en la salida en vez de
+ *  romper el lint. */
+const RAIZ_ADMIN = 'apps/admin/src';
 const RAICES_UI = ['packages/ui/src/components', 'packages/ui/src/brand'];
 
 function archivosTsx(dir) {
@@ -5797,7 +5803,9 @@ function r66(archivos) {
   for (const { path, src } of archivos) {
     if (vistos.has(path)) continue;
     vistos.add(path);
-    const n = hitsDeVoseo(src).length;
+    /* ⑯ · en un `.tsx` la voz también puede vivir SUELTA entre etiquetas — y en
+       una app sin i18n vive ahí y en ningún otro lado. Ver `lib-voz` ⑯. */
+    const n = hitsDeVoseo(src, { jsx: /\.tsx$/.test(path) }).length;
     if (n === 0) continue;
     if (ES_GALERIA.test(path)) { enGaleria += n; continue; }
     porArchivo.set(path, n);
@@ -5825,12 +5833,24 @@ function r66(archivos) {
     }
   }
 
-  const enCero = [...Object.keys(BASELINE_VOSEO)].filter((p) => (porArchivo.get(p) ?? 0) === 0);
+  const enCero = [...Object.keys(BASELINE_VOSEO)].filter((p) => (porArchivo.get(p) ?? 0) === 0)
+
+  /* 🔴 QUÉ APPS VIO, POR NOMBRE — `L-500`, y lo pidió el founder.
+     **Una app entera puede quedar fuera del corpus y el verde se lee igual**:
+     fue exactamente lo que pasó con `apps/admin`, que además es la única sin
+     i18n. *Un verde sobre una app que no mira se lee igual que un verde
+     ganado.* */
+  const APPS_ESPERADAS = ['apps/cliente', 'apps/prestador', 'apps/admin']
+  const appsVistas = APPS_ESPERADAS.filter((a) => [...vistos].some((p) => p.startsWith(a + '/')))
+  const appsAusentes = APPS_ESPERADAS.filter((a) => !appsVistas.includes(a));
 
   return {
     fallos,
     info:
       `${total} cadena(s) en voseo en ${porArchivo.size} archivo(s) de producto` +
+      ` · APPS VISTAS: ${appsVistas.join(' · ') || 'NINGUNA'}` +
+      (appsAusentes.length ? ` · 🔴 AUSENTES DEL CORPUS: ${appsAusentes.join(' · ')} — su verde NO dice nada de ellas` : '') +
+      ` · lee texto entrecomillado Y suelto en JSX (\`.tsx\`)` +
       (enGaleria ? ` · ${enGaleria} en galería (NO cuentan: son cadenas de demostración, ver ES_GALERIA)` : '') +
       (enCero.length ? ` · ${enCero.length} baseline(s) YA EN 0` : '') +
       ` · ${VOZ_LO_QUE_NO_VE}` +
@@ -8401,7 +8421,8 @@ corridas.push(['R83 (el dato del otro asiento no se dibuja)', r83([...apps, ...a
 corridas.push(['R82 (dos manejadores de teclado no viven juntos)', r82([...ui, ...leer(archivosCodigo('packages/ui/src'))])]);
 corridas.push(['R81 (la hoja no queda a medias ni la empuja el teclado)', r81([...ui, ...apps, ...appsCodigo, ...leer(archivosCodigo('packages/ui/src'))])]);
 corridas.push(['R80 (la voz que nace en el motor)', r80(migraciones)]);
-corridas.push(['R66 (la voz no vuelve al voseo)', r66([...appsCodigo, ...leer(archivosCodigo('packages/ui/src')), ...leer(archivosCodigo('packages/api/src')), ...galeria])]);
+corridas.push(['R66 (la voz no vuelve al voseo)', r66([...appsCodigo,
+  ...(existsSync(RAIZ_ADMIN) ? leer(archivosCodigo(RAIZ_ADMIN)) : []), ...leer(archivosCodigo('packages/ui/src')), ...leer(archivosCodigo('packages/api/src')), ...galeria])]);
 corridas.push(['R65 (el area de reserva de una marca ajena sigue entrando)', r65(apps)]);
 corridas.push(['R63 (una superficie no promete una ruta que nadie sirve)', r63([...apps, ...appsCodigo])]);
 corridas.push(['R62 (la prop jubilada no se sigue montando)', r62([...apps, ...ui, ...galeria])]);

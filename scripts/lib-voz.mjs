@@ -305,6 +305,60 @@ function _sinComentariosSql(src) {
   return fuera.join('\n');
 }
 
+/**
+ * ═══ ⑯ · EL TEXTO SUELTO EN JSX — S114-B (lo midió F) ══════════════════════
+ *
+ * 🔴 **El matcher sólo veía texto ENTRECOMILLADO**, y F lo probó con el
+ * discriminador que lo vuelve incontestable: **el mismo texto da 1 en un
+ * literal y 0 en JSX.** En un solo archivo encontró «Volvé» y **no vio
+ * «Decidís» ni «Elegí»**.
+ *
+ * ── 🔴 Y LA RAZÓN POR LA QUE NUNCA SE NOTÓ ES LA QUE IMPORTA ──────────────
+ * **En las apps móviles todo el texto va por i18n**, así que la voz de producto
+ * vive en un diccionario: **es una cadena entrecomillada por construcción**. El
+ * ciego no tenía dónde manifestarse. **`apps/admin` es React web SIN i18n** y su
+ * texto visible vive suelto entre etiquetas ⇒ **una app entera fuera del
+ * alcance, con el gate en verde.**
+ *
+ * *Un instrumento puede estar ciego durante meses sin dar un solo falso verde,
+ * si el sujeto que no ve todavía no existe. El día que existe, el verde de
+ * ayer y el de hoy se leen igual.*
+ *
+ * ── LO QUE COSTÓ, MEDIDO ANTES DE APLICARLO (`L-502`) ─────────────────────
+ * Sobre el corpus vivo: **`apps/cliente` 0 · `apps/prestador` 0 · `packages/ui`
+ * 9 y los NUEVE en `TokenGallery`**, que `R66` ya excluye con su razón.
+ * **Delta rojo: CERO.** *La ampliación no enrojece nada que exista hoy —
+ * porque el texto móvil ya estaba entrecomillado.*
+ *
+ * ── ⚠️ SOBRE UN CANDIDATO DE JSX NO CORREN LAS EXCLUSIONES DE CÓDIGO ──────
+ * ⑩ (snake_case), ⑪ (rutas de import) y ⑫ (claves de i18n) existen para
+ * descartar **cadenas que son código**. Un nodo de texto JSX **no es código por
+ * construcción**, y aplicárselas descartaría una palabra suelta legítima:
+ * `<span>contanos</span>` es todo minúsculas y ⑩ lo tomaría por identificador.
+ */
+const RE_TEXTO_JSX = />([^<>{}]*[a-záéíóúñü][^<>{}]*)</gi
+
+/**
+ * Las cadenas candidatas de UNA línea. Las entrecomilladas siempre; el texto
+ * suelto de JSX sólo cuando el consumidor lo pide (`.tsx`).
+ * @returns {{v:string, deJsx:boolean}[]}
+ */
+function _candidatas(linea, jsx) {
+  const out = []
+  for (const m of linea.matchAll(/'([^'\\]{4,})'|"([^"\\]{4,})"/g)) {
+    out.push({ v: m[1] ?? m[2], deJsx: false })
+  }
+  if (!jsx) return out
+  for (const m of linea.matchAll(RE_TEXTO_JSX)) {
+    const t = m[1].trim()
+    /* Nada de sintaxis adentro: si tiene `=`, `;`, backtick o `$`, no es un
+       nodo de texto — es una comparación o una interpolación partida. */
+    if (t.length < 4 || /[=;`$\\]/.test(t)) continue
+    out.push({ v: t, deJsx: true })
+  }
+  return out
+}
+
 function _arrancaPalabra(b, x) {
   let desde = 0;
   for (;;) {
@@ -315,7 +369,7 @@ function _arrancaPalabra(b, x) {
   }
 }
 
-export function hitsDeVoseo(src, { lenguaje = 'js' } = {}) {
+export function hitsDeVoseo(src, { lenguaje = 'js', jsx = false } = {}) {
   const lineas = (lenguaje === 'sql' ? _sinComentariosSql(src) : src).split('\n');
   let enBloque = false;
   const hits = [];
@@ -333,8 +387,7 @@ export function hitsDeVoseo(src, { lenguaje = 'js' } = {}) {
        comería media línea. Ver `_sinComentariosSql`. */
     if (lenguaje !== 'sql') l = l.replace(/\/\/.*$/, '');
 
-    for (const m of l.matchAll(/'([^'\\]{4,})'|"([^"\\]{4,})"/g)) {
-      const v = m[1] ?? m[2];
+    for (const { v, deJsx } of _candidatas(l, jsx)) {
       /* ⑩ — UN IDENTIFICADOR NO ES UNA FRASE. `no_sos_del_equipo` es un código
          de error tipado, no voz: cambiarlo rompe el matching y no le habla a
          nadie. Se descarta por FORMA (snake_case puro), que es inequívoco —
@@ -348,7 +401,7 @@ export function hitsDeVoseo(src, { lenguaje = 'js' } = {}) {
          ⚠️ El `%` va **opcional y sólo al final**: `'mascota_sin_acceso: no
          podés atar esa compra'` tiene un espacio, así que NO cae acá y sigue
          contando — *un código con una frase pegada ES voz.* */
-      if (/^[a-z0-9_]+%?$/.test(v)) continue;
+      if (!deJsx && /^[a-z0-9_]+%?$/.test(v)) continue;
 
       /* ⑪ — **UNA RUTA DE IMPORT NO ES VOZ, y esto lo cobró B.** Su
          `'./components/HojaContanos'` daba rojo por «contanos»: un
@@ -366,7 +419,7 @@ export function hitsDeVoseo(src, { lenguaje = 'js' } = {}) {
          Lo cobró mi propio perfil el día que sumé «contanos» a la lista: *la
          exclusión existía, la escribí yo, y no cubría el caso más frecuente
          del repo.* `*` en vez de `+`, y el control lo fija. */
-      if (/^(\.{1,2}\/|@[\w-]*\/|[\w-]+\/)/.test(v) && !/\s/.test(v)) continue;
+      if (!deJsx && /^(\.{1,2}\/|@[\w-]*\/|[\w-]+\/)/.test(v) && !/\s/.test(v)) continue;
 
       /* ⑫ — **UNA CLAVE DE i18n NO ES VOZ**, y esto lo destapó ampliar la lista
          a 114 formas: `'checkoutGuarderia.esperaMensual'` daba rojo por
@@ -375,7 +428,7 @@ export function hitsDeVoseo(src, { lenguaje = 'js' } = {}) {
          una familia lee es el VALOR del diccionario, y ése se mide igual.*
          Misma forma que ⑩ y ⑪: se descarta la CADENA que parece identificador
          —sin espacios, con punto o camelCase—, jamás la línea. */
-      if (!/\s/.test(v) && (/^[a-z][A-Za-z0-9]*(\.[a-zA-Z0-9_]+)+$/.test(v)
+      if (!deJsx && !/\s/.test(v) && (/^[a-z][A-Za-z0-9]*(\.[a-zA-Z0-9_]+)+$/.test(v)
           || /^[a-z][a-z0-9]*[A-Z][A-Za-z0-9]*$/.test(v))) continue;
 
       const b = v.toLowerCase();
@@ -415,7 +468,11 @@ export function hitsDeVoseo(src, { lenguaje = 'js' } = {}) {
 /** Igual, leyendo del disco. **El lenguaje sale de la extensión** — un
  *  consumidor que pase una migración no tiene que acordarse de decirlo. */
 export const hitsDeArchivo = (ruta) =>
-  hitsDeVoseo(readFileSync(ruta, 'utf8'), { lenguaje: /\.sql$/i.test(String(ruta)) ? 'sql' : 'js' });
+  hitsDeVoseo(readFileSync(ruta, 'utf8'), {
+    lenguaje: /\.sql$/i.test(String(ruta)) ? 'sql' : 'js',
+    /* ⑯ · el texto suelto de JSX sólo existe en `.tsx`. */
+    jsx: /\.tsx$/i.test(String(ruta)),
+  });
 
 /* ═══════════════════════════════════════════════════════════════════════
  * ⑫ · EL HUECO DEL AVISO CLÍNICO — S106 (lo halló B, lo curó A)
