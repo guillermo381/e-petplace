@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   obtenerHojaDelCaso, resolverCaso, responderEnCaso, tomarCaso,
-  type HojaDelCaso, type AlcanceResolucion,
+  pedirPropuestaDelCaso,
+  type HojaDelCaso, type AlcanceResolucion, type PropuestaDelCaso,
 } from '@api-admin'
 import { color, sp, radio, fuente } from '../tokens'
 import { Carta, Boton, Monto, Insignia, VacioQueHabla, Fallo } from '../ui/piezas'
@@ -15,10 +16,15 @@ import { Carta, Boton, Monto, Insignia, VacioQueHabla, Fallo } from '../ui/pieza
  * ese prestador en 90 días · la propuesta de la máquina **marcada como
  * propuesta**.
  *
- * 🔴 **La propuesta no existe todavía y la pantalla lo DICE** en vez de dejar
- * un hueco. Censado en `pg_proc`: no hay ninguna función de propuesta de
- * postventa. *Inventarla acá le daría autoridad de máquina a una sugerencia
- * que no respalda nadie, sobre plata de un tercero.*
+ * 🔴 **La propuesta la prepara `postventa-hoja`** (edge de A) y llega
+ * **marcada como propuesta**: se muestra, no se aplica. Quien decide es la casa
+ * y queda su `decidido_por`.
+ *
+ * ⚠️ Esta cabecera decía, hasta el 9-sep, que «se censó `pg_proc` y no existe
+ * ninguna función de propuesta». Era falso y el censo era correcto: **una edge
+ * function no vive en `pg_proc`**. La edge estaba desplegada y ACTIVE mientras
+ * la pantalla afirmaba su ausencia. *Un vacío honesto sobre algo que sí existe
+ * no es honesto: es una afirmación equivocada con el tono de una medición.*
  *
  * 🔴 **Los contadores de 90 días son DE LA CASA** (§6): están para que quien
  * decide tenga contexto. *Jamás se le dice a una familia que reclama seguido,
@@ -166,7 +172,7 @@ export default function HojaCaso() {
         <div style={{ flex: 1, minWidth: 320 }}>
           <Plata hoja={hoja} />
           <Contexto hoja={hoja} />
-          <Propuesta />
+          <Propuesta hoja={hoja} />
           <Tomar hoja={hoja} alTomar={cargar} />
           <Decidir hoja={hoja} alDecidir={cargar} />
         </div>
@@ -244,21 +250,78 @@ function Contexto({ hoja }: { hoja: HojaDelCaso }) {
 }
 
 /**
- * §6 pide «la propuesta de la máquina, marcada como propuesta». Hoy no existe
- * ninguna, y el lugar lo dice en vez de quedar vacío o —peor— de mostrar una
- * heurística escrita acá que se leería como si fuera del motor.
+ * §6: «la propuesta de la máquina, marcada como propuesta».
+ *
+ * 🔴 **No se pide sola al abrir el caso**, y es decisión, no pereza: cada
+ * llamada cuesta un modelo, y la casa abre la Hoja muchas veces para mirar el
+ * hilo sin necesitar un resumen. Se pide cuando alguien la pide.
+ *
+ * 🔴 **Y el que decide es quien lee.** El texto va rotulado y sin ningún
+ * botón que lo aplique: no hay camino desde acá a `resolverCaso`. *Una
+ * propuesta con un botón «aceptar» al lado deja de ser una propuesta.*
  */
-function Propuesta() {
+function Propuesta({ hoja }: { hoja: HojaDelCaso }) {
+  const [pidiendo, setPidiendo] = useState(false)
+  const [propuesta, setPropuesta] = useState<PropuestaDelCaso | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  /* El hilo puede no tener ni un mensaje con cuerpo (un caso recién abierto con
+     puros `hecho`), y el edge rebota `hilo_vacio`. La puerta no ofrece lo que
+     va a rechazar (Ley 23): sin material, el botón no se dibuja. */
+  const hayMaterial = hoja.hilo.some((m) => typeof m.cuerpo === 'string' && m.cuerpo.trim() !== '')
+
+  async function pedir() {
+    setPidiendo(true); setError(null)
+    try {
+      const r = await pedirPropuestaDelCaso(hoja)
+      if (!r.ok) { setError(r.mensaje); return }
+      setPropuesta(r.data)
+    } catch (e) {
+      /* Mismo criterio que al abrir la Hoja: un camino que no llegue a
+         `setPropuesta` ni a `setError` dejaría el botón girando para siempre. */
+      setError(`No se pudo preparar el resumen: ${e instanceof Error ? e.message : String(e)}`)
+    } finally {
+      setPidiendo(false)
+    }
+  }
+
   return (
     <Seccion titulo="Propuesta de la máquina">
-      <VacioQueHabla
-        titulo="Todavía no hay propuesta"
-        porque={
-          'El motor de postventa no tiene función de propuesta: se censó y no existe ' +
-          'ninguna. Cuando exista, va a aparecer acá marcada como propuesta y con su ' +
-          'porqué — y va a seguir sin aplicarse sola: la decisión es tuya y queda escrita.'
-        }
-      />
+      {propuesta ? (
+        <div>
+          <p style={{ color: color.texto2, fontSize: 12, margin: `0 0 ${sp[2]}px` }}>
+            Lo preparó la máquina leyendo el hilo. La decisión es tuya.
+          </p>
+          <p style={{ color: color.texto, fontSize: 13, lineHeight: 1.6, margin: `0 0 ${sp[3]}px` }}>
+            {propuesta.resumenHilo}
+          </p>
+          <p style={{ color: color.texto, fontSize: 13, lineHeight: 1.6, margin: 0, fontWeight: 600 }}>
+            {propuesta.que}
+          </p>
+          <p style={{ color: color.texto2, fontSize: 12, lineHeight: 1.6, margin: `${sp[2]}px 0 0` }}>
+            {propuesta.porque}
+          </p>
+        </div>
+      ) : !hayMaterial ? (
+        <VacioQueHabla
+          titulo="Todavía no hay nada que resumir"
+          porque={
+            'El hilo no tiene mensajes con texto. Cuando la familia o el prestador escriban, ' +
+            'se va a poder pedir el resumen y la propuesta.'
+          }
+        />
+      ) : (
+        <div>
+          <p style={{ color: color.texto2, fontSize: 12, margin: `0 0 ${sp[3]}px`, lineHeight: 1.5 }}>
+            La máquina puede leer el hilo y proponer un camino, con su porqué.
+            No se aplica sola.
+          </p>
+          <Boton onClick={pedir} disabled={pidiendo}>
+            {pidiendo ? 'Leyendo el caso…' : 'Pedir el resumen y la propuesta'}
+          </Boton>
+        </div>
+      )}
+      {error ? <div style={{ marginTop: sp[3] }}><Fallo mensaje={error} /></div> : null}
     </Seccion>
   )
 }
@@ -375,6 +438,10 @@ function Decidir({ hoja, alDecidir }: { hoja: HojaDelCaso; alDecidir: () => void
   }
 
   const faltaMonto = alcance === 'parcial' && (!monto || Number(monto) <= 0)
+  /* Espeja el gate del motor, no una regla propia: `parcial` y `sin_devolucion`.
+     Si esto y el motor divergen, gana el motor — por eso se mide de su cuerpo. */
+  const faltaRazon =
+    (alcance === 'parcial' || alcance === 'sin_devolucion') && !motivo.trim()
 
   return (
     <Seccion titulo="Decidir">
@@ -396,30 +463,65 @@ function Decidir({ hoja, alDecidir }: { hoja: HojaDelCaso; alDecidir: () => void
       </div>
 
       {alcance === 'parcial' ? (
-        <input type="number" min="0" step="0.01" placeholder="Monto a devolver"
+        /* El `max` sale de `devolvibleMaximo`, que esta misma Hoja ya muestra
+           arriba («Se puede devolver hasta»). Sin él, la puerta ofrece un número
+           que el motor va a rebotar con `monto_supera_total` — Ley 23: la puerta
+           no ofrece lo que va a rechazar. Si el techo es `null` (no se pudo
+           determinar lo pagado) NO se inventa uno: se deja sin `max` y decide el
+           motor, que sí lo sabe. */
+        <input type="number" min="0" step="0.01"
+               max={hoja.plata.devolvibleMaximo ?? undefined}
+               placeholder={hoja.plata.devolvibleMaximo !== null
+                 ? `Monto a devolver (hasta ${hoja.plata.devolvibleMaximo})`
+                 : 'Monto a devolver'}
                value={monto} onChange={(e) => setMonto(e.target.value)}
                style={campo} />
       ) : null}
 
-      {alcance === 'sin_devolucion' ? (
-        <input type="text" placeholder="El motivo — la familia lo va a leer"
-               value={motivo} onChange={(e) => setMotivo(e.target.value)}
-               style={campo} />
-      ) : null}
+      {/* 🔴 EL CAMPO SE DIBUJA EN LOS TRES ALCANCES; EL MOTOR LO EXIGE EN DOS.
+
+          Medido del cuerpo de `caso_resolver` (9-sep), no de un reporte:
+              IF p_alcance IN ('parcial','sin_devolucion')
+                 AND (p_motivo IS NULL OR btrim(p_motivo) = '') -> razon_requerida
+
+          Esta pantalla se escribió cuando la razón sólo se pedía en
+          `sin_devolucion`; **la firma se movió debajo de una pantalla ya
+          escrita** y quedó mandando `null` en parcial => el motor rebotaba, con
+          razón, y la casa no tenía dónde escribirla.
+
+          ⚠️ Y son DOS decisiones distintas, por eso no se resuelven con una sola
+          condición: **dibujar** no es **exigir**. Se ofrece en los tres porque
+          explicar una devolución total también le sirve a la familia; se bloquea
+          sólo donde el motor bloquea. *Una pantalla más estricta que su motor
+          también es un defecto — sólo que uno que nadie reporta, porque parece
+          prudencia.* */}
+      <input type="text"
+             placeholder={alcance === 'parcial'
+               ? 'Por qué se devuelve esa parte — la familia lo va a leer'
+               : alcance === 'total'
+                 ? 'Por qué se devuelve todo (opcional) — la familia lo va a leer'
+                 : 'El motivo — la familia lo va a leer'}
+             value={motivo} onChange={(e) => setMotivo(e.target.value)}
+             style={campo} />
 
       {error ? <div style={{ marginTop: sp[3] }}><Fallo mensaje={error} /></div> : null}
 
       <div style={{ marginTop: sp[4] }}>
-        <Boton onClick={decidir} disabled={!alcance || faltaMonto || enviando}>
+        <Boton onClick={decidir} disabled={!alcance || faltaMonto || faltaRazon || enviando}>
           {enviando ? 'Registrando…' : 'Registrar la decisión'}
         </Boton>
       </div>
 
       {/* El botón apagado dice POR QUÉ está apagado (L-424: un guard que sólo
           sabe negarse manda a reintentar). */}
+      {alcance && faltaRazon ? (
+        <p style={{ color: color.texto3, fontSize: 12, margin: `${sp[2]}px 0 0` }}>
+          Falta escribir por qué. La familia lo va a leer.
+        </p>
+      ) : null}
       {!alcance ? (
         <p style={{ color: color.texto2, fontSize: 12, margin: `${sp[2]}px 0 0` }}>
-          Elegí qué hacer para poder registrarlo.
+          Elige qué hacer para poder registrarlo.
         </p>
       ) : faltaMonto ? (
         <p style={{ color: color.texto2, fontSize: 12, margin: `${sp[2]}px 0 0` }}>

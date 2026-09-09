@@ -426,6 +426,11 @@ const CODIGOS_RES = [
      movimiento no procede, así que la puerta tiene que conocerlos o los
      traduce a genérico. */
   'actor_no_puede', 'transicion_inexistente', 'motivo_requerido',
+  /* 🔴 Los tres que el motor agregó después de escribirse este wrapper, medidos
+     de `pg_get_functiondef` (9-sep). Sin ellos caían en `error_desconocido` y la
+     pantalla decía «No pudimos registrar la decisión» — que manda a buscar el
+     problema donde no está, cuando el motor había dicho exactamente qué faltaba. */
+  'razon_requerida', 'monto_supera_total', 'etapa_incorrecta',
 ] as const;
 export type CodigoErrorResolver = (typeof CODIGOS_RES)[number];
 
@@ -440,6 +445,13 @@ const MENSAJES_RES: Record<CodigoErrorResolver, string> = {
   actor_no_puede: 'Tu cuenta no puede hacer ese movimiento en este caso.',
   transicion_inexistente: 'Ese paso no existe desde el estado actual del caso.',
   motivo_requerido: 'Ese paso necesita un motivo escrito.',
+  /* La razón se pide en `parcial` y en `sin_devolucion` — medido del cuerpo:
+     `IF p_alcance IN ('parcial','sin_devolucion') AND (p_motivo IS NULL …)`.
+     En `total` NO se pide, y la pantalla no la exige ahí. */
+  razon_requerida: 'Falta escribir por qué se resuelve así.',
+  /* Trae `total` y `disponible` frescos en el rebote; la pantalla los muestra. */
+  monto_supera_total: 'El monto es mayor que lo que se puede devolver.',
+  etapa_incorrecta: 'El caso ya no está en un estado que se pueda resolver. Vuelve a abrirlo para ver cómo quedó.',
 };
 
 /** Los tres alcances que `caso_resolver` acepta, medidos de su cuerpo. */
@@ -545,4 +557,106 @@ export async function responderEnCaso(
       detalle: String(r?.codigo ?? '') || null };
   }
   return { ok: true, data: true };
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   LA PROPUESTA DE LA MÁQUINA (DIRECCION_POSTVENTA §6)
+
+   🔴 POR QUÉ ESTO NO EXISTÍA, Y ES LO QUE MÁS VALE DE ESTA CURA: la Hoja decía
+   «se censó y no existe ninguna función de propuesta». El censo era verdadero y
+   la conclusión falsa — **midió `pg_proc`, y una edge function no vive ahí**.
+   `postventa-hoja` estaba desplegada y ACTIVE mientras la pantalla afirmaba su
+   ausencia. *Un censo acota lo que su instrumento puede ver; llamarlo «no
+   existe» le da alcance universal a una medición parcial.*
+   ⇒ censar una capacidad exige preguntarle a TODAS las capas donde puede vivir:
+   `pg_proc`, `supabase/functions`, y el código de las apps.
+
+   ⚠️ Y el contrato tiene una trampa medida del cuerpo del edge, no de un
+   reporte: **cuando el modelo falla, responde HTTP 200 con `{codigo, mensaje}`**
+   —a propósito, para que la casa sepa que el resumen no salió sin perder el
+   caso—. Discriminar por status daría éxito sobre un rechazo, que es el defecto
+   que S107 midió en el actuador de pagos: acá se discrimina **por la presencia
+   de `propuesta`**. */
+export interface PropuestaDelCaso {
+  resumenHilo: string;
+  que: string;
+  porque: string;
+}
+
+/** Lo que la pantalla necesita saber: salió, o no salió y por qué. */
+export type ResultadoPropuesta =
+  | { ok: true; data: PropuestaDelCaso }
+  | { ok: false; mensaje: string };
+
+/* Los tres rebotes de cuerpo del edge, medidos de su `type CodigoError`. Sólo
+   `hilo_vacio` es alcanzable desde acá si la Hoja llama con el hilo vacío — por
+   eso la pantalla no la llama en ese caso, y esto queda como red. */
+const MENSAJES_PROPUESTA = {
+  cuerpo_invalido: 'No se pudo preparar el resumen: el pedido salió mal armado.',
+  caso_vacio: 'No se pudo preparar el resumen: el caso llegó vacío.',
+  hilo_vacio: 'Todavía no hay mensajes que resumir.',
+} as const;
+
+export async function pedirPropuestaDelCaso(hoja: HojaDelCaso): Promise<ResultadoPropuesta> {
+  /* El hilo va con el vocabulario que el edge acepta —`familia|prestador|casa`—
+     y es el MISMO del CHECK `chk_msj_autor` (medido, no supuesto): cero
+     traducción. Se valida igual, porque un valor nuevo del motor entraría acá
+     como turno que el edge descarta en silencio. */
+  const QUIEN: readonly string[] = ['familia', 'prestador', 'casa'];
+  const turnos = hoja.hilo
+    /* `cuerpo` es nullable y el edge exige `texto: string`: un `hecho` sin
+       cuerpo no se manda vacío, se omite. */
+    .filter((m) => typeof m.cuerpo === 'string' && m.cuerpo.trim() !== '' && QUIEN.includes(m.autor))
+    .map((m) => ({ quien: m.autor, texto: m.cuerpo as string, cuando: m.creadoEn }));
+
+  if (turnos.length === 0) return { ok: false, mensaje: MENSAJES_PROPUESTA.hilo_vacio };
+
+  const { data, error } = await getClient().functions.invoke('postventa-hoja', {
+    body: {
+      caso: {
+        motivo: hoja.motivo, clase: hoja.clase, etapa: hoja.etapa,
+        objeto: hoja.objeto, plazo_hasta: hoja.plazoHasta,
+      },
+      hilo: turnos,
+      /* Lo que el sistema sabe del servicio. Va la plata porque es lo que
+         sostiene o descarta una propuesta de devolución. */
+      evidencia: {
+        pagado: hoja.plata.pagado, moneda: hoja.plata.moneda,
+        devolvible_maximo: hoja.plata.devolvibleMaximo,
+        tiene_devengo: hoja.plata.tieneDevengo,
+        por_que_no_se_sabe: hoja.plata.porQueNoSeSabe,
+      },
+    },
+  });
+
+  if (error || data === null || typeof data !== 'object') {
+    return { ok: false, mensaje: 'No se pudo preparar el resumen. El caso y el hilo están completos.' };
+  }
+
+  const d = data as Record<string, unknown>;
+  const p = d.propuesta as Record<string, unknown> | undefined;
+
+  /* Acá está la discriminación por CONTENIDO, no por status. */
+  if (typeof p !== 'object' || p === null || typeof p.que !== 'string') {
+    const cod = typeof d.codigo === 'string' ? d.codigo : '';
+    const conocido = Object.prototype.hasOwnProperty.call(MENSAJES_PROPUESTA, cod)
+      ? MENSAJES_PROPUESTA[cod as keyof typeof MENSAJES_PROPUESTA]
+      : undefined;
+    return {
+      ok: false,
+      mensaje: conocido
+        ?? (typeof d.mensaje === 'string' && d.mensaje !== ''
+          ? d.mensaje
+          : 'No se pudo preparar el resumen. El caso y el hilo están completos.'),
+    };
+  }
+
+  return {
+    ok: true,
+    data: {
+      resumenHilo: typeof d.resumen_hilo === 'string' ? d.resumen_hilo : '',
+      que: p.que,
+      porque: typeof p.porque === 'string' ? p.porque : '',
+    },
+  };
 }
