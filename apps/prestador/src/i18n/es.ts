@@ -4756,8 +4756,21 @@ export const prestadorEs = {
     /* C8 · pide, sin drama. El número va porque decir «tenés servicios sin
        cerrar» sin cuántos obliga a ir a contarlos. */
     sinCerrar: 'Tienes {{n}} servicios sin cerrar. Ciérralos para cobrarlos.',
-    /* Y a las 48 h la verdad, sin adorno: ya pasó. */
-    sinCerrarVencidos: '{{n}} quedaron sin cerrar: no se cobran y la familia recibió su devolución.',
+    /* 🔴 **LA SEGUNDA LÍNEA AFIRMABA ALGO QUE LA PANTALLA NO PUEDE SABER.**
+       ⏪ Decía «…no se cobran **y la familia recibió su devolución**». E lo
+       midió: de los 62 que la línea mostraba, sólo 6 son cobrables, y sobre los
+       otros 56 **no hay ni un caso ni un evento económico** — o sea que ninguna
+       familia recibió nada.
+
+       *No era una exageración de copy: era la pantalla contando como hecho
+       consumado algo que ocurre en otro subsistema y que acá no se consulta.*
+       Y su modo de falla es el peor para un prestador: le dice que su plata ya
+       se fue, con un número inflado diez veces.
+
+       Ahora dice **sólo lo que el motor sabe de ese objeto**: pasó su plazo y
+       ya no se cobra. Lo que pase con la plata de la familia lo dirá quien lo
+       sepa, en su lugar. */
+    sinCerrarVencidos: '{{n}} quedaron sin cerrar y ya no se pueden cobrar.',
     casoTitulo: 'El caso',
     asientoCasa: 'e-PetPlace',
     asientoFamilia: 'La familia',

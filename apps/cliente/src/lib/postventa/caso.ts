@@ -59,10 +59,17 @@ export type CasoParaLaPantalla = CasoDetalle & {
 };
 
 export function traducirCaso(c: CasoDetalle): CasoParaLaPantalla {
-  /* `etapaEnEscalera` manda cuando viene: es el paso congelado. Si no viene,
-     se traduce la etapa actual — y con un final alterno eso da `null`, que es
-     lo correcto: ese final no es un paso de la fila. */
-  const base = c.etapaEnEscalera ?? c.etapa;
+  /* 🔴 **`etapaEnEscalera` SÓLO manda cuando hay FINAL ALTERNO, y ése era el
+     defecto que el founder vio: un caso CERRADO se dibujaba como «Resuelto».**
+
+     Ese campo existe para una cosa: congelar la fila donde estaba cuando el
+     caso salió de la escalera por un final que no es un paso (resuelto entre
+     ustedes, retirado, sin lugar). *Pero `cerrado` SÍ es un paso de la
+     escalera* — el último—, y aplicarle el congelado lo devolvía al anterior.
+
+     ⇒ con final alterno se usa el congelado; **sin él, manda la etapa real**,
+     que es la que la familia tiene que ver. */
+  const base = c.final !== null ? (c.etapaEnEscalera ?? c.etapa) : c.etapa;
   return {
     ...c,
     etapaDeLaFila: A_ESCALERA[base],

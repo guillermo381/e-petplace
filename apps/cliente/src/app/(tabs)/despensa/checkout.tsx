@@ -80,7 +80,7 @@ import {
   configurarRecurrencia,
   crearPedidoDespensa,
   obtenerMiSaldo,
-  pagarCompraConSaldo,
+  aplicarSaldoACompra,
   crearCompraDesdePedidos,
   crearIntentoPago,
   verificarCompuertas,
@@ -527,7 +527,11 @@ export default function DespensaCheckout() {
     /* En la misma ola que el nombre de la tienda: el saldo es un dato del
        resumen, y pedirlo aparte sería otro viaje del peaje de `L-223`. */
     void obtenerMiSaldo().then((rs) => {
-      if (rs.ok) setSaldo(rs.data);
+      /* 🔴 **`0` NO ES `null`.** Si la lectura falla, el saldo queda `null` y no
+         se ofrece nada — que es lo conservador— pero **`0` es una respuesta**:
+         la familia no tiene saldo, y eso se sabe. *Meter las dos cosas en el
+         mismo valor haría indistinguible «no tiene» de «no pudimos leer».* */
+      setSaldo(rs.ok ? rs.data : null);
     });
     // F6: el nombre de la tienda, en UN viaje para los N pedidos.
     const nom = await obtenerNombresTiendaPorPedido(okIds.map((p) => p.pedido_id));
@@ -830,39 +834,89 @@ export default function DespensaCheckout() {
             por pedido: con dos tiendas, un rebote en la segunda dejaba la
             primera ya cobrada. A lo hizo atómico por compra. *El saldo es
             plata: un cobro parcial no es un caso borde.* */}
-        {saldo !== null && compraTotal !== null && saldo >= compraTotal ? (
+        {/* 🔴 **ACÁ JUNTÉ DOS COSAS DISTINTAS Y EL FOUNDER LO ENCONTRÓ.**
+            ⏪ La condición era `saldo >= compraTotal` **para todo**, así que con
+            $13 y un pedido más caro la pantalla ocultaba **las dos cosas: el
+            botón Y el número**. La familia sabe que tiene saldo y no lo veía
+            por ningún lado.
+
+            *No ofrecer lo que no se puede usar es correcto; ocultar que existe
+            es otra cosa.* Ahora son dos decisiones separadas:
+              · **el saldo se DICE siempre que exista** (abajo, como dato);
+              · **el botón se OFRECE sólo si alcanza.**
+
+            Y cuando no alcanza, la línea dice cuánto falta — el mismo dato que
+            le pedí a A para el rebote, aplicado antes de que lo intente.
+
+            ⏳ **ESA LÍNEA NO ES UN CONSUELO: ES LA ANTESALA DEL PAGO MIXTO.**
+            Firma del founder (8-sep): *si el saldo no alcanza, se usa lo que
+            hay y el resto va por el riel.* Mi corrección —decir el saldo
+            aunque no alcance— iba en la dirección correcta **y se quedaba
+            corta**: el problema no era mostrarlo, era que no se pudiera usar.
+
+            🔴 **Por eso esta línea NO se retira cuando llegue el mixto**: pasa
+            a ser el paso previo —«tenés esto, falta esto»— y el botón deja de
+            exigir que alcance. *Quien lea esto después de la firma podría
+            leerla como un residuo del diseño viejo y borrarla; queda escrito
+            para que no.* El contrato lo está midiendo A. */}
+        {/* ═══ EL SALDO ES PAGO MIXTO — firma del founder, 8-sep ═══════════
+            ⏪ **Acá el botón exigía `saldo >= compraTotal`**, y esa condición
+            murió con la firma: *si no alcanza, se aplica lo que hay y el resto
+            va por el riel.* Mi corrección anterior —decir el saldo aunque no
+            alcance— iba bien **y se quedaba corta**: el problema no era
+            mostrarlo, era que no se pudiera usar.
+
+            🔴 **Y la línea DICE DE DÓNDE SALE CADA PESO antes de confirmar.**
+            No es un detalle de copy: *una familia que ve un total y aprieta
+            pagar tiene derecho a saber cuánto salió de su saldo y cuánto de su
+            tarjeta* — y a decidir con eso a la vista, no después.
+
+            ⚠️ **`aplicarSaldoACompra` NO cobra el resto**: aplica el saldo y
+            deja la compra lista para que el riel cobre la diferencia
+            (`pagos-cobro` lee `compras.saldo_aplicado`). Por eso el mixto
+            **sigue por el botón de siempre**, y no hay dos caminos de pago
+            compitiendo. */}
+        {saldo !== null && saldo > 0 && compraTotal !== null ? (
+          <Texto variante="apoyo">
+            {saldo >= compraTotal
+              ? t('despensa.saldoCubreTodo', { saldo: dinero(compraTotal) ?? '' })
+              : t('despensa.saldoMixto', {
+                  saldo: dinero(saldo) ?? '',
+                  resto: dinero(compraTotal - saldo) ?? '',
+                })}
+          </Texto>
+        ) : null}
+        {saldo !== null && saldo > 0 && compraTotal !== null ? (
           <Boton
             variante="apoyada"
             bloque
-            /* `?? ''` inalcanzable: el guard de arriba ya exige `saldo !== null`. Se
-               pone porque TS no estrecha a través de la condición del JSX, y un
-               `!` forzado es lo que la regla 34 prohíbe. */
-            etiqueta={t('despensa.pagarConSaldo', { saldo: dinero(saldo) ?? '' })}
+            etiqueta={
+              saldo >= compraTotal
+                ? t('despensa.pagarConSaldo', { saldo: dinero(compraTotal) ?? '' })
+                : t('despensa.usarSaldo', { saldo: dinero(saldo) ?? '' })
+            }
             cargando={trabajando}
             onPress={() => {
               if (compraId === null || trabajando) return;
               setTrabajando(true);
-              void pagarCompraConSaldo(compraId).then((r) => {
+              void aplicarSaldoACompra(compraId).then((r) => {
                 setTrabajando(false);
-                if (r.ok) {
-                  /* `duplicado` = ya estaba pagada. No se celebra dos veces ni
-                     se trata como error: se dice lo que hay y se sigue. */
+                if (!r.ok) {
+                  mostrar({ variante: 'error', texto: r.mensaje });
+                  return;
+                }
+                setSaldo(r.data.saldoRestante);
+                if (r.data.modo === 'pagado') {
+                  /* Cubrió todo: no hay nada que cobrar. `duplicado` —ya estaba
+                     pagada— no se celebra dos veces ni se trata como error. */
                   setFase('exito');
                   return;
                 }
-                /* 🔴 El rebote DICE CUÁNTO FALTA — `saldo_insuficiente` trae
-                   `saldo` y `total` (unión discriminada). *«No alcanza» sin el
-                   número deja a la familia sin saber qué hacer con eso.* */
-                mostrar({
-                  variante: 'error',
-                  texto:
-                    r.codigo === 'saldo_insuficiente'
-                      ? t('despensa.saldoNoAlcanza', { falta: dinero(r.total - r.saldo) ?? '' })
-                      : r.mensaje,
-                });
-                /* Si no alcanzaba, el número de arriba estaba viejo: se relee
-                   en vez de dejar una oferta que ya sabemos falsa. */
-                if (r.codigo === 'saldo_insuficiente') setSaldo(r.saldo);
+                /* 🔴 **MIXTO Y `sin_saldo` NO TERMINAN ACÁ**: el saldo quedó
+                   aplicado y **el resto lo cobra el riel de siempre**. Se sigue
+                   por `pagar()`, que es el camino que ya existe — *dos caminos
+                   de cobro compitiendo es lo que este contrato vino a evitar.* */
+                void pagar();
               });
             }}
           />
