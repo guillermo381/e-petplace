@@ -4787,6 +4787,7 @@ export const prestadorEs = {
     reconocerCuerpo: 'La familia elige después a dónde va la plata.',
     devolverTodo: 'Devolver todo',
     devolverParte: 'Devolver una parte',
+    parcialNecesitaMonto: 'Para devolver una parte hay que decir de cuánto es.',
   },
 
 } as const;

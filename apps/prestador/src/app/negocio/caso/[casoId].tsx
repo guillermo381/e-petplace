@@ -40,6 +40,7 @@ import {
   SuperficieChat,
   Texto,
   spacing,
+  useAviso,
   useTheme,
 } from '@epetplace/ui';
 import {
@@ -68,6 +69,7 @@ const VOZ_ASIENTO: Record<AsientoCaso, 'postventa.asientoCasa' | 'postventa.asie
 export default function CasoDelPrestador() {
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
+  const aviso = useAviso();
   const { casoId } = useLocalSearchParams<{ casoId?: string }>();
 
   const [caso, setCaso] = useState<Fase<CasoDetalle>>('cargando');
@@ -124,12 +126,32 @@ export default function CasoDelPrestador() {
     async (alcance: 'total' | 'parcial' | 'sin_devolucion') => {
       if (typeof casoId !== 'string') return;
       setObrando(true);
-      await reconocerYResolver(casoId, { alcance });
+      const r = await reconocerYResolver(casoId, { alcance });
       setObrando(false);
+      /* 🔴 **EL RESULTADO SE LEE, Y ANTES SE TIRABA.** ⏪ Acá decía
+         `await reconocerYResolver(…)` a secas: cuando el motor rebotaba
+         —y con `parcial` rebota SIEMPRE, porque le falta el monto— la Hoja se
+         cerraba, la pantalla recargaba **y no pasaba nada**. *Un control que
+         devuelve silencio no informa de un problema: informa de que la app
+         está rota.* El founder lo caminó desde el prestador.
+         El monto es la otra mitad y **es de A** (buzón
+         `S114-C-para-A-el-parcial-no-puede-decir-cuanto`): sin el total del
+         objeto no hay tope que poner, y una caja con tope que no sabe cuál es
+         su tope es este mismo defecto con otra cara. */
+      if (!r.ok) {
+        aviso.mostrar({
+          variante: 'error',
+          texto:
+            r.codigo === 'monto_requerido_en_parcial'
+              ? t('postventa.parcialNecesitaMonto')
+              : r.mensaje,
+        });
+        return;
+      }
       setHojaResolver(false);
       await cargar();
     },
-    [casoId, cargar],
+    [casoId, cargar, aviso, t],
   );
 
   const aLaCasa = useCallback(async () => {

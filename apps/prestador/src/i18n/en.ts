@@ -3767,6 +3767,7 @@ export const prestadorEn = {
     reconocerCuerpo: 'The family then chooses where the money goes.',
     devolverTodo: 'Return everything',
     devolverParte: 'Return a part',
+    parcialNecesitaMonto: 'To refund part of it, you need to say how much.',
   },
 
 } as const satisfies Espejo<typeof prestadorEs>;
