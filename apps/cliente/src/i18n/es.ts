@@ -2200,6 +2200,8 @@ export const clienteEs = {
     activada: 'Lista: la placa es de {{nombre}}.',
   },
   busqueda: {
+    nexoCargando: 'Un momento, estoy viendo a quién le puedo preguntar.',
+    nexoSinMascota: 'Nexo conversa sobre una mascota, y ahora mismo no hay ninguna activa.',
     grupo_mascotas: 'Mascotas',
     grupo_citas: 'Citas',
     grupo_papeles: 'Papeles',

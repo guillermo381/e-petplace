@@ -91,7 +91,20 @@ export default function Nexo() {
   const { t, idioma } = useTraduccion();
   const router = useRouter();
   const aviso = useAviso();
-  const { mascotaId, nombre } = useLocalSearchParams<{ mascotaId: string; nombre?: string }>();
+  const { mascotaId, nombre, semilla } = useLocalSearchParams<{
+    mascotaId: string;
+    nombre?: string;
+    /** ⭐ **LO QUE LA FAMILIA YA ESCRIBIÓ EN LA BÚSQUEDA** (S114-C).
+     *  🔴 Lo mandaba `buscar.tsx` desde S113 **y acá nadie lo leía**: el
+     *  parámetro llegaba y se perdía, así que la familia reescribía lo que la
+     *  pantalla acababa de leerle. *Un parámetro que viaja y nadie recibe no
+     *  falla: deja el trabajo hecho tirado.*
+     *  **Precarga, no envía.** Lo que se tipea en un buscador es un TÉRMINO
+     *  —«proplan», «vacuna»—, no una pregunta; mandarlo solo al modelo gastaría
+     *  un turno en algo que la familia todavía no formuló. Queda en la caja,
+     *  a un toque. */
+    semilla?: string;
+  }>();
 
   /* 🔴 S114-C · EL PISO DE MEMORIAL DE LAS CINCO PIEZAS DE ESTA PANTALLA.
      Sus guards colgaban de `theme.mode === 'memorial'`, **que no se enciende
@@ -107,7 +120,7 @@ export default function Nexo() {
   const [contexto, setContexto] = useState<ContextoCoach | null | 'error'>(null);
   const [lineas, setLineas] = useState<Linea[]>([]);
   const [memoria, setMemoria] = useState<readonly HechoDeMemoria[]>([]);
-  const [texto, setTexto] = useState('');
+  const [texto, setTexto] = useState(semilla?.trim() ?? '');
   const [pensando, setPensando] = useState(false);
   const [grupos, setGrupos] = useState<readonly GrupoResultados[] | null>(null);
   const [termino, setTermino] = useState('');
@@ -514,7 +527,17 @@ export default function Nexo() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('nexo.enviar')}
-            disabled={texto.trim() === '' || pensando}
+            /* 🔴 **`mascotaId` ENTRA AL `disabled`, y ésa era la mitad de un
+               defecto que el founder caminó** (S114-C). `enviar` abre con
+               `if (mascotaId === undefined …) return` — un guard correcto—,
+               pero el botón sólo miraba el texto ⇒ **se veía encendido y no
+               hacía nada.** *Un control que devuelve silencio no informa de un
+               problema: informa de que la app está rota.*
+               La otra mitad —quién llegaba acá sin mascota— se curó en
+               `buscar.tsx`, que ahora la elige antes de empujar. **Esta línea
+               queda igual: un guard que no se puede ver apagado vuelve a
+               mentir la próxima vez que alguien abra una puerta nueva.** */
+            disabled={mascotaId === undefined || texto.trim() === '' || pensando}
             onPress={() => void enviar(texto)}
             /* ⚠️ Y con él se va su `paddingBottom`, que existía para compensar
                el desalineo de arriba. *Un ajuste que corrige un síntoma

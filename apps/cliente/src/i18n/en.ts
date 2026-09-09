@@ -1750,6 +1750,8 @@ export const clienteEn = {
     activada: 'Done: the tag belongs to {{nombre}}.',
   },
   busqueda: {
+    nexoCargando: "One moment — I'm checking who I can ask.",
+    nexoSinMascota: "Nexo talks about a pet, and right now there isn't an active one.",
     grupo_mascotas: 'Pets',
     grupo_citas: 'Appointments',
     grupo_papeles: 'Papers',
