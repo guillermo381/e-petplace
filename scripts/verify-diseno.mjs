@@ -33,7 +33,7 @@ import { construirArbol, hitSlopsVecinos, autoPruebaArbol } from './lib-arbol-mo
 /* R66 · la lógica de voz vive en UN solo lugar: es el instrumento de la pista C
    movido a biblioteca. Importar en vez de reimplementar es la regla, no una
    preferencia — una copia del matcher divergiría sin avisar. */
-import { hitsDeVoseo, VOZ_LO_QUE_NO_VE, VOZ_COMO_AMPLIAR } from './lib-voz.mjs';
+import { hitsDeVoseo, VOZ_LO_QUE_NO_VE, VOZ_COMO_AMPLIAR, VOZ_TRES_CIEGOS } from './lib-voz.mjs';
 import { decodificar as decodificarPng, cuerpo as cuerpoPng, puntoRedondo as puntoRedondoPng } from './medir-png.mjs';
 
 /** El sha256 del isotipo de Deuna **sobre el que se hizo la cuenta de R65**.
@@ -5850,7 +5850,8 @@ function r66(archivos) {
       `${total} cadena(s) en voseo en ${porArchivo.size} archivo(s) de producto` +
       ` · APPS VISTAS: ${appsVistas.join(' · ') || 'NINGUNA'}` +
       (appsAusentes.length ? ` · 🔴 AUSENTES DEL CORPUS: ${appsAusentes.join(' · ')} — su verde NO dice nada de ellas` : '') +
-      ` · lee texto entrecomillado Y suelto en JSX (\`.tsx\`)` +
+      ` · lee texto entrecomillado Y suelto en JSX, inline o en su propia línea (\`.tsx\`)` +
+      ` · ${VOZ_TRES_CIEGOS}` +
       (enGaleria ? ` · ${enGaleria} en galería (NO cuentan: son cadenas de demostración, ver ES_GALERIA)` : '') +
       (enCero.length ? ` · ${enCero.length} baseline(s) YA EN 0` : '') +
       ` · ${VOZ_LO_QUE_NO_VE}` +
