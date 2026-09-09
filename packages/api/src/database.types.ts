@@ -23637,6 +23637,10 @@ export type Database = {
           titulo: string
         }[]
       }
+      _caso_monto_objeto: {
+        Args: { p_id: string; p_tipo: string }
+        Returns: number
+      }
       _caso_mover: {
         Args: {
           p_actor: string
@@ -24503,8 +24507,8 @@ export type Database = {
         Args: {
           p_alcance: string
           p_caso_id: string
-          p_destino?: string
           p_monto?: number
+          p_motivo?: string
         }
         Returns: Json
       }

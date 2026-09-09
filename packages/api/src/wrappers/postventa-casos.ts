@@ -359,10 +359,12 @@ export async function responderCaso(casoId: string, texto: string) {
  * casa pagaría la diferencia sin que nadie lo vea.
  */
 export async function reconocerYResolver(
-  casoId: string, p: { alcance: 'total' | 'parcial' | 'sin_devolucion'; monto?: number },
-): Promise<ResultadoWrapper<{ camino: string | null; teniaDevengo: boolean; etapa: EtapaCaso }, 'no_podes_resolver' | 'alcance_invalido' | 'monto_requerido_en_parcial'>> {
+  casoId: string, p: { alcance: 'total' | 'parcial' | 'sin_devolucion'; monto?: number; motivo?: string },
+): Promise<ResultadoWrapper<{ camino: string | null; teniaDevengo: boolean; etapa: EtapaCaso }, 'no_podes_resolver' | 'alcance_invalido' | 'monto_requerido_en_parcial' | 'monto_supera_total'>> {
   const { data, error } = await getClient().rpc('caso_reconocer_y_resolver', {
-    p_caso_id: casoId, p_alcance: p.alcance, p_monto: p.monto ?? undefined,
+    p_caso_id: casoId, p_alcance: p.alcance,
+    p_monto: p.monto ?? undefined,
+    p_motivo: p.motivo ?? undefined,
   });
   if (error) return { ok: false, codigo: 'no_podes_resolver', mensaje: ERR };
   const d = (data ?? {}) as Record<string, unknown>;
