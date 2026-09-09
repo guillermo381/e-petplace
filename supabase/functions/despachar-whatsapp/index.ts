@@ -330,7 +330,13 @@ Deno.serve(async (req) => {
     const rWConf = await fetch(
       `https://graph.facebook.com/v21.0/${waba}?fields=name,messaging_limit_tier`, { headers: cab });
     const cWConf = await rWConf.json().catch(() => ({})) as Record<string, unknown>;
-    const messagingLimitTier = cWConf?.messaging_limit_tier ?? null;
+    /* 🔴 EL TIER vive en el NÚMERO, no en el WABA (medición de E: el WABA devuelve
+       null). Se lee de /{phoneId}; se deja el del WABA como fallback por si Meta
+       lo mueve. Entre 1K y 2K hay ~USD 22,60/día. */
+    const rTier = await fetch(
+      `https://graph.facebook.com/v21.0/${phoneId}?fields=messaging_limit_tier`, { headers: cab });
+    const cTier = await rTier.json().catch(() => ({})) as Record<string, unknown>;
+    const messagingLimitTier = cTier?.messaging_limit_tier ?? cWConf?.messaging_limit_tier ?? null;
 
     const rNConf = await fetch(
       `https://graph.facebook.com/v21.0/${waba}/phone_numbers` +
@@ -454,8 +460,9 @@ Deno.serve(async (req) => {
     // La plantilla la dice la DB (`resuelto_como`), jamás esta función: el
     // nombre y el idioma de la plantilla son dato de negocio aprobado por
     // Meta, y hardcodearlos acá sería la segunda verdad.
-    const plantilla = (i.resuelto_como as Record<string, unknown> | null)?.plantilla;
-    const idioma = (i.resuelto_como as Record<string, unknown> | null)?.plantilla_idioma;
+    const rc = i.resuelto_como as Record<string, unknown> | null;
+    const plantilla = rc?.plantilla;
+    const idioma = rc?.plantilla_idioma;
     if (typeof plantilla !== 'string' || typeof idioma !== 'string') {
       await supabase
         .from('notificacion_intencion')
@@ -465,6 +472,27 @@ Deno.serve(async (req) => {
       continue;
     }
 
+    /* 🔴 EL ENSAMBLADO — las variables {{n}} se armaron en registrar_intencion y
+       viven en resuelto_como. Si el ensamblado NO está completo, la intención
+       REBOTA: NO se manda con un hueco. Meta acepta un mensaje mal armado sin
+       quejarse y lo lee la familia (firma founder ③). Un tipo con plantilla pero
+       sin variables ensambladas (p.ej. pedido_confirmado, que pide 5 y no tiene
+       spec) cae acá — no se manda mudo. */
+    const ensCOK = rc?.ensamblado_completo;
+    const vars = Array.isArray(rc?.variables) ? rc.variables as Array<{ n: number; valor: string | null }> : null;
+    if (ensCOK !== true || vars === null) {
+      await supabase
+        .from('notificacion_intencion')
+        .update({ estado: 'fallida', motivo: `ensamblado_incompleto:${JSON.stringify(rc?.ensamblado_faltante ?? null)}` })
+        .eq('id', i.id);
+      fallidas++;
+      continue;
+    }
+    // los parámetros del BODY, en orden {{1}}{{2}}{{3}}…
+    const parametros = [...vars]
+      .sort((a, b) => a.n - b.n)
+      .map((v) => ({ type: 'text', text: String(v.valor) }));
+
     const res = await fetch(URL_META, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -472,7 +500,11 @@ Deno.serve(async (req) => {
         messaging_product: 'whatsapp',
         to: tel,
         type: 'template',
-        template: { name: plantilla, language: { code: idioma } },
+        template: {
+          name: plantilla,
+          language: { code: idioma },
+          components: [{ type: 'body', parameters: parametros }],
+        },
       }),
     });
 
