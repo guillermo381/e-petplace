@@ -143,6 +143,33 @@ const WABA_MONEDA = 'USD';
 const WABA_HUSO = 'America/Guayaquil';
 const MENSAJES_POR_CASO = 2;   // §10: sólo ACTUAR y PLATA MOVIDA
 
+/* ═══ EL LÍMITE DE MENSAJERÍA — Y LO PRIMERO ES QUE **NO ES UN PRECIO** ═════
+   Meta verificó el negocio (founder, 8-sep) y con eso sube el **messaging
+   limit**. 🔴 **Ese límite NO cambia el costo por caso**: es un techo de
+   *destinatarios ÚNICOS por 24 h*, no una tarifa. *Confundirlos haría que
+   «subió el límite» se lea como «cambió lo que pagamos», y no cambió nada de
+   lo de arriba.*
+
+   Lo que sí cambia es **el techo de GASTO DIARIO**, que es el número que un
+   founder de verdad quiere: como los 2 mensajes de un caso van a la MISMA
+   familia, el límite de destinatarios es también el límite de **casos por
+   día** ⇒ `techo_diario = tier × costo_por_caso`.
+
+   🔴 **NO ESTÁ MEDIDO, y se dice en vez de suponerse.** La edge
+   `despachar-whatsapp?verificar=1` pide del número
+   `verified_name, code_verification_status, quality_rating,
+   display_phone_number, platform_type` — **`messaging_limit_tier` no está en
+   esa lista**, así que desde afuera no se puede leer. *El founder mencionó
+   2.000; no lo escribo como medido porque no lo medí.*
+   **Cura (una línea, territorio de la edge):** sumar `messaging_limit_tier` a
+   esos fields. Mientras tanto se lee en el WhatsApp Manager.
+
+   ⚠️ Y el 2.000 no es un tier estándar de Meta (250 · 1K · 10K · 100K ·
+   ilimitado) ⇒ **hay que mirarlo, no deducirlo de la conversación.** */
+const TIER_DESTINATARIOS_24H = null;   // no medido — ver arriba
+const TIER_PROCEDENCIA = 'no legible desde afuera: la edge no pide ' +
+  '`messaging_limit_tier` entre los fields del número';
+
 medir(13, 'costo de WhatsApp por caso',
   `${MENSAJES_POR_CASO} × USD ${TARIFA_UTILITY_RESTO_LATAM} × familias con opt-in`,
   () => {
@@ -171,6 +198,17 @@ medir(13, 'costo de WhatsApp por caso',
       `NO se estima el VOLUMEN (casos por familia): ese dato no existe, y §11bis`,
       `  existe para no tenerlo inventado. Lo de arriba es costo POR CASO y su techo,`,
       `  jamás un gasto proyectado.`,
+      ``,
+      `LÍMITE DE MENSAJERÍA (Meta verificó el negocio, 8-sep) — y NO es un precio:`,
+      `  es un techo de DESTINATARIOS ÚNICOS por 24 h. El costo por caso NO cambia.`,
+      `  tier medido: ${TIER_DESTINATARIOS_24H ?? 'SIN MEDIR'} · ${TIER_PROCEDENCIA}`,
+      `  cuando se sepa: techo_diario = tier × USD ${porCaso.toFixed(4)}`,
+      `    (los 2 mensajes de un caso van a la MISMA familia ⇒ tier = casos/día)`,
+      `    p.ej. 1.000 ⇒ USD ${(1000 * porCaso).toFixed(2)}/día · 2.000 ⇒ USD ${(2000 * porCaso).toFixed(2)}/día`,
+      `  ⚠️ 2.000 no es un tier estándar de Meta (250·1K·10K·100K·ilimitado): se MIRA.`,
+      ``,
+      `CATEGORÍA, re-medida hoy con las dos que faltaban: 10/10 APPROVED en UTILITY.`,
+      `  Importa para el costo: MARKETING se tarifa distinto y abre otra ventana.`,
     ].join('\n      ');
   });
 

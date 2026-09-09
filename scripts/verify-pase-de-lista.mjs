@@ -50,6 +50,14 @@
  *
  * Por eso `--todos` suma los gates de esta pista, que **no están en el hook a
  * propósito** (pegan a la base), y **avisa cuando `main` se movió**:
+ * 🔴 **`main` ES EL LOCAL, Y NO ES `origin/main` — medido el 8-sep: 47 commits de
+ * diferencia.** En esta casa la conducción (A) mergea en el árbol principal y
+ * empuja después, así que **el `main` local ve el trabajo ajeno ANTES que el
+ * remoto** ⇒ como referencia de «¿estoy al día?» es la más EXIGENTE de las dos,
+ * que es la que corresponde. *Lo que no corresponde es decir «main» a secas:
+ * quien lea va a entender `origin/main`, y las dos afirmaciones son verdaderas
+ * y distintas.* Por eso la salida lo NOMBRA.
+ *
  * `git rev-list --count HEAD..main` dice cuántos commits ajenos hay sin
  * mezclar — *sin archivo de estado que se pueda quedar viejo, que es el mismo
  * defecto una capa más arriba.*
@@ -234,7 +242,20 @@ if (ajenos === null) {
   console.log('   traé main y volvé a correr. *Después de una cura ajena, se corren todos —');
   console.log('   el peor defecto de S114 sólo apareció así.*');
 } else {
-  console.log('✅ esta rama tiene todo lo de `main`: el pase de lista corrió contra el árbol al día.');
+  /* Se nombra CUÁL main, y se dice si el local va adelante del remoto: sin eso,
+     «al día» es cierto para mí y ambiguo para el que lo lee. */
+  let adelanto = null;
+  try {
+    adelanto = Number(execFileSync('git', ['rev-list', '--count', 'origin/main..main'],
+      { encoding: 'utf8' }).trim());
+  } catch { /* sin origin/main a mano: se dice lo que se sabe y nada más */ }
+  const detalle = adelanto === null
+    ? ' (no se pudo comparar con `origin/main`)'
+    : adelanto === 0
+      ? ' (y `main` local == `origin/main`)'
+      : ` (⚠️ \`main\` local va ${adelanto} commit(s) ADELANTE de \`origin/main\`: ` +
+        'la referencia es la local, que es la más exigente)';
+  console.log(`✅ esta rama tiene todo lo de \`main\` LOCAL${detalle}: el pase de lista corrió contra el árbol al día.`);
 }
 const mudosSorpresa = mudos.filter((m) => !m.declarado);
 if (mudos.length) {
