@@ -156,7 +156,8 @@ export interface CasoDetalle {
   final: FinalAlterno | null;
   cerrado: boolean;
   plazoHasta: string | null;
-  objeto: { tipo: ObjetoPostventa; id: string; titulo: string | null; fecha: string | null };
+  objeto: { tipo: ObjetoPostventa; id: string; titulo: string | null; fecha: string | null;
+            total: number | null; disponibleDevolver: number | null };
   resolucion: {
     alcance: 'total' | 'parcial' | 'sin_devolucion' | null;
     monto: number | null;
@@ -187,6 +188,8 @@ export async function leerCaso(casoId: string): Promise<ResultadoWrapper<CasoDet
     objeto: {
       tipo: o.tipo as ObjetoPostventa, id: o.id as string,
       titulo: (o.titulo as string | null) ?? null, fecha: (o.fecha as string | null) ?? null,
+      total: o.total != null ? Number(o.total) : null,
+      disponibleDevolver: o.disponible_devolver != null ? Number(o.disponible_devolver) : null,
     },
     resolucion: {
       alcance: (r.alcance as CasoDetalle['resolucion']['alcance']) ?? null,
@@ -360,7 +363,7 @@ export async function responderCaso(casoId: string, texto: string) {
  */
 export async function reconocerYResolver(
   casoId: string, p: { alcance: 'total' | 'parcial' | 'sin_devolucion'; monto?: number; motivo?: string },
-): Promise<ResultadoWrapper<{ camino: string | null; teniaDevengo: boolean; etapa: EtapaCaso }, 'no_podes_resolver' | 'alcance_invalido' | 'monto_requerido_en_parcial' | 'monto_supera_total'>> {
+): Promise<ResultadoWrapper<{ camino: string | null; teniaDevengo: boolean; etapa: EtapaCaso }, 'no_podes_resolver' | 'alcance_invalido' | 'monto_requerido_en_parcial' | 'monto_supera_total' | 'razon_requerida_en_parcial'>> {
   const { data, error } = await getClient().rpc('caso_reconocer_y_resolver', {
     p_caso_id: casoId, p_alcance: p.alcance,
     p_monto: p.monto ?? undefined,

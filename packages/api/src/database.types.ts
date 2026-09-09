@@ -23655,6 +23655,10 @@ export type Database = {
         Args: { p_id: string; p_tipo: string }
         Returns: string
       }
+      _caso_ya_devuelto: {
+        Args: { p_excluir: string; p_id: string; p_tipo: string }
+        Returns: number
+      }
       _categoria_es_apagable: {
         Args: { p_categoria: string }
         Returns: boolean
