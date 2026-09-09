@@ -242,7 +242,7 @@ function Contexto({ hoja }: { hoja: HojaDelCaso }) {
         <span style={{ fontFamily: fuente.mono, fontWeight: 600 }}>{hoja.casosPrestador90d}</span>
       </Fila>
       <p style={{ color: color.texto2, fontSize: 12, lineHeight: 1.5, margin: `${sp[3]}px 0 0` }}>
-        Sin contar este caso. <strong>Es información para vos.</strong> No se le
+        Sin contar este caso. <strong>Es información para ti.</strong> No se le
         dice a la familia que reclama seguido, y no se le niega nada por un número.
       </p>
     </Seccion>

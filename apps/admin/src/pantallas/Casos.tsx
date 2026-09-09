@@ -45,7 +45,7 @@ export default function Casos() {
       {abiertos.length > 0 ? (
         <div style={{ display: 'flex', gap: sp[6], marginBottom: sp[6] }}>
           <Carta style={{ flex: 1 }}>
-            <div style={{ color: color.texto2, fontSize: 12, fontWeight: 700 }}>TE PIDIERON A VOS</div>
+            <div style={{ color: color.texto2, fontSize: 12, fontWeight: 700 }}>TE PIDIERON A TI</div>
             <div style={{ fontSize: 24, fontFamily: fuente.mono, color: conLaCasa ? color.acento : color.texto }}>
               {conLaCasa}
             </div>
