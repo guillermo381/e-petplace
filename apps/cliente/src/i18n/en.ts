@@ -2167,6 +2167,8 @@ export const clienteEn = {
 
     criterioPara: 'For {{nombre}}',
     criterioSinAlergenos: "We left out anything with {{lista}}, because it's on their record.",
+    criterioSinAlergenosRecortado: 'We left out anything with {{lista}} and {{n}} more allergens, because their record lists them.',
+    criterioListaCompleta: 'Everything we left out',
     criterioSinAlergias: 'Their record says they have no known allergies.',
     criterioCondicion: 'We included prescription diets because of their recorded condition.',
     elegiMascota: 'Pick a pet and we’ll only show what they can eat.',
