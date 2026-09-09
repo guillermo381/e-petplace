@@ -28703,6 +28703,55 @@ lo construye y la otra lo mide **sobre el objeto que ya existe**.
 ---
 
 
+### `L-527` — En una configuración por capas, la de arriba VACÍA no significa «heredá»: significa «hacé nada»
+
+**S114-F, firma del founder.** El caso que cerró dos días de diagnóstico:
+
+```
+Project Settings      Behavior «Custom» · Command  exit 1     ← construir siempre
+Production Overrides  Command  (VACÍO)                        ← ligado a UN deployment
+```
+
+🔴 **Un Command vacío no es «sin override»: es un comando vacío, y un comando vacío termina
+con `exit 0`** — que en ese campo significa **saltear el build**. **El override manda en
+producción y anula el `exit 1` del proyecto.**
+
+> ***La capa de arriba, vacía, no cede el paso: decide.***
+
+## Por qué es tan difícil de ver
+
+**Un campo en blanco se lee como «no configurado».** Es la lectura por defecto de cualquiera,
+y en casi todos los sistemas es correcta: *vacío = usá el de abajo*. Acá no — **y la pantalla
+no lo dice**: muestra un campo vacío, exactamente igual a uno que no aplica.
+
+⚠️ **Y su consecuencia fue perfecta para engañar:** el founder cambió la capa de abajo y **el
+build salió** —porque ese deployment todavía no tenía override—, así que *el cambio pareció
+funcionar*. **El propio deployment que salió creó el override**, y desde entonces todo se
+saltea. ⇒ **una cura que se auto-anula al aplicarse**, y cuyo síntoma aparece recién en el
+push siguiente, cuando ya nadie la está mirando.
+
+⇒ **Ante un campo vacío en una capa de override, la pregunta no es «¿qué hereda?» sino
+«¿QUÉ HACE un valor vacío acá?».** *En un campo que se ejecuta, el vacío no es ausencia de
+orden: es una orden.*
+
+## La familia, que es la del día entero
+
+| | el vacío que engaña |
+|---|---|
+| [[L-523]] | un contrato que cambia deja al consumidor **mostrando vacío** — o reventando, y no se puede saber cuál |
+| `LETRA_PORTAL_ADMIN §3.4` | un gate que es un `WHERE` devuelve `[]`: **«no hay» y «no podés» quedan indistinguibles** |
+| **`L-527`** | un campo de configuración **vacío que se ejecuta** y significa «no hagas nada» |
+
+> ***Tres formas del mismo hueco en un día: el vacío se lee como ausencia, y en los tres
+> casos era un valor operante.***
+
+*(Y su cura estructural es la misma que la de [[L-526]]: **lo que se puede versionar en el
+repo se versiona.** Un archivo tiene una sola capa y no tiene campos en blanco con
+semántica oculta — lo que no está, no está.)*
+
+---
+
+
 ### `L-526` — Una configuración con DOS CAPAS donde una parece la otra: leerla es verdadero sobre una y falso sobre la que manda
 
 **S114-F, firma del founder.** Dos días persiguiendo por qué un proyecto de Vercel dejaba de
@@ -29181,6 +29230,45 @@ vez que alguien la lee.* Por eso se retiró con su historia, no se borró
 tienen deployment. El hecho era verdadero; la regla que le colgué encima, no. *Y la
 distinción tiene nombre: lo que había era una **intermitencia**, no un corte* — y las dos
 producen exactamente las mismas tres observaciones.
+
+> 🔴 **ENMIENDA 2 (9-sep, y cierra el caso): «intermitencia sin explicar» YA NO RIGE —
+> tiene causa, y no es una regresión.** El `Ignored Build Step` de Vercel vive en **dos
+> capas**: *Project Settings* (donde el founder puso `Custom` + `exit 1`, **y sigue puesto**)
+> y ***Production Overrides*, ligado a un deployment concreto, con el Command VACÍO.**
+> ***El override manda en producción y su comando vacío termina con `exit 0`: saltear.***
+>
+> ⇒ **Los siete commits sin deployment no son una racha ni una intermitencia: son el mismo
+> override actuando.** Y explica por qué «funcionó» una vez: *el deployment que salió creó
+> su propio override, y desde entonces todo se saltea.*
+>
+> **✅ CAUSA COMPLETA (9-sep, cierra el caso):** el «Production Override» **no es un ajuste
+> fantasma ni un valor de Vercel: ES EL `vercel.json` DEL DEPLOYMENT, CONGELADO.** El
+> changelog de Vercel lo dice — los *configuration overrides per-deployment* **son las seis
+> propiedades del `vercel.json`**, `ignoreCommand` entre ellas.
+>
+> ⇒ **El override vacío es mi propio archivo:** yo retiré el campo en `66cf314`, y **los DIEZ
+> deployments que existen vienen de commits sin él** (medido, uno por uno). *Los dos únicos
+> commits que sí lo llevaban —`f3171cc`, `b5716d1`— **nunca construyeron**, así que **no hay
+> ningún deployment con el override lleno para promover**.*
+>
+> 🔴 **Y de ahí sale la trampa que cierra la lección: el override vacío saltea el build, así
+> que la cura no puede entrar por la puerta que ella misma abre.** El commit que traería el
+> `ignoreCommand` **no llega a construirse**, así que nunca crea su propio override.
+> ***Una configuración que se auto-perpetúa porque su remedio necesita justamente lo que
+> ella impide.***
+>
+> **La salida, para la próxima:** el campo se pone en el `vercel.json` **ANTES del primer
+> deployment del proyecto** — ahí no hay círculo, porque todavía no hay override que romper.
+> *Ejecutado en `apps/admin` el mismo día.*
+>
+> **Lo que sobrevive de esta lección es su núcleo y se refuerza:** una racha no prueba una
+> regla — *y acá ni siquiera era una racha: era **una sola causa** produciendo siete
+> observaciones idénticas.* **El caso NO va a soporte.** Ver [[L-526]] y [[L-527]].
+>
+> ⏹️ **Y el caso se cierra sin curar, por firma del founder:** *Placas queda rota en el
+> legado — es una pantalla de un repo que se va a apagar, el diagnóstico está completo, y
+> **el costo de seguir supera al defecto**.* **Saber cuándo dejar de perseguir un defecto
+> también es una decisión de ingeniería.**
 
 > ✅ **ENMIENDA (mismo día): se intentó fundar el umbral de verdad, y el intento
 > FALLÓ por la misma razón — que es lo que vuelve exigible la lección.**

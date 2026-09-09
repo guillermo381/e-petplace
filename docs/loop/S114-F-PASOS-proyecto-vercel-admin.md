@@ -57,6 +57,35 @@ VITE_SUPABASE_ANON_KEY   la anon key — la MISMA del resto de la casa
    aplicación (≈200 kB en vez de ≈480) y sirve una página en blanco.
 ```
 
+## ③bis 🔴 EL IGNORED BUILD STEP — antes del PRIMER deployment, y no después
+
+**Settings → Build and Deployment → Ignored Build Step → `Custom` → Command: `exit 1`**
+
+*(En Vercel el código está invertido: `exit 0` SALTEA, `exit 1` CONSTRUYE.)*
+
+⚠️ **Este paso NO se puede hacer después, y ésa es toda la razón por la que está acá.**
+
+**Lo que pasó en el legado (8/9-sep-2026, `L-527`) y cuesta dos días si se repite:** el
+`Ignored Build Step` vive en **dos capas** — *Project Settings* y un **Production Override
+congelado en el deployment**, que **manda** y es **de sólo lectura**. **El primer deployment
+congela su override con lo que haya en ese momento**, y si el `vercel.json` no declara
+`ignoreCommand`, ese override queda **vacío** — *que no significa «heredá el de abajo», sino
+**«no hagas nada»**: `exit 0`, saltear.*
+
+⇒ **Desde ahí, todo push se saltea, el Project Settings deja de tener efecto, y el override
+no se puede editar ni borrar.** Y la salida es circular: *el commit que traería la cura no
+llega a construirse.*
+
+**Por eso van las DOS cosas, y en este orden:**
+
+1. **El campo en el repo** — `apps/admin/vercel.json`:
+   ```json
+   { "ignoreCommand": "exit 1" }
+   ```
+   *Es lo que el primer deployment va a congelar como override. **Versionado, con una sola
+   capa, y se revisa en un diff.***
+2. **El Project Settings**, como red por si el archivo desaparece.
+
 ## ④ Deploy
 
 Debería tardar **~1-2 min**. **Cómo saber que salió bien de verdad** — no alcanza con el
