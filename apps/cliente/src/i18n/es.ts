@@ -2200,6 +2200,8 @@ export const clienteEs = {
     activada: 'Lista: la placa es de {{nombre}}.',
   },
   busqueda: {
+    nexoCargando: 'Un momento, estoy viendo a quién le puedo preguntar.',
+    nexoSinMascota: 'Nexo conversa sobre una mascota, y ahora mismo no hay ninguna activa.',
     grupo_mascotas: 'Mascotas',
     grupo_citas: 'Citas',
     grupo_papeles: 'Papeles',
@@ -2925,6 +2927,7 @@ export const clienteEs = {
     biometricoRechazado: 'No pudimos confirmarlo. Prueba de nuevo.',
   },
   despensa: {
+    usarMiSaldo: 'Usar mi saldo de {{saldo}} en este pedido',
     saldoCubreTodo: 'Tu saldo cubre todo: {{saldo}}.',
     saldoMixto: 'Se pagan {{saldo}} con tu saldo y {{resto}} con tu tarjeta.',
     usarSaldo: 'Usar tu saldo ({{saldo}}) y pagar el resto',
@@ -4524,6 +4527,7 @@ export const clienteEs = {
     reboteSinSesion: 'Vuelve a entrar a tu cuenta y prueba de nuevo.',
     reboteGenerico: 'No pudimos abrir el caso. Prueba de nuevo.',
     hablarConAlguien: '¿Prefieres que te atienda una persona?',
+    pedirLaCasa: 'Pedir que intervenga e-PetPlace',
     misCasosTitulo: 'Mis casos',
     misCasosIntro: 'Lo que abriste y en qué quedó.',
     misCasosVacio: 'No tienes casos.',

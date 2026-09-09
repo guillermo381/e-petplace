@@ -64,7 +64,7 @@ import {
   type ResultadoBusqueda,
   type TurnoCoach,
 } from '@epetplace/api';
-import { fechaCortaMono, type IdiomaSoportado } from '@epetplace/i18n';
+import { fechaCortaMono, horaCortaDeMensaje, type IdiomaSoportado } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
 import { esMemorial } from '@/lib/memorial';
 import { useEstadoVida } from '@/lib/postventa/useEstadoVida';
@@ -84,14 +84,34 @@ type Linea = {
   deDondeVoz?: string;
 };
 
-const hora = () =>
-  new Date().toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit' });
+/* 🔴 **LA HORA LA DICE EL RIEL, Y ACÁ ESTABA REIMPLEMENTADA MAL.**
+   ⏪ Decía `toLocaleTimeString('es-EC', …)`: **idioma clavado** —la app en
+   inglés mostraba «9:42 p. m.»— y **formato de 12 horas con sufijo**, que es
+   exactamente lo que `horaCortaDeMensaje` descartó por medición (§2.3 pide
+   «14:32»; el sufijo ocupa el doble de ancho bajo cada burbuja y no se parece
+   a ninguna otra hora de la casa).
+   *El vecino ya lo tenía resuelto —la pantalla del caso del prestador lo usa—
+   y esta pantalla escribió el suyo.* Se copia al vecino. */
+const hora = (idioma: IdiomaSoportado) => horaCortaDeMensaje(new Date().toISOString(), idioma);
 
 export default function Nexo() {
   const { t, idioma } = useTraduccion();
   const router = useRouter();
   const aviso = useAviso();
-  const { mascotaId, nombre } = useLocalSearchParams<{ mascotaId: string; nombre?: string }>();
+  const { mascotaId, nombre, semilla } = useLocalSearchParams<{
+    mascotaId: string;
+    nombre?: string;
+    /** ⭐ **LO QUE LA FAMILIA YA ESCRIBIÓ EN LA BÚSQUEDA** (S114-C).
+     *  🔴 Lo mandaba `buscar.tsx` desde S113 **y acá nadie lo leía**: el
+     *  parámetro llegaba y se perdía, así que la familia reescribía lo que la
+     *  pantalla acababa de leerle. *Un parámetro que viaja y nadie recibe no
+     *  falla: deja el trabajo hecho tirado.*
+     *  **Precarga, no envía.** Lo que se tipea en un buscador es un TÉRMINO
+     *  —«proplan», «vacuna»—, no una pregunta; mandarlo solo al modelo gastaría
+     *  un turno en algo que la familia todavía no formuló. Queda en la caja,
+     *  a un toque. */
+    semilla?: string;
+  }>();
 
   /* 🔴 S114-C · EL PISO DE MEMORIAL DE LAS CINCO PIEZAS DE ESTA PANTALLA.
      Sus guards colgaban de `theme.mode === 'memorial'`, **que no se enciende
@@ -107,7 +127,7 @@ export default function Nexo() {
   const [contexto, setContexto] = useState<ContextoCoach | null | 'error'>(null);
   const [lineas, setLineas] = useState<Linea[]>([]);
   const [memoria, setMemoria] = useState<readonly HechoDeMemoria[]>([]);
-  const [texto, setTexto] = useState('');
+  const [texto, setTexto] = useState(semilla?.trim() ?? '');
   const [pensando, setPensando] = useState(false);
   const [grupos, setGrupos] = useState<readonly GrupoResultados[] | null>(null);
   const [termino, setTermino] = useState('');
@@ -166,11 +186,19 @@ export default function Nexo() {
       setContexto(c.ok ? c.data : 'error');
       if (h.ok) {
         setLineas(
-          h.data.map((x: TurnoCoach) => ({
-            id: `s${x.turno}`,
+          h.data.map((x: TurnoCoach, i: number) => ({
+            /* 🔴 **`turno` NO ES ÚNICO, y el error salía en el aparato**:
+               «Encountered two children with the same key `s3`». La pregunta y
+               la respuesta **comparten número de turno**, así que cada turno
+               producía dos filas con la misma clave. *React puede duplicar u
+               omitir hijos con claves repetidas — el defecto no es el warning:
+               es que un mensaje puede desaparecer del hilo.*
+               El índice alcanza para que sea única; el turno y el rol quedan
+               para que la clave siga diciendo de qué fila es. */
+            id: `s${i}-${x.turno}-${x.rol}`,
             rol: x.rol,
             texto: x.texto,
-            hora: new Date(x.creado_en).toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit' }),
+            hora: horaCortaDeMensaje(x.creado_en, idioma),
           })),
         );
       }
@@ -187,7 +215,7 @@ export default function Nexo() {
       if (mascotaId === undefined || q === '' || pensando) return;
       setTexto('');
       setGrupos(null);
-      const mio: Linea = { id: `l${Date.now()}`, rol: 'familia', texto: q, hora: hora() };
+      const mio: Linea = { id: `l${Date.now()}`, rol: 'familia', texto: q, hora: hora(idioma) };
       setLineas((xs) => [...xs, mio]);
       setPensando(true);
 
@@ -228,7 +256,7 @@ export default function Nexo() {
           id: `n${Date.now()}`,
           rol: 'nexo',
           texto: dijo,
-          hora: hora(),
+          hora: hora(idioma),
           /* 🔴 El aviso de IA lo decide **el servidor** (`aviso_ia`), no la
              pantalla: si lo contara la app, cambiar de dispositivo lo volvería
              a mostrar o —peor— dejaría de mostrarlo cuando corresponde. */
@@ -242,7 +270,7 @@ export default function Nexo() {
       ]);
       void guardarTurnoCoach(mascotaId, 'nexo', dijo);
     },
-    [mascotaId, pensando, aviso, router, t],
+    [mascotaId, pensando, aviso, router, t, idioma],
   );
 
   if (contexto === 'error') {
@@ -339,7 +367,7 @@ export default function Nexo() {
           {lineas.length === 0 && grupos === null && typeof contexto === 'object' ? (
             <PresentacionNexo
               autor={t('nexo.autor')}
-              hora={hora()}
+              hora={hora(idioma)}
               burbujas={[
                 t('nexo.presenta1', { nombre: nombreVivo ?? '' }),
                 t('nexo.presenta2', { nombre: nombreVivo ?? '' }),
@@ -514,7 +542,17 @@ export default function Nexo() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('nexo.enviar')}
-            disabled={texto.trim() === '' || pensando}
+            /* 🔴 **`mascotaId` ENTRA AL `disabled`, y ésa era la mitad de un
+               defecto que el founder caminó** (S114-C). `enviar` abre con
+               `if (mascotaId === undefined …) return` — un guard correcto—,
+               pero el botón sólo miraba el texto ⇒ **se veía encendido y no
+               hacía nada.** *Un control que devuelve silencio no informa de un
+               problema: informa de que la app está rota.*
+               La otra mitad —quién llegaba acá sin mascota— se curó en
+               `buscar.tsx`, que ahora la elige antes de empujar. **Esta línea
+               queda igual: un guard que no se puede ver apagado vuelve a
+               mentir la próxima vez que alguien abra una puerta nueva.** */
+            disabled={mascotaId === undefined || texto.trim() === '' || pensando}
             onPress={() => void enviar(texto)}
             /* ⚠️ Y con él se va su `paddingBottom`, que existía para compensar
                el desalineo de arriba. *Un ajuste que corrige un síntoma

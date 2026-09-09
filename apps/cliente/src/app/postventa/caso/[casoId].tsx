@@ -44,8 +44,10 @@ import {
   Esqueleto,
   EstadoVacio,
   EventoDelHilo,
+  Boton,
   Icono,
   AsaModal,
+  useAviso,
   ModalDosAlturas,
   SuperficieChat,
   type AlturaModal,
@@ -58,6 +60,7 @@ import {
 import {
   enviarMensajeDeCaso,
   leerCaso,
+  pedirACasa,
   leerMensajesDeCaso,
   type AsientoCaso,
   type MensajeCaso,
@@ -174,6 +177,8 @@ export default function PantallaDelCaso() {
      lo lee — no hay prop que olvidar (contrato de B, `47b20a4c`). */
   const [altoTeclado, setAltoTeclado] = useState(0);
   const insets = useSafeAreaInsets();
+  const aviso = useAviso();
+  const [pidiendoCasa, setPidiendoCasa] = useState(false);
 
   /* ⏪ **ACÁ VIVÍA LA SUBIDA A `completo` CON EL TECLADO ABIERTO, y se fue a
      la pieza — decisión de B, con su propia `R81` como argumento.** Yo la había
@@ -231,6 +236,21 @@ export default function PantallaDelCaso() {
       setCursor(m.data.cursor);
     }
   }, [casoId, fusionar]);
+
+  /** Pedirle a e-PetPlace que intervenga. **Recarga siempre**, también si
+   *  rebota: el rebote más probable es que el caso ya se movió —otra persona,
+   *  otro dispositivo— y en ese caso lo que la pantalla tiene es viejo.
+   *  *Mostrar el error sin refrescar deja a la familia mirando un botón que ya
+   *  no corresponde.* */
+  const aLaCasa = useCallback(async () => {
+    if (typeof casoId !== 'string' || pidiendoCasa) return;
+    setPidiendoCasa(true);
+    const r = await pedirACasa(casoId);
+    setPidiendoCasa(false);
+    if (!r.ok) aviso.mostrar({ variante: 'error', texto: r.mensaje });
+    await cargar();
+  }, [casoId, pidiendoCasa, aviso, cargar]);
+
 
   useFocusEffect(
     useCallback(() => {
@@ -547,9 +567,39 @@ export default function PantallaDelCaso() {
                 cerrado no se pregunta: no hay avisos que mandar. */}
             {!caso.cerrado && <PermisoWhatsApp casoId={caso.casoId} />}
 
-            {/* §3.4 · siempre alcanzable, jamás en un menú. Va en el
-                encabezado FIJO: en la lista se iría con el scroll. */}
-            <Texto variante="apoyo">{t('postventa.hablarConAlguien')}</Texto>
+            {/* ═══ 🔴 §3.4 · ERA UNA FRASE, Y AHORA ES UNA PUERTA ═════════
+                **Medido: `pedirACasa` tenía CERO consumidores en el cliente.**
+                El motor la acepta desde S114-A —`caso_pedir_casa` resuelve
+                `familia` o `prestador`—, el prestador la usa, y **la familia,
+                que es a quien P14 protege, no tenía por dónde**. Acá vivía
+                *«¿Prefieres que te atienda una persona?»* en `Texto`: una
+                pregunta sin respuesta posible. `L-318` con su cara más cara —
+                *invita y no abre*.
+
+                🔴 **Y la firma del 9-sep la vuelve obligatoria justo acá:** si
+                el prestador reconoce y **no** devuelve, la familia ve el hecho
+                con su razón **y en el mismo lugar** la salida. *«No te devuelvo
+                nada» sin salida inmediata es la promesa de P14 quedando en
+                manos del que cobró.*
+
+                **Cuándo NO se ofrece**, y las dos razones son distintas: con el
+                caso ya en la casa **no hay nada que pedir** (y el motor
+                rebotaría), y con el caso cerrado **esto ya terminó**. En los
+                dos casos se calla el control; la frase tampoco queda sola,
+                porque una pregunta que nadie puede contestar es peor que
+                ninguna. */}
+            {!caso.cerrado && caso.etapa !== 'con_casa' ? (
+              <View style={{ gap: spacing[2] }}>
+                <Texto variante="apoyo">{t('postventa.hablarConAlguien')}</Texto>
+                <Boton
+                  variante="secundario"
+                  etiqueta={t('postventa.pedirLaCasa')}
+                  bloque
+                  cargando={pidiendoCasa}
+                  onPress={() => void aLaCasa()}
+                />
+              </View>
+            ) : null}
         </View>
       </ScrollView>
 

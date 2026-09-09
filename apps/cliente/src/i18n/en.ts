@@ -1750,6 +1750,8 @@ export const clienteEn = {
     activada: 'Done: the tag belongs to {{nombre}}.',
   },
   busqueda: {
+    nexoCargando: "One moment — I'm checking who I can ask.",
+    nexoSinMascota: "Nexo talks about a pet, and right now there isn't an active one.",
     grupo_mascotas: 'Pets',
     grupo_citas: 'Appointments',
     grupo_papeles: 'Papers',
@@ -2156,6 +2158,7 @@ export const clienteEn = {
     biometricoRechazado: 'We couldn’t confirm it. Try again.',
   },
   despensa: {
+    usarMiSaldo: 'Use my {{saldo}} balance on this order',
     saldoCubreTodo: 'Your balance covers it all: {{saldo}}.',
     saldoMixto: '{{saldo}} from your balance and {{resto}} from your card.',
     usarSaldo: 'Use your balance ({{saldo}}) and pay the rest',
@@ -3286,6 +3289,7 @@ export const clienteEn = {
     reboteSinSesion: 'Sign in again and try once more.',
     reboteGenerico: "We couldn't open the case. Try again.",
     hablarConAlguien: 'Would you rather a person helped you?',
+    pedirLaCasa: 'Ask e-PetPlace to step in',
     misCasosTitulo: 'My cases',
     misCasosIntro: 'What you opened and how it ended.',
     misCasosVacio: 'You have no cases.',
