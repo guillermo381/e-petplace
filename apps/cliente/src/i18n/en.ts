@@ -3295,7 +3295,7 @@ export const clienteEn = {
     misCasosVacio: 'You have no cases.',
     filtroTodos: 'All',
     filtroAbiertos: 'Open',
-    filtroCerrados: 'Closed',
+    filtroCerrados: 'Finished',
     fechaTodos: 'Any time',
     fechaSemana: 'This week',
     fechaMes: 'This month',

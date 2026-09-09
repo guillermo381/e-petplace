@@ -4533,7 +4533,7 @@ export const clienteEs = {
     misCasosVacio: 'No tienes casos.',
     filtroTodos: 'Todos',
     filtroAbiertos: 'Abiertos',
-    filtroCerrados: 'Cerrados',
+    filtroCerrados: 'Terminados',
     fechaTodos: 'Siempre',
     fechaSemana: 'Esta semana',
     fechaMes: 'Este mes',
