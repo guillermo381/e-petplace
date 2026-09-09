@@ -30,15 +30,48 @@ export default function HojaCaso() {
   const navegar = useNavigate()
   const [hoja, setHoja] = useState<HojaDelCaso | null>(null)
   const [error, setError] = useState<string | null>(null)
+  /* 🔴 TRES ESTADOS EXPLÍCITOS, y «cargando» es UNO de ellos — no el hueco que
+     queda cuando no hay datos ni error.
+
+     Lo que había: `if (!hoja) return <p>Cargando…</p>`. Con eso, **cualquier
+     camino que no llegue a `setHoja` ni a `setError` deja el spinner para
+     siempre** — y eso fue exactamente lo que pasó en producción: el wrapper
+     LANZÓ (un `this` perdido dentro de supabase-js), la promesa se rechazó, y
+     como no había `catch`, la pantalla se quedó cargando sin decir nada.
+
+     *Un spinner infinito es un error sin superficie.* Y acá la casa está
+     resolviendo un caso con plata de por medio: **quedarse mirando un spinner
+     es lo peor que le puede pasar.** */
+  const [cargando, setCargando] = useState(true)
 
   const cargar = useCallback(async () => {
-    setError(null)
-    const r = await obtenerHojaDelCaso(casoId)
-    if (!r.ok) { setError(r.mensaje); setHoja(null); return }
-    setHoja(r.data)
+    setCargando(true); setError(null)
+    try {
+      const r = await obtenerHojaDelCaso(casoId)
+      if (!r.ok) { setError(r.mensaje); setHoja(null); return }
+      setHoja(r.data)
+    } catch (e) {
+      /* El catch que faltaba. Una excepción del wrapper no puede volverse
+         silencio: se dice, y se dice CON su causa — sin ella, «algo falló» manda
+         a buscar el problema a cualquier lado. */
+      setError(`No pudimos abrir el caso: ${e instanceof Error ? e.message : String(e)}`)
+      setHoja(null)
+    } finally {
+      /* En `finally`: si sólo estuviera en el camino feliz, cada rama nueva de
+         error tendría que acordarse de apagarlo — y la que se olvide reproduce
+         este mismo defecto. */
+      setCargando(false)
+    }
   }, [casoId])
 
   useEffect(() => { cargar() }, [cargar])
+
+  /* El orden importa: primero CARGANDO (estado propio), después ERROR, y recién
+     entonces la ausencia de datos — que ya no puede confundirse con «todavía no
+     llegó». */
+  if (cargando) {
+    return <p style={{ color: color.texto2, fontFamily: fuente.cuerpo }}>Cargando el caso…</p>
+  }
 
   if (error) {
     return (
@@ -50,7 +83,18 @@ export default function HojaCaso() {
       </div>
     )
   }
-  if (!hoja) return <p style={{ color: color.texto2, fontFamily: fuente.cuerpo }}>Cargando…</p>
+  /* Sin error y sin datos: ya NO es «cargando» — es una respuesta vacía, que es
+     un hecho distinto y se dice como tal. */
+  if (!hoja) {
+    return (
+      <div style={{ fontFamily: fuente.cuerpo, maxWidth: 700 }}>
+        <Fallo mensaje="El caso no devolvió datos. Puede haber sido borrado, o la respuesta llegó vacía." />
+        <div style={{ marginTop: sp[4] }}>
+          <Boton variante="secundario" onClick={() => navegar('/casos')}>Volver a los casos</Boton>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div style={{ fontFamily: fuente.cuerpo, maxWidth: 1000 }}>
