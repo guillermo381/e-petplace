@@ -363,7 +363,7 @@ export async function responderCaso(casoId: string, texto: string) {
  */
 export type CodigoReconocer =
   | 'no_podes_resolver' | 'alcance_invalido' | 'monto_requerido_en_parcial'
-  | 'razon_requerida_en_parcial' | 'monto_supera_total';
+  | 'razon_requerida' | 'monto_supera_total';
 
 /** El rebote por tope LLEVA sus números (patrón de la casa: un error tipado
  *  trae el dato para componer el mensaje). En una carrera —alguien devolvió
@@ -385,7 +385,7 @@ export async function reconocerYResolver(
   const d = (data ?? {}) as Record<string, unknown>;
   if (d.ok !== true) {
     const CODES = ['no_podes_resolver','alcance_invalido','monto_requerido_en_parcial',
-                   'razon_requerida_en_parcial','monto_supera_total'] as const;
+                   'razon_requerida','monto_supera_total'] as const;
     const raw = typeof d.codigo === 'string' ? d.codigo : 'no_podes_resolver';
     const cod: CodigoReconocer = (CODES as readonly string[]).includes(raw)
       ? (raw as CodigoReconocer) : 'no_podes_resolver';
