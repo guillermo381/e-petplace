@@ -46,6 +46,26 @@
  *     estado, que se ven distinto en pantalla.
  *   · clase 3 · PEDIDO   — `producto_en_mal_estado`, urgente ⇒ `con_casa`.
  *
+ * 🔴 **Y un caso ABIERTO de cada forma, que es lo que faltaba.** Los primeros
+ * tres terminaron resueltos, y **sobre un caso resuelto la Hoja prueba que LEE,
+ * no que PROPONE**: el camino principal —la casa o el prestador decidiendo— no
+ * se puede caminar sin un caso vivo. Se abren dos y **NO se resuelven**:
+ *   · clase 2 sobre una cita  ⇒ `con_prestador`, con su plazo de 24 h corriendo
+ *   · clase 3 sobre un pedido ⇒ `con_casa`, urgente
+ * *Son las dos formas abiertas distintas, y se ven distinto en pantalla.*
+ *
+ * ── ⑤ EL HILO, CON LA VOZ DEL PRESTADOR ADENTRO ─────────────────────────
+ * Un caso abierto no alcanza si su hilo tiene un solo turno de la casa.
+ * **Sin la otra parte, el resumen es un eco del relato**: la Hoja parecería
+ * proponer cuando en realidad está devolviendo lo mismo que le entró. Por eso
+ * el hilo se arma con **≥3 turnos y la voz del PRESTADOR adentro**, y **se
+ * deja sin resolver** — *si el hilo ya trae la solución, volvemos a medir
+ * lectura.*
+ *
+ * ⚠️ El autor **no se pasa por parámetro**: `caso_responder` lo DERIVA de la
+ * sesión (*«un autor que el llamador declara es un autor que el llamador
+ * elige»*). Así que cada turno se escribe desde la sesión de quien habla.
+ *
  * ⚠️ **EFECTO DECLARADO:** cerrar el paseo **DEVENGA** — nace un evento
  * económico. Es deliberado (le da a §6 un objeto con devengo, que es el camino
  * interesante) **y mueve el universo de `verify:devengo-por-sujeto`**. Se dice
@@ -160,6 +180,20 @@ const receta = [
 const abiertos = [];
 for (const r of receta) {
   if (!r.id) { decir(`   🟠 clase ${r.clase} · ${r.tipo}: sin objeto disponible en ventana`); continue; }
+  /* 🔴 IDEMPOTENCIA PROPIA, y la necesita: el guard `caso_ya_abierto` de la
+     puerta mira el OBJETO, no la receta — y NO cuenta como abierto un caso en
+     `resuelto_entre_partes`. ⇒ cada corrida abría un caso de clase 2 nuevo
+     sobre otro objeto y la siembra crecía sola. *Un sembrador que no se
+     pregunta si ya sembró no siembra: acumula.* */
+  const yaDeEstaClase = dbQuery(`
+    select id from casos_postventa
+     where relato like '${MARCA}%' and clase = ${r.clase} and objeto_tipo = '${r.tipo}'
+     limit 1`)[0]?.id;
+  if (yaDeEstaClase) {
+    decir(`   ↻ clase ${r.clase} · ${r.tipo.padEnd(7)} ya sembrado: ${yaDeEstaClase}`);
+    abiertos.push({ ...r, caso: yaDeEstaClase, etapa: null });
+    continue;
+  }
   const { data, error } = await sFam.rpc('abrir_caso', {
     p_objeto_tipo: r.tipo, p_objeto_id: r.id, p_motivo: r.motivo,
     p_relato: r.relato, p_procedencia: 'familia', p_modo: 'texto',
@@ -191,10 +225,172 @@ else {
 const c1 = abiertos.find((a) => a.clase === 1);
 if (c1) decir(`   ✅ ${c1.caso} (clase 1) queda en elegir destino SIN monto — el otro sabor`);
 
+// ══ ④ UN CASO ABIERTO DE CADA FORMA — idempotente ════════════════════════
+decir('\n── ④ casos ABIERTOS (para caminar el camino principal, no sólo la lectura) ──');
+const ABIERTAS = ['recibido', 'con_prestador', 'con_casa'];
+const yaAbiertos = dbQuery(`
+  select etapa, count(*)::int n from casos_postventa
+   where etapa in (${ABIERTAS.map((e) => `'${e}'`).join(',')}) group by 1`);
+const tieneEtapa = (e) => yaAbiertos.some((x) => x.etapa === e && x.n > 0);
+
+const recetaAbierta = [
+  { etapa: 'con_prestador', clase: 2, tipo: 'cita', motivo: 'duracion',
+    relato: `${MARCA} La sesión duró bastante menos de lo que decía la reserva.`,
+    buscar: `select c.id from evento_cita_servicio c
+              left join mascotas m on m.id = c.mascota_id
+             where c.user_id = '${uid}' and c.prestador_id is not null
+               and coalesce((select a.cerrada_en from evento_atencion a where a.cita_id = c.id),
+                            (c.fecha + c.hora)::timestamptz) >= now() - interval '7 days'
+               and coalesce(m.estado_vida,'activa') = 'activa'
+               and not exists (select 1 from casos_postventa k
+                                where k.objeto_tipo = 'cita' and k.objeto_id = c.id)
+               and not exists (select 1 from guarderia_estadias g where g.cita_id = c.id)
+             order by c.fecha desc limit 1` },
+  { etapa: 'con_casa', clase: 3, tipo: 'pedido', motivo: 'producto_en_mal_estado',
+    relato: `${MARCA} Llegó en mal estado y mi mascota alcanzó a comer.`,
+    buscar: `select p.id from pedidos p
+             where p.user_id = '${uid}' and p.created_at >= now() - interval '7 days'
+               and not exists (select 1 from casos_postventa k
+                                where k.objeto_tipo = 'pedido' and k.objeto_id = p.id)
+             limit 1` },
+];
+
+for (const r of recetaAbierta) {
+  if (tieneEtapa(r.etapa)) { decir(`   ↻ ya hay un caso en \`${r.etapa}\`: no abro otro`); continue; }
+  const obj = dbQuery(r.buscar)[0]?.id;
+  if (!obj) { decir(`   🟠 ${r.etapa}: sin objeto libre en ventana`); continue; }
+  const { data, error } = await sFam.rpc('abrir_caso', {
+    p_objeto_tipo: r.tipo, p_objeto_id: obj, p_motivo: r.motivo,
+    p_relato: r.relato, p_procedencia: 'familia', p_modo: 'texto',
+  });
+  if (error || data?.ok !== true) { decir(`   🟠 ${r.etapa}: ${error?.message ?? JSON.stringify(data)}`); continue; }
+  const v = dbQuery(`select etapa, clase, plazo_prestador_hasta from casos_postventa where id = '${data.caso_id}'`)[0];
+  decir(`   ✅ clase ${v.clase} · ${r.tipo.padEnd(7)} ${data.caso_id} → \`${v.etapa}\`` +
+        (v.plazo_prestador_hasta ? ` · plazo hasta ${String(v.plazo_prestador_hasta).slice(0, 16)}` : ''));
+  /* 🔴 NO se resuelve. Ése es el punto: un caso resuelto prueba que la Hoja
+     LEE; uno abierto es el único que deja caminar lo que PROPONE. */
+}
+
+// ══ ⑤ EL HILO DEL CASO ABIERTO — con la voz del prestador ════════════════
+decir('\n── ⑤ el hilo del caso de clase 2 abierto (≥3 turnos, con el prestador) ──');
+const abierto2 = dbQuery(`
+  select k.id, k.prestador_id,
+         (select count(*)::int from caso_mensajes m where m.caso_id = k.id) as turnos,
+         (select count(*)::int from caso_mensajes m where m.caso_id = k.id and m.autor = 'prestador') as del_prestador
+    from casos_postventa k
+   where k.clase = 2 and k.etapa in ('recibido','con_prestador')
+   order by k.creado_en desc limit 1`)[0];
+
+if (!abierto2) decir('   🟠 no hay caso de clase 2 abierto al que armarle el hilo');
+else if (abierto2.turnos >= 3 && abierto2.del_prestador > 0) {
+  decir(`   ↻ ${abierto2.id} ya tiene ${abierto2.turnos} turnos y voz del prestador: no agrego`);
+} else {
+  const titular = dbQuery(`
+    select u.email from prestadores p join auth.users u on u.id = p.user_id
+     where p.id = '${abierto2.prestador_id}'`)[0]?.email;
+  let sPre = null;
+  for (const [em, pw] of [['demo-prestador@epetplace.dev', cl('epetplace-cuenta-prueba')],
+                          [titular, cl('epetplace-siembra-s97', 'siembra')]]) {
+    if (!em) continue;
+    try { sPre = await sesion(em, pw); decir(`   sesión del prestador: ${em}`); break; } catch { /* siguiente */ }
+  }
+  if (!sPre) decir(`   🟠 no abre la sesión del prestador (${titular}) — el hilo queda sin su voz`);
+  else {
+    /* Tres turnos que NO traen la solución: la familia aporta un dato, el
+       prestador da SU versión —que es la que falta— y la familia responde a
+       eso. El caso queda abierto: la decisión no está en el hilo. */
+    const turnos = [
+      [sFam, `${MARCA} Fueron 22 minutos, lo tengo en el historial del GPS. Reservé 45.`],
+      [sPre, `${MARCA} Revisé la salida: el paseador cortó antes porque el perro se resistía a caminar y volvió. No lo cargamos como incidente y debí avisarte.`],
+      [sFam, `${MARCA} Entiendo lo del perro, pero pagué 45 minutos y nadie me avisó. ¿Cómo lo resolvemos?`],
+    ];
+    for (const [ses, texto] of turnos) {
+      const { data, error } = await ses.rpc('caso_responder', { p_caso_id: abierto2.id, p_texto: texto });
+      if (error || data?.ok === false) { decir(`   🟠 turno rebotó: ${error?.message ?? JSON.stringify(data)}`); break; }
+    }
+    const fin2 = dbQuery(`
+      select (select count(*)::int from caso_mensajes m where m.caso_id = '${abierto2.id}') turnos,
+             (select string_agg(distinct m.autor, ', ' order by m.autor) from caso_mensajes m where m.caso_id = '${abierto2.id}') autores,
+             etapa from casos_postventa where id = '${abierto2.id}'`)[0];
+    decir(`   ✅ ${abierto2.id} → ${fin2.turnos} turnos · voces: ${fin2.autores} · etapa \`${fin2.etapa}\` (SIN resolver)`);
+  }
+}
+
+// ══ ⑥ UN CASO CON FECHA VIEJA — el sujeto del VACÍO de C ═════════════════
+/* C construyó el vacío honesto de «Mis casos»: la rama que distingue
+   «no tuviste que reclamar nada» de «no hay con esos filtros». **No la puede
+   ejercer** porque todos los casos de esa familia son de esta semana, así que
+   ninguna combinación de los dos ejes da cero. *Y no fabricó un dato para
+   verlo en verde, que fue lo correcto.*
+
+   🔴 **`creado_en` NO se puede retroceder por ninguna RPC** — lo pone la puerta
+   con `now()`. Lo que SÍ se puede hacer viejo es **`objeto_fecha`**, que es la
+   otra fecha que devuelve `obtener_mis_casos` y la que una familia piensa como
+   «la fecha»: la del servicio, no la del reclamo.
+
+   Para eso hace falta un objeto con fecha vieja que **igual pase la ventana de
+   7 días** — y la ventana cuelga del CIERRE, no de la fecha. Un pedido de
+   agosto parado en `liberado_preparacion` no pasa (su cierre es su
+   `created_at`); **cancelado hoy por su puerta real, sí**: el cierre pasa a ser
+   hoy y `entrega_fecha_objetivo` sigue siendo de agosto. */
+decir('\n── ⑥ un caso con OBJETO viejo (el vacío de C) ──');
+const yaViejo = dbQuery(`
+  select k.id from casos_postventa k
+   join pedidos p on p.id = k.objeto_id and k.objeto_tipo = 'pedido'
+  where k.relato like '${MARCA}%' and p.entrega_fecha_objetivo < (now() - interval '20 days')::date
+  limit 1`)[0]?.id;
+
+if (yaViejo) decir(`   ↻ ya existe un caso con objeto viejo: ${yaViejo}`);
+else {
+  /* Se elige el pedido MÁS BARATO y sin envío: nada en tránsito, mínimo
+     impacto. Cancelar libera inventario — efecto real y declarado. */
+  const viejo = dbQuery(`
+    select p.id, p.total, p.entrega_fecha_objetivo,
+           (select u.email from cuentas_comerciales cc join auth.users u on u.id = cc.owner_profile_id
+             where cc.id = p.cuenta_comercial_id) as vendedor
+      from pedidos p
+     where p.user_id = '${uid}' and p.estado = 'liberado_preparacion'
+       and p.entrega_fecha_objetivo < (now() - interval '20 days')::date
+       and not exists (select 1 from envios e where e.pedido_id = p.id)
+       and not exists (select 1 from casos_postventa k
+                        where k.objeto_tipo = 'pedido' and k.objeto_id = p.id)
+     order by p.total asc limit 1`)[0];
+  if (!viejo) decir('   🟠 no hay pedido viejo sin envío al que darle cierre');
+  else {
+    /* 🔴 CANCELA EL VENDEDOR, NO LA FAMILIA. El catálogo declara que desde
+       `liberado_preparacion` el único terminal es `cancelado_vendedor` con
+       actor `vendedor` — probado: como `cliente` la puerta rebota
+       `transicion_no_permitida`. *La puerta funcionando; y el motivo del caso
+       queda coherente con la historia en vez de contradecirla.* */
+    let sVen = null;
+    try { sVen = await sesion(viejo.vendedor, cl('epetplace-siembra-s97', 'siembra')); }
+    catch (e) { decir(`   🟠 no abre la sesión del vendedor (${viejo.vendedor}): ${e.message}`); }
+    const can = sVen ? await sVen.rpc('cancelar_pedido_despensa', {
+      p_pedido_id: viejo.id, p_actor: 'vendedor',
+      p_motivo: `${MARCA} sin stock — cancelado para dar cierre a un objeto viejo (siembra)`,
+    }) : { error: { message: 'sin sesión de vendedor' } };
+    if (can.error || can.data?.ok === false) {
+      decir(`   🟠 cancelar rebotó: ${can.error?.message ?? JSON.stringify(can.data)}`);
+    } else {
+      decir(`   ✅ pedido ${viejo.id} (${viejo.entrega_fecha_objetivo}, $${viejo.total}) cerrado hoy`);
+      const { data, error } = await sFam.rpc('abrir_caso', {
+        p_objeto_tipo: 'pedido', p_objeto_id: viejo.id, p_motivo: 'cancelado_vendedor',
+        p_relato: `${MARCA} Me cancelaron este pedido de agosto y sigo esperando la plata.`,
+        p_procedencia: 'familia', p_modo: 'texto',
+      });
+      if (error || data?.ok !== true) decir(`   🟠 abrir_caso rebotó: ${error?.message ?? JSON.stringify(data)}`);
+      else {
+        const v = dbQuery(`select etapa, clase from casos_postventa where id = '${data.caso_id}'`)[0];
+        decir(`   ✅ caso ${data.caso_id} → clase ${v.clase} · \`${v.etapa}\` · objeto_fecha ${viejo.entrega_fecha_objetivo}`);
+      }
+    }
+  }
+}
+
 // ══ CENSO FINAL ══════════════════════════════════════════════════════════
 const censo = dbQuery(`
   select clase, etapa, count(*)::int n from casos_postventa
-   where relato like '${MARCA}%' group by 1,2 order by 1`);
+   where relato like '${MARCA}%' group by 1,2 order by 1,2`);
 console.log('\n── LO SEMBRADO (marca `' + MARCA + '`) ──');
 for (const c of censo) console.log(`   clase ${c.clase} · ${c.etapa.padEnd(16)} ${c.n}`);
 const total = dbQuery(`select count(*)::int n from casos_postventa where relato like '${MARCA}%'`)[0].n;

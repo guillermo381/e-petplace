@@ -4695,6 +4695,7 @@ export type Database = {
           impuesto_total: number
           moneda: string
           saldo_aplicado: number
+          saldo_reservado_hasta: string | null
           subtotal: number
           total: number
           updated_at: string
@@ -4709,6 +4710,7 @@ export type Database = {
           impuesto_total?: number
           moneda?: string
           saldo_aplicado?: number
+          saldo_reservado_hasta?: string | null
           subtotal?: number
           total?: number
           updated_at?: string
@@ -4723,6 +4725,7 @@ export type Database = {
           impuesto_total?: number
           moneda?: string
           saldo_aplicado?: number
+          saldo_reservado_hasta?: string | null
           subtotal?: number
           total?: number
           updated_at?: string
@@ -23634,6 +23637,10 @@ export type Database = {
           titulo: string
         }[]
       }
+      _caso_monto_objeto: {
+        Args: { p_id: string; p_tipo: string }
+        Returns: number
+      }
       _caso_mover: {
         Args: {
           p_actor: string
@@ -23647,6 +23654,10 @@ export type Database = {
       _caso_tiene_devengo: {
         Args: { p_id: string; p_tipo: string }
         Returns: string
+      }
+      _caso_ya_devuelto: {
+        Args: { p_excluir: string; p_id: string; p_tipo: string }
+        Returns: number
       }
       _categoria_es_apagable: {
         Args: { p_categoria: string }
@@ -24500,8 +24511,8 @@ export type Database = {
         Args: {
           p_alcance: string
           p_caso_id: string
-          p_destino?: string
           p_monto?: number
+          p_motivo?: string
         }
         Returns: Json
       }
@@ -25647,6 +25658,11 @@ export type Database = {
         }
         Returns: Json
       }
+      liberar_reserva_saldo_compra: {
+        Args: { p_compra_id: string }
+        Returns: Json
+      }
+      liberar_reservas_saldo_vencidas: { Args: never; Returns: number }
       listar_lotes: { Args: never; Returns: Json }
       listar_memoria_coach: { Args: { p_mascota_id: string }; Returns: Json }
       listar_placas_de_lote: { Args: { p_lote_id: string }; Returns: Json }

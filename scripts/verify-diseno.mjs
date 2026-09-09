@@ -6033,6 +6033,13 @@ function r82(archivos) {
  * ⇒ **todo montaje declara `altoTeclado`**, y quien no lo quiera pasa `0`
  * explícito — que es una decisión, no un olvido.
  *
+ * ── ⑶ Y NADIE LE SUMA EL INSET (S114-B, y la abrió mi propia cura) ────────
+ * Bajo edge-to-edge `endCoordinates.height` reporta el teclado **sin la barra
+ * de gestos**, así que la pieza compone `altoTeclado + insetBottom` adentro. Un
+ * consumidor que además le sume la barra **la paga dos veces**. *La cura de un
+ * defecto abrió la puerta del defecto inverso, y el guard entra en el mismo
+ * acto que la cura — no en la sesión siguiente, cuando ya haya pasado.*
+ *
  * ── ⚠️ EL TECHO DE LA VENTANA, DECLARADO (`L-501`) ────────────────────────
  * El brazo ⑵ mira **40 renglones desde la apertura de la etiqueta**, y no
  * busca el `>` que la cierra **porque ese `>` aparece adentro de las props**
@@ -6083,6 +6090,18 @@ function r81(archivos) {
       if (!/<ModalDosAlturas(?![A-Za-z0-9_])/.test(lineas[i])) continue
       montajes++
       const ventana = lineas.slice(i, i + TECHO_R81).join('\n')
+      /* ⑶ · NADIE LE SUMA EL INSET (S114-B). La pieza compone
+         `altoTeclado + insetBottom` adentro; un consumidor que además le sume
+         la barra de gestos **la paga dos veces** y el campo queda flotando.
+         *Es el mismo defecto de hoy con el signo dado vuelta, y por eso entra
+         acá: la cura abrió esta puerta.* */
+      const sumado = ventana.match(/altoTeclado=\{[^}]*\binsets?\.bottom\b/)
+      if (sumado !== null) {
+        fallos.push(
+          `R81 **${path}:${i + 1} le SUMA el inset a \`altoTeclado\`.** La pieza ya compone \`altoTeclado + insetBottom\`: acá se paga dos veces y el campo queda flotando sobre un hueco. *Pasá lo que reporta la plataforma —\`endCoordinates.height\`, sin la barra— y nada más.*`,
+        )
+        continue
+      }
       if (/\baltoTeclado\s*=/.test(ventana)) continue
       fallos.push(
         `R81 **${path}:${i + 1} monta \`ModalDosAlturas\` sin \`altoTeclado\`.** La pieza crece POR DENTRO sólo si el consumidor le pasa ese alto; sin él **el teclado empuja el panel entero**. *Ya pasó una vez y lo escribió quien lo pagó: «acepta \`altoTeclado\` y yo no se lo pasaba».* Si de verdad no hay teclado en esa pantalla, pasá \`altoTeclado={0}\` — **una decisión se ve; un olvido no.**`,
@@ -6095,6 +6114,7 @@ function r81(archivos) {
     fallos,
     info:
       `${montajes} montaje(s) de la hoja arrastrable · imán a 3 posiciones vigilado en la pieza · ` +
+      `\`altoTeclado\` exigido y SIN el inset sumado (la pieza lo compone) · ` +
       `ventana de ${TECHO_R81} renglones DECLARADA (el \`>\` de cierre vive adentro de las props — \`L-501\`) · ` +
       `⚠️ su verde dice «asienta y nadie la empuja», jamás «la hoja se siente bien»: eso se mira en aparato`,
   }

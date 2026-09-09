@@ -1,0 +1,87 @@
+{
+ "tomada_en": "2026-09-08T02:43:00.173Z",
+ "tomada_en_local": "7/9/2026, 9:43:00 p. m.",
+ "sha": "374c844207cb08bdcea6526959f5e63106dd2880",
+ "filas": [
+  {
+   "estado": "completada",
+   "n": 10,
+   "obj": "cita",
+   "sin_evento": 10,
+   "sintetico": false,
+   "via": "telemedicina"
+  },
+  {
+   "estado": "completada",
+   "n": 3,
+   "obj": "cita",
+   "sin_evento": 3,
+   "sintetico": false,
+   "via": "consulta_general"
+  },
+  {
+   "estado": "entregado",
+   "n": 3,
+   "obj": "pedido",
+   "sin_evento": 3,
+   "sintetico": false,
+   "via": "despensa"
+  },
+  {
+   "estado": "completada",
+   "n": 1,
+   "obj": "cita",
+   "sin_evento": 1,
+   "sintetico": false,
+   "via": "(cita sin oficio)"
+  },
+  {
+   "estado": "completada",
+   "n": 1,
+   "obj": "cita",
+   "sin_evento": 1,
+   "sintetico": false,
+   "via": "consulta_especializada"
+  },
+  {
+   "estado": "entregada",
+   "n": 1,
+   "obj": "estadia",
+   "sin_evento": 1,
+   "sintetico": false,
+   "via": "guarderia"
+  },
+  {
+   "estado": "completada",
+   "n": 2,
+   "obj": "cita",
+   "sin_evento": 0,
+   "sintetico": false,
+   "via": "adiestramiento"
+  },
+  {
+   "estado": "completada",
+   "n": 6,
+   "obj": "cita",
+   "sin_evento": 0,
+   "sintetico": false,
+   "via": "grooming"
+  },
+  {
+   "estado": "completada",
+   "n": 1,
+   "obj": "cita",
+   "sin_evento": 0,
+   "sintetico": false,
+   "via": "grooming_completo"
+  },
+  {
+   "estado": "completada",
+   "n": 28,
+   "obj": "cita",
+   "sin_evento": 0,
+   "sintetico": false,
+   "via": "paseo"
+  }
+ ]
+}

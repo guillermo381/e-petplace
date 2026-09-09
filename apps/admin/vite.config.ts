@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { fileURLToPath } from 'node:url'
 
@@ -14,13 +14,60 @@ import { fileURLToPath } from 'node:url'
  * fuente, no como paquete construido. Es lo que hacen las otras apps del
  * monorepo con `packages/api` y no agrega deuda nueva.
  */
-export default defineConfig({
+/**
+ * 🔴 EL GUARD DEL BUILD — sin esto se publica un sitio VACÍO que dice «✓ built».
+ *
+ * `src/lib/supabase.ts` ya lanza si faltan las variables: eso es correcto y
+ * fail-closed. **Pero un `throw` a nivel de módulo NO frena el build: lo vuelve
+ * código inalcanzable, y Rollup hace tree-shaking de TODA la app detrás.**
+ *
+ * Medido (8-sep-2026), y por eso está acá:
+ *
+ * ```
+ * sin variables   199,89 kB · exit 0 · «✓ built»  → React + el guard. NADA de la app.
+ * con variables   482,67 kB · exit 0              → la app entera
+ * ```
+ *
+ * *El bundle de 199 kB pesa lo suficiente para parecer real, se publica sin un
+ * solo error, y sirve una página en blanco.* Yo reporté ese número como «el
+ * admin construido» durante toda una tanda.
+ *
+ * ⇒ **Un guard de RUNTIME no protege el BUILD.** El artefacto se produce igual y
+ * el `exit 0` dice que salió bien. La única forma de que no se publique es que
+ * el build falle acá — mismo criterio que `apps/pagos-web/build.mjs`, que
+ * aborta con `process.exit(1)` y cuyo comentario ya lo decía:
+ * *«una página servida con config incompleta se ve bien y no funciona».*
+ */
+function exigirEnv(modo: string) {
+  const env = loadEnv(modo, process.cwd(), 'VITE_')
+  const faltan = ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY']
+    .filter((k) => !env[k]?.trim())
+  if (faltan.length) {
+    console.error(
+      `\n🔴 FALTAN VARIABLES: ${faltan.join(', ')}.\n` +
+      `   Este sitio NO se publica a medias: sin ellas el bundle sale sin la\n` +
+      `   aplicación (≈200 kB en vez de ≈480) y sirve una página en blanco,\n` +
+      `   sin un solo error. Cargalas en el entorno del build y reintentá.\n`)
+    process.exit(1)
+  }
+}
+
+export default defineConfig(({ mode }) => {
+  exigirEnv(mode)
+  return {
   plugins: [react()],
   resolve: {
     alias: {
-      '@api-admin': fileURLToPath(new URL('../../packages/api/src/admin/index.ts', import.meta.url)),
-      '@api': fileURLToPath(new URL('../../packages/api/src', import.meta.url)),
+      /* 🔴 Por PAQUETE, no por ruta relativa — y es la diferencia entre que el
+         deploy funcione o no. Con `../../packages/api` el import SALE del
+         directorio de la app: si el build corre con Root Directory `apps/admin`,
+         esa ruta puede no existir. Declarando `@epetplace/api` como dependencia
+         del workspace, pnpm pone el symlink en `node_modules` y **resuelve
+         igual desde cualquier raíz**. */
+      '@api-admin': '@epetplace/api/src/admin/index.ts',
+      '@api': '@epetplace/api/src',
     },
   },
   server: { port: 5273 },
+  }
 })

@@ -24,5 +24,27 @@ export type {
   CodigoErrorGenerar,
 } from './liquidaciones';
 
+export {
+  obtenerBandejaCasos,
+  obtenerHojaDelCaso,
+  /* 🔴 `tomarCaso` va acá y no en el archivo solo: una función que la puerta
+     única no exporta NO EXISTE para la app — es `L-318`, motor sin puerta.
+     Casi la dejo afuera. */
+  tomarCaso,
+  resolverCaso,
+  responderEnCaso,
+  ETAPAS_ABIERTAS,
+  ETAPAS_FINALES,
+} from './postventa';
+export type {
+  FilaBandeja,
+  HojaDelCaso,
+  MensajeCaso,
+  PlataDelCaso,
+  AlcanceResolucion,
+  CodigoErrorPostventa,
+  CodigoErrorResolver,
+} from './postventa';
+
 export { initApi, getClient, uidActual } from '../client';
 export type { ResultadoWrapper } from '../resultado';

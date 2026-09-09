@@ -1014,7 +1014,7 @@ texto de otro aviso — y cobrado por intento.* **Los siete restantes son de la
 mesa**, y la tabla es su lugar.
 
 **Los bloqueos, medidos el 7-sep-2026 a las 20:50 Guayaquil** *(la hora va
-porque con cinco pistas en paralelo un estado de este tipo dura horas —`L-500`)*:
+porque con cinco pistas en paralelo un estado de este tipo dura horas —`L-515`)*:
 
 | # | bloqueo | estado | dueño |
 |---|---|---|---|

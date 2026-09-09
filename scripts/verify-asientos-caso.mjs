@@ -43,11 +43,14 @@
  *
  * ── ¿PERDONA ALGO QUE EL PRODUCTO NO PERDONA? ────────────────────────────
  * **Sí, y son tres, declaradas:**
- * · 🔴 **EL ASIENTO DE LA CASA NO SE EJERCE.** Medido: las dos cuentas de
- *   `admin_users` activas (`guillo381@…`, `admin@e-petplace.com`) **no abren
- *   sesión** con la credencial de prueba de la casa. *Un asiento que no se
- *   puede ejercer se declara, no se simula con `SET ROLE`* — §9.3 pide
- *   PostgREST real. **Queda como el único de los cinco sin medir.**
+ * · **EL ASIENTO DE LA CASA YA SE EJERCE** (A, adenda 13): la cuenta
+ *   `casa-prueba-s114@epetplace.dev` es una **sesión de usuario real con
+ *   `is_admin()=true`**, no `service_role` ni bypass. Los cinco asientos se
+ *   miden. *Lo que queda declarado es OTRA cosa, más fina:* **hoy TODOS los
+ *   casos de la base pertenecen a la misma familia**, así que la comparación
+ *   «casa ve todos» **no puede separarse de «la familia ve los suyos»** por
+ *   conteo. Se mide igual —casa sin filtro contra el total real— y **se dice
+ *   que esa mitad no discrimina hasta que exista un caso de otra familia.***
  * · La **sonda del candado** corre con una sola cuenta; la medición exacta por
  *   `has_table_privilege` cubre `authenticated` y `anon`, y **para cualquier
  *   otro rol este arnés es ciego**.
@@ -187,26 +190,54 @@ const FAMILIA = 'guillo381+8@gmail.com', TERCERO_FAM = 'guillo381+2@gmail.com';
 const OTRO_PRESTADOR = 'guillo381+paseo1@gmail.com';
 const PRESTADOR_ID = 'de300000-0000-4000-8000-0000000000e5';   // Paseos Andres
 
-const objeto = dbQuery(`
+/* 🔴 PRIMERO SE BUSCA UN CASO QUE YA EXISTA: un arnés que no necesita escribir
+   es estrictamente mejor que uno que siembra y limpia. Y el caso tiene que ser
+   de ESTA familia y de ESTE prestador, o los asientos de abajo medirían otra
+   cosa que la que dicen.
+   ⚠️ La primera versión creaba SIEMPRE, eligiendo «la cita más nueva» — y el
+   día que esa cita ya tenía un caso, la puerta devolvió `caso_ya_abierto`, el
+   fixture chocó contra `uq_caso_abierto_por_objeto` y **el arnés se puso mudo
+   sin declarar nada**. *Lo cazó correr todos después de sembrar; mirando sólo
+   lo que había tocado, se quedaba mudo con el tablero en verde.* */
+const casoExistente = dbQuery(`
+  select k.id from casos_postventa k
+   join auth.users u on u.id = k.familia_user_id
+  where u.email = '${FAMILIA}' and k.prestador_id = '${PRESTADOR_ID}'
+  order by k.creado_en desc limit 1`)[0]?.id ?? null;
+
+const objeto = casoExistente ? null : dbQuery(`
   select c.id, c.user_id from evento_cita_servicio c
    join auth.users u on u.id = c.user_id
   where u.email = '${FAMILIA}' and c.prestador_id = '${PRESTADOR_ID}'
+    and not exists (select 1 from casos_postventa k
+                     where k.objeto_tipo = 'cita' and k.objeto_id = c.id)
   order by c.fecha desc limit 1`)[0];
-if (!objeto) { console.error('   🟠 no hay objeto para el fixture.'); process.exit(2); }
+if (!casoExistente && !objeto) {
+  console.error('   🟠 NO CONCLUYENTE · ni hay un caso de esta familia+prestador para reusar,');
+  console.error('      ni una cita libre sobre la que abrir uno. Sin sujeto no se miden asientos.');
+  process.exit(2);
+}
 
-// La PUERTA REAL primero — su rechazo también es medición.
 const sFam = await sesion(FAMILIA, siembra);
 if (sFam.err) { console.error(`   🟠 la familia no abre sesión: ${sFam.err}`); process.exit(2); }
-const { data: puerta } = await sFam.c.rpc('abrir_caso', {
+
+let casoId = casoExistente;
+let creadoAcá = false;
+if (casoId) console.log(`   ↻ se REUSA un caso existente (${casoId}): el arnés NO escribe nada.`);
+
+// La PUERTA REAL primero — su rechazo también es medición.
+const { data: puerta } = casoId ? { data: null } : await sFam.c.rpc('abrir_caso', {
   p_objeto_tipo: 'cita', p_objeto_id: objeto.id, p_motivo: 'calidad',
   p_relato: `${MARCA} control de asientos`, p_procedencia: 'familia', p_modo: 'texto',
 });
 const abrioPorLaPuerta = puerta?.ok === true;
-console.log(`   puerta real \`abrir_caso\`: ${abrioPorLaPuerta ? '✅ abrió' : `rebotó · ${puerta?.codigo ?? '(sin código)'}`}` +
-            (abrioPorLaPuerta ? '' : '  ← la puerta funcionando; se siembra por fixture'));
-
-let casoId = abrioPorLaPuerta ? (puerta.caso_id ?? puerta.id) : null;
+if (!casoExistente) {
+  console.log(`   puerta real \`abrir_caso\`: ${abrioPorLaPuerta ? '✅ abrió' : `rebotó · ${puerta?.codigo ?? '(sin código)'}`}` +
+              (abrioPorLaPuerta ? '' : '  ← la puerta funcionando; se siembra por fixture'));
+}
+if (!casoId && abrioPorLaPuerta) { casoId = puerta.caso_id ?? puerta.id; creadoAcá = true; }
 if (!casoId) {
+  creadoAcá = true;
   const { data, error } = await admin.from('casos_postventa').insert({
     objeto_tipo: 'cita', objeto_id: objeto.id, motivo_codigo: 'calidad', clase: 2,
     familia_user_id: objeto.user_id, prestador_id: PRESTADOR_ID,
@@ -243,12 +274,15 @@ try {
   const vTer = sTerFam.err ? { err: sTerFam.err } : await cuenta(sTerFam.c);
   const vOtro = sOtroPre.err ? { err: sOtroPre.err } : await cuenta(sOtroPre.c);
   const vAnon = await cuenta(anon);
+  const sCasa = await sesion('casa-prueba-s114@epetplace.dev', clave('epetplace-cuenta-casa-prueba'));
+  const vCasa = sCasa.err ? { err: sCasa.err } : await cuenta(sCasa.c);
 
   veredictoAsientos = [
     ['familia (dueña del caso)', FAMILIA, vFam, 1],
     ['prestador DEL objeto', 'demo-prestador@epetplace.dev', vPre, 1],
     ['prestador AJENO', OTRO_PRESTADOR, vOtro, 0],
     ['tercero (otra familia)', TERCERO_FAM, vTer, 0],
+    ['casa (is_admin)', 'casa-prueba-s114@epetplace.dev', vCasa, 1],
     ['anon', '(sin sesión)', vAnon, 'rechazado'],
   ];
   for (const [rot, quien, v, esperado] of veredictoAsientos) {
@@ -267,14 +301,37 @@ try {
     console.error('   🟠 ni la familia ni el prestador ven el caso ⇒ la consulta no mide.');
     notas.push('control positivo de los asientos caído');
   }
-  console.log('   ⚪ casa (is_admin)          — NO EJERCIDO: ninguna cuenta de `admin_users`');
-  console.log('      activa abre sesión con la credencial de prueba. Se declara, no se simula.');
-  notas.push('el asiento CASA no se pudo ejercer: sin credencial de una cuenta admin');
+  /* ── «CASA VE TODOS», y hasta dónde llega la prueba ──────────────────
+     Ver el caso fixture prueba que la casa entra; NO prueba que vea TODOS.
+     Para eso se cuenta SIN filtro y se compara contra el total real. */
+  const totalReal = dbQuery('select count(*)::int n from casos_postventa')[0].n;
+  const sinFiltro = async (cli) => {
+    const { count, error } = await cli.from('casos_postventa').select('id', { count: 'exact', head: true });
+    return error ? null : (count ?? 0);
+  };
+  const casaTodos = sCasa.err ? null : await sinFiltro(sCasa.c);
+  const terceroTodos = sTerFam.err ? null : await sinFiltro(sTerFam.c);
+  const familiaTodos = await sinFiltro(sFam.c);
+  console.log(`   ── «casa ve todos»: casa ${casaTodos} · familia ${familiaTodos} · tercero ${terceroTodos} · total real ${totalReal}`);
+  if (casaTodos !== totalReal) {
+    fallos.push(`asiento CASA: sin filtro ve ${casaTodos} de ${totalReal} casos — no ve todos`);
+  }
+  if (terceroTodos !== 0) fallos.push(`el tercero ve ${terceroTodos} casos sin filtro, esperado 0`);
+  if (familiaTodos === totalReal) {
+    console.log('   ⚠️ hoy la familia también ve el total: TODOS los casos de la base son suyos,');
+    console.log('      así que este conteo NO separa «casa ve todos» de «la familia ve los suyos».');
+    notas.push('«casa ve todos» no discrimina hoy: no existe un caso de otra familia');
+  }
 } finally {
-  // ── RESIDUO CERO ──
-  await admin.from('caso_mensajes').delete().eq('caso_id', casoId);
-  await admin.from('casos_postventa').delete().eq('id', casoId);
-  const quedan = dbQuery(`select count(*)::int n from casos_postventa where relato like '%${MARCA}%'`)[0].n;
+  // ── RESIDUO CERO — sólo se borra lo que ESTE arnés creó ──
+  if (creadoAcá) {
+    await admin.from('caso_mensajes').delete().eq('caso_id', casoId);
+    await admin.from('casos_postventa').delete().eq('id', casoId);
+  } else {
+    console.log('   ✅ no se creó nada: no hay residuo que borrar');
+  }
+  const quedan = creadoAcá
+    ? dbQuery(`select count(*)::int n from casos_postventa where relato like '%${MARCA}%'`)[0].n : 0;
   if (quedan > 0) {
     console.error(`\n🟠 NO CONCLUYENTE · quedaron ${quedan} filas del fixture sin borrar.`);
     console.error('   Una sonda que deja residuo contamina la medición ajena.');
@@ -291,5 +348,6 @@ if (fallos.length) {
   process.exit(1);
 }
 console.log(`🟢 VERDE · candado puesto en las ${existentes.length} tablas que existen, y los`);
-console.log('   cuatro asientos ejercibles miden bien por PostgREST real.');
+console.log('   CINCO asientos de §9.3 —familia · prestador · casa · tercero · anon— más el');
+console.log('   prestador AJENO, todos por PostgREST real.');
 for (const n of notas) console.log(`   ⚠️ ${n}`);

@@ -51,7 +51,7 @@ deshace:
 con `tipo_evento='venta'` los cinco casos «rebotaron», pero por el enum de
 `tipo_evento`, no por `origen_tipo`. **Lo delató el discriminador**: `cita`, que
 es legítimo, también rebotaba. *Un arnés donde el caso bueno también falla no
-está midiendo lo que cree.* (Es `L-498` cobrándose el mismo día que se escribió.)
+está midiendo lo que cree.* (Es `L-513` cobrándose el mismo día que se escribió.)
 
 ## Por qué esto habría costado caro
 

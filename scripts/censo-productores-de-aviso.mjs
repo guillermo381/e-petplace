@@ -1,57 +1,50 @@
 #!/usr/bin/env node
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * censo:productores-de-aviso — S114-E · el ciego que A declaró, curado
+ * ☠️ LÁPIDA · censo:productores-de-aviso — JUBILADO el 8-sep-2026 (S114-E)
  * ═══════════════════════════════════════════════════════════════════════════
  *
- * **El ciego, con las palabras de A** (`S114-A-RELEVAMIENTO` §5):
- * *«Mi censo mide productores por LITERAL en el cuerpo de una función, y eso
- * no ve a los que emiten POR DATO.»* `guarderia_entregada` y
- * `guarderia_no_recogida` salieron «SIN PRODUCTOR» **y tienen intenciones
- * reales**: su productor es `_guarderia_aplicar_acto`, que lee
- * `cat_guarderia_transiciones.tipo_notificacion` y emite lo que el catálogo
- * diga. **Su productor es una fila, no una línea.**
+ * **Lo reemplaza `scripts/s114/verify-aviso-emitio-sin-productor.mjs`
+ * (`pnpm censo:productores-de-aviso`), que es la FUENTE ÚNICA.**
  *
- * ── CÓMO SE LE PREGUNTA AL OBJETO ─────────────────────────────────────────
- * No se busca la tabla que uno ya sabe que existe — eso mide la memoria del
- * que escribe el censo. Se recorren **TODAS las columnas de texto de todas las
- * tablas de `public`** y se pregunta cuáles CONTIENEN un código de
- * `cat_notificacion_tipos`. Una columna que guarda códigos de aviso **es** un
- * productor por dato, se llame como se llame y esté en la tabla que esté.
+ * ── POR QUÉ MUERE, y no es que estuviera mal ─────────────────────────────
+ * Este censo nació para curar un ciego declarado del de A: **medía productores
+ * por LITERAL en el cuerpo de una función y no veía a los que emiten POR DATO**
+ * (una fila de catálogo, no una línea de código). Su aporte fue el **barrido
+ * genérico de las 1.407 columnas de texto de `public`**, que encuentra un
+ * productor-por-dato **sin saber de antemano qué catálogo mirar**.
  *
- * 🔴 **Por qué no se filtra por nombre de columna:** filtrar por
- * `~* 'notificacion|aviso'` habría encontrado `tipo_notificacion` y habría
- * dado el mismo resultado **por casualidad**. Un censo atado a un nombre mide
- * la convención, no el hecho (`L-489` de la casa) — y la convención se rompe
- * en la primera tabla que llame `evento` a lo que otra llama `notificacion`.
+ * **Ese aporte ya vive adentro del gate de A** — verificado leyendo su código,
+ * no su mensaje: tiene el barrido por lotes, el reintento por conexión, el
+ * discriminador causal contra la puerta única de emisión, el control del caso
+ * conocido y la clasificación de «contienen el código pero no lo emiten».
+ * Su propia cabecera nombra a los dos. ⇒ **no queda parte aditiva que acotar:
+ * es redundancia entera.**
  *
- * ── LOS DOS CENSOS CORREN JUNTOS, A PROPÓSITO ─────────────────────────────
- * El script reproduce **el censo por literal de A** y corre **el censo por
- * dato** en la misma pasada, y reporta la diferencia. *No se trata de
- * reemplazar el instrumento de A: se trata de medir cuánto no veía* — y eso
- * sólo se puede decir si los dos números salen de la misma corrida.
+ * ── POR QUÉ NO SE DEJA CONVIVIENDO ───────────────────────────────────────
+ * Los dos publicaban números distintos sobre lo mismo — este decía «12 sin
+ * productor» contando los que **nunca emitieron**, y el de A los separa bien
+ * (deuda `D-673`, no rojo). **Dos instrumentos que miden lo mismo y publican
+ * números distintos es peor que uno solo:** el que lee elige, sin saber que
+ * está eligiendo.
  *
- * ── LO QUE ESTE CENSO TAMPOCO VE, DECLARADO ───────────────────────────────
- * · **`jsonb`.** Sólo recorre `text`, `varchar` y `citext`. Un código de aviso
- *   guardado dentro de un `jsonb` de configuración **no lo encuentra**, y esta
- *   casa guarda mucha cosa en `jsonb`. *Acota, no cierra* — igual que el de A.
- * · **Un productor por dato cuya fila todavía no existe.** Si el catálogo está
- *   vacío, el tipo sale sin productor aunque el código sepa leerlo.
- * · **No prueba que el productor CORRA.** Prueba que existe quien podría
- *   emitirlo. El contador de intenciones es otra medición, y va al lado.
- *
- * Salida: tabla por tipo con `literal` · `dato` · `intenciones`, y el delta.
+ * ── POR QUÉ EL ARCHIVO SE QUEDA, Y SALE 2 ────────────────────────────────
+ * *Un puente que sobrevive a su río manda al próximo a construir otro*
+ * (`L-395`). Borrarlo dejaría el nombre libre para que alguien lo reinvente sin
+ * enterarse de que la pregunta ya tiene dueño. **Sale 2 —no 0— porque un
+ * jubilado que devuelve verde se lee como una medición que pasó.**
  */
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   ☠️ JUBILADO — S114-A ④ (adenda 14③). El censo duplicaba el cruce
-   «emitió vs productor» que A ya tenía, y su parte aditiva —el barrido general
-   por DATO de todas las columnas de texto + el discriminador causal— SE MUDÓ,
-   ENTERA, a: scripts/s114/verify-aviso-emitio-sin-productor.mjs
-   El instrumento consolidado se corre igual que antes: `pnpm censo:productores-de-aviso`.
-   Este archivo queda de lápida: su razonamiento arriba es el registro de cómo se
-   midió (los dos defectos del propio instrumento y el discriminador). No corre. */
-
-console.error('☠️  JUBILADO — el censo vive en scripts/s114/verify-aviso-emitio-sin-productor.mjs');
-console.error('   corré:  pnpm censo:productores-de-aviso');
+console.error('☠️ censo:productores-de-aviso está JUBILADO (S114-E, 8-sep-2026).');
+console.error('');
+console.error('   Lo reemplaza, y es la FUENTE ÚNICA:');
+console.error('     pnpm censo:productores-de-aviso');
+console.error('     scripts/s114/verify-aviso-emitio-sin-productor.mjs');
+console.error('');
+console.error('   Su aporte —el barrido genérico de las columnas de texto de `public`,');
+console.error('   que encuentra un productor-por-dato sin saber qué catálogo mirar— ya');
+console.error('   está adentro de ese gate, junto con el discriminador y sus controles.');
+console.error('   No quedó parte aditiva: era redundancia entera.');
+console.error('');
+console.error('   Sale 2 y no 0 a propósito: un jubilado en verde se lee como una');
+console.error('   medición que pasó.');
 process.exit(2);

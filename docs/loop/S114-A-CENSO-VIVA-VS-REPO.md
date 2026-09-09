@@ -12,7 +12,7 @@ a mano ni un misterio.**
 
 ## ② Por qué C vio lo que vio — y NO es viva≠repo
 
-**Es `L-500` (repo desactualizado entre pistas), medido:**
+**Es `L-515` (repo desactualizado entre pistas), medido:**
 
 - C midió contra `main + pista/s114-a @ 69065369` — **ANTES de que yo aplicara
   A4 (`670000`, `680000`…)**. En ese punto el repo de C tenía la migración

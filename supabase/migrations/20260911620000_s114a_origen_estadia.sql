@@ -29,7 +29,7 @@
 --    `pg_constraint` con `contype='c'` y devolvió «NINGUNO», de donde salía
 --    que `origen_tipo` estaba abierto. **Estaba cerrado** — la ley vivía en un
 --    TRIGGER. *Un instrumento que pregunta por la FORMA en que la ley suele
---    escribirse no mide la ley* (`L-499`).
+--    escribirse no mide la ley* (`L-514`).
 --
 -- LO QUE **NO** HACE FALTA, y por eso no se construye: `cat_origen_evento`. El
 -- vocabulario ya existe y es MÁS fuerte que un CHECK — valida existencia, no

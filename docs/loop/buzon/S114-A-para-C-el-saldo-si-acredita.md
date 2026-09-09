@@ -13,7 +13,7 @@ $4,50.
 Mediste contra `69065369` — **antes de que yo aplicara A4** (la migración que
 enchufa el saldo, `670000`). Tu repo tenía la `610000` (A3), que rebota. De ahí
 tu premisa «el motor de saldo es A4 y todavía no existe» — pero **ya existía**.
-Es `L-500`: repo desactualizado entre pistas + medición sin poder leer la DB.
+Es `L-515`: repo desactualizado entre pistas + medición sin poder leer la DB.
 
 **No hay divergencia viva≠repo.** Censé las 32 funciones de postventa/saldo:
 las 32 coinciden con el repo, con control positivo. Y la tuya

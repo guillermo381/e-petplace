@@ -30,9 +30,39 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
-/** Medido el 7-sep-2026. SOLO-BAJA: cada cura que mueva su decisión a
- *  `packages/domain` lo baja, y quien lo baje edita este número. */
-const BASELINE = 9
+/**
+ * Medido el 7-sep-2026. SOLO-BAJA: cada cura que mueva su decisión a
+ * `packages/domain` lo baja, y quien lo baje edita este número.
+ *
+ * 🔴 **AL MERGEAR LA RAMA DE C: ESTE NÚMERO BAJA A 8** (S114-B).
+ * C curó una derivación en `pasaporte.tsx` que en este árbol todavía existe.
+ * **No se baja acá y ahora, y el porqué es del trinquete:** *bajar un
+ * solo-baja contra un estado que no tengo lo pone ROJO PARA TODOS si esa cura
+ * no llega* — y el gate no puede distinguir «la cura no vino» de «alguien la
+ * revirtió». ⇒ **lo baja quien mergea, en el mismo commit del merge**, que es
+ * mi propia `L-502`: *el que amplía o cura mueve el baseline en el mismo acto.*
+ *
+ * ⚠️ **Y si después del merge sigue diciendo 9, la cura no entró** — el número
+ * es lo único que lo dice, porque un trinquete que no baja no se queja: se
+ * queda quieto y se lee igual que uno al día.
+ *
+ * ── ⚠️ EL DESACUERDO QUE ESTO DESTAPÓ, y vale más que el número ──────────
+ * Mi censo EN PROSA (`S114-B-CONTRATO-MEMORIAL` §⑥) tabuló **3 filas / 5
+ * sitios** y este gate contaba **9** — **dos artefactos míos, sobre el mismo
+ * hecho, con números distintos, y nadie los cruzó**. El censo agrupaba por
+ * ARCHIVO (`pasaporte.tsx (:98 · :162)` en una sola fila) y el gate cuenta
+ * SITIOS. *Un censo que agrupa por archivo pierde la cuenta de los sitios, y su
+ * número se lee igual de firme que el del instrumento.*
+ * **La autoridad es el gate**: el censo en prosa es una lectura, éste es una
+ * medición reproducible. Es `L-503` entre dos artefactos del mismo autor.
+ */
+// 🔴 S114-A · bajado 9→2 al integrar la cura de C (la quinta derivación en
+// pasaporte.tsx, ahora vía esMemorial de lib/memorial) + el merge que retiró
+// cambiarPerdida. El founder pidió «bajá a 8» desde la vista de B (9→8, un
+// arreglo); el piso MEDIDO en el candidato ensamblado es 2 — se mueve al piso
+// real, no al número de otra rama (el gate lo exige: el que cura mueve el
+// baseline en el mismo acto, L-502). Si sube de 2, una derivación nueva entró.
+const BASELINE = 2
 /** Exentos POR NOMBRE, jamás por patrón (mismo criterio que `R78` §④). */
 const EXENTOS = new Set([
   // La definición vive acá: es el destino, no una copia.

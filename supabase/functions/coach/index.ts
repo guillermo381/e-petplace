@@ -109,6 +109,9 @@ interface Contexto {
   especie: string
   sujeto?: string | null
   estado_vida?: string | null
+  /** ⑦ · true SÓLO tras la vuelta de perdida→activa, hasta que el Coach muestra
+   *  la bienvenida una vez. */
+  bienvenida_regreso?: boolean | null
   sexo?: string | null
   edad_texto?: string | null
   etapa?: string | null
@@ -283,6 +286,16 @@ export function sistemaDe(c: Contexto): string {
   return `Eres Nexo, el asistente de e-PetPlace. Le hablas a la familia de una mascota
 sobre SU expediente. Tuteo neutro, cálido, frases cortas, sin signos de
 admiración y sin marketing.
+${c.estado_vida === 'perdida' ? `
+🔴 ${c.nombre} ESTÁ PERDIDA (no murió). Acompañá la búsqueda:
+- NO consueles ni hables de duelo. No es un memorial, y este es el momento en
+  que la familia más necesita el producto funcionando.
+- NO sugieras estudios, chequeos ni cuidados por su raza o su etapa mientras
+  esté perdida — eso es hablar de otra cosa.
+- Lo más útil ahora es su pasaporte con el QR y la placa: si alguien la
+  encuentra y lee su placa, va a ver el teléfono de la familia. Recuérdalo y
+  que revisen que su contacto esté visible.
+` : ''}
 
 🔴 TUTEO, NO VOSEO: "quieres" y no "querés", "fíjate" y no "fijate", "tienes" y
 no "tenés". Y nada de "dale" — es el que se escapa
@@ -461,6 +474,24 @@ Eres una inteligencia artificial de e-PetPlace, y lo dices sin rodeos si te lo
 preguntan o si alguien da a entender que eres una persona. No te presentás como
 veterinario, ni como el equipo, ni como alguien que atendió a la mascota.
 
+═══ CÓMO SE HACE CADA COSA EN LA APP ═══
+Conoces tu propio producto. Si la familia pregunta CÓMO hacer algo, le dices
+DÓNDE está, con el lugar real. **NUNCA la mandes a "soporte", a "atención al
+cliente" ni al "menú principal": no existen.** Un asistente que no conoce su
+producto inventa un lugar; dices el que hay, y si de verdad no sabes dónde
+está algo, lo dices honesto y ofreces lo que sí puedes — nunca un lugar falso.
+
+Lo que sabes dónde vive:
+- **Reportar que ${c.nombre} se perdió (o que apareció):** en su PERFIL, en la
+  zona «Su vida» — los botones «Se perdió» y, cuando vuelva, «Apareció». Ahí
+  mismo, antes de nada, conviene revisar que su pasaporte tenga el contacto
+  visible: si alguien la encuentra y lee su placa, va a ver el teléfono.
+- **Su pasaporte, el QR y la placa:** en la pantalla del pasaporte de ${c.nombre},
+  desde su perfil. Ahí se elige qué se muestra y se comparte el QR.
+- **Despedir a una mascota que ya no está (memorial):** también en su perfil,
+  zona «Su vida». Es una decisión, no una nota; se hace con su fecha.
+${c.telemedicina_disponible ? '- **Ver o consultar a un veterinario:** puedes ofrecer abrir una consulta desde la app (ver el semáforo).' : '- **Ver a su veterinario:** desde la app, cuando el semáforo lo pida.'}
+
 ═══ CÓMO CONTESTAS ═══
 Entre 80 y 150 palabras. **Una sola pregunta por turno, como máximo.**
 Siempre puedes decir de qué dato del expediente sale lo que dices — si te lo
@@ -563,6 +594,24 @@ export function presentacion(c: Contexto): { burbujas: string[]; chips: string[]
       `está tu veterinario.`,
     ],
     chips: chipsDeInicio(c),
+  }
+}
+
+// ── PERDIDA · el Coach acompaña la búsqueda (firma founder, 7-sep-2026) ─────
+// Perdida NO es memorial: no se apaga (①), no consuela ni abre con duelo (②),
+// y lo primero que ofrece es lo único que sirve ahora — el pasaporte con el QR
+// y la placa (③). Las anticipaciones por raza/etapa y los recordatorios de
+// vacuna/antiparasitario/peso (④⑤) ya NO salen: generar_avisos_coach los gatea
+// por estado_vida='activa', así que se apagan solos con perdida y vuelven
+// cuando vuelva ella. La literal de la placa es del founder, verbatim.
+export function presentacionPerdida(c: Contexto): { burbujas: string[]; chips: string[] } {
+  return {
+    burbujas: [
+      `Estoy para ayudarte a buscar a ${c.nombre}.`,
+      `Lo primero es su pasaporte: fíjate que estén el QR y la placa, y que tu ` +
+      `contacto se vea. Si alguien lo encuentra y lee su placa, va a ver tu teléfono.`,
+    ],
+    chips: ['¿Cómo reviso su placa?', '¿Qué hago si lo encuentran?'],
   }
 }
 
@@ -713,9 +762,10 @@ export function saneaPropuesta(
  *  ③ deja MEDIBLE cuántas se proponen y cuántas se confirman, que es lo único
  *     que va a decir si esto sirve.
  *
- *  ⚠️ CONTRATO CON A (no existe todavía; medido el 6-sep):
- *    `propuestas_memoria(id, mascota_id, hecho, clase, origen, estado, creado_por, creado_en)`
- *      origen ∈ 'contanos' | 'chat'   ·   estado ∈ 'pendiente'|'confirmada'|'descartada'
+ *  ✅ ESQUEMA REAL (S113, migración 20260909860000; corregido S114-A el 7-sep):
+ *    `propuestas_memoria(id, mascota_id, hecho, clase, estado, turno_id, creada_en, resuelta_en, resuelta_por)`
+ *      estado default 'pendiente'. NO tiene `origen` ni `creado_por` — el edge
+ *      los escribía por error y el INSERT rebotaba para toda mascota.
  *    y su puerta `confirmar_propuesta_memoria(id)`, que escribe `coach_memoria`
  *    con `fuente='confirmado_de_ia'`. **Esta edge NUNCA toca `coach_memoria`.**
  */
@@ -725,10 +775,17 @@ async function crearPropuestas(
   hechos: { hecho: string; clase: string }[], origen: 'contanos' | 'chat',
 ): Promise<{ id: string; hecho: string; clase: string }[] | null> {
   if (!hechos.length) return []
+  // 🔴 S114-A · el esquema real de propuestas_memoria (S113, 20260909860000) es
+  // (mascota_id, hecho, clase, estado, turno_id, creada_en, resuelta_*): NO tiene
+  // `origen` ni `creado_por`. El edge los escribía y el INSERT rebotaba
+  // (`propuesta_no_guardada`) para TODA mascota — el «contanos» estaba roto de
+  // nacimiento, no sólo con perdida. `estado` cae al default 'pendiente'.
+  // `origen`/`uid` se dejan en la firma por estabilidad pero no viajan a la DB
+  // (nada los lee; la procedencia del hecho es la misma para todos — §⑥).
+  void origen; void uid;
   const { data, error: err } = await sb.from('propuestas_memoria').insert(
     hechos.map((h) => ({
       mascota_id: mascotaId, hecho: h.hecho, clase: h.clase,
-      origen, estado: 'pendiente', creado_por: uid,
     })),
   ).select('id, hecho, clase')
   if (err) {
@@ -930,8 +987,28 @@ Deno.serve(async (req) => {
 
     // ── PRESENTAR · cero modelo ──────────────────────────────────────────
     if (acto === 'presentar') {
+      // Perdida: acompaña la búsqueda, no abre como si nada ni como memorial.
+      if (c.estado_vida === 'perdida') {
+        return new Response(JSON.stringify({
+          ...presentacionPerdida(c), fuente: 'plantilla', aviso_ia: true,
+        }), { status: 200, headers: JSON_HEADERS })
+      }
+      const pres = presentacion(c)
+      // ⑦ · la bienvenida de regreso, UNA sola vez y sin ceremonia. Se consume
+      // atómicamente (update where flag=true): si ESTE llamado lo apagó, muestra
+      // la línea; si otro se adelantó, no la repite. Nada más — ni resumen de
+      // los días perdidos, ni pendientes de golpe; los recordatorios vuelven
+      // solos por el gate dinámico. La línea es del founder, verbatim.
+      if (c.bienvenida_regreso) {
+        const { data: consumido } = await sb.from('mascotas')
+          .update({ bienvenida_regreso_pendiente: false })
+          .eq('id', mascotaId).eq('bienvenida_regreso_pendiente', true).select('id')
+        if (Array.isArray(consumido) && consumido.length > 0) {
+          pres.burbujas = ['Qué bueno tenerlo de vuelta.', ...pres.burbujas]
+        }
+      }
       return new Response(JSON.stringify({
-        ...presentacion(c), fuente: 'plantilla', aviso_ia: true,
+        ...pres, fuente: 'plantilla', aviso_ia: true,
       }), { status: 200, headers: JSON_HEADERS })
     }
 

@@ -199,11 +199,21 @@ Deno.serve(async (req) => {
       const cW = await rW.json().catch(() => ({}));
       const rN = await fetch(
         `https://graph.facebook.com/v21.0/${id}/phone_numbers` +
-          `?fields=display_phone_number,verified_name&limit=5`, { headers: cab });
+          `?fields=id,display_phone_number,verified_name&limit=5`, { headers: cab });
       const cN = await rN.json().catch(() => ({}));
+      /* 🔴 ¿Pudimos ENUMERAR los números de este WABA? Un fetch que falló y una
+         lista vacía NO son «no coincide»: son «no sé». Se guarda aparte para que
+         par_coherente no confunda una lista que no se llenó con una que no tiene
+         el número (founder, 8-sep). */
+      const numerosEnumeradosOk = rN.ok && Array.isArray(cN?.data);
+      const numeroIds: string[] = numerosEnumeradosOk
+        ? (cN.data as Record<string, unknown>[]).map((n) => String(n.id ?? '')).filter(Boolean)
+        : [];
       wabaAlcanzables.push({
         id,
         name: cW?.name ?? null,
+        numeros_enumerados_ok: numerosEnumeradosOk,
+        numero_ids: numeroIds,
         /* 🔴 El discriminador que el founder pidió, y sale del DATO:
            el prefijo del número dice el país. `+593` es Ecuador, `+1` no. */
         numeros: Array.isArray(cN?.data)
@@ -298,6 +308,30 @@ Deno.serve(async (req) => {
     const enUtility = plantillas.filter((t) => t.category === 'UTILITY').length;
     const aprobadas = plantillas.filter((t) => t.status === 'APPROVED').length;
 
+    /* 🔴 EL PAR — ¿el WABA del que LEEMOS plantillas es dueño del número desde
+       el que ENVIAMOS? (pedido de E, firma founder 8-sep). TRISTATE, no boolean:
+       un includes() sobre lista vacía da false SIEMPRE, y eso haría publicar
+       «apuntan a cuentas distintas» sobre una lista que nunca se llenó. Se
+       distingue «no pude enumerar» (null) de «enumeré y el número no está» (false).
+         · null  → no se puede concluir (waba configurado no alcanzable, o no se
+                   pudieron enumerar sus números): NO afirmar incoherencia.
+         · true  → el número configurado ESTÁ entre los del WABA configurado.
+         · false → se enumeraron números y el configurado NO está: cuentas distintas. */
+    const entradaConfig = wabaAlcanzables.find((w) => w.es_el_configurado);
+    let parCoherente: boolean | null;
+    let parMotivo: string;
+    if (!entradaConfig) {
+      parCoherente = null; parMotivo = 'waba_configurado_no_alcanzable';
+    } else if (!entradaConfig.numeros_enumerados_ok) {
+      parCoherente = null; parMotivo = 'no_se_pudieron_enumerar_los_numeros';
+    } else if (entradaConfig.numero_ids.length === 0) {
+      parCoherente = null; parMotivo = 'el_waba_no_declara_numeros';
+    } else if (entradaConfig.numero_ids.includes(phoneId)) {
+      parCoherente = true; parMotivo = 'el_numero_pertenece_al_waba_configurado';
+    } else {
+      parCoherente = false; parMotivo = 'el_numero_no_esta_en_el_waba_configurado';
+    }
+
     return Response.json({
       modo: 'verificar',
       token_forma: forma,
@@ -313,6 +347,10 @@ Deno.serve(async (req) => {
          apunta. *Es la diferencia entre «no puedo» y «estoy mirando otra
          cosa», y hasta ahora no se podía distinguir.* */
       waba_configurado_alcanzable: idsWaba.includes(waba),
+      /* 🔴 EL PAR, para el gate de E: true/false SÓLO cuando se pudo enumerar;
+         null cuando no se puede concluir (lista vacía ≠ no coincide). */
+      par_coherente: parCoherente,
+      par_coherente_motivo: parMotivo,
       http_debug_token: rD.status,
       http_plantillas: rT.status,
       http_numero: rP.status,

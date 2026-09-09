@@ -8,7 +8,10 @@ import { color, sp, radio, fuente } from '../tokens'
  * («Prestadores — próximamente») sería exactamente el portal entero con otro
  * nombre que §1 prohíbe.
  */
-const RUTAS = [{ to: '/liquidaciones', label: 'Liquidaciones' }]
+const RUTAS = [
+  { to: '/casos', label: 'Casos' },
+  { to: '/liquidaciones', label: 'Liquidaciones' },
+]
 
 export default function Layout() {
   return (

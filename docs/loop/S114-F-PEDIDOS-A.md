@@ -86,3 +86,61 @@ ledger.
 DDL.** Devolvió `rows: []` **sin error** y la función no se creó — se descubrió
 preguntándole al objeto, no al comando. Corre con un rol temporal. Para DDL,
 `db push`.
+
+---
+
+## ⑤ 🟡 DEUDA CON DUEÑO — el pasaporte puede nacer MUDO, y el default hace parecer que no
+
+**Sin número a propósito:** el canon prohíbe escribir un número antes de
+depositar la ficha. **La ficha es de A**, que le pone el número con
+`pnpm proximo:ficha` al depositarla.
+
+### El hecho, medido en el ensayo de la placa (S114-F, adenda 13)
+
+`activar_placa` **crea el pasaporte y NO crea su fila en `pasaporte_config`**
+(medido: cero ocurrencias de `pasaporte_config` en su cuerpo). Sin esa fila, la
+página pública **muestra sólo el nombre de la mascota**: sin foto, sin contacto,
+sin botón de llamar.
+
+*Lo vi en pantalla: entre activar y configurar, el pasaporte de Zeus decía
+«Zeus» y nada más. El propósito entero del pasaporte es que alguien pueda
+llamar, y no se podía.*
+
+### 🔴 Lo que lo vuelve difícil de ver: el default dice que está cubierto
+
+```sql
+-- pasaporte_config
+mostrar_contacto  DEFAULT true
+mostrar_salud     DEFAULT true
+mostrar_chip      DEFAULT true
+```
+
+**Los tres defaults son `true`** — quien lea el esquema concluye que el
+pasaporte muestra el contacto por defecto. **Y no es cierto: un default de
+columna sólo se aplica cuando alguien inserta la fila, y acá nadie la inserta.**
+*El esquema promete un comportamiento que ninguna ruta produce.*
+
+### Por qué NO es un defecto del producto hoy
+
+**El front lo cubre:** `apps/cliente/src/app/placa/[token].tsx:135` hace
+`router.replace('/hogar/mascota/pasaporte')` **inmediatamente después de
+activar**, así que la familia aterriza en la pantalla de configuración.
+*Perseguí esto antes de reportarlo: mi pasaporte quedó mudo porque llamé la RPC
+directo y me salteé la pantalla.*
+
+### Por qué igual se anota
+
+**Quien evita el estado mudo es el FRONT, no el motor.** Si algún día se activa
+por otra vía —un script de alta masiva, otra superficie, un flujo de tienda que
+active al comprar— **el pasaporte nace sin contacto y nada avisa**: no hay error,
+no hay estado inválido, la placa funciona y no sirve.
+
+**Dos formas posibles, y la elección es de A porque es su territorio:**
+1. `activar_placa` inserta la config con los defaults en la misma transacción
+   (los `true` del esquema pasarían a regir de verdad); **o**
+2. la edge `pasaporte` trata «sin config» como «config por defecto» en vez de
+   como «no mostrar nada».
+
+⚠️ **No propongo cuál.** La primera escribe una fila que hoy no existe y la
+segunda cambia cómo se lee un estado ya existente — **son decisiones distintas
+sobre 22 pasaportes vivos**, y ninguna es de F.
