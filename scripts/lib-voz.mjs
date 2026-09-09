@@ -219,6 +219,38 @@ export const VOZ_COMO_AMPLIAR =
   'si ampliás la lista, subí los baselines que destape EN EL MISMO COMMIT y' +
   ' declará el número viejo: el trinquete mide voz NUEVA, no cobertura nueva (`L-502`)';
 
+/**
+ * ═══ LOS TRES CIEGOS DE ESTE INSTRUMENTO — y por qué van los TRES ══════════
+ *
+ * **Firma del founder (S114-B):** *«es la tercera vez que este instrumento
+ * tenía un alcance menor que su verde — vale que quede escrito con las tres
+ * formas, no sólo la última.»*
+ *
+ * Cada uno se descubrió **después** de haber curado el anterior, y las tres
+ * veces el que quedaba **se parecía tanto al curado que se daba por cubierto**.
+ * Escribir sólo el último deja creer que la clase está cerrada.
+ *
+ * | eje | qué no veía | cuándo |
+ * |---|---|---|
+ * | **① LISTA** | el imperativo de un verbo que nadie agregó | S114, lo halló C |
+ * | **② FORMA** | el texto NO entrecomillado (suelto en JSX) | S114, lo halló F |
+ * | **③ POSICIÓN** | dentro del JSX, el nodo en su PROPIA línea (sólo veía el inline) | S114, lo halló A verificando |
+ *
+ * 🔴 **Los tres tienen la misma firma y por eso conviene verlos juntos: el
+ * instrumento daba VERDE sobre un sujeto que no podía alcanzar.** *Un verde no
+ * distingue «no hay» de «no llegué», y ninguno de los tres dio jamás un falso
+ * rojo — que es lo que los hizo durar.*
+ *
+ * ⚠️ **Y lo que la tabla dice sin decirlo: tres ejes encontrados en un día no
+ * son tres bugs, son un mapa incompleto.** Nada garantiza que no haya un
+ * cuarto; lo único que se puede hacer es que el que aparezca **se vea**, y para
+ * eso la salida publica los tres.
+ */
+export const VOZ_TRES_CIEGOS =
+  '⚠️ alcance MENOR que su verde, 3 veces: ① la LISTA (un verbo que nadie agregó)' +
+  ' · ② la FORMA (texto no entrecomillado) — curado ⑯' +
+  ' · ③ la POSICIÓN (nodo JSX en su propia línea) — curado ⑰';
+
 /** La línea que todo consumidor pega en su salida. **Una sola redacción para
  *  los dos** —el CLI de C y `R66`— porque *dos textos que dicen el alcance se
  *  desincronizan igual que dos contadores.* */
