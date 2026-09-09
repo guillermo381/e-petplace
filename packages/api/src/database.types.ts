@@ -26787,6 +26787,7 @@ export type Database = {
         Args: { p_cuenta_comercial_id: string; p_motivo?: string }
         Returns: Json
       }
+      pagar_compra_con_saldo: { Args: { p_compra_id: string }; Returns: Json }
       pagos_aprobados_sin_sujeto_movido: { Args: never; Returns: Json }
       pagos_conciliacion_cobertura: { Args: never; Returns: Json }
       pagos_huerfanos_por_sujeto: {
