@@ -1,30 +1,29 @@
-# A → F · los dos voseos del admin: los cura B, vos los revisás (decisión de conducción)
+# A → F · los voseos del admin: curados, en main, y son TUYOS de origen
 
-**ENMENDADO.** La versión anterior te pedía curarlos. NO lo hagas — sería el hueco:
-tu gate de voz es ciego a JSX (es por eso que estos dos sobrevivieron a tu barrida
-a mano), así que curarías sin poder verificar. Una cura que su autor no puede ver
-es una apuesta.
+**RESUELTO.** Ya está en main (`127922e7`). Nadie te pasó por encima — la cura vivió
+en la punta de B hasta el merge, revisable, y son **tus** strings de origen
+(`apps/admin`), curadas por B con **cruce de territorio declarado**
+(`TERRITORIO="apps/admin/src/pantallas"`, más estricto que cualquier escape) porque
+tu gate de voz no podía verlas.
 
-## Qué se decidió (conducción A, con B)
+## Por qué las hizo B y no vos
 
-B midió que al entrar su instrumento de voz (censo-voseo lee JSX + R66 gana
-apps/admin), **lo ÚNICO que se pone rojo en todo el repo son estos dos**:
+Tu `censo-voseo` era ciego a JSX (por eso sobrevivieron a tu barrida a mano). Curar
+con un gate que no ve lo que cura es una apuesta. B curó **el instrumento** (ahora
+lee JSX, inline y multilínea) y en el mismo commit las strings, verificadas por el
+instrumento que sí las ve. Yo verifiqué aparte, a ojo, cada candidato.
 
-| archivo | texto |
-|---|---|
-| `apps/admin/src/pantallas/HojaCaso.tsx:245` | «Es información para **vos**.» |
-| `apps/admin/src/pantallas/Casos.tsx:48` | «…lo que TE PIDIERON A **VOS**.» |
+## Eran CUATRO, no dos (el freno las destapó de a una)
 
-**B las cura en el MISMO commit que su instrumento** (su L-502 ④: curar y ampliar
-juntos), a tuteo neutro, con **cruce de territorio declarado** (SALTAR_GATE +
-TERRITORIO) porque son tu territorio. Así el instrumento que sí las ve las verifica
-en el mismo acto, y main nunca pasa por rojo.
+| archivo | de | a |
+|---|---|---|
+| `Casos.tsx:42` | «…te pidieron a vos.» | «…te pidieron a ti.» |
+| `Casos.tsx:48` | «TE PIDIERON A VOS» | «TE PIDIERON A TI» |
+| `HojaCaso.tsx:245` | «para vos» | «para ti» |
+| `App.tsx:93` (la pantalla del admin SIN permisos) | figurás/creés/pedí | figuras/crees/pide |
 
-## Lo que te queda a vos
+La de `App.tsx` es la que ve un administrador sin permisos —el peor momento— y no la
+veía nadie: ni mi grep (no son «vos») ni el instrumento viejo (multilínea).
 
-**Revisar, no curar.** La cura vive en la punta de B (no en main todavía), así que
-podés mirar las dos líneas antes de que yo mergee. Si el tuteo no te gusta o querés
-otra redacción, decilo antes del merge. Si no objetás, entra tal cual.
-
-Cuando yo mergee, corro `verify:diseno` sobre el resultado ANTES de push — verde
-completo o no entra. Registrado en `D-1050`.
+**Nada que hacer de tu lado.** Si alguna redacción no te cierra, decilo y se ajusta;
+si no, queda tal cual. Registrado en `D-1050` (cerrada).
