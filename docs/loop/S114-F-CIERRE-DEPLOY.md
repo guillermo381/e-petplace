@@ -163,6 +163,83 @@ se probó a mano antes de cablearlo, y después la ejerció sola sobre `f3171cc`
 
 ---
 
+> # 🔴 LOS NÚMEROS DE ESTE PARTE SON LOS DE MI RAMA, NO LOS AUTORITATIVOS
+>
+> **La numeración que rige es la del candidato / `main`.** Esta rama queda como
+> **registro**, y sus números **no se alinean a propósito**: alinearlos sin que la rama
+> se re-mergee sólo agregaría un lugar más donde pueden divergir.
+>
+> | lección | acá | **en el candidato** |
+> |---|---|---|
+> | Medir una RAMA y concluir sobre la otra | `L-500` | **`L-511`** |
+> | El instrumento detrás de un caché | `L-501` | **`L-512`** |
+> | La espera que deja de discriminar | `L-502` | **`L-518`** |
+> | Una respuesta de éxito ≠ trabajo hecho | `L-503` | **`L-519`** |
+> | El texto de una interfaz · la sonda · la prosa | `L-504` `L-505` `L-506` | **iguales** |
+> | La racha con ventana propia | `L-516` | **`L-516`** |
+> | El hedge no viaja | `L-517` | **`L-517`** |
+>
+> **Por qué se movieron:** `L-500`–`L-503` chocaban con lecciones de B que **se citan en
+> código** en 10 lugares (`verify-diseno.mjs`, `lib-voz.mjs`, `verify-contador-piezas.mjs`)
+> ⇒ **B es inamovible y yo el movible.** Las mías eran doc-only: cero citas en `.mjs`,
+> `.ts`, `.tsx` o `.yml`.
+>
+> *(Y esta tabla existe por `L-517`, que nació de este mismo hilo: **si la marca no está
+> pegada a lo que alguien va a copiar, no está.** Un lector de este parte se lleva el
+> número, no el contexto donde vivía.)*
+
+## El cierre del hilo del login — la mitad que no vive en el repo
+
+**8-sep-2026.** El bundle quedó verde y el clic verificado, y **aun así el founder terminaba
+en el sitio público al loguearse.**
+
+**Lo que medí, y las tres señales daban bien:**
+
+```
+el bundle publicado    URL vieja 0 · canónica 1, dentro del signInWithOAuth
+el dominio             /  /login  /placas  →  200, cero redirects, mismo host
+la sonda de OAuth      302 → accounts.google.com con redirect_to intacto
+```
+
+🔴 **La causa: `https://admin.epetplace.com` no estaba en las *Redirect URLs* de Supabase.**
+Lo que estaba era **la URL de rama vieja** — la que el código había dejado de usar. Al
+volver del proveedor, Supabase descartaba el `redirect_to` y caía al Site URL.
+
+> ***Una URL canónica vive en DOS lugares: el código y la allow-list del proveedor de auth.
+> Cambiar uno solo no rompe nada — desvía.*** Y el desvío ocurre **después** de autenticar,
+> así que el login «funciona»: te deja adentro de otro lado.
+
+**Por qué ninguna medición del bundle podía verlo:** *la mitad que faltaba no vive en el
+repo.* Y mi sonda tampoco alcanzaba — **medía el despacho, no la vuelta** (`L-505`): su
+propio discriminador ya me había avisado que no distinguía. **Resuelto por el founder**
+agregando `https://admin.epetplace.com/**`; el login con Google entra al portal.
+
+**Queda como `L-525`, y como paso obligatorio del proyecto nuevo:** *la URL de `apps/admin`
+entra a la allow-list ANTES del primer login.*
+
+## La tanda del asiento — lo anotado
+
+| | |
+|---|---|
+| **`tomarCaso` sin exportar** | `L-318`, *la lección que venía citando*. Una función que la puerta única no exporta **no existe** para la app. Cazada antes de subir. |
+| **voseo en un mensaje de pantalla** | «tenés que tomar el caso» → curado. Censo de los 14 mensajes: **cero con voseo**. El comentario del código queda en voseo a propósito: es habla del equipo, no voz de producto. |
+| **el botón, montado sólo en `con_prestador`** | y **`Decidir` no se dibuja ahí**. Ley 23 — *la puerta no ofrece lo que va a rechazar*: el motor rebota `caso_no_tomado`, así que mostrar los dos controles sería invitar a un rebote. |
+| **🔴 `L-521`** | el build del admin **no compilaba la aplicación** y yo reporté su peso como prueba. Ver abajo. |
+
+### ¿El bundle vacío llegó a producción? — **NO**, medido
+
+```
+admin.epetplace.com → index-B4k1WxEH.js · 1,86 MB
+  Placas 2 · Logística 5    → es el LEGADO, entero
+  Tomar el caso 0           → nada de apps/admin
+  Faltan VITE_SUPABASE 0    → nada del bundle vacío
+```
+
+⚠️ **Lo salvaron tres accidentes, no una defensa:** `apps/admin` no está en `main` · el
+proyecto Vercel del monorepo no construye desde el 6-sep · `admin.epetplace.com` sirve
+otro repo. **Los tres están en cola de resolverse** — el día que cualquiera se destrabe,
+el bundle vacío se publica solo. *Por eso la cura no podía esperar.*
+
 ## Las cuatro lecciones
 
 | | |

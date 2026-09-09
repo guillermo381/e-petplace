@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
-  obtenerHojaDelCaso, resolverCaso, responderEnCaso,
+  obtenerHojaDelCaso, resolverCaso, responderEnCaso, tomarCaso,
   type HojaDelCaso, type AlcanceResolucion,
 } from '@api-admin'
 import { color, sp, radio, fuente } from '../tokens'
@@ -123,6 +123,7 @@ export default function HojaCaso() {
           <Plata hoja={hoja} />
           <Contexto hoja={hoja} />
           <Propuesta />
+          <Tomar hoja={hoja} alTomar={cargar} />
           <Decidir hoja={hoja} alDecidir={cargar} />
         </div>
       </div>
@@ -219,12 +220,82 @@ function Propuesta() {
 }
 
 /** §6: «decidir es un toque». Y la decisión queda con su `decidido_por`. */
+/**
+ * TOMAR EL CASO — la puerta de la casa cuando las partes no se pusieron de acuerdo.
+ *
+ * §2 de la letra: **la casa entra al vencer el plazo o cuando cualquiera la
+ * llama.** Sin esto, la casa veía los casos `con_prestador` en la bandeja y
+ * **no podía hacer nada con ellos** — el caso central de la letra no tenía
+ * puerta.
+ *
+ * 🔴 **Se monta SÓLO en `con_prestador`, y en ese estado `Decidir` no se
+ * dibuja.** Es la Ley 23 de la casa —*la puerta no ofrece lo que va a
+ * rechazar*—: el motor rebota `caso_no_tomado` si la casa intenta resolver sin
+ * tomar, así que ofrecer los dos controles a la vez sería invitar a un rebote.
+ */
+function Tomar({ hoja, alTomar }: { hoja: HojaDelCaso; alTomar: () => void }) {
+  const [error, setError] = useState<string | null>(null)
+  const [enviando, setEnviando] = useState(false)
+
+  if (hoja.cerrado || hoja.etapa !== 'con_prestador') return null
+
+  const vencido =
+    hoja.plazoHasta !== null && new Date(hoja.plazoHasta).getTime() < Date.now()
+
+  async function tomar() {
+    setEnviando(true); setError(null)
+    const r = await tomarCaso(hoja.casoId)
+    setEnviando(false)
+    if (!r.ok) { setError(r.mensaje); return }
+    alTomar()
+  }
+
+  return (
+    <Seccion titulo="El caso está con el prestador">
+      <p style={{ color: color.texto2, fontSize: 13, lineHeight: 1.55, margin: `0 0 ${sp[3]}px` }}>
+        {vencido
+          /* Los dos textos dicen un HECHO distinto, no el mismo con otro tono:
+             uno es «se pasó el plazo», el otro «todavía está en plazo». Un
+             único texto obligaría a leer la fecha para saber cuál es. */
+          ? 'El plazo para que responda ya venció y el caso sigue abierto.'
+          : 'El prestador todavía está en plazo para responder.'}
+        {' '}Si la casa toma el caso, pasa a decidirlo ella y queda escrito en el hilo
+        quién lo tomó.
+      </p>
+      {hoja.plazoHasta ? (
+        <Fila etiqueta={vencido ? 'Venció' : 'Vence'}>
+          <span style={{
+            fontFamily: fuente.mono, fontSize: 12,
+            color: vencido ? color.alerta : color.texto2,
+          }}>
+            {hoja.plazoHasta.slice(0, 16).replace('T', ' ')}
+          </span>
+        </Fila>
+      ) : (
+        /* Sin plazo no se inventa uno: se dice que no hay. */
+        <Fila etiqueta="Plazo"><span style={{ color: color.texto3 }}>sin plazo registrado</span></Fila>
+      )}
+      <div style={{ marginTop: sp[4] }}>
+        <Boton onClick={tomar} disabled={enviando}>
+          {enviando ? 'Tomando…' : 'Tomar el caso'}
+        </Boton>
+      </div>
+      {error ? <div style={{ marginTop: sp[3] }}><Fallo mensaje={error} /></div> : null}
+    </Seccion>
+  )
+}
+
 function Decidir({ hoja, alDecidir }: { hoja: HojaDelCaso; alDecidir: () => void }) {
   const [alcance, setAlcance] = useState<AlcanceResolucion | null>(null)
   const [monto, setMonto] = useState('')
   const [motivo, setMotivo] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [enviando, setEnviando] = useState(false)
+
+  /* 🔴 Sin esto, los controles de resolver aparecen sobre un caso que el motor
+     va a rebotar con `caso_no_tomado`. El botón de tomar (arriba) es lo que
+     corresponde en ese estado — Ley 23. */
+  if (!hoja.cerrado && hoja.etapa !== 'con_casa') return null
 
   if (hoja.cerrado) {
     return (

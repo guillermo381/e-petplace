@@ -29382,6 +29382,491 @@ lo construye y la otra lo mide **sobre el objeto que ya existe**.
 ---
 
 
+### `L-527` — En una configuración por capas, la de arriba VACÍA no significa «heredá»: significa «hacé nada»
+
+**S114-F, firma del founder.** El caso que cerró dos días de diagnóstico:
+
+```
+Project Settings      Behavior «Custom» · Command  exit 1     ← construir siempre
+Production Overrides  Command  (VACÍO)                        ← ligado a UN deployment
+```
+
+🔴 **Un Command vacío no es «sin override»: es un comando vacío, y un comando vacío termina
+con `exit 0`** — que en ese campo significa **saltear el build**. **El override manda en
+producción y anula el `exit 1` del proyecto.**
+
+> ***La capa de arriba, vacía, no cede el paso: decide.***
+
+## Por qué es tan difícil de ver
+
+**Un campo en blanco se lee como «no configurado».** Es la lectura por defecto de cualquiera,
+y en casi todos los sistemas es correcta: *vacío = usá el de abajo*. Acá no — **y la pantalla
+no lo dice**: muestra un campo vacío, exactamente igual a uno que no aplica.
+
+⚠️ **Y su consecuencia fue perfecta para engañar:** el founder cambió la capa de abajo y **el
+build salió** —porque ese deployment todavía no tenía override—, así que *el cambio pareció
+funcionar*. **El propio deployment que salió creó el override**, y desde entonces todo se
+saltea. ⇒ **una cura que se auto-anula al aplicarse**, y cuyo síntoma aparece recién en el
+push siguiente, cuando ya nadie la está mirando.
+
+⇒ **Ante un campo vacío en una capa de override, la pregunta no es «¿qué hereda?» sino
+«¿QUÉ HACE un valor vacío acá?».** *En un campo que se ejecuta, el vacío no es ausencia de
+orden: es una orden.*
+
+## La familia, que es la del día entero
+
+| | el vacío que engaña |
+|---|---|
+| [[L-523]] | un contrato que cambia deja al consumidor **mostrando vacío** — o reventando, y no se puede saber cuál |
+| `LETRA_PORTAL_ADMIN §3.4` | un gate que es un `WHERE` devuelve `[]`: **«no hay» y «no podés» quedan indistinguibles** |
+| **`L-527`** | un campo de configuración **vacío que se ejecuta** y significa «no hagas nada» |
+
+> ***Tres formas del mismo hueco en un día: el vacío se lee como ausencia, y en los tres
+> casos era un valor operante.***
+
+*(Y su cura estructural es la misma que la de [[L-526]]: **lo que se puede versionar en el
+repo se versiona.** Un archivo tiene una sola capa y no tiene campos en blanco con
+semántica oculta — lo que no está, no está.)*
+
+---
+
+
+### `L-526` — Una configuración con DOS CAPAS donde una parece la otra: leerla es verdadero sobre una y falso sobre la que manda
+
+**S114-F, firma del founder.** Dos días persiguiendo por qué un proyecto de Vercel dejaba de
+crear deployments. La causa no era ninguna de las que se persiguieron.
+
+🔴 **El `Ignored Build Step` existe en DOS capas:** un **Production Override** ligado a *un
+deployment concreto* —congelado con él— y el **Project Settings**, que es el que rige lo
+nuevo. **Se cambió una y se leyó la otra.**
+
+```
+día 1   se cambia una capa  →  el hook construye  →  «resuelto»
+día 2   se lee la otra capa →  dice «Automatic»   →  «volvió solo: es una REGRESIÓN»
+```
+
+> ***Las dos lecturas eran verdaderas. Ninguna era la que decidía.***
+
+## Lo que esta clase le hizo al diagnóstico — tres conclusiones falsas, todas «bien medidas»
+
+| conclusión | por qué se cayó |
+|---|---|
+| *«el `ignoreCommand` queda absuelto»* | el control —un commit **sin** el campo que tampoco construyó— **estaba dentro del mismo bloque de la causa real**. Un control que comparte la variable confusora **no controla nada** |
+| *«la heurística decide por tamaño del diff»* | falsada por un commit de **60 líneas reales** que no construyó, después de que uno de 122 sí |
+| *«es una intermitencia sin explicar»* y luego *«es una regresión»* | **ninguna de las dos**: la configuración nunca cambió sola — *cambió de capa el que la miraba* |
+
+**Las tres salieron de medir mientras una variable no controlada actuaba sobre todos los
+brazos.** *El error no fue medir mal: fue **no saber que había una segunda capa prendida**.*
+
+## Por qué esta clase resiste al método
+
+**Medir más no ayuda.** Se puede leer la pantalla diez veces, con captura, y **las diez
+dicen lo mismo y las diez son verdaderas** — sobre la capa que se está mirando. **El dato
+que falta no es un valor: es que existe otro lugar donde vive el mismo valor.**
+
+⇒ **Ante una configuración que no se comporta como dice, la primera pregunta no es «¿qué
+dice?» sino «¿DÓNDE MÁS vive esto?».** Un override por deployment, un `.env` de proyecto vs
+uno de entorno, un archivo del repo que pisa el dashboard, una policy y un grant.
+
+⚠️ **Y la señal que la delata, que es lo único accionable:** *cuando un cambio de
+configuración «funciona» y después «se revierte solo», casi nunca se revirtió — casi
+siempre se aplicó a una capa que no era la que rige.* **Un ajuste no vuelve solo; lo que
+vuelve es la lectura al lugar equivocado.**
+
+**Y de ahí sale la cura estructural, que no depende de acordarse:** *lo que se puede
+versionar en el repo se versiona* — un archivo tiene una sola capa, se revisa en un diff y
+sobrevive a que alguien mire la pantalla equivocada.
+
+*(Familia directa de [[L-525]] —una URL canónica vive en dos lugares— con la vuelta de
+tuerca de que **acá las dos capas se llaman igual y se ven iguales**. Y cierra el arco de
+[[L-521]] y [[L-524]]: cuatro formas de leer una señal adyacente como si fuera el hecho.)*
+
+⏳ **Pendiente de la confirmación del founder:** cuál de las dos capas se cambió cada vez.
+Con eso se enmienda `L-516`, que hoy dice «intermitencia sin explicar» y **ya no rige**.
+
+---
+
+
+### `L-525` — Una URL canónica vive en DOS lugares, y cambiar uno solo no rompe nada: desvía
+
+**S114-F, firma del founder.** Curé el `redirectTo` del admin: la URL de rama pasó a
+`https://admin.epetplace.com`. **Lo verifiqué de tres formas y las tres dieron verde:**
+
+```
+el bundle publicado    la URL vieja 0 · la canónica 1, dentro del signInWithOAuth
+el dominio             /  /login  /placas  →  200, cero redirects
+la sonda de OAuth      302 → accounts.google.com con redirect_to intacto
+```
+
+🔴 **Y al loguearse, el founder terminaba en el sitio público.**
+
+**La causa: `https://admin.epetplace.com` NO estaba en las *Redirect URLs* de Supabase.** Lo
+que estaba era **la URL de rama vieja** — la que el código había dejado de usar. Al volver
+del proveedor, Supabase **descarta el `redirect_to` que no reconoce y cae al Site URL**.
+
+> ***Una URL canónica vive en DOS lugares: el código y la allow-list del proveedor de auth.***
+> **Cambiar uno solo no rompe nada — desvía.** Y el desvío ocurre *después* de que el
+> usuario se autenticó, así que **el login “funciona”: te deja adentro de otro lado.**
+
+## Por qué ninguna medición del bundle podía verlo
+
+**El código publicado era correcto**, y eso es lo que engaña. La mitad que faltaba **no vive
+en el repo**: vive en la configuración del proveedor, donde **ningún gate, typecheck ni
+grep llega**.
+
+⚠️ **Y mi sonda tampoco: medía el DESPACHO, no la vuelta** ([[L-505]]). El `302` hacia
+Google sale igual con una URL permitida y con una que no — *la validación ocurre en el
+callback*. **Su discriminador ya me había avisado que no distinguía**, y aun así el
+diagnóstico completo tardó porque *el eslabón que faltaba no era medible desde afuera.*
+
+⇒ **Toda URL canónica que cambie se cambia en los DOS lugares, EN EL MISMO ACTO.** Y una
+URL nueva **entra a la allow-list ANTES del primer login**, no después — *porque el primer
+síntoma no es un error: es alguien que entra y aparece en otro sitio.*
+
+**El rastro que lo hace diagnosticable, para la próxima:** *si el login funciona y te deja
+en otro lado, la falla está del lado del proveedor, no del código* — **cuando la app está
+mal, no llegás a autenticarte; cuando la allow-list está mal, te autenticás y viajás.**
+
+*(Familia de [[L-521]] y [[L-524]]: las tres son sobre medir la señal adyacente. Acá el
+bundle era correcto y el hecho vivía **fuera del repo** — el único de los tres donde ni
+siquiera había artefacto que abrir.)*
+
+---
+
+
+### `L-524` — Para saber si algo se usa, no se lee el código: se cuentan sus filas
+
+**S114-F, firma del founder.** Había que decidir cuáles de las **27 pantallas** de un portal
+viejo valía reconstruir. **El instinto es clasificarlas por estado** —anda / rota / sin
+permiso— y eso fue lo primero que hice: **12 andan, 10 están rotas, 5 dan `permission
+denied`.**
+
+🔴 **Esa tabla no servía para decidir nada.** Ordena por *qué tan sano está el código*, y la
+pregunta era otra: ***¿alguien la usa?***
+
+**Lo que sí decidió fue contar filas:**
+
+```
+Gamificacion   1 005 líneas  →  puntos_usuario 1 fila · logros_usuario 2
+PlanesPrime      858 líneas  →  planes_prime 3 filas
+Promociones      920 líneas  →  cupones 1 · campanas 1
+Logistica      1 956 líneas  →  envios 5 filas
+BetaUsers        676 líneas  →  beta_users 2 filas
+```
+
+⇒ **~11 000 líneas de pantalla para administrar unas pocas decenas de filas.** *Ninguna de
+esas cinco estaba «rota»: tres de ellas **andan perfectamente**.*
+
+> ***Una pantalla sana que administra una tabla vacía es más cara de mantener que una rota
+> que nadie abre — porque la sana invita a seguir manteniéndola.***
+
+## Por qué el estado del código engaña
+
+**«Anda» y «se usa» son hechos distintos, y sólo uno se puede leer en el repo.** El código
+dice si compila y si sus tablas existen; **no dice si alguien entró alguna vez.** Y como es
+lo único visible desde el editor, **se convierte en el criterio por defecto** — y ordena la
+lista exactamente al revés de lo que hace falta.
+
+⇒ **Antes de estimar qué cuesta reconstruir algo, se cuenta cuánto se usa.** Un `count(*)`
+por tabla es más barato que leer una pantalla, y **reordena la lista entera**.
+
+⚠️ **Y el corolario incómodo, que es el que ahorra el trabajo:** *lo que hay que justificar
+no es retirar una pantalla — es CONSERVARLA.* Con la carga de la prueba al revés, once mil
+líneas se sostienen solas porque están escritas, y **cada una vuelve a costar el día que
+alguien cambia el modelo debajo.**
+
+**El límite, declarado:** contar filas mide **volumen**, no **importancia**. Una tabla de
+dos filas puede ser crítica —`country_config` son 2 y define la moneda de un país— así que
+**el número abre la pregunta, no la cierra.** *Lo que cierra es cruzarlo con qué hace falta
+para operar: `country_config` se difiere porque **casi nunca se toca**, no porque tenga
+pocas filas.*
+
+*(Familia de [[L-521]] y [[L-523]] del mismo arco: las tres son sobre **medir el hecho y no
+su señal adyacente**. El peso de un bundle, el `exit 0`, y ahora el estado del código —
+todas se leen como si dijeran algo que no dicen.)*
+
+---
+
+
+### `L-523` — Un cambio de contrato del motor no rompe al consumidor con un error: lo deja mostrando VACÍO
+
+**S114-F.** A curó `listar_lotes()` sobre un hallazgo mío: el gate era `WHERE is_admin()`
+y devolvía `[]`, así que *«no hay lotes»* y *«no podés verlos»* llegaban a la pantalla como
+el mismo valor. **El contrato pasó a hablar:**
+
+```
+antes   [ {…}, {…} ]                                  ← un array
+ahora   { ok:true, lotes:[…] } | { ok:false, codigo }  ← un sobre
+```
+
+🔴 **Y eso rompió, en silencio, el consumidor que yo acababa de desplegar.**
+
+```js
+setLotes((data ?? []) as Lote[])      // data ya no es un array: es un objeto
+```
+
+**No lanza.** `data ?? []` devuelve el objeto, `.map` no encuentra filas, y la pantalla
+dice **«todavía no hay ningún lote» para siempre**.
+
+> ***Que es exactamente el modo de falla que el cambio vino a eliminar.***
+> La cura, consumida sin adaptar, **reprodujo el defecto que curaba** — un piso más arriba.
+
+## La ley
+
+**Cuando un contrato cambia de forma, el consumidor viejo casi nunca falla: interpreta mal
+y sigue.** Un array que pasa a ser objeto, un campo que se anida, una lista que se envuelve
+— *el lenguaje no se queja porque la operación sigue siendo legal sobre el valor nuevo*.
+
+⇒ ***Y el resultado se ve como «no hay datos», que es el estado más común y el menos
+sospechoso de toda pantalla.*** Nadie audita un estado vacío: se lee como una verdad sobre
+el mundo, no como un síntoma.
+
+**Por eso un cambio de contrato exige DOS actos, y el segundo es el que se olvida:**
+① cambiar el motor · ② **censar sus consumidores y adaptarlos en el mismo acto** —
+`grep` del nombre de la función en apps, packages y repos vecinos. *Acá dio 1 (el legado) y
+0 en el monorepo, así que el censo fue barato; el día que dé 6, es la diferencia entre una
+cura y seis pantallas mudas.*
+
+⚠️ **Y lo que lo salvó no fue un gate: fue un aviso.** Ningún typecheck lo veía —el valor
+venía de un `jsonb`, tipado a mano ([[L-498]])— y el build salió en verde. **Se supo porque
+quien cambió el motor avisó al consumidor.** *En una casa con seis pistas eso no es cortesía:
+es el único mecanismo que existe para esta clase.*
+
+> 🔴 **ENMIENDA (mismo día, con el caso en producción): esta lección decía de MENOS, y el
+> error es factual.** Escribí que *«el `.map` no encuentra filas y la pantalla muestra
+> vacío»*. **Falso:** `.map` **no existe** sobre un objeto, así que **tira
+> `TypeError: e.map is not a function` y la pantalla queda EN NEGRO.** Medido en producción,
+> `Placas.tsx:159`.
+>
+> **Y la corrección hace la clase MÁS grande, no más chica: el mismo cambio de contrato
+> produce los DOS desenlaces, y cuál toca depende de una casualidad de la forma.**
+>
+> ```
+> array → objeto,  y el consumidor hace .map()       → TypeError · pantalla en negro
+> array → objeto,  y el consumidor hace .length / [] → 0 filas   · vacío silencioso
+> ```
+>
+> ⇒ ***El silencioso es el peligroso, y el ruidoso es el afortunado.*** Que este caso haya
+> reventado **fue suerte**: si `Placas` hubiera leído `data?.length` en vez de `.map`, hoy
+> seguiría diciendo «no hay lotes» y nadie lo sabría. **La lección no es «rompe» ni «muestra
+> vacío»: es que el autor del cambio no puede saber cuál de los dos le toca al consumidor.**
+
+*(Familia de [[L-318]] —motor sin puerta— y su reverso: allá la pieza no llega a usarse;
+acá **se usa con la forma vieja y produce un resultado plausible**. Y de [[L-521]]: las dos
+son sobre un verde que no dice nada del contenido.)*
+
+---
+
+
+### `L-522` — `--filter` en un lockfile lo PODA a la plataforma de quien lo corre
+
+**S114-F, firma del founder.** Para agregar **una** dependencia a **un** paquete del
+monorepo corrí lo que parece la forma cuidadosa —tocar sólo lo mío—:
+
+```bash
+pnpm install --lockfile-only --filter @epetplace/admin
+```
+
+🔴 **Borró 146 líneas del lock. Entre ellas, los 30 binarios de `lightningcss-linux`** —
+*los que necesita el build de Vercel, que corre en Linux.*
+
+```
+--filter          9 insertions · 146 deletions   🔴 lock podado a macOS
+sin --filter     19 insertions ·  16 deletions   ✅ los 30 binarios de linux intactos
+```
+
+> ***Un lock podado compila perfecto en la máquina que lo podó y rompe en el CI.***
+> El daño es de la clase que no se ve: no falla nada, no avisa nada, y el archivo queda
+> más chico — *que en un lockfile se lee como limpieza.*
+
+⚠️ **Y lo que lo vuelve peligroso no es el comando: es que `--filter` significa lo
+contrario de lo que uno lee.** Uno lo pone para **acotar el alcance del cambio**; pnpm lo
+entiende como **acotar el universo a resolver**, y lo que queda fuera del filtro **no se
+conserva: se cae**. *La intención y la semántica apuntan en direcciones opuestas, y la
+salida es exitosa en las dos lecturas.*
+
+⇒ **En un monorepo, el lockfile se regenera SIN `--filter`.** Acotar el commit se hace con
+el pathspec, no con el resolvedor.
+
+## Lo que lo cazó, y no fue un error
+
+**El `--stat`.** `1 file changed, 9 insertions(+), 146 deletions(-)` sobre un cambio que
+tenía que agregar **una línea**. *Ninguna otra señal habló*: `exit 0`, «Done in 3.6s», y el
+build local siguió funcionando — **porque la plataforma local es justamente la que el lock
+conservó.**
+
+⇒ **Un `git diff --stat` antes de commitear un lockfile no es prolijidad: es el único
+lugar donde este daño es visible.** Un lock es ilegible de a línea, así que la única
+pregunta que se puede hacer es *«¿el tamaño del cambio se parece a lo que hice?»* — y acá
+la respuesta era no por dos órdenes de magnitud.
+
+*(Familia de [[L-521]] del mismo arco —un artefacto que se produce con éxito y no contiene
+lo que uno cree— pero en un archivo que **nadie lee**: en un bundle uno puede grepear una
+cadena propia; en un lockfile de 20 000 líneas **la única medición al alcance es el
+tamaño del diff**.)*
+
+---
+
+
+### `L-521` — Un artefacto que se construye con ÉXITO no prueba que contenga lo que uno cree
+
+**S114-F, firma del founder — la más cara del arco.**
+
+`apps/admin/src/lib/supabase.ts` lanza si faltan sus variables de entorno. Es
+fail-closed, está bien puesto, y su comentario dice lo que hay que decir. **No alcanzó.**
+
+🔴 **Un `throw` a nivel de módulo no frena el build: vuelve inalcanzable todo lo que viene
+detrás, y Rollup hace tree-shaking de la aplicación entera.**
+
+```
+sin variables   199,89 kB · exit 0 · «✓ built»   → React + el guard. NADA de la app.
+con variables   482,67 kB · exit 0               → la aplicación completa
+```
+
+*El de 199 kB no da un error, no avisa, y **pesa lo suficiente para parecer real**. Se
+publica limpio y sirve una página en blanco.*
+
+⚠️ **Y lo peor no es el bundle: reporté ese número como «el admin construido» durante toda
+una tanda.** «199,89 kB» quedó en el parte, en un commit y en dos mensajes a otra pista —
+*como evidencia de que la app compilaba.*
+
+## 🔴 LAS TRES CAPAS QUE MINTIERON, en el orden en que mintieron
+
+| | señal | por qué engaña |
+|---|---|---|
+| **1** | `exit 0` + `✓ built` | *el proceso terminó bien* — y terminar bien no dice **qué produjo** |
+| **2** | el **sourcemap listaba mis 14 archivos** | ***lista lo que Rollup PROCESÓ, no lo que QUEDÓ en el output.*** Casi lo tomo por prueba: es la más peligrosa de las tres, porque **nombra los archivos correctos, uno por uno** |
+| **3** | *(lo único que cerró)* **grepear el bundle** | ninguna cadena de la UI adentro |
+
+**Y la causa apareció leyendo los últimos 500 caracteres del artefacto**, donde el bundle
+termina literalmente en `throw … Error(\`Faltan VITE_SUPABASE_URL…\`)`.
+
+> ***El artefacto lo decía todo si uno lo abría; ninguna de sus señales lo decía.***
+
+## ① La ley: tres señales ADYACENTES al hecho se leen como el hecho
+
+**El peso, el código de salida y el sourcemap no son el contenido: están al lado.** Cada
+una es verdadera sobre lo suyo —el proceso terminó, el archivo pesa, esos módulos se
+procesaron— y **ninguna responde la única pregunta que importa: ¿está adentro lo que creo
+que está?**
+
+⇒ **Lo único que prueba que un artefacto contiene algo es buscar adentro una cadena que
+sólo pueda venir de eso.** *El peso no es una medición: es una pista.* Y ese control se
+corre **la primera vez que se construye**, no la décima — porque después el número entra
+al parte y se cita como si estuviera verificado.
+
+## ② La forma más común, y la más incómoda: **saberlo y no aplicarlo al propio artefacto**
+
+🔴 **El criterio correcto ya estaba escrito en `apps/pagos-web/build.mjs`** —un guard que
+**aborta el build** con `process.exit(1)`— **y su comentario decía exactamente esto:**
+*«una página servida con config incompleta se ve bien y no funciona»*.
+
+**Yo estaba citando ese archivo en un aviso del buzón el MISMO día.**
+
+> ***Nadie audita lo que acaba de construir.*** La regla se aplica al código ajeno —donde
+> uno llega como lector— y no al propio, donde uno llega como autor y ya sabe qué quiso
+> hacer. *No fue ignorancia de la ley: fue no volver a mirar el propio resultado con ella
+> en la mano.*
+
+## ¿Llegó a producción? — NO, medido
+
+```
+admin.epetplace.com  →  index-B4k1WxEH.js  ·  1 857 532 bytes (1,86 MB)
+   Placas 2 · Logística 5      → es el LEGADO, y está entero
+   Tomar el caso 0 · caso_pedir_casa 0   → nada de apps/admin
+   Faltan VITE_SUPABASE 0                → nada del bundle vacío
+```
+
+**Tres barreras independientes lo impidieron, y ninguna fue este guard:** `apps/admin`
+**no está en `main`** (vive sólo en la rama de F) · el proyecto Vercel del monorepo **no
+construye desde el 6-sep** · y `admin.epetplace.com` **sirve otro repo**.
+
+⚠️ ***Se salvó por tres accidentes, no por una defensa.*** El día que cualquiera de los
+tres se resuelva —y los tres están en cola— el bundle vacío se publica solo.
+
+## La cura, y su control en las dos direcciones
+
+`vite.config.ts` verifica las variables **antes de construir** y aborta con
+`process.exit(1)`.
+
+```
+sin variables → exit 1, con el mensaje que nombra qué falta y qué pasa si no está
+con variables → exit 0, 482 kB, y las cadenas de la app adentro (medidas)
+```
+
+*Un guard de build que sólo se probó fallando podría estar rompiendo también el caso
+bueno: **por eso se ejercen los dos lados**.*
+
+*(Familia de [[L-318]] —motor sin puerta— pero invertida: acá la puerta existe y funciona,
+y lo que falla es que **su falla no viaja al artefacto**. Y de [[L-503]]: un `2xx`/`exit 0`
+dice que el proceso terminó, no que hizo lo que uno cree.)*
+
+---
+
+
+### `L-517` — El hedge no viaja entre sesiones: viaja la conclusión
+
+**S114-F, firma del founder.** Le pasé a otra pista un hallazgo con su hipótesis
+**bien marcada**: *«puede ser deliberada — Expo SDK 57 puede exigir TS 6, **es la
+explicación más probable***»*. Escrito con «puede», con «más probable», y con una
+sección aparte titulada **«lo que NO se midió»**.
+
+🔴 **Volvió como hecho.** La pista integradora contestó que iba a *«agregar la línea
+que declara que la divergencia es deliberada (Expo SDK 57)»* — **en el canon**, en un
+archivo que existe para que nadie vuelva a medir.
+
+**Lo medí antes de que lo escribiera, y no se sostenía:**
+
+```
+expo@57.0.4 · expo-router@57.0.4   typescript en peerDeps: —   en devDeps: —
+                                   ⇒ Expo NO lo exige
+
+git log -L de la línea en apps/cliente  →  UN SOLO commit: 98e14c97, el scaffold
+apps/cliente ~6.0.3 · apps/prestador ~6.0.3 · raíz ~5.9.0 · packages ~5.9.0
+                                   ⇒ los cuatro del MISMO commit, hace dos meses
+```
+
+*No era una decisión: era lo que dejó `create-expo-app` y nadie miró.*
+
+> ***Un hedge es contexto, y el contexto no sobrevive a un traspaso.*** Lo que cruza de
+> una sesión a otra es la frase que sirve para actuar — **«deliberada (Expo SDK 57)»**—,
+> no el párrafo donde vivía con su «puede». Y del otro lado llega **sin la marca y con la
+> autoridad de venir de quien midió el resto.**
+
+⚠️ **Y lo que lo vuelve un tipo propio y no un descuido: no hubo error de medición.** No
+medí de más ni de menos, y marqué bien. *El defecto ocurrió enteramente en el traspaso* —
+que es el único lugar donde ningún gate mira, porque **con seis pistas y un solo canal
+humano el «puede» se cae y queda el «es».**
+
+## El corolario, y su tercera salida
+
+**Una inferencia que va a viajar a otra pista se manda con lo que haría falta para
+medirla.** En este caso eran diez palabras:
+`cat node_modules/expo/package.json | grep typescript`. *Con eso, la pista receptora lo
+resuelve en dos segundos y no escribe nada falso.*
+
+🔴 **Pero «o no se manda» sería peor que el defecto que cura**, y por eso la regla tiene
+tres salidas y no dos:
+
+| | |
+|---|---|
+| **va con su instrumento** | lo normal — y casi siempre es un comando de una línea |
+| **va marcada `SIN INSTRUMENTO`** | cuando medirla es caro. *Una hipótesis sin forma de medirla sigue valiendo como pista; lo que no vale es que llegue como hecho* |
+| **no se manda** | sólo cuando ni siquiera se puede decir qué la mediría — o sea, cuando ni el que la emite sabe qué está afirmando |
+
+**Y el matiz operativo, que es lo que falló acá: el hedge va PEGADO a la frase que va a
+viajar, no en su contexto.** Yo lo puse en el cuerpo del documento y en una sección
+aparte; **lo que la otra pista extrajo fue la frase**. *Si la marca no está adentro de la
+oración que alguien va a copiar, no está.*
+
+*(Pariente de [[L-166]] —todo dato vivo se relee al usarlo— pero de la otra punta: allá
+el receptor confía en un dato que envejeció; acá **el emisor marca bien y la marca se cae
+sola en el camino**. Y de [[L-158]]: una tabla de hallazgos no se vuelve orden sin el
+literal — acá el literal existía y no viajó.)*
+
+---
+
+
 ### `L-516` — Una racha de observaciones no prueba una regla si la ventana la elegí yo
 
 **S114-F.** Tres commits seguidos no produjeron deployment. Sondeé cada uno **5 minutos**
@@ -29424,6 +29909,45 @@ vez que alguien la lee.* Por eso se retiró con su historia, no se borró
 tienen deployment. El hecho era verdadero; la regla que le colgué encima, no. *Y la
 distinción tiene nombre: lo que había era una **intermitencia**, no un corte* — y las dos
 producen exactamente las mismas tres observaciones.
+
+> 🔴 **ENMIENDA 2 (9-sep, y cierra el caso): «intermitencia sin explicar» YA NO RIGE —
+> tiene causa, y no es una regresión.** El `Ignored Build Step` de Vercel vive en **dos
+> capas**: *Project Settings* (donde el founder puso `Custom` + `exit 1`, **y sigue puesto**)
+> y ***Production Overrides*, ligado a un deployment concreto, con el Command VACÍO.**
+> ***El override manda en producción y su comando vacío termina con `exit 0`: saltear.***
+>
+> ⇒ **Los siete commits sin deployment no son una racha ni una intermitencia: son el mismo
+> override actuando.** Y explica por qué «funcionó» una vez: *el deployment que salió creó
+> su propio override, y desde entonces todo se saltea.*
+>
+> **✅ CAUSA COMPLETA (9-sep, cierra el caso):** el «Production Override» **no es un ajuste
+> fantasma ni un valor de Vercel: ES EL `vercel.json` DEL DEPLOYMENT, CONGELADO.** El
+> changelog de Vercel lo dice — los *configuration overrides per-deployment* **son las seis
+> propiedades del `vercel.json`**, `ignoreCommand` entre ellas.
+>
+> ⇒ **El override vacío es mi propio archivo:** yo retiré el campo en `66cf314`, y **los DIEZ
+> deployments que existen vienen de commits sin él** (medido, uno por uno). *Los dos únicos
+> commits que sí lo llevaban —`f3171cc`, `b5716d1`— **nunca construyeron**, así que **no hay
+> ningún deployment con el override lleno para promover**.*
+>
+> 🔴 **Y de ahí sale la trampa que cierra la lección: el override vacío saltea el build, así
+> que la cura no puede entrar por la puerta que ella misma abre.** El commit que traería el
+> `ignoreCommand` **no llega a construirse**, así que nunca crea su propio override.
+> ***Una configuración que se auto-perpetúa porque su remedio necesita justamente lo que
+> ella impide.***
+>
+> **La salida, para la próxima:** el campo se pone en el `vercel.json` **ANTES del primer
+> deployment del proyecto** — ahí no hay círculo, porque todavía no hay override que romper.
+> *Ejecutado en `apps/admin` el mismo día.*
+>
+> **Lo que sobrevive de esta lección es su núcleo y se refuerza:** una racha no prueba una
+> regla — *y acá ni siquiera era una racha: era **una sola causa** produciendo siete
+> observaciones idénticas.* **El caso NO va a soporte.** Ver [[L-526]] y [[L-527]].
+>
+> ⏹️ **Y el caso se cierra sin curar, por firma del founder:** *Placas queda rota en el
+> legado — es una pantalla de un repo que se va a apagar, el diagnóstico está completo, y
+> **el costo de seguir supera al defecto**.* **Saber cuándo dejar de perseguir un defecto
+> también es una decisión de ingeniería.**
 
 > ✅ **ENMIENDA (mismo día): se intentó fundar el umbral de verdad, y el intento
 > FALLÓ por la misma razón — que es lo que vuelve exigible la lección.**

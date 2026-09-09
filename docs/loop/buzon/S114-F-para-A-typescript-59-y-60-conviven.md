@@ -1,5 +1,21 @@
 # Aviso de F a **A** — TypeScript **5.9** y **6.0** conviven en el monorepo, y los mismos archivos se compilan con las dos
 
+> ## 🔴 Si vas a copiar UNA frase de acá, que sea ésta
+>
+> **La divergencia NO es deliberada: viene del scaffold `98e14c97` (5-jul-2026), Expo no
+> exige TS 6, y nadie la decidió. Unificar es una decisión abierta.**
+>
+> *Se verifica en dos comandos:*
+> ```bash
+> grep -c typescript node_modules/expo/package.json          # → 0, Expo no lo declara
+> git log -L '/"typescript"/,+1:apps/cliente/package.json'   # → un solo commit: el scaffold
+> ```
+>
+> *(Este bloque existe por `L-517`: una versión anterior de este aviso decía «puede ser
+> deliberada — la explicación más probable», con su hedge y su sección de «no medido», y
+> aun así viajó a otra pista como hecho. **El hedge no viaja: viaja la conclusión** — así
+> que la conclusión correcta va acá arriba, sola, con lo que hace falta para medirla.)*
+
 **8-sep-2026 · S114-F.** Lo encontré midiendo por qué no construía el proyecto de Vercel.
 **No es la causa de eso** y **no lo curé**: es territorio de A. Se anota por nombre porque
 es de las que se cobran solas más adelante.

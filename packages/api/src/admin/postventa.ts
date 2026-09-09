@@ -390,6 +390,16 @@ async function leerPlataDelObjeto(
 const CODIGOS_RES = [
   'sin_sesion', 'caso_no_existe', 'no_podes_resolver',
   'alcance_invalido', 'monto_requerido_en_parcial', 'error_desconocido',
+  /* 🔴 El guard temprano de `caso_resolver` (S114-A ③): si la casa intenta
+     resolver un caso que no tomó, rebota ACÁ — antes de tocar la plata. Sin
+     este código el rebote caía en `error_desconocido` y la pantalla decía «no
+     pudimos registrar la decisión», que manda a buscar el problema donde no
+     está. */
+  'caso_no_tomado',
+  /* Los de `_caso_mover`: `caso_resolver` los devuelve tal cual cuando el
+     movimiento no procede, así que la puerta tiene que conocerlos o los
+     traduce a genérico. */
+  'actor_no_puede', 'transicion_inexistente', 'motivo_requerido',
 ] as const;
 export type CodigoErrorResolver = (typeof CODIGOS_RES)[number];
 
@@ -400,10 +410,60 @@ const MENSAJES_RES: Record<CodigoErrorResolver, string> = {
   alcance_invalido: 'El alcance tiene que ser total, parcial o sin devolución.',
   monto_requerido_en_parcial: 'Una devolución parcial necesita su monto.',
   error_desconocido: 'No pudimos registrar la decisión.',
+  caso_no_tomado: 'Hay que tomar el caso primero: todavía está con el prestador.',
+  actor_no_puede: 'Tu cuenta no puede hacer ese movimiento en este caso.',
+  transicion_inexistente: 'Ese paso no existe desde el estado actual del caso.',
+  motivo_requerido: 'Ese paso necesita un motivo escrito.',
 };
 
 /** Los tres alcances que `caso_resolver` acepta, medidos de su cuerpo. */
 export type AlcanceResolucion = 'total' | 'parcial' | 'sin_devolucion';
+
+/**
+ * TOMAR EL CASO — la casa entra por su cuenta.
+ *
+ * §2 de la letra: **la casa entra al vencer el plazo o cuando cualquiera la
+ * llama.** Sin esto, la casa sólo podía atender lo que le pasaron — y el caso
+ * central (el prestador respondió, no se pusieron de acuerdo, alguien tiene que
+ * decidir) **no tenía puerta**.
+ *
+ * 🔴 **El motor distingue DOS entradas y esta función usa la segunda** (firma
+ * del founder): «me llamaron» —lo escribe la familia o el prestador— y **«entré
+ * yo»**, que es ésta. `caso_pedir_casa` resuelve el actor de la sesión y deja
+ * en el hilo el mensaje que corresponde a cada una: *quién decidió que la casa
+ * entrara es parte del expediente, no un detalle de implementación.*
+ *
+ * Se llama a la MISMA RPC que usan los otros dos actores a propósito: una
+ * puerta paralela para el admin duplicaría la regla de transiciones, y el día
+ * que el catálogo cambie una de las dos quedaría atrás.
+ */
+export async function tomarCaso(
+  casoId: string,
+): Promise<ResultadoWrapper<{ etapa: string | null }, CodigoErrorResolver>> {
+  const rpc = getClient().rpc as unknown as (
+    fn: string, args: Record<string, unknown>,
+  ) => Promise<{ data: unknown; error: { message?: string } | null }>;
+
+  const { data, error } = await rpc('caso_pedir_casa', { p_caso_id: casoId });
+  if (error) {
+    return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES_RES.error_desconocido };
+  }
+
+  /* El rebote viaja en el `data`, no en el `error` — leerlo del `error` daría
+     éxito sobre un rechazo (L-318 / el actuador de S107). */
+  const r = data as Record<string, unknown> | null;
+  if (!r || r.ok !== true) {
+    const cod = String(r?.codigo ?? '') as CodigoErrorResolver;
+    const conocido = (CODIGOS_RES as readonly string[]).includes(cod);
+    return {
+      ok: false,
+      codigo: conocido ? cod : 'error_desconocido',
+      mensaje: conocido ? MENSAJES_RES[cod] : MENSAJES_RES.error_desconocido,
+      detalle: conocido ? null : String(r?.codigo ?? ''),
+    };
+  }
+  return { ok: true, data: { etapa: (r.etapa as string | null) ?? null } };
+}
 
 /**
  * RESOLVER — §6: «decidir es un toque», y la decisión **queda escrita**.
