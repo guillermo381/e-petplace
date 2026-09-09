@@ -206,13 +206,20 @@ Deno.serve(async (req) => {
      sujetos. *Distinguirlas convertiría esto en un oráculo de compras o de
      citas ajenas.* */
   let moneda = 'USD';
+  let saldoAplicado = 0;   // 🔴 S114-A pago mixto: cuánto del total ya cubre el saldo del hogar
   if (hayCompra) {
     const { data: compra } = await db.from('compras')
-      .select('id, user_id, moneda').eq('id', compraId).maybeSingle();
+      .select('id, user_id, moneda, saldo_aplicado').eq('id', compraId).maybeSingle();
     if (!compra || compra.user_id !== userId) {
       return json({ ok: false, codigo: 'compra_no_existe' }, 409);
     }
     moneda = compra.moneda ?? 'USD';
+    /* 🔴 PAGO MIXTO (S114-A): si la compra tiene saldo del hogar aplicado, el
+       riel cobra SÓLO la diferencia (total - saldo_aplicado). El saldo ya está
+       RESERVADO por aplicar_saldo_a_compra y se consume al confirmar el webhook
+       (confirmar_pago_compra). El monto del riel se recorta más abajo, después
+       de sumar el desglose. */
+    saldoAplicado = Number(compra.saldo_aplicado ?? 0);
   }
   /* 🔴 ERA UN `else`, Y EL `else` SE COMIÓ AL BONO — medido contra la edge
      DESPLEGADA, no contra un arnés: un cobro real de paquete volvió
@@ -490,6 +497,22 @@ Deno.serve(async (req) => {
     iva = desglose.reduce((a, d) => a + Number(d.impuesto ?? 0), 0);
     base = desglose.reduce((a, d) => a + Number(d.subtotal ?? 0) + Number(d.envio ?? 0), 0);
     pedidoDelIntento = desglose[0].pedido_id;
+    /* 🔴 PAGO MIXTO — el riel cobra total - saldo_aplicado. `monto` es lo que se
+       cobra Y lo que queda escrito en el intento; confirmar_pago_compra valida a
+       nivel compra contra (total - saldo_aplicado), así que los dos coinciden.
+       ⚠️ vat/taxable_amount siguen siendo los del desglose completo (hoy 0: todo
+       el catálogo es EC_IVA_0). El día que entre un producto GRAVADO, cómo se
+       declara el IVA de una venta pagada en parte con saldo es criterio fiscal
+       (Erick), no se decide acá: se declara y se frena, igual que el resto del IVA. */
+    if (saldoAplicado > 0) {
+      monto = Math.round((monto - saldoAplicado) * 100) / 100;
+      if (!(monto > 0)) {
+        /* saldo cubre todo (o más): esta compra no va por el riel — se paga con
+           aplicar_saldo_a_compra por el camino directo. Que llegue acá es un
+           llamado mal armado, no un cobro de 0. */
+        return json({ ok: false, codigo: 'compra_cubierta_por_saldo' }, 409);
+      }
+    }
   }
   /* 🔴 EL SEGUNDO `else` DE LA MISMA CLASE, en el mismo archivo — y apareció
      al medir otra vez DESPUÉS de curar el primero. Curado el `else` de la

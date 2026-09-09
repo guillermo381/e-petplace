@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       _test_resultado_d242: {
@@ -4669,6 +4694,7 @@ export type Database = {
           id: string
           impuesto_total: number
           moneda: string
+          saldo_aplicado: number
           subtotal: number
           total: number
           updated_at: string
@@ -4682,6 +4708,7 @@ export type Database = {
           id?: string
           impuesto_total?: number
           moneda?: string
+          saldo_aplicado?: number
           subtotal?: number
           total?: number
           updated_at?: string
@@ -4695,6 +4722,7 @@ export type Database = {
           id?: string
           impuesto_total?: number
           moneda?: string
+          saldo_aplicado?: number
           subtotal?: number
           total?: number
           updated_at?: string
@@ -24356,6 +24384,10 @@ export type Database = {
         }
         Returns: string
       }
+      aplicar_saldo_a_compra: {
+        Args: { p_compra_id: string; p_monto_saldo?: number }
+        Returns: Json
+      }
       aprobar_presupuesto_familia: {
         Args: { p_presupuesto_id: string }
         Returns: Json
@@ -26755,7 +26787,6 @@ export type Database = {
         Args: { p_cuenta_comercial_id: string; p_motivo?: string }
         Returns: Json
       }
-      pagar_compra_con_saldo: { Args: { p_compra_id: string }; Returns: Json }
       pagos_aprobados_sin_sujeto_movido: { Args: never; Returns: Json }
       pagos_conciliacion_cobertura: { Args: never; Returns: Json }
       pagos_huerfanos_por_sujeto: {
@@ -27938,6 +27969,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       estado_cuenta_comercial_enum: [

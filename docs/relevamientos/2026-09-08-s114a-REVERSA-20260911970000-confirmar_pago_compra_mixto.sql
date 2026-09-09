@@ -1,0 +1,8 @@
+-- REVERSA de 20260911970000 · restaura confirmar_pago_compra al cuerpo previo
+-- (validación de monto contra v_c.total; sin brazo mixto). El cuerpo previo es
+-- el de 20260821010000_s101_motor_pagos.sql; recuperable por git desde ese
+-- commit. Se cita el archivo para no transcribir 100 líneas propensas a error:
+--   git show <sha_previo>:supabase/migrations/20260821010000_s101_motor_pagos.sql
+-- y reaplicar el CREATE OR REPLACE de confirmar_pago_compra de ese archivo.
+-- ⚠️ Revertir DESPUÉS de un pago mixto confirmado no deshace el consumo de
+--    saldo ya escrito (movimientos): sólo cambia el comportamiento futuro.
