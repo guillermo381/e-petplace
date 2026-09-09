@@ -361,9 +361,21 @@ export async function responderCaso(casoId: string, texto: string) {
  * escribiría un reembolso declarado sobre un servicio que sí devengó, y la
  * casa pagaría la diferencia sin que nadie lo vea.
  */
+export type CodigoReconocer =
+  | 'no_podes_resolver' | 'alcance_invalido' | 'monto_requerido_en_parcial'
+  | 'razon_requerida_en_parcial' | 'monto_supera_total';
+
+/** El rebote por tope LLEVA sus números (patrón de la casa: un error tipado
+ *  trae el dato para componer el mensaje). En una carrera —alguien devolvió
+ *  mientras la Hoja estaba abierta— `disponible` del rebote es el número FRESCO;
+ *  el de `leerCaso` quedó viejo. El resto de los códigos van sin datos. */
+export type ErrorReconocer =
+  | { ok: false; codigo: 'monto_supera_total'; mensaje: string; total: number | null; disponible: number | null }
+  | { ok: false; codigo: Exclude<CodigoReconocer, 'monto_supera_total'>; mensaje: string };
+
 export async function reconocerYResolver(
   casoId: string, p: { alcance: 'total' | 'parcial' | 'sin_devolucion'; monto?: number; motivo?: string },
-): Promise<ResultadoWrapper<{ camino: string | null; teniaDevengo: boolean; etapa: EtapaCaso }, 'no_podes_resolver' | 'alcance_invalido' | 'monto_requerido_en_parcial' | 'monto_supera_total' | 'razon_requerida_en_parcial'>> {
+): Promise<{ ok: true; data: { camino: string | null; teniaDevengo: boolean; etapa: EtapaCaso } } | ErrorReconocer> {
   const { data, error } = await getClient().rpc('caso_reconocer_y_resolver', {
     p_caso_id: casoId, p_alcance: p.alcance,
     p_monto: p.monto ?? undefined,
@@ -371,7 +383,20 @@ export async function reconocerYResolver(
   });
   if (error) return { ok: false, codigo: 'no_podes_resolver', mensaje: ERR };
   const d = (data ?? {}) as Record<string, unknown>;
-  if (d.ok !== true) return { ok: false, codigo: (d.codigo as 'no_podes_resolver') ?? 'no_podes_resolver', mensaje: ERR };
+  if (d.ok !== true) {
+    const CODES = ['no_podes_resolver','alcance_invalido','monto_requerido_en_parcial',
+                   'razon_requerida_en_parcial','monto_supera_total'] as const;
+    const raw = typeof d.codigo === 'string' ? d.codigo : 'no_podes_resolver';
+    const cod: CodigoReconocer = (CODES as readonly string[]).includes(raw)
+      ? (raw as CodigoReconocer) : 'no_podes_resolver';
+    if (cod === 'monto_supera_total') {
+      // los números FRESCOS del motor, para el mensaje en la carrera
+      return { ok: false, codigo: 'monto_supera_total', mensaje: ERR,
+        total: d.total != null ? Number(d.total) : null,
+        disponible: d.disponible != null ? Number(d.disponible) : null };
+    }
+    return { ok: false, codigo: cod, mensaje: ERR };
+  }
   return { ok: true, data: {
     camino: (d.camino as string | null) ?? null,
     teniaDevengo: d.tenia_devengo === true,

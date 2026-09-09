@@ -2012,6 +2012,7 @@ export {
   ETAPAS_EN_ESCALERA,
   type EtapaCaso, type FinalAlterno, type AsientoCaso, type MensajeCaso,
   type CasoEnBandeja, type CodigoAbrirCaso, type CasoDetalle, type ServicioSinCerrar,
+  type CodigoReconocer, type ErrorReconocer,
 } from './wrappers/postventa-casos';
 
 // S114 · A4 · el saldo e-PetPlace (F6). Un lector; acreditar/consumir son del
