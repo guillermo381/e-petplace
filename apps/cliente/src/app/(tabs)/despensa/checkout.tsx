@@ -527,7 +527,11 @@ export default function DespensaCheckout() {
     /* En la misma ola que el nombre de la tienda: el saldo es un dato del
        resumen, y pedirlo aparte sería otro viaje del peaje de `L-223`. */
     void obtenerMiSaldo().then((rs) => {
-      if (rs.ok) setSaldo(rs.data);
+      /* 🔴 **`0` NO ES `null`.** Si la lectura falla, el saldo queda `null` y no
+         se ofrece nada — que es lo conservador— pero **`0` es una respuesta**:
+         la familia no tiene saldo, y eso se sabe. *Meter las dos cosas en el
+         mismo valor haría indistinguible «no tiene» de «no pudimos leer».* */
+      setSaldo(rs.ok ? rs.data : null);
     });
     // F6: el nombre de la tienda, en UN viaje para los N pedidos.
     const nom = await obtenerNombresTiendaPorPedido(okIds.map((p) => p.pedido_id));
@@ -830,6 +834,27 @@ export default function DespensaCheckout() {
             por pedido: con dos tiendas, un rebote en la segunda dejaba la
             primera ya cobrada. A lo hizo atómico por compra. *El saldo es
             plata: un cobro parcial no es un caso borde.* */}
+        {/* 🔴 **ACÁ JUNTÉ DOS COSAS DISTINTAS Y EL FOUNDER LO ENCONTRÓ.**
+            ⏪ La condición era `saldo >= compraTotal` **para todo**, así que con
+            $13 y un pedido más caro la pantalla ocultaba **las dos cosas: el
+            botón Y el número**. La familia sabe que tiene saldo y no lo veía
+            por ningún lado.
+
+            *No ofrecer lo que no se puede usar es correcto; ocultar que existe
+            es otra cosa.* Ahora son dos decisiones separadas:
+              · **el saldo se DICE siempre que exista** (abajo, como dato);
+              · **el botón se OFRECE sólo si alcanza.**
+
+            Y cuando no alcanza, la línea dice cuánto falta — el mismo dato que
+            le pedí a A para el rebote, aplicado antes de que lo intente. */}
+        {saldo !== null && saldo > 0 && compraTotal !== null && saldo < compraTotal ? (
+          <Texto variante="apoyo">
+            {t('despensa.saldoNoAlcanzaAun', {
+              saldo: dinero(saldo) ?? '',
+              falta: dinero(compraTotal - saldo) ?? '',
+            })}
+          </Texto>
+        ) : null}
         {saldo !== null && compraTotal !== null && saldo >= compraTotal ? (
           <Boton
             variante="apoyada"
