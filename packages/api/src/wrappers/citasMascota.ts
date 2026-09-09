@@ -100,7 +100,11 @@ async function _citasActivas(
     // `NULL >= hoy` no es verdadero, así que el dueño aprobaba y su
     // procedimiento desaparecía de todas sus superficies. Entra también
     // la sin-fecha CON presupuesto (jamás una sin fecha huérfana).
-    .or(`fecha.gte.${hoyLocal()},and(fecha.is.null,presupuesto_id.not.is.null)`)
+    // 🔴 S114-A (hueco que C midió): `en_curso` entra SIEMPRE, aunque su fecha
+    //    sea de un día pasado — una atención abierta y nunca cerrada es activa,
+    //    no historia. Sin esta rama, la query la excluía por fecha y el historial
+    //    no lista `en_curso` ⇒ quedaba invisible en las dos listas (Thor tenía 1).
+    .or(`fecha.gte.${hoyLocal()},and(fecha.is.null,presupuesto_id.not.is.null),estado.eq.en_curso`)
     // nullsFirst: las sin fecha PRESIDEN — son las que esperan acción
     // (ley de la casa del prestador, aplicada a la casa del dueño).
     .order('fecha', { ascending: true, nullsFirst: true })

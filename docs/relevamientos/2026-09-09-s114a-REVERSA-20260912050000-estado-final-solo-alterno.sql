@@ -1,0 +1,4 @@
+-- REVERSA de 20260912050000: _caso_mover vuelve a setear estado_final = p_hasta
+-- para todo final (cuerpo previo, recuperable por git). El backfill que puso
+-- estado_final=NULL en los finales EN ESCALERA no se revierte automáticamente
+-- (habría que re-derivarlo de etapa); se declara.
