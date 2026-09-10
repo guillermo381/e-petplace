@@ -120,6 +120,7 @@ import { useDiaEnVista } from '@/lib/dia-en-vista';
 import { usePantallaEnfocada } from '@/lib/pantalla-enfocada';
 import { hoyLocal, sumarDias } from '@/lib/dia-local';
 import { CeldasModuloVentas } from '@/components/celdas-modulo-ventas';
+import { abrirAjustesDelSistema, useSinAvisos } from '@/lib/sin-avisos';
 import { VentanaPedidos } from '@/components/ventana-pedidos';
 import { hoyLocalISO } from '@/lib/ventas-formato';
 import { vozCitaVet } from '@/lib/voz-cita-vet';
@@ -1034,6 +1035,9 @@ export default function Hoy() {
      «Tenés 3 servicios sin cerrar. Cerralos para cobrarlos» — con el número,
      **sin drama y sin countdown**. *No es castigo: es la consecuencia dicha a
      tiempo, dos veces, antes de que ocurra.* */
+  /** `D-1057`: el sistema tiene los avisos apagados. Se relee al foco, así que
+   *  la señal **se va sola** cuando el prestador vuelve de los ajustes. */
+  const sinAvisos = useSinAvisos();
   const [sinCerrar, setSinCerrar] = useState<{ cantidad: number; vencidos: number }>({
     cantidad: 0,
     vencidos: 0,
@@ -2505,6 +2509,29 @@ export default function Hoy() {
             ⚠️ **Y el cero no se dice**: sin servicios sin cerrar la línea no
             existe — un «0 sin cerrar» es ruido, y la ausencia ya es la buena
             noticia. */}
+        {/* ═══ ⭐ LA SEÑAL DE QUE ESTÁS SIN SEÑAL — `D-1057`, firma ⑤ ═══════
+            **Va PRIMERA de la franja y no se puede descartar** (③): cerrarla
+            sería apagar la única señal de que estás sin señal.
+
+            🔴 **Y acá el costo es peor que del lado de la familia:** *un
+            prestador sin avisos no se entera de que se le abrió un caso, y
+            tiene 24 h para responder.* No se pierde una notificación — **se le
+            vence un plazo mientras no sabe que existe.**
+
+            ⚠️ Sólo con el permiso **`negado`**: `no_medible` no se pinta
+            (`L-197`), y `undetermined` es de `InvitacionAvisos`, que ya invita
+            en ese caso y **a propósito no invita con el permiso denegado**
+            —el diálogo del SO no se abre— remitiendo a Preferencias. *Éste es
+            el hueco que la firma nombra: ahí ya está, y nadie entra.* */}
+        {sinAvisos && (
+          <CeldaNavegacion
+            icono="campana"
+            titulo={t('agenda.sinAvisosTitulo')}
+            detalle={t('agenda.sinAvisosDetalle')}
+            onPress={abrirAjustesDelSistema}
+          />
+        )}
+
         {pantalla.estado === 'listo' && sinCerrar.cantidad > 0 && (
           <View style={{ gap: spacing[2] }}>
             <Texto variante="cuerpo">

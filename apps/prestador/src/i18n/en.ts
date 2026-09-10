@@ -175,6 +175,8 @@ export const prestadorEn = {
     despachoTitulo: 'Order {{orden}}',
   },
   agenda: {
+    sinAvisosTitulo: 'We can’t notify you about anything.',
+    sinAvisosDetalle: 'Turn on notifications so you hear about cases: you have 24 hours to reply.',
     presenciaAdentro_one: '{{count}} inside',
     presenciaAdentro_other: '{{count}} inside',
     presenciaEnViaje_one: '{{count}} on the way',

@@ -275,6 +275,8 @@ export const clienteEn = {
     entradaDetalle: 'Each with their own story.',
   },
   hogar: {
+    sinAvisosTitulo: 'We can’t notify you about anything.',
+    sinAvisosDetalle: 'Turn on notifications so appointments and cases reach you.',
     proximaPlagaCorta: '{{plaga}} · {{fecha}}',
     proximaVacunaCorta: '{{nombre}} · {{fecha}}',
     falloServicios: "We couldn't load your {{servicio}} history",

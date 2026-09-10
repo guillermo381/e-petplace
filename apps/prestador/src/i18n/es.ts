@@ -292,6 +292,8 @@ export const prestadorEs = {
     despachoTitulo: 'Pedido {{orden}}',
   },
   agenda: {
+    sinAvisosTitulo: 'No podemos avisarte de nada.',
+    sinAvisosDetalle: 'Activa los avisos para enterarte de los casos: tienes 24 horas para responder.',
     /* G10 · La cabecera dice la verdad POR ESTADO. Un total («3 animales hoy»)
        es cierto y esconde justo la diferencia que decide qué hace el cuidador
        ahora. Las partes en cero no se dicen: «0 adentro» es ruido que hay que
