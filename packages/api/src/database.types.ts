@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       _test_resultado_d242: {
@@ -3063,6 +3038,7 @@ export type Database = {
           en_sombra: boolean
           ignora_techo: boolean
           plantilla_idioma: string
+          plantilla_variables: Json | null
           plantilla_whatsapp: string | null
         }
         Insert: {
@@ -3075,6 +3051,7 @@ export type Database = {
           en_sombra?: boolean
           ignora_techo?: boolean
           plantilla_idioma?: string
+          plantilla_variables?: Json | null
           plantilla_whatsapp?: string | null
         }
         Update: {
@@ -3087,6 +3064,7 @@ export type Database = {
           en_sombra?: boolean
           ignora_techo?: boolean
           plantilla_idioma?: string
+          plantilla_variables?: Json | null
           plantilla_whatsapp?: string | null
         }
         Relationships: [
@@ -14566,6 +14544,47 @@ export type Database = {
         }
         Relationships: []
       }
+      notificacion_entrega: {
+        Row: {
+          actualizado_en: string
+          canal: string
+          cerrado_en: string | null
+          creado_en: string
+          estado: string
+          id: string
+          intencion_id: string
+          motivo: string | null
+        }
+        Insert: {
+          actualizado_en?: string
+          canal: string
+          cerrado_en?: string | null
+          creado_en?: string
+          estado?: string
+          id?: string
+          intencion_id: string
+          motivo?: string | null
+        }
+        Update: {
+          actualizado_en?: string
+          canal?: string
+          cerrado_en?: string | null
+          creado_en?: string
+          estado?: string
+          id?: string
+          intencion_id?: string
+          motivo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacion_entrega_intencion_id_fkey"
+            columns: ["intencion_id"]
+            isOneToOne: false
+            referencedRelation: "notificacion_intencion"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notificacion_intencion: {
         Row: {
           categoria: string
@@ -23598,6 +23617,10 @@ export type Database = {
         Args: { p_presupuesto_id: string }
         Returns: string
       }
+      _asunto_del_caso: {
+        Args: { p_id: string; p_tipo: string }
+        Returns: string
+      }
       _atencion_en_estados: {
         Args: { p_atencion_id: string; p_estados: string[] }
         Returns: Record<string, unknown>
@@ -23774,6 +23797,15 @@ export type Database = {
       _empleado_matricula_ok: {
         Args: { p_empleado_id: string; p_tipo_servicio: string }
         Returns: boolean
+      }
+      _ensamblar_plantilla: {
+        Args: {
+          p_datos: Json
+          p_destinatario: string
+          p_plantilla: string
+          p_spec: Json
+        }
+        Returns: Json
       }
       _es_repartidor_del_pedido: {
         Args: { p_pedido_id: string }
@@ -27986,9 +28018,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       estado_cuenta_comercial_enum: [

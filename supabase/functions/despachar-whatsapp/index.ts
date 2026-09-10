@@ -83,16 +83,22 @@ Deno.serve(async (req) => {
   );
 
   // ① Lo que la DB YA marcó para transporte por WhatsApp.
-  const { data: pendientes, error: errorSel } = await supabase
-    .from('notificacion_intencion')
-    .select('id, tipo, destinatario_user_id, datos, resuelto_como')
+  // S114 multicanal: la cola es la tabla de ENTREGAS (una intención, N canales);
+  // este edge ve las de 'whatsapp'. Se aplana a la forma de siempre + `entregaId`,
+  // así el resto del código no cambia y sólo el MARCADO apunta a la entrega.
+  const { data: pendientesRaw, error: errorSel } = await supabase
+    .from('notificacion_entrega')
+    .select('id, notificacion_intencion!inner(id, tipo, destinatario_user_id, datos, resuelto_como)')
+    .eq('canal', 'whatsapp')
     .eq('estado', 'encolada')
-    .eq('resuelto_como->>despacho', 'para_transporte')
-    .eq('resuelto_como->>canal_elegido', 'whatsapp')
     .limit(50);
   if (errorSel) {
     return Response.json({ error: 'lectura_fallo', causa: errorSel.message }, { status: 500 });
   }
+  const pendientes = (pendientesRaw ?? []).map((e) => {
+    const n = (e as { notificacion_intencion: Record<string, unknown> }).notificacion_intencion;
+    return { entregaId: (e as { id: string }).id, ...n } as Record<string, unknown> & { entregaId: string; id: string; destinatario_user_id: string };
+  });
 
   // ② El destinatario: su teléfono. Se mide la FORMA antes de intentar nada,
   //    porque un lote donde la mitad de los números no son E.164 tiene que
@@ -465,9 +471,9 @@ Deno.serve(async (req) => {
     const idioma = rc?.plantilla_idioma;
     if (typeof plantilla !== 'string' || typeof idioma !== 'string') {
       await supabase
-        .from('notificacion_intencion')
-        .update({ estado: 'fallida', motivo: 'sin_plantilla_resuelta' })
-        .eq('id', i.id);
+        .from('notificacion_entrega')
+        .update({ estado: 'fallida', motivo: 'sin_plantilla_resuelta', cerrado_en: new Date().toISOString() })
+        .eq('id', i.entregaId);
       fallidas++;
       continue;
     }
@@ -482,9 +488,9 @@ Deno.serve(async (req) => {
     const vars = Array.isArray(rc?.variables) ? rc.variables as Array<{ n: number; valor: string | null }> : null;
     if (ensCOK !== true || vars === null) {
       await supabase
-        .from('notificacion_intencion')
-        .update({ estado: 'fallida', motivo: `ensamblado_incompleto:${JSON.stringify(rc?.ensamblado_faltante ?? null)}` })
-        .eq('id', i.id);
+        .from('notificacion_entrega')
+        .update({ estado: 'fallida', motivo: `ensamblado_incompleto:${JSON.stringify(rc?.ensamblado_faltante ?? null)}`, cerrado_en: new Date().toISOString() })
+        .eq('id', i.entregaId);
       fallidas++;
       continue;
     }
@@ -509,7 +515,10 @@ Deno.serve(async (req) => {
     });
 
     if (res.ok) {
-      await supabase.from('notificacion_intencion').update({ estado: 'aceptada_transporte' }).eq('id', i.id);
+      await supabase.from('notificacion_entrega')
+        .update({ estado: 'aceptada_transporte', cerrado_en: new Date().toISOString() }).eq('id', i.entregaId);
+      await supabase.from('notificacion_intencion')
+        .update({ estado: 'aceptada_transporte' }).eq('id', i.id).eq('estado', 'encolada');
       entregadas++;
     } else {
       const cuerpo = await res.text();
@@ -520,9 +529,9 @@ Deno.serve(async (req) => {
         continue;
       }
       await supabase
-        .from('notificacion_intencion')
-        .update({ estado: 'fallida', motivo: cuerpo.slice(0, 300) })
-        .eq('id', i.id);
+        .from('notificacion_entrega')
+        .update({ estado: 'fallida', motivo: cuerpo.slice(0, 300), cerrado_en: new Date().toISOString() })
+        .eq('id', i.entregaId);
       fallidas++;
     }
   }

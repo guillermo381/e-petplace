@@ -459,16 +459,21 @@ Deno.serve(async (req) => {
   }
 
   // ② Lo marcado para_transporte con canal email — lo único que esta función entrega.
-  const { data: pendientes, error: errorSel } = await supabase
-    .from('notificacion_intencion')
-    .select('id, tipo, destinatario_user_id, datos, resuelto_como')
+  // S114 multicanal: la cola son las ENTREGAS del canal email (una intención, N
+  // canales). Se aplana a la forma de siempre + `entregaId`; sólo el MARCADO cambia.
+  const { data: pendientesRaw, error: errorSel } = await supabase
+    .from('notificacion_entrega')
+    .select('id, notificacion_intencion!inner(id, tipo, destinatario_user_id, datos, resuelto_como)')
+    .eq('canal', 'email')
     .eq('estado', 'encolada')
-    .eq('resuelto_como->>despacho', 'para_transporte')
-    .eq('resuelto_como->>canal_elegido', 'email')
     .limit(50);
   if (errorSel) {
     return Response.json({ error: 'lectura_fallo', causa: errorSel.message }, { status: 500 });
   }
+  const pendientes = (pendientesRaw ?? []).map((e) => {
+    const n = (e as { notificacion_intencion: Record<string, unknown> }).notificacion_intencion;
+    return { entregaId: (e as { id: string }).id, ...n } as Record<string, unknown> & { entregaId: string; id: string; tipo: string; destinatario_user_id: string; resuelto_como: Record<string, unknown> };
+  });
 
   const apiKey = Deno.env.get('RESEND_API_KEY');
   if (!apiKey) {
@@ -489,9 +494,9 @@ Deno.serve(async (req) => {
     const { data: usuario } = await supabase.auth.admin.getUserById(i.destinatario_user_id);
     const email = usuario?.user?.email;
     if (!email) {
-      await supabase.from('notificacion_intencion')
-        .update({ estado: 'fallida', motivo: 'destinatario_sin_email' })
-        .eq('id', i.id);
+      await supabase.from('notificacion_entrega')
+        .update({ estado: 'fallida', motivo: 'destinatario_sin_email', cerrado_en: new Date().toISOString() })
+        .eq('id', i.entregaId);
       fallidas++;
       continue;
     }
@@ -519,18 +524,17 @@ Deno.serve(async (req) => {
 
     if (r.ok) {
       const cuerpo = await r.json();
+      await supabase.from('notificacion_entrega')
+        .update({ estado: 'aceptada_transporte', motivo: cuerpo?.id ? `resend:${cuerpo.id}` : null, cerrado_en: new Date().toISOString() })
+        .eq('id', i.entregaId);
       await supabase.from('notificacion_intencion')
-        .update({
-          estado: 'aceptada_transporte',
-          resuelto_como: { ...i.resuelto_como, proveedor_id: cuerpo?.id ?? null },
-        })
-        .eq('id', i.id);
+        .update({ estado: 'aceptada_transporte' }).eq('id', i.id).eq('estado', 'encolada');
       entregadas++;
     } else {
       const causa = await r.text();
-      await supabase.from('notificacion_intencion')
-        .update({ estado: 'fallida', motivo: `resend_${r.status}: ${causa.slice(0, 180)}` })
-        .eq('id', i.id);
+      await supabase.from('notificacion_entrega')
+        .update({ estado: 'fallida', motivo: `resend_${r.status}: ${causa.slice(0, 180)}`, cerrado_en: new Date().toISOString() })
+        .eq('id', i.entregaId);
       fallidas++;
     }
   }
