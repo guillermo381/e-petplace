@@ -31082,6 +31082,39 @@ release— con su cinturón de dos rojos: ② intento `pendiente` más viejo que
 ---
 
 
+### `D-1055` 🔴 · No se puede distinguir un token de push VIVO de uno FANTASMA — FCM v1 no da receipt, y no hay ACK de la app
+
+**Medido (S114-A, incidente founder 10-sep):** el founder tenía un token `activo`
+(27-ago) al que FCM devolvía 200 y marcábamos `entregada`/`aceptada_transporte`, y su
+teléfono no recibía NADA — un **token fantasma** (FCM acepta una registración que el
+aparato ya no tiene, y no la 404-ea hasta pasado un tiempo). **FCM v1 NO da receipt de
+entrega por-mensaje al emisor**: el 200 es aceptación, no recepción. Server-side es
+**imposible** distinguir un token vivo de un fantasma no-reapado.
+
+**La consecuencia, escrita:** en octubre, **una familia que no recibe nada se ve igual
+que una que sí** — el tablero dice «aceptada por transporte» para las dos. Push es el
+canal por defecto de todo el motor; un fantasma silencioso = una familia que deja de
+recibir sin que nadie se entere.
+
+**La cura y su costo, medido (NO se construye acá):** lo único que confirma recepción
+es un **ACK desde la app** — un handler que, al recibir el push, avisa al servidor.
+Costo: handler en las DOS apps (cliente + prestador) + un RPC + su wrapper + una
+columna/estado de «recibida_en_aparato». **Cobertura PARCIAL**: confiable con la app en
+primer plano; en background, para mensajes `notification` (los que mandamos, para que
+se muestren con la app cerrada), el JS no corre y el ACK no llega — así que un ACK
+ausente no probaría fantasma, sólo «no confirmado». Una cobertura mejor exigiría
+mensajes `data` + handler de fondo, que en Android es poco fiable (ya declarado en
+`despachar-push`).
+
+**🔴 DISPARO:** antes del soft launch de octubre (cuando haya familias reales cuya
+falta de push sea invisible), o el primer reporte de «no me llegan las notificaciones»
+que no se explique por permisos. **Dueño:** A (motor) + C (handlers de app). Mientras
+no exista, el estado honesto `aceptada_transporte` (D-… del rename) es la mitigación:
+al menos el nombre ya no promete recepción.
+
+---
+
+
 ### `D-1054` 🟡 · NO EXISTE una audiencia «casa» en el motor de avisos, ni superficie donde la casa lea — dueño F
 
 **Hallazgo (S114-A, medido):** `cat_notificacion_tipos.audiencia` tiene CHECK que sólo
