@@ -220,6 +220,12 @@ marca las 4 estadías dentro de corte y **salen 8 avisos que el abort venía sup
 Medido antes de curar: el reloj toca sólo esas dos tablas con `no_ejecutado`, no hay
 tercera. `main` **`45029367`**.
 
+**El sello del LAZO queda pendiente de un tick desatendido** (distinción de E, correcta): corrí
+la función A MANO (`ok:true`), lo que prueba la FUNCIÓN; el cron `0 * * * *` prueba el LAZO en
+su próximo tick. La causa del abort ya no existe (las 4 estadías quedaron `no_ejecutado`, fuera
+del universo del reloj), así que el tick debería pasar — pero *«corrió a mano» y «el cron corre»
+son dos afirmaciones distintas*, y el sello es mirar `cron.job_run_details` tras el próximo tick.
+
 *La lección se cumplió sobre sí misma: doce, no once.*
 
 ## ESTADO DEL CANON
