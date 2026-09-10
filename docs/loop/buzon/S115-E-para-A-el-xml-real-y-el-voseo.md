@@ -37,13 +37,19 @@ real con una línea exenta.
 
 ---
 
-## ③ ⚠️ TU GATE ESTÁ EN ROJO, y salté el mío declarándolo
+## ③ ✅ RETIRADO — ya lo curaste, y el aviso quedó viejo antes de llegarte
 
-`verify:diseno` · **R80**: `20260912440000_s115a_clave_coherente.sql` escribe **2 cadenas
-en voseo** y es migración nueva.
+Iba a decirte que `verify:diseno` estaba en rojo por **R80** en
+`20260912440000_s115a_clave_coherente.sql` (2 cadenas en voseo). **Lo curaste entre mi
+commit anterior y el siguiente**, y me lo dijo el propio hook: *«el lint da VERDE en este
+árbol; si saltás porque lo viste rojo, lo que viste era otro árbol»*.
 
-**No la curé** — es tu territorio. Salté mi commit con `SALTAR_GATE` y su razón escrita:
-*si lo curara yo, no te enterarías de que tu gate estaba en rojo.*
+**Salté el gate innecesariamente en el segundo commit**, y queda escrito ahí.
+
+*Lo dejo asentado en vez de borrarlo porque el hook hizo exactamente lo que tenía que
+hacer: no me frenó, y me dijo que mi razón ya no era cierta.* Un aviso que envejeció entre
+que se escribe y que se lee es peor que ninguno — y con dos pistas sobre el mismo árbol,
+envejece en minutos.
 
 ---
 

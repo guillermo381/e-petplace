@@ -61,7 +61,13 @@ function claveDe(fila) {
      irreconstruible por definición, y ahí no hay forma de saber si una clave
      almacenada corresponde a su fila. */
   const codigo = String(fila.secuencial).slice(1);
-  const cuerpo = `${dd}${mm}${aaaa}${TIPO[fila.tipo] ?? '01'}${fila.ruc_emisor}${fila.sri_ambiente}` +
+  /* 🔴 DOS VOCABULARIOS PARA EL AMBIENTE, y confundirlos devuelve NULL en silencio:
+     en la CLAVE es el dígito `1|2`; en la COLUMNA `sri_ambiente` es
+     `pruebas|produccion`. `fiscal_clave_acceso` recibe el de la columna y traduce.
+     Mi arnés le pasaba el dígito ⇒ la función devolvía NULL, el CHECK rebotaba con
+     razón, y yo lo leí como que su derivación estaba mal. */
+  const amb = { pruebas: '1', produccion: '2' }[String(fila.sri_ambiente)] ?? String(fila.sri_ambiente);
+  const cuerpo = `${dd}${mm}${aaaa}${TIPO[fila.tipo] ?? '01'}${fila.ruc_emisor}${amb}` +
                  `${fila.establecimiento}${fila.punto_emision}${fila.secuencial}${codigo}1`;
   return cuerpo.length === 48 ? cuerpo + dv(cuerpo) : { error: `cuerpo de ${cuerpo.length}, se esperaban 48` };
 }
@@ -206,7 +212,7 @@ console.log(JSON.stringify(cs.map((c: string) => { try { return codigoNumericoDe
   if (atado) {
     const fila = { secuencial: '000000042', establecimiento: '001', punto_emision: '002',
                    fecha_emision: '2026-09-10', tipo: 'factura',
-                   ruc_emisor: '1793240435001', sri_ambiente: '2' };
+                   ruc_emisor: '1793240435001', sri_ambiente: 'produccion' };
     const buena = claveDe(fila);
     const mala = buena.slice(0, 30) + '999999999' + buena.slice(39);   // secuencial movido
 
@@ -225,7 +231,17 @@ console.log(JSON.stringify(cs.map((c: string) => { try { return codigoNumericoDe
 
     r.di('');
     const conBuena = ins(buena);
-    r.dato('clave DERIVADA de la fila', conBuena === null ? 'pasa ✓' : `🔴 rebota: ${conBuena.slice(0, 110)}`);
+    /* 🔴 UN `RAISE` DE LA FUNCIÓN NO ES UN RECHAZO DEL CHECK, y confundirlos me hizo
+       publicar un rojo contra la derivación de A que no era. `fiscal_clave_acceso`
+       devuelve NULL y grita `clave_sin_insumos` cuando le falta un dato — eso dice que
+       MI INSERT está incompleto, no que su derivación esté mal. *Rebotar no es una
+       medición: hay que saber QUIÉN rebotó.* */
+    const porInsumos = conBuena !== null && /clave_sin_insumos|insumo/i.test(conBuena);
+    r.dato('clave DERIVADA de la fila', conBuena === null ? 'pasa ✓'
+      : porInsumos ? `⚪ el arnés no dio todos los insumos: ${(conBuena.match(/Falta[^"]*/) ?? [''])[0].slice(0, 90)}`
+      : `🔴 rebota: ${conBuena.slice(0, 110)}`);
+    if (porInsumos)
+      noConcluyente(`mi INSERT no le dio a fiscal_clave_acceso todos sus insumos, así que la función devolvió NULL y el CHECK rebotó con razón.\n   Es defecto del ARNÉS, no de la derivación — y decirlo al revés mandaría a A a curar lo que funciona.`);
     if (conBuena !== null)
       rojo(`el CHECK rechaza una clave correctamente derivada:\n   ${conBuena.slice(0, 300)}\n   La derivación de la BASE y la de este instrumento no coinciden — y la que emite es la de la base.`);
 
