@@ -31026,6 +31026,47 @@ dejando las puertas.
 
 ---
 
+### `D-1052` 🔴 · LA CARRERA · el reloj de reserva de saldo suelta por TIEMPO sin preguntar si el riel ya cobró — forma propuesta, espera firma
+
+**El defecto, medido (incidente founder 9-sep):** `liberar_reservas_saldo_vencidas()`
+(cron cada 15 min) suelta **toda** compra `esperando_pago` con `saldo_aplicado>0` y
+`saldo_reservado_hasta < now()` — **sin mirar si hay un cobro en vuelo o aprobado**.
+En sandbox no costó plata; **en producción, una reserva que vence mientras la
+pasarela aprueba deja a la familia pagando de más**: el riel cobró `total − saldo`,
+el reloj devuelve el saldo, y `confirmar_pago_compra` después rebota `monto_no_coincide`
+(porque `total − 0 ≠ lo cobrado`) ⇒ compra cobrada por el riel, saldo devuelto,
+pedido sin entregar. **Es el estado que no puede existir en octubre.**
+
+**🔴 FORMA PROPUESTA (medida, NO curada a ojo — espera firma del founder):** el
+reloj NO suelta una reserva mientras haya un cobro VIVO para esa compra. «Vivo» =
+un intento en `estado IN ('pendiente','aprobado')`. Concretamente, al WHERE de
+`liberar_reservas_saldo_vencidas`:
+```
+AND NOT EXISTS (SELECT 1 FROM pagos_intentos pi
+                WHERE pi.compra_id = compras.id
+                  AND pi.estado IN ('pendiente','aprobado'))
+```
+**Por qué (a) «consultar el intento» y no (b) «no vencer una vez que salió al riel»:**
+(a) subsume a (b) sin su riesgo. Con (a), las dos responsabilidades quedan
+separadas y medidas contra el código vivo:
+- **el RELOJ** suelta sólo reservas de checkouts MUERTOS —los que nunca dispararon,
+  o cuyos intentos están todos `rechazado`—;
+- **el BARRIDO** (`pagos-conciliar` → `aplicar_consulta_activa_nuvei`, que YA existe
+  y resuelve intentos `pendiente`) le pregunta a la pasarela por los VIVOS y
+  confirma (consume saldo) o los marca `rechazado` — y **recién entonces** el
+  siguiente tick del reloj los suelta.
+(b) sola dejaría una reserva colgada para siempre si el riel rechazó async y ese
+rechazo nunca se registró; (a) igual la suelta cuando el intento pasa a `rechazado`.
+
+**Alcance:** sólo `liberar_reservas_saldo_vencidas` (el cron). `liberar_reserva_saldo_compra`
+(la que llama pagos-cobro en el rebote SÍNCRONO) NO se toca: se invoca justo cuando
+el riel dijo que no, que es correcto. **Dueño:** A. **Disparo:** firma del founder
+sobre esta forma → migración con su cinturón (rojo: una compra con intento `pendiente`
+y reserva vencida NO se suelta; verde: sin intento vivo, sí).
+
+---
+
+
 ### `D-1051` 🟡 · El pago mixto sobre una compra GRAVADA rebota (`mixto_gravado_no_soportado`) — falta la regla de reparto de Erick
 
 **Qué pasa:** cuando el saldo del hogar cubre parte de una compra **con IVA > 0**,
