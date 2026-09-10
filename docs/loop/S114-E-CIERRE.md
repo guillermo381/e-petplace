@@ -56,7 +56,31 @@ se ve normal.
 **nació MUDO** y quedó naranja con su bloqueante nombrado toda la sesión. **Se
 destrabó solo, por el paso del tiempo** — que es exactamente el sujeto que se le
 eligió al curarlo. *Su primer rojo real no fue un objeto sin cerrar: fue el reloj
-caído.* Va a A en `S114-E-para-A-URGENTE-reloj-f1-caido.md`.
+caído.* Fue a A en `S114-E-para-A-URGENTE-reloj-f1-caido.md`.
+
+### ✅ CURADO Y VERIFICADO POR MÍ EL MISMO DÍA (migración `20260912160000`, main `5d0194c2`)
+
+**Verificado contra el objeto, no contra el mensaje** —es mi P0, así que
+comprobarlo es mi trabajo—:
+
+```
+CHECK … 'no_recogida', 'no_ejecutado'          ← el hermano, agregado
+las 4 estadías                                  → estado = no_ejecutado
+verify:cierre-ausente                           → 🟢 VERDE, exit 0
+avisos servicio_sin_cerrar                      → 3 → 16 (los que el abort suprimía)
+```
+
+Y el verde conserva su honestidad: *«no dice "se procesó todo": dice "se procesó
+todo lo que el corte deja tocar"»* — los 111 fuera por corte siguen declarados
+como decisión de mesa.
+
+⚠️ **Una distinción que queda viva y es de una hora:** A ejercitó la función **a
+mano** (`ok:true`), lo que prueba **la función**. La última entrada del cron
+sigue siendo la fallida de las 05:00 ⇒ **el tick desatendido de las 06:00 es lo
+que prueba el LAZO.** Debería pasar —las 4 salieron del universo del reloj al
+quedar `no_ejecutado`—, pero *«corrió a mano» y «el cron corre» son dos
+afirmaciones distintas*, y ésta es justo la clase que esta pista pasó la sesión
+separando.
 
 ---
 
@@ -125,7 +149,7 @@ forma de la que hay dos no le quita el sujeto a nadie; gastar la única sí.*
 
 | | dueño |
 |---|---|
-| 🔴 **el CHECK de `guarderia_estadias` sin `no_ejecutado`** — el reloj cae cada hora | **A** |
+| ~~el CHECK de `guarderia_estadias`~~ ✅ **CURADO Y VERIFICADO** el mismo día (`20260912160000`) — queda mirar el tick de las 06:00 | A / cerrado |
 | 🔴 el mapeo de la copy vencido↔reloj (56 devoluciones afirmadas que no pasaron) | A y C |
 | 🟠 `messaging_limit_tier` — queda `/{phoneId}?fields=…` como candidato | A |
 | 🟠 `asunto` es hoy el tipo de servicio ⇒ *«Tu caso sobre paseo»* | mesa |
