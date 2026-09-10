@@ -17,7 +17,13 @@
  */
 import { correr, q, uno, rojo, noConcluyente } from './_lib-e.mjs';
 
-const RUC = '9999999999002', EST = '998', PTO = '998';
+/* 🔴 EL RUC DE PRUEBA ES ÚNICO POR PROCESO. Con un RUC fijo, DOS corridas
+   simultáneas de la suite se pisan: una borra en su `finally` el contador que la
+   otra está usando, y la segunda muere con `secuencia_no_existe` — un rojo que no
+   es del producto. Medido en vivo: dos `correr-todo.mjs` a la vez se trabaron.
+   *Un instrumento que verifica concurrencia y no tolera ser corrido dos veces está
+   midiendo en un mundo más tranquilo que el real.* */
+const RUC = `9999${String(process.pid).padStart(5, '0').slice(-5)}9002`, EST = '998', PTO = '998';
 const doc = (sec, estado) =>
   `insert into documentos_fiscales (total, sentido, rol, tipo, estado, emitida_por_tercero,
       establecimiento, punto_emision, secuencial)

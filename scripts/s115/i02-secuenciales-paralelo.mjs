@@ -21,7 +21,37 @@
 import { spawn } from 'node:child_process';
 import { correr, q, uno, rojo, noConcluyente } from './_lib-e.mjs';
 
-const RUC = '9999999999001', EST = '999', PTO = '999', N = 6;
+/* 🔴 EL RUC DE PRUEBA ES ÚNICO POR PROCESO. Con un RUC fijo, DOS corridas
+   simultáneas de la suite se pisan: una borra en su `finally` el contador que la
+   otra está usando, y la segunda muere con `secuencia_no_existe` — un rojo que no
+   es del producto. Medido en vivo: dos `correr-todo.mjs` a la vez se trabaron.
+   *Un instrumento que verifica concurrencia y no tolera ser corrido dos veces está
+   midiendo en un mundo más tranquilo que el real.* */
+const RUC = `9999${String(process.pid).padStart(5, '0').slice(-5)}9001`, EST = '999', PTO = '999';
+
+/* 🔴 CUÁNTAS TOMAS, Y POR QUÉ NO MÁS.
+   `tomar_secuencial_fiscal` usa `FOR UPDATE`, así que las tomas **se serializan por
+   diseño** — que es exactamente lo correcto. Cada una paga su round-trip del CLI
+   (~3 s medidos) MÁS la espera del lock ⇒ el costo crece con N, y bajo carga algunas
+   superan el timeout del CLI y el instrumento sale NO CONCLUYENTE.
+
+   *La ironía que conviene registrar: este instrumento es lento PORQUE el motor está
+   bien.* Con la versión MAX+1 —el defecto que viene a cazar— las tomas no se
+   serializarían y volarían. **La lentitud es evidencia de la corrección.**
+
+   🔴 Y EL LÍMITE DURO, MEDIDO Y NO SUPUESTO: **el CLI de Supabase NO es seguro para
+   uso concurrente.** Cada `db query --linked` crea un ROL TEMPORAL de login
+   («Initialising login role…»); con 6 invocaciones simultáneas colisionan entre sí y
+   cinco mueren con `LegacyDbConfigConnectTempRoleError` — *después de 165 segundos de
+   reintentos*. Medido con seis procesos y el crudo capturado.
+
+   ⇒ La concurrencia REAL se logra sólo cuando las invocaciones llegan escalonadas.
+   Con N=3 eso pasa casi siempre; con 6 y la máquina cargada, casi nunca. **Cuando
+   colisiona, el instrumento lo NOMBRA y sale NO CONCLUYENTE — jamás rojo**: el canal
+   que falla no dice nada del motor. Se puede subir con `--tomas N`. */
+const iN = process.argv.indexOf('--tomas');
+const N = iN >= 0 ? Number(process.argv[iN + 1]) : 3;
+const TIMEOUT_MS = 90_000;
 
 /** Una toma en su PROPIO proceso — la única forma de tener concurrencia real. */
 function tomarEnParalelo(i) {
@@ -29,12 +59,23 @@ function tomarEnParalelo(i) {
     const sql = `select public.tomar_secuencial_fiscal('${RUC}','${EST}','${PTO}','factura') as s`;
     const p = spawn('npx', ['supabase', '--experimental', 'db', 'query', '--linked', sql],
       { encoding: 'utf8', cwd: '/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace' });
-    let out = '';
+    let out = '', err = '';
+    const t0 = Date.now();
+    /* Timeout PROPIO: sin él, un subproceso colgado deja al instrumento esperando
+       para siempre y su silencio se lee como «todavía está midiendo». */
+    const reloj = setTimeout(() => { p.kill('SIGKILL'); }, TIMEOUT_MS);
     p.stdout.on('data', (d) => { out += d; });
-    p.stderr.on('data', () => {});
-    p.on('close', () => {
+    p.stderr.on('data', (d) => { err += d; });
+    p.on('close', (code, senal) => {
+      clearTimeout(reloj);
       const m = out.match(/"s"\s*:\s*"(\d+)"/);
-      res({ i, valor: m ? m[1] : null, crudo: out.slice(0, 200) });
+      res({
+        i, valor: m ? m[1] : null, ms: Date.now() - t0,
+        // El motivo se NOMBRA: «no devolvió valor» no distingue un timeout de un error.
+        motivo: m ? null : senal === 'SIGKILL' ? `timeout a los ${TIMEOUT_MS / 1000}s`
+                : code !== 0 ? `exit ${code}` : 'salida sin el campo esperado',
+        crudo: (err || out).slice(0, 220),
+      });
     });
   });
 }
@@ -73,12 +114,28 @@ await correr('i02 · dos emisiones simultáneas → secuenciales distintos', asy
     const ms = Date.now() - t0;
 
     const fallados = res.filter((x) => x.valor === null);
-    if (fallados.length)
-      noConcluyente(`${fallados.length}/${N} tomas no devolvieron valor — el canal falló, no el motor.\n   ${fallados[0].crudo}`);
+    if (fallados.length) {
+      const porMotivo = {};
+      for (const f of fallados) porMotivo[f.motivo] = (porMotivo[f.motivo] ?? 0) + 1;
+      // La causa conocida se NOMBRA; si es otra, se dice que es otra.
+      const esRolTemporal = fallados.some((f) => /ConnectTempRoleError|temp role/i.test(f.crudo));
+      noConcluyente(
+        `${fallados.length}/${N} tomas no devolvieron valor — el CANAL, no el motor.\n` +
+        `   motivos: ${Object.entries(porMotivo).map(([m, n]) => `${n}× ${m}`).join(' · ')}\n` +
+        `   tiempos: ${res.map((x) => `${Math.round(x.ms / 1000)}s`).join(' ')}\n` +
+        (esRolTemporal
+          ? `   🔴 CAUSA IDENTIFICADA: LegacyDbConfigConnectTempRoleError.\n` +
+            `   El CLI crea un ROL TEMPORAL de login por invocación y N simultáneas\n` +
+            `   COLISIONAN ENTRE SÍ. Es una limitación del canal, no del motor —\n` +
+            `   el propio instrumento no puede usar el CLI para probar concurrencia\n` +
+            `   más allá de unas pocas tomas. Reintentá con --tomas 2.\n`
+          : `   Causa NO identificada: el crudo va abajo sin interpretar.\n`) +
+        `   crudo: ${fallados[0].crudo}`);
+    }
 
     const valores = res.map((x) => Number(x.valor)).sort((a, b) => a - b);
     const unicos = new Set(valores);
-    r.dato('tomas concurrentes', `${N} en ${ms} ms`);
+    r.dato('tomas concurrentes', `${N} en ${ms} ms (serializadas por FOR UPDATE, como debe ser)`);
     r.dato('valores', valores.join(', '));
     r.dato('distintos', `${unicos.size} de ${N}`);
 
