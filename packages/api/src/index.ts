@@ -2038,3 +2038,5 @@ export {
 export type {
   TarifaServicio, ComisionAplicable, CodigoEconomico,
 } from './wrappers/economico';
+export { tresNumerosDelPrestador, configuracionPago } from './wrappers/economico';
+export type { TresNumeros, ConfiguracionPago } from './wrappers/economico';

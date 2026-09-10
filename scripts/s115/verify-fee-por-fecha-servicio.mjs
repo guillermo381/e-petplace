@@ -48,17 +48,32 @@ if (!data || !Array.isArray(data) || data.length === 0) {
     '  Sin un caso que discrimine (una cita con fecha en otra vigencia) esto no mide nada.');
 }
 
-let rojos = 0;
+let rojos = 0, medidos = 0, noMedibles = 0;
 for (const c of data) {
-  const marca = c.ok ? 'OK  ' : '🔴  ';
+  /* 🔴 TRES ESTADOS EN LA SALIDA, NO DOS. Un caso sin desglose NO se verificó — y
+     llamarlo «OK» sería que el gate confirme lo que quiere ver. Se marca distinto. */
+  const esNoMedible = c.motivo?.startsWith('SIN DESGLOSE');
+  if (esNoMedible) noMedibles++; else if (c.ok) medidos++;
+  const marca = esNoMedible ? '·   ' : (c.ok ? 'OK  ' : '🔴  ');
   console.log(`${marca}${c.caso}`);
   console.log(`      congelado=${c.pct_congelado ?? '—'}  confirmacion=${c.pct_confirmacion ?? '—'}  esperado(fecha servicio)=${c.pct_esperado ?? '—'}`);
-  if (!c.ok) { rojos++; console.log(`      ⇒ ${c.motivo}`); }
+  if (c.motivo) console.log(`      ⇒ ${c.motivo}`);
+  if (!c.ok && !esNoMedible) rojos++;
 }
 
 if (rojos > 0) {
   salir(ROJO,
-    `\n🔴 ROJO · ${rojos} caso(s). El fee no se está resolviendo por la fecha del SERVICIO,\n` +
-    '   o el congelado y la confirmación no dicen lo mismo.');
+    `\n🔴 ROJO · ${rojos} caso(s) MEDIDOS no cuadran: el fee congelado no es el de la\n` +
+    '   fecha del servicio.');
 }
-salir(SANO, `\nSANO · ${data.length} caso(s): congelado = confirmación = la fila de la fecha del servicio.`);
+if (medidos === 0) {
+  /* 🔴 CERO MEDIDOS NO ES SANO: es que no hubo con qué medir. *Un gate que no encontró
+     ningún caso y dice «verde» es el silencio disfrazado de salud.* */
+  salir(NO_CONCLUYENTE,
+    `\nNO CONCLUYENTE · ${data.length} caso(s), TODOS sin desglose congelado: no hubo nada\n` +
+    '   que verificar. Hace falta una cita con fecha en otra vigencia y desglose congelado\n' +
+    '   (estado `pendiente_pago`) para que este gate diga algo.');
+}
+salir(SANO,
+  `\nSANO · ${medidos} caso(s) MEDIDOS: el fee congelado es el de la fecha del servicio.` +
+  (noMedibles ? `\n       (${noMedibles} sin desglose — no medibles, no verdes.)` : ''));

@@ -126,3 +126,114 @@ export function netoDelPrestador(precioNeto: number, c: ComisionAplicable): {
     neto: Math.round((precioNeto - comision) * 100) / 100,
   };
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LOS TRES NÚMEROS DEL PRESTADOR (MODELO_ECONOMICO · D-C)
+// «tu precio sin IVA · lo que ve la familia · lo que recibes»
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface TresNumeros {
+  /** Lo que el prestador declara. Es su precio, sin IVA. */
+  neto: number;
+  /** Lo que la familia ve y paga: neto + IVA. Nunca se le suma nada en el checkout. */
+  loQueVeLaFamilia: number;
+  /** Lo que el prestador recibe: neto − comisión. **Sin descuento de riel.** */
+  loQueRecibis: number;
+  comision: number;
+  /** `minimo` cuando el piso mandó, `porcentual` cuando mandó el %, `base_cero` si no hay base. */
+  aplico: 'porcentual' | 'minimo' | 'base_cero';
+  comisionPct: number;
+  comisionMinimo: number;
+  ivaPct: number;
+  fechaVigencia: string;
+}
+
+/**
+ * Los tres números, para la FECHA en que el precio va a regir.
+ *
+ * 🔴 TRES COSAS QUE ESTA PUERTA HACE Y LA VIEJA NO:
+ *  ① aplica el **mínimo** — sin él la pantalla muestra «18 %» y cobra el piso;
+ *  ② el riel **NO se descuenta** al prestador (D-C): recibe su precio menos la comisión;
+ *  ③ pide la comisión de la **fecha en que el precio rige**, no la de hoy.
+ *
+ * ⚠️ `obtenerComisionVigenteCita()` sigue viva porque cuatro talleres publicados la
+ * consumen, pero **devuelve el modelo viejo** (sólo el %, sin mínimo y con el riel
+ * descontado). Migrá a ésta al tocar cada taller.
+ */
+export async function tresNumerosDelPrestador(args: {
+  prestadorId: string; tipoServicio: string; precioNeto: number; fechaVigencia: string;
+}): Promise<ResultadoWrapper<TresNumeros>> {
+  const c = await comisionAplicable({
+    prestadorId: args.prestadorId, tipoServicio: args.tipoServicio,
+    fechaVigencia: args.fechaVigencia,
+  });
+  if (!c.ok) return c;
+
+  const { comision, aplico, neto } = netoDelPrestador(args.precioNeto, c.data);
+  const iva = c.data.tarifaIvaPct ?? 0;
+
+  return {
+    ok: true,
+    data: {
+      neto: args.precioNeto,
+      loQueVeLaFamilia: Math.round(args.precioNeto * (100 + iva)) / 100,
+      loQueRecibis: neto,
+      comision, aplico,
+      comisionPct: c.data.pct, comisionMinimo: c.data.minimo,
+      ivaPct: iva, fechaVigencia: c.data.fechaConsultada,
+    },
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LA CONFIGURACIÓN DEL CHECKOUT — orden de medios y diferido
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface ConfiguracionPago {
+  /** El orden en que se OFRECEN. DeUna primero por costo de riel (D-D). */
+  ordenMedios: string[];
+  /** `false` hoy. Cuesta 7,7 %–15 %: encenderlo es una decisión, no un descuido. */
+  diferidoVivo: boolean;
+  /** El bono de recarga. Su encendido es `bonoRecargaVivo`, NO que el mínimo sea > 0. */
+  bonoRecargaPct: number;
+  bonoRecargaMinimo: number;
+  bonoRecargaVivo: boolean;
+}
+
+/**
+ * 🔴 EL ORDEN NO ES ESTÉTICO: ES PLATA. Crédito corriente cuesta 6,35 % + $0,05;
+ * débito 2,9 %; **cada punto de mezcla que sale de crédito vale ~4 % del ticket.**
+ * Por eso viene del servidor y no de un array en la pantalla: se reordena sin deploy.
+ */
+export async function configuracionPago(): Promise<ResultadoWrapper<ConfiguracionPago>> {
+  const { data, error } = await getClient()
+    .from('app_config').select('clave, valor')
+    .in('clave', ['medios_pago_orden', 'pago_diferido_vivo',
+                  'saldo_bono_recarga_pct', 'saldo_bono_recarga_minimo',
+                  'saldo_bono_recarga_vivo']);
+  if (error) return fallo('no_se_pudo', 'No pudimos leer la configuración de pago.');
+
+  const m = new Map((data ?? []).map((r) => [r.clave as string, r.valor as string]));
+  const orden = (m.get('medios_pago_orden') ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+  if (orden.length === 0) {
+    /* Fail-closed: sin orden configurado NO se inventa uno. Un orden por defecto
+       escrito en la pantalla es exactamente lo que esta clave existe para evitar. */
+    return fallo('sin_configuracion', 'No hay orden de medios de pago configurado.');
+  }
+  const minimo = Number(m.get('saldo_bono_recarga_minimo') ?? 0);
+  return {
+    ok: true,
+    data: {
+      ordenMedios: orden,
+      diferidoVivo: m.get('pago_diferido_vivo') === 'true',
+      bonoRecargaPct: Number(m.get('saldo_bono_recarga_pct') ?? 0),
+      bonoRecargaMinimo: minimo,
+      /* 🔴 El encendido tiene BANDERA PROPIA, y no se deriva del mínimo. La v1 hacía
+         `minimo > 0` — y cuando el mínimo pasó a su valor firmado ($50) el bono se
+         habría leído como ENCENDIDO sin que nadie lo encendiera. *Un apagado que
+         depende de que un valor sea cero se prende solo el día que alguien escribe
+         el valor de verdad.* */
+      bonoRecargaVivo: m.get('saldo_bono_recarga_vivo') === 'true',
+    },
+  };
+}

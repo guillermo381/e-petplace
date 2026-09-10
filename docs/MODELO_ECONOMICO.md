@@ -1,6 +1,39 @@
 # MODELO_ECONOMICO.md — e-PetPlace (Ecuador)
 **v1.1 · 10 de septiembre de 2026 · mesa + founder.** (v1.0 misma fecha: despensa al 12 % y base de costos incompleta — superada por firma del founder.) Reemplaza las hipótesis económicas del MODELO_FINANCIERO v2.9 (§2.2 mapa de revenue, §3.1 fórmula, 8.1) por lo medido: calculadora de Nuvei, RUC de Satori Inov, normativa verificada. El contrato técnico del ledger no cambia; cambian los NÚMEROS que `fee_configs` guarda y quién paga qué. Calculadora viva: `MODELO_ECONOMICO_EPETPLACE_v1.1.xlsx` (todo lo amarillo es supuesto a reemplazar).
 
+> **➕ ENMIENDA S115-A (10-sep-2026) — EL CARRITO MIXTO Y EL MÍNIMO SOBRE BASE CERO.**
+> Dos casos que la v1.1 no decide y que el objeto obligó a resolver. Firmados por el
+> founder sobre la medición.
+>
+> **E-A · El mínimo del carrito mixto: manda la categoría de MAYOR BASE.**
+> §2 D-A fija «$2,00 alimento / $1,00 resto» y no dice qué pasa cuando un pedido tiene
+> las dos cosas. Medido: de **105 pedidos con ítems, 94 son sólo alimento, 10 sólo resto
+> y 1 es MIXTO** — existe, no es teórico.
+> ⇒ **Manda el mínimo de la categoría con mayor base imponible del pedido.**
+> *Ejemplo firmado: un pedido de $45 de alimento + $3 de accesorio paga el mínimo de
+> alimento ($2,00).* Al revés —aplicar el mínimo alto por tener una sola bolsa— castigaría
+> un accesorio de $3; aplicar el bajo regalaría el piso en un pedido que es casi todo
+> alimento. **El dominante es el único criterio derivable del dato.**
+> Vive en `_devengar_pedido`, que manda `categoria_origen` al resolver.
+>
+> **E-B · El mínimo NO aplica sobre base cero.**
+> Medido al cablear el mínimo: hay **110 citas con precio $0,00** —días de guardería
+> consumidos de un paquete, ya pagados en el bono— y `comision_efectiva(0, 18, 1.50)`
+> devolvía **$1,50**. Hoy no muerde (esas citas no devengan), pero el mínimo creaba la
+> posibilidad de **cobrar la comisión dos veces**.
+> ⇒ **Base cero ⇒ comisión cero**, con su propio valor de snapshot (`aplico: 'base_cero'`).
+> *El mínimo es un piso sobre una transacción real, no un cargo por una no-transacción.*
+>
+> **E-C · Para una CITA, «la fecha en que el precio rige» es la del SERVICIO.**
+> Firma del founder (opción 2). Y la forma que la sostiene no es que las dos puertas
+> coincidan: es que **haya una sola** — la confirmación LEE el `fee_config_id` congelado
+> y sólo resuelve si no hay; el congelador re-congela al reagendar **mientras la cita no
+> esté pagada**. *Dos resoluciones independientes del mismo hecho no pueden «coincidir»:
+> pueden, como mucho, no haber divergido todavía.*
+> Servicios sin fecha propia (despensa, paquete, plan) caen a la fecha del pago, y está
+> escrito en el código, no como default silencioso.
+
+
 ---
 
 ## 0. Veredicto
