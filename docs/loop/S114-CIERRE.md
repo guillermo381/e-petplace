@@ -238,10 +238,13 @@ son dos afirmaciones distintas*, y el sello es mirar `cron.job_run_details` tras
 - **Fichas S114 depositadas, una c/u:** `D-1050`…`D-1058`.
 - **Partes de cierre de las seis pistas en `main` (barrido L-217):** `S114-B.md` (B, es su
   cierre) · `S114-C.md` + `S114-C-HALLAZGOS-DE-CAMINAR.md` (C) · `S114-D-CIERRE.md` (D) ·
-  `S114-E-CIERRE.md` (E) · `S114-F-CIERRE.md` (F). Los tres últimos vivían sólo en sus
-  ramas y se trajeron **por contenido** (no merge de rama, para no arrastrar código —
-  `L-529`); la corrección la trajo D citando el precedente caro de S92 (seis actas que
-  quedaron fuera del canon por ser la última acción de cada pista).
+  `S114-E-CIERRE.md` (E) · `S114-F-CIERRE.md` (F). **CINCO de seis vivían sólo en sus ramas en su versión final** —los de D, E y F enteros,
+  y los asientos finales de B (los doce guards + tabla de disparos) y C (§⑰ enmendada) que
+  en `main` estaban en su versión de mitad de sesión— y se trajeron **por contenido, con el
+  blob verificado idéntico** (no merge de rama, para no arrastrar código — `L-529`; y el
+  blob es lo único que descarta un `>` truncado, lección de D). Lo cazaron D, B y C citando
+  `L-217`; el precedente caro es S92 (seis actas fuera del canon por ser la última acción de
+  cada pista).
 - **Higiene de otras ramas (S113, no S114):** se deduplicó `L-517` (dos copias idénticas) y
   se **consolidó `D-1047`** (dos fichas distintas con el mismo número — la misma deuda filada
   por D y E en paralelo, ambas con `pnpm proximo:ficha`; la colisión que `D-1003` cura pero
