@@ -180,6 +180,28 @@ function paresDe(t: Theme, nombre: string): Pair[] {
     add(`status.${s}Text / bg.card`, t.status[`${s}Text`], t.bg.card)
   }
 
+  /* S115-B · EL TILDE DE «este número cierra», sobre el INTERIOR de la caja
+     del campo (`caja-de-campo.ts`: `bg.card` en claro, `bg.overlay` en los
+     oscuros) — que NO es `bg.card` pelada en dos de los tres temas.
+
+     🔴 **EL PAR NO ESTABA DECLARADO Y EL GATE DABA VERDE IGUAL** — 431 pares,
+     cero fallos, y ninguno era éste. Al declararlo salió lo que había que
+     encontrar: **`status.success` (el verde PURO) da 1.63 sobre blanco**, muy
+     por debajo del 3:1 de un elemento no textual. Por Ley 2 el hex puro es
+     GRÁFICA y el registro funcional es la variante AA — y un tilde que es la
+     única señal de que la cédula cerró **es funcional, no decoración**.
+     ⇒ la pieza usa `successText` (6.33 en claro; en los dos oscuros los dos
+     tokens coinciden, así que ahí no cambia nada).
+     *Un gate de pares declarados no crece con el código: el color nuevo se
+     declara o su verde no dice nada del color nuevo.* */
+  add(
+    'S115 · tilde de validez / interior del campo',
+    t.status.successText,
+    t.mode === 'light' ? t.bg.card : t.bg.overlay,
+    undefined,
+    true, // no textual: es un glifo, su piso es 3:1
+  )
+
   // Tintes de Tarjeta (B3.2): el texto AA de cada capa sobre su tint compositado.
   // (warning/danger/success ya están cubiertos por los pares de status de arriba;
   // vida comparte tint con success.)

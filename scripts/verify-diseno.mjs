@@ -289,6 +289,14 @@ const ui = leer(RAICES_UI.flatMap(archivosTsx));
 /** El corpus de LÓGICA (ver `archivosCodigo`): incluye `.ts`, donde viven los
  *  flujos extraídos. Hoy lo consume R34. */
 const appsCodigo = leer(RAICES.flatMap(archivosCodigo));
+/** S115-B · el corpus de LÓGICA de `packages/ui` — hermano de `appsCodigo` y
+ *  por la MISMA razón (L-226): `identificacion-ec.ts` es una pieza fiscal que
+ *  vive en un `.ts`, y un corpus de solo `.tsx` **no la vería y daría verde**.
+ *  Se agrega acotado —lo consumen R84 y R85— en vez de ensanchar el corpus
+ *  entero, que encendería de una vez todas las demás reglas sobre archivos que
+ *  nunca miraron (mismo criterio que `archivosCodigo` ya declara). */
+const uiCodigo = leer(RAICES_UI.flatMap(archivosCodigo));
+
 /** S96-B · el corpus de R35: la galería es el único lugar de `ui` que se
  *  compone como PANTALLA, y era el hueco de R2 (que solo mira `apps/`). */
 const galeria = leer(archivosTsx('packages/ui/src/gallery'));
@@ -2307,6 +2315,25 @@ const FIXTURES = {
         "const ORDEN_CASO: readonly EtapaCaso[] = ['recibido', 'con_prestador']\n",
     },
   ],
+  /* R84 · la tarifa escrita adentro de la pieza: compila, se ve perfecta, y
+     queda mintiendo el día que la ley mueva el número — que en Ecuador ya
+     pasó una vez (12 → 15). */
+  R84: [{
+    path: 'packages/ui/src/components/DesgloseCompra.tsx',
+    src: "const rotulo = 'IVA 15 %'\nconst tope = '$50'\nexport function DesgloseCompra() { return rotulo + tope }\n",
+  }],
+  /* R85 · la voz suelta en el JSX, sin pasar por el riel: el typecheck la
+     deja pasar porque es un string perfectamente válido. */
+  R85: [{
+    path: 'packages/ui/src/components/TarjetaFactura.tsx',
+    src: "export function TarjetaFactura() {\n  return <Texto variante=\"cuerpo\">Tu factura está lista</Texto>\n}\n",
+  }],
+  /* R86 · el motivo del rechazo, con el nombre puesto: es lo que llega a la
+     pantalla el día que alguien tenga apuro por diagnosticar. */
+  R86: [{
+    path: 'packages/ui/src/components/TarjetaFactura.tsx',
+    src: "export type TarjetaFacturaProps = { estado: EstadoFactura; motivoRechazo?: string }\n",
+  }],
   /* R72 · la etapa que existe en la unión y falta en el orden: compila, no
      falla, y el paso desaparece de la escalera. */
   R72: [{
@@ -7407,6 +7434,12 @@ const TABLA_R77 = new Map([
   // ── EXHAUSTIVOS: si le falta un miembro, la pantalla pierde un paso ──
   ['ConvivenciaInput.tsx::ORDEN', 'exhaustivo'],
   ['EscaleraCaso.tsx::ORDEN_CASO', 'exhaustivo'],
+  /* S115-B · los tres tipos de identificación del SRI. **EXHAUSTIVO, y la
+     consecuencia de que le falte uno es concreta**: el selector deja de
+     ofrecer ese tipo y la persona que tiene pasaporte se queda sin forma de
+     facturar. El orden NO es alfabético —cédula va primera porque es el caso
+     de casi toda familia—, así que tampoco se puede derivar del tipo. */
+  ['CampoIdentificacion.tsx::TIPOS', 'exhaustivo'],
   ['EscaleraSolicitud.tsx::ORDEN', 'exhaustivo'],
   ['HojaFiltros.tsx::ORDEN_CONVIVENCIA', 'exhaustivo'],
   ['ModalDosAlturas.tsx::candidatas', 'exhaustivo'],
@@ -7938,7 +7971,188 @@ function r69(archivos) {
   return { fallos, info: `${ofensores} absoluto(s) después del montaje · ${declarados} declarado(s)` }
 }
 
-const REGLAS = { R83: r83, R82: r82, R81: r81, R80: r80, R79: r79, R78: r78, R77: r77, R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * S115-B · LAS TRES REGLAS DE LAS PIEZAS FISCALES.
+ *
+ * Las cinco piezas de la factura, nombradas UNA vez: si mañana nace una sexta
+ * y no entra a esta lista, las tres reglas la ignoran en silencio — por eso el
+ * ancla de cada una exige encontrarlas TODAS y grita si falta alguna.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+const PIEZAS_FISCALES = [
+  'CampoIdentificacion',
+  'SelectorFacturacion',
+  'DesgloseCompra',
+  'TarjetaFactura',
+  'CampoClaveAcceso',
+]
+
+/** Las piezas fiscales del corpus, con su fuente ya sin comentarios — las
+ *  cabeceras de esta casa HABLAN de IVA y de tarifas, así que medirlas
+ *  crudas daría un rojo sobre la documentación que explica por qué el
+ *  número no está. */
+function fiscalesDe(archivos) {
+  return PIEZAS_FISCALES.map((nombre) => {
+    const f = piezaDe(archivos, nombre)
+    return f === null ? null : { nombre, path: f.path, src: sinComentarios(f.src ?? '') }
+  })
+}
+
+/** R84 · NINGUNA TARIFA VIVE ADENTRO DE UNA PIEZA (S115-B).
+ *
+ *  🔴 QUÉ MIDE, Y POR QUÉ NO LO VE NINGÚN OTRO INSTRUMENTO: un `'IVA 15 %'`
+ *  escrito en el JSX **compila, se ve bien y es correcto hoy**. El día que la
+ *  ley mueva el número, la pieza sigue verde y empieza a mentir. *No es un
+ *  defecto que falle: es uno que funciona mal.*
+ *
+ *  Y no es hipotético: **en Ecuador ya pasó**. La tabla `facturas` conserva
+ *  `subtotal_12` al lado de `subtotal_15` como cicatriz de ese cambio.
+ *
+ *  ⚠️ LO QUE **NO** MIDE, declarado: no mira `apps/`. Una pantalla que teclee
+ *  la tarifa queda fuera de su alcance — su verde dice «las piezas no la
+ *  tienen adentro», jamás «nadie la escribe a mano en el producto». */
+function r84(archivos) {
+  const fiscales = fiscalesDe(archivos)
+  const fallos = [...ancla('R84', fiscales.filter(Boolean).length, PIEZAS_FISCALES.length, 'pieza(s) fiscal(es) en el corpus')]
+  if (fallos.length > 0) return { fallos, info: 'corpus incompleto' }
+
+  let literales = 0
+  for (const { nombre, src: crudo } of fiscales) {
+    /* 🔴 LAS KEYS DEL RIEL SE SACAN ANTES DE MIRAR, y lo encontró la regla
+       acusándose a sí misma en su primera corrida: `t('desglose.iva')` es una
+       KEY —el nombre de una entrada del diccionario— y mi patrón la leía como
+       una voz con la palabra «IVA» adentro. *Un rojo por la razón equivocada
+       está tan roto como un verde por la razón equivocada*: si lo dejaba, la
+       única cura posible habría sido renombrar la key, o sea deformar el
+       código para contentar al instrumento.
+       La voz de esa key vive en `es.ts`/`en.ts` **y ahí SÍ debe decir IVA**:
+       lo que la regla persigue es la tarifa escrita en la PIEZA. */
+    const src = crudo.replace(/t\(\s*(['"`])(?:(?!\1)[^\\]|\\.)*\1/g, 't(KEY')
+    /* Solo dentro de LITERALES DE STRING: `subtotal_15` es el nombre de una
+       prop —espejo de la columna de la base— y marcarlo sería el rojo falso
+       que apagaría la regla entera. */
+    for (const m of src.matchAll(/(['"`])((?:(?!\1)[^\\]|\\.)*)\1/g)) {
+      const texto = m[2]
+      literales += 1
+      if (/\bIVA\b|\bVAT\b/i.test(texto)) {
+        fallos.push(
+          `R84 **\`${nombre}\` nombra el IVA en un literal (\`${texto.slice(0, 40)}\`, línea ${lineaDe(src, m.index)}).** ` +
+          `La voz va al riel con \`{{tarifa}}\`; el número lo pone quien la monta.`,
+        )
+      } else if (/\d\s*%/.test(texto) || /^\s*\$\s*\d/.test(texto)) {
+        fallos.push(
+          `R84 **\`${nombre}\` tiene una tarifa o un monto escrito (\`${texto.slice(0, 40)}\`, línea ${lineaDe(src, m.index)}).** ` +
+          `Son números que la ley mueve — en Ecuador el IVA ya pasó de 12 a 15.`,
+        )
+      }
+    }
+  }
+  return {
+    fallos,
+    info:
+      `0 tarifa(s) escrita(s) adentro · alcance: ${PIEZAS_FISCALES.length} pieza(s), ${literales} literal(es) mirado(s) · ` +
+      `su verde dice «la tarifa llega por props», JAMÁS «el cálculo del IVA está bien» ni «ninguna pantalla la teclea»`,
+  }
+}
+
+/** R85 · TODA VOZ DE UNA PIEZA FISCAL PASA POR EL RIEL, EN LOS DOS IDIOMAS.
+ *
+ *  🔴 **LA MITAD HONESTA: el par es↔en ya lo garantiza el typecheck** —
+ *  `en.ts` cierra con `satisfies Espejo<typeof uiEs>` y una key faltante
+ *  rompe la compilación (probado en vivo: `TS2741`). Medirlo de nuevo acá es
+ *  defensa en profundidad barata, **y sobrevive a que alguien quite el
+ *  `satisfies`**, que es justo cuando haría falta.
+ *
+ *  **LA MITAD QUE NADIE MÁS MIDE, y es la que justifica la regla:** un texto
+ *  en español escrito directo en el JSX es un string perfectamente válido. El
+ *  compilador lo acepta, el Espejo ni se entera —nunca fue una key— y la
+ *  pieza queda monolingüe sin que nada se ponga rojo. */
+function r85(archivos) {
+  const fiscales = fiscalesDe(archivos)
+  const fallos = [...ancla('R85', fiscales.filter(Boolean).length, PIEZAS_FISCALES.length, 'pieza(s) fiscal(es) en el corpus')]
+
+  let es = ''
+  let en = ''
+  try {
+    es = readFileSync(join(RAIZ_REPO, 'packages/ui/src/i18n/es.ts'), 'utf8')
+    en = readFileSync(join(RAIZ_REPO, 'packages/ui/src/i18n/en.ts'), 'utf8')
+  } catch {
+    fallos.push('R85: ANCLA ROTA — no pude leer los diccionarios del namespace `ui`. Un cero acá diría «no miré».')
+  }
+  if (fallos.length > 0) return { fallos, info: 'corpus incompleto' }
+
+  let claves = 0
+  for (const { nombre, src } of fiscales) {
+    /* ① la pieza consume el riel */
+    if (!/useTraduccionUi/.test(src)) {
+      fallos.push(`R85 **\`${nombre}\` no consume \`useTraduccionUi\`** — una pieza sin riel no puede tener par en inglés.`)
+    }
+    /* ② cada raíz de key existe en LOS DOS diccionarios */
+    for (const m of src.matchAll(/t\(\s*[`'"]([a-zA-Z]+)\./g)) {
+      claves += 1
+      for (const [idioma, dic] of [['es', es], ['en', en]]) {
+        if (!new RegExp(`\\b${m[1]}\\s*:\\s*\\{`).test(dic)) {
+          fallos.push(`R85 **\`${nombre}\` usa \`${m[1]}.*\` y ese grupo no está en \`${idioma}.ts\`.**`)
+        }
+      }
+    }
+    /* ③ voz suelta: un texto con espacios dentro de un nodo de JSX */
+    for (const m of src.matchAll(/>\s*([A-Za-zÁÉÍÓÚÑáéíóúñ¿¡][^<>{}\n]*\s+[^<>{}\n]*?)\s*</g)) {
+      fallos.push(
+        `R85 **\`${nombre}\` tiene voz suelta en el JSX** (\`${m[1].trim().slice(0, 40)}\`, línea ${lineaDe(src, m.index)}) — ` +
+        `el compilador la acepta y el Espejo ni se entera: nunca fue una key.`,
+      )
+    }
+  }
+  return {
+    fallos,
+    info:
+      `0 voz/voces sueltas · alcance: ${PIEZAS_FISCALES.length} pieza(s), ${claves} llamada(s) al riel · ` +
+      `su verde dice «la voz pasa por el riel y su grupo existe en los dos idiomas», JAMÁS «la traducción es buena»`,
+  }
+}
+
+/** R86 · EL ERROR DEL SRI NO PUEDE LLEGAR A LA FAMILIA (S115-B).
+ *
+ *  🔴 QUÉ MIDE: que `TarjetaFactura` **no tenga por dónde recibirlo**. Ni una
+ *  prop con ese nombre, ni un slot `ReactNode` — *que es por donde entraría
+ *  sin llamarse motivo*, exactamente la mitad que `R74` aprendió a mirar en
+ *  `CabeceraCaso`.
+ *
+ *  El porqué no es de estilo: en Ecuador la factura electrónica falla seguido
+ *  (`MODELO_DESPENSA` §8.6bis), así que `corrigiendo` **es un estado normal
+ *  del sistema**. Mostrar el texto crudo del organismo convertiría un trámite
+ *  nuestro en una falla que la persona no puede resolver. */
+function r86(archivos) {
+  const f = piezaDe(archivos, 'TarjetaFactura')
+  if (f === null) {
+    return { fallos: ['R86: ANCLA ROTA — `TarjetaFactura.tsx` no está en el corpus. Un cero acá diría «no miré».'], info: 'corpus incompleto' }
+  }
+  const src = sinComentarios(f.src ?? '')
+  const fallos = [...ancla('R86', /TarjetaFacturaProps/.test(src) ? 1 : 0, 1, 'declaración de props (sin ella la pieza no es la que creo)')]
+  if (fallos.length > 0) return { fallos, info: 'ancla rota' }
+
+  for (const m of src.matchAll(/\b(motivo|motivoRechazo|sriError|sri_error|detalleError|razonRechazo)\b/gi)) {
+    fallos.push(
+      `R86 **\`TarjetaFactura\` nombra \`${m[1]}\` (línea ${lineaDe(src, m.index)}).** ` +
+      `La familia nunca ve el error del SRI: la prop no debe existir, no basta con no renderizarla.`,
+    )
+  }
+  /* El slot: la puerta por la que el motivo entra SIN llamarse motivo. */
+  for (const m of src.matchAll(/:\s*ReactNode/g)) {
+    fallos.push(
+      `R86 **\`TarjetaFactura\` acepta un slot \`ReactNode\` (línea ${lineaDe(src, m.index)}).** ` +
+      `Un slot deja meter el texto crudo del organismo sin que ninguna prop se llame «motivo» (misma clase que R74).`,
+    )
+  }
+  const props = [...src.matchAll(/\b\w+\??:/g)].length
+  return {
+    fallos: [...fallos, ...ancla('R86', props, 3, 'campo(s) de props mirados (sin ellos el cero no dice nada)')],
+    info: `0 vía(s) de entrada del motivo · alcance: ${props} campo(s) de props mirados · su verde dice «no hay por dónde pasarlo», jamás «el mensaje que se muestra es el correcto»`,
+  }
+}
+
+const REGLAS = { R86: r86, R85: r85, R84: r84, R83: r83, R82: r82, R81: r81, R80: r80, R79: r79, R78: r78, R77: r77, R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -8407,6 +8621,12 @@ corridas.push(['R73 (las dos tarjetas del dinero son parejas)', r73(ui)])
 corridas.push(['R74 (la cabecera del caso no dice el monto)', r74(ui)])
 corridas.push(['R75 («otro» no es un motivo, y la lista no scrollea)', r75(ui)])
 corridas.push(['R76 (el plazo no es una alarma ni un contador)', r76(ui)])
+/* S115-B · las tres fiscales. Corren sobre `uiCodigo` y no sobre `ui` porque
+   `identificacion-ec.ts` vive en un `.ts` y el corpus de solo `.tsx` no lo
+   vería — daría verde sin haberlo mirado (L-226). */
+corridas.push(['R84 (ninguna tarifa vive adentro de una pieza)', r84(uiCodigo)])
+corridas.push(['R85 (la voz fiscal pasa por el riel, en los dos idiomas)', r85(uiCodigo)])
+corridas.push(['R86 (el error del SRI no llega a la familia)', r86(uiCodigo)])
 corridas.push(['R71 (un wrapper sin exportar es un motor sin puerta)', r71(leer(['packages/api/src/index.ts', ...archivosCodigo('packages/api/src/wrappers')]))])
 corridas.push(['R69 (nada absoluto despues de SuperficieLlamada)', r69([...apps, ...appsCodigo])]);
 corridas.push(['R68 (nada del componente dentro de un worklet de gesto)', r68([...ui, ...apps, ...appsCodigo, ...leer(archivosCodigo('packages/ui/src'))])]);

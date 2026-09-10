@@ -30,6 +30,11 @@ import { ActivarPlaca } from '../components/ActivarPlaca'
 import { FichaPapel } from '../components/FichaPapel'
 import { HojaTraerPapeles } from '../components/HojaTraerPapeles'
 import { HuellaDelVinculo } from '../components/HuellaDelVinculo'
+import { CampoIdentificacion, type DatosIdentificacion } from '../components/CampoIdentificacion'
+import { SelectorFacturacion, type ModoFacturacion } from '../components/SelectorFacturacion'
+import { DesgloseCompra } from '../components/DesgloseCompra'
+import { TarjetaFactura, FacturasVacio } from '../components/TarjetaFactura'
+import { CampoClaveAcceso } from '../components/CampoClaveAcceso'
 import { PantallaDocumentos } from '../components/PantallaDocumentos'
 import { TarjetaMetrica } from '../components/TarjetaMetrica'
 import { TarjetaHoy } from '../components/TarjetaHoy'
@@ -9359,6 +9364,9 @@ function GaleriaInterna() {
             />
           </View>
         </Seccion>
+        <Seccion titulo="⭐ GATE S115 — LAS PIEZAS DE LA FACTURA · qué decide: (a) que el tipo de identificación se lea como una ELECCIÓN y no como un formulario que adivina; (b) que la opción apagada por el tope se entienda como una REGLA que se aprende y no como algo roto; (c) que el IVA en $0,00 se lea como un hecho («no paga») y no como un dato que falta; (d) que las cuatro caras de la factura midan lo mismo y no salten al cambiar de estado; (e) que 49 dígitos se puedan comparar contra un papel">
+          <BloqueFiscalS115 />
+        </Seccion>
     </ScrollView>
   )
 }
@@ -10006,6 +10014,149 @@ function PiezasDelOficioS107() {
           ]}
           rotuloOpcionales="Opcional"
           opcionales={[{ clave: 'redes', texto: 'Pueden publicar fotos de mi mascota en redes' }]}
+        />
+      </View>
+    </View>
+  )
+}
+
+/* ===========================================================================
+ * S115-B - EL BLOQUE FISCAL DE LA GALERIA.
+ *
+ * Los estados que el founder pidio ver, todos a la vez: los cuatro de la
+ * factura, el desglose MIXTO 0/15, una cedula VALIDA y una INVALIDA, y el
+ * tope superado que apaga «Consumidor final».
+ *
+ * ADVERTENCIA: los numeros son de RELLENO. La tarifa y el tope entran por
+ * props en las cinco piezas, asi que estos valores son del fixture y no de la
+ * casa - `R84` mide que ninguna pieza los tenga adentro.
+ * =========================================================================== */
+function BloqueFiscalS115() {
+  const { theme } = useTheme()
+  /* Dos formularios en paralelo: uno que cierra su digito verificador y otro
+     que no. Sin el segundo, la galeria mostraria solo el camino feliz - y el
+     estado que hay que juzgar es justamente el del error. */
+  const [ok, setOk] = useState<DatosIdentificacion>({
+    tipo: 'cedula',
+    identificacion: '1712345675',
+    razonSocial: '',
+    direccion: 'Av. Shyris N34-120',
+    email: 'karina@correo.com',
+  })
+  const [mal, setMal] = useState<DatosIdentificacion>({
+    tipo: 'cedula',
+    identificacion: '1712345670',
+    razonSocial: '',
+    direccion: '',
+    email: '',
+  })
+  const [conRuc, setConRuc] = useState<DatosIdentificacion>({
+    tipo: 'ruc',
+    identificacion: '1790011674001',
+    razonSocial: 'Veterinaria Los Shyris Cia. Ltda.',
+    direccion: 'Av. Portugal E11-20',
+    email: 'facturacion@shyris.ec',
+  })
+  const [modo, setModo] = useState<ModoFacturacion>('consumidorFinal')
+  const [modoTope, setModoTope] = useState<ModoFacturacion>('misDatos')
+  const [guardar, setGuardar] = useState(true)
+  const [clave, setClave] = useState('')
+
+  const rotulo = (texto: string) => (
+    <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+      {texto}
+    </Text>
+  )
+
+  return (
+    <View style={{ gap: spacing[8] }}>
+      {/* (1) EL CAMPO - valido, invalido y RUC */}
+      <View style={{ gap: spacing[3] }}>
+        {rotulo('CampoIdentificacion · cedula VALIDA (1712345675) · el check aparece quieto, sin animacion')}
+        <CampoIdentificacion valor={ok} onCambiar={setOk} />
+      </View>
+      <View style={{ gap: spacing[3] }}>
+        {rotulo('· cedula INVALIDA (ultimo digito cambiado) · dirige: dice que revisar, no se lamenta')}
+        <CampoIdentificacion valor={mal} onCambiar={setMal} />
+      </View>
+      <View style={{ gap: spacing[3] }}>
+        {rotulo('· RUC · aparece «Razon social», que con cedula ni se dibuja')}
+        <CampoIdentificacion valor={conRuc} onCambiar={setConRuc} />
+      </View>
+
+      {/* (2) EL SELECTOR - bajo el tope y por encima */}
+      <View style={{ gap: spacing[3] }}>
+        {rotulo('SelectorFacturacion · BAJO el tope: las dos opciones disponibles')}
+        <SelectorFacturacion
+          elegido={modo}
+          onElegir={setModo}
+          total={18.4}
+          topeConsumidorFinal={50}
+          topeFormateado="$50.00"
+          guardar={guardar}
+          onGuardar={setGuardar}
+          mostrarDeducible
+        >
+          <CampoIdentificacion valor={ok} onCambiar={setOk} />
+        </SelectorFacturacion>
+      </View>
+      <View style={{ gap: spacing[3] }}>
+        {rotulo('· TOPE SUPERADO ($82,90 > $50) · «Consumidor final» APAGADA con su razon - jamas escondida')}
+        <SelectorFacturacion
+          elegido={modoTope}
+          onElegir={setModoTope}
+          total={82.9}
+          topeConsumidorFinal={50}
+          topeFormateado="$50.00"
+        >
+          <CampoIdentificacion valor={conRuc} onCambiar={setConRuc} />
+        </SelectorFacturacion>
+      </View>
+
+      {/* (3) EL DESGLOSE - mixto, una tarifa, y el cero honesto */}
+      <View style={{ gap: spacing[3] }}>
+        {rotulo('DesgloseCompra · MIXTO 0/15 · los dos subtotales con su etiqueta y la frase que ensena')}
+        <DesgloseCompra subtotal_0={24.5} subtotal_15={12} iva={1.8} total={38.3} tarifaIva={15} />
+      </View>
+      <View style={{ gap: spacing[3] }}>
+        {rotulo('· SOLO alimento · el IVA en $0.00 SE MUESTRA: es un hecho medido, no un dato que falta')}
+        <DesgloseCompra subtotal_0={24.5} subtotal_15={null} iva={0} total={24.5} tarifaIva={15} />
+      </View>
+      <View style={{ gap: spacing[3] }}>
+        {rotulo('· con descuento · y el IVA todavia sin calcular (null) NO se dibuja - el otro estado')}
+        <DesgloseCompra subtotal_0={null} subtotal_15={40} iva={null} total={34} descuento={-6} tarifaIva={15} />
+      </View>
+
+      {/* (4) LA FACTURA - las cuatro caras miden lo mismo */}
+      <View style={{ gap: spacing[3] }}>
+        {rotulo('TarjetaFactura · los CUATRO estados · miden lo mismo: la lista no salta al cambiar')}
+        <TarjetaFactura estado="preparando" />
+        <TarjetaFactura
+          estado="lista"
+          numero="001-002-000000123"
+          onDescargarPdf={() => {}}
+          onDescargarXml={() => {}}
+        />
+        <TarjetaFactura estado="corrigiendo" numero="001-002-000000124" />
+        <TarjetaFactura
+          estado="notaCredito"
+          numero="001-002-000000125"
+          monto={12}
+          onDescargarPdf={() => {}}
+          onDescargarXml={() => {}}
+        />
+        {rotulo('· el vacio digno · SIN boton: una factura no se crea, aparece cuando compras')}
+        <FacturasVacio />
+      </View>
+
+      {/* (5) LA CLAVE DE ACCESO */}
+      <View style={{ gap: spacing[3] }}>
+        {rotulo('CampoClaveAcceso · 49 digitos agrupados de a cuatro, como en el papel · pegar y comparar')}
+        <CampoClaveAcceso valor={clave} onCambiar={setClave} />
+        {rotulo('· ya pegada y VALIDA · el dv (…773) se VERIFICO con el algoritmo, no se tecleo: el primero que escribi a mano terminaba en 7 y NO cerraba')}
+        <CampoClaveAcceso
+          valor="1009202601179001167400110010010000000011234567773"
+          onCambiar={() => {}}
         />
       </View>
     </View>
