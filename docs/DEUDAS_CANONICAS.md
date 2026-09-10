@@ -30061,42 +30061,6 @@ de que un dato verdadero sostenga una conclusión falsa — la brecha entre acep
 el texto que describe el caso típico, la sonda parada en el eslabón anterior, la prosa que
 participa, y ahora la racha con la ventana propia.)*
 
----
-
-### `L-517` — El hedge no viaja entre sesiones: viaja la conclusión
-
-**S114-F, firma del founder.** Le pasé a otra pista un hallazgo con su hipótesis
-**bien marcada**: *«puede ser deliberada — Expo SDK 57 puede exigir TS 6, **es la
-explicación más probable***»*. Escrito con «puede», con «más probable», y con una
-sección aparte titulada **«lo que NO se midió»**.
-
-🔴 **Volvió como hecho.** La pista integradora contestó que iba a *«agregar la línea
-que declara que la divergencia es deliberada (Expo SDK 57)»* — **en el canon**, en un
-archivo que existe para que nadie vuelva a medir.
-
-**Lo medí antes de que lo escribiera, y no se sostenía:**
-
-```
-expo@57.0.4 · expo-router@57.0.4   typescript en peerDeps: —   en devDeps: —
-                                   ⇒ Expo NO lo exige
-
-git log -L de la línea en apps/cliente  →  UN SOLO commit: 98e14c97, el scaffold
-apps/cliente ~6.0.3 · apps/prestador ~6.0.3 · raíz ~5.9.0 · packages ~5.9.0
-                                   ⇒ los cuatro del MISMO commit, hace dos meses
-```
-
-*No era una decisión: era lo que dejó `create-expo-app` y nadie miró.*
-
-> ***Un hedge es contexto, y el contexto no sobrevive a un traspaso.*** Lo que cruza de
-> una sesión a otra es la frase que sirve para actuar — **«deliberada (Expo SDK 57)»**—,
-> no el párrafo donde vivía con su «puede». Y del otro lado llega **sin la marca y con la
-> autoridad de venir de quien midió el resto.**
-
-⚠️ **Y lo que lo vuelve un tipo propio y no un descuido: no hubo error de medición.** No
-medí de más ni de menos, y marqué bien. *El defecto ocurrió enteramente en el traspaso* —
-que es el único lugar donde ningún gate mira, porque **con seis pistas y un solo canal
-humano el «puede» se cae y queda el «es».**
-
 ## El corolario, y su tercera salida
 
 **Una inferencia que va a viajar a otra pista se manda con lo que haría falta para
@@ -31423,6 +31387,13 @@ número que exista es **un piso**, y se dice así cada vez que se publica.
 primeras familias**. Hasta entonces la deuda no se puede pagar y no es un atraso:
 es que el objeto no existe.
 
+**La medición que queda como piso** (S113-D · 15 exámenes, 190 analitos, Sonnet, una
+corrida, ~$0,024 por papel): filas **190/190** · valor **190/190** · unidad **190/190**
+· referencia **190/190** · marca ASCII **6/6** · **marcas inventadas 0 sobre 178 filas
+sin marca** · **adjetivos de juicio 0**. *La filaron D y E por separado con `pnpm
+proximo:ficha` y salió el mismo número — la colisión que `D-1003` cura pero que se pidió
+simultáneo en dos ramas; consolidadas en esta ficha al cierre de S114.*
+
 **Y una cosa que NO se le cobra al modelo.** La vara tiene un defecto medido por
 dos pistas por separado: **las fuentes del generador no dibujan `⁶` (U+2076) ni
 `⁹` (U+2079)** —son subconjuntos latinos de `@fontsource`, y sí llevan `³`
@@ -31462,45 +31433,6 @@ cinco sesiones apagado y viajó cuando otra cosa obligó el build).
 **Dueño:** A. **Nace:** S113 (6-sep-2026).
 
 
-
-### `D-1047` 🟡 · El conjunto de papeles clínicos es SINTÉTICO: mide la ley, no la variedad — su número es un PISO
-
-**Firma del founder (7-sep-2026), verbatim en lo que decide:** *los 38 de
-`documentos_clinicos_muestra` son SINTÉTICOS y no hay más. Deja de pedirse un
-papel real: no existe hoy.* ⇒ **nadie vuelve a poner «faltan papeles reales»
-como bloqueo**: no es una deuda de trabajo, es una deuda de MUNDO, y su disparo
-son las primeras familias.
-
-**Qué mide el conjunto, y es mucho:** **LA LEY** — que no interpreta, que
-transcribe con su unidad y su referencia, y que **no inventa marcas**. Su
-trampa central es exactamente la nuestra: valores fuera de rango **con y sin
-bandera impresa**, y los que no la llevan son los que delatan interpretación.
-Es, además, **tablero de regresión**: el día que alguien toque el prompt de
-`extract-papel`, este conjunto dice si se rompió algo.
-
-**Qué NO mide:** la variedad del papel real — manuscrito, stickers, papel
-arrugado, una foto torcida sacada en un mostrador. 🔴 **Ningún porcentaje suyo
-se cita como exactitud sobre papeles de verdad.** Se dice «piso», y se dice
-cada vez.
-
-**La medición que queda como piso** (S113-D, 15 exámenes · 190 analitos, Sonnet,
-una corrida, $0,024 por papel): filas **190/190** · valor **190/190** ·
-unidad **190/190** · referencia **190/190** · marca ASCII **6/6** ·
-**marcas inventadas 0 sobre 178 filas sin marca** · **adjetivos de juicio 0**.
-
-**Y la regla que sale de acá, que vale para cualquier conjunto de referencia:**
-**las filas cuya vara el artefacto no puede llevar se corrigen en la VARA, no
-se le cobran al modelo.** Medido: `⁶` y `⁹` (bloque Superíndices) están en **0
-de las 46 fuentes** del generador y `³` (Latin-1) en **46 de 46** — el papel
-mostraba un cuadro vacío donde el `ground_truth` decía la unidad. *Medir contra
-una verdad que el artefacto no lleva le cobra al modelo un error del generador.*
-Curado en el generador (superíndices a `^n`, y la celda de la marca con una
-fuente que tiene la flecha), **verificado contra la imagen y no contra el
-código**. Lo encontraron D y E por separado, en dos glifos distintos.
-
-**Disparo:** las primeras familias reales cargando un papel suyo. Ahí se re-mide
-con papeles de verdad y este número deja de ser el piso para ser una línea de
-comparación.
 
 ### `D-1045` 🟡 · Ninguna alergia dice quién la registró — el único discriminador es un proxy
 
