@@ -31108,6 +31108,35 @@ antes del soft launch de octubre.
 ---
 
 
+### `D-1058` 🟢 · El canal de notificación de Android — deliberadamente ausente; NO es causa de no-entrega (medido y confirmado)
+
+**Medido (S114-A + C):** las dos apps **no crean ningún canal** (`setNotificationChannelAsync`
+= 0) y el plugin `expo-notifications` no declara `defaultChannel` — sólo ícono y color.
+Fue **una decisión de D con su razón en el código de `despachar-push`:** se manda
+`notification` payload (no data-only, «para que se MUESTRE con la app cerrada») y **sin
+`channel_id` A PROPÓSITO** —«nombrar un canal inexistente hace que Android descarte el
+aviso en silencio, la peor falla posible acá»—.
+
+**Por qué NO es la causa de «no llega» (corrección de C, confirmada por el gate):** con
+`notification` + sin `channel_id`, **Android usa su canal por defecto y el aviso SE
+MUESTRA**. El push #4 llegó con token fresco + permiso dado ⇒ el fallback funciona en un
+aparato real. La ausencia de canal explica, como mucho, que el aviso caiga en
+«Miscellaneous» —un tema de **aspecto** y de que la persona pueda tenerlo silenciado—,
+**jamás de entrega.**
+
+**⚠️ Si algún día se construye un canal propio (por aspecto), el ORDEN es en piedra
+(riesgo que D ya nombró):** primero la app crea el canal y llega a los aparatos, DESPUÉS
+el despachador lo nombra — **nunca en el mismo tren, nunca al revés.** Un despachador que
+nombra un canal que el aparato todavía no creó = descarte silencioso, justo el modo de
+falla que la decisión original evita.
+
+**🔴 DISPARO (firma founder):** «un aparato donde el push NO llegue con token fresco y
+permiso dado» — sólo entonces el canal vuelve a ser candidato; hoy NO lo es. **Dueño:**
+C (apps), si se decide por aspecto. Hoy no hay nada que construir.
+
+---
+
+
 ### `D-1057` 🔴 · El permiso de notificaciones denegado/descartado es SILENCIOSO — nadie se entera, ni la familia ni nosotros
 
 **Medido (S114-A, incidente founder):** la app SÍ pide el permiso —`InvitacionAvisos`
@@ -31162,6 +31191,16 @@ doble — un permiso de Android BLOQUEADO da el MISMO síntoma que un token fant
 200, aparato sin mostrar nada), y **los fantasmas se generan solos** (FCM rota tokens;
 ver `D-1056`). Sin ACK no se distingue ninguno de los tres (fantasma · permiso off ·
 vivo), y los tres se ven `aceptada_transporte`.
+
+**CIERRE CON EVIDENCIA (S114, 10-sep):** el push del founder no llegaba, y resultó
+ser **DOS causas juntas** con el MISMO síntoma —token fantasma + permiso de Android
+bloqueado—, más una TERCERA candidata (canal inexistente) que se descartó por medición.
+**Las tres dan exactamente `FCM 200` y nada mostrado, y NINGUNA es medible desde el
+servidor.** Distinguirlas costó ~2 horas de prueba a mano (reinstalar para token fresco,
+conceder el permiso, y descartar el canal por el otro lado). *Ésa es la prueba de esta
+ficha: sin ACK no se distingue fantasma de permiso-off de no-mostrado — y hoy fueron dos
+a la vez.* La cura de raíz del token (para que no se regenere el fantasma) es `D-1056`
+(ya en main); la del permiso silencioso es `D-1057` (ya en main); el ACK sigue abierto.
 
 **🔴 DISPARO:** antes del soft launch de octubre (cuando haya familias reales cuya
 falta de push sea invisible), o el primer reporte de «no me llegan las notificaciones»
