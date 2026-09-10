@@ -29382,6 +29382,43 @@ lo construye y la otra lo mide **sobre el objeto que ya existe**.
 ---
 
 
+### `L-533` — Un instrumento que puede FALLAR con el mismo código que su HALLAZGO no está midiendo: está adivinando
+
+**Origen: E, S114 (sellando el tick desatendido de F1) — y se la cobró en su propio
+instrumento, que es lo que la vuelve exigible.** La primera versión del esperador del
+tick vivía en `/tmp` e importaba `./scripts/lib-db.mjs`. **Un import de ESM se resuelve
+contra el ARCHIVO que importa, jamás contra el `cwd`** ⇒ murió con
+`ERR_MODULE_NOT_FOUND` **y salió con código 1** — que en su propio contrato significaba
+*«el tick falló»*.
+
+🔴 **El fallo del instrumento se disfrazó del hallazgo exacto que el instrumento estaba
+buscando.** Sin abrir el archivo de salida, el parte habría dicho *«el reloj volvió a
+caer»* sobre un tick **que ni siquiera había ocurrido** — una afirmación falsa,
+perfectamente creíble, sobre el P0 de la sesión.
+
+**La cura es separar los códigos, y son TRES, no dos:**
+
+```
+0 → el lazo está sano          (hallazgo verde del PRODUCTO)
+1 → rojo del PRODUCTO           (el tick corrió y falló)
+2 → NO CONCLUYENTE              (el instrumento no pudo medir)
+```
+
+Vive curado en `scripts/s114/esperar-tick-f1.mjs`.
+
+**Por qué no alcanza con «revisar el script»:** este defecto **no tiene síntoma** — el
+instrumento corre, termina, y devuelve un número que su contrato sabe interpretar. *Es
+la familia de `L-459` (la primera prueba de un guard nuevo no es que dé verde, es que dé
+rojo sobre un caso real) y de `L-192` (una verificación cuyo modo de falla es el silencio
+no es una verificación), vista desde el lado del código de salida.*
+
+**Exigible:** todo instrumento que decida sobre un hecho del producto **reserva un código
+propio para «no pude medir»**, y quien lo consume trata ese código como **ausencia de
+medición, jamás como el rojo del producto**. Un instrumento de dos códigos sobre un
+mundo de tres estados **fabrica el tercero**.
+
+---
+
 ### `L-532` — «La llave i18n existe pero el bundle no la tiene» — una clase que ningún gate de la casa cubre, sólo el aparato
 
 **Origen: C, S114 (handoff al cierre; filada por A).** Las llaves tipadas de i18n

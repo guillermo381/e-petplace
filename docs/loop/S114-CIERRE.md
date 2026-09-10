@@ -220,11 +220,24 @@ marca las 4 estadías dentro de corte y **salen 8 avisos que el abort venía sup
 Medido antes de curar: el reloj toca sólo esas dos tablas con `no_ejecutado`, no hay
 tercera. `main` **`45029367`**.
 
-**El sello del LAZO queda pendiente de un tick desatendido** (distinción de E, correcta): corrí
-la función A MANO (`ok:true`), lo que prueba la FUNCIÓN; el cron `0 * * * *` prueba el LAZO en
-su próximo tick. La causa del abort ya no existe (las 4 estadías quedaron `no_ejecutado`, fuera
-del universo del reloj), así que el tick debería pasar — pero *«corrió a mano» y «el cron corre»
-son dos afirmaciones distintas*, y el sello es mirar `cron.job_run_details` tras el próximo tick.
+**✅ SELLADO — EL P0 CIERRA ENTERO.** El tick **desatendido** corrió solo:
+
+```
+cron · expirar-objetos-sin-cierre · 2026-09-10 06:00:00 · succeeded · "1 row"
+```
+
+La distinción de E era correcta y estuvo viva una hora: **correr la función A MANO
+(`ok:true`) prueba la FUNCIÓN; el tick que nadie disparó prueba el LAZO** — *«corrió a
+mano» y «el cron corre» son dos afirmaciones distintas*. **Se separó, se esperó, y el
+reloj lo contestó solo.** Instrumento: `scripts/s114/esperar-tick-f1.mjs`.
+
+🔴 **Y el sello cobró la lección de la sesión en el propio instrumento que la iba a
+sellar** — hoy **`L-533`**: la primera versión del esperador murió con
+`ERR_MODULE_NOT_FOUND` **y salió con código 1**, que en su contrato significaba *«el tick
+falló»*. *El fallo del instrumento se disfrazó del hallazgo exacto que buscaba*: sin
+abrir el archivo de salida, el parte habría dicho «el reloj volvió a caer» sobre un tick
+que ni siquiera había ocurrido. Curado separando **tres** códigos (0 lazo sano · 1 rojo
+del producto · 2 no concluyente).
 
 *La lección se cumplió sobre sí misma: doce, no once.*
 
