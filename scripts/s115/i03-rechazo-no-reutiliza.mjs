@@ -57,6 +57,13 @@ await correr('i03 · un rechazo no devuelve el secuencial', async (r) => {
   if (!porUq) noConcluyente(`rebotó por otra causa: ${rebote.slice(0, 250)}`);
 
   // ── (c) EL CONTADOR NO RETROCEDE TRAS UN RECHAZO ─────────────────────────
+  /* 🔴 SE BARREN LOS CONTADORES DE PRUEBA VIEJOS ANTES DE SEMBRAR EL PROPIO.
+     Un instrumento matado con SIGKILL **no corre su `finally`** y deja su contador
+     atrás; medido en vivo tras matar dos corridas trabadas. Todos los RUC `9999…`
+     son de sonda por construcción, así que barrerlos es seguro — y hace que el
+     instrumento se recupere solo de una corrida anterior muerta, en vez de acumular
+     residuo que después alguien tiene que limpiar a mano. */
+  q(`delete from fiscal_sequences where ruc like '9999%'`);
   q(`insert into fiscal_sequences (ruc, establecimiento, punto_emision, tipo_documento)
      values ('${RUC}','${EST}','${PTO}','factura') on conflict do nothing`);
   try {
