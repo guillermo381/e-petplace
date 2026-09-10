@@ -10,7 +10,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { resolverPuerto } from '../_shared/facturacion/mod.ts';
-import { reconstruirClaveAcceso } from '../_shared/facturacion/clave_acceso.ts';
+import { reconstruirClaveAcceso, ambienteTexto } from '../_shared/facturacion/clave_acceso.ts';
 import { construirCanonico, CONSUMIDOR_FINAL, CANONICO_VERSION,
          type ItemCanonico, type ReceptorCanonico } from '../_shared/facturacion/canonico.ts';
 
@@ -102,7 +102,13 @@ Deno.serve(async (req) => {
       });
 
       // ④ PERSISTIR ANTES DEL POST — el paso que vuelve reintentable todo esto
-      await db.from('documentos_fiscales').update({
+      //
+      // 🔴 SU ERROR SE LEE. Era `await` a secas: supabase-js NO lanza, devuelve
+      //    `{ error }` — así que un rebote de CHECK aquí dejaba el documento en
+      //    `borrador` y el pase siguiente le tomaba OTRO secuencial. *Un fallo que
+      //    no se lee no se ve como fallo: se ve como huecos en la numeración que
+      //    hay que explicarle al SRI meses después.*
+      const { error: ePersist } = await db.from('documentos_fiscales').update({
         estado: 'emitiendo', establecimiento: emisor.establecimiento,
         punto_emision: emisor.punto_emision, secuencial: sec, clave_acceso: clave,
         /* 🔴 EL EMISOR SE CONGELA EN LA FILA, y sin esto «reconstruible desde la
@@ -113,13 +119,14 @@ Deno.serve(async (req) => {
         ruc_emisor: emisor.ruc,
         razon_social_emisor: emisor.razon_social,
         direccion_emisor: emisor.direccion_matriz,
-        sri_ambiente: String(emisor.ambiente),
+        sri_ambiente: ambienteTexto(emisor.ambiente),   // 'pruebas'|'produccion' — su CHECK
         canonico, canonico_version: CANONICO_VERSION, proveedor: puerto.nombre,
         subtotal_0: canonico.subtotales_por_tarifa.find((g) => g.tarifa_pct === 0)?.base ?? 0,
         subtotal_15: canonico.subtotales_por_tarifa.find((g) => g.tarifa_pct !== 0)?.base ?? 0,
         iva: canonico.subtotales_por_tarifa.reduce((a, g) => a + g.valor_iva, 0),
         total: canonico.total,
       }).eq('id', d.id);
+      if (ePersist) throw new Error(`persistir_antes_del_post: ${ePersist.message}`);
 
       // ⑤ recién ahora, afuera
       const r = await puerto.emitir({ ...canonico, clave_acceso: clave });

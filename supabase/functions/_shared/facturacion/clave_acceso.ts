@@ -130,6 +130,23 @@ export function reconstruirClaveAcceso(fila: {
 }
 
 /**
+ * El ambiente, en sus DOS vocabularios — y no son intercambiables.
+ *
+ * 🔴 La columna `documentos_fiscales.sri_ambiente` es TEXTO con un CHECK
+ *    heredado (`'pruebas' | 'produccion'`); la CLAVE de acceso lleva el DÍGITO
+ *    (1 | 2). *Escribir el dígito en la columna rebota el UPDATE — y como nadie
+ *    leía el error del `.update()`, el documento se quedaba en `borrador` y el
+ *    siguiente pase consumía OTRO secuencial: huecos en la numeración, que es
+ *    justo lo que el orden de esta función existe para impedir.*
+ */
+export const AMBIENTE_TEXTO = { 1: 'pruebas', 2: 'produccion' } as const;
+export function ambienteTexto(d: number): 'pruebas' | 'produccion' {
+  const t = AMBIENTE_TEXTO[d as 1 | 2];
+  if (!t) throw new Error(`ambiente_invalido: ${d}`);
+  return t;
+}
+
+/**
  * `YYYY-MM-DD` → Date en UTC.
  *
  * 🔴 `new Date('2026-09-10')` YA es medianoche UTC, pero `new Date()` en el
