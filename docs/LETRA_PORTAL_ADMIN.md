@@ -337,6 +337,11 @@ que no medirla: una decisión de negocio se toma sobre ella.*
 **Es motor, y es de A** — la columna, su backfill sobre los 61 eventos vivos, y el productor
 que la estampe de ahí en adelante.
 
+⚠️ **Ampliado el mismo día (§6.7 ②): la palanca tiene número.** `MODELO_ECONOMICO` v1.1 §3.bis
+mide que **cada punto que sale de tarjeta de crédito vale ~4 % del ticket**, y calcula el
+break-even entero sobre una **mezcla supuesta** de 45 % crédito · 15 % débito · 40 % DeUna.
+*Este corte es el único instrumento que diría si esa mezcla es real.*
+
 ### 6.3 · 🔴 La caja retenida es plata que hoy nadie anota
 
 `MODELO_FISCAL` §5 ya describe la retención — **2 % de renta** sobre pagos al establecimiento
@@ -349,9 +354,12 @@ pregunta abierta al contador**.
 distintas en la misma fila.
 
 Así que ③ tiene **dos huecos, y sólo uno es de código**: el registro por transacción (motor,
-de A) y **el número que el contador todavía no ratificó** (F4). *Un tablero de caja retenida
-alimentado por un porcentaje supuesto no muestra plata atrapada: muestra una hipótesis con
-formato de dinero.*
+de A) y ~~**el número que el contador todavía no ratificó** (F4)~~ **[🔴 TACHADO EL MISMO DÍA —
+ver §6.7 ①: `MODELO_ECONOMICO` v1.1 §1 hecho 2 ya lo da verificado, 2 % de renta + 30/70 % del
+IVA, con fuente. El porcentaje está firmado; lo que sigue faltando es DÓNDE anotarlo]**.
+*Un tablero de caja retenida alimentado por un porcentaje supuesto no muestra plata atrapada:
+muestra una hipótesis con formato de dinero — y por eso el número firmado no cierra este hueco,
+lo vuelve construible.*
 
 ### 6.4 · 🔴 La alerta del certificado no tiene dato — y es el ítem más barato de la lista
 
@@ -407,6 +415,63 @@ puerta, no quien construye contra ella.*
 - **El número de la retención** (F4, del contador) ni **la tarifa de veterinaria** (F1, en
   disputa por `MODELO_FISCAL` v0.4 · E3).
 
+### 6.7 · ⚠️ ENMIENDA DEL MISMO DÍA — el contexto económico que §6.1 no había leído
+
+> **Escrita minutos después de depositar §6.1, y se declara en vez de reescribirla en
+> silencio.** Al medir el árbol aparecieron `docs/MODELO_ECONOMICO.md` **v1.1** (10-sep,
+> mesa + founder, **sin commitear al momento de escribir esto**) y dos migraciones de A de
+> hace tres horas. *§6.1 se midió contra el motor vivo y contra `MODELO_FISCAL`; no contra
+> la letra económica que se firmó esta misma mañana* — que es el contexto directo de este
+> dictado. **Es `L-166` en carne: un dato vivo se relee al usarlo, y el mío tenía cuatro
+> horas.**
+
+**① Lo que CORRIGE de §6.3 — el número de la retención ya no es una hipótesis.**
+`MODELO_ECONOMICO` §1 hecho 2 lo da verificado: las emisoras retienen **2 % de renta sobre la
+base y 30 % (bienes) / 70 % (servicios) del IVA** de cada cobro con tarjeta, con su fuente
+(calculadora de Nuvei + tablas de retención). Y lo dice casi con las palabras del dictado:
+*«No es costo: es caja que sale hoy y vuelve en meses. Hay que tenerla.»*
+
+⇒ **Se tacha de §6.3** *«el número que el contador todavía no ratificó»*: el porcentaje está
+firmado. **Lo que NO cambia es el hallazgo**: sigue sin haber **dónde anotarla** — cero
+columnas de retención en `pagos_*`. Y `MODELO_ECONOMICO` §3 ya le puso destino al motor:
+*«deja de ser "TODO lejano"; se diseña apagado con la primera liquidación y se enciende para
+las cuentas en agencia»*. **Queda una incógnita con dueño que sí toca a ③:** *«costo real de
+DeUna y si retiene renta/IVA»* — Carlos Ochoa. Si DeUna no retiene, la caja atrapada depende
+de la mezcla, y el tablero ③ y el ② dejan de ser dos tableros independientes.
+
+**② Lo que REFUERZA de §6.2 — la palanca tiene número, y es grande.**
+El veredicto de `MODELO_ECONOMICO` §0 corre con una **mezcla supuesta de lanzamiento de
+45 % crédito · 15 % débito · 40 % DeUna**, y §3.bis cuantifica la palanca: **«cada punto que
+sale de tarjeta de crédito vale ~4 % del ticket»**. El break-even entero —610 transacciones/mes
+en F&F, ~2.020 en Operación— está calculado **sobre esa mezcla supuesta**.
+
+⇒ *El corte por medio de pago no es un tablero de gestión: es el único instrumento que
+diría si la mezcla real se parece a la que sostiene el break-even.* **Y hoy no se puede
+construir** (§6.2). Eso mueve a ② hacia el criterio ① de §2 — lo cual **no lo firma esta
+sección**: lo firma el founder en §6.5, y ahora con este número a la vista.
+
+**③ Lo que hay que RE-MEDIR antes de construir ① y ② — trabajo de A en vuelo, no medido acá.**
+En disco, sin commitear: `20260912340000_s115a_fees_firmados.sql` (toca `fee_configs`,
+`_resolver_fee_aplicable`, `resolver_fee_aplicable`, `comision_efectiva`) y
+`20260912350000_s115a_payout_y_categoria.sql` (reescribe `crear_evento_economico`, que **gana
+`p_categoria_origen`**, y `_trg_cita_congela_desglose`).
+
+⚠️ **No se afirma nada sobre ellas.** Lo que sí se declara, y cambia el reparto:
+
+- La columna `minimo_por_transaccion` de `fee_configs` —que §6.1 fila ① da por existente— **es
+  de esa tanda de hoy**, no del modelo viejo.
+- `p_categoria_origen` sugiere que **el corte por vertical de ② está naciendo ahora mismo**;
+  al medir, `eventos_economicos` **todavía no tenía** la columna `categoria_origen`. *O la
+  migración no está aplicada, o la columna llega en otra: no se midió y no se afirma.*
+- `MODELO_ECONOMICO` §3 confirma por su lado el hallazgo de ①: *«Historial automático ya
+  existe»* — y **sigue sin aparecer la puerta de escritura atómica**; las funciones que A toca
+  son lectores de resolución, no el acto de cerrar una vigencia y abrir la siguiente.
+
+**Regla que deja esta enmienda, para quien construya sobre §6.1:** *se re-mide contra el motor
+el día que se empiece, y se declara la hora.* Con cinco pistas escribiendo, **un censo de la
+mañana no describe la tarde** — y el de §6.1 ya se venció una vez antes de que nadie lo usara.
+
+
 ---
 
 ## Historial
@@ -419,6 +484,11 @@ puerta, no quien construye contra ella.*
   aunque `MODELO_FISCAL` §7 ya la pedía. **Choque de alcance declarado y NO resuelto (§6.5):**
   ② y ③ no pasan la puerta de §2 — esperan firma del founder por (a) enmendar la puerta o
   (b) nominarlos como excepción.
+  **§6.7 — enmienda del mismo día:** §6.1 se midió sin haber leído `MODELO_ECONOMICO` v1.1
+  (firmado esa misma mañana). Corrige §6.3 (el número de la retención **ya está verificado**),
+  refuerza §6.2 (**~4 % del ticket por punto de mezcla**; el break-even corre sobre una mezcla
+  supuesta) y declara **dos migraciones de A en vuelo** que pueden mover §6.1 — sin afirmar
+  nada sobre ellas. *Se declara en vez de reescribir en silencio.*
 
 - **v1.0 (S114, 7-sep-2026):** alcance firmado por el founder sobre el relevamiento de F. Opción 1
   con web real. Puerta de §2 establecida como el único criterio de entrada. Frontera con el legado
