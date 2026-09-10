@@ -29382,6 +29382,34 @@ lo construye y la otra lo mide **sobre el objeto que ya existe**.
 ---
 
 
+### `L-529` — Un `git merge` parado en la rama equivocada produce un árbol que PARECE revertir main, y el diff two-dot del merge-base lo lee limpio
+
+**Qué pasó (S114-A, 9-sep, error propio declarado):** iba a mergear la punta de F a
+main. Medí el delta con `git diff <merge-base>..<punta>` (two-dot) → 3 archivos de
+apps/admin, lectura limpia. Pero corrí `git merge --no-ff <punta>` **sin `git checkout
+main` antes** — quedé parado en `candidato/s114-2`. El merge combinó el trabajo de
+candidato (que NO tenía las curas recientes de main) con la punta de F, y al comparar
+el resultado contra main **parecía haber revertido** el instrumento de B, borrado
+docs y quitado 100 líneas de `DEUDAS_CANONICAS`.
+
+**Cómo se cazó, y es la lección:** midiendo **lo que el merge AGREGÓ a main**
+—`git diff <main-antes>..<commit-de-merge> --stat`— ANTES de pushear. Ese diff mostró
+borrados que no tenían por qué existir ⇒ el merge estaba mal. `origin` nunca se tocó;
+`git reset --hard` volvió todo; se restauró candidato desde su punta pusheada
+(nada vivía sólo en local). **El costo fue tiempo, no contenido.**
+
+**Las dos reglas que deja:**
+1. **Antes de `git merge`, confirmar la rama activa** (`git rev-parse --abbrev-ref
+   HEAD`) — el merge va SIEMPRE a la rama donde estás parado, no a la que nombra el
+   comando.
+2. **La vara de un merge es lo que AGREGA al destino** (`<destino>..<merge>`), no el
+   delta de la punta contra su merge-base. El two-dot de la punta describe la punta;
+   sólo el diff contra el destino real dice qué le va a pasar al destino. *Un merge
+   parado en la rama equivocada da un two-dot limpio y un resultado sucio.*
+
+---
+
+
 ### `L-528` — Dibujar no es exigir: una pantalla más estricta que su motor también es un defecto — uno que nadie reporta porque parece prudencia
 
 F corrigió mi alcance sobre el campo de motivo del parcial, y la distinción vale
