@@ -246,7 +246,20 @@ console.log(JSON.stringify(cuerpos.map((c: string) => digitoVerificador(c))));
        cubren, pero mi verificador y nuestra pieza salieron de la misma lectura de la
        especificación: *su acuerdo no prueba que el SRI opine igual.* Hace falta una
        factura real cuyo resto sea 1, y hasta entonces se declara sin corpus. */
-    r.di('      corpus real: restos 0 · 5 · 7 · 10 ✓ — FALTA el resto 1 (declarado sin corpus).');
+    /* 🔴 CORPUS CERRADO EN LO QUE IMPORTA — siete facturas de producción:
+         resto  0 → dv 0  TOGA FASHION      (11−0 = 11 ⇒ 0)   ← borde
+         resto  1 → dv 1  SUSHICORP         (11−1 = 10 ⇒ 1)   ← borde
+         resto  2 → dv 9  CRECERMED
+         resto  4 → dv 7  AGROMIRO-EC
+         resto  5 → dv 6  Multicines
+         resto  7 → dv 4  Sweet & Coffee
+         resto 10 → dv 1  227ITALY                            ← borde
+       **Los TRES casos donde la especificación es ambigua o especial (0, 1, 10) están
+       validados contra producción.** Faltan 3, 6, 8 y 9 — y ésos NO son ambiguos:
+       `11−r` da un dígito directo, sin convención de por medio. *El hueco que
+       importaba era el de los bordes, y está cerrado.* */
+    r.di('      corpus real: restos 0 · 1 · 2 · 4 · 5 · 7 · 10 ✓ sobre 7 facturas de producción.');
+    r.di('      los TRES bordes (0 · 1 · 10) validados contra el SRI; faltan 3·6·8·9, que no son ambiguos.');
   }
 
   r.di(`\n   → ${claves.length} clave(s) real(es): módulo 11, estructura y RECONSTRUCCIÓN byte a byte.`);

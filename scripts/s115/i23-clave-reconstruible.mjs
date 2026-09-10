@@ -198,6 +198,49 @@ console.log(JSON.stringify(cs.map((c: string) => { try { return codigoNumericoDe
     for (const d of desviados.slice(0, 5)) r.dato('  🔴', JSON.stringify(d));
   }
 
+  // ── (d bis) 🔴 EL CRUCE EN LA BASE, EJERCIDO ────────────────────────────
+  /* Que el CHECK exista no dice que funcione. Se le da de comer una clave que NO se
+     deriva de la fila y tiene que rebotar; y una que SÍ, y tiene que pasar. Sin el
+     segundo brazo, un CHECK que rechazara TODO también «rebotaría». */
+  const atado = ata.some((c) => /fiscal_clave_acceso|reconstruible/.test(c.def));
+  if (atado) {
+    const fila = { secuencial: '000000042', establecimiento: '001', punto_emision: '002',
+                   fecha_emision: '2026-09-10', tipo: 'factura',
+                   ruc_emisor: '1793240435001', sri_ambiente: '2' };
+    const buena = claveDe(fila);
+    const mala = buena.slice(0, 30) + '999999999' + buena.slice(39);   // secuencial movido
+
+    const ins = (clave) => {
+      try {
+        q(`begin;
+           insert into documentos_fiscales (total, sentido, rol, tipo, estado, emitida_por_tercero,
+               establecimiento, punto_emision, secuencial, fecha_emision, ruc_emisor, sri_ambiente, clave_acceso)
+             values (10.00,'emitido','venta_cliente','factura','autorizada',false,
+               '${fila.establecimiento}','${fila.punto_emision}','${fila.secuencial}',
+               '${fila.fecha_emision}','${fila.ruc_emisor}','${fila.sri_ambiente}','${clave}');
+           rollback;`);
+        return null;
+      } catch (e) { return String(e?.message ?? e); }
+    };
+
+    r.di('');
+    const conBuena = ins(buena);
+    r.dato('clave DERIVADA de la fila', conBuena === null ? 'pasa ✓' : `🔴 rebota: ${conBuena.slice(0, 110)}`);
+    if (conBuena !== null)
+      rojo(`el CHECK rechaza una clave correctamente derivada:\n   ${conBuena.slice(0, 300)}\n   La derivación de la BASE y la de este instrumento no coinciden — y la que emite es la de la base.`);
+
+    const conMala = ins(mala);
+    const porElCheck = conMala !== null && /reconstruible|clave/i.test(conMala);
+    r.dato('rojo ejercido · clave que NO deriva', conMala === null
+      ? '🔴 PASÓ — el cruce no frena nada' : porElCheck ? 'rebota por el CHECK ✓' : `rebota por otra causa: ${conMala.slice(0, 90)}`);
+    if (conMala === null)
+      rojo('una clave que no se deriva de su fila ENTRÓ igual: el CHECK existe y no frena.');
+    if (!porElCheck)
+      noConcluyente(`la clave mala rebotó por otra causa — rebotar no es una medición:\n   ${conMala.slice(0, 250)}`);
+
+    r.di('      ⇒ la derivación de la BASE coincide con la mía: tres implementaciones (SQL, TS y este instrumento) dicen lo mismo.');
+  }
+
   // ── (e) VEREDICTO ───────────────────────────────────────────────────────
   if (desviados.length)
     rojo(`${desviados.length} de ${conClave.length} clave(s) almacenada(s) NO se derivan de los datos de su fila.\n` +
