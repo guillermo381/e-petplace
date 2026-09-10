@@ -134,7 +134,8 @@
     "verify:vistas-invoker": "node scripts/verify-vistas-invoker.mjs",
     "verify:vocabularios": "node scripts/verify-vocabularios.mjs",
     "verify:voz-por-tipo": "node scripts/verify-voz-por-tipo.mjs",
-    "verify:voz-sin-hueco": "tsx apps/cliente/scripts/verify-voz-sin-hueco.mts"
+    "verify:voz-sin-hueco": "tsx apps/cliente/scripts/verify-voz-sin-hueco.mts",
+    "verify:rename": "node scripts/s115/verify-rename-seguro.mjs"
   },
   "devDependencies": {
     "eslint": "^10.9.1",

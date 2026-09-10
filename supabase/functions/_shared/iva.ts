@@ -8,10 +8,20 @@
 //    y dos copias divergen el día que una se corrija.** `pagos-cobro` y
 //    `pagos-cobro-recurrente` la importan; ninguna la reimplementa.
 //
-// ── LO QUE ESTE MÓDULO **NO** DECIDE ───────────────────────────────────────
-// Si el redondeo va por línea o sobre el total (pregunta al contador, del
-// founder) — **tolera las dos formas a propósito**. Ni la forma final de los
-// tres campos del `order`, que espera la respuesta de Erick.
+// ── EL REDONDEO, FIRMADO (S115, mesa) ──────────────────────────────────────
+// **POR LÍNEA, dos decimales, y el total es la SUMA DE LAS LÍNEAS.**
+// Este módulo **dejó de tolerar las dos formas**: *que tolere dos es que ninguna
+// está decidida*, y una tolerancia de ±1 centavo por línea deja pasar en silencio
+// un cálculo hecho con la otra regla.
+//
+// 🔴 Y SE CUENTA EN CENTAVOS ENTEROS, no en float. Medido: 15 % de 6,70 da 1,01
+//    en `numeric` y 1,00 en float64 ⇒ comparar con igualdad exacta sobre floats
+//    fabrica rojos sobre líneas correctas. La base de datos calcula en `numeric`
+//    (el CHECK `chk_iva_cuadra` de `pagos_desglose_lineas`); acá se compara el
+//    MISMO número, en enteros, para que las dos capas no puedan discrepar.
+//
+// Lo que este módulo sigue sin decidir: la forma final de los tres campos del
+// `order`, que espera la respuesta de Erick.
 // ═══════════════════════════════════════════════════════════════════════════
 
 export interface LineaIva {
@@ -87,18 +97,37 @@ export function verificarIva(lineas: LineaIva[]): VeredictoIva {
     .filter((l) => Number(l.impuesto || 0) > 0)
     .reduce((a, l) => a + Number(l.subtotal || 0), 0));
 
-  const esperado = r2(baseGravada * nominal / 100);
+  /* 🔴 LA VERIFICACIÓN ES POR LÍNEA, y ésa es toda la diferencia con la versión
+     anterior. Antes se comparaba la SUMA de los impuestos contra el redondeo del
+     TOTAL — que es la otra regla de redondeo — y se perdonaba la diferencia con
+     una tolerancia de ±1 centavo por línea. *Esa tolerancia era el lugar exacto
+     donde las dos reglas convivían sin que nadie eligiera.*
 
-  /* ± 1 centavo POR LÍNEA: con N líneas que redondean su propio impuesto, la
-     suma puede diferir hasta en N centavos del redondeo del total. Exigir
-     igualdad exacta sobre la suma es «perseguir el centavo por transacción». */
-  const tolerancia = 0.01 * Math.max(1, lineas.length);
-  const desvio = Math.abs(impuesto - esperado);
-
-  if (desvio > tolerancia + 1e-9) {
+     Ahora: cada línea tiene que ser el redondeo correcto de SU propia base, y el
+     total sale de sumarlas. No hace falta tolerancia porque ya no se comparan dos
+     caminos distintos: se compara una línea contra sí misma. */
+  const cent = (n: number) => Math.round(Number(n || 0) * 100);
+  const malas: string[] = [];
+  for (const l of lineas) {
+    const imp = Number(l.impuesto || 0);
+    if (imp === 0) continue;
+    if (l.pct == null) {
+      return { ok: false, codigo: 'iva_sin_tasa_declarada',
+        detalle: `una linea con impuesto=${imp} no declara su tasa nominal` };
+    }
+    /* En centavos ENTEROS: `round(base * pct / 100)` sobre la base ya en centavos.
+       Es la misma cuenta que hace `chk_iva_cuadra` en numeric, sin el error de
+       representación que tendría en float. */
+    const baseC = cent(l.subtotal);
+    const esperadoC = Math.round((baseC * Number(l.pct)) / 100);
+    const impC = cent(imp);
+    if (impC !== esperadoC) {
+      malas.push(`base=${(baseC / 100).toFixed(2)} pct=${l.pct} impuesto=${(impC / 100).toFixed(2)} esperado=${(esperadoC / 100).toFixed(2)}`);
+    }
+  }
+  if (malas.length > 0) {
     return { ok: false, codigo: 'iva_no_coincide_con_nominal',
-      detalle: `impuesto=${impuesto} esperado=${esperado} nominal=${nominal}% `
-             + `base=${baseGravada} desvio=${r2(desvio)} tolerancia=${r2(tolerancia)}` };
+      detalle: `${malas.length} linea(s) no cuadran con el redondeo por linea: ${malas.slice(0, 3).join(' · ')}` };
   }
 
   return {
