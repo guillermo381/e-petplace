@@ -31,6 +31,12 @@ type EstadoGate =
   | { fase: 'admin' }
   | { fase: 'no_admin' }
   | { fase: 'no_se_pudo'; mensaje: string }
+  /* El regreso de Google que no llegó a ser sesión. NO es `sin_sesion`: ahí la
+     persona no intentó nada; acá intentó, volvió, y algo se rompió en el
+     camino. Mandarla al login sin decirlo la deja reintentando para siempre
+     contra el mismo defecto — «volviste al login» es indistinguible de «no
+     tenés permiso», y son dos cosas distintas. */
+  | { fase: 'callback_fallido'; mensaje: string }
 
 function Splash() {
   return (
@@ -56,7 +62,50 @@ export default function App() {
       setEstado({ fase: r.data ? 'admin' : 'no_admin' })
     }
 
-    supabase.auth.getSession().then(({ data }) => resolver(data.session))
+    /* ─── EL REGRESO DE GOOGLE ────────────────────────────────────────────
+       🔴 **El cliente de la casa trae `detectSessionInUrl: false`**, y está
+       bien: `packages/api/src/client.ts` lo comparte con las dos apps de
+       Expo, y *RN no es un browser* — ahí no hay URL que mirar. **Pero el
+       admin SÍ es un browser**, y con `flowType: 'pkce'` Google vuelve a
+       `window.location.origin` con `?code=…` esperando que alguien lo canjee.
+       Nadie lo canjeaba ⇒ el código moría en la barra de direcciones,
+       `getSession()` devolvía `null` y el gate mandaba al login. *Volver al
+       login del mismo portal es exactamente lo que hace un callback que nadie
+       consume.* Por eso email y contraseña sí entraban: no pasan por la URL.
+
+       Se canjea acá y no se toca `initApi`: cambiar el cliente compartido para
+       arreglar esta app le movería el piso a `cliente` y `prestador`, que están
+       en producción y para las que ese `false` es correcto. Esto es literal-
+       mente lo que `detectSessionInUrl` haría por dentro, hecho en la única
+       app que lo necesita. */
+    async function arrancar() {
+      const params = new URLSearchParams(window.location.search)
+      const code = params.get('code')
+      const errGoogle = params.get('error_description') ?? params.get('error')
+
+      /* Google puede volver diciendo que NO, y eso no es un fallo nuestro: hay
+         que repetirlo tal cual en vez de disfrazarlo de «no hay sesión». */
+      if (errGoogle) {
+        limpiarUrl()
+        if (vivo) setEstado({ fase: 'callback_fallido', mensaje: errGoogle })
+        return
+      }
+
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code)
+        /* La URL se limpia SIEMPRE, salga bien o mal: un `code` es de un solo
+           uso, y dejarlo puesto hace que el próximo refresh reintente con uno
+           ya gastado y falle por una razón distinta de la original. */
+        limpiarUrl()
+        if (!vivo) return
+        if (error) { setEstado({ fase: 'callback_fallido', mensaje: error.message }); return }
+      }
+
+      const { data } = await supabase.auth.getSession()
+      resolver(data.session)
+    }
+
+    arrancar()
 
     const { data: sub } = supabase.auth.onAuthStateChange((evento, sesion) => {
       if (evento === 'TOKEN_REFRESHED') return
@@ -83,6 +132,21 @@ export default function App() {
     )
   }
 
+  if (estado.fase === 'callback_fallido') {
+    return (
+      <Pantalla>
+        <Fallo mensaje="Volviste de Google pero no pudimos abrir la sesión." detalle={estado.mensaje} />
+        <p style={{ color: color.texto2, fontSize: 14, margin: `${sp[4]}px 0 ${sp[4]}px`, lineHeight: 1.5 }}>
+          No es que no tengas permiso: la sesión no llegó a crearse. Puedes
+          intentar de nuevo, o entrar con tu email y contraseña.
+        </p>
+        <Boton variante="secundario" onClick={() => { window.location.href = window.location.origin }}>
+          Volver al inicio
+        </Boton>
+      </Pantalla>
+    )
+  }
+
   if (estado.fase === 'no_admin') {
     return (
       <Pantalla>
@@ -90,8 +154,8 @@ export default function App() {
           Esta cuenta no tiene acceso a operaciones.
         </h1>
         <p style={{ color: color.texto2, fontSize: 14, margin: `0 0 ${sp[5]}px`, lineHeight: 1.5 }}>
-          Tu sesión es válida, pero no figurás como administrador de plataforma.
-          Si creés que es un error, pedí que te den de alta en <code>admin_users</code>.
+          Tu sesión es válida, pero no figuras como administrador de plataforma.
+          Si crees que es un error, pide que te den de alta en <code>admin_users</code>.
         </p>
         <Boton variante="secundario" onClick={() => supabase.auth.signOut()}>Cerrar sesión</Boton>
       </Pantalla>
@@ -113,6 +177,11 @@ export default function App() {
       </Routes>
     </BrowserRouter>
   )
+}
+
+/** Saca `?code`/`?error` de la barra sin recargar ni ensuciar el historial. */
+function limpiarUrl() {
+  window.history.replaceState({}, '', window.location.pathname)
 }
 
 function Pantalla({ children }: { children: React.ReactNode }) {
