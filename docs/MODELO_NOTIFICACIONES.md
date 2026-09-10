@@ -668,11 +668,35 @@ comercial en el mismo dominio de envío.
 - Meta actualiza sus rate cards **por trimestre**: todo número entra a
   `MODELO_FINANCIERO` **con fecha** y con revisión trimestral agendada.
 
-**Regla de selección de canal:** el motor elige por (criticidad temporal
-de la categoría × consentimiento × disponibilidad del canal), con **cadena
-de respaldo declarada** y una sola entrega por intención. **Prohibido el
-disparo múltiple**: el mismo aviso por tres canales es ruido, y en
-WhatsApp además es plata.
+**Regla de selección de canal:** ~~el motor elige por (criticidad temporal de la
+categoría × consentimiento × disponibilidad del canal), con cadena de respaldo
+declarada y una sola entrega por intención. Prohibido el disparo múltiple: el mismo
+aviso por tres canales es ruido, y en WhatsApp además es plata.~~
+
+> **ENMIENDA §10 FIRMADA (founder, S114 — LA PREFERENCIA MANDA):** el motor entrega
+> en la **UNIÓN** de los canales REQUERIDOS (`canal_forzado`, siempre) y los de
+> PREFERENCIA vivos. Si la familia marcó correo, WhatsApp y push, **le llegan los
+> tres** — el `orden` deja de ser una carrera que elige uno y pasa a ser, a lo sumo,
+> un desempate. *La preferencia es del cliente y él la ve marcada; que el motor
+> entregue por uno solo hace que las otras casillas mientan.*
+>
+> La línea original —«una sola entrega por intención»— existía para **no repetir el
+> MISMO aviso en el MISMO canal**, no para anular preferencias. Sigue vigente en esa
+> forma: **una entrega por intención POR CANAL ELEGIDO** (sin duplicar en un canal).
+> La **constancia forzada por email** es un canal REQUERIDO, ortogonal a la
+> preferencia — así `caso_resuelto` = whatsapp (preferencia) + email (constancia)
+> deja de ser contradicción y pasa a ser el modelo.
+>
+> **EXENTO: `cita_recordatorio`** va por UN canal — es el aviso más frecuente
+> (111/30d) y un empujón, no una constancia; por tres canales entrena a ignorar, y
+> el día que importe la familia ya dejó de mirar. *El volumen es la razón para eximir
+> un empujón, jamás una constancia (`pago_confirmado`, alto volumen, NO se exime: es
+> plata).*
+>
+> **Mecánica (S114):** UNA intención, N `notificacion_entrega` (una por canal). El
+> techo (§8 y el techo duro) sigue contando la INTENCIÓN, no las entregas — por eso
+> es una-intención-N-entregas y no N intenciones: N intenciones dispararían el techo
+> N× más rápido y descartarían avisos legítimos.
 
 > **ENMIENDA §7 FIRMADA (founder, S88 — nacida del gate del primer envío):**
 > **el canal elegido es el primero habilitado CON TRANSPORTE VIVO.** La
@@ -715,8 +739,10 @@ si nace en uno solo, se aprueba dos veces).
 Esta sección existe porque el modo de falla de este motor es
 irreversible y público.
 
-1. **Idempotencia:** una intención = una entrega, con clave de deduplicado
-   y referencia al evento que la disparó. Un reintento jamás duplica.
+1. **Idempotencia:** una intención = una entrega **POR CANAL** (S114: la
+   `notificacion_entrega` es única por `(intencion_id, canal)`), con clave de
+   deduplicado de la intención y referencia al evento que la disparó. Un reintento
+   jamás duplica en el mismo canal.
 2. **MODO SOMBRA obligatorio:** todo tipo de notificación nuevo corre
    primero **sin enviar**, registrando qué HABRÍA mandado y a quién,
    durante una ventana declarada. El primer envío real de un tipo nuevo es
