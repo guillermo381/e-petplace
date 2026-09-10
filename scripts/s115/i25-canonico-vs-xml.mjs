@@ -176,7 +176,17 @@ await correr('i25 · nuestro canónico contra un XML autorizado real', async (r)
     const quince = /<codigoPorcentaje>4<\/codigoPorcentaje>/.test(comp);
     if (cero)   r.di('      ✅ 0 % confirmado contra XML autorizado: codigoPorcentaje=0 · tarifa 0.000000 · valor 0.00');
     if (quince) r.di('      ✅ 15 % confirmado contra XML autorizado: codigoPorcentaje=4 · tarifa 15.00');
-    r.di('      ⚠️ el 5 % sigue SIN corpus: sólo visto impreso en un RIDE, nunca en un XML.');
+    /* 🔴 EL ÚNICO HUECO DE CORPUS QUE QUEDA. Todo lo demás del frente fiscal está
+       confirmado contra XML autorizados o contra siete claves de producción:
+         · clave de acceso → 7 facturas, restos 0·1·2·4·5·7·10 (los tres bordes)
+         · IVA 15 %        → SUSHICORP, codigoPorcentaje 4
+         · IVA  0 %        → CRECERMED, codigoPorcentaje 0 · tarifa 0.000000
+         · IVA  5 %        → **SÓLO VISTO IMPRESO EN UN RIDE (La Biferia), nunca en un XML**
+       *Un código de tarifa que no vimos en un XML autorizado es una ficha, no un dato:
+       si el nuestro no es el del catálogo del SRI, el XML se arma bien, se firma bien,
+       y lo devuelve el organismo.* Hace falta una factura real con una línea al 5 %. */
+    r.di('      ⚠️ el 5 % es el ÚNICO hueco de corpus que queda: visto impreso en un RIDE,');
+    r.di('         nunca en un XML autorizado. Todo lo demás del frente está confirmado.');
 
     // ── (e bis) DECIMALES: base con más precisión, totales con dos ─────────
     const dec = (t) => { const v = (new RegExp(`<${t}>([^<]*)</${t}>`).exec(comp) ?? [])[1] ?? ''; const p = v.split('.')[1]; return { v, d: p ? p.length : 0 }; };

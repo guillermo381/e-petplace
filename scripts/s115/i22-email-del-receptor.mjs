@@ -141,6 +141,46 @@ await correr('i22 · el email del documento es del receptor, nunca del emisor', 
       r.di('      ⇒ el detector distingue el caso REAL del defecto del caso REAL correcto.');
   }
 
+  // ── (d ter) EL CORREO «TU FACTURA» LLEVA **DOS** ADJUNTOS ───────────────
+  /* 🔴 AL COMPRADOR SE LE ENTREGAN **RIDE Y XML AUTORIZADO**, no sólo el PDF. El XML
+     es el comprobante con validez legal; el RIDE es su representación impresa. Mandar
+     sólo el PDF **no falla**: la familia recibe algo que parece su factura y no tiene
+     el documento que vale — y lo descubre el día que lo necesita para algo. */
+  const ADJUNTOS = ['ride', 'pdf', 'xml'];
+  const tipo = q(
+    `select codigo from cat_notificacion_tipos
+      where codigo ~* 'factura|comprobante|fiscal' order by 1`);
+  r.di('');
+  r.dato('aviso de factura en el catálogo', tipo.length ? tipo.map((t) => t.codigo).join(', ') : '🔴 ninguno');
+
+  const { spawnSync } = await import('node:child_process');
+  const RAIZ = '/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace';
+  const gr = (pat, dir) => {
+    const g = spawnSync('grep', ['-rniE', '--include=*.ts', pat, dir], { encoding: 'utf8', cwd: RAIZ });
+    return g.status === 0 ? g.stdout.trim().split('\n').filter(Boolean) : [];
+  };
+  const soportaAdjuntos = gr('attachment|adjunto|attach', 'supabase/functions/despachar-correo');
+  r.dato('el despachador soporta adjuntos', soportaAdjuntos.length ? `sí (${soportaAdjuntos.length})` : '🔴 NO');
+
+  /* El DETECTOR se prueba hoy, aunque el correo no exista: dos payloads de fixture,
+     uno con los dos adjuntos y otro con uno solo. *Si no distingue, su verde del día
+     que el correo nazca no diría nada.* */
+  const cuenta = (payload) => ADJUNTOS.filter((a) => new RegExp(a, 'i').test(JSON.stringify(payload))).length;
+  const conLosDos = cuenta({ adjuntos: [{ tipo: 'ride', url: 'a.pdf' }, { tipo: 'xml', url: 'a.xml' }] });
+  const soloUno  = cuenta({ adjuntos: [{ tipo: 'ride', url: 'a.pdf' }] });
+  r.dato('detector probado', `con los dos: ${conLosDos} · con uno solo: ${soloUno}${conLosDos > soloUno ? ' ✓ distingue' : ' 🔴 no distingue'}`);
+  if (conLosDos <= soloUno)
+    noConcluyente('el detector de adjuntos no distingue un envío completo de uno incompleto.');
+
+  if (!tipo.length && !soportaAdjuntos.length) {
+    r.di('      ⚠️ EL CORREO «TU FACTURA» NO EXISTE TODAVÍA: cero tipos de aviso fiscales y');
+    r.di('         cero soporte de adjuntos en `despachar-correo`. **No se cuenta como verde**');
+    r.di('         —no hay envío que pueda estar incompleto—, y el detector queda probado');
+    r.di('         para cuando exista. Es el mismo criterio que i17 con la tarifa.');
+  } else if (!soportaAdjuntos.length) {
+    rojo('hay aviso de factura pero `despachar-correo` no soporta adjuntos: el XML autorizado no puede viajar.');
+  }
+
   // ── (e) VEREDICTO ────────────────────────────────────────────────────────
   if (delEmisor.length)
     rojo(`${delEmisor.length} documento(s) llevan el correo del EMISOR como receptor.\n   No falla nada: el SRI autoriza, el PDF se genera, y el cliente nunca recibe su factura.\n   Después reclama, y desde adentro todo se ve bien.`);
