@@ -1,8 +1,8 @@
 # MODELO_ECONOMICO.md — e-PetPlace (Ecuador)
 **v1.1 · 10 de septiembre de 2026 · mesa + founder.** (v1.0 misma fecha: despensa al 12 % y base de costos incompleta — superada por firma del founder.) Reemplaza las hipótesis económicas del MODELO_FINANCIERO v2.9 (§2.2 mapa de revenue, §3.1 fórmula, 8.1) por lo medido: calculadora de Nuvei, RUC de Satori Inov, normativa verificada. El contrato técnico del ledger no cambia; cambian los NÚMEROS que `fee_configs` guarda y quién paga qué. Calculadora viva: `MODELO_ECONOMICO_EPETPLACE_v1.1.xlsx` (todo lo amarillo es supuesto a reemplazar).
 
-> **➕ ENMIENDA S115-A (10-sep-2026) — EL CARRITO MIXTO Y EL MÍNIMO SOBRE BASE CERO.**
-> Dos casos que la v1.1 no decide y que el objeto obligó a resolver. Firmados por el
+> **➕ ENMIENDA S115-A (10-sep-2026) — EL CARRITO MIXTO, LA BASE CERO Y LA FECHA QUE RIGE.**
+> Tres casos que la v1.1 no decide y que el objeto obligó a resolver. Firmados por el
 > founder sobre la medición.
 >
 > **E-A · El mínimo del carrito mixto: manda la categoría de MAYOR BASE.**
@@ -16,22 +16,42 @@
 > alimento. **El dominante es el único criterio derivable del dato.**
 > Vive en `_devengar_pedido`, que manda `categoria_origen` al resolver.
 >
-> **E-B · El mínimo NO aplica sobre base cero.**
-> Medido al cablear el mínimo: hay **110 citas con precio $0,00** —días de guardería
-> consumidos de un paquete, ya pagados en el bono— y `comision_efectiva(0, 18, 1.50)`
-> devolvía **$1,50**. Hoy no muerde (esas citas no devengan), pero el mínimo creaba la
-> posibilidad de **cobrar la comisión dos veces**.
-> ⇒ **Base cero ⇒ comisión cero**, con su propio valor de snapshot (`aplico: 'base_cero'`).
-> *El mínimo es un piso sobre una transacción real, no un cargo por una no-transacción.*
+> **E-B · BASE CERO ⇒ COMISIÓN CERO. Es la regla, no un caso borde.**
+> *El mínimo por transacción es un piso sobre una transacción real, no un cargo por
+> una no-transacción.* **Un día de guardería consumido de un paquete ya pagó su
+> comisión el día que el paquete se compró** — cobrarle el mínimo sería cobrar dos
+> veces el mismo hecho económico.
+> Medido al cablear el mínimo: **110 citas con precio $0,00** y
+> `comision_efectiva(0, 18, 1.50)` devolvía **$1,50**. Hoy esas citas no devengan, así
+> que no mordía; *lo que el mínimo creó fue la posibilidad*, y la posibilidad se cierra
+> en la fórmula, no en los llamadores.
+> ⇒ `comision_efectiva` devuelve **0** con base 0, y lo DICE en su snapshot
+> (`aplico: 'base_cero'`) — para que una comisión cero se distinga de una comisión
+> que nadie calculó.
 >
 > **E-C · Para una CITA, «la fecha en que el precio rige» es la del SERVICIO.**
-> Firma del founder (opción 2). Y la forma que la sostiene no es que las dos puertas
-> coincidan: es que **haya una sola** — la confirmación LEE el `fee_config_id` congelado
-> y sólo resuelve si no hay; el congelador re-congela al reagendar **mientras la cita no
-> esté pagada**. *Dos resoluciones independientes del mismo hecho no pueden «coincidir»:
-> pueden, como mucho, no haber divergido todavía.*
-> Servicios sin fecha propia (despensa, paquete, plan) caen a la fecha del pago, y está
-> escrito en el código, no como default silencioso.
+> Firma del founder (opción 2), **enmendando su propia firma anterior en voz alta**:
+> se había pedido *«que las dos puertas resuelvan la MISMA `fee_config_id`»*, y eso
+> es más débil de lo que parece —
+> ***dos resoluciones independientes del mismo hecho no pueden «coincidir»: pueden,
+> como mucho, no haber divergido todavía.*** **La forma que rige es que haya UNA
+> sola fuente**, y queda escrita acá para que no se rediscuta:
+>
+> - la **confirmación LEE** el `fee_config_id` congelado en el desglose; sólo resuelve
+>   si no hay ninguno;
+> - el **congelador re-congela al reagendar** *mientras la cita no esté pagada*;
+> - servicios **sin fecha propia** (despensa, paquete, plan) caen a la fecha del pago
+>   **explícitamente** (`origen: 'fecha_pago'`), jamás como default silencioso.
+>
+> **El caso que obligó a la forma — LA REAGENDA.** Una cita de septiembre congela su
+> comisión al valor de septiembre. La familia la mueve a octubre, donde rige otro
+> valor. Con dos resoluciones: el congelado sigue diciendo septiembre y la confirmación
+> —que resuelve de cero— dice octubre. **Ninguna de las dos está rota y las dos
+> discrepan**, y el desglose que ve el prestador deja de coincidir con lo que se le
+> descuenta. Con una sola fuente el caso desaparece: al reagendar se re-congela, y la
+> confirmación lee lo que quedó congelado.
+> *La condición «mientras no esté pagada» es lo que impide que un movimiento de agenda
+> le cambie el precio a algo ya cobrado.*
 
 
 ---

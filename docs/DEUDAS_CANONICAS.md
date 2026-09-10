@@ -31981,3 +31981,96 @@ decidir.
 
 **☠️ Condición de muerte:** ninguna — es de método. Su recordatorio útil es que
 la escribió A el mismo día que la rompió.
+
+---
+
+### `D-1059` 🔴 · 218 objetos de `public` con grant de ESCRITURA para `anon` — y el número que decide no es 218, es 1
+
+**Abierta:** S115-A, 10-sep-2026. **Dueño:** A (pasada propia de seguridad).
+**Alcance:** los grants heredados de `anon` sobre `public`, INSERT/UPDATE/DELETE.
+**NO es de una tanda fiscal** — va **ANTES de producción**, en su propia pasada.
+
+#### Lo medido (10-sep-2026, comandos abajo)
+
+| Qué | Número |
+|---|---|
+| Objetos distintos con INSERT/UPDATE/DELETE para `anon` | **218** |
+| Grants (3 privilegios × objeto) | **651** |
+| De ésos, con RLS activa | **206** |
+| De ésos, VISTAS sin RLS | **12** — las doce con `security_invoker` ON y **`is_updatable = NO`** |
+| **Tablas con una policy de escritura que ALCANZA a `anon`** | **5** |
+| **Tablas donde `anon` ESCRIBE de verdad (probado)** | **1** |
+
+**El número grande describe la herencia; el número chico es el trabajo.** Es la misma
+forma que `D-686` en S92: *861 grants sobre 217 tablas parecía inabarcable, y el trabajo
+real eran cuatro tablas.*
+
+#### Las cinco con policy que alcanza a `anon`, y por qué cuatro no muerden
+
+Las cinco tienen policies declaradas `TO public` —y `public` incluye a `anon`—, pero
+**cuatro gatean por `auth.uid()`**, que sin sesión es `NULL`:
+`profiles` (INSERT/UPDATE `auth.uid() = id`) · `solicitudes_adopcion`
+(`auth.uid() = user_id`) · `evento_cita_servicio` (UPDATE por prestador del `auth.uid()`)
+· `prestador_empleado_servicios` (INSERT/DELETE por el mismo camino).
+*Aciertan por cómo SQL trata los nulos, no por diseño* (`L-424`) — y eso es
+exactamente lo que las vuelve frágiles: **el día que alguien agregue un `OR` a
+cualquiera de esas cuatro, el grant ya está puesto.** No son un agujero: son defensa en
+profundidad ausente.
+
+#### 🔴 La que SÍ muerde, y no es lectura de predicado: es un INSERT que pasó
+
+`donaciones · INSERT · TO public · WITH CHECK ((auth.uid() = user_id) OR (user_id IS NULL))`
+
+La segunda rama **no mira la sesión**. Probado por camino real, **con `SET LOCAL ROLE anon`
+dentro de una transacción con `ROLLBACK`** (residuo verificado en 0; la tabla tiene 0 filas
+antes y después):
+
+```
+anon_inserta_donacion → PASO — anon escribió la fila ca618ccf-…
+```
+
+⇒ **cualquiera con la anon key —que viaja en el bundle y es pública— puede escribir filas
+en `donaciones` sin cuenta.** *Que una policy exista no prueba que niegue; lo prueba
+verla negar* (`L-321`).
+
+**⚠️ Y la pregunta que la ficha NO responde a propósito: puede ser DELIBERADO.**
+`MODELO_DESPENSA` firma *«donación sin destino elegible»* y una donación anónima sin
+cuenta es un caso de producto legítimo. **La decisión es de la mesa, no de esta pista:**
+si es deliberado, la policy se reescribe para que lo DIGA (rate limit, monto máximo, y
+`user_id IS NULL` como intención declarada y no como agujero de un `OR`); si no lo es, se
+cierra. *Lo que no puede quedar es que una puerta abierta a internet lo esté por el
+descuido de un predicado.*
+
+#### Lo que esta pasada tiene que hacer (no se construyó nada hoy)
+
+1. **Revocar los 651 grants de escritura** que nadie decidió, con el discriminador de
+   S92: `has_table_privilege('anon', …)` antes y después, **y el control de que el
+   camino legítimo sigue vivo** — el precedente de los tres catálogos, donde revocar de
+   más habría dejado a la gente sin poder crear cuenta y *ningún typecheck lo habría dicho*.
+2. **Las 12 vistas:** el grant no alcanza nada hoy (`is_updatable = NO`), pero se revoca
+   igual — *una vista que mañana se vuelve actualizable no avisa*.
+3. **Las 5 policies `TO public`:** pasan a `TO authenticated`, salvo la decisión de mesa
+   sobre `donaciones`.
+4. **El cinturón:** que la migración ABORTE si `anon` conserva escritura sobre algo no
+   declarado en una lista blanca — el molde de S92, con sus tres brazos probados EN ROJO
+   antes de confiarle la primera migración (`L-216`: un `REVOKE … FROM anon` que deja
+   `PUBLIC` intacto **no cierra nada**).
+
+#### Cómo se re-mide (el comando, no el número — `D-1015`)
+
+```sql
+select count(distinct table_name) from information_schema.role_table_grants
+ where grantee='anon' and table_schema='public'
+   and privilege_type in ('INSERT','UPDATE','DELETE');
+```
+y las que de verdad alcanzan algo:
+```sql
+select distinct p.tablename, p.cmd, p.qual, p.with_check from pg_policies p
+ where p.schemaname='public' and ('anon'=any(p.roles) or 'public'=any(p.roles))
+   and p.cmd in ('INSERT','UPDATE','DELETE','ALL');
+```
+
+**☠️ Condición de muerte:** los 651 grants en 0 con su cinturón vigilando, las 5 policies
+decididas una por una, y `donaciones` con su forma firmada por la mesa.
+**Disparo: ANTES de producción.** Hoy el ambiente es sandbox de punta a punta; el día que
+la anon key sirva contra plata real, esto deja de ser defensa en profundidad.

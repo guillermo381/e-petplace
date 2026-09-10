@@ -10,7 +10,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { resolverPuerto } from '../_shared/facturacion/mod.ts';
-import { construirClaveAcceso } from '../_shared/facturacion/clave_acceso.ts';
+import { reconstruirClaveAcceso } from '../_shared/facturacion/clave_acceso.ts';
 import { construirCanonico, CONSUMIDOR_FINAL, CANONICO_VERSION,
          type ItemCanonico, type ReceptorCanonico } from '../_shared/facturacion/canonico.ts';
 
@@ -59,14 +59,20 @@ Deno.serve(async (req) => {
       });
       if (eSec || !sec) throw new Error(`secuencial: ${eSec?.message ?? 'vacio'}`);
 
-      // ③ la clave, del lado nuestro
-      const codigoNumerico = String(Math.floor(Math.random() * 1e8)).padStart(8, '0');
-      const clave = construirClaveAcceso({
-        fecha: new Date(), tipoComprobante: d.tipo, ruc: emisor.ruc,
-        ambiente: emisor.ambiente as 1 | 2,
-        establecimiento: emisor.establecimiento, puntoEmision: emisor.punto_emision,
-        secuencial: sec as string, codigoNumerico,
-      });
+      // ③ la clave, del lado nuestro — y DERIVADA, no sorteada.
+      //
+      // 🔴 Los dos insumos salen de la FILA, no del ambiente: la fecha es
+      //    `fecha_emision` (era `new Date()`, el reloj de la edge — un documento
+      //    de las 21:30 en Guayaquil quedaba con la clave del día siguiente) y el
+      //    código numérico sale del secuencial (era `Math.random()`). *Con eso la
+      //    clave deja de ser un dato que hay que ir a buscar y pasa a ser una
+      //    función de la fila: se recalcula y se coteja.*
+      const clave = reconstruirClaveAcceso(
+        { fecha_emision: d.fecha_emision, tipo: d.tipo,
+          establecimiento: emisor.establecimiento, punto_emision: emisor.punto_emision,
+          secuencial: sec as string },
+        { ruc: emisor.ruc, ambiente: emisor.ambiente },
+      );
 
       const items: ItemCanonico[] = lineas.map((l) => ({
         linea: l.linea, descripcion: l.descripcion, cantidad: Number(l.cantidad),
@@ -99,6 +105,15 @@ Deno.serve(async (req) => {
       await db.from('documentos_fiscales').update({
         estado: 'emitiendo', establecimiento: emisor.establecimiento,
         punto_emision: emisor.punto_emision, secuencial: sec, clave_acceso: clave,
+        /* 🔴 EL EMISOR SE CONGELA EN LA FILA, y sin esto «reconstruible desde la
+           fila» sería falso: `fiscal_emisor` es UNA fila mutable —el día que
+           cambie el establecimiento o el ambiente pase a producción, toda clave
+           vieja dejaría de recalcular—. *Un cotejo que necesita una tabla que
+           puede haber cambiado no verifica el pasado: lo reescribe.* */
+        ruc_emisor: emisor.ruc,
+        razon_social_emisor: emisor.razon_social,
+        direccion_emisor: emisor.direccion_matriz,
+        sri_ambiente: String(emisor.ambiente),
         canonico, canonico_version: CANONICO_VERSION, proveedor: puerto.nombre,
         subtotal_0: canonico.subtotales_por_tarifa.find((g) => g.tarifa_pct === 0)?.base ?? 0,
         subtotal_15: canonico.subtotales_por_tarifa.find((g) => g.tarifa_pct !== 0)?.base ?? 0,

@@ -78,6 +78,71 @@ export function construirClaveAcceso(p: PartesClave): string {
   return base + String(digitoVerificador(base));
 }
 
+/**
+ * EL CÓDIGO NUMÉRICO SALE DEL SECUENCIAL — no de un dado.
+ *
+ * 🔴 La ficha del SRI deja los 8 dígitos a criterio del emisor, y por eso mismo
+ *    la decisión es nuestra y tiene consecuencia: con un valor ALEATORIO la clave
+ *    deja de poder recalcularse desde la fila y hay que ir a buscarla; derivada
+ *    del secuencial, la clave es una FUNCIÓN de los datos del documento — se
+ *    recalcula, se coteja, y una fila con la clave cambiada se nota.
+ *
+ * Es lo que hacen las facturas reales que medimos: Multicines secuencial 17078 →
+ * código `00017078`; 227ITALY 126825 → `00126825`. *El secuencial sin su cero
+ * inicial*, que sobre 9 dígitos son sus últimos 8.
+ *
+ * ⚠️ Con secuencial ≥ 100.000.000 se pierde el dígito de la izquierda. NO rompe
+ *    nada: el secuencial COMPLETO ya viaja en la clave en su propio campo, así
+ *    que la clave sigue siendo única y sigue siendo derivable — lo único que
+ *    deja de ser es inyectiva en estos 8 dígitos, que no identifican nada.
+ */
+export function codigoNumericoDesdeSecuencial(secuencial: string): string {
+  if (!/^\d{1,9}$/.test(secuencial)) throw new Error('secuencial_invalido');
+  return secuencial.padStart(9, '0').slice(-8);
+}
+
+/**
+ * La clave RECALCULADA desde una fila de `documentos_fiscales` + su emisor.
+ *
+ * Existe para que haya UNA sola implementación: la que emite y la que verifica.
+ * *No es tautológico comparar contra la almacenada — la almacenada es un dato de
+ * una corrida pasada; lo que este cotejo caza es la deriva entre lo que se emitió
+ * y lo que hoy se puede reconstruir, que es exactamente el defecto que un código
+ * aleatorio volvía invisible.*
+ */
+export function reconstruirClaveAcceso(fila: {
+  fecha_emision: string;                       // date (YYYY-MM-DD) — de la FILA, no del reloj
+  tipo: keyof typeof TIPO_COMPROBANTE;
+  establecimiento: string;
+  punto_emision: string;
+  secuencial: string;
+}, emisor: { ruc: string; ambiente: number }): string {
+  return construirClaveAcceso({
+    fecha: fechaDeFilaUTC(fila.fecha_emision),
+    tipoComprobante: fila.tipo,
+    ruc: emisor.ruc,
+    ambiente: emisor.ambiente as 1 | 2,
+    establecimiento: fila.establecimiento,
+    puntoEmision: fila.punto_emision,
+    secuencial: fila.secuencial,
+    codigoNumerico: codigoNumericoDesdeSecuencial(fila.secuencial),
+  });
+}
+
+/**
+ * `YYYY-MM-DD` → Date en UTC.
+ *
+ * 🔴 `new Date('2026-09-10')` YA es medianoche UTC, pero `new Date()` en el
+ *    emisor NO era eso: era el reloj de la edge. Un documento nacido 21:30 en
+ *    Guayaquil (02:30 UTC del día siguiente) tenía `fecha_emision` de un día y
+ *    clave de otro — *y nadie lo iba a notar, porque los dos valores son
+ *    plausibles por separado.*
+ */
+export function fechaDeFilaUTC(fecha: string): Date {
+  if (!/^\d{4}-\d{2}-\d{2}/.test(fecha)) throw new Error('fecha_emision_invalida');
+  return new Date(`${fecha.slice(0, 10)}T00:00:00.000Z`);
+}
+
 /** Valida una clave ajena (la de la clínica, en agencia). Local: el SRI es tanda 2. */
 export function validarClaveAcceso(clave: string): { ok: boolean; motivo?: string } {
   if (!/^\d{49}$/.test(clave)) return { ok: false, motivo: 'largo_o_formato' };
