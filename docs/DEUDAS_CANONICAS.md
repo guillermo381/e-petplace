@@ -29382,6 +29382,37 @@ lo construye y la otra lo mide **sobre el objeto que ya existe**.
 ---
 
 
+### `L-530` — Un `2xx` con `wamid` del transporte significa «lo tomó», JAMÁS «llegó» — y la demora entre las dos cosas puede ser larga
+
+La lección que corona el arco de notificaciones de S114. Tres veces el mismo síntoma
+—**el transporte responde OK y nada se muestra en el teléfono**— con tres causas
+distintas (token fantasma, permiso de Android bloqueado, y esta: **demora**), y
+ninguna distinguible desde el emisor en el momento del envío.
+
+**El caso:** los dos WhatsApp salían con `Meta 2xx` y `wamid` válido (el mensaje
+medido dentro del sistema de Meta, con el E.164 correcto codificado en el propio
+wamid), y no aparecían en el teléfono. **Resultó ser DEMORA, no corte** — llegaron
+más tarde. *Un `2xx` con id de mensaje prueba que el transporte lo ACEPTÓ, no que el
+aparato lo recibió; y entre «aceptado» y «recibido» puede haber minutos u horas.*
+
+**Por qué importa y qué lo cierra:** sin un receipt, **«demorado» y «perdido» se ven
+idénticos** —que es exactamente lo que estuvimos haciendo a mano, dos veces, durante
+horas—. El receipt es el único árbitro:
+- **WhatsApp SÍ lo da** (webhook de estado: sent/delivered/read/failed) ⇒ el estado
+  puede decir la verdad (`entregada_aparato`/`leida`); es lo que cierra `D-1055` para
+  este canal.
+- **Push (FCM v1) NO lo da por mensaje** ⇒ ahí `aceptada_transporte` es el techo de lo
+  que se sabe, y «demorado vs perdido» queda indistinguible (`D-1055` abierta para push).
+
+**La regla:** ningún estado de transporte se nombra por lo que uno espera que pase
+(«entregada») sino por lo que el transporte CONFIRMA («aceptada_transporte» hasta que
+un receipt diga más). Es la misma clase que el rename `entregada→aceptada_transporte`
+de esta sesión — un nombre que promete recepción sobre una aceptación miente, y el
+costo de esa mentira fue medido en horas.
+
+---
+
+
 ### `L-529` — Un `git merge` parado en la rama equivocada produce un árbol que PARECE revertir main, y el diff two-dot del merge-base lo lee limpio
 
 **Qué pasó (S114-A, 9-sep, error propio declarado):** iba a mergear la punta de F a
@@ -31213,6 +31244,12 @@ ACK de la app es parcial (foreground sí, background no) — ahí `aceptada_tran
 sigue siendo lo máximo que se sabe, y la mitigación es sólo el nombre honesto + la
 cura del token (`D-1056`). *La asimetría es del transporte, no nuestra: WhatsApp
 confirma, FCM no.*
+
+**VALIDADO E2E (S114, 10-sep):** el canal whatsapp se caminó de punta a punta
+—productor → ensamblado → ruteo → entrega → **recepción real en el teléfono**—. El
+mensaje que parecía cortado **era DEMORA** (2xx + wamid, llegó más tarde); ver `L-530`.
+Confirma la asimetría: con el webhook wired, whatsapp distingue demorado de perdido;
+push no puede.
 
 **🔴 DISPARO:** antes del soft launch de octubre (cuando haya familias reales cuya
 falta de push sea invisible), o el primer reporte de «no me llegan las notificaciones»
