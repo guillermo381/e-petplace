@@ -116,8 +116,43 @@ Deno.serve(async (req) => {
         nombreCuenta = cc?.razon_social ?? null;
       }
 
+      /* 🔴 LA FORMA DE PAGO, FAIL-CLOSED. Medido: la base no distingue crédito de
+         débito —`marca` es la marca de la tarjeta, `forma` es el flujo— así que
+         para nuvei el medio hay que declararlo. Sin él el documento ESPERA en
+         vez de salir con un `<formaPago>` inventado. */
+      const { data: fp } = await db.rpc('fiscal_forma_pago_del_intento',
+                                        { p_intento_id: d.pago_intento_id });
+      if (!fp?.ok) {
+        await db.from('documentos_fiscales').update({
+          estado: 'pendiente_manual',
+          motivo_rechazo: `forma_pago: ${JSON.stringify(fp ?? { codigo: 'sin_respuesta' })}`.slice(0, 400),
+        }).eq('id', d.id);
+        hechos.push({ id: d.id, resultado: 'sin_forma_de_pago' });
+        continue;
+      }
+
+      const emisorCanonico = {
+        ...emisor,
+        /* Cae a la matriz si nadie declaró la del local — y se ve en el dato,
+           no se disfraza: el XML lleva la dirección que la casa realmente tiene. */
+        direccion_establecimiento: emisor.direccion_establecimiento ?? emisor.direccion_matriz,
+      };
+
+      /* 🔴 FAIL-CLOSED del 2.1.0: decirse agente de retención sin declarar la
+         resolución produciría el campo vacío o inventado. El documento espera. */
+      if (emisor.agente_retencion && !emisor.agente_retencion_resolucion) {
+        await db.from('documentos_fiscales').update({
+          estado: 'pendiente_manual',
+          motivo_rechazo: 'agente_retencion_sin_resolucion: el emisor se declara agente '
+                        + 'de retención y no tiene número de resolución cargado.',
+        }).eq('id', d.id);
+        hechos.push({ id: d.id, resultado: 'agente_retencion_sin_resolucion' });
+        continue;
+      }
+
       const canonico = construirCanonico({
-        tipo: d.tipo, fecha_emision: d.fecha_emision, emisor, receptor, items, catalogos,
+        tipo: d.tipo, fecha_emision: d.fecha_emision, emisor: emisorCanonico,
+        receptor, items, catalogos, forma_pago_sri: fp.codigo_sri,
         razonSocialCuentaComercial: nombreCuenta,
         referencias: { pago_intento_id: d.pago_intento_id, origen_tipo: lineas[0]?.origen_tipo ?? null,
                        origen_id: lineas[0]?.origen_id ?? null },

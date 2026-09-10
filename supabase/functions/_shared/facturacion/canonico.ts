@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════
-// EL DOCUMENTO CANÓNICO v2 — la fuente de la que sale el XML
+// EL DOCUMENTO CANÓNICO v3 — la fuente de la que sale el XML
 //
 // 🔴 SE PERSISTE. `documentos_fiscales.canonico` guarda esto tal cual se emitió,
 //    con su `canonico_version`. *Un documento cuyo contenido hay que reconstruir
@@ -7,7 +7,7 @@
 //    entonces el precio, el nombre del servicio y la tarifa cambiaron.*
 // ═══════════════════════════════════════════════════════════════════════════
 
-export const CANONICO_VERSION = 2;   // v2: códigos del SRI + fechaEmision dd/mm/aaaa
+export const CANONICO_VERSION = 3;   // v3: dirEstablecimiento · propina · formaPago · esquema
 
 /**
  * Los catálogos traducidos, tal como salen de la base.
@@ -37,13 +37,34 @@ export interface EmisorCanonico {
   razon_social: string;
   nombre_comercial: string | null;
   direccion_matriz: string;
+  /** La dirección del LOCAL. Cae a la matriz si nadie la declaró, y se ve. */
+  direccion_establecimiento: string;
   establecimiento: string;
   punto_emision: string;
   obligado_contabilidad: boolean;
   leyenda_regimen: string | null;
   contribuyente_especial: string | null;
   ambiente: 1 | 2;
+  /**
+   * La versión del esquema del comprobante (1.0.0 | 2.1.0), como DATO.
+   *
+   * 🔴 Conviven las dos en producción. Manda la que exija el proveedor que se
+   *    elija; hasta entonces 2.1.0 — la más nueva, y la que trae
+   *    `agenteRetencion`, que hace falta si el SRI designa a Satori.
+   *    *Un literal en el generador obliga a un deploy para cambiar de esquema.*
+   */
+  version_esquema: string;
+  /**
+   * El número de RESOLUCIÓN con que el SRI designa agente de retención — no un
+   * booleano. Va en `<agenteRetencion>` del 2.1.0, y sólo si existe: *el campo
+   * no admite un valor inventado.*
+   */
+  agente_retencion_resolucion: string | null;
 }
+
+/* ⚠️ LA MONEDA NO ESTÁ ACÁ A PROPÓSITO: la pone el generador de XML de cada
+   proveedor, no nosotros. Guardarla como decisión propia crearía dos fuentes
+   para el mismo valor, y la nuestra envejecería sin que nadie la mire. */
 
 export interface ReceptorCanonico {
   tipo_identificacion: 'ruc' | 'cedula' | 'pasaporte' | 'consumidor_final';
@@ -82,6 +103,15 @@ export interface DocumentoCanonico {
   subtotales_por_tarifa: { codigo_iva: string; tarifa_pct: number; base: number; valor_iva: number }[];
   descuento_total: number;
   total: number;
+  /**
+   * 🔴 VA AUNQUE SEA CERO, y el porqué queda escrito para que nadie lo
+   *    «arregle»: **nosotros no cobramos propina.** Nuestra tarifa de servicio
+   *    NO es una propina — es una LÍNEA DE VENTA con su IVA, que va en el
+   *    detalle y tributa. *Ponerla acá la sacaría de la base imponible.*
+   */
+  propina: number;
+  /** Código del catálogo del SRI (tabla 24), derivado del riel del pago. */
+  forma_pago_sri: string;
   informacion_adicional: Record<string, string>;
   referencias: {
     pago_intento_id: string | null;
@@ -132,6 +162,8 @@ export function construirCanonico(args: {
   receptor: ReceptorCanonico;
   items: ItemCanonico[];
   catalogos: CatalogosSri;
+  /** Código del SRI ya resuelto. Es obligatorio: sin él no hay XML válido. */
+  forma_pago_sri: string;
   descuento_total?: number;
   rucProveedorFacturacion?: string | null;
   razonSocialCuentaComercial?: string | null;
@@ -150,6 +182,9 @@ export function construirCanonico(args: {
     return { ...it, codigo_sri: t.codigo_sri, codigo_porcentaje_sri: t.codigo_porcentaje_sri };
   });
 
+  if (!args.forma_pago_sri) {
+    throw new Error('forma_pago_sin_codigo_sri: el riel del pago no resolvió a un código');
+  }
   const idSri = args.catalogos.identificacion[args.receptor.tipo_identificacion];
   if (!idSri) throw new Error(`identificacion_sin_codigo_sri: ${args.receptor.tipo_identificacion}`);
   const receptor: ReceptorCanonico = { ...args.receptor, tipo_identificacion_sri: idSri };
@@ -178,6 +213,8 @@ export function construirCanonico(args: {
     subtotales_por_tarifa: grupos,
     descuento_total: args.descuento_total ?? 0,
     total: Math.round((base + iva) * 100) / 100,
+    propina: 0,                       // ver el comentario del campo: es 0 A PROPÓSITO
+    forma_pago_sri: args.forma_pago_sri,
     informacion_adicional: info,
     referencias: args.referencias,
   };

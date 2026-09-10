@@ -35,11 +35,13 @@ export function xmlDesdeCanonico(c: DocumentoCanonico, claveAcceso: string): str
 
   const grupos = c.subtotales_por_tarifa.map((g) =>
     `<totalImpuesto><codigo>${esc(c.items.find((i) => i.codigo_iva === g.codigo_iva)?.codigo_sri ?? '')}</codigo><codigoPorcentaje>${esc(c.items.find((i) => i.codigo_iva === g.codigo_iva)?.codigo_porcentaje_sri ?? '')}</codigoPorcentaje>` +
-    `<baseImponible>${g.base.toFixed(2)}</baseImponible><valor>${g.valor_iva.toFixed(2)}</valor></totalImpuesto>`
+    `<baseImponible>${g.base.toFixed(2)}</baseImponible>` +
+    /* 2.1.0 · la tarifa TAMBIÉN va en el total por grupo, no sólo en el detalle */
+    `<tarifa>${g.tarifa_pct}</tarifa><valor>${g.valor_iva.toFixed(2)}</valor></totalImpuesto>`
   ).join('');
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<${c.tipo === 'factura' ? 'factura' : 'notaCredito'} id="comprobante" version="1.0.0">
+<${c.tipo === 'factura' ? 'factura' : 'notaCredito'} id="comprobante" version="${esc(c.emisor.version_esquema)}">
   <!-- ${MARCA_PRUEBAS} -->
   <infoTributaria>
     <ambiente>${c.emisor.ambiente}</ambiente><tipoEmision>1</tipoEmision>
@@ -48,7 +50,12 @@ export function xmlDesdeCanonico(c: DocumentoCanonico, claveAcceso: string): str
     <ruc>${esc(c.emisor.ruc)}</ruc>
     <claveAcceso>${esc(claveAcceso)}</claveAcceso>
     <estab>${esc(c.emisor.establecimiento)}</estab><ptoEmi>${esc(c.emisor.punto_emision)}</ptoEmi>
-    <dirMatriz>${esc(c.emisor.direccion_matriz)}</dirMatriz>
+    <dirMatriz>${esc(c.emisor.direccion_matriz)}</dirMatriz>${
+      /* 2.1.0 · sólo si el SRI designó: el campo lleva la RESOLUCIÓN, no un sí. */
+      c.emisor.agente_retencion_resolucion
+        ? `\n    <agenteRetencion>${esc(c.emisor.agente_retencion_resolucion)}</agenteRetencion>`
+        : ''}
+    <dirEstablecimiento>${esc(c.emisor.direccion_establecimiento)}</dirEstablecimiento>
   </infoTributaria>
   <infoComprobante>
     <obligadoContabilidad>${c.emisor.obligado_contabilidad ? 'SI' : 'NO'}</obligadoContabilidad>
@@ -57,6 +64,11 @@ export function xmlDesdeCanonico(c: DocumentoCanonico, claveAcceso: string): str
     <razonSocialComprador>${esc(c.receptor.razon_social)}</razonSocialComprador>
     <identificacionComprador>${esc(c.receptor.identificacion)}</identificacionComprador>
     <totalDescuento>${c.descuento_total.toFixed(2)}</totalDescuento>
+    <propina>${c.propina.toFixed(2)}</propina>
+    <!-- la moneda la pone el generador de cada proveedor; el simulador
+         escribe el literal del SRI para que el XML esté completo -->
+    <moneda>US Dollar</moneda>
+    <pagos><pago><formaPago>${esc(c.forma_pago_sri)}</formaPago><total>${c.total.toFixed(2)}</total></pago></pagos>
     ${grupos}
     <importeTotal>${c.total.toFixed(2)}</importeTotal>
   </infoComprobante>

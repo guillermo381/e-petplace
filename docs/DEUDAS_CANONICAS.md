@@ -32033,7 +32033,23 @@ anon_inserta_donacion → PASO — anon escribió la fila ca618ccf-…
 en `donaciones` sin cuenta.** *Que una policy exista no prueba que niegue; lo prueba
 verla negar* (`L-321`).
 
-**⚠️ Y la pregunta que la ficha NO responde a propósito: puede ser DELIBERADO.**
+**✅ CERRADA POR FIRMA DEL FOUNDER (10-sep-2026) — migración `20260912520000`.**
+El `OR` sale de las **DOS** policies (el censo encontró que el SELECT tenía el mismo
+defecto: `anon` también podía LEER). *No dejaba pasar donaciones anónimas: dejaba pasar
+cualquier fila sin dueño.* Si el producto necesita donar sin cuenta, se resuelve con una
+función `SECURITY DEFINER` con su propio guard, jamás relajando una policy.
+Censo previo, porque revocar de más rompe un camino legítimo y ningún typecheck lo dice:
+**0 consumidores** en el monorepo y en las cuatro webs del legado, **0 filas** en la tabla.
+Y un hallazgo que refuerza la firma: el `chat-ayuda` del legado ya le dice a la gente
+*«las donaciones también requieren cuenta»* — **la policy contradecía la letra publicada.**
+Cinturón con sus tres brazos: `anon` no escribe · `anon` no lee · **el dueño SÍ dona**
+(el discriminador que impide el verde por la razón equivocada).
+
+**Lo que sigue abierto de esta ficha:** los **651 grants** y las **otras cuatro policies**
+—`profiles`, `solicitudes_adopcion`, `evento_cita_servicio`, `prestador_empleado_servicios`—
+que **aciertan por accidente** y quedan como deuda declarada, no como cura de esta tanda.
+
+**⚠️ Y la pregunta que la ficha ya no responde, porque la mesa la contestó:**
 `MODELO_DESPENSA` firma *«donación sin destino elegible»* y una donación anónima sin
 cuenta es un caso de producto legítimo. **La decisión es de la mesa, no de esta pista:**
 si es deliberado, la policy se reescribe para que lo DIGA (rate limit, monto máximo, y
