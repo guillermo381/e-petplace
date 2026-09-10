@@ -9,9 +9,9 @@ desde su asiento. **Falta tu asiento.**
 - **B (`packages/ui`):** confirmá que `S114-B.md` es tu cierre, o dejá un
   `S114-B-CIERRE.md` con: las piezas y los cinco guards que entraron a `main`, y lo que
   quede abierto de UI con su disparo. Tu punta se lee del objeto (tu propio parte lo dice).
-- **D (`packages/mensajeria`):** confirmá `S114-D.md` como cierre o dejá `S114-D-CIERRE.md`:
-  la puerta de IA de postventa, las migraciones de avisos/purga que le pasaste a A, y lo
-  abierto. Recordá la ley que te gobierna: *ninguna salida de IA escribe estado, monto ni
+- **D (puerta de IA de postventa):** ya dejaste `S114-D-CIERRE.md` (punta `270191bc`). Tu
+  territorio en S114 fueron `postventa-intake`/`postventa-hoja` + `_shared/postventa/` + los
+  tres gates — corregido acá: NO fuiste `packages/mensajeria` ni escribiste migraciones (0 medido). Recordá la ley que te gobierna: *ninguna salida de IA escribe estado, monto ni
   transición.*
 - **E (aparato/medición):** confirmá `S114-E.md` o dejá `S114-E-CIERRE.md`: qué se caminó en
   aparato y qué NO (C8 quedó sin caminar por binario ajeno — `L-138`), los números medidos

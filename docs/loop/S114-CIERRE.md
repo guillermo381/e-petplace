@@ -5,7 +5,7 @@
 > deuda vieja salió de paso, y qué NO se hizo con su razón.
 >
 > **Pistas:** A (conducción + DB + `packages/api` + docs + merges/OTA) · B (`packages/ui`)
-> · C (`apps/cliente` + `apps/prestador`) · D (`packages/mensajeria`) · E (aparato,
+> · C (`apps/cliente` + `apps/prestador`) · D (puerta de IA de postventa: `postventa-intake`/`postventa-hoja` + `_shared/postventa/` + sus tres gates — NO escribió migraciones) · E (aparato,
 > medición, camino real) · F (portal de operaciones — el admin).
 >
 > **`main` al cierre: `814a06c1`** — *«el receipt real de WhatsApp (wamid + webhook de
@@ -103,6 +103,14 @@ puede ser verdadera y la conclusión falsa si el instrumento no puede producir s
   reparte con el mismo factor. El ledger (comisión/payout) reversa proporcional al monto,
   **independiente de cómo se pagó**.
 
+### La puerta de IA de postventa (D)
+- **El modelo redacta, nunca decide.** `postventa-intake` (clasifica el reclamo de la
+  familia) y `postventa-hoja` (arma la hoja del caso) sobre `_shared/postventa/`, con sus
+  tres gates. **Ninguna salida de IA escribe estado, monto ni transición** — una regla
+  determinística decide que algo exista; el modelo sólo pone palabras. D no escribió una
+  sola migración en S114 (medido: `git diff --name-only e516a089..270191bc` → 0 en
+  `supabase/migrations/`).
+
 ### El portal de operaciones (F)
 - **El admin reconstruido** — no compilaba; F lo levantó, curó el `redirectTo` que mandaba
   al login de Vercel, y dejó los lectores del legado hablando.
@@ -186,9 +194,9 @@ vuelta · el `redirectTo` al login de Vercel · el admin que no compilaba.
 
 ## OPERATIVO
 
-- **`main` = `814a06c1`.** Tren final: `candidato/s114-2 @ bfd20774` mergeado con verde
+- **`main` = `45029367`** (tren final `814a06c1` + el cierre documental + el P0 del reloj, ver CODA). El tren de contenido: `candidato/s114-2 @ bfd20774` mergeado con verde
   completo sin `SALTAR_GATE`, censo doble.
-- **59 migraciones `_s114a_`** · **782 migraciones locales** (local = remoto al cierre).
+- **60 migraciones `_s114a_`** · **782 migraciones locales** (local = remoto al cierre).
 - **Edges desplegadas:** `pagos-cobro` (triple fiscal) · `despachar-push` ·
   `despachar-whatsapp` (guarda wamid) · `despachar-correo` (las tres leen de
   `notificacion_entrega`) · **`whatsapp-estado`** (webhook nuevo, `--no-verify-jwt`).
@@ -196,6 +204,23 @@ vuelta · el `redirectTo` al login de Vercel · el admin que no compilaba.
 - **Sin OTA:** delta = 1 migración + 2 edges + `config.toml` + tipos + 1 reversa; cero apps.
 - **Gates verdes al mergear:** `@epetplace/api` · `packages/ui` · `apps/cliente` ·
   `apps/prestador` · `verify:diseno` · `verify:edge-deno`.
+
+## CODA — EL CIERRE MISMO CAMINÓ Y ENCONTRÓ UNA DOCE
+
+Fiel a la lección corona, **la propia rueda de cierre encontró un defecto vivo**: E midió
+que el cron `expirar-objetos-sin-cierre` fallaba **cada hora desde las 05:00 del 10-sep**
+— `no_ejecutado` estaba en el CHECK de `evento_cita_servicio` (curado) pero **no en el de
+`guarderia_estadias`**, su tabla hermana. La rama de estadías escribía un valor que su
+propio CHECK prohíbe ⇒ la excepción **abortaba la función entera, incluidos los avisos de
+citas**. Sin síntoma: vivía en `cron.job_run_details`, que nadie lee, mientras la pantalla
+del prestador se veía normal. **Y lo encontró el primer rojo real de un gate que nació
+mudo** (`verify:cierre-ausente`), destrabado por el paso del tiempo. Curado
+(`20260912160000`, cinturón sonda-ROLLBACK VERDE): tras la cura el reloj corre `ok:true`,
+marca las 4 estadías dentro de corte y **salen 8 avisos que el abort venía suprimiendo**.
+Medido antes de curar: el reloj toca sólo esas dos tablas con `no_ejecutado`, no hay
+tercera. `main` **`45029367`**.
+
+*La lección se cumplió sobre sí misma: doce, no once.*
 
 ## ESTADO DEL CANON
 
@@ -209,4 +234,9 @@ vuelta · el `redirectTo` al login de Vercel · el admin que no compilaba.
   se **consolidó `D-1047`** (dos fichas distintas con el mismo número — la misma deuda filada
   por D y E en paralelo, ambas con `pnpm proximo:ficha`; la colisión que `D-1003` cura pero
   que se pidió simultáneo en dos ramas). **Cero colisiones de número en todo el canon** tras
-  el cierre.
+  el cierre. **Dos correcciones medidas de peers, aplicadas:** el territorio de D en S114 fue
+  la **puerta de IA de postventa** (no `packages/mensajeria`, y sin migraciones — `git diff`
+  0); y `D-1050` se **re-verificó contra `main`** ante un reporte de F: un voseo real sembrado
+  en `apps/admin/.../Casos.tsx` **hace fallar `verify:diseno` con exit 1** (R66 lo caza, APPS
+  VISTAS incluye admin), y la cura de B (`127922e7`) es ancestro del tren — la ficha queda
+  RESUELTA, el VERDE que F midió no es reproducible en `main` actual.
