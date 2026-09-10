@@ -20,10 +20,18 @@ console.log(`   rama ${rama} · sha ${sha.slice(0, 8)} · ${instrumentos.length}
 const filas = [];
 for (const f of instrumentos) {
   const t0 = Date.now();
-  const r = spawnSync('node', [f], { encoding: 'utf8', cwd: DIR, timeout: 300000 });
+  /* 🔴 TIMEOUT PROPIO DEL ORQUESTADOR, y 300 s eran demasiados: con el canal
+     colisionando, `i02` colgó la suite ENTERA más de cinco minutos y las otras doce
+     mediciones no llegaron a correr. *Es el mismo defecto que curé DENTRO de i02, un
+     piso más arriba: sin techo, un instrumento colgado se lleva puesta la corrida.*
+     120 s alcanzan de sobra — el más lento medido tarda ~32 s. */
+  const r = spawnSync('node', [f], { encoding: 'utf8', cwd: DIR, timeout: 120000 });
   const ms = Date.now() - t0;
-  // Un instrumento que muere sin código conocido NO se cuenta como sano.
-  const code = r.status === null ? 2 : r.status;
+  /* Un instrumento que muere sin código conocido NO se cuenta como sano — y un
+     timeout del orquestador es NO CONCLUYENTE, jamás rojo: que la suite se canse de
+     esperar no dice nada del producto. */
+  const code = (r.status === null || r.signal) ? 2 : r.status;
+  if (r.signal) console.log(`   ⚪ ${f} superó los 120 s y lo cortó el orquestador (${r.signal}) — no es un rojo del producto.`);
   filas.push({ f, code, ms, salida: r.stdout });
   console.log(`${CODIGO[code] ?? `⚠️ exit ${code}`}  ${f.padEnd(34)} ${String(ms).padStart(6)} ms`);
 }
