@@ -28,9 +28,11 @@ Deno.serve(async (req) => {
   const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
   const { data: cfg } = await db.from('app_config').select('clave,valor')
-    .in('clave', ['fiscal_proveedor', 'fiscal_ambiente']);
+    .in('clave', ['fiscal_proveedor', 'fiscal_ambiente', 'fiscal_simular_cupo_agotado']);
   const proveedor = cfg?.find((c) => c.clave === 'fiscal_proveedor')?.valor ?? 'manual';
-  const puerto = resolverPuerto(proveedor, Deno.env.get('FACTURACION_WEBHOOK_SECRET') ?? 'pruebas');
+  const simularCupo = cfg?.find((c) => c.clave === 'fiscal_simular_cupo_agotado')?.valor === 'true';
+  const puerto = resolverPuerto(proveedor,
+    Deno.env.get('FACTURACION_WEBHOOK_SECRET') ?? 'pruebas', simularCupo);
 
   const { data: emisor } = await db.from('fiscal_emisor').select('*').single();
   if (!emisor) return json({ ok: false, codigo: 'sin_emisor_configurado' }, 409);
@@ -56,8 +58,13 @@ Deno.serve(async (req) => {
     identificacion: Object.fromEntries(identRows.map((i) => [i.codigo, i.codigo_sri])),
   };
 
+  /* 🔴 LA COLA INCLUYE LOS `emitiendo`, y sin eso la retriabilidad que el
+     encabezado promete no existía: un documento que quedó en vuelo —timeout,
+     proveedor caído, cupo agotado— **no lo levantaba nadie**. Ahora vuelve, y
+     REUSA su secuencial (ver ②): tomarle uno nuevo dejaría un hueco en la
+     numeración que hay que explicarle al SRI. */
   const { data: pendientes } = await db.from('documentos_fiscales')
-    .select('*').eq('estado', 'borrador').eq('sentido', 'emitido').limit(20);
+    .select('*').in('estado', ['borrador', 'emitiendo']).eq('sentido', 'emitido').limit(20);
 
   const hechos: unknown[] = [];
   for (const d of pendientes ?? []) {
@@ -74,12 +81,19 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      // ② el secuencial, ATÓMICO (FOR UPDATE del lado de la base)
-      const { data: sec, error: eSec } = await db.rpc('tomar_secuencial_fiscal', {
-        p_ruc: emisor.ruc, p_establecimiento: emisor.establecimiento,
-        p_punto_emision: emisor.punto_emision, p_tipo: d.tipo,
-      });
-      if (eSec || !sec) throw new Error(`secuencial: ${eSec?.message ?? 'vacio'}`);
+      // ② el secuencial, ATÓMICO (FOR UPDATE del lado de la base) — y SÓLO si
+      //    el documento no tiene ya el suyo. *Un reintento que toma número
+      //    nuevo no es un reintento: es un documento nuevo, y el anterior queda
+      //    como un hueco en la numeración.*
+      let sec: string | null = d.secuencial ?? null;
+      if (!sec) {
+        const { data: nuevo, error: eSec } = await db.rpc('tomar_secuencial_fiscal', {
+          p_ruc: emisor.ruc, p_establecimiento: emisor.establecimiento,
+          p_punto_emision: emisor.punto_emision, p_tipo: d.tipo,
+        });
+        if (eSec || !nuevo) throw new Error(`secuencial: ${eSec?.message ?? 'vacio'}`);
+        sec = nuevo as string;
+      }
 
       // ③ la clave, del lado nuestro — y DERIVADA, no sorteada.
       //
@@ -187,13 +201,21 @@ Deno.serve(async (req) => {
 
       // ⑤ recién ahora, afuera
       const r = await puerto.emitir({ ...canonico, clave_acceso: clave });
+
+      /* 🔴 UN RECHAZO REINTENTABLE NO PIERDE LA FACTURA. El documento queda en
+         `emitiendo` —con su secuencial y su clave intactos— y el reconciliador
+         lo vuelve a tomar. Es la misma máquina que el SRI caído, distinguida
+         por su CÓDIGO y no por su texto. Fail-closed: nunca se pierde, y como
+         la clave es estable, tampoco se emite dos veces. */
+      const reintentable = r.reintentable === true;
       await db.from('documentos_fiscales').update({
         referencia_proveedor: r.referencia,
-        estado: r.estado,
+        estado: reintentable ? 'emitiendo' : r.estado,
         motivo_rechazo: r.motivo ?? null,
       }).eq('id', d.id);
 
-      hechos.push({ id: d.id, secuencial: sec, estado: r.estado });
+      hechos.push({ id: d.id, secuencial: sec, estado: reintentable ? 'emitiendo' : r.estado,
+                    ...(reintentable ? { en_cola_por: r.codigo ?? 'reintentable' } : {}) });
     } catch (e) {
       /* Un rechazo NO reutiliza el secuencial: la corrección es un documento
          NUEVO que apunta al rechazado (tanda 2). Acá sólo se nombra el fallo. */

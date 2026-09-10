@@ -1,0 +1,3 @@
+-- REVERSA de 20260912570000 · vuelve la clave del adjunto a `ruta`, que es la
+-- palabra que `verify:rutas-de-aviso` lee en los productores: revertir esto
+-- vuelve ciego al gate sobre este productor.

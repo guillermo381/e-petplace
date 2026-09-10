@@ -114,7 +114,16 @@ export function rideDesdeCanonico(c: DocumentoCanonico, claveAcceso: string): st
 <p style="color:#7a736a">${MARCA_PRUEBAS}</p>`;
 }
 
-export function crearSimulador(secretoWebhook: string): PuertoFacturacion {
+export function crearSimulador(
+  secretoWebhook: string,
+  /**
+   * 🔴 EL ROJO DEL CUPO SE PUEDE PRODUCIR SIN TOCAR CÓDIGO. Entra como
+   *    argumento porque su fuente es `app_config.fiscal_simular_cupo_agotado`:
+   *    *un rechazo que sólo se puede ensayar editando el simulador es un
+   *    rechazo que nadie va a ensayar.*
+   */
+  simularCupoAgotado = false,
+): PuertoFacturacion {
   return {
     nombre: 'simulador',
     capacidades(): Capacidades {
@@ -134,6 +143,17 @@ export function crearSimulador(secretoWebhook: string): PuertoFacturacion {
       if (!clave) {
         return { referencia: null, estado: 'no_autorizada', clave_acceso: null,
                  motivo: 'sin_clave_acceso: la casa pone el número y no llegó' };
+      }
+      /* El proveedor elegido no renueva solo: avisa y reactiva al instante,
+         pero con el cupo agotado la emisión se DETIENE. Eso NO es un rechazo
+         del comprobante —nunca llegó a evaluarse— así que vuelve a la cola con
+         su secuencial y su clave intactos. */
+      if (simularCupoAgotado) {
+        return {
+          referencia: null, estado: 'emitiendo', clave_acceso: clave,
+          codigo: 'cupo_agotado', reintentable: true,
+          motivo: 'cupo_agotado: el plan del proveedor no admite más documentos en el período',
+        };
       }
       return { referencia: `sim_${clave.slice(-12)}`, estado: 'emitiendo', clave_acceso: clave };
     },
