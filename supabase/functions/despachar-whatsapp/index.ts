@@ -515,8 +515,14 @@ Deno.serve(async (req) => {
     });
 
     if (res.ok) {
+      // S114 · el wamid es la llave con que el webhook de estado (whatsapp-estado)
+      // va a encontrar esta entrega para marcarla entregada_aparato/leida. Se guarda
+      // en el ÉXITO. `cerrado_en` queda NULL: aceptada NO es el fin del ciclo en
+      // WhatsApp (a diferencia de push/email) — lo cierra el webhook al confirmar.
+      const okBody = await res.json().catch(() => ({} as Record<string, unknown>));
+      const wamid = (okBody as { messages?: Array<{ id?: string }> })?.messages?.[0]?.id ?? null;
       await supabase.from('notificacion_entrega')
-        .update({ estado: 'aceptada_transporte', cerrado_en: new Date().toISOString() }).eq('id', i.entregaId);
+        .update({ estado: 'aceptada_transporte', proveedor_msg_id: wamid }).eq('id', i.entregaId);
       await supabase.from('notificacion_intencion')
         .update({ estado: 'aceptada_transporte' }).eq('id', i.id).eq('estado', 'encolada');
       entregadas++;

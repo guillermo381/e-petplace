@@ -14554,6 +14554,7 @@ export type Database = {
           id: string
           intencion_id: string
           motivo: string | null
+          proveedor_msg_id: string | null
         }
         Insert: {
           actualizado_en?: string
@@ -14564,6 +14565,7 @@ export type Database = {
           id?: string
           intencion_id: string
           motivo?: string | null
+          proveedor_msg_id?: string | null
         }
         Update: {
           actualizado_en?: string
@@ -14574,6 +14576,7 @@ export type Database = {
           id?: string
           intencion_id?: string
           motivo?: string | null
+          proveedor_msg_id?: string | null
         }
         Relationships: [
           {
