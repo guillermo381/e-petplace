@@ -32141,3 +32141,108 @@ equivocada. **El defecto sobrevive porque su síntoma acusa a otro.**
 
 **☠️ Condición de muerte:** ninguna — es de método. Su recordatorio útil es que hicieron
 falta **siete** facturas para verla: con dos o tres, la coincidencia parecía la regla.
+
+---
+
+### `D-1060` 🟡 · CUATRO SECUENCIALES FISCALES QUEMADOS EN S115 — declarados, no borrados
+
+**Medido 10-sep-2026 23:55 UTC:** `fiscal_sequences.ultimo_secuencial = 4` para
+`1793240435001 · 001-002 · factura`, con **`documentos_fiscales` en CERO filas**.
+Los cuatro números **no viven en ninguna fila**, y eso ante el SRI es un hueco en la
+numeración que hay que poder explicar.
+
+**Firma del founder: se declaran, no se borran.** *Retroceder un contador de
+numeración fiscal para que el número «cierre» es reescribir el pasado; declararlo es
+poder contarlo.*
+
+#### De dónde salió cada uno
+
+| # | Quién | Por qué |
+|---|---|---|
+| 1, 2 | el e2e de **E** contra la edge real | la edge **desplegada** (v1, de la tanda 1) no escribía `ruc_emisor`, y el trigger `clave_sin_insumos` —que A aplicó el mismo día— rechazaba su UPDATE. Nadie leía el error: la edge informaba `emitiendo` y la fila quedaba en `borrador`. |
+| 3 | el **cinturón** de `20260912600000` | su brazo verde reserva un número real y borra el documento. *El cinturón que prueba que no se queman números, quemó uno.* |
+| 4 | el **e2e de cierre** de A | el documento se emitió, se autorizó, y se borró: **una factura de prueba sin marca dentro del libro fiscal es peor que un hueco declarado** (precedente S92 — el 80 % de las familias eran sonda y toda métrica anterior estaba inflada tres veces). |
+
+#### La causa raíz de 1 y 2, que es lo que vale de esta ficha
+
+**Una migración invalidó las escrituras de una edge function viva, y la función no se
+movió.** Es `D-662` un piso más arriba: el canon la escribió para BUNDLES —*el repo y
+el teléfono son dos versiones de la verdad y una migración mueve sólo una*— y una edge
+desplegada es exactamente lo mismo. Ver **`L-536`**.
+
+#### Curado en la misma sesión (para que no vuelva a pasar)
+
+- `fiscal_reservar_numero` toma el número, deriva la clave y escribe la fila **en la
+  misma transacción**: o la fila queda con su número, o el número no se consume. Es
+  idempotente, así que un reintento reusa el suyo.
+- Todo `update` del pipeline fiscal exige **una fila afectada**: cero es un rojo.
+- El parte de la edge se arma **releyendo la fila**, no de variables locales.
+- Ejercido contra la edge real: seis corridas, un solo número (`000000004`), y la
+  sexta devolvió `procesados: 0`.
+
+**⚠️ Lo que NO está curado y por eso la ficha queda abierta:** el patrón del cinturón.
+Un brazo verde que reserva un número real y borra su documento **quema uno cada vez que
+la migración se aplica**. La forma correcta es que el brazo verde corra en una
+subtransacción que se deshace sola, como los fixtures de la casa.
+
+**☠️ Condición de muerte:** cuando el patrón del cinturón esté curado **y** la primera
+conciliación real con el SRI declare estos cuatro huecos. **Disparo:** la primera
+emisión en ambiente de producción — antes de eso, los cuatro son de `pruebas` y no le
+deben explicación a nadie.
+
+---
+
+### `L-536` · UNA MIGRACIÓN Y UNA EDGE FUNCTION SON DOS VERSIONES DE LA VERDAD, Y UN `db push` MUEVE UNA SOLA
+
+**`D-662` escrita un piso más arriba.** El canon ya dice que *una migración que renombra
+o mueve columnas declara qué BUNDLES vivos la consultan*, porque el repo y el teléfono
+son dos verdades y una migración mueve sólo una. **Una edge function desplegada es
+exactamente lo mismo, y eso no estaba escrito** — por eso volvió a pasar.
+
+#### El caso, medido (S115-A, 10-sep-2026)
+
+`20260912440000` puso un trigger que exige que una clave de acceso traiga sus siete
+insumos. En el repo, `fiscal-emitir` ya escribía `ruc_emisor`; **en producción corría la
+versión 1, de la tanda 1, que no lo escribe**. Resultado reproducido en una transacción
+con `ROLLBACK`:
+
+```
+UPDATE de la edge v1 → REBOTO — 23514: clave_sin_insumos
+la fila quedó en     → borrador
+```
+
+⇒ **dos secuenciales consumidos y ninguna fila con ellos** (`D-1060`). *Y el typecheck
+estaba verde, `deno check` estaba verde, y la migración aplicó sin una advertencia:
+ninguno de los tres mira lo que está desplegado.*
+
+#### Por qué es peor que su hermana de bundles
+
+Un bundle viejo **lee** y rompe una pantalla: se ve. Una edge vieja **escribe**, y si
+además no lee el error de su escritura, **informa éxito** — la edge devolvía
+`{"estado":"emitiendo"}` mientras la fila se quedaba en `borrador`. *El síntoma no fue
+una falla: fue un parte optimista y un contador que subía solo.*
+
+#### La regla
+
+**Toda migración que agregue una restricción o una columna que una edge escriba declara
+qué EDGE FUNCTIONS la tocan, y su despliegue es parte del mismo acto** — igual que la
+regla del bundle: *renombrar y publicar son un solo acto*.
+
+Se mide, no se recuerda:
+```bash
+npx supabase functions list          # versión y fecha de cada una
+grep -rln "<tabla>" supabase/functions --include=index.ts
+```
+*Una función cuya versión desplegada es anterior a la migración que la afecta es una
+bomba con fecha: no falla hasta que alguien la llama.*
+
+#### Sus dos hermanas de la misma sesión
+
+- **`L-535`** — lo que escribe un tercero se guarda como llega. Ésta es sobre lo que
+  escribe **una versión vieja de uno mismo**.
+- Y la que la deja pasar: **un `update` de supabase-js que afecta cero filas NO es un
+  error**. Sin eso, esto habría sido un rebote ruidoso en el primer intento.
+
+**☠️ Condición de muerte:** ninguna — es de método. Su recordatorio útil es que la pista
+que la escribió tenía `D-662` citada en su propio canon y no la vio aplicar acá, porque
+decía «bundles».

@@ -10,12 +10,37 @@
 // ═══════════════════════════════════════════════════════════════════════════
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { resolverPuerto } from '../_shared/facturacion/mod.ts';
-import { reconstruirClaveAcceso, ambienteTexto } from '../_shared/facturacion/clave_acceso.ts';
+// La clave y el secuencial los resuelve `fiscal_reservar_numero` del lado de la
+// base, en un solo hecho: acá ya no se construyen.
 import { construirCanonico, CONSUMIDOR_FINAL, CANONICO_VERSION,
          type ItemCanonico, type ReceptorCanonico,
          type CatalogosSri } from '../_shared/facturacion/canonico.ts';
 
 const json = (b: unknown, s = 200) => Response.json(b, { status: s });
+
+/**
+ * TODO update del pipeline fiscal pasa por acá.
+ *
+ * 🔴 CERO FILAS ES UN ROJO, NO UN SILENCIO. En supabase-js un update que no
+ *    encuentra su fila **no es error**: devuelve `{ error: null }` y sigue. Ése
+ *    es el modo de falla que dejó dos secuenciales quemados y ninguna fila con
+ *    ellos — la edge informó `emitiendo` y la fila se quedó en `borrador`.
+ *    `.select('id')` obliga a PostgREST a devolver lo que tocó, y contar eso es
+ *    la única forma de saber que tocó algo.
+ */
+/* Recibe la CONSULTA ya armada, no el cliente: el builder de PostgREST es
+   *thenable* pero no es una Promise, y atar el helper al genérico del cliente
+   arrastra los parámetros del schema. Así el helper es una línea y no miente. */
+async function exigeUnaFila(
+  q: PromiseLike<{ data: unknown[] | null; error: { message: string } | null }>,
+  paso: string,
+): Promise<void> {
+  const { data, error } = await q;
+  if (error) throw new Error(`${paso}: ${error.message}`);
+  if (!data || data.length !== 1) {
+    throw new Error(`${paso}: afectó ${data?.length ?? 0} filas — la escritura no llegó`);
+  }
+}
 
 Deno.serve(async (req) => {
   // Guard de perímetro, mismo molde que despachar-push: secreto compartido.
@@ -61,54 +86,45 @@ Deno.serve(async (req) => {
   /* 🔴 LA COLA INCLUYE LOS `emitiendo`, y sin eso la retriabilidad que el
      encabezado promete no existía: un documento que quedó en vuelo —timeout,
      proveedor caído, cupo agotado— **no lo levantaba nadie**. Ahora vuelve, y
-     REUSA su secuencial (ver ②): tomarle uno nuevo dejaría un hueco en la
-     numeración que hay que explicarle al SRI. */
+     REUSA su secuencial —`fiscal_reservar_numero` es idempotente—: tomarle uno
+     nuevo dejaría un hueco que hay que explicarle al SRI. */
   const { data: pendientes } = await db.from('documentos_fiscales')
     .select('*').in('estado', ['borrador', 'emitiendo']).eq('sentido', 'emitido').limit(20);
 
   const hechos: unknown[] = [];
   for (const d of pendientes ?? []) {
     try {
+      /* ⓪ 🔴 SI EL PROVEEDOR YA LO TOMÓ, SE CONSULTA — NO SE RE-EMITE.
+         Defecto que introduje al meter los `emitiendo` en la cola: con una
+         `referencia_proveedor` ya asignada, cada tick del reloj volvía a hacer
+         POST del MISMO comprobante. *Un reintento de algo que sí llegó no es un
+         reintento: es un envío duplicado, y del otro lado hay un comprobante
+         real.* Medido en el e2e: cuatro corridas, cuatro POST. */
+      if (d.referencia_proveedor && d.estado === 'emitiendo') {
+        const c = await puerto.consultarEstado(d.referencia_proveedor);
+        await exigeUnaFila(db.from('documentos_fiscales').update({
+          estado: c.estado,
+          motivo_rechazo: c.motivo ?? null,
+          ...(c.autorizado_en ? { autorizado_en: c.autorizado_en } : {}),
+        }).eq('id', d.id).select('id'), 'consulta_estado');
+        const { data: f } = await db.from('documentos_fiscales')
+          .select('estado,secuencial').eq('id', d.id).maybeSingle();
+        hechos.push({ id: d.id, camino: 'consultado', leido_de_la_fila: true,
+                      estado: f?.estado, secuencial: f?.secuencial });
+        continue;
+      }
+
       // ① las líneas: son la base imponible. Sin ellas no se emite (fail-closed).
       const { data: lineas } = await db.from('pagos_desglose_lineas')
         .select('*').eq('pago_intento_id', d.pago_intento_id).order('linea');
       if (!lineas?.length) {
-        await db.from('documentos_fiscales').update({
+        await exigeUnaFila(db.from('documentos_fiscales').update({
           estado: 'pendiente_manual',
           motivo_rechazo: 'sin_lineas_fiscales: no hay base imponible que facturar',
-        }).eq('id', d.id);
+        }).eq('id', d.id).select('id'), 'sin_lineas');
         hechos.push({ id: d.id, resultado: 'sin_lineas' });
         continue;
       }
-
-      // ② el secuencial, ATÓMICO (FOR UPDATE del lado de la base) — y SÓLO si
-      //    el documento no tiene ya el suyo. *Un reintento que toma número
-      //    nuevo no es un reintento: es un documento nuevo, y el anterior queda
-      //    como un hueco en la numeración.*
-      let sec: string | null = d.secuencial ?? null;
-      if (!sec) {
-        const { data: nuevo, error: eSec } = await db.rpc('tomar_secuencial_fiscal', {
-          p_ruc: emisor.ruc, p_establecimiento: emisor.establecimiento,
-          p_punto_emision: emisor.punto_emision, p_tipo: d.tipo,
-        });
-        if (eSec || !nuevo) throw new Error(`secuencial: ${eSec?.message ?? 'vacio'}`);
-        sec = nuevo as string;
-      }
-
-      // ③ la clave, del lado nuestro — y DERIVADA, no sorteada.
-      //
-      // 🔴 Los dos insumos salen de la FILA, no del ambiente: la fecha es
-      //    `fecha_emision` (era `new Date()`, el reloj de la edge — un documento
-      //    de las 21:30 en Guayaquil quedaba con la clave del día siguiente) y el
-      //    código numérico sale del secuencial (era `Math.random()`). *Con eso la
-      //    clave deja de ser un dato que hay que ir a buscar y pasa a ser una
-      //    función de la fila: se recalcula y se coteja.*
-      const clave = reconstruirClaveAcceso(
-        { fecha_emision: d.fecha_emision, tipo: d.tipo,
-          establecimiento: emisor.establecimiento, punto_emision: emisor.punto_emision,
-          secuencial: sec as string },
-        { ruc: emisor.ruc, ambiente: emisor.ambiente },
-      );
 
       const items: ItemCanonico[] = lineas.map((l) => ({
         linea: l.linea, descripcion: l.descripcion, cantidad: Number(l.cantidad),
@@ -137,10 +153,10 @@ Deno.serve(async (req) => {
       const { data: fp } = await db.rpc('fiscal_forma_pago_del_intento',
                                         { p_intento_id: d.pago_intento_id });
       if (!fp?.ok) {
-        await db.from('documentos_fiscales').update({
+        await exigeUnaFila(db.from('documentos_fiscales').update({
           estado: 'pendiente_manual',
           motivo_rechazo: `forma_pago: ${JSON.stringify(fp ?? { codigo: 'sin_respuesta' })}`.slice(0, 400),
-        }).eq('id', d.id);
+        }).eq('id', d.id).select('id'), 'sin_forma_de_pago');
         hechos.push({ id: d.id, resultado: 'sin_forma_de_pago' });
         continue;
       }
@@ -155,11 +171,11 @@ Deno.serve(async (req) => {
       /* 🔴 FAIL-CLOSED del 2.1.0: decirse agente de retención sin declarar la
          resolución produciría el campo vacío o inventado. El documento espera. */
       if (emisor.agente_retencion && !emisor.agente_retencion_resolucion) {
-        await db.from('documentos_fiscales').update({
+        await exigeUnaFila(db.from('documentos_fiscales').update({
           estado: 'pendiente_manual',
           motivo_rechazo: 'agente_retencion_sin_resolucion: el emisor se declara agente '
                         + 'de retención y no tiene número de resolución cargado.',
-        }).eq('id', d.id);
+        }).eq('id', d.id).select('id'), 'agente_retencion');
         hechos.push({ id: d.id, resultado: 'agente_retencion_sin_resolucion' });
         continue;
       }
@@ -172,56 +188,71 @@ Deno.serve(async (req) => {
                        origen_id: lineas[0]?.origen_id ?? null },
       });
 
-      // ④ PERSISTIR ANTES DEL POST — el paso que vuelve reintentable todo esto
+      // ④ EL NÚMERO Y SU FILA, EN UN SOLO HECHO
       //
-      // 🔴 SU ERROR SE LEE. Era `await` a secas: supabase-js NO lanza, devuelve
-      //    `{ error }` — así que un rebote de CHECK aquí dejaba el documento en
-      //    `borrador` y el pase siguiente le tomaba OTRO secuencial. *Un fallo que
-      //    no se lee no se ve como fallo: se ve como huecos en la numeración que
-      //    hay que explicarle al SRI meses después.*
-      const { error: ePersist } = await db.from('documentos_fiscales').update({
-        estado: 'emitiendo', establecimiento: emisor.establecimiento,
-        punto_emision: emisor.punto_emision, secuencial: sec, clave_acceso: clave,
-        /* 🔴 EL EMISOR SE CONGELA EN LA FILA, y sin esto «reconstruible desde la
-           fila» sería falso: `fiscal_emisor` es UNA fila mutable —el día que
-           cambie el establecimiento o el ambiente pase a producción, toda clave
-           vieja dejaría de recalcular—. *Un cotejo que necesita una tabla que
-           puede haber cambiado no verifica el pasado: lo reescribe.* */
-        ruc_emisor: emisor.ruc,
-        razon_social_emisor: emisor.razon_social,
-        direccion_emisor: emisor.direccion_matriz,
-        sri_ambiente: ambienteTexto(emisor.ambiente),   // 'pruebas'|'produccion' — su CHECK
-        canonico, canonico_version: CANONICO_VERSION, proveedor: puerto.nombre,
-        subtotal_0: canonico.subtotales_por_tarifa.find((g) => g.tarifa_pct === 0)?.base ?? 0,
-        subtotal_15: canonico.subtotales_por_tarifa.find((g) => g.tarifa_pct !== 0)?.base ?? 0,
-        iva: canonico.subtotales_por_tarifa.reduce((a, g) => a + g.valor_iva, 0),
-        total: canonico.total,
-      }).eq('id', d.id);
-      if (ePersist) throw new Error(`persistir_antes_del_post: ${ePersist.message}`);
+      // 🔴 Era: RPC del secuencial → UPDATE aparte. Entre los dos había una
+      //    ventana, y el e2e de E la encontró: el UPDATE rebotó, nadie leyó el
+      //    error, y **el número quedó consumido sin vivir en ninguna fila**.
+      //    Ahora `fiscal_reservar_numero` toma el número, deriva la clave y
+      //    escribe la fila en la MISMA transacción: o la fila queda con su
+      //    número, o el número no se consume. Y es idempotente, así que un
+      //    reintento reusa el suyo en vez de abrir un hueco.
+      const { data: reserva, error: eRes } = await db.rpc('fiscal_reservar_numero', {
+        p_documento_id: d.id,
+        p_canonico: canonico,
+        p_canonico_version: CANONICO_VERSION,
+        p_proveedor: puerto.nombre,
+        p_subtotal_0: canonico.subtotales_por_tarifa.find((g) => g.tarifa_pct === 0)?.base ?? 0,
+        p_subtotal_15: canonico.subtotales_por_tarifa.find((g) => g.tarifa_pct !== 0)?.base ?? 0,
+        p_iva: canonico.subtotales_por_tarifa.reduce((a, g) => a + g.valor_iva, 0),
+        p_total: canonico.total,
+      });
+      if (eRes) throw new Error(`reservar_numero: ${eRes.message}`);
+      if (!reserva?.ok) throw new Error(`reservar_numero: ${JSON.stringify(reserva)}`);
+      const clave: string = reserva.clave_acceso;
 
       // ⑤ recién ahora, afuera
       const r = await puerto.emitir({ ...canonico, clave_acceso: clave });
 
-      /* 🔴 UN RECHAZO REINTENTABLE NO PIERDE LA FACTURA. El documento queda en
-         `emitiendo` —con su secuencial y su clave intactos— y el reconciliador
-         lo vuelve a tomar. Es la misma máquina que el SRI caído, distinguida
-         por su CÓDIGO y no por su texto. Fail-closed: nunca se pierde, y como
-         la clave es estable, tampoco se emite dos veces. */
+      /* Un rechazo REINTENTABLE no pierde la factura: queda en `emitiendo` con
+         su secuencial y su clave, y el reconciliador la vuelve a tomar. */
       const reintentable = r.reintentable === true;
-      await db.from('documentos_fiscales').update({
+      await exigeUnaFila(db.from('documentos_fiscales').update({
         referencia_proveedor: r.referencia,
         estado: reintentable ? 'emitiendo' : r.estado,
         motivo_rechazo: r.motivo ?? null,
-      }).eq('id', d.id);
+      }).eq('id', d.id).select('id'), 'resultado_emision');
 
-      hechos.push({ id: d.id, secuencial: sec, estado: reintentable ? 'emitiendo' : r.estado,
-                    ...(reintentable ? { en_cola_por: r.codigo ?? 'reintentable' } : {}) });
+      /* 🔴 EL PARTE SE ARMA LEYENDO LA FILA. Antes salía de variables locales:
+         decía `estado: 'emitiendo'` porque ESO fue lo que se intentó, no lo que
+         quedó. *Un instrumento que informa su intención en vez de su efecto no
+         está midiendo* — y su `ok` fue exactamente lo que tapó el defecto. */
+      const { data: fila } = await db.from('documentos_fiscales')
+        .select('estado,secuencial,clave_acceso,motivo_rechazo').eq('id', d.id).maybeSingle();
+
+      hechos.push({
+        id: d.id,
+        leido_de_la_fila: true,
+        estado: fila?.estado ?? '(no se pudo releer)',
+        secuencial: fila?.secuencial ?? null,
+        tiene_clave: !!fila?.clave_acceso,
+        ...(reintentable ? { en_cola_por: r.codigo ?? 'reintentable' } : {}),
+        ...(fila?.estado !== (reintentable ? 'emitiendo' : r.estado)
+            ? { divergencia: `el puerto dijo ${r.estado} y la fila dice ${fila?.estado}` }
+            : {}),
+      });
     } catch (e) {
       /* Un rechazo NO reutiliza el secuencial: la corrección es un documento
          NUEVO que apunta al rechazado (tanda 2). Acá sólo se nombra el fallo. */
-      await db.from('documentos_fiscales').update({
-        estado: 'no_autorizada', motivo_rechazo: `emitir: ${String(e).slice(0, 180)}`,
-      }).eq('id', d.id);
+      /* Ni el registro del fallo se da por hecho: si TAMBIÉN afecta 0 filas,
+         se grita en el log — que es el único lugar que queda. */
+      try {
+        await exigeUnaFila(db.from('documentos_fiscales').update({
+          estado: 'no_autorizada', motivo_rechazo: `emitir: ${String(e).slice(0, 180)}`,
+        }).eq('id', d.id).select('id'), 'registrar_fallo');
+      } catch (e2) {
+        console.error(`fiscal_emitir_sin_rastro documento=${d.id} ${String(e2).slice(0, 160)}`);
+      }
       hechos.push({ id: d.id, error: String(e).slice(0, 120) });
     }
   }
