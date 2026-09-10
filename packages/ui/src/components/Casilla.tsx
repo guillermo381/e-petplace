@@ -45,7 +45,7 @@
 
 import type { ReactNode } from 'react'
 import { Pressable, View } from 'react-native'
-import Svg, { Path } from 'react-native-svg'
+import { Tilde } from './tilde'
 
 import { palette } from '../tokens/palette'
 import { radius } from '../tokens/radius'
@@ -112,17 +112,12 @@ export function Casilla({
         }}
       >
         {marcada && (
-          <Svg width={14} height={14} viewBox="0 0 14 14">
-            {/* el check en PAPEL (Ley 22) — constante en los tres temas */}
-            <Path
-              d="M2.5 7.5 L5.5 10.5 L11.5 3.5"
-              stroke={palette.white}
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="none"
-            />
-          </Svg>
+          /* ⏪ S115-B · el trazo salió a `tilde.tsx` y esta pieza pasa a
+             CONSUMIRLO. Vivía dibujado acá adentro sin salida, y al
+             necesitarlo el campo fiscal copiar el `d` habría sido la segunda
+             copia (L-175). El color no se mueve: PAPEL sobre el fill sólido
+             (Ley 22), constante en los tres temas. */
+          <Tilde color={palette.white} />
         )}
       </View>
       <View style={{ flex: 1 }}>{children}</View>
