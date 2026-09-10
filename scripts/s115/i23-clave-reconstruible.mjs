@@ -46,9 +46,20 @@ function claveDe(fila) {
   const dd = String(f.getUTCDate()).padStart(2, '0');
   const mm = String(f.getUTCMonth() + 1).padStart(2, '0');
   const aaaa = String(f.getUTCFullYear());
-  /* 🔴 EL CÓDIGO NUMÉRICO SE DERIVA DEL SECUENCIAL — la convención de las dos facturas
-     reales medidas. Es exactamente el cambio que A tiene que hacer: mientras sea
-     `Math.random()`, este instrumento no puede cerrar, y lo dice. */
+  /* 🔴 EL CÓDIGO NUMÉRICO SE DERIVA DEL SECUENCIAL — Y NO PORQUE LO HAGA EL MERCADO.
+     Con CUATRO facturas reales medidas hay **DOS convenciones**, y ninguna es
+     obligatoria:
+        · Multicines (015-118) y 227ITALY (003-001) → el secuencial sin su cero inicial
+        · TOGA (004-002) y Sweet & Coffee (047-050) → la constante `12345678`
+     Proveedores distintos y tamaños de empresa opuestos —un RIMPE y un gran
+     contribuyente— usando cada convención. *El mercado no tiene una sola forma, así
+     que «lo que hace el mercado» no puede ser el criterio.*
+
+     **Nuestro criterio es OTRO: la reconstrucción.** Derivarlo del secuencial es la
+     única forma de que la clave se pueda recalcular desde los datos de la fila — con
+     una constante también sería determinista, pero con `Math.random()` es
+     irreconstruible por definición, y ahí no hay forma de saber si una clave
+     almacenada corresponde a su fila. */
   const codigo = String(fila.secuencial).slice(1);
   const cuerpo = `${dd}${mm}${aaaa}${TIPO[fila.tipo] ?? '01'}${fila.ruc_emisor}${fila.sri_ambiente}` +
                  `${fila.establecimiento}${fila.punto_emision}${fila.secuencial}${codigo}1`;

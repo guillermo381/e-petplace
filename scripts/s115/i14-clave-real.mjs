@@ -237,6 +237,16 @@ console.log(JSON.stringify(cuerpos.map((c: string) => digitoVerificador(c))));
         rojo(`en el caso ambiguo del estándar (resto ${b.resto}) mi verificador dice ${mio} y nuestra pieza ${dvPieza[i]}.\n   Una de las dos produce claves que el SRI rechaza — y la que las genera es la pieza.`);
     }
     r.di(`      ⇒ los restos 1 y 10 comparten dv = ${dvPieza[0]}: es la colisión del estándar, no un defecto.`);
+    /* 🔴 EL CORPUS REAL, y lo que le falta. Cuatro facturas de producción medidas:
+         resto  0 → dv 0   TOGA FASHION      (11−0 = 11 ⇒ 0)
+         resto  5 → dv 6   Multicines
+         resto  7 → dv 4   Sweet & Coffee
+         resto 10 → dv 1   227ITALY          (uno de los dos casos ambiguos)
+       **Falta el resto 1**, el otro caso ambiguo. Los cuerpos que fabrico acá lo
+       cubren, pero mi verificador y nuestra pieza salieron de la misma lectura de la
+       especificación: *su acuerdo no prueba que el SRI opine igual.* Hace falta una
+       factura real cuyo resto sea 1, y hasta entonces se declara sin corpus. */
+    r.di('      corpus real: restos 0 · 5 · 7 · 10 ✓ — FALTA el resto 1 (declarado sin corpus).');
   }
 
   r.di(`\n   → ${claves.length} clave(s) real(es): módulo 11, estructura y RECONSTRUCCIÓN byte a byte.`);
