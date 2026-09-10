@@ -31026,6 +31026,33 @@ dejando las puertas.
 
 ---
 
+### `D-1051` 🟡 · El pago mixto sobre una compra GRAVADA rebota (`mixto_gravado_no_soportado`) — falta la regla de reparto de Erick
+
+**Qué pasa:** cuando el saldo del hogar cubre parte de una compra **con IVA > 0**,
+`pagos-cobro` **rebota antes de la pasarela** con `mixto_gravado_no_soportado` en
+vez de mandar un triple `amount/taxable_amount/vat` mal armado. Es la decisión
+firmada del founder (S114-A): *no se inventa el reparto proporcional de
+`taxable_amount`/`vat` sobre un cobro parcial — es criterio fiscal.* Un cobro que
+rebota con nombre es mejor que uno mal armado que Nuvei rechaza.
+
+**Por qué es deuda y no está cerrado:** bloquea un caso real —**una familia con
+saldo pagando una compra con IVA**— que **en octubre va a existir** cuando la
+despensa tenga producto gravado. Hoy el IVA-0 (mixto) ya cobra; el gravado mixto
+no.
+
+**El número que lo dimensiona (medido S114, 9-sep):** hoy hay **4 compras con
+IVA ≠ 0, máximo $2,01**. Es chico ahora y no lo va a ser cuando la despensa crezca.
+
+**🔴 DISPARO:** *la regla de reparto de `taxable_amount`/`vat` de Erick* — la misma
+familia abierta de S105 (el guard de IVA que espera su respuesta). El día que Erick
+conteste cómo se declara el IVA de una venta pagada en parte con saldo, se implementa
+el reparto en `pagos-cobro` (donde hoy está el rebote ②) y se retira este código.
+**Dueño:** A (motor de pagos). Sin este disparo escrito, se descubre con una familia
+adelante.
+
+---
+
+
 ### `D-1050` ☠️ RESUELTA (S114, main `127922e7`) · `scripts/censo-voseo.mjs` era ciego a la app del admin (React web sin i18n) y su 0 se leía como salud
 
 Hallazgo de F, medido con discriminador (mismo texto en los dos casos):
