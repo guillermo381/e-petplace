@@ -53,8 +53,15 @@ const noConc = filas.filter((x) => x.code === 2);
 if (noConc.length) {
   console.log('\n── NO CONCLUYENTES (declarados, no omitidos)');
   for (const r of noConc) {
-    const i = r.salida.split('\n').findIndex((l) => l.includes('NO CONCLUYENTE'));
-    console.log(`   ${r.f}\n      ${(r.salida.split('\n')[i + 1] ?? '').trim().slice(0, 240)}`);
+    /* 🔴 EL MOTIVO PUEDE SER MULTILÍNEA. Tomar sólo la línea siguiente dejaba el
+       resumen EN BLANCO justo para los mensajes más informativos —los que explican
+       la causa en varias líneas—, y un resumen que no dice el motivo convierte un
+       "no pude medir" en un "no sé por qué". Se toman todas las líneas hasta el
+       final del bloque. */
+    const lineas = r.salida.split('\n');
+    const i = lineas.findIndex((l) => l.includes('NO CONCLUYENTE'));
+    const motivo = lineas.slice(i + 1).map((l) => l.trim()).filter(Boolean).join(' ');
+    console.log(`   ${r.f}\n      ${motivo.slice(0, 300) || '(el instrumento no dijo el motivo — revisar su salida completa)'}`);
   }
 }
 process.exit(rojos.length ? 1 : 0);
