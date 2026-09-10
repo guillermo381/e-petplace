@@ -1,5 +1,12 @@
 # MODELO_FINANCIERO.md — e-PetPlace
 
+> ➕ **ENMIENDA S115 (10-sep-2026) — el modelo económico deja de ser hipótesis.** Medido contra la calculadora de costos de Nuvei, el RUC de Satori Inov y normativa verificada; detalle en `MODELO_ECONOMICO.md` v1.1.
+> · **§2.2 mapa de revenue:** los defaults ~~14 % seller / 15 % prestador~~ pasan a **18 % servicios de cuidado · 15 % despensa · 12 % clínicas en agencia (+IVA)**, cada uno con **mínimo por transacción**, todo leído de `fee_configs`.
+> · **§3.1 fórmula universal:** la identidad `GMV = pasarela + plataforma + payout` se mantiene, pero **`payout = base − comisión`**: la pasarela deja de descontarse del actor y pasa a ser **costo de e-PetPlace dentro de `monto_plataforma`**. El prestador recibe su precio menos la comisión, sin descuentos de riel.
+> · **Nuevo ingreso de plataforma: `tarifa_servicio`**, $0,99 con IVA por reserva o pedido, ítem de catálogo de `plataforma_directa`, línea propia en el desglose y en la factura. Promocionada a $0 en F&F por cupón financiado (Decisión H).
+> · **8.1 (donación) y 8.2 (cupón) quedan como están**; el ejemplo de 8.2 se recalcula con la comisión vigente, no con el 15 % del texto.
+> · **Costos:** la base real y el break-even viven en `MODELO_ECONOMICO.md` §3.bis.
+
 > Documento maestro del motor financiero del ecosistema e-PetPlace.
 > Última actualización: 16 Jul 2026 v2.9 — Enmiendas S66 disparadas por `MODELO_VETERINARIA.md` v1.0 (§15.1): §2.7 REESCRITO (el choque letra-vs-DB relevado en el Bloque 0 S66 se resuelve — `uq_prestadores_user_id` GANA: humano→prestador queda 1:1; la multiplicidad vive en cuenta→sedes y cuenta→personas) + §2.8 NUEVO (gratis+comisión como patrón de plataforma para todo prestador, con la línea premium declarada sin dibujar).
 > Versiones anteriores:
@@ -181,8 +188,8 @@ La plataforma cobra cuando hay un evento económico que pasa por ella. El qué s
 
 | Rol del actor | Qué cobra la plataforma | Cuándo |
 |---|---|---|
-| Seller de productos | Comisión % sobre venta (default 14% EC/CO) | Pedido pagado |
-| Prestador de servicios | Comisión % sobre cita (default 15% EC/CO, parametrizable por mercado vía fee_configs) | Cita completada y pagada |
+| Seller de productos | ~~Comisión % sobre venta (default 14% EC/CO)~~ **→ 15 % despensa con mínimo (ENMIENDA S115 · `MODELO_ECONOMICO` D-A)** | Pedido pagado |
+| Prestador de servicios | ~~Comisión % sobre cita (default 15% EC/CO, parametrizable por mercado vía fee_configs)~~ **→ 18 % cuidado · 12 %+IVA clínicas en agencia, con mínimo por transacción (ENMIENDA S115 · `MODELO_ECONOMICO` D-A)** | Cita completada y pagada |
 | Refugio | Solo comisión Kushki passthrough sobre donaciones | Donación recibida |
 | Refugio (adopción con costo) | Comisión Kushki passthrough | Adopción con pago de vacunas/esterilización |
 | Criadero (suscripción) | Fee mensual fijo | Pago recurrente |
@@ -275,7 +282,7 @@ GMV = Kushki_fee + Plataforma_fee + Payout
 - `Plataforma_fee` = revenue para e-PetPlace (`monto_plataforma`).
 - `Payout` = lo que recibe el actor (`monto_payout`, NULL si revenue puro plataforma).
 
-Cualquier modelo de fee cabe en esta ecuación. Criaderos con fee fijo: `Plataforma_fee = constante`. Refugios con donaciones: `Plataforma_fee = 0`. Sellers con 14%: `Plataforma_fee = GMV × 0.14`.
+Cualquier modelo de fee cabe en esta ecuación. Criaderos con fee fijo: `Plataforma_fee = constante`. Refugios con donaciones: `Plataforma_fee = 0`. ~~Sellers con 14%: `Plataforma_fee = GMV × 0.14`.~~ **ENMIENDA S115: los porcentajes vigentes son 18/15/12 con mínimo, y `Plataforma_fee` ABSORBE la pasarela (D-C). Ninguno vive en código: `fee_configs` los guarda (D-759).**
 
 ### 3.2 Snapshot de fees al momento del devengo
 
@@ -558,7 +565,7 @@ Función motor. 18 parámetros. Lógica:
 4. Pasa el `tipo_actor` validado a `resolver_fee_aplicable`.
 5. Calcula `monto_plataforma` según `tipo_calculo`.
 6. Aplica decisión H (descuentos) si aplica.
-7. Calcula `monto_payout = bruto - kushki_fee - plataforma`.
+7. ~~Calcula `monto_payout = bruto - kushki_fee - plataforma`.~~ **ENMIENDA S115 (D-C): `monto_payout = base − comisión`. La pasarela ya NO se descuenta del actor — es costo de e-PetPlace dentro de `monto_plataforma`.** *Bajo reventa el riel es costo de Satori, y a la familia no se le puede recargar por pagar con tarjeta (LODC art. 9 y 19).*
 8. Snapshotea `fee_calculo_detalle` con `tipo_actor_resuelto`.
 9. INSERT en `eventos_economicos` con `estado='pendiente_liquidar'`.
 
