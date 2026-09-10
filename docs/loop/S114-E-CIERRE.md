@@ -74,13 +74,34 @@ Y el verde conserva su honestidad: *«no dice "se procesó todo": dice "se proce
 todo lo que el corte deja tocar"»* — los 111 fuera por corte siguen declarados
 como decisión de mesa.
 
-⚠️ **Una distinción que queda viva y es de una hora:** A ejercitó la función **a
+### ✅ SELLADO · el tick DESATENDIDO de las 06:00 corrió SUCCEEDED
+
+```
+cron · expirar-objetos-sin-cierre · 2026-09-10 06:00:00 · succeeded · "1 row"
+```
+
+**El lazo está sano: corrió solo, sin que nadie lo disparara.** Con esto el P0
+cierra entero — la función estaba probada desde la cura; **esto prueba el
+mecanismo**. Instrumento: `scripts/s114/esperar-tick-f1.mjs`.
+
+⚠️ **La distinción que se selló acá, y estuvo viva una hora:** A ejercitó la función **a
 mano** (`ok:true`), lo que prueba **la función**. La última entrada del cron
 sigue siendo la fallida de las 05:00 ⇒ **el tick desatendido de las 06:00 es lo
 que prueba el LAZO.** Debería pasar —las 4 salieron del universo del reloj al
 quedar `no_ejecutado`—, pero *«corrió a mano» y «el cron corre» son dos
 afirmaciones distintas*, y ésta es justo la clase que esta pista pasó la sesión
-separando.
+separando. **Se separó, se esperó, y el reloj lo contestó solo.**
+
+🔴 **Y el sello me cobró una última vez la lección de la pista, en su propio
+instrumento.** La primera versión del esperador vivía en `/tmp` e importaba
+`./scripts/lib-db.mjs`; **un import de ESM se resuelve contra el ARCHIVO, no
+contra el cwd** ⇒ murió con `ERR_MODULE_NOT_FOUND` **y salió con código 1**, que
+en mi propio contrato significaba *«el tick falló»*. **El fallo del instrumento
+se disfrazó del hallazgo exacto que el instrumento buscaba** — sin abrir el
+archivo de salida, el parte habría dicho *«el reloj volvió a caer»* sobre un tick
+que ni siquiera había ocurrido. *Un instrumento que puede fallar con el mismo
+código que su hallazgo no está midiendo: está adivinando.* Curado separando los
+tres códigos (0 lazo sano · 1 rojo del producto · 2 no concluyente).
 
 ---
 
@@ -149,7 +170,7 @@ forma de la que hay dos no le quita el sujeto a nadie; gastar la única sí.*
 
 | | dueño |
 |---|---|
-| ~~el CHECK de `guarderia_estadias`~~ ✅ **CURADO Y VERIFICADO** el mismo día (`20260912160000`) — queda mirar el tick de las 06:00 | A / cerrado |
+| ~~el CHECK de `guarderia_estadias`~~ ✅ **CURADO, VERIFICADO Y SELLADO** — el tick desatendido de las 06:00 corrió `succeeded` | **cerrado** |
 | 🔴 el mapeo de la copy vencido↔reloj (56 devoluciones afirmadas que no pasaron) | A y C |
 | 🟠 `messaging_limit_tier` — queda `/{phoneId}?fields=…` como candidato | A |
 | 🟠 `asunto` es hoy el tipo de servicio ⇒ *«Tu caso sobre paseo»* | mesa |
