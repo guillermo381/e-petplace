@@ -53,3 +53,21 @@ voluntad**. Bajé el instrumento a `--tomas 3` por defecto y ahora **nombra la c
 cuando colisiona, en vez del genérico «el canal falló».
 
 *Una medición que no se puede repetir no es falsa — pero tampoco es un gate.*
+
+---
+
+## Se recupera solo — no hay nada que reparar
+
+Tras las colisiones el canal queda **degradado un rato**: durante varios minutos hasta un
+`select 1` colgaba. **Medido después de esperar sin tocar nada: `canal OK en 3097 ms`**,
+que es la latencia normal.
+
+*Lo digo porque sin este dato el mensaje de arriba invita a buscar algo que arreglar.* No
+hay que reiniciar nada ni tocar el proyecto: **se espera.** Lo que sí conviene es no
+insistir mientras está degradado — cada intento nuevo alarga la cola y hace más lenta la
+recuperación.
+
+**Y el residuo que sí hay que mirar:** un instrumento matado con `SIGKILL` mientras espera
+**no corre su `finally`** y deja sus filas de sonda atrás. Los míos ahora **barren lo viejo
+al arrancar** en vez de confiar en su propia limpieza — así una corrida muerta no le
+ensucia la medición a la siguiente.
