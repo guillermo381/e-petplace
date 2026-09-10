@@ -48,27 +48,39 @@ const TABLAS_CATALOGO = CATALOGO.map(([t]) => t).concat([
 
 await correr('i13 · el precio del catálogo es neto y el mostrado se deriva', async (r) => {
   // ── (a) ¿EXISTE YA LA SEPARACIÓN? Sin ella no hay comportamiento que medir ──
+  /* 🔴 SE BUSCA EN TABLAS **Y VISTAS**. La primera versión filtraba `relkind='r'` y
+     salió NO CONCLUYENTE diciendo «no está cableado» cuando **sí lo estaba**: A lo
+     implementó como VISTA (`v_catalogo_precio_final`) más una función. *El censo
+     midió la forma que yo imaginé, no el hecho.* Misma clase que `L-534`. */
   const separacion = q(
     `select c.relname, a.attname from pg_attribute a
        join pg_class c on c.oid=a.attrelid join pg_namespace n on n.oid=c.relnamespace
-      where n.nspname='public' and c.relkind='r' and a.attnum>0 and not a.attisdropped
-        and a.attname ~ '(^|_)(neto|mostrado)($|_)'
+      where n.nspname='public' and c.relkind in ('r','v','m') and a.attnum>0 and not a.attisdropped
+        and a.attname ~ '(^|_)(neto|mostrado|final)($|_)'
         -- 🔴 ACOTADO AL CATÁLOGO por la MISMA razón que el censo de delatores:
         --    sin esto, liquidaciones.monto_neto_a_pagar (que es del LEDGER) se leia
         --    como «la separacion ya esta cableada» y el instrumento salia SANO sobre
         --    un brazo que no había medido. Tercera vez de la misma clase en el mismo
         --    archivo: el alcance se declara en CADA consulta, no una vez por instrumento.
-        and c.relname in (${TABLAS_CATALOGO.map((t) => `'${t}'`).join(',')})
+        and (c.relname in (${TABLAS_CATALOGO.map((t) => `'${t}'`).join(',')})
+             or c.relname ~ 'catalogo|precio')
       order by 1,2`);
+
+  /* La derivación se busca por lo que HACE, no por cómo se llama: una función que
+     recibe un neto y un código de IVA y consulta la tarifa vigente. Buscarla por
+     nombre («derivar_precio») no encontraba `precio_final`, que es la que existe. */
   const derivadores = q(
-    `select proname from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+    `select p.proname, pg_get_function_identity_arguments(p.oid) as args
+       from pg_proc p join pg_namespace n on n.oid=p.pronamespace
       where n.nspname='public'
-        and pg_get_functiondef(p.oid) ~ 'precio_neto|precio_mostrado|derivar_precio'
+        and pg_get_functiondef(p.oid) ~ 'cat_tasas_impuesto'
+        and pg_get_function_identity_arguments(p.oid) ~ 'numeric'
+        and p.proname !~ 'trg_'
       order by 1`);
   r.dato('columnas neto/mostrado', separacion.length
     ? separacion.map((x) => `${x.relname}.${x.attname}`).join(', ') : 'ninguna');
   r.dato('funciones que derivan', derivadores.length
-    ? derivadores.map((x) => x.proname).join(', ') : 'ninguna');
+    ? derivadores.map((x) => `${x.proname}(${x.args})`).join(', ') : 'ninguna');
 
   // ── (b) EL CENSO DE DELATORES — este brazo mide HOY, cableado o no ─────────
   // 🔴 El patrón va ANCLADO. Sin anclar, `mostrado` pesca `mostrador` y el censo
@@ -170,6 +182,46 @@ await correr('i13 · el precio del catálogo es neto y el mostrado se deriva', a
     noConcluyente('la separación neto/mostrado no existe todavía: el brazo (b) no tiene qué medir.');
   }
 
-  // ── (f) Cuando esté cableado: la derivación real, contra los ítems vivos ──
-  r.di('\n   → ningún precio final guardado, y la derivación en numeric es exacta.');
+  // ── (f) LA DERIVACIÓN REAL, contra los ítems VIVOS del catálogo ──────────
+  const vista = separacion.find((x) => x.relname.startsWith('v_'))?.relname;
+  if (!vista) {
+    r.di('\n   ⚠️ hay columnas neto pero ninguna VISTA que exponga el par neto/final:\n      la derivación existe y no tiene puerta.');
+    noConcluyente('no hay vista que exponga neto y final juntos.');
+  }
+  const fn = derivadores.find((d) => /precio|final/.test(d.proname));
+  if (!fn) noConcluyente('hay vista pero ninguna función de derivación identificable.');
+
+  const vivos = q(
+    `select count(*)::int as n,
+            count(*) filter (where precio_final is not null)::int as con_final,
+            count(*) filter (where precio_neto is not null and precio_final is null)::int as neto_sin_final,
+            count(*) filter (where precio_final is not null
+                    and precio_final <> round(precio_neto * (1 + tarifa_pct/100), 2))::int as desviados
+       from ${vista}`);
+  const v = vivos[0];
+  r.di('');
+  r.dato(`ítems vivos en ${vista}`, `${v.n}`);
+  r.dato('con precio final derivado', `${v.con_final}`);
+  r.dato('con neto y SIN final', `${v.neto_sin_final}${v.neto_sin_final ? ' (tarifa no vigente ⇒ NULL honesto, fail-closed)' : ''}`);
+  r.dato('desviados de round(neto × (1+pct/100), 2)', `${v.desviados}`);
+  if (v.desviados > 0) {
+    const muestra = q(
+      `select servicio, codigo_iva, tarifa_pct, precio_neto, precio_final,
+              round(precio_neto * (1 + tarifa_pct/100), 2) as esperado
+         from ${vista}
+        where precio_final is not null
+          and precio_final <> round(precio_neto * (1 + tarifa_pct/100), 2) limit 5`);
+    for (const m of muestra) r.dato('  🔴', JSON.stringify(m));
+    rojo(`${v.desviados} ítem(s) del catálogo tienen un precio final que NO es round(neto × (1+pct/100), 2).`);
+  }
+  if (v.n === 0) noConcluyente(`${vista} no tiene filas: la derivación no se pudo ejercer sobre datos vivos.`);
+
+  // Que la vista NO reimplemente la derivación por su cuenta.
+  const defVista = q(`select pg_get_viewdef('${vista}'::regclass, true) as d`)[0].d;
+  const usaLaFn = defVista.includes(fn.proname);
+  r.dato('la vista usa la función única', usaLaFn ? `sí (${fn.proname}) ✓` : '🔴 NO — reimplementa la derivación');
+  if (!usaLaFn)
+    rojo(`${vista} calcula el final por su cuenta en vez de usar ${fn.proname}(). El día que cambie la tarifa habrá dos precios distintos para el mismo servicio.`);
+
+  r.di('\n   → el catálogo guarda NETO, el final se deriva por una sola función, y los ítems vivos cierran.');
 });

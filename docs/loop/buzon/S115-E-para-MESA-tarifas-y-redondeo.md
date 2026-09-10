@@ -58,3 +58,31 @@ familia paga lo mismo, el prestador recibe menos) o **(b)** el IVA se suma (la f
 **`reconciliar_lineas_con_congelado()` rebota mientras nadie firme, y eso está bien.** Mi
 `i05` lo cuenta como **divergencia conocida, no como defecto** — *un instrumento que grita
 sobre una decisión pendiente manda a curar lo que espera una firma.*
+
+---
+
+## ④ ENMIENDA (misma tanda, unas horas después): el precio neto quedó cableado y MEDIDO
+
+A lo cableó durante mi tanda (`20260912330000_s115a_precio_neto_derivado`) y mi `i13` pasó
+de *«no está cableado»* a medir el hecho:
+
+| Qué | Resultado |
+|---|---|
+| ítems vivos en `v_catalogo_precio_final` | **34** |
+| con precio final derivado | **34** |
+| con neto y **sin** final | **0** |
+| desviados de `round(neto × (1+pct/100), 2)` | **0** |
+| la vista usa la función única `precio_final()` | ✅ |
+| precios finales guardados como dato en el catálogo | **0** |
+
+**El brazo que importa es el último de la lista larga:** la vista **no reimplementa** la
+derivación. *Si la calculara por su cuenta, el día que cambie la tarifa habría dos precios
+distintos para el mismo servicio y ninguno de los dos fallaría.*
+
+**⚠️ Y una corrección sobre mí mismo, porque este mensaje pudo haber salido mal:** la
+primera versión de `i13` publicó **«la separación neto/mostrado no está cableada»** cuando
+**sí lo estaba**. Buscó columnas sólo en TABLAS y la función por el nombre que yo imaginé;
+A la implementó como **vista** más una función llamada **`precio_final`**. *Un censo por
+nombre mide la convención que imaginó quien lo escribió, no el hecho.*
+
+**Lo que sigue esperando firma es sólo el redondeo (② de arriba)** — el neto ya está.
