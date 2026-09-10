@@ -29382,6 +29382,34 @@ lo construye y la otra lo mide **sobre el objeto que ya existe**.
 ---
 
 
+### `L-532` — «La llave i18n existe pero el bundle no la tiene» — una clase que ningún gate de la casa cubre, sólo el aparato
+
+**Origen: C, S114 (handoff al cierre; filada por A).** Las llaves tipadas de i18n
+cubren *«la llave no existe»* —eso lo caza el typecheck en el commit—. Lo que **no**
+cubren es que la llave exista en el código y **el bundle publicado no la traiga**:
+compila verde, pasa todo gate, y en el teléfono sale el crudo (`{{n}}`, o la llave
+literal). Su modo de falla es de RUNTIME y sólo lo ve el aparato. **Es hermana de
+`L-138`/`L-160`** (el binario que corre no es el árbol que compiló) y de la clase
+`missingKeyHandler` de C, que no corre en CI. *Un verde de typecheck sobre i18n dice
+«la llave está declarada», jamás «el bundle la sirve».*
+
+---
+
+### `L-531` — Antes de construir la cura de un candidato, se mide el otro lado — porque una cura sin medir no es inútil: mete el defecto que el vecino ya había prevenido
+
+**Origen: C, S114 (handoff al cierre; filada por A; la mesa la firmó en su día).**
+Cuando dos piezas se tocan (un lector y su escritor, dos ramas del mismo motivo, dos
+lados de un canal), la cura de un lado se mide contra el otro **antes** de escribirla.
+El matiz que la vuelve exigible, y es de C: con el canal de mensajería, curar sin
+mirar el vecino **no habría sido un no-op** —habría reintroducido el defecto que el
+otro lado ya había prevenido—. *No es «revisá dos veces»: es que el segundo lado puede
+tener una razón viva que tu cura pisa sin saberlo.* Pariente de la disciplina de
+«ensanchar un lector ajeno sólo con las tres condiciones» y de «sospecha vs.
+afirmación ajena».
+
+---
+
+
 ### `L-530` — Un `2xx` con `wamid` del transporte significa «lo tomó», JAMÁS «llegó» — y la demora entre las dos cosas puede ser larga
 
 La lección que corona el arco de notificaciones de S114. Tres veces el mismo síntoma
