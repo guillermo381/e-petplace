@@ -509,7 +509,7 @@ Deno.serve(async (req) => {
     });
 
     if (res.ok) {
-      await supabase.from('notificacion_intencion').update({ estado: 'entregada' }).eq('id', i.id);
+      await supabase.from('notificacion_intencion').update({ estado: 'aceptada_transporte' }).eq('id', i.id);
       entregadas++;
     } else {
       const cuerpo = await res.text();

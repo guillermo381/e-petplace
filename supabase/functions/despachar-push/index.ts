@@ -285,7 +285,7 @@ Deno.serve(async (req) => {
     if (algunaOk) {
       await supabase
         .from('notificacion_intencion')
-        .update({ estado: 'entregada' })
+        .update({ estado: 'aceptada_transporte' })
         .eq('id', i.id);
       entregadas++;
     } else if (algunaReintentable) {

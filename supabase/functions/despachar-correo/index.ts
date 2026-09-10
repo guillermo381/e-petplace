@@ -521,7 +521,7 @@ Deno.serve(async (req) => {
       const cuerpo = await r.json();
       await supabase.from('notificacion_intencion')
         .update({
-          estado: 'entregada',
+          estado: 'aceptada_transporte',
           resuelto_como: { ...i.resuelto_como, proveedor_id: cuerpo?.id ?? null },
         })
         .eq('id', i.id);
