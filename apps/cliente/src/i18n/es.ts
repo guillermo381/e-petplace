@@ -391,6 +391,8 @@ export const clienteEs = {
     entradaDetalle: 'Cada quien con su propia historia.',
   },
   hogar: {
+    sinAvisosTitulo: 'No podemos avisarte de nada.',
+    sinAvisosDetalle: 'Activa los avisos para que te lleguen las citas y los casos.',
     proximaPlagaCorta: '{{plaga}} · {{fecha}}',
     proximaVacunaCorta: '{{nombre}} · {{fecha}}',
     // S91-C · LAS VOCES POR RAMA (orden de mesa, hallazgo de D). Tres

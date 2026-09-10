@@ -127,6 +127,7 @@ import { FiltroPills } from '@/components/filtro-pills';
    en memorial?» y «¿la mascota falleció?». *Importarla con su nombre las
    confundiría en el peor lugar: el compilador avisó, pero un lector no.* */
 import { esMemorial as mascotaEnMemorial } from '@/lib/memorial';
+import { abrirAjustesDelSistema, useSinAvisos } from '@/lib/sin-avisos';
 
 
 type TraductorHogar = ReturnType<typeof useTraduccion>['t'];
@@ -654,6 +655,8 @@ export default function Hogar() {
   const { t, idioma } = useTraduccion();
   const insets = useSafeAreaInsets();
   const { mostrar } = useAviso();
+  /** `D-1057`: el sistema tiene los avisos apagados. Se relee al foco. */
+  const sinAvisos = useSinAvisos();
 
   const [mascotas, setMascotas] = useState<EstadoMascotas>('cargando');
   /* La «i» del hogar sin mascotas (N22). Vive acá arriba y no junto a su
@@ -1244,6 +1247,37 @@ export default function Hogar() {
     if (esMemorial) return [];
     const ahora = Date.now();
     const filas: FilaReco_[] = [
+      /* ═══ ⭐ LA SEÑAL DE QUE ESTÁS SIN SEÑAL — `D-1057`, firma del founder ══
+         **Va PRIMERA, y eso es la mitad ③ de la firma.** *«No se puede
+         descartar, porque cerrarla es apagar la única señal de que estás sin
+         señal»* — y quedar detrás del «Ver N más» es descartarla por otra vía:
+         con doce pedidos en vuelo, una fila colapsada no existe para nadie.
+         Presidir es lo que la vuelve indescartable de verdad.
+
+         🔴 **Y NO APARECE SI NO QUEDA NINGUNA MASCOTA ACTIVA** (④). La ley de
+         la casa —*en memorial la app no le pide nada a esa familia*— no tiene
+         excepción, ni siquiera para esto.
+         ⚠️ **La condición es «ninguna activa», no «alguna en memorial», y lo
+         declaro por si la mesa lo lee distinto:** el indicador es del HOGAR y
+         no de una mascota, así que apagarlo porque UNA falleció dejaría sin
+         señal a una familia que todavía tiene otras vivas y sus citas. *La casa
+         ya contestó esta misma pregunta en `focoNexo`, que devuelve `'ninguna'`
+         con `activas.length === 0` — se copia al vecino en vez de inventar.*
+         ⚠️ Y **no se cuelga de `theme.mode`**: ése es el guard que `D-1021`
+         midió apagado. La señal real es `estado_vida`, vía `enMemoriaDe`. */
+      ...(sinAvisos && Array.isArray(mascotas) && mascotas.some((m) => !enMemoriaDe(m.id))
+        ? [
+            {
+              key: 'sin-avisos',
+              mascotaId: null,
+              capa: 'identidad',
+              icono: 'campana',
+              titulo: t('hogar.sinAvisosTitulo'),
+              detalle: t('hogar.sinAvisosDetalle'),
+              onPress: abrirAjustesDelSistema,
+            } satisfies FilaReco_,
+          ]
+        : []),
       ...solicitudesPend.map((s): FilaReco_ => {
         const min = Math.max(1, Math.round((Date.parse(s.expiraEn) - ahora) / 60000));
         return {
