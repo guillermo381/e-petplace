@@ -500,10 +500,10 @@ Deno.serve(async (req) => {
     /* 🔴 PAGO MIXTO — el riel cobra total - saldo_aplicado. `monto` es lo que se
        cobra Y lo que queda escrito en el intento; confirmar_pago_compra valida a
        nivel compra contra (total - saldo_aplicado), así que los dos coinciden.
-       ⚠️ vat/taxable_amount siguen siendo los del desglose completo (hoy 0: todo
-       el catálogo es EC_IVA_0). El día que entre un producto GRAVADO, cómo se
-       declara el IVA de una venta pagada en parte con saldo es criterio fiscal
-       (Erick), no se decide acá: se declara y se frena, igual que el resto del IVA. */
+       ⚠️ El triple fiscal se RECONCILIA con este monto reducido más abajo, tras
+       el guard de IVA (S114-A): IVA 0 ⇒ taxable_amount = monto reducido; GRAVADO
+       + saldo ⇒ rebota `mixto_gravado_no_soportado` (criterio de Erick, no se
+       arma acá). Y un `③` propio reconcilia antes de la pasarela. */
     if (saldoAplicado > 0) {
       monto = Math.round((monto - saldoAplicado) * 100) / 100;
       if (!(monto > 0)) {
@@ -687,6 +687,60 @@ Deno.serve(async (req) => {
     return json({ ok: false, codigo: vIva.codigo, detalle: vIva.detalle }, 409);
   }
 
+  /* ═══ 🔴 PAGO MIXTO · EL TRIPLE FISCAL RECONCILIA CON EL MONTO REDUCIDO ═══
+     Firma del founder (S114-A). Cuando el saldo del hogar cubre parte de la
+     compra, `amount` va recortado (total − saldo) pero `vat`/`taxable_amount`
+     salían del desglose COMPLETO ⇒ Nuvei rebotaba `order.amount Invalid`
+     («Check the parameters vat, taxable_amount and amount»): valida
+     `amount == taxable_amount + vat`, y 208,10 ≠ 283,60 + 0. Medido en vivo:
+     todo cobro FULL pasa; los tres REDUCIDOS rebotaban igual. */
+  const ordenVat = vIva.vat;
+  let ordenTaxable = vIva.taxable_amount;
+  const ordenPct = vIva.tax_percentage;
+  if (saldoAplicado > 0) {
+    if (vIva.vat === 0) {
+      /* ① IVA 0: taxable_amount = monto reducido ⇒ amount == taxable_amount + 0. */
+      ordenTaxable = Number(monto.toFixed(2));
+    } else {
+      /* ② GRAVADO + saldo: el reparto proporcional de vat/taxable sobre un cobro
+         parcial es criterio fiscal (Erick / S105, familia abierta). NO se
+         inventa — se rebota con nombre propio ANTES de la pasarela. *Un cobro
+         que rebota con nombre es mejor que uno mal armado.* */
+      await db.from('pagos_intentos').insert({
+        ...columnasDelSujeto(),
+        proveedor: 'nuvei', proveedor_referencia: sujeto, monto, moneda,
+        forma: 'tokenizacion', estado: 'rechazado',
+        motivo_rechazo: `mixto_gravado_no_soportado: saldo sobre compra con IVA>0 (vat=${vIva.vat}); el reparto es criterio fiscal (Erick), no se arma acá`,
+        cerrado_en: new Date().toISOString(),
+        clave_idempotencia: `cobro:mixtoiva:${sujeto}:${Date.now()}`,
+        pagador_user_id: userId, pagador_origen: 'sesion',
+      });
+      return json({ ok: false, codigo: 'mixto_gravado_no_soportado',
+        detalle: 'un cobro pagado en parte con saldo sobre una compra gravada necesita el criterio fiscal de Erick; no se manda un triple que no reconcilia' }, 409);
+    }
+
+    /* ③ 🔴 EL ROJO DE NUESTRO LADO, ANTES DE LA PASARELA — el triple reconcilia
+       como Nuvei lo valida (`amount == taxable_amount + vat`). Hoy lo cazaba
+       Nuvei y nos enterábamos por el rechazo; acá rebota antes, con nombre.
+       Sólo sobre el camino mixto: en el FULL, el triple sale del guard de Erick
+       y su forma gravada la valida la pasarela. */
+    const amt = Number(monto.toFixed(2));
+    const suma = Math.round((ordenTaxable + ordenVat) * 100) / 100;
+    if (Math.abs(amt - suma) > 0.005) {
+      await db.from('pagos_intentos').insert({
+        ...columnasDelSujeto(),
+        proveedor: 'nuvei', proveedor_referencia: sujeto, monto, moneda,
+        forma: 'tokenizacion', estado: 'rechazado',
+        motivo_rechazo: `triple_fiscal_no_reconcilia: amount=${amt} != taxable_amount(${ordenTaxable}) + vat(${ordenVat}) = ${suma}`,
+        cerrado_en: new Date().toISOString(),
+        clave_idempotencia: `cobro:triple:${sujeto}:${Date.now()}`,
+        pagador_user_id: userId, pagador_origen: 'sesion',
+      });
+      return json({ ok: false, codigo: 'triple_fiscal_no_reconcilia',
+        detalle: `amount=${amt} no reconcilia con taxable_amount+vat=${suma}` }, 409);
+    }
+  }
+
 
   // ── ④ COMPUERTAS SERVER-SIDE ──────────────────────────────────────────────
   /* 🔴 Las compuertas de la COMPRA son de la compra. **La cita ya trae las
@@ -789,9 +843,9 @@ Deno.serve(async (req) => {
           /* 🔴 LOS TRES SALEN DEL VEREDICTO, y `tax_percentage` es el NOMINAL
              (15), jamás el recalculado: *mandarle 14,98 al proveedor sería
              declararle una tasa que no existe en Ecuador.* */
-          vat: vIva.vat,
-          taxable_amount: vIva.taxable_amount,
-          tax_percentage: vIva.tax_percentage,
+          vat: ordenVat,
+          taxable_amount: ordenTaxable,
+          tax_percentage: ordenPct,
         },
         card: { token: tarjeta.token },
       }),
