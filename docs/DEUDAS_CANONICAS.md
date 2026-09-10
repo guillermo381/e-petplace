@@ -31054,7 +31054,55 @@ dejando las puertas.
 
 ---
 
-### `D-1052` 🔴 · LA CARRERA · el reloj de reserva de saldo suelta por TIEMPO sin preguntar si el riel ya cobró — forma propuesta, espera firma
+### `D-1053` 🔴 · EL TECHO de reserva de saldo (24h) — expirar + escalar + soltar, como UNA unidad ACOPLADA
+
+**Firma del founder (S114-A):** una reserva de saldo no puede quedar colgada
+eternamente. Cuando el barrido no alcanza a resolver un intento que se queda
+`pendiente` para siempre (la pasarela nunca contesta), a las **24 h** (umbral único
+en `app_config`, firmado — NO uno por riel) el intento se transiciona a **`expirado`**
+con un **hallazgo durable** (`expirado_sin_resolucion`), se **escala a la casa por el
+motor de avisos** (tipo propio + productor, JAMÁS un `console.error`), y **recién
+entonces** la condición del reloj (`D-1052`) suelta la reserva.
+
+**🔴 EL RELEASE ESTÁ ACOPLADO AL ESCALADO — no se implementa suelto.** *Soltar el
+saldo sin avisar sería asumir «no cobró», que es justo lo que no sabemos* (el riel
+pudo haber cobrado tarde). El escalado es lo único que vuelve aceptable el release;
+por eso van en el mismo acto o no van.
+
+**Por qué no entró en S114-A:** el escalado exige una **clase de audiencia «casa»**
+que hoy no existe (**`D-1054`**, dueño F). Medido: `cat_notificacion_tipos` sólo
+admite `cliente|prestador|ambas`, y no hay superficie donde la casa lea sus avisos.
+
+**🔴 DISPARO:** `D-1054` (la audiencia casa + su superficie). El día que exista, se
+construye esta unidad entera —`expirado` + hallazgo + tipo de aviso + productor +
+release— con su cinturón de dos rojos: ② intento `pendiente` más viejo que el umbral
+→ `expirado` + escalado → reserva soltada; ③ intento que resuelve DENTRO del umbral
+→ NO se expira (el techo no mata lo que el barrido iba a salvar). **Dueño:** A.
+
+---
+
+
+### `D-1054` 🟡 · NO EXISTE una audiencia «casa» en el motor de avisos, ni superficie donde la casa lea — dueño F
+
+**Hallazgo (S114-A, medido):** `cat_notificacion_tipos.audiencia` tiene CHECK que sólo
+admite `cliente | prestador | ambas` — **no hay `admin`/`casa`**. Y no hay pantalla
+donde la casa (hoy, el founder) lea sus avisos: las apps son cliente/prestador,
+`notificacion_intencion` con audiencia casa no la consume nadie, y `transporte_vivo=false`
++ la veda cierran el push. ⇒ **un aviso dirigido a la casa quedaría escrito y sin
+llegar** — peor que un log honesto.
+
+**Por qué importa y quién es dueño:** es la pieza que falta para que la casa pueda ser
+avisada de CUALQUIER cosa — y el primer cliente concreto es `D-1053` (el escalado del
+techo de saldo), pero no el único (todo escalado de pagos, conciliación, seguridad
+querrá esta audiencia). **Es su propio arco** (clase de audiencia entera): el CHECK,
+el/los tipo(s), la resolución de destinatario de la casa, y **una superficie de avisos
+de la casa en `apps/admin`** (territorio de F). **Dueño: F.** **Disparo:** cuando se
+decida construir el canal de avisos de la casa.
+
+---
+
+
+### `D-1052` 🟡 · LA CARRERA · el reloj de reserva de saldo soltaba por TIEMPO sin preguntar si el riel ya cobró — FORMA FIRMADA, condición del reloj EN MOTOR, techo split a `D-1053`
 
 **El defecto, medido (incidente founder 9-sep):** `liberar_reservas_saldo_vencidas()`
 (cron cada 15 min) suelta **toda** compra `esperando_pago` con `saldo_aplicado>0` y
@@ -31085,6 +31133,14 @@ separadas y medidas contra el código vivo:
   siguiente tick del reloj los suelta.
 (b) sola dejaría una reserva colgada para siempre si el riel rechazó async y ese
 rechazo nunca se registró; (a) igual la suelta cuando el intento pasa a `rechazado`.
+
+**FIRMADO Y CONSTRUIDO (parcial, S114-A):** la **condición del reloj** ya está en el
+motor (`liberar_reservas_saldo_vencidas` no suelta si hay intento `pendiente`/`aprobado`;
+mig. `20260912110000`, cinturón sonda-ROLLBACK con rojo ① + verde). **El TECHO de 24h
+NO** — se fichó como unidad acoplada en **`D-1053`** porque su release depende de un
+escalado a la casa que hoy no tiene por dónde llegar (**`D-1054`**). **Interino declarado
+en `LETRA_SALDO` §8:** un intento que nunca resuelve deja su reserva RETENIDA
+indefinidamente, recuperable a mano con `liberar_reserva_saldo_compra`.
 
 **Alcance:** sólo `liberar_reservas_saldo_vencidas` (el cron). `liberar_reserva_saldo_compra`
 (la que llama pagos-cobro en el rebote SÍNCRONO) NO se toca: se invoca justo cuando

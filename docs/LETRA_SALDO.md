@@ -115,6 +115,28 @@ clientes), nunca ingreso. Ver §7.
   factor**: si se devuelve la mitad, vuelve la mitad de cada porción. *(S114-A ④:
   `caso_resolver` reparte cuando el caso es sobre un pedido cuya compra tuvo saldo.)*
 
+## §5bis · EL INTERINO DE LA RESERVA DE SALDO (S114 — decisión tomada, no olvido)
+
+En el pago mixto, el saldo que la familia aplica a una compra se **reserva** mientras
+el riel cobra el resto (`compras.saldo_aplicado` sobre `esperando_pago`, restando del
+disponible). Esa reserva se resuelve por tres caminos: el riel **confirma** (se
+consume el saldo), el riel **rechaza síncrono** (se suelta en el acto), o el checkout
+queda **muerto** y el reloj lo suelta al vencer.
+
+**🔴 EL HUECO DECLARADO, con su costo:** desde S114, el reloj **no suelta una reserva
+si hay un cobro vivo** (intento `pendiente`/`aprobado`) — para no devolverle el saldo
+a una familia cuya tarjeta el riel ya cobró (la carrera, `D-1052`). La contracara es
+que **un intento que NUNCA se resuelve —la pasarela jamás contesta— deja su reserva
+RETENIDA indefinidamente.** El **techo** que la soltaría a las 24 h con aviso a la casa
+está **fichado y NO construido** (`D-1053`), porque soltar sin avisar sería asumir «no
+cobró», y el canal de avisos a la casa todavía no existe (`D-1054`).
+
+**Mientras el techo no exista, el destrabe es MANUAL y por el motor, jamás por un
+UPDATE:** se llama `liberar_reserva_saldo_compra('<compra_id>')` — idempotente, sólo
+suelta una reserva viva (`esperando_pago` + saldo > 0), nunca des-consume una pagada.
+El costo del interino es **saldo inmovilizado de una familia** hasta que alguien lo
+destrabe a mano; se declara acá para que ese alguien sepa que existe y cómo se hace.
+
 ## §6 · SI SE PUEDE RETIRAR
 
 **Sí, como excepción y por soporte — jamás como botón en la app (v1).**
@@ -153,6 +175,7 @@ al cliente por recuperar su plata). Si el volumen lo vuelve caro, se revisa con 
 | 3 | Plazo de prescripción real para el reconocimiento de §7 | Contador |
 | 4 | La promesa del camino al medio de pago original en los T&C | Respuesta de Nuvei (refund diferido sí/no) |
 | 5 | El esquema exacto de tablas (¿extiende el motor financiero o nace tabla propia?) | Censo de S102 contra la base — esta letra fija el contrato, no los nombres |
+| 6 | El **techo** de la reserva de saldo (soltar a las 24 h un intento que nunca resuelve) — acoplado a un aviso a la casa que hoy no existe. Interino en §5bis: se destraba a mano con `liberar_reserva_saldo_compra` | A (`D-1053`) + F (`D-1054`, la audiencia casa) |
 
 ---
 
