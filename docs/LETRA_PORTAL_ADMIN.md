@@ -278,7 +278,147 @@ relevamiento — incluido si algo sigue ambiguo sobre el rastro de uso.
 
 ---
 
+## §6 · EL TABLERO ECONÓMICO Y FISCAL — dictado del founder (S115, 10-sep-2026)
+
+> **Depositado verbatim.** Lo que sigue es la letra del founder, sin editar. Debajo, en §6.1,
+> el estado MEDIDO de cada pieza contra el motor vivo — porque la ley del dictado
+> («todo LEE del motor») decide quién construye qué, y dos de los cinco tableros piden
+> números que hoy la base no tiene.
+
+```
+apps/admin. Todo lo que sigue LEE del motor; ningún número se calcula en la pantalla.
+
+① Editor de comisiones: las filas vigentes de fee_configs con su porcentaje, su mínimo,
+su vigencia y su historial visible (quién cambió qué y cuándo). Cambiar una comisión es
+cerrar la vigente y abrir otra, nunca editar el pasado. ② Tablero de margen por
+transacción y por mes: GMV, ingreso de la casa (comisión + tarifa de servicio), costo del
+riel, costos variables, contribución, y el take rate efectivo. Con corte por vertical y
+por medio de pago — ese corte es el que dice si la mezcla se está moviendo hacia DeUna,
+que es la palanca más grande que tenemos. ③ Tablero de caja retenida: retención de renta
+y de IVA acumuladas del período, y cuánto lleva atrapado. Es plata que vuelve, pero hay
+que verla. ④ Panel fiscal: documentos por estado, rechazos, reemisión, cierre manual,
+alerta de vencimiento del certificado a 30 y 7 días. ⑤ La compuerta de la liquidación,
+visible: qué prestador no puede cobrar y por qué (falta su comprobante del período).
+
+Sin gráficos de torta, sin proyecciones: números del mes, comparables con el anterior.
+```
+
+### 6.1 · El estado medido de cada tablero
+
+> Medido el 10-sep-2026 contra el proyecto `zyltipqscdsdsxnjclhp` con
+> `npx supabase --experimental db query --linked --file <censo>.sql`.
+> **Un tablero sin lector no es una pantalla pendiente: es motor pendiente**, y quien lo
+> dibuje igual va a publicar un número plausible sobre datos que no existen.
+
+| # | Tablero | Motor hoy | Qué falta |
+|---|---|---|---|
+| ① | Editor de comisiones | 🟢 **casi entero** — `fee_configs` ya tiene `vigencia_desde/hasta`, `activo`, `minimo_por_transaccion`, `created_by`, `notas`; **el historial ya se está grabando** en `fee_configs_historial` (`operacion`, `valor_anterior`, `valor_nuevo`, `cambiado_por`, `cambiado_en`, `motivo`) por el trigger `audit_fee_configs` | El lector admin y **la puerta de escritura atómica** — cerrar la vigente y abrir la nueva en un acto. Hoy no existe `admin_cambiar_comision`: sin ella, «cerrar y abrir» son dos UPDATE y un rebote deja el período sin comisión vigente |
+| ② | Margen y take rate efectivo | 🟡 **la mitad** — los insumos por evento existen (`monto_bruto`, `monto_kushki_fee`, `monto_plataforma`, `monto_payout`, `fecha_devengo`) | 🔴 **El corte por MEDIO DE PAGO no es derivable hoy** — ver §6.2. Y el corte «por vertical» no sale de `revenue_stream`: tiene **un solo valor vivo** (`transaccional`); lo que hoy distingue es `origen_tipo` (`cita · estadia · pedido`) |
+| ③ | Caja retenida | 🔴 **no existe** — ver §6.3 | El registro de la retención. Cero columnas de retención en `pagos_*`. `liquidaciones.retenciones_fiscales` es lo que Satori **retiene a terceros**, no lo que a Satori **le retienen**; `fiscal_emisor.agente_retencion` es una bandera |
+| ④ | Panel fiscal | 🟢 **dos de cuatro** — `fiscal_admin_listar(estado, desde, hasta)` y `fiscal_admin_cerrar_manual(...)` vivas; `documentos_fiscales` tiene `estado`, `sri_error`, `motivo_rechazo`, `autorizado_en` y `documento_referencia_id` | **Reemisión** (no hay función) y 🔴 **la alerta del certificado, que no tiene dato** — ver §6.4 |
+| ⑤ | Compuerta de la liquidación | 🟡 **la vista existe, muda** — `v_liquidaciones_pendientes_pago` trae `estado`, `datos_bancarios`, `dias_desde_aprobacion` | **El porqué.** La vista no expone si falta el comprobante del período (`documentos_fiscales.rol = comprobante_proveedor`). Sin eso la pantalla puede decir «no cobra» y no puede decir por qué, que es exactamente lo que el dictado pide |
+
+### 6.2 · 🔴 El corte por medio de pago — la palanca más grande no se puede medir hoy
+
+El dictado dice que el corte por medio de pago *«es el que dice si la mezcla se está
+moviendo hacia DeUna, que es la palanca más grande que tenemos»*. **Medido: hoy no se puede
+construir.**
+
+`eventos_economicos` **no tiene `pago_intento_id`**. Sus únicas columnas de atadura son
+`origen_tipo` / `origen_id` (que apuntan al objeto — cita, estadía, pedido — no al pago) y
+`kushki_charge_id`, que está **en 0 de 61 eventos**. El medio de pago vive en
+`pagos_intentos.proveedor` / `.forma`, y **no hay camino del evento al intento**.
+
+⚠️ **Lo que lo vuelve urgente y no burocrático: este tablero no falla si se construye igual.**
+Agrupa todo bajo un solo medio, o bajo «desconocido», y publica un número de mezcla
+perfectamente creíble. *La palanca más grande medida con el instrumento equivocado es peor
+que no medirla: una decisión de negocio se toma sobre ella.*
+
+**Es motor, y es de A** — la columna, su backfill sobre los 61 eventos vivos, y el productor
+que la estampe de ahí en adelante.
+
+### 6.3 · 🔴 La caja retenida es plata que hoy nadie anota
+
+`MODELO_FISCAL` §5 ya describe la retención — **2 % de renta** sobre pagos al establecimiento
+afiliado (Res. NAC-DGERCGC26-00000009, mar-2026) más retención de IVA cuando aplica, que la
+pasarela descuenta de la liquidación de fondos — y la deja como **F4, «dimensionarlo»,
+pregunta abierta al contador**.
+
+**Medido: no hay dónde anotarla.** Ninguna tabla `pagos_*` tiene columna de retención, y
+`monto_kushki_fee` es el **costo del riel**, no la retención — sumarlos sería contar dos cosas
+distintas en la misma fila.
+
+Así que ③ tiene **dos huecos, y sólo uno es de código**: el registro por transacción (motor,
+de A) y **el número que el contador todavía no ratificó** (F4). *Un tablero de caja retenida
+alimentado por un porcentaje supuesto no muestra plata atrapada: muestra una hipótesis con
+formato de dinero.*
+
+### 6.4 · 🔴 La alerta del certificado no tiene dato — y es el ítem más barato de la lista
+
+`MODELO_FISCAL` §7 ya la pedía, con su razón escrita: *«alerta de vencimiento del certificado
+a 30 y 7 días (un certificado vencido detiene el 100 % de la facturación)»*. El dictado la
+ratifica.
+
+**Medido: `fiscal_emisor` no tiene ninguna columna de vencimiento** (`id · ruc · razon_social ·
+nombre_comercial · direccion_matriz · establecimiento · punto_emision · obligado_contabilidad ·
+leyenda_regimen · agente_retencion · contribuyente_especial · ambiente · actualizado_en`). El
+censo de columnas `certificad|vence|expira|caduc` en todo `public` devuelve 31 columnas y
+**ninguna es del emisor fiscal**.
+
+Es **una columna y un lector**, y su ausencia apaga la facturación entera un martes cualquiera
+sin aviso previo.
+
+### 6.5 · ⚠️ EL CHOQUE DE ALCANCE — ② y ③ contra la puerta de §2, para firma
+
+**§2 firma que entra al MVP sólo lo que cumple una de dos:** ① sin eso no se puede operar el
+1 de octubre, o ② toca plata de un tercero. Y **§4 dice, literal:** *«Cualquier cosa que no
+pase la puerta de §2. No se "deja preparada": no se nombra.»*
+
+Contra esa puerta, los cinco no entran igual:
+
+- **① editor de comisiones · ④ panel fiscal · ⑤ compuerta visible — PASAN.** ① y ⑤ tocan plata
+  de un tercero de frente (definen cuánto cobra el prestador, y por qué no cobra). ④ pasa por
+  las dos: una factura rechazada sin camino de reemisión **detiene** la operación.
+- **② margen y ③ caja retenida — por la puerta literal, «esperan».** Son tableros de lectura de
+  gestión: no detienen la operación el 1-oct y no mueven plata de un tercero.
+
+**Esto no se absorbe en silencio.** El founder los está dictando, o sea que los está decidiendo
+— pero decidirlos **ensancha §2**, y esta casa ya pagó tres veces el precio de dejar dos letras
+firmadas contradiciéndose (el magenta en S83, la plata en S88, la telemedicina en S113):
+*cualquiera cita la que le conviene y está «en regla»*.
+
+**Las dos formas de cerrarlo, y las dos son del founder:**
+
+- **(a) Enmendar §2** con un tercer criterio —*«③ mide si el negocio aguanta»*— y que ② y ③
+  entren por ahí, con el criterio escrito para que la próxima pantalla se contraste contra él.
+- **(b) Dejar §2 como está** y declarar ② y ③ como **excepción nominada del founder**, fuera de
+  la puerta y con esa marca puesta.
+
+*A favor de (a), honestamente: la contribución y la caja atrapada no son métricas de vanidad —
+son lo que dice si hay con qué operar en noviembre. Pero el criterio lo escribe quien firma la
+puerta, no quien construye contra ella.*
+
+### 6.6 · Lo que este dictado NO decide
+
+- **El diseño de los cinco tableros.** Rige §4: se decide con su dirección escrita antes de
+  construir, y se juzga en la pantalla real.
+- **El orden de construcción** dentro de §2.1. Hoy la tabla de §2.1 tiene cuatro filas y estos
+  cinco no están en ninguna.
+- **El número de la retención** (F4, del contador) ni **la tarifa de veterinaria** (F1, en
+  disputa por `MODELO_FISCAL` v0.4 · E3).
+
+---
+
 ## Historial
+
+- **v1.1 (S115, 10-sep-2026):** §6 — dictado del founder del **tablero económico y fiscal**
+  (cinco piezas), depositado verbatim, con el estado MEDIDO de cada una contra el motor vivo
+  (§6.1). Tres hallazgos: el **corte por medio de pago no es derivable** (`eventos_economicos`
+  sin `pago_intento_id`; `kushki_charge_id` en 0 de 61) · la **caja retenida no se registra**
+  en ninguna tabla de pagos · la **alerta del certificado no tiene dato** en `fiscal_emisor`,
+  aunque `MODELO_FISCAL` §7 ya la pedía. **Choque de alcance declarado y NO resuelto (§6.5):**
+  ② y ③ no pasan la puerta de §2 — esperan firma del founder por (a) enmendar la puerta o
+  (b) nominarlos como excepción.
 
 - **v1.0 (S114, 7-sep-2026):** alcance firmado por el founder sobre el relevamiento de F. Opción 1
   con web real. Puerta de §2 establecida como el único criterio de entrada. Frontera con el legado
