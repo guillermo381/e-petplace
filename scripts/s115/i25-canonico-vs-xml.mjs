@@ -39,6 +39,21 @@ const desescapar = (s) => s
   .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
   .replace(/&apos;/g, "'").replace(/&amp;/g, '&');
 
+/* 🔴 CAMPOS QUE **NO** SE EXIGEN AL CANÓNICO, cada uno con su razón medida.
+   Sin esta lista el cruce inventa faltantes — que es el defecto que `i26` mide en su
+   propio eje. */
+const NO_SE_EXIGEN = {
+  moneda: 'el LITERAL lo pone el proveedor: SUSHICORP emite «US Dollar» y CRECERMED «DOLAR» ' +
+          'sobre el mismo dólar. No hay literal exacto que clavar — nuestro canónico no debe fijarlo.',
+  formaPago: 'PENDIENTE de catálogo. El 16 aparece en las dos facturas, pero en una es tarjeta de ' +
+             'débito y en otra pago por sistema financiero ⇒ NO se adopta por parecido: el mapeo de ' +
+             'nuestros rieles sale del catálogo del SRI, y hasta tenerlo se declara pendiente.',
+};
+
+/* Campos que existen SÓLO en una versión del esquema. Medido sobre XML autorizados:
+   1.0.0 trae `propina`, `plazo`, `unidadTiempo`; 2.1.0 trae `agenteRetencion`. */
+const SOLO_EN_VERSION = { propina: '1.0.0', plazo: '1.0.0', unidadTiempo: '1.0.0', agenteRetencion: '2.1.0' };
+
 /** Cada campo del SRI con el nombre que DEBE tener en nuestro canónico. */
 const MAPA = [
   // infoTributaria
@@ -115,14 +130,23 @@ await correr('i25 · nuestro canónico contra un XML autorizado real', async (r)
     r.dato('campos hoja en el comprobante', `${presentes.size} distintos`);
 
     // ── (c) 🔴 EL CRUCE, campo por campo ───────────────────────────────────
-    const faltan = [];
+    const version = (/<(?:factura|notaCredito)[^>]*version="([^"]+)"/.exec(comp) ?? [])[1] ?? '(sin versión)';
+    r.dato('versión del esquema', version);
+
+    const faltan = [], noExigidos = [];
     for (const [sri, nuestro] of MAPA) {
       if (!presentes.has(sri)) continue;                   // el XML no lo trae: no se exige
+      if (NO_SE_EXIGEN[sri]) { noExigidos.push(sri); continue; }
       const donde = corpus.find((c) => nuestro.split('|').some((n) => new RegExp(`\\b${n}\\b`).test(c.t)));
       if (!donde) faltan.push({ sri, esperado: nuestro, valor: campo(sri, comp) });
     }
     r.di('');
-    r.dato('campos del XML cubiertos', `${MAPA.filter(([s]) => presentes.has(s)).length - faltan.length} de ${MAPA.filter(([s]) => presentes.has(s)).length}`);
+    const exigibles = MAPA.filter(([s]) => presentes.has(s) && !NO_SE_EXIGEN[s]).length;
+    r.dato('campos exigibles cubiertos', `${exigibles - faltan.length} de ${exigibles}`);
+    for (const n of noExigidos) r.dato(`  ⓘ ${n}`, `NO se exige — ${NO_SE_EXIGEN[n].slice(0, 100)}…`);
+    const propiosDeOtra = Object.entries(SOLO_EN_VERSION).filter(([c, v]) => v !== version && presentes.has(c));
+    if (propiosDeOtra.length)
+      r.dato('  ⚠️ campos de otra versión', propiosDeOtra.map(([c, v]) => `${c} (es de ${v})`).join(', '));
     for (const f of faltan) r.dato(`  🔴 ${f.sri}`, `= "${f.valor}" · nuestro canónico no tiene «${f.esperado}»`);
 
     // ── (d) EL FORMATO DE LA FECHA ─────────────────────────────────────────
@@ -143,10 +167,31 @@ await correr('i25 · nuestro canónico contra un XML autorizado real', async (r)
     r.dato('el canónico traduce por catálogo', tieneMapa ? 'sí — CatalogosSri ✓' : '🔴 NO: el código iría inventado');
     if (!tieneMapa)
       faltan.push({ sri: 'codigoPorcentaje', esperado: 'CatalogosSri', valor: codPct });
-    /* El 15 % del XML real es `codigoPorcentaje=4`. El del 0 % NO se puede confirmar
-       con este documento: esta factura no tiene líneas al 0 %. Se dice. */
-    r.di('      ⚠️ este XML sólo trae líneas al 15 % (codigoPorcentaje=4): **el código del 0 %');
-    r.di('         NO queda validado contra producción**, y hace falta una factura que lo tenga.');
+    /* 🔴 LOS CÓDIGOS CONFIRMADOS CONTRA XML AUTORIZADO, y los que no.
+         15 % → codigoPorcentaje 4 · tarifa 15.00   (SUSHICORP, 1.0.0)
+          0 % → codigoPorcentaje 0 · tarifa 0.000000 · valor 0.00 en el total Y en cada
+                línea                                (CRECERMED, 2.1.0)
+       **El 5 % sigue SIN corpus**: sólo se vio impreso en un RIDE, nunca en un XML. */
+    const cero = /<codigoPorcentaje>0<\/codigoPorcentaje>/.test(comp);
+    const quince = /<codigoPorcentaje>4<\/codigoPorcentaje>/.test(comp);
+    if (cero)   r.di('      ✅ 0 % confirmado contra XML autorizado: codigoPorcentaje=0 · tarifa 0.000000 · valor 0.00');
+    if (quince) r.di('      ✅ 15 % confirmado contra XML autorizado: codigoPorcentaje=4 · tarifa 15.00');
+    r.di('      ⚠️ el 5 % sigue SIN corpus: sólo visto impreso en un RIDE, nunca en un XML.');
+
+    // ── (e bis) DECIMALES: base con más precisión, totales con dos ─────────
+    const dec = (t) => { const v = (new RegExp(`<${t}>([^<]*)</${t}>`).exec(comp) ?? [])[1] ?? ''; const p = v.split('.')[1]; return { v, d: p ? p.length : 0 }; };
+    const base = dec('baseImponible'), unit = dec('precioUnitario');
+    const totLinea = dec('precioTotalSinImpuesto'), total = dec('importeTotal');
+    r.di('');
+    r.dato('baseImponible', `${base.v} (${base.d} decimales)`);
+    r.dato('precioUnitario', `${unit.v} (${unit.d} decimales)`);
+    r.dato('precioTotalSinImpuesto', `${totLinea.v} (${totLinea.d})`);
+    r.dato('importeTotal', `${total.v} (${total.d})`);
+    if (Math.max(base.d, unit.d) > 2)
+      r.di(`      ⇒ el SRI acepta **${Math.max(base.d, unit.d)} decimales** en la base y el unitario, y **${total.d}** en el total.\n` +
+           '         Coincide con la regla firmada de la casa —cada línea redondea a dos y el total es la SUMA—\n' +
+           '         **sólo si la base unitaria conserva su precisión**: con `numeric(12,2)` se redondea al\n' +
+           '         entrar y la suma sale de otro número (ver `i24`).');
 
     // ── (f) LA FIRMA ──────────────────────────────────────────────────────
     r.di('');

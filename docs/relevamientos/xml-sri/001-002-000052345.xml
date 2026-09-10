@@ -1,0 +1,228 @@
+<autorizacion>
+  <estado>AUTORIZADO</estado>
+  <numeroAutorizacion>1001202601179246376900120010020000523453121521412</numeroAutorizacion>
+  <fechaAutorizacion>2026-01-10 14:07:48</fechaAutorizacion>
+  <ambiente>PRODUCCION</ambiente>
+  <comprobante>
+    <factura version="2.1.0" id="comprobante">
+      <infoTributaria>
+        <ambiente>2</ambiente>
+        <tipoEmision>1</tipoEmision>
+        <razonSocial>CRECERMED CIA LTDA</razonSocial>
+        <nombreComercial>Rio Coca S1</nombreComercial>
+        <ruc>1792463769001</ruc>
+        <claveAcceso>1001202601179246376900120010020000523453121521412</claveAcceso>
+        <codDoc>01</codDoc>
+        <estab>001</estab>
+        <ptoEmi>002</ptoEmi>
+        <secuencial>000052345</secuencial>
+        <dirMatriz>Isla Isabela N43 205</dirMatriz>
+        <agenteRetencion>1</agenteRetencion>
+      </infoTributaria>
+      <infoFactura>
+        <fechaEmision>10/01/2026</fechaEmision>
+        <dirEstablecimiento>Isla Isabela N43 205</dirEstablecimiento>
+        <obligadoContabilidad>SI</obligadoContabilidad>
+        <tipoIdentificacionComprador>05</tipoIdentificacionComprador>
+        <razonSocialComprador>SUAREZ GONZALEZ LUIS GUILLERMO</razonSocialComprador>
+        <identificacionComprador>1762613006</identificacionComprador>
+        <direccionComprador>Banco Pichincha Ecuador</direccionComprador>
+        <totalSinImpuestos>169.000000</totalSinImpuestos>
+        <totalDescuento>0.00</totalDescuento>
+        <totalConImpuestos>
+          <totalImpuesto>
+            <codigo>2</codigo>
+            <codigoPorcentaje>0</codigoPorcentaje>
+            <baseImponible>169.000000</baseImponible>
+            <tarifa>0.000000</tarifa>
+            <valor>0.00</valor>
+          </totalImpuesto>
+        </totalConImpuestos>
+        <importeTotal>169.00</importeTotal>
+        <moneda>DOLAR</moneda>
+        <pagos>
+          <pago>
+            <formaPago>16</formaPago>
+            <total>169.00</total>
+          </pago>
+        </pagos>
+      </infoFactura>
+      <detalles>
+        <detalle>
+          <codigoPrincipal>INFANRIX</codigoPrincipal>
+          <codigoAuxiliar>A21CE582B</codigoAuxiliar>
+          <descripcion>[INFANRIX] HEXAVALENTE (DPAT, HIB,HB,PVI) </descripcion>
+          <cantidad>1.000000</cantidad>
+          <precioUnitario>68.000000</precioUnitario>
+          <descuento>0.00</descuento>
+          <precioTotalSinImpuesto>68.00</precioTotalSinImpuesto>
+          <impuestos>
+            <impuesto>
+              <codigo>2</codigo>
+              <codigoPorcentaje>0</codigoPorcentaje>
+              <tarifa>0.000000</tarifa>
+              <baseImponible>68.000000</baseImponible>
+              <valor>0.00</valor>
+            </impuesto>
+          </impuestos>
+        </detalle>
+        <detalle>
+          <codigoPrincipal>VAXNEUVANCE</codigoPrincipal>
+          <codigoAuxiliar>Y017296</codigoAuxiliar>
+          <descripcion>[VAXNEUVANCE] NEUMOCOCO 0</descripcion>
+          <cantidad>1.000000</cantidad>
+          <precioUnitario>78.000000</precioUnitario>
+          <descuento>0.00</descuento>
+          <precioTotalSinImpuesto>78.00</precioTotalSinImpuesto>
+          <impuestos>
+            <impuesto>
+              <codigo>2</codigo>
+              <codigoPorcentaje>0</codigoPorcentaje>
+              <tarifa>0.000000</tarifa>
+              <baseImponible>78.000000</baseImponible>
+              <valor>0.00</valor>
+            </impuesto>
+          </impuestos>
+        </detalle>
+        <detalle>
+          <codigoPrincipal>VAXIGRIP</codigoPrincipal>
+          <codigoAuxiliar>5DF57D2</codigoAuxiliar>
+          <descripcion>[VAXIGRIP] INFLUENZA V</descripcion>
+          <cantidad>1.000000</cantidad>
+          <precioUnitario>23.000000</precioUnitario>
+          <descuento>0.00</descuento>
+          <precioTotalSinImpuesto>23.00</precioTotalSinImpuesto>
+          <impuestos>
+            <impuesto>
+              <codigo>2</codigo>
+              <codigoPorcentaje>0</codigoPorcentaje>
+              <tarifa>0.000000</tarifa>
+              <baseImponible>23.000000</baseImponible>
+              <valor>0.00</valor>
+            </impuesto>
+          </impuestos>
+        </detalle>
+      </detalles>
+      <infoAdicional>
+        <campoAdicional nombre="Referencia">Fact 001-002-000052345</campoAdicional>
+        <campoAdicional nombre="Vendedor">Usuario 4</campoAdicional>
+        <campoAdicional nombre="E-mail">user4@facturacioncrecermed.com</campoAdicional>
+      </infoAdicional>
+      <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Id="Signatureb19264e8-bcfa-4f30-87eb-c7177f2779ac">
+        <ds:SignedInfo>
+          <ds:Reference Type="http://uri.etsi.org/01903#SignedProperties" Id="SignedPropertiesIDe9fae45b-25b5-48ef-9a4a-ae428cbc2f4a" URI="#Signatureb19264e8-bcfa-4f30-87eb-c7177f2779ac-SignedPropertiesID58405e9f-64fe-4d19-83e1-cfd65907a87b">
+            <ds:DigestValue>rMD0W1NTe9Z48mNx1+SAobLBc2g=</ds:DigestValue>
+          </ds:Reference>
+          <ds:Reference URI="#Certificatea20eee52-de4c-45e2-9d1f-4e9d7dfa8246">
+            <ds:DigestValue>ab8KxtejBKPUkjkutx0ganmDXZs=</ds:DigestValue>
+          </ds:Reference>
+          <ds:Reference URI="#comprobante" Id="Reference-ID-86ce812b-2398-493c-8b29-055bc2be3a01">
+            <ds:DigestValue>XSijKS66gThbc61YRGrpwS/NfbA=</ds:DigestValue>
+          </ds:Reference>
+        </ds:SignedInfo>
+        <ds:SignatureValue>hDjAqGo2+3FxjxGKkWtv5p5PTRXuqXLQrUfbji4ZTYiyWEPHC+K/LTC68qIxljUkfm6HYv4Gb1hz
+V8jME4L3q5zBFSEFlG/gmBVJGa30DP1v7ovyHCsXfIoi77eB0dnn8S7uZnIzAErWPR2OhRRPCW3k
+4a0ETILKzXASlaaHcJuYCw5JL80MpEpddnRxQyoHulxr0pEQeFQv5LZ+gQTjvx+u2DXn8fZrr6SY
+SfIKRqU/7kYJwjk/rq9gTYLR2NNJ/kkAcdYyKWjvhk+KA16SvTJRF2RdRBERnxctG+1bVVuB5bCk
+IrLxt1lMjpjFR6iJbWKPW2MIi1yHtcvI35SAVQ==
+</ds:SignatureValue>
+        <ds:KeyInfo Id="Certificatea20eee52-de4c-45e2-9d1f-4e9d7dfa8246">
+          <ds:X509Data>
+            <ds:X509Certificate>MIIMADCCCeigAwIBAgIEEPZxzzANBgkqhkiG9w0BAQsFADCBmTELMAkGA1UEBhMCRUMxHTAbBgNV
+BAoMFFNFQ1VSSVRZIERBVEEgUy5BLiAyMTAwLgYDVQQLDCdFTlRJREFEIERFIENFUlRJRklDQUNJ
+T04gREUgSU5GT1JNQUNJT04xOTA3BgNVBAMMMEFVVE9SSURBRCBERSBDRVJUSUZJQ0FDSU9OIFNV
+QkNBLTIgU0VDVVJJVFkgREFUQTAeFw0yMzA1MTIyMjQ3MTRaFw0yNjA1MTEyMjQ3MTRaMIGdMSYw
+JAYDVQQDDB1NQVJJQSBGRVJOQURBIEFHVUlOQUdBIFJPTUVSTzEVMBMGA1UEBRMMMTIwNTIzMTc1
+NjQ2MTAwLgYDVQQLDCdFTlRJREFEIERFIENFUlRJRklDQUNJT04gREUgSU5GT1JNQUNJT04xHTAb
+BgNVBAoMFFNFQ1VSSVRZIERBVEEgUy5BLiAyMQswCQYDVQQGEwJFQzCCASIwDQYJKoZIhvcNAQEB
+BQADggEPADCCAQoCggEBALMhPwHjW5f0hhQ0ZEfokliMXHrRwJ0zAsYJhNOeDlfe+EtvQ0j2iuw/
+YXt6jcqGoNtIpoAsTSdvEQAyTTVaGvIsYS22fbNvXG+HIa8prKLeLS5U0Tes3UAVK0M6ftfiSnK6
+o19Z0vG1QPSupfZPVLc4qzB2wDNdgBUNjU3D6u+6/B5A54BxZSOoSRPK+LQmlWtzeI1rjiqdCpo5
+mJu1kbMQElSOCvBnl3WLLJCEZOGUcDAG2lETT8LADc5MIDijnejPBoveO0VHFNPONLiiD75th8pT
+KAYgz8PMe34O5ILLh4UGw7uwhU4f/62loIKl7592VUooHyswtoUWS8ww1QkCAwEAAaOCB0gwggdE
+MAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUjLrKEVd4JYAdawpLVb+NrmLdvY8wWQYIKwYBBQUH
+AQEETTBLMEkGCCsGAQUFBzABhj1odHRwOi8vb2NzcGd3LnNlY3VyaXR5ZGF0YS5uZXQuZWMvZWpi
+Y2EvcHVibGljd2ViL3N0YXR1cy9vY3NwMIHPBgNVHS4EgccwgcQwgcGggb6ggbuGgbhsZGFwOi8v
+bGRhcHNkY2EyLnNlY3VyaXR5ZGF0YS5uZXQuZWMvQ049QVVUT1JJREFEIERFIENFUlRJRklDQUNJ
+T04gU1VCQ0EtMiBTRUNVUklUWSBEQVRBLE9VPUVOVElEQUQgREUgQ0VSVElGSUNBQ0lPTiBERSBJ
+TkZPUk1BQ0lPTixPPVNFQ1VSSVRZIERBVEEgUy5BLiAyLEM9RUM/ZGVsdGFSZXZvY2F0aW9uTGlz
+dD9iYXNlMCQGA1UdEQQdMBuBGW1mLmFndWluYWdhQGNyZWNlcm1lZC5jb20wggEVBgNVHSAEggEM
+MIIBCDBiBgorBgEEAYKmcgIJMFQwUgYIKwYBBQUHAgIwRh5EAEMAZQByAHQAaQBmAGkAYwBhAGQA
+bwAgAGQAZQAgAFIAZQBwAHIAZQBzAGUAbgB0AGEAbgB0AGUAIABMAGUAZwBhAGwwgaEGCisGAQQB
+gqZyAgMwgZIwgY8GCCsGAQUFBwIBFoGCaHR0cHM6Ly93d3cuc2VjdXJpdHlkYXRhLm5ldC5lYy93
+cC1jb250ZW50L2Rvd25sb2Fkcy9Ob3JtYXRpdmFzL1BfZGVfQ2VydGlmaWNhZG9zL1BvbGl0aWNh
+cyBkZSBDZXJ0aWZpY2FkbyBSZXByZXNlbnRhbnRlIExlZ2FsLnBkZjCCAqIGA1UdHwSCApkwggKV
+MIHloEGgP4Y9aHR0cDovL29jc3Bndy5zZWN1cml0eWRhdGEubmV0LmVjL2VqYmNhL3B1YmxpY3dl
+Yi9zdGF0dXMvb2NzcKKBn6SBnDCBmTE5MDcGA1UEAwwwQVVUT1JJREFEIERFIENFUlRJRklDQUNJ
+T04gU1VCQ0EtMiBTRUNVUklUWSBEQVRBMTAwLgYDVQQLDCdFTlRJREFEIERFIENFUlRJRklDQUNJ
+T04gREUgSU5GT1JNQUNJT04xHTAbBgNVBAoMFFNFQ1VSSVRZIERBVEEgUy5BLiAyMQswCQYDVQQG
+EwJFQzCBx6CBxKCBwYaBvmxkYXA6Ly9sZGFwc2RjYTIuc2VjdXJpdHlkYXRhLm5ldC5lYy9DTj1B
+VVRPUklEQUQgREUgQ0VSVElGSUNBQ0lPTiBTVUJDQS0yIFNFQ1VSSVRZIERBVEEsT1U9RU5USURB
+RCBERSBDRVJUSUZJQ0FDSU9OIERFIElORk9STUFDSU9OLE89U0VDVVJJVFkgREFUQSBTLkEuIDIs
+Qz1FQz9jZXJ0aWZpY2F0ZVJldm9jYXRpb25MaXN0P2Jhc2UwgeCggd2ggdqGgddodHRwczovL3Bv
+cnRhbC1vcGVyYWRvcjIuc2VjdXJpdHlkYXRhLm5ldC5lYy9lamJjYS9wdWJsaWN3ZWIvd2ViZGlz
+dC9jZXJ0ZGlzdD9jbWQ9Y3JsJmlzc3Vlcj1DTj1BVVRPUklEQUQgREUgQ0VSVElGSUNBQ0lPTiBT
+VUJDQS0yIFNFQ1VSSVRZIERBVEEsT1U9RU5USURBRCBERSBDRVJUSUZJQ0FDSU9OIERFIElORk9S
+TUFDSU9OLE89U0VDVVJJVFkgREFUQSBTLkEuIDIsQz1FQzAdBgNVHQ4EFgQUJmKf9BQSldeg72gb
+TRZarIAQ9i0wKwYDVR0QBCQwIoAPMjAyMzA1MTIyMjQ3MTRagQ8yMDI2MDUxMTIyNDcxNFowCwYD
+VR0PBAQDAgXgMB8GCisGAQQBgqZyAwUEEQwPR0VSRU5URSBHRU5FUkFMMBoGCisGAQQBgqZyAwEE
+DAwKMTcxNDE2MjU1NzAVBgorBgEEAYKmcgMJBAcMBVFVSVRPMBEGCisGAQQBgqZyAyIEAwwBLjAu
+BgorBgEEAYKmcgMHBCAMHklTTEEgSVNBQkVMQSBONDMyMDUgWSBSSU8gQ09DQTAdBgorBgEEAYKm
+cgMCBA8MDU1BUklBIEZFUk5BREEwHwYKKwYBBAGCpnIDIAQRDA8wMDEwMDIwMDAzOTgzMDAwEwYK
+KwYBBAGCpnIDIQQFDANQRlgwFwYKKwYBBAGCpnIDDAQJDAdFQ1VBRE9SMBgGCisGAQQBgqZyAwME
+CgwIQUdVSU5BR0EwIgYKKwYBBAGCpnIDCgQUDBJDUkVDRVJNRUQgQ0lBIExUREEwHQYKKwYBBAGC
+pnIDCwQPDA0xNzkyNDYzNzY5MDAxMBIGCisGAQQBgqZyAx0EBAwCTm8wFgYKKwYBBAGCpnIDBAQI
+DAZST01FUk8wGgYKKwYBBAGCpnIDCAQMDAowNTIyMjUxNTI5MA0GCSqGSIb3DQEBCwUAA4ICAQAF
+8WDfN8Ssw0vdsplYHz+exZS0fsKClMy2HDPoIPkcFGb1dPKVQil/wSt5BxTXOmZiw2e9IYwneoeI
+dqF6Njc8LjuI02GcOoaLEoEqSDrb67/03SPVAnKgnPEN0a6RyO6hdrNO9orrFEhpcO+w2I8+YM4d
+oIvHF/j14ihm0SictxoBZUuC6rdgo2SZsFubWOpjA03u7vD3IZ++73SAY9oM+1S7bDYpzxTVcS/s
+wNGNDt0VGhvw/6vDhtjimQxNA+mvadc8MnGh4Xvvd+6u3gm2OEcmLEPQng+7UmOyL99ujnFsG3Ws
+PrIFxrcqO2ik0xu5HMfg/u4kzGEbJ2v4C35PdCxjSP3uGC+7HQsQdUcIljjttC9hR9aBFohp+fA9
+Y45cWC6MlsZepPPoYjEi9qB48EFWeywIGXR84wx3EljhH0u3+Wz8dSx57iYD8EMNwck4jP/2pUGD
+mYoAS+420bfhYqWP111+75bEQNV/X3tPAHtmnaoVvvYG+FJ45ySOsGbayiPcBTJOxIWV/d657K5x
+DtH1AFoBVHLfBjGZ61vNS61CJqOHbtyBwHrVIdK8WbHcrg9XcN4sOUQBTPEWO9O5f/2ca6RZkziU
+0pwkMYZZ7F7juhRa/w5OCQs7xJ0YLA8zByEUtAqQm53iNDeJH4bayGzweAsrxtaF8Dpfs34KiA==
+</ds:X509Certificate>
+          </ds:X509Data>
+          <ds:KeyValue>
+            <ds:RSAKeyValue>
+              <ds:Modulus>syE/AeNbl/SGFDRkR+iSWIxcetHAnTMCxgmE054OV974S29DSPaK7D9he3qNyoag20imgCxNJ28R
+ADJNNVoa8ixhLbZ9s29cb4chrymsot4tLlTRN6zdQBUrQzp+1+JKcrqjX1nS8bVA9K6l9k9Utzir
+MHbAM12AFQ2NTcPq77r8HkDngHFlI6hJE8r4tCaVa3N4jWuOKp0KmjmYm7WRsxASVI4K8GeXdYss
+kIRk4ZRwMAbaURNPwsANzkwgOKOd6M8Gi947RUcU0840uKIPvm2HylMoBiDPw8x7fg7kgsuHhQbD
+u7CFTh//raWggqXvn3ZVSigfKzC2hRZLzDDVCQ==
+</ds:Modulus>
+              <ds:Exponent>AQAB
+</ds:Exponent>
+            </ds:RSAKeyValue>
+          </ds:KeyValue>
+        </ds:KeyInfo>
+        <ds:Object>
+          <etsi:QualifyingProperties xmlns:etsi="http://uri.etsi.org/01903/v1.3.2#" Target="#Signatureb19264e8-bcfa-4f30-87eb-c7177f2779ac" Id="Signatureb19264e8-bcfa-4f30-87eb-c7177f2779ac">
+            <etsi:SignedProperties Id="Signatureb19264e8-bcfa-4f30-87eb-c7177f2779ac-SignedPropertiesID58405e9f-64fe-4d19-83e1-cfd65907a87b">
+              <etsi:SignedSignatureProperties>
+                <etsi:SigningCertificate>
+                  <etsi:Cert>
+                    <etsi:CertDigest>
+                      <ds:DigestValue>/P77PxiBcV/mLOifxH79l93Nfng=</ds:DigestValue>
+                    </etsi:CertDigest>
+                    <etsi:IssuerSerial>
+                      <ds:X509IssuerName>CN=AUTORIDAD DE CERTIFICACION SUBCA-2 SECURITY DATA,OU=ENTIDAD DE CERTIFICACION DE INFORMACION,O=SECURITY DATA S.A. 2,C=EC</ds:X509IssuerName>
+                      <ds:X509SerialNumber>284586447</ds:X509SerialNumber>
+                    </etsi:IssuerSerial>
+                  </etsi:Cert>
+                </etsi:SigningCertificate>
+              </etsi:SignedSignatureProperties>
+              <etsi:SignedDataObjectProperties>
+                <etsi:DataObjectFormat ObjectReference="#Reference-ID-86ce812b-2398-493c-8b29-055bc2be3a01">
+                  <etsi:Description>contenido comprobante</etsi:Description>
+                  <etsi:MimeType>text/xml</etsi:MimeType>
+                </etsi:DataObjectFormat>
+              </etsi:SignedDataObjectProperties>
+            </etsi:SignedProperties>
+          </etsi:QualifyingProperties>
+        </ds:Object>
+      </ds:Signature>
+    </factura>
+  </comprobante>
+</autorizacion>

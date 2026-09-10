@@ -1,8 +1,20 @@
 /**
  * S115-E · INSTRUMENTO 22 — EL EMAIL DEL DOCUMENTO ES DEL RECEPTOR, NUNCA DEL EMISOR.
  *
- * 🔴 EL DEFECTO MÁS COMÚN DEL RIDE, y visto en una factura real: el campo del correo
- * trae **el de la propia empresa que emite**. No falla nada — el SRI autoriza igual, el
+ * 🔴 EL DEFECTO MÁS COMÚN DEL RIDE, Y HAY CORPUS DE PRODUCCIÓN DE LOS DOS LADOS.
+ * Medido sobre dos XML autorizados, en `docs/relevamientos/xml-sri/`:
+ *
+ *   CRECERMED  `<campoAdicional nombre="E-mail">user4@facturacioncrecermed.com`  🔴 EMISOR
+ *   SUSHICORP  `<campoAdicional nombre="Email">guillo381@gmail.com`             ✅ receptor
+ *
+ * *Una factura real de producción, de una clínica, con el correo de su propio sistema de
+ * facturación en el campo del comprador.* El SRI la autorizó igual. El cliente no la
+ * recibe, reclama, y desde adentro todo se ve bien.
+ *
+ * ⚠️ Y ni el NOMBRE del campo es estable: `E-mail` en una, `Email` en la otra. Un lector
+ * que busque uno solo no ve al otro.
+ *
+ * El campo del correo trae **el de la propia empresa que emite**. No falla nada — el SRI autoriza igual, el
  * PDF se genera igual — y **el cliente nunca recibe su factura**. Después reclama, y
  * desde adentro todo se ve bien: el documento existe, está autorizado, y «se envió».
  *
@@ -96,6 +108,38 @@ await correr('i22 · el email del documento es del receptor, nunca del emisor', 
   const resto = uno(`select count(*)::int as n from documentos_fiscales where email in ('${SONDA}','familia.gomez@gmail.com')`).n;
   r.dato('residuo', `${resto}`);
   if (resto !== 0) rojo(`el instrumento dejó ${resto} documento(s).`);
+
+  // ── (d bis) EL CORPUS REAL: los dos XML autorizados ─────────────────────
+  /* El detector se prueba contra facturas de verdad, no sólo contra lo plantado: una
+     que tiene el defecto y otra que no. *Un detector que sólo se vio cazar sondas
+     propias no probó que reconoce el caso del mundo.* */
+  const { readdirSync, readFileSync, existsSync } = await import('node:fs');
+  const DIR = '/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace/docs/relevamientos/xml-sri';
+  if (existsSync(DIR)) {
+    const desesc = (t) => t.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+    let conDefecto = 0, sinDefecto = 0;
+    r.di('');
+    for (const f of readdirSync(DIR).filter((x) => x.endsWith('.xml'))) {
+      const bruto = readFileSync(`${DIR}/${f}`, 'utf8');
+      const m = /<comprobante>([\s\S]*?)<\/comprobante>/.exec(bruto);
+      const comp = m ? desesc(m[1]) : bruto;
+      const razon = (/<razonSocial>([^<]*)/.exec(comp) ?? [])[1] ?? '';
+      // El nombre del campo NO es estable: E-mail / Email / correo.
+      const correos = [...comp.matchAll(/<campoAdicional nombre="([^"]*[Mm]ail[^"]*)"[^>]*>([^<]*)</g)];
+      for (const [, nombre, valor] of correos) {
+        const dominio = String(valor).split('@')[1]?.toLowerCase() ?? '';
+        const marca = razon.toLowerCase().replace(/[^a-z]/g, '').slice(0, 6);
+        const esDelEmisor = marca.length >= 4 && dominio.replace(/[^a-z]/g, '').includes(marca);
+        if (esDelEmisor) conDefecto++; else sinDefecto++;
+        r.dato(`  ${f.slice(0, 20)} · "${nombre}"`, `${valor} → ${esDelEmisor ? '🔴 DEL EMISOR' : 'del receptor ✓'}`);
+      }
+    }
+    r.dato('corpus real', `${conDefecto} con el defecto · ${sinDefecto} sin él`);
+    if (conDefecto === 0 || sinDefecto === 0)
+      r.di('      ⚠️ el corpus tiene un solo lado: el detector no se pudo contrastar contra los dos casos reales.');
+    else
+      r.di('      ⇒ el detector distingue el caso REAL del defecto del caso REAL correcto.');
+  }
 
   // ── (e) VEREDICTO ────────────────────────────────────────────────────────
   if (delEmisor.length)
