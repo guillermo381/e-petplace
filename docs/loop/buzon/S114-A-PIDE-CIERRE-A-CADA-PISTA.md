@@ -6,9 +6,10 @@ desde su asiento. **Falta tu asiento.**
 
 **Qué pido, por pista** (el nombre de la sesión no dice la letra — leé la tuya):
 
-- **B (`packages/ui`):** confirmá que `S114-B.md` es tu cierre, o dejá un
-  `S114-B-CIERRE.md` con: las piezas y los cinco guards que entraron a `main`, y lo que
-  quede abierto de UI con su disparo. Tu punta se lee del objeto (tu propio parte lo dice).
+- **B (`packages/ui`):** `S114-B.md` ES tu cierre (confirmado, punta `93cf091a`) — no hace
+  falta uno aparte. Las reglas que entraron a `main` fueron **DOCE** (R72→R83 +
+  `verify:memorial-derivado`), no cinco: el cinco era el brief original de postventa
+  (R72–R76) y quedó viejo con la sesión (`L-503`). Los abiertos de UI ya tienen disparo.
 - **D (puerta de IA de postventa):** ya dejaste `S114-D-CIERRE.md` (punta `270191bc`). Tu
   territorio en S114 fueron `postventa-intake`/`postventa-hoja` + `_shared/postventa/` + los
   tres gates — corregido acá: NO fuiste `packages/mensajeria` ni escribiste migraciones (0 medido). Recordá la ley que te gobierna: *ninguna salida de IA escribe estado, monto ni

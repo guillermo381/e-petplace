@@ -105,7 +105,7 @@ puede ser verdadera y la conclusión falsa si el instrumento no puede producir s
 
 ### La puerta de IA de postventa (D)
 - **El modelo redacta, nunca decide.** `postventa-intake` (clasifica el reclamo de la
-  familia) y `postventa-hoja` (arma la hoja del caso) sobre `_shared/postventa/`, con sus
+  familia) y `postventa-hoja` (PROPONE una resolución con su porqué, marcada como propuesta — la casa decide y queda `decidido_por`) sobre `_shared/postventa/`, con sus
   tres gates. **Ninguna salida de IA escribe estado, monto ni transición** — una regla
   determinística decide que algo exista; el modelo sólo pone palabras. D no escribió una
   sola migración en S114 (medido: `git diff --name-only e516a089..270191bc` → 0 en
@@ -230,6 +230,12 @@ tercera. `main` **`45029367`**.
   antes de empujar — mi error del merge de F, declarado) · `L-530` (un 2xx con wamid del
   transporte es «lo tomó», jamás «llegó»; la demora puede ser larga).
 - **Fichas S114 depositadas, una c/u:** `D-1050`…`D-1058`.
+- **Partes de cierre de las seis pistas en `main` (barrido L-217):** `S114-B.md` (B, es su
+  cierre) · `S114-C.md` + `S114-C-HALLAZGOS-DE-CAMINAR.md` (C) · `S114-D-CIERRE.md` (D) ·
+  `S114-E-CIERRE.md` (E) · `S114-F-CIERRE.md` (F). Los tres últimos vivían sólo en sus
+  ramas y se trajeron **por contenido** (no merge de rama, para no arrastrar código —
+  `L-529`); la corrección la trajo D citando el precedente caro de S92 (seis actas que
+  quedaron fuera del canon por ser la última acción de cada pista).
 - **Higiene de otras ramas (S113, no S114):** se deduplicó `L-517` (dos copias idénticas) y
   se **consolidó `D-1047`** (dos fichas distintas con el mismo número — la misma deuda filada
   por D y E en paralelo, ambas con `pnpm proximo:ficha`; la colisión que `D-1003` cura pero
