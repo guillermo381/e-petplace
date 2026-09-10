@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════
-// EL DOCUMENTO CANÓNICO v1 — la fuente de la que sale el XML
+// EL DOCUMENTO CANÓNICO v2 — la fuente de la que sale el XML
 //
 // 🔴 SE PERSISTE. `documentos_fiscales.canonico` guarda esto tal cual se emitió,
 //    con su `canonico_version`. *Un documento cuyo contenido hay que reconstruir
@@ -7,7 +7,30 @@
 //    entonces el precio, el nombre del servicio y la tarifa cambiaron.*
 // ═══════════════════════════════════════════════════════════════════════════
 
-export const CANONICO_VERSION = 1;
+export const CANONICO_VERSION = 2;   // v2: códigos del SRI + fechaEmision dd/mm/aaaa
+
+/**
+ * Los catálogos traducidos, tal como salen de la base.
+ *
+ * 🔴 Entran como ARGUMENTO y no se leen acá adentro: el canónico es una función
+ *    pura de lo que recibe, y por eso se puede reconstruir en un test sin base.
+ *    *Y falla si le falta una entrada — jamás cae a un default: un
+ *    `codigoPorcentaje` inventado produce un XML que el SRI rechaza, y el rechazo
+ *    aparece semanas después, en otro sistema, sin decir de dónde vino.*
+ */
+export interface CatalogosSri {
+  /** codigo_iva de la casa → { codigo, codigoPorcentaje } del SRI */
+  tasas: Record<string, { codigo_sri: string; codigo_porcentaje_sri: string }>;
+  /** tipo_identificacion de la casa → codigo del SRI */
+  identificacion: Record<string, string>;
+}
+
+/** `YYYY-MM-DD` → `dd/mm/aaaa`, que es como el SRI quiere la fecha en el XML. */
+export function fechaSri(iso: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  if (!m) throw new Error(`fecha_emision_invalida: ${iso}`);
+  return `${m[3]}/${m[2]}/${m[1]}`;
+}
 
 export interface EmisorCanonico {
   ruc: string;
@@ -24,6 +47,8 @@ export interface EmisorCanonico {
 
 export interface ReceptorCanonico {
   tipo_identificacion: 'ruc' | 'cedula' | 'pasaporte' | 'consumidor_final';
+  /** El código del SRI (05|04|06|07). Se CONGELA acá: el catálogo puede cambiar. */
+  tipo_identificacion_sri?: string;
   identificacion: string;
   razon_social: string;
   direccion: string | null;
@@ -40,11 +65,17 @@ export interface ItemCanonico {
   tarifa_pct: number;
   base: number;
   valor_iva: number;
+  /** Los dos códigos del SRI, traducidos del catálogo y congelados en el documento. */
+  codigo_sri?: string;              // tipo de impuesto: 2 = IVA
+  codigo_porcentaje_sri?: string;   // tarifa: 0 = 0 % · 4 = 15 % · 5 = 5 %
 }
 
 export interface DocumentoCanonico {
   version: number;
   tipo: 'factura' | 'nota_credito';
+  /** La fecha del documento, en los dos formatos: el nuestro y el del SRI. */
+  fecha_emision: string;        // ISO, de la FILA (zona del emisor), no del reloj
+  fecha_emision_sri: string;    // dd/mm/aaaa — lo que va en <fechaEmision>
   emisor: EmisorCanonico;
   receptor: ReceptorCanonico;
   items: ItemCanonico[];
@@ -96,15 +127,34 @@ export function subtotalesPorTarifa(items: ItemCanonico[]) {
 
 export function construirCanonico(args: {
   tipo: 'factura' | 'nota_credito';
+  fecha_emision: string;              // ISO, de la fila
   emisor: EmisorCanonico;
   receptor: ReceptorCanonico;
   items: ItemCanonico[];
+  catalogos: CatalogosSri;
   descuento_total?: number;
   rucProveedorFacturacion?: string | null;
   razonSocialCuentaComercial?: string | null;
   referencias: DocumentoCanonico['referencias'];
 }): DocumentoCanonico {
-  const grupos = subtotalesPorTarifa(args.items);
+  /* ── LA TRADUCCIÓN, FAIL-CLOSED ──────────────────────────────────────────
+     🔴 Medido en el simulador antes de esto: escribía nuestro `EC_IVA_15`
+     dentro de `<codigoPorcentaje>` y nuestro `cedula` en
+     `<tipoIdentificacionComprador>`. *El XML se armaba igual y el simulador lo
+     aceptaba: el rechazo sólo aparecía el día que del otro lado hubiera un web
+     service de verdad.* Por eso acá se LANZA en vez de caer a un default —
+     un código inventado produce el mismo XML plausible que el defecto original. */
+  const items: ItemCanonico[] = args.items.map((it) => {
+    const t = args.catalogos.tasas[it.codigo_iva];
+    if (!t) throw new Error(`tasa_sin_codigo_sri: ${it.codigo_iva}`);
+    return { ...it, codigo_sri: t.codigo_sri, codigo_porcentaje_sri: t.codigo_porcentaje_sri };
+  });
+
+  const idSri = args.catalogos.identificacion[args.receptor.tipo_identificacion];
+  if (!idSri) throw new Error(`identificacion_sin_codigo_sri: ${args.receptor.tipo_identificacion}`);
+  const receptor: ReceptorCanonico = { ...args.receptor, tipo_identificacion_sri: idSri };
+
+  const grupos = subtotalesPorTarifa(items);
   const base = grupos.reduce((a, g) => a + g.base, 0);
   const iva = grupos.reduce((a, g) => a + g.valor_iva, 0);
 
@@ -120,9 +170,11 @@ export function construirCanonico(args: {
   return {
     version: CANONICO_VERSION,
     tipo: args.tipo,
+    fecha_emision: args.fecha_emision,
+    fecha_emision_sri: fechaSri(args.fecha_emision),
     emisor: args.emisor,
-    receptor: args.receptor,
-    items: args.items,
+    receptor,
+    items,
     subtotales_por_tarifa: grupos,
     descuento_total: args.descuento_total ?? 0,
     total: Math.round((base + iva) * 100) / 100,

@@ -28,13 +28,13 @@ export function xmlDesdeCanonico(c: DocumentoCanonico, claveAcceso: string): str
       <precioUnitario>${i.precio_unitario.toFixed(2)}</precioUnitario>
       <descuento>${i.descuento.toFixed(2)}</descuento>
       <precioTotalSinImpuesto>${i.base.toFixed(2)}</precioTotalSinImpuesto>
-      <impuesto><codigoPorcentaje>${esc(i.codigo_iva)}</codigoPorcentaje>` +
+      <impuesto><codigo>${esc(i.codigo_sri ?? '')}</codigo><codigoPorcentaje>${esc(i.codigo_porcentaje_sri ?? '')}</codigoPorcentaje>` +
       `<tarifa>${i.tarifa_pct}</tarifa><baseImponible>${i.base.toFixed(2)}</baseImponible>` +
       `<valor>${i.valor_iva.toFixed(2)}</valor></impuesto>
     </detalle>`).join('');
 
   const grupos = c.subtotales_por_tarifa.map((g) =>
-    `<totalImpuesto><codigoPorcentaje>${esc(g.codigo_iva)}</codigoPorcentaje>` +
+    `<totalImpuesto><codigo>${esc(c.items.find((i) => i.codigo_iva === g.codigo_iva)?.codigo_sri ?? '')}</codigo><codigoPorcentaje>${esc(c.items.find((i) => i.codigo_iva === g.codigo_iva)?.codigo_porcentaje_sri ?? '')}</codigoPorcentaje>` +
     `<baseImponible>${g.base.toFixed(2)}</baseImponible><valor>${g.valor_iva.toFixed(2)}</valor></totalImpuesto>`
   ).join('');
 
@@ -52,7 +52,8 @@ export function xmlDesdeCanonico(c: DocumentoCanonico, claveAcceso: string): str
   </infoTributaria>
   <infoComprobante>
     <obligadoContabilidad>${c.emisor.obligado_contabilidad ? 'SI' : 'NO'}</obligadoContabilidad>
-    <tipoIdentificacionComprador>${esc(c.receptor.tipo_identificacion)}</tipoIdentificacionComprador>
+    <tipoIdentificacionComprador>${esc(c.receptor.tipo_identificacion_sri ?? '')}</tipoIdentificacionComprador>
+    <fechaEmision>${esc(c.fecha_emision_sri)}</fechaEmision>
     <razonSocialComprador>${esc(c.receptor.razon_social)}</razonSocialComprador>
     <identificacionComprador>${esc(c.receptor.identificacion)}</identificacionComprador>
     <totalDescuento>${c.descuento_total.toFixed(2)}</totalDescuento>

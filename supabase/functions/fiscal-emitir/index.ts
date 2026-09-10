@@ -12,7 +12,8 @@ import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { resolverPuerto } from '../_shared/facturacion/mod.ts';
 import { reconstruirClaveAcceso, ambienteTexto } from '../_shared/facturacion/clave_acceso.ts';
 import { construirCanonico, CONSUMIDOR_FINAL, CANONICO_VERSION,
-         type ItemCanonico, type ReceptorCanonico } from '../_shared/facturacion/canonico.ts';
+         type ItemCanonico, type ReceptorCanonico,
+         type CatalogosSri } from '../_shared/facturacion/canonico.ts';
 
 const json = (b: unknown, s = 200) => Response.json(b, { status: s });
 
@@ -33,6 +34,27 @@ Deno.serve(async (req) => {
 
   const { data: emisor } = await db.from('fiscal_emisor').select('*').single();
   if (!emisor) return json({ ok: false, codigo: 'sin_emisor_configurado' }, 409);
+
+  /* ── LOS CÓDIGOS DEL SRI SON DATO ─────────────────────────────────────────
+     Se leen UNA vez por corrida y se pasan al canónico, que los CONGELA en el
+     documento. *Un documento que para reimprimirse tuviera que volver a
+     consultar el catálogo no se puede reimprimir dos años después: para
+     entonces la tarifa cambió.* Fail-closed: sin catálogo no se emite. */
+  const [{ data: tasasRows }, { data: identRows }] = await Promise.all([
+    db.from('cat_tasas_impuesto')
+      .select('codigo,codigo_sri,codigo_porcentaje_sri').eq('activo', true),
+    db.from('cat_identificacion_sri')
+      .select('codigo,codigo_sri').eq('country_code', 'EC').eq('activo', true),
+  ]);
+  if (!tasasRows?.length || !identRows?.length) {
+    return json({ ok: false, codigo: 'catalogo_sri_vacio' }, 409);
+  }
+  const catalogos: CatalogosSri = {
+    tasas: Object.fromEntries(tasasRows
+      .filter((t) => t.codigo_sri && t.codigo_porcentaje_sri)
+      .map((t) => [t.codigo, { codigo_sri: t.codigo_sri!, codigo_porcentaje_sri: t.codigo_porcentaje_sri! }])),
+    identificacion: Object.fromEntries(identRows.map((i) => [i.codigo, i.codigo_sri])),
+  };
 
   const { data: pendientes } = await db.from('documentos_fiscales')
     .select('*').eq('estado', 'borrador').eq('sentido', 'emitido').limit(20);
@@ -95,7 +117,7 @@ Deno.serve(async (req) => {
       }
 
       const canonico = construirCanonico({
-        tipo: d.tipo, emisor, receptor, items,
+        tipo: d.tipo, fecha_emision: d.fecha_emision, emisor, receptor, items, catalogos,
         razonSocialCuentaComercial: nombreCuenta,
         referencias: { pago_intento_id: d.pago_intento_id, origen_tipo: lineas[0]?.origen_tipo ?? null,
                        origen_id: lineas[0]?.origen_id ?? null },
