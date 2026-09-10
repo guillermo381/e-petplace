@@ -274,8 +274,10 @@ export {
 export {
   obtenerCitasActivasMascota,
   obtenerCitasActivasHogar,
+  obtenerHistorialCitasMascota,
   type CitaActivaMascota,
   type CitaActivaHogar,
+  type CitaHistorialMascota,
 } from './wrappers/citasMascota';
 export { mascotasElegibles, type EstadoVidaMascota } from './wrappers/_mascotas-elegibles';
 
@@ -2010,8 +2012,10 @@ export {
   ETAPAS_EN_ESCALERA,
   type EtapaCaso, type FinalAlterno, type AsientoCaso, type MensajeCaso,
   type CasoEnBandeja, type CodigoAbrirCaso, type CasoDetalle, type ServicioSinCerrar,
+  type CodigoReconocer, type ErrorReconocer,
 } from './wrappers/postventa-casos';
 
 // S114 · A4 · el saldo e-PetPlace (F6). Un lector; acreditar/consumir son del
 // motor, sin EXECUTE para authenticated (D-314).
-export { obtenerMiSaldo } from './wrappers/postventa-saldo';
+export { obtenerMiSaldo, aplicarSaldoACompra } from './wrappers/postventa-saldo';
+export type { ResultadoSaldoACompra, CodigoSaldoACompra } from './wrappers/postventa-saldo';

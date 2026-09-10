@@ -83,16 +83,22 @@ Deno.serve(async (req) => {
   );
 
   // ① Lo que la DB YA marcó para transporte por WhatsApp.
-  const { data: pendientes, error: errorSel } = await supabase
-    .from('notificacion_intencion')
-    .select('id, tipo, destinatario_user_id, datos, resuelto_como')
+  // S114 multicanal: la cola es la tabla de ENTREGAS (una intención, N canales);
+  // este edge ve las de 'whatsapp'. Se aplana a la forma de siempre + `entregaId`,
+  // así el resto del código no cambia y sólo el MARCADO apunta a la entrega.
+  const { data: pendientesRaw, error: errorSel } = await supabase
+    .from('notificacion_entrega')
+    .select('id, notificacion_intencion!inner(id, tipo, destinatario_user_id, datos, resuelto_como)')
+    .eq('canal', 'whatsapp')
     .eq('estado', 'encolada')
-    .eq('resuelto_como->>despacho', 'para_transporte')
-    .eq('resuelto_como->>canal_elegido', 'whatsapp')
     .limit(50);
   if (errorSel) {
     return Response.json({ error: 'lectura_fallo', causa: errorSel.message }, { status: 500 });
   }
+  const pendientes = (pendientesRaw ?? []).map((e) => {
+    const n = (e as { notificacion_intencion: Record<string, unknown> }).notificacion_intencion;
+    return { entregaId: (e as { id: string }).id, ...n } as Record<string, unknown> & { entregaId: string; id: string; destinatario_user_id: string };
+  });
 
   // ② El destinatario: su teléfono. Se mide la FORMA antes de intentar nada,
   //    porque un lote donde la mitad de los números no son E.164 tiene que
@@ -195,15 +201,29 @@ Deno.serve(async (req) => {
     const wabaAlcanzables = [];
     for (const id of idsWaba) {
       const rW = await fetch(
-        `https://graph.facebook.com/v21.0/${id}?fields=name,timezone_id`, { headers: cab });
+        `https://graph.facebook.com/v21.0/${id}?fields=name,timezone_id,messaging_limit_tier`, { headers: cab });
       const cW = await rW.json().catch(() => ({}));
       const rN = await fetch(
         `https://graph.facebook.com/v21.0/${id}/phone_numbers` +
-          `?fields=display_phone_number,verified_name&limit=5`, { headers: cab });
+          `?fields=id,display_phone_number,verified_name&limit=5`, { headers: cab });
       const cN = await rN.json().catch(() => ({}));
+      /* 🔴 ¿Pudimos ENUMERAR los números de este WABA? Un fetch que falló y una
+         lista vacía NO son «no coincide»: son «no sé». Se guarda aparte para que
+         par_coherente no confunda una lista que no se llenó con una que no tiene
+         el número (founder, 8-sep). */
+      const numerosEnumeradosOk = rN.ok && Array.isArray(cN?.data);
+      const numeroIds: string[] = numerosEnumeradosOk
+        ? (cN.data as Record<string, unknown>[]).map((n) => String(n.id ?? '')).filter(Boolean)
+        : [];
       wabaAlcanzables.push({
         id,
         name: cW?.name ?? null,
+        /* 🔴 S114-A (pedido de E): el TECHO de mensajería del WABA. Entre 1K y 2K
+           hay ~USD 22,60/día de diferencia, y 2.000 no es un tier estándar de
+           Meta — hay que LEERLO, no suponerlo. Se lee del WABA configurado. */
+        messaging_limit_tier: (cW as Record<string, unknown>)?.messaging_limit_tier ?? null,
+        numeros_enumerados_ok: numerosEnumeradosOk,
+        numero_ids: numeroIds,
         /* 🔴 El discriminador que el founder pidió, y sale del DATO:
            el prefijo del número dice el país. `+593` es Ecuador, `+1` no. */
         numeros: Array.isArray(cN?.data)
@@ -298,6 +318,55 @@ Deno.serve(async (req) => {
     const enUtility = plantillas.filter((t) => t.category === 'UTILITY').length;
     const aprobadas = plantillas.filter((t) => t.status === 'APPROVED').length;
 
+    /* 🔴 EL PAR — ¿el WABA del que LEEMOS plantillas es dueño del número desde
+       el que ENVIAMOS? (pedido de E, firma founder 8-sep). TRISTATE, no boolean:
+       un includes() sobre lista vacía da false SIEMPRE, y eso haría publicar
+       «apuntan a cuentas distintas» sobre una lista que nunca se llenó. Se
+       distingue «no pude enumerar» (null) de «enumeré y el número no está» (false).
+         · null  → no se puede concluir (waba configurado no alcanzable, o no se
+                   pudieron enumerar sus números): NO afirmar incoherencia.
+         · true  → el número configurado ESTÁ entre los del WABA configurado.
+         · false → se enumeraron números y el configurado NO está: cuentas distintas. */
+    /* 🔴 EL WABA CONFIGURADO, DIRECTO — NO por el `for` sobre waba_alcanzables
+       (L-318, corrección de E): un token de usuario de sistema puede no listar
+       `target_ids` en sus scopes granulares, así que ese array vuelve VACÍO y
+       todo lo que colgaba del bucle no corría nunca. Pero el configurado SÍ es
+       alcanzable directo: `/{waba}/message_templates` responde 200 con las 10
+       plantillas (http_plantillas abajo). De ACÁ salen el techo y el par. */
+    const rWConf = await fetch(
+      `https://graph.facebook.com/v21.0/${waba}?fields=name,messaging_limit_tier`, { headers: cab });
+    const cWConf = await rWConf.json().catch(() => ({})) as Record<string, unknown>;
+    /* 🔴 EL TIER vive en el NÚMERO, no en el WABA (medición de E: el WABA devuelve
+       null). Se lee de /{phoneId}; se deja el del WABA como fallback por si Meta
+       lo mueve. Entre 1K y 2K hay ~USD 22,60/día. */
+    const rTier = await fetch(
+      `https://graph.facebook.com/v21.0/${phoneId}?fields=messaging_limit_tier`, { headers: cab });
+    const cTier = await rTier.json().catch(() => ({})) as Record<string, unknown>;
+    const messagingLimitTier = cTier?.messaging_limit_tier ?? cWConf?.messaging_limit_tier ?? null;
+
+    const rNConf = await fetch(
+      `https://graph.facebook.com/v21.0/${waba}/phone_numbers` +
+        `?fields=id,display_phone_number,verified_name&limit=10`, { headers: cab });
+    const cNConf = await rNConf.json().catch(() => ({}));
+    const numerosConfOk = rNConf.ok && Array.isArray((cNConf as { data?: unknown })?.data);
+    const numeroIdsConf: string[] = numerosConfOk
+      ? ((cNConf as { data: Record<string, unknown>[] }).data).map((n) => String(n.id ?? '')).filter(Boolean)
+      : [];
+
+    // El par, computado sobre el fetch DIRECTO (no el bucle vacío). Tristate:
+    // null = no se puede concluir · true/false = enumeré y (está / no está).
+    let parCoherente: boolean | null;
+    let parMotivo: string;
+    if (!numerosConfOk) {
+      parCoherente = null; parMotivo = 'no_se_pudieron_enumerar_los_numeros';
+    } else if (numeroIdsConf.length === 0) {
+      parCoherente = null; parMotivo = 'el_waba_no_declara_numeros';
+    } else if (numeroIdsConf.includes(phoneId)) {
+      parCoherente = true; parMotivo = 'el_numero_pertenece_al_waba_configurado';
+    } else {
+      parCoherente = false; parMotivo = 'el_numero_no_esta_en_el_waba_configurado';
+    }
+
     return Response.json({
       modo: 'verificar',
       token_forma: forma,
@@ -312,7 +381,16 @@ Deno.serve(async (req) => {
          `false` con token válido, el problema NO es el token: es a qué
          apunta. *Es la diferencia entre «no puedo» y «estoy mirando otra
          cosa», y hasta ahora no se podía distinguir.* */
-      waba_configurado_alcanzable: idsWaba.includes(waba),
+      // 🔴 alcanzable = el fetch DIRECTO al WABA configurado respondió (o sus
+      // plantillas: rT). El idsWaba del bucle puede estar vacío por scopes.
+      waba_configurado_alcanzable: rWConf.ok || rT.status === 200,
+      /* 🔴 EL PAR, para el gate de E: true/false SÓLO cuando se pudo enumerar;
+         null cuando no se puede concluir (lista vacía ≠ no coincide). */
+      par_coherente: parCoherente,
+      par_coherente_motivo: parMotivo,
+      /* 🔴 EL TECHO del WABA configurado, leído directo (pedido de E; antes
+         colgaba del bucle vacío y nunca corría). 1K vs 2K = ~USD 22,60/día. */
+      messaging_limit_tier: messagingLimitTier,
       http_debug_token: rD.status,
       http_plantillas: rT.status,
       http_numero: rP.status,
@@ -388,16 +466,38 @@ Deno.serve(async (req) => {
     // La plantilla la dice la DB (`resuelto_como`), jamás esta función: el
     // nombre y el idioma de la plantilla son dato de negocio aprobado por
     // Meta, y hardcodearlos acá sería la segunda verdad.
-    const plantilla = (i.resuelto_como as Record<string, unknown> | null)?.plantilla;
-    const idioma = (i.resuelto_como as Record<string, unknown> | null)?.plantilla_idioma;
+    const rc = i.resuelto_como as Record<string, unknown> | null;
+    const plantilla = rc?.plantilla;
+    const idioma = rc?.plantilla_idioma;
     if (typeof plantilla !== 'string' || typeof idioma !== 'string') {
       await supabase
-        .from('notificacion_intencion')
-        .update({ estado: 'fallida', motivo: 'sin_plantilla_resuelta' })
-        .eq('id', i.id);
+        .from('notificacion_entrega')
+        .update({ estado: 'fallida', motivo: 'sin_plantilla_resuelta', cerrado_en: new Date().toISOString() })
+        .eq('id', i.entregaId);
       fallidas++;
       continue;
     }
+
+    /* 🔴 EL ENSAMBLADO — las variables {{n}} se armaron en registrar_intencion y
+       viven en resuelto_como. Si el ensamblado NO está completo, la intención
+       REBOTA: NO se manda con un hueco. Meta acepta un mensaje mal armado sin
+       quejarse y lo lee la familia (firma founder ③). Un tipo con plantilla pero
+       sin variables ensambladas (p.ej. pedido_confirmado, que pide 5 y no tiene
+       spec) cae acá — no se manda mudo. */
+    const ensCOK = rc?.ensamblado_completo;
+    const vars = Array.isArray(rc?.variables) ? rc.variables as Array<{ n: number; valor: string | null }> : null;
+    if (ensCOK !== true || vars === null) {
+      await supabase
+        .from('notificacion_entrega')
+        .update({ estado: 'fallida', motivo: `ensamblado_incompleto:${JSON.stringify(rc?.ensamblado_faltante ?? null)}`, cerrado_en: new Date().toISOString() })
+        .eq('id', i.entregaId);
+      fallidas++;
+      continue;
+    }
+    // los parámetros del BODY, en orden {{1}}{{2}}{{3}}…
+    const parametros = [...vars]
+      .sort((a, b) => a.n - b.n)
+      .map((v) => ({ type: 'text', text: String(v.valor) }));
 
     const res = await fetch(URL_META, {
       method: 'POST',
@@ -406,12 +506,25 @@ Deno.serve(async (req) => {
         messaging_product: 'whatsapp',
         to: tel,
         type: 'template',
-        template: { name: plantilla, language: { code: idioma } },
+        template: {
+          name: plantilla,
+          language: { code: idioma },
+          components: [{ type: 'body', parameters: parametros }],
+        },
       }),
     });
 
     if (res.ok) {
-      await supabase.from('notificacion_intencion').update({ estado: 'entregada' }).eq('id', i.id);
+      // S114 · el wamid es la llave con que el webhook de estado (whatsapp-estado)
+      // va a encontrar esta entrega para marcarla entregada_aparato/leida. Se guarda
+      // en el ÉXITO. `cerrado_en` queda NULL: aceptada NO es el fin del ciclo en
+      // WhatsApp (a diferencia de push/email) — lo cierra el webhook al confirmar.
+      const okBody = await res.json().catch(() => ({} as Record<string, unknown>));
+      const wamid = (okBody as { messages?: Array<{ id?: string }> })?.messages?.[0]?.id ?? null;
+      await supabase.from('notificacion_entrega')
+        .update({ estado: 'aceptada_transporte', proveedor_msg_id: wamid }).eq('id', i.entregaId);
+      await supabase.from('notificacion_intencion')
+        .update({ estado: 'aceptada_transporte' }).eq('id', i.id).eq('estado', 'encolada');
       entregadas++;
     } else {
       const cuerpo = await res.text();
@@ -422,9 +535,9 @@ Deno.serve(async (req) => {
         continue;
       }
       await supabase
-        .from('notificacion_intencion')
-        .update({ estado: 'fallida', motivo: cuerpo.slice(0, 300) })
-        .eq('id', i.id);
+        .from('notificacion_entrega')
+        .update({ estado: 'fallida', motivo: cuerpo.slice(0, 300), cerrado_en: new Date().toISOString() })
+        .eq('id', i.entregaId);
       fallidas++;
     }
   }

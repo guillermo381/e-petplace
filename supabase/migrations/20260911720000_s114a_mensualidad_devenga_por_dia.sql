@@ -1,6 +1,6 @@
 -- S114-A · LA MENSUALIDAD DE GUARDERÍA DEVENGA POR DÍA EJECUTADO
 -- ═══════════════════════════════════════════════════════════════════════════
--- Defecto medido (adenda URGENTE, clase L-499): `_devengar_estadia` detectaba
+-- Defecto medido (adenda URGENTE, clase L-514): `_devengar_estadia` detectaba
 -- la mensualidad leyendo `cita.suscripcion_servicio_id`, y el aplicador de
 -- guardería NUNCA escribe esa columna. Peor: `suscripcion_servicio_id` es FK a
 -- `suscripciones_servicio` (planes de PASEO) — la suscripción de guardería vive

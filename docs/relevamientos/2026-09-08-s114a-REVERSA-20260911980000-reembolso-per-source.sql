@@ -1,0 +1,6 @@
+-- REVERSA de 20260911980000 · restaura caso_resolver SIN el reparto per-source
+-- (cuerpo previo de 20260911850000_s114a_casa_toma_caso.sql; recuperable por git):
+--   git show <sha_previo>:supabase/migrations/20260911850000_s114a_casa_toma_caso.sql
+-- y reaplicar su CREATE OR REPLACE de caso_resolver.
+-- ⚠️ Revertir DESPUÉS de una devolución mixta no deshace el saldo ya acreditado
+--    al hogar (movimiento origen 'caso'): sólo cambia el comportamiento futuro.

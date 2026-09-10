@@ -28685,6 +28685,685 @@ rojo: no corre, y su silencio se lee como salud.**
 
 ---
 
+### `L-503` — UN NÚMERO PUBLICADO SE MIDE, NO SE ESCRIBE: LA CURA NO ES CORREGIRLO, ES RETIRARLO Y DECLARAR SU COMANDO
+
+> **Firma del founder (S114-B, 8-sep-2026):** *«Siete veces no es una
+> coincidencia, es una regla que nadie enunció.»*
+>
+> ### **Un ordinal escrito de a uno no es un conteo: es una sucesión de estimaciones, y la segunda ya no sabe qué contó la primera.**
+
+## LA FORMA, Y POR QUÉ ES INVISIBLE
+
+Un número derivado —cuántas piezas, cuántas migraciones, cuál es el próximo
+libre, la enésima aparición de algo— **se escribe una vez y el mundo sigue su
+vida**. Tres cosas lo vuelven la clase de error que más dura en esta casa:
+
+**① No gatea nada, así que nadie lo verifica.** *Un número que no rompe nada se
+lee sin verificarse.* Un typecheck no lo mira, un lint no lo mira, y el lector
+lo usa para decidir.
+
+**② Decae en UNA SOLA dirección.** El mundo crece y el número no ⇒ el error es
+siempre **hacia abajo**, y *en un lint un número más chico se lee como progreso*
+(`L-226`). **Nunca se ve como error: se ve como buena noticia.**
+
+**③ 🔴 Y LA NOTA QUE PARECE CUIDADO LO EMPEORA.** «RE-MEDIDO S85», «(S46)»,
+«medido contra el objeto» **se leen como dato ya verificado**, no como dato que
+caducó. **Es `L-498` en su forma numérica:** *lo que parece cuidado es lo que
+impide que alguien mire.* Un número con su constancia al lado **es más difícil
+de dudar que uno desnudo**.
+
+## LOS OCHO SUJETOS, con su medición
+
+*El founder contó siete; al enumerarlos apareció un octavo **en mi propio
+parte**. Se dice: no se ajusta la lista para que cierre con el número de quien
+la pidió.*
+
+| sujeto | publicado | real | cuánto vivió |
+|---|---|---|---|
+| **migraciones** | cayó **cuatro veces** — 9 → 77 → 138 → 186 | **722** | cada re-medición ya venía vieja al escribirse |
+| **fichas `D-`/`L-`** | cayó **seis veces** | tope real | el número se tomaba dos veces el mismo día |
+| **piezas de `packages/ui`** | 53 · y **cuatro números conviviendo** | **179** | **28 sesiones** |
+| **wrappers de `packages/api`** | 26 «(S46)» | **122** | **~67 sesiones** — el más vencido del canon |
+| **pares de voseo** (`lib-voz`) | «hoy son 138» | **136** (eran 132 al medirlo) | la prosa se escribió una vez |
+| **cadenas de galería** (`R66`) | «134» | **67** — contadas dos veces | informativo, y por eso nadie lo miró |
+| **ordinales de `L-501`** | dos «cuartas» y una «quinta» que salteaba | **7**, en cuatro mecanismos | cada uno numerado contra el recuerdo del anterior |
+| **reglas de `verify:diseno`** | «66» en el pie de mi parte | **71** | *lo escribí yo, en el documento donde denunciaba la clase* |
+
+**Precedente ajeno, y prueba que la clase no nació conmigo:** en **S82** el
+re-censo de los consumidores de `Texto.cuerpo` dio **71** donde la ficha decía
+**3**, con la nota *«el conteo venció»* — **registrado, y nunca generalizado.**
+
+🔴 **El número que la vuelve ley:** hay **28 menciones de re-medición** en el
+canon y sus documentos vecinos *(medido: `grep -rn "RE-MEDIDO\|re-medido\|el
+conteo venció" docs/DEUDAS_CANONICAS.md CLAUDE.md .claude/skills/… packages/ui/CLAUDE.md
+| wc -l`)*. **Veintiocho anotaciones del mismo hecho y ninguna regla.** *Una
+casa que anota veintiocho veces lo mismo no tiene un problema de disciplina:
+tiene una ley sin escribir.*
+
+## LA CURA — tres cláusulas, y ninguna es «acordate de actualizarlo»
+
+**① EL NÚMERO SALE DEL TEXTO Y EN SU LUGAR VA SU COMANDO.** *La prosa decae; el
+objeto no* (`L-141`). El canon declara **cómo se pide**, jamás cuánto da:
+`ls supabase/migrations/*.sql | wc -l` · `pnpm proximo:ficha` ·
+`node scripts/verify-contador-piezas.mjs`.
+
+**② EL GATE FALLA SI ALGUIEN VUELVE A ESCRIBIR EL NÚMERO, aunque ese día
+coincida.** *Un contador correcto hoy es falso en tres sesiones*, y un gate que
+sólo compara valores bendice al que lo escribió bien por casualidad. Lo que se
+prohíbe es **publicarlo**, no equivocarlo.
+
+⚠️ **Y su trampa, medida:** la línea ya curada **cita** el número viejo, y un
+patrón que busca «N piezas» **no distingue una CITA de una PUBLICACIÓN** — el
+gate se cazó a sí mismo. Se resuelve por **semántica** (una línea que declara el
+comando ya no publica: es historia), *jamás* atándolo a un detalle de formato,
+que dura hasta el próximo que escriba distinto.
+
+**③ SI HAY VARIAS ESCALAS, SE NOMBRAN.** Los cuatro números de «piezas» no eran
+cuatro errores: eran **tres escalas sin nombre y un error** —piezas en disco ·
+filas del índice de la skill · número de nacimiento de la serie—. *Sin nombrar
+las escalas, corregir una vuelve falsas a las otras.*
+
+### El corolario del ORDINAL, que es la variante temporal
+
+Un ordinal —«la cuarta vez que…»— **se numera contra el recuerdo del anterior**,
+y por eso es la forma más frágil: no hay objeto que contar, sólo memoria. **La
+cura tiene la misma forma:** una **tabla** como única fuente, y **cada caso
+nombra su MECANISMO y apunta a la tabla en vez de afirmar su número**. *Un
+ordinal escrito al lado de un caso decae en cuanto aparece el siguiente; la
+tabla es el único lugar donde se puede recontar.*
+
+## ⚠️ LO QUE ESTA LEY **NO** DICE
+
+**No prohíbe escribir números.** Un número **medido, fechado y con el comando
+que lo produce** es una medición y vale exactamente por eso. Lo que se prohíbe
+es **publicar un número derivado sin su forma de re-derivarlo** — porque ése,
+el día que caduca, **no avisa**.
+
+---
+
+### `L-502` — UN TRINQUETE CASTIGA A QUIEN LO MEJORA: AMPLIAR EL ALCANCE LO ENROJECE SOBRE DEUDA VIEJA, Y ASÍ NADIE LO AMPLÍA
+
+> **Firma del founder (S114-B, 8-sep-2026).** *«El instrumento se queda como
+> está, y nadie tomó esa decisión: la tomó su forma.»*
+
+## LA FORMA
+
+Un **trinquete** (baseline solo-baja) promete: *lo que ya está se cura cuando se
+toca; lo nuevo no entra.* La promesa se cumple mientras el **alcance** no se
+mueva.
+
+**Pero el alcance de casi todo trinquete vive en un dato editable** — una lista
+de términos, una tabla de baselines por archivo, un conjunto de rutas — y **es
+más angosto que el fenómeno que el trinquete nombra**. ⇒ el día que alguien lo
+enriquece —que es exactamente lo que uno quiere que pase— **aparece deuda vieja
+que nadie introdujo hoy, y el gate se pone rojo sobre quien mejoró el
+instrumento, no sobre quien escribió el defecto.**
+
+**El costo del buen acto lo paga el que lo hace. ⇒ nadie lo hace.** Y lo peor
+no es la fricción: es que **la omisión no se ve como una decisión**. Nadie
+escribió «no ampliemos la lista»; simplemente nunca hubo un momento cómodo, y
+el resultado —un instrumento congelado— **se lee igual que un instrumento
+completo**.
+
+## LA EVIDENCIA, MEDIDA — y corrige mi propia afirmación
+
+`R66` mide la voz con una **lista de 132 formas**. C midió que `marcá` no está;
+B verificó y encontró que `firmá` tampoco. **La lista lleva meses sin crecer, y
+nadie decidió no agregarlos.**
+
+**Lo que costaría agregarlos, medido en vez de supuesto:**
+
+| ampliación | archivos que se pondrían en rojo |
+|---|---|
+| sólo `marcá` + `firmá` (+2 enclíticos) | **0** |
+| una tanda realista de **17 formas** halladas censando el corpus | **9** — 4 en `R66`, 5 en `R80` |
+
+🔴 **La primera fila corrige lo que yo había afirmado sin medir:** dije que
+agregarlos «puede poner el gate en rojo» y **para esos dos verbos no pasa
+nada**. *La ley es cierta; mi ejemplo no la probaba.* **La prueba es la segunda
+fila** — y su contenido es lo que la vuelve seria: entre los 9 aparecen **tres
+`«No operás este negocio.»` en `packages/api`** y un **`«Registrá el parte del
+perro»`**, o sea *voz que le llega a una persona en el peor momento*, en el
+paquete cuyo baseline el founder firmó porque **«A curó 160 voseos acá y nada lo
+sostenía»**. **Sobrevivieron a la barrida porque la lista no tenía los verbos**,
+y siguen ahí porque enriquecerla enrojece a quien la enriquece.
+
+## LA CURA, Y ES EXIGIBLE PORQUE ES UNA LÍNEA
+
+**Quien amplía el alcance sube en el mismo commit los baselines que la
+ampliación destape, y declara el número viejo al lado del nuevo.**
+
+*No es hacer trampa:* **un trinquete mide voz nueva, no cobertura nueva.** Subir
+un baseline porque el instrumento ahora ve más **no es lo mismo** que subirlo
+porque alguien escribió más — y confundirlos es lo que hace que nadie se anime a
+tocar el instrumento. El commit que amplía **dice cuál de las dos cosas está
+haciendo**, y con eso el trinquete vuelve a medir lo que dice medir.
+
+⚠️ **Y la mitad que no se olvida:** la deuda que la ampliación destapa **es
+real y hay que verla**. La ley no dice «no amplíes»: dice **que el rojo no caiga
+sobre el que amplió**. *Lo que estaba mal escrito sigue estando mal escrito, y
+ahora además tiene número.*
+
+## ① EL CENSO DE LA CLASE — cuáles la tienen, cuáles no, y qué costaría
+
+**El test, en tres condiciones que se cumplen JUNTAS:** ① el alcance vive en un
+dato editable (lista · tabla · conjunto de rutas) · ② ampliarlo **sólo puede
+sumar** hits · ③ ampliarlo es un **acto deseable** que alguien haría por su
+cuenta.
+
+| trinquete | alcance hoy | ampliación previsible | costo **medido** |
+|---|---|---|---|
+| **`R66`** · la voz | lista de 132 formas · `apps`+`ui`+`api` | sumar verbos | **+4 archivos** (17 formas) · **0** (2 formas) |
+| **`R80`** · la voz en SQL | la misma lista · 722 migraciones | sumar verbos | **+5 archivos**, y **ninguno curable en su lugar**: es lápida |
+| **`R66`/`R80`** · corpus | dejan afuera `supabase/functions` | mirarlo | **18 hits / 10 archivos** |
+| **`R77`** · uniones enumeradas a mano | `packages/ui/src` · 13 sitios | a `apps/` | **3 sitios**, y **uno está incompleto** — un hallazgo real |
+| **`R78`** · memorial por tema | `packages/ui/src` · base 11 | a `apps/` | **0 · NO tiene la propiedad**: hay 5 usos de `mode === 'memorial'` en `apps/` y **ningún gate de existencia** |
+| **`verify:memorial-derivado`** | base 9 · **exime `packages/domain`** | quitar la exención | **2 menciones** — y la exención existe **para que la deuda se pague ahí**, no para esconderla |
+
+**Dos resultados que valen más que la lista:**
+
+① **`R78` no la tiene**, y eso importa: *la propiedad no es universal, así que
+se testea y no se supone.* Un trinquete cuyo sujeto no existe fuera de su
+corpus no se congela por ampliarlo.
+
+② 🔴 **La ampliación de `R77` estaba diferida a *«una tanda propia»* por
+suponer que era cara y NADIE la había medido.** *El diferimiento no lo produjo
+el costo: lo produjo no conocerlo* — que es la misma ley un piso más arriba.
+**Se ejecutó el 8-sep** (13 sitios → 31), **y del otro lado había un defecto de
+producto**: dos de las TRES copias del guard de especie del mostrador tenían
+**9 de las 11** — *un caballo llegaba al mostrador y el guard decía que su
+especie no existe*, y `readonly AvatarMascotaEspecie[]` **compila con nueve**.
+**Ése es el precio real de diferir por un costo que nadie midió.**
+
+## ② EL EJEMPLO CANÓNICO — y son DOS autocorrecciones en direcciones OPUESTAS
+
+**Firma del founder (8-sep-2026).** El censo de arriba se hizo dos veces, y la
+primera falló *de la misma manera que la ley describe*:
+
+| lo que publiqué | lo que midió el detector de verdad |
+|---|---|
+| ampliar `R77` a `apps/` cuesta **3 sitios** | **18** — mi patrón no tenía la puerta de arrays anotados ni la de `push` |
+| «hay un hallazgo real esperando: `ClaveEscalon` incompleto 4/5» | **no lo era** — son dos caminos deliberados y la cabecera del archivo lo explica |
+
+> **Un censo hecho con un instrumento más débil que el que va a correr no mide
+> el trabajo: mide su propio alcance.**
+
+🔴 **Y que los dos errores apunten en direcciones OPUESTAS es la evidencia de
+que no había sesgo, sino falta de medición.** *Un sesgo empuja siempre para el
+mismo lado —a favor de lo que uno quiere concluir—; esto subestimó el costo y
+sobreestimó el hallazgo a la vez.* **Eso sólo lo produce no haber mirado.**
+
+⇒ **la regla operativa que sale:** el número con el que se decide si una
+ampliación es cara **se mide con el detector que va a correr**, jamás con una
+aproximación escrita para el censo. *Si medir con el detector real es caro, el
+censo declara que su número es una cota y de qué lado.*
+
+## ③ CURAR UNA VOZ SIN AGREGAR SU VERBO DEJA LA CURA SIN GUARD
+
+**Ratificado por la mesa (8-sep-2026)**, y es la otra mitad de ④: *ampliar
+después de curar no es sólo más barato — es lo único que sostiene la cura.*
+
+Las cuatro voces de `packages/api` **sobrevivieron a una barrida entera** porque
+la lista no tenía sus verbos. Curarlas sin agregar `operás` y `registrá` habría
+sido **la quinta barrida sin guard**, que es exactamente el estado del que `R66`
+nació para sacarnos. **El discriminador, corrido en las dos direcciones:**
+
+```
+lista NUEVA + el voseo reintroducido …… ROJO   ✅ el guard sostiene la cura
+lista VIEJA + el MISMO voseo ………………… exit 0  🔴 habría pasado invisible
+```
+
+⇒ **una cura de voz incluye el verbo que la vigila**, o es una barrida con otro
+nombre.
+
+### ⚠️ Y CÓMO SE TOCA UNA LISTA QUE NO ES DE UNO
+
+La lista vive en territorio ajeno. **El primer intento la reformateó entera —
+552 líneas por un cambio de 4— y se revirtió.** *Un diff irrevisable en
+territorio ajeno esconde el cambio que uno vino a hacer*, y el dueño no tiene
+cómo saber qué se le tocó. **Inserción quirúrgica: 16 líneas, cero borrados**,
+respetando el formato existente al carácter.
+
+## ④ LA PARTE PRÁCTICA — CURAR PRIMERO VUELVE GRATIS LA AMPLIACIÓN
+
+**Firma del founder (8-sep-2026): «es lo que la vuelve accionable en vez de una
+advertencia».**
+
+El mismo día se ejecutó el ciclo entero y el orden importó:
+
+```
+1 · curar las 4 voces …………………… packages/api a tuteo
+2 · ampliar la lista 132 → 136 …… marcá · firmá · operás · registrá
+3 · correr el gate ………………………… VERDE. La ampliación destapó CERO.
+```
+
+**Al revés, el paso 2 habría enrojecido cuatro archivos que nadie tocó hoy** —
+que es la ley cobrándose. ⇒ **ampliar el alcance DESPUÉS de curar lo que la
+ampliación va a destapar convierte el rojo en nada**, y el trabajo de subir
+baselines desaparece porque no hay nada que subir.
+
+⚠️ **Con su límite, que es donde la ley sigue mordiendo:** funciona **si la
+deuda es curable**. En `R80` —una lápida sobre migraciones aplicadas— **no lo
+es**, y por eso `pasá` y `hablá` siguen fuera de la lista con su costo escrito:
+enrojecerían **5 migraciones que no se pueden curar en su lugar**. *Ahí la única
+puerta es la de la cura: subir la lápida en el mismo commit, con su razón.*
+
+## ⚠️ EL ALCANCE DE ESTE CENSO, declarado
+
+**Se midieron 6 trinquetes de los 48 que hay en la casa** (43 baselines en
+`verify:diseno` + 5 gates con baseline propio). De ésos, **13 tienen baseline
+> 0** y **15 tienen su alcance en una tabla, un conjunto o una lista** — que es
+la población donde el test de arriba puede dar positivo. **Los otros 42 no se
+testearon**, y se dice: *un censo que no declara su denominador se lee como
+completo.*
+
+---
+
+### `L-501` — EL DELIMITADOR APARECE ADENTRO DE LO QUE QUERÉS CAPTURAR, Y UN INSTRUMENTO QUE ACUSA A OTRO NECESITA TECHO ANTES QUE PATRÓN
+
+> **Firma del founder (S114-B, 7-sep-2026).** Sale de dos defectos propios en
+> una sola sesión, **los dos cazados produciendo el rojo — ninguno leyendo.**
+
+## ① LA FORMA: `[^X]*` supone que `X` no está adentro. En código real, siempre puede estar.
+
+**Los TRES casos, de la misma sesión y del mismo autor** — y el conteo va
+exacto abajo, en su propia sección.
+
+```
+R78                   \(([^)]*mode === 'memorial'[^)]*)\)
+  el guard curado …… if (esDeUnaMascota && (props.enMemorial || theme.mode === '…'))
+  ⇒ `[^)]*` corta en el paréntesis INTERIOR ⇒ la pieza desapareció de la medición
+
+verify:memorial-derivado   desde = lastIndexOf('{', idx)
+  el sitio real …… const esMemorial = (m: {estado_vida: string|null}) => m.estado_vida !== '…'
+  ⇒ el `{` más cercano es el de la ANOTACIÓN DE TIPO ⇒ la ventana arrancaba
+    DESPUÉS del nombre ⇒ **el caso que el gate existe para cazar salía VERDE**
+```
+
+**Y la familia es más ancha que el regex:** `lastIndexOf(delim)` tiene el mismo
+defecto sin ser una clase de caracteres. *No es un problema de expresiones
+regulares: es suponer que el símbolo que uso para delimitar no aparece adentro
+del sujeto.* **En código anidado —JSX, genéricos, tipos inline— siempre aparece.**
+
+```
+R79                   enRiel: `[^;]{0,80}?` sobre la sentencia
+  el caso real de C …… objeto: t(`postventa.objeto_${…}`),
+                       motivo: c.motivo,
+  ⇒ el `t(` del renglón de ARRIBA queda a <80 caracteres del `c.motivo` de
+    abajo ⇒ **el defecto que la regla existe para cazar salía VERDE**
+```
+
+### ⚠️ EL CONTEO, EXACTO Y SIN INFLAR (`L-499` el mismo día)
+
+> ⏪ **ACÁ DECÍA CUATRO Y SON SIETE** (re-contado el 8-sep). No es que
+> aparecieran tres más y ya: **al sumarlas encontré que el árbol tenía DOS
+> «cuartas» y una «quinta» que salteaba un número** — cada aparición se numeró
+> contra el recuerdo de la anterior, no contra una taxonomía. *Un ordinal
+> escrito de a uno no es un conteo: es una sucesión de estimaciones, y la
+> segunda ya no sabe qué contó la primera.* Se re-contaron **las siete desde el
+> objeto**, con la tabla de abajo como única fuente.
+
+| mecanismo | cuántas | cuáles |
+|---|---|---|
+| **① LECTURA** — el patrón corta en un delimitador **que está adentro del contenido** | **3** | `[^)]*` en `R78` · el `{` de la anotación de tipo en `verify:memorial-derivado` · `[^;]{0,80}?` en `R79` |
+| **② ESCRITURA** — el contenido **contiene el terminador de la región donde lo escribo** | **1** | `` `apps/*/src` `` adentro de un JSDoc: el `*/` **cierra el comentario** y voltea el archivo entero |
+| **③ FRONTERA que no coincide con el borde del token** | **2** | falta la izquierda ⇒ **captura de MÁS** (`airedale` ⊃ «dale») · exige una derecha que el caso no tiene ⇒ **captura de MENOS** (`[\s/>]` en `R81`, y el montaje real **termina la línea justo ahí**) |
+| **④ FALTA EL TECHO** — no hay delimitador involucrado | **1** | la ventana de 286 líneas |
+| **de la clase, en total** | **7** | **siete instrumentos distintos, todos del mismo autor y de la misma sesión** |
+
+**Por qué no se dice «siete iguales», que sería más contundente y menos cierto:**
+① y ② son el mismo choque —*contenido ⊃ delimitador*— **en direcciones
+opuestas**, leer y escribir. ③ **no es un delimitador adentro**: es una frontera
+mal puesta, *y sus dos casos tienen signo contrario* —uno captura de más y el
+otro de menos—. ④ **no tiene delimitador**: comparte la consecuencia y no el
+mecanismo.
+
+🔴 **Y la que más enseña de las siete es la de `R81`, por CÓMO se supo:** la
+regla informaba **CERO montajes con uno vivo**, y no lo dijo el rojo — **lo dijo
+el ANCLA**. *Un patrón que captura de menos no falla: da un número más chico, y
+en un lint un número más chico se lee como progreso* (`L-226`). **Sin ancla, esa
+regla habría nacido verde, decorativa y con cara de sana.**
+
+⚠️ **Y una distinción con su hermana, para que no se mezclen los números:** las
+siete de acá son **instrumentos míos de una sesión**. La que **cruzó de
+subsistema** es `L-499` —SQL · git · JSX · SVG—, y *esa* es su propiedad
+distintiva. **Los dos números miden cosas distintas.**
+
+## ② 🔴 LA PEOR ES LA CURA SIN TECHO, Y ES LA QUE ACUSA A OTRO
+
+Al curar el `{`, la ventana pasó a caminar hacia atrás **buscando el inicio de
+la sentencia — y sin tope.** Dentro de un JSX caminó **286 líneas** hasta un
+`return (`, se tragó un `{!esMemorial` de otra sección, y **reportó un décimo
+sitio como derivación de memorial en un archivo de OTRA PISTA.**
+
+> **Era verosímil, en un archivo real, y estaba a punto de irse como defecto
+> ajeno.** *La cura del primer defecto produjo uno más caro: el primero contaba
+> de menos y el segundo acusaba de más.*
+
+### La regla, en la palabra del founder
+
+> ### **Un instrumento que acusa a otro merece un TECHO antes que un patrón mejor.**
+
+**Un falso negativo cuesta una medición; un falso positivo cuesta el tiempo de
+otro y su confianza en el instrumento.** *Y el que recibe la acusación no tiene
+cómo distinguirla de una real: le llega con `archivo:línea`, en su archivo, de
+un gate que corre.*
+
+**Lo exigible, y es barato:**
+- **toda ventana declara su tope EN LÍNEAS** —acá 4: *una decisión se escribe en
+  una a tres; más que eso ya no es la sentencia, es el vecindario*—;
+- **y su otro borde**: la línea en blanco. *Los comentarios se blanquean para no
+  correr la numeración, así que una línea vacía es el borde real del bloque.*
+- **antes de reportar en territorio ajeno, se abre el sitio.** Acá alcanzó con
+  mirar la línea acusada: su ventana empezaba 286 líneas más arriba.
+
+## ③ Y LO QUE NO SE HACE: un patrón más listo
+
+**La salida instintiva es refinar el regex** —balancear paréntesis, contar
+llaves—. *Es el camino largo hacia el mismo error*: un parser a medias falla
+distinto, no menos. **Lo que cierra la clase son dos cosas baratas:** el techo,
+y **un segundo instrumento que falle distinto** — en `L-499` el más tosco
+posible encontró lo que el refinado no veía.
+
+**Hermana de `L-500` y no la duplica:** aquélla dice *qué publicar para que la
+ceguera se note*; ésta, *qué limitar para que el instrumento no invente*.
+
+---
+
+
+### `L-500` — UN GATE PUBLICA CIFRAS, NO ADJETIVOS: «VERDE» NO PUEDE DELATAR CEGUERA, UN CONTADOR SÍ
+
+> **Firma del founder (S114, 7-sep-2026), y nace de DOS pistas el mismo día
+> con el mismo error y distinta ropa.**
+
+**Un instrumento puede seguir dando el veredicto correcto y haber dejado de
+ver parte de su sujeto.** Eso **no es un fallo**: es una pérdida de COBERTURA —
+y **un booleano no tiene forma de expresarla.** *«Verde» significa lo mismo
+cuando el gate miró todo que cuando miró la mitad.*
+
+⇒ **la única señal que un instrumento correcto puede dar de que se quedó ciego
+es una CIFRA que se mueve sin que nadie haya tocado ese sujeto.**
+
+### Los dos casos
+
+**① F — el comparador de desigualdad** *(citado de `docs/loop/S114-F-TANDA1.md`;
+**lo midió F, no yo**)*. Un watcher de deploy con
+`if [ "$H" != "index-fK9Opg5L.js" ]`: cuando un 403 dejó sin bundle que
+extraer, **la cadena vacía también es distinta** y el watcher anunció
+
+```
+✅ DEPLOY NUEVO ·  · 22:02:00
+```
+
+> *«Un comparador de desigualdad trata «cambió» y «no pude leerlo» como la
+> misma cosa.»* — **«Lo cazó que el propio mensaje imprimiera el hash y saliera
+> en blanco: si sólo hubiera dicho "DEPLOY NUEVO", me lo creía.»**
+
+**② B — el matcher que corta en el primer paréntesis.** `R78` mide qué piezas
+deciden si existen mirando sólo el tema memorial. Su patrón era
+`\(([^)]*mode === 'memorial'[^)]*)\)` — y al curar una pieza con condición
+**anidada** (`if (esDeUnaMascota && (props.enMemorial || theme.mode === 'memorial')))`)
+**`[^)]*` corta en el primer paréntesis y la pieza desapareció de la
+medición.**
+
+**El brazo del rojo seguía andando** —revertir el guard a sólo-tema seguía
+dando 12 y rojo, verificado—, **así que la regla no estaba rota: contaba de
+menos.** Y lo único que lo dijo fue **`conDato`, que bajó de 2 a 1**.
+
+### 🔴 LO QUE LOS HERMANA, y es más incómodo que el error
+
+**En los dos, el instrumento seguía siendo CORRECTO en su veredicto.** El
+watcher habría anunciado un deploy real; `R78` sigue enrojeciendo ante la
+regresión. *Lo que se rompió no fue la respuesta: fue de cuánto la estaba
+sacando.* **Y una pérdida de alcance no tiene síntoma** — por eso hizo falta que
+algo NUMÉRICO estuviera a la vista.
+
+**Los dos se cazaron por el mismo mecanismo:** *el instrumento imprimía un valor
+que podía moverse solo, y se movió.*
+
+### La regla, exigible
+
+> ### **Todo gate publica, junto a su veredicto, al menos UNA cifra que pueda moverse sin que nadie toque su sujeto:** el tamaño del corpus, el hash leído, cuántos casos clasificó, cuántos ya están curados.
+
+**Y su corolario operativo, que es el que hay que ejecutar:** *cuando un número
+de un gate cambia y nadie tocó ese sujeto, **eso es el hallazgo** — no un
+detalle de la salida.* **No se re-alinea el número: se pregunta qué dejó de
+ver.**
+
+⚠️ **Y no basta con imprimir cualquier cosa: tiene que ser una cifra CAPAZ de
+moverse sola.** «OK», «verde» y «0 fallos» no pueden. *Un `0` que siempre fue
+`0` y un `0` que acaba de quedarse ciego se imprimen idénticos* — de ahí que la
+cifra útil sea la del ALCANCE (cuánto miró), no la del resultado.
+
+### El trío, y cada uno cubre lo que el otro no
+
+```
+L-459 · ¿el instrumento SABE decir que no?     → su rojo se prueba
+L-498 · ¿su prosa convence de no revisarlo?    → la nota es lo que hay que dejar de leer
+L-500 · ¿su salida puede DELATAR su ceguera?   → publicá cifras, no adjetivos
+```
+*Los tres se cobraron en la misma sesión, y ninguno habría cazado a los otros
+dos.*
+
+---
+
+
+### `L-499` — UN CENSO POR LA FORMA DEL MONTAJE MIDE LA CONVENCIÓN, NO EL HECHO
+
+> **Firma del founder (S114-B, 7-sep-2026).** *Lo que la vuelve regla y no
+> anécdota es que **la clase cruzó de subsistema**.*
+
+**El caso.** Censando qué piezas de `packages/ui` protegen algo con el tema
+memorial, declaré que `PastillaConociendolo` **no la montaba nadie**. Evidencia:
+`grep -rl "<PastillaConociendolo" apps/*/src` ⇒ vacío.
+
+**Al verificar antes de entregar: SÍ estaba importada**
+(`[mascotaId].tsx:73`) — usada cero veces. **El hecho no cambió** —no se
+dibuja— **pero la evidencia era incompleta**, y *quien grepeara el nombre
+habría encontrado un hit y concluido lo contrario del que yo publicaba.*
+
+### 🔴 LA CLASE YA EXISTÍA EN OTROS DOS SUBSISTEMAS, Y ÉSA ES LA NOVEDAD
+
+```
+SQL   · L-170 · un censo por `pg_get_functiondef` lee los COMENTARIOS como código
+      · L-437 · un censo por patrón ACOTA, no cierra — un 0 no prueba ausencia
+git   · L-494 · `ls-tree | grep` mide el NOMBRE DEL ARCHIVO; la función vive
+                adentro de uno que no la nombra
+JSX   · ésta  · `grep "<Pieza"` mide LA FORMA DEL MONTAJE; el consumo puede
+                estar en un import, un slot, una variable o un salto de línea
+SVG   · ésta  · contar el token `M6` da 29 «momentos vitales» en `packages/ui`
+                y **los 29 son paths** (`d="M6 6l12 12…"`)
+```
+
+> ### ⚠️ TERCERA VEZ EL MISMO DÍA, y la tercera fue la más tonta y la más útil
+> El censo de memorial contó **29 `M6`** en `packages/ui` como si fueran
+> derivaciones del momento vital. **Son coordenadas de dibujo.** *Un token de
+> dos caracteres no tiene contexto, y contarlo mide su ORTOGRAFÍA.*
+>
+> **Que la clase se cobre tres veces en una sesión, en tres formas distintas y
+> al mismo autor, es lo que la separa de un descuido:** no es que uno se
+> distraiga — es que **el instrumento barato siempre está a mano y siempre
+> contesta algo.**
+
+> ### **Tres lenguajes, tres instrumentos, el mismo error: preguntarle a la superficie del código por un hecho que vive un piso más adentro.**
+> *Mientras vivía en SQL se leía como una peculiaridad de `pg_proc`. Al aparecer
+> en git y en JSX deja de ser del subsistema y pasa a ser del método:* **no es
+> que `pg_get_functiondef` engañe — es que TODO censo por texto responde la
+> pregunta que su patrón sabe hacer, y ninguna otra.**
+
+### La prueba, y es de una línea
+
+> **«¿Mi patrón puede fallar con el hecho PRESENTE?»** Si la respuesta es sí
+> —y con texto casi siempre lo es— **el cero no es una conclusión: es un
+> candidato.**
+
+**Su cura no es un patrón mejor: son DOS instrumentos que fallan distinto.**
+Acá alcanzó con el más barato posible —el nombre pelado, sin `<`— y **encontró
+el hit que el otro no veía**. *Un segundo instrumento tosco vale más que un
+primero refinado: no comparten el supuesto.*
+
+⚠️ **Y lo que la hizo aparecer no fue revisar el código: fue verificar lo que
+estaba por ENTREGAR como si lo hubiera escrito otro.** *El censo era mío, la
+conclusión era mía, y por eso ninguna relectura de mi propio razonamiento podía
+cazarla — sólo volver a preguntarle al objeto.*
+
+**Hermana de `L-498`, y no la duplica:** aquélla es sobre **la prosa que
+convence de no mirar**; ésta, sobre **el instrumento que mira mal**. *Las dos se
+cobraron el mismo día y en el mismo censo.*
+
+---
+
+
+### `L-498` — LO QUE PARECE CUIDADO ES LO QUE IMPIDE QUE ALGUIEN MIRE
+
+> **Firma del founder (S114-B, 7-sep-2026): la clase tiene nombre.**
+
+**Un artefacto que exhibe su propio cuidado deja de ser verificado.** No porque
+engañe: porque **el lector concluye, razonablemente, que ya alguien miró.** Y
+cuanto mejor escrita está la nota, más fuerte es esa conclusión — así que **la
+prolijidad no protege al dato: lo blinda contra la revisión.**
+
+### Los dos casos, y son de la misma sesión
+
+| | lo que exhibía | lo que era |
+|---|---|---|
+| **el contador** | *«RE-MEDIDO S103-A contra el objeto — decía 52, y la brecha era de 29»*, con su método auditable escrito al lado | **decía 81 y eran 171** · 28 sesiones |
+| **el guard de memorial** | `if (theme.mode === 'memorial') return null`, con *«⛔ En memorial no se pide terminar de contar nada»* en negrita encima | **el tema no se enciende en producto** (`D-1021`): once piezas con su protección escrita y apagada |
+
+**Y el contador ya se había predicho a sí mismo.** Su propia nota decía: *«una
+skill se carga en TODA tarea de UI, así que un número viejo acá no desinforma a
+un lector — desinforma a cada construcción»*. **Se cumplió, y la nota no lo
+evitó: la hizo más creíble.**
+
+### Por qué ningún gate la caza
+
+**Los dos artefactos están BIEN ESCRITOS y son CORRECTOS en su lógica.** El
+contador tenía su método; el guard tiene su condición bien puesta. *Lo que
+falla no está adentro del artefacto: está en que su premisa —que el número se
+re-mide, que el interruptor se aprieta— vive afuera y nadie la vuelve a
+comprobar.* Un typecheck ve tipos, un lint ve formas, y **ninguno de los dos ve
+una premisa vencida que el propio texto declara como vigente**.
+
+### La prueba, y es de UNA pregunta
+
+> ### **«¿Este guard PUEDE encenderse? ¿Este número PUEDE cambiar?»**
+> No *«¿está bien escrito?»* ni *«¿tiene su razón al lado?»* — **la nota es
+> justamente la que hay que dejar de leer.**
+
+**Su corolario operativo, que es lo que la vuelve exigible:** toda protección
+que se escribe **se prueba encendida en el mismo acto** — el mismo *rojo
+primero* que la casa ya exige de un gate, aplicado a un `return null`. *Si no
+se puede producir el estado que la enciende, la protección no está puesta:
+está declarada.* Y toda cifra publicada **declara su comando en vez de su
+valor** (precedente: migraciones cayó cuatro veces, fichas seis, piezas tres).
+
+### La hermana que ya estaba escrita, y por qué ésta no la duplica
+
+`L-459` dice *«la primera prueba de un guard nuevo no es que dé verde: es que
+dé rojo sobre el primer caso real»* — **y habla de INSTRUMENTOS**. Ésta habla
+de **la prosa que los acompaña**: no de si el guard sabe decir que no, sino de
+que **su comentario convence al lector de que no hace falta preguntárselo.**
+*`L-459` protege del instrumento que no mide; `L-498`, del texto que hace
+innecesario mirarlo.*
+
+⚠️ **Y las dos veces las encontró alguien MONTANDO, no leyendo** — `D-1021` la
+halló C en el emulador, y el contador salió de correr su gate. *Ningún repaso
+del texto podía cazarlas: el texto era la parte buena.*
+
+---
+
+
+### `L-508` — Si la línea base del defecto es más chica que el ruido, el gate va en la ENTRADA: medir la salida vende falta de poder como resultado
+
+**El caso (S114-D · lote 7, 8-sep-2026).** La mesa firmó que el `porque` de la
+Hoja de postventa le habla **siempre a la casa, nunca a la familia**, sobre una
+observación real: en 1 de 5 corridas había salido *«el dato del GPS que
+aportaste»*. La orden incluía **medir que no vuelva**.
+
+Antes de tocar el prompt medí la línea base: **1 caso en 15 corridas (~7 %)**, y
+**0 de 10** en la corrida dedicada con el prompt viejo. Ese número decide todo lo
+que viene después:
+
+> Con una base de ~7 %, **un `0/20` después de la cura es indistinguible del
+> `0/10` que ya daba antes de tocar nada.**
+
+O sea que la medición pedida —«que no vuelva»— **no la puede contestar la
+salida**: no tiene poder para separar la cura del azar. Y presentar ese `0/N`
+como evidencia sería exactamente el error: *vender falta de poder como
+resultado*, con la agravante de que el número se ve idéntico a una prueba.
+
+**La ley.** Cuando la tasa base de un defecto es tan baja que la N disponible no
+puede distinguir la cura del ruido, **el gate no va en la salida: va en la
+entrada, donde el hecho es exacto**. Acá la entrada es el prompt, y lo que se
+hace cumplir es que **no ofrezca** la forma prohibida — determinístico, en cada
+commit, sin depender del modelo. La salida se sigue corriendo, pero se reporta
+como **control de no-regresión**, y se dice que eso es.
+
+**El correctivo, exigible:** antes de prometer «medí que no vuelva» sobre un
+sujeto que es un modelo, se mide la línea base. Si el defecto aparece con una
+frecuencia que la N alcanzable no separa del ruido, **se declara y se mueve el
+gate a la entrada** en vez de correr N grande hasta que salga cero.
+
+**Su corolario, y es lo que la vuelve exigible en vez de teórica:** un `0/N` de
+salida no es inútil — dice que la cura **no rompió otra cosa**. En este caso el
+acto de resolución pasó de 10/10 a 9/10 (ruido con esa N) y el anclaje subió de
+2,2 a 2,5 sobre 4. *Ese es su trabajo: control, no prueba.* Confundirlos es lo
+que la ley prohíbe.
+
+**Hermana:** `L-462` (un empate en pocos casos fáciles es ausencia de evidencia,
+no una recomendación). La misma aritmética, del otro lado: allá el conjunto no
+podía distinguir dos opciones; acá no puede distinguir una cura de su ausencia.
+
+---
+
+### `L-507` — En un prompt, un EJEMPLO pesa más que una DECLARACIÓN — y el peor viene copiado de un contexto donde era correcto
+
+**El caso (S114-D · lote 7, 8-sep-2026).** El `system` de `postventa-hoja`
+**declaraba** su destinatario en la primera línea —*«Sos quien prepara el
+material para la persona de e-PetPlace que va a resolver un caso»*— y lo
+**desmentía en la última con un ejemplo**:
+
+```
+Escribí en tuteo neutro ("tu mascota", "te cobraron"), nunca voseo.
+```
+
+Esas dos formas son exactamente las que le hablan a la familia. El modelo
+obedeció al ejemplo: en 1 de 5 el `porque` le escribió a la familia —*«el dato
+del GPS que aportaste»*— en una pieza que sólo lee la casa.
+
+**De dónde salió el ejemplo, que es lo que da la forma exacta:** de
+`_shared/postventa/plantillas.ts`, **donde es correcto** — ahí se redactan los
+mensajes PARA la familia. Lo copié de una pieza a otra sin notar que el
+destinatario no viajaba con él. ⇒ **copiar un ejemplo sin copiar su destinatario.**
+
+**La ley.** En un prompt, **un ejemplo pesa más que una declaración**: el modelo
+copia lo que ve escrito, no lo que se le enuncia. Y por eso el ejemplo copiado
+de otro contexto es el más peligroso — *llega con la autoridad de haber
+funcionado*, igual que `D-976` con los criterios trasplantados, y su error no se
+ve leyendo la regla porque la regla dice lo correcto.
+
+**Hermana mayor:** el muro de NEXO ya tiene escrita la forma general —*«dos
+líneas del mismo system que se contradicen no dejan una regla a medias: dejan la
+que invita»*— y esta ficha le agrega el giro: **la que invitaba no era otra
+regla, era un ejemplo**, que ni siquiera se lee como una instrucción y por eso
+sobrevive a las relecturas.
+
+**El correctivo, exigible:** todo ejemplo dentro de un prompt se lee
+preguntando *«¿a quién le habla ESTE texto?»* antes de moverlo de pieza. Y donde
+el destinatario importa, el prompt **manda la persona gramatical explícita** —
+tercera para las partes— en vez de sólo prohibir la otra: *una prohibición sin
+alternativa obliga al modelo a adivinar la forma.*
+
+**Lo que lo hace cumplir, y por qué ahí:** `verify:postventa-contrato` mide que
+el `system` no OFREZCA formas de segunda persona — y **discrimina por posición**,
+porque el prompt curado las cita como ejemplo de lo prohibido. La primera versión
+del gate preguntaba «¿hay una negación en la línea?» y **la línea vieja pasaba**:
+termina en *«nunca voseo»*, que es una negación de otra cosa y viene después.
+*Un rojo por la razón equivocada está tan roto como un verde por la razón
+equivocada, porque manda a arreglar lo que no es.*
+
+---
+
 ### `L-497` — Cuando dos personas arman fixtures para el mismo sujeto, LOS DOS los arman más fáciles
 
 **S113-E + S113-D, tres cobros en un día:** ① las frases de búsqueda —**18/23**
@@ -28699,6 +29378,1185 @@ JSON volvió a romperse y ninguno lo había visto.
 
 ⇒ **Dos manos no alcanzan si las dos construyen el sujeto**; alcanzan cuando una
 lo construye y la otra lo mide **sobre el objeto que ya existe**.
+
+---
+
+
+### `L-530` — Un `2xx` con `wamid` del transporte significa «lo tomó», JAMÁS «llegó» — y la demora entre las dos cosas puede ser larga
+
+La lección que corona el arco de notificaciones de S114. Tres veces el mismo síntoma
+—**el transporte responde OK y nada se muestra en el teléfono**— con tres causas
+distintas (token fantasma, permiso de Android bloqueado, y esta: **demora**), y
+ninguna distinguible desde el emisor en el momento del envío.
+
+**El caso:** los dos WhatsApp salían con `Meta 2xx` y `wamid` válido (el mensaje
+medido dentro del sistema de Meta, con el E.164 correcto codificado en el propio
+wamid), y no aparecían en el teléfono. **Resultó ser DEMORA, no corte** — llegaron
+más tarde. *Un `2xx` con id de mensaje prueba que el transporte lo ACEPTÓ, no que el
+aparato lo recibió; y entre «aceptado» y «recibido» puede haber minutos u horas.*
+
+**Por qué importa y qué lo cierra:** sin un receipt, **«demorado» y «perdido» se ven
+idénticos** —que es exactamente lo que estuvimos haciendo a mano, dos veces, durante
+horas—. El receipt es el único árbitro:
+- **WhatsApp SÍ lo da** (webhook de estado: sent/delivered/read/failed) ⇒ el estado
+  puede decir la verdad (`entregada_aparato`/`leida`); es lo que cierra `D-1055` para
+  este canal.
+- **Push (FCM v1) NO lo da por mensaje** ⇒ ahí `aceptada_transporte` es el techo de lo
+  que se sabe, y «demorado vs perdido» queda indistinguible (`D-1055` abierta para push).
+
+**La regla:** ningún estado de transporte se nombra por lo que uno espera que pase
+(«entregada») sino por lo que el transporte CONFIRMA («aceptada_transporte» hasta que
+un receipt diga más). Es la misma clase que el rename `entregada→aceptada_transporte`
+de esta sesión — un nombre que promete recepción sobre una aceptación miente, y el
+costo de esa mentira fue medido en horas.
+
+---
+
+
+### `L-529` — Un `git merge` parado en la rama equivocada produce un árbol que PARECE revertir main, y el diff two-dot del merge-base lo lee limpio
+
+**Qué pasó (S114-A, 9-sep, error propio declarado):** iba a mergear la punta de F a
+main. Medí el delta con `git diff <merge-base>..<punta>` (two-dot) → 3 archivos de
+apps/admin, lectura limpia. Pero corrí `git merge --no-ff <punta>` **sin `git checkout
+main` antes** — quedé parado en `candidato/s114-2`. El merge combinó el trabajo de
+candidato (que NO tenía las curas recientes de main) con la punta de F, y al comparar
+el resultado contra main **parecía haber revertido** el instrumento de B, borrado
+docs y quitado 100 líneas de `DEUDAS_CANONICAS`.
+
+**Cómo se cazó, y es la lección:** midiendo **lo que el merge AGREGÓ a main**
+—`git diff <main-antes>..<commit-de-merge> --stat`— ANTES de pushear. Ese diff mostró
+borrados que no tenían por qué existir ⇒ el merge estaba mal. `origin` nunca se tocó;
+`git reset --hard` volvió todo; se restauró candidato desde su punta pusheada
+(nada vivía sólo en local). **El costo fue tiempo, no contenido.**
+
+**Las dos reglas que deja:**
+1. **Antes de `git merge`, confirmar la rama activa** (`git rev-parse --abbrev-ref
+   HEAD`) — el merge va SIEMPRE a la rama donde estás parado, no a la que nombra el
+   comando.
+2. **La vara de un merge es lo que AGREGA al destino** (`<destino>..<merge>`), no el
+   delta de la punta contra su merge-base. El two-dot de la punta describe la punta;
+   sólo el diff contra el destino real dice qué le va a pasar al destino. *Un merge
+   parado en la rama equivocada da un two-dot limpio y un resultado sucio.*
+
+---
+
+
+### `L-528` — Dibujar no es exigir: una pantalla más estricta que su motor también es un defecto — uno que nadie reporta porque parece prudencia
+
+F corrigió mi alcance sobre el campo de motivo del parcial, y la distinción vale
+más que la cura. Medido del CUERPO de `caso_resolver` (no del reporte): la razón
+es obligatoria en `parcial` y `sin_devolucion`, **en `total` NO**. ⇒ el campo se
+**dibuja en los tres** (explicar una devolución total también le sirve a la
+familia) y se **bloquea sólo en los dos donde el motor bloquea**. Son **dos
+decisiones distintas** y por eso no se resuelven con una condición sola. Exigir la
+razón en `total` habría bloqueado un camino que el motor acepta.
+
+**El modo de falla, que es lo que la vuelve ley:** una pantalla más estricta que
+su motor **no produce error, ni rebote, ni log** — sólo se niega, en silencio, a
+algo que el sistema habría aceptado, y **nadie reporta ese defecto porque una
+negativa parece prudencia.** Es el espejo de `L-318` (motor sin puerta): ahí el
+motor puede hacer algo que la pantalla nunca ofrece; acá la pantalla prohíbe algo
+que el motor permite. **Los dos son mudos.**
+
+**Cura exigible:** cuando una pantalla impone una precondición, se mide contra el
+CUERPO del motor —no contra la clase, ni contra un reporte— y **«dibujar» y
+«exigir» se deciden por separado.** Un campo puede pedirse siempre y bloquear sólo
+donde el motor bloquea.
+
+---
+
+
+### `L-527` — En una configuración por capas, la de arriba VACÍA no significa «heredá»: significa «hacé nada»
+
+**S114-F, firma del founder.** El caso que cerró dos días de diagnóstico:
+
+```
+Project Settings      Behavior «Custom» · Command  exit 1     ← construir siempre
+Production Overrides  Command  (VACÍO)                        ← ligado a UN deployment
+```
+
+🔴 **Un Command vacío no es «sin override»: es un comando vacío, y un comando vacío termina
+con `exit 0`** — que en ese campo significa **saltear el build**. **El override manda en
+producción y anula el `exit 1` del proyecto.**
+
+> ***La capa de arriba, vacía, no cede el paso: decide.***
+
+## Por qué es tan difícil de ver
+
+**Un campo en blanco se lee como «no configurado».** Es la lectura por defecto de cualquiera,
+y en casi todos los sistemas es correcta: *vacío = usá el de abajo*. Acá no — **y la pantalla
+no lo dice**: muestra un campo vacío, exactamente igual a uno que no aplica.
+
+⚠️ **Y su consecuencia fue perfecta para engañar:** el founder cambió la capa de abajo y **el
+build salió** —porque ese deployment todavía no tenía override—, así que *el cambio pareció
+funcionar*. **El propio deployment que salió creó el override**, y desde entonces todo se
+saltea. ⇒ **una cura que se auto-anula al aplicarse**, y cuyo síntoma aparece recién en el
+push siguiente, cuando ya nadie la está mirando.
+
+⇒ **Ante un campo vacío en una capa de override, la pregunta no es «¿qué hereda?» sino
+«¿QUÉ HACE un valor vacío acá?».** *En un campo que se ejecuta, el vacío no es ausencia de
+orden: es una orden.*
+
+## La familia, que es la del día entero
+
+| | el vacío que engaña |
+|---|---|
+| [[L-523]] | un contrato que cambia deja al consumidor **mostrando vacío** — o reventando, y no se puede saber cuál |
+| `LETRA_PORTAL_ADMIN §3.4` | un gate que es un `WHERE` devuelve `[]`: **«no hay» y «no podés» quedan indistinguibles** |
+| **`L-527`** | un campo de configuración **vacío que se ejecuta** y significa «no hagas nada» |
+
+> ***Tres formas del mismo hueco en un día: el vacío se lee como ausencia, y en los tres
+> casos era un valor operante.***
+
+*(Y su cura estructural es la misma que la de [[L-526]]: **lo que se puede versionar en el
+repo se versiona.** Un archivo tiene una sola capa y no tiene campos en blanco con
+semántica oculta — lo que no está, no está.)*
+
+---
+
+
+### `L-526` — Una configuración con DOS CAPAS donde una parece la otra: leerla es verdadero sobre una y falso sobre la que manda
+
+**S114-F, firma del founder.** Dos días persiguiendo por qué un proyecto de Vercel dejaba de
+crear deployments. La causa no era ninguna de las que se persiguieron.
+
+🔴 **El `Ignored Build Step` existe en DOS capas:** un **Production Override** ligado a *un
+deployment concreto* —congelado con él— y el **Project Settings**, que es el que rige lo
+nuevo. **Se cambió una y se leyó la otra.**
+
+```
+día 1   se cambia una capa  →  el hook construye  →  «resuelto»
+día 2   se lee la otra capa →  dice «Automatic»   →  «volvió solo: es una REGRESIÓN»
+```
+
+> ***Las dos lecturas eran verdaderas. Ninguna era la que decidía.***
+
+## Lo que esta clase le hizo al diagnóstico — tres conclusiones falsas, todas «bien medidas»
+
+| conclusión | por qué se cayó |
+|---|---|
+| *«el `ignoreCommand` queda absuelto»* | el control —un commit **sin** el campo que tampoco construyó— **estaba dentro del mismo bloque de la causa real**. Un control que comparte la variable confusora **no controla nada** |
+| *«la heurística decide por tamaño del diff»* | falsada por un commit de **60 líneas reales** que no construyó, después de que uno de 122 sí |
+| *«es una intermitencia sin explicar»* y luego *«es una regresión»* | **ninguna de las dos**: la configuración nunca cambió sola — *cambió de capa el que la miraba* |
+
+**Las tres salieron de medir mientras una variable no controlada actuaba sobre todos los
+brazos.** *El error no fue medir mal: fue **no saber que había una segunda capa prendida**.*
+
+## Por qué esta clase resiste al método
+
+**Medir más no ayuda.** Se puede leer la pantalla diez veces, con captura, y **las diez
+dicen lo mismo y las diez son verdaderas** — sobre la capa que se está mirando. **El dato
+que falta no es un valor: es que existe otro lugar donde vive el mismo valor.**
+
+⇒ **Ante una configuración que no se comporta como dice, la primera pregunta no es «¿qué
+dice?» sino «¿DÓNDE MÁS vive esto?».** Un override por deployment, un `.env` de proyecto vs
+uno de entorno, un archivo del repo que pisa el dashboard, una policy y un grant.
+
+⚠️ **Y la señal que la delata, que es lo único accionable:** *cuando un cambio de
+configuración «funciona» y después «se revierte solo», casi nunca se revirtió — casi
+siempre se aplicó a una capa que no era la que rige.* **Un ajuste no vuelve solo; lo que
+vuelve es la lectura al lugar equivocado.**
+
+**Y de ahí sale la cura estructural, que no depende de acordarse:** *lo que se puede
+versionar en el repo se versiona* — un archivo tiene una sola capa, se revisa en un diff y
+sobrevive a que alguien mire la pantalla equivocada.
+
+*(Familia directa de [[L-525]] —una URL canónica vive en dos lugares— con la vuelta de
+tuerca de que **acá las dos capas se llaman igual y se ven iguales**. Y cierra el arco de
+[[L-521]] y [[L-524]]: cuatro formas de leer una señal adyacente como si fuera el hecho.)*
+
+⏳ **Pendiente de la confirmación del founder:** cuál de las dos capas se cambió cada vez.
+Con eso se enmienda `L-516`, que hoy dice «intermitencia sin explicar» y **ya no rige**.
+
+---
+
+
+### `L-525` — Una URL canónica vive en DOS lugares, y cambiar uno solo no rompe nada: desvía
+
+**S114-F, firma del founder.** Curé el `redirectTo` del admin: la URL de rama pasó a
+`https://admin.epetplace.com`. **Lo verifiqué de tres formas y las tres dieron verde:**
+
+```
+el bundle publicado    la URL vieja 0 · la canónica 1, dentro del signInWithOAuth
+el dominio             /  /login  /placas  →  200, cero redirects
+la sonda de OAuth      302 → accounts.google.com con redirect_to intacto
+```
+
+🔴 **Y al loguearse, el founder terminaba en el sitio público.**
+
+**La causa: `https://admin.epetplace.com` NO estaba en las *Redirect URLs* de Supabase.** Lo
+que estaba era **la URL de rama vieja** — la que el código había dejado de usar. Al volver
+del proveedor, Supabase **descarta el `redirect_to` que no reconoce y cae al Site URL**.
+
+> ***Una URL canónica vive en DOS lugares: el código y la allow-list del proveedor de auth.***
+> **Cambiar uno solo no rompe nada — desvía.** Y el desvío ocurre *después* de que el
+> usuario se autenticó, así que **el login “funciona”: te deja adentro de otro lado.**
+
+## Por qué ninguna medición del bundle podía verlo
+
+**El código publicado era correcto**, y eso es lo que engaña. La mitad que faltaba **no vive
+en el repo**: vive en la configuración del proveedor, donde **ningún gate, typecheck ni
+grep llega**.
+
+⚠️ **Y mi sonda tampoco: medía el DESPACHO, no la vuelta** ([[L-505]]). El `302` hacia
+Google sale igual con una URL permitida y con una que no — *la validación ocurre en el
+callback*. **Su discriminador ya me había avisado que no distinguía**, y aun así el
+diagnóstico completo tardó porque *el eslabón que faltaba no era medible desde afuera.*
+
+⇒ **Toda URL canónica que cambie se cambia en los DOS lugares, EN EL MISMO ACTO.** Y una
+URL nueva **entra a la allow-list ANTES del primer login**, no después — *porque el primer
+síntoma no es un error: es alguien que entra y aparece en otro sitio.*
+
+**El rastro que lo hace diagnosticable, para la próxima:** *si el login funciona y te deja
+en otro lado, la falla está del lado del proveedor, no del código* — **cuando la app está
+mal, no llegás a autenticarte; cuando la allow-list está mal, te autenticás y viajás.**
+
+*(Familia de [[L-521]] y [[L-524]]: las tres son sobre medir la señal adyacente. Acá el
+bundle era correcto y el hecho vivía **fuera del repo** — el único de los tres donde ni
+siquiera había artefacto que abrir.)*
+
+---
+
+
+### `L-524` — Para saber si algo se usa, no se lee el código: se cuentan sus filas
+
+**S114-F, firma del founder.** Había que decidir cuáles de las **27 pantallas** de un portal
+viejo valía reconstruir. **El instinto es clasificarlas por estado** —anda / rota / sin
+permiso— y eso fue lo primero que hice: **12 andan, 10 están rotas, 5 dan `permission
+denied`.**
+
+🔴 **Esa tabla no servía para decidir nada.** Ordena por *qué tan sano está el código*, y la
+pregunta era otra: ***¿alguien la usa?***
+
+**Lo que sí decidió fue contar filas:**
+
+```
+Gamificacion   1 005 líneas  →  puntos_usuario 1 fila · logros_usuario 2
+PlanesPrime      858 líneas  →  planes_prime 3 filas
+Promociones      920 líneas  →  cupones 1 · campanas 1
+Logistica      1 956 líneas  →  envios 5 filas
+BetaUsers        676 líneas  →  beta_users 2 filas
+```
+
+⇒ **~11 000 líneas de pantalla para administrar unas pocas decenas de filas.** *Ninguna de
+esas cinco estaba «rota»: tres de ellas **andan perfectamente**.*
+
+> ***Una pantalla sana que administra una tabla vacía es más cara de mantener que una rota
+> que nadie abre — porque la sana invita a seguir manteniéndola.***
+
+## Por qué el estado del código engaña
+
+**«Anda» y «se usa» son hechos distintos, y sólo uno se puede leer en el repo.** El código
+dice si compila y si sus tablas existen; **no dice si alguien entró alguna vez.** Y como es
+lo único visible desde el editor, **se convierte en el criterio por defecto** — y ordena la
+lista exactamente al revés de lo que hace falta.
+
+⇒ **Antes de estimar qué cuesta reconstruir algo, se cuenta cuánto se usa.** Un `count(*)`
+por tabla es más barato que leer una pantalla, y **reordena la lista entera**.
+
+⚠️ **Y el corolario incómodo, que es el que ahorra el trabajo:** *lo que hay que justificar
+no es retirar una pantalla — es CONSERVARLA.* Con la carga de la prueba al revés, once mil
+líneas se sostienen solas porque están escritas, y **cada una vuelve a costar el día que
+alguien cambia el modelo debajo.**
+
+**El límite, declarado:** contar filas mide **volumen**, no **importancia**. Una tabla de
+dos filas puede ser crítica —`country_config` son 2 y define la moneda de un país— así que
+**el número abre la pregunta, no la cierra.** *Lo que cierra es cruzarlo con qué hace falta
+para operar: `country_config` se difiere porque **casi nunca se toca**, no porque tenga
+pocas filas.*
+
+*(Familia de [[L-521]] y [[L-523]] del mismo arco: las tres son sobre **medir el hecho y no
+su señal adyacente**. El peso de un bundle, el `exit 0`, y ahora el estado del código —
+todas se leen como si dijeran algo que no dicen.)*
+
+---
+
+
+### `L-523` — Un cambio de contrato del motor no rompe al consumidor con un error: lo deja mostrando VACÍO
+
+**S114-F.** A curó `listar_lotes()` sobre un hallazgo mío: el gate era `WHERE is_admin()`
+y devolvía `[]`, así que *«no hay lotes»* y *«no podés verlos»* llegaban a la pantalla como
+el mismo valor. **El contrato pasó a hablar:**
+
+```
+antes   [ {…}, {…} ]                                  ← un array
+ahora   { ok:true, lotes:[…] } | { ok:false, codigo }  ← un sobre
+```
+
+🔴 **Y eso rompió, en silencio, el consumidor que yo acababa de desplegar.**
+
+```js
+setLotes((data ?? []) as Lote[])      // data ya no es un array: es un objeto
+```
+
+**No lanza.** `data ?? []` devuelve el objeto, `.map` no encuentra filas, y la pantalla
+dice **«todavía no hay ningún lote» para siempre**.
+
+> ***Que es exactamente el modo de falla que el cambio vino a eliminar.***
+> La cura, consumida sin adaptar, **reprodujo el defecto que curaba** — un piso más arriba.
+
+## La ley
+
+**Cuando un contrato cambia de forma, el consumidor viejo casi nunca falla: interpreta mal
+y sigue.** Un array que pasa a ser objeto, un campo que se anida, una lista que se envuelve
+— *el lenguaje no se queja porque la operación sigue siendo legal sobre el valor nuevo*.
+
+⇒ ***Y el resultado se ve como «no hay datos», que es el estado más común y el menos
+sospechoso de toda pantalla.*** Nadie audita un estado vacío: se lee como una verdad sobre
+el mundo, no como un síntoma.
+
+**Por eso un cambio de contrato exige DOS actos, y el segundo es el que se olvida:**
+① cambiar el motor · ② **censar sus consumidores y adaptarlos en el mismo acto** —
+`grep` del nombre de la función en apps, packages y repos vecinos. *Acá dio 1 (el legado) y
+0 en el monorepo, así que el censo fue barato; el día que dé 6, es la diferencia entre una
+cura y seis pantallas mudas.*
+
+⚠️ **Y lo que lo salvó no fue un gate: fue un aviso.** Ningún typecheck lo veía —el valor
+venía de un `jsonb`, tipado a mano ([[L-498]])— y el build salió en verde. **Se supo porque
+quien cambió el motor avisó al consumidor.** *En una casa con seis pistas eso no es cortesía:
+es el único mecanismo que existe para esta clase.*
+
+> 🔴 **ENMIENDA (mismo día, con el caso en producción): esta lección decía de MENOS, y el
+> error es factual.** Escribí que *«el `.map` no encuentra filas y la pantalla muestra
+> vacío»*. **Falso:** `.map` **no existe** sobre un objeto, así que **tira
+> `TypeError: e.map is not a function` y la pantalla queda EN NEGRO.** Medido en producción,
+> `Placas.tsx:159`.
+>
+> **Y la corrección hace la clase MÁS grande, no más chica: el mismo cambio de contrato
+> produce los DOS desenlaces, y cuál toca depende de una casualidad de la forma.**
+>
+> ```
+> array → objeto,  y el consumidor hace .map()       → TypeError · pantalla en negro
+> array → objeto,  y el consumidor hace .length / [] → 0 filas   · vacío silencioso
+> ```
+>
+> ⇒ ***El silencioso es el peligroso, y el ruidoso es el afortunado.*** Que este caso haya
+> reventado **fue suerte**: si `Placas` hubiera leído `data?.length` en vez de `.map`, hoy
+> seguiría diciendo «no hay lotes» y nadie lo sabría. **La lección no es «rompe» ni «muestra
+> vacío»: es que el autor del cambio no puede saber cuál de los dos le toca al consumidor.**
+
+*(Familia de [[L-318]] —motor sin puerta— y su reverso: allá la pieza no llega a usarse;
+acá **se usa con la forma vieja y produce un resultado plausible**. Y de [[L-521]]: las dos
+son sobre un verde que no dice nada del contenido.)*
+
+---
+
+
+### `L-522` — `--filter` en un lockfile lo PODA a la plataforma de quien lo corre
+
+**S114-F, firma del founder.** Para agregar **una** dependencia a **un** paquete del
+monorepo corrí lo que parece la forma cuidadosa —tocar sólo lo mío—:
+
+```bash
+pnpm install --lockfile-only --filter @epetplace/admin
+```
+
+🔴 **Borró 146 líneas del lock. Entre ellas, los 30 binarios de `lightningcss-linux`** —
+*los que necesita el build de Vercel, que corre en Linux.*
+
+```
+--filter          9 insertions · 146 deletions   🔴 lock podado a macOS
+sin --filter     19 insertions ·  16 deletions   ✅ los 30 binarios de linux intactos
+```
+
+> ***Un lock podado compila perfecto en la máquina que lo podó y rompe en el CI.***
+> El daño es de la clase que no se ve: no falla nada, no avisa nada, y el archivo queda
+> más chico — *que en un lockfile se lee como limpieza.*
+
+⚠️ **Y lo que lo vuelve peligroso no es el comando: es que `--filter` significa lo
+contrario de lo que uno lee.** Uno lo pone para **acotar el alcance del cambio**; pnpm lo
+entiende como **acotar el universo a resolver**, y lo que queda fuera del filtro **no se
+conserva: se cae**. *La intención y la semántica apuntan en direcciones opuestas, y la
+salida es exitosa en las dos lecturas.*
+
+⇒ **En un monorepo, el lockfile se regenera SIN `--filter`.** Acotar el commit se hace con
+el pathspec, no con el resolvedor.
+
+## Lo que lo cazó, y no fue un error
+
+**El `--stat`.** `1 file changed, 9 insertions(+), 146 deletions(-)` sobre un cambio que
+tenía que agregar **una línea**. *Ninguna otra señal habló*: `exit 0`, «Done in 3.6s», y el
+build local siguió funcionando — **porque la plataforma local es justamente la que el lock
+conservó.**
+
+⇒ **Un `git diff --stat` antes de commitear un lockfile no es prolijidad: es el único
+lugar donde este daño es visible.** Un lock es ilegible de a línea, así que la única
+pregunta que se puede hacer es *«¿el tamaño del cambio se parece a lo que hice?»* — y acá
+la respuesta era no por dos órdenes de magnitud.
+
+*(Familia de [[L-521]] del mismo arco —un artefacto que se produce con éxito y no contiene
+lo que uno cree— pero en un archivo que **nadie lee**: en un bundle uno puede grepear una
+cadena propia; en un lockfile de 20 000 líneas **la única medición al alcance es el
+tamaño del diff**.)*
+
+---
+
+
+### `L-521` — Un artefacto que se construye con ÉXITO no prueba que contenga lo que uno cree
+
+**S114-F, firma del founder — la más cara del arco.**
+
+`apps/admin/src/lib/supabase.ts` lanza si faltan sus variables de entorno. Es
+fail-closed, está bien puesto, y su comentario dice lo que hay que decir. **No alcanzó.**
+
+🔴 **Un `throw` a nivel de módulo no frena el build: vuelve inalcanzable todo lo que viene
+detrás, y Rollup hace tree-shaking de la aplicación entera.**
+
+```
+sin variables   199,89 kB · exit 0 · «✓ built»   → React + el guard. NADA de la app.
+con variables   482,67 kB · exit 0               → la aplicación completa
+```
+
+*El de 199 kB no da un error, no avisa, y **pesa lo suficiente para parecer real**. Se
+publica limpio y sirve una página en blanco.*
+
+⚠️ **Y lo peor no es el bundle: reporté ese número como «el admin construido» durante toda
+una tanda.** «199,89 kB» quedó en el parte, en un commit y en dos mensajes a otra pista —
+*como evidencia de que la app compilaba.*
+
+## 🔴 LAS TRES CAPAS QUE MINTIERON, en el orden en que mintieron
+
+| | señal | por qué engaña |
+|---|---|---|
+| **1** | `exit 0` + `✓ built` | *el proceso terminó bien* — y terminar bien no dice **qué produjo** |
+| **2** | el **sourcemap listaba mis 14 archivos** | ***lista lo que Rollup PROCESÓ, no lo que QUEDÓ en el output.*** Casi lo tomo por prueba: es la más peligrosa de las tres, porque **nombra los archivos correctos, uno por uno** |
+| **3** | *(lo único que cerró)* **grepear el bundle** | ninguna cadena de la UI adentro |
+
+**Y la causa apareció leyendo los últimos 500 caracteres del artefacto**, donde el bundle
+termina literalmente en `throw … Error(\`Faltan VITE_SUPABASE_URL…\`)`.
+
+> ***El artefacto lo decía todo si uno lo abría; ninguna de sus señales lo decía.***
+
+## ① La ley: tres señales ADYACENTES al hecho se leen como el hecho
+
+**El peso, el código de salida y el sourcemap no son el contenido: están al lado.** Cada
+una es verdadera sobre lo suyo —el proceso terminó, el archivo pesa, esos módulos se
+procesaron— y **ninguna responde la única pregunta que importa: ¿está adentro lo que creo
+que está?**
+
+⇒ **Lo único que prueba que un artefacto contiene algo es buscar adentro una cadena que
+sólo pueda venir de eso.** *El peso no es una medición: es una pista.* Y ese control se
+corre **la primera vez que se construye**, no la décima — porque después el número entra
+al parte y se cita como si estuviera verificado.
+
+## ② La forma más común, y la más incómoda: **saberlo y no aplicarlo al propio artefacto**
+
+🔴 **El criterio correcto ya estaba escrito en `apps/pagos-web/build.mjs`** —un guard que
+**aborta el build** con `process.exit(1)`— **y su comentario decía exactamente esto:**
+*«una página servida con config incompleta se ve bien y no funciona»*.
+
+**Yo estaba citando ese archivo en un aviso del buzón el MISMO día.**
+
+> ***Nadie audita lo que acaba de construir.*** La regla se aplica al código ajeno —donde
+> uno llega como lector— y no al propio, donde uno llega como autor y ya sabe qué quiso
+> hacer. *No fue ignorancia de la ley: fue no volver a mirar el propio resultado con ella
+> en la mano.*
+
+## ¿Llegó a producción? — NO, medido
+
+```
+admin.epetplace.com  →  index-B4k1WxEH.js  ·  1 857 532 bytes (1,86 MB)
+   Placas 2 · Logística 5      → es el LEGADO, y está entero
+   Tomar el caso 0 · caso_pedir_casa 0   → nada de apps/admin
+   Faltan VITE_SUPABASE 0                → nada del bundle vacío
+```
+
+**Tres barreras independientes lo impidieron, y ninguna fue este guard:** `apps/admin`
+**no está en `main`** (vive sólo en la rama de F) · el proyecto Vercel del monorepo **no
+construye desde el 6-sep** · y `admin.epetplace.com` **sirve otro repo**.
+
+⚠️ ***Se salvó por tres accidentes, no por una defensa.*** El día que cualquiera de los
+tres se resuelva —y los tres están en cola— el bundle vacío se publica solo.
+
+## La cura, y su control en las dos direcciones
+
+`vite.config.ts` verifica las variables **antes de construir** y aborta con
+`process.exit(1)`.
+
+```
+sin variables → exit 1, con el mensaje que nombra qué falta y qué pasa si no está
+con variables → exit 0, 482 kB, y las cadenas de la app adentro (medidas)
+```
+
+*Un guard de build que sólo se probó fallando podría estar rompiendo también el caso
+bueno: **por eso se ejercen los dos lados**.*
+
+*(Familia de [[L-318]] —motor sin puerta— pero invertida: acá la puerta existe y funciona,
+y lo que falla es que **su falla no viaja al artefacto**. Y de [[L-503]]: un `2xx`/`exit 0`
+dice que el proceso terminó, no que hizo lo que uno cree.)*
+
+---
+
+
+### `L-517` — El hedge no viaja entre sesiones: viaja la conclusión
+
+**S114-F, firma del founder.** Le pasé a otra pista un hallazgo con su hipótesis
+**bien marcada**: *«puede ser deliberada — Expo SDK 57 puede exigir TS 6, **es la
+explicación más probable***»*. Escrito con «puede», con «más probable», y con una
+sección aparte titulada **«lo que NO se midió»**.
+
+🔴 **Volvió como hecho.** La pista integradora contestó que iba a *«agregar la línea
+que declara que la divergencia es deliberada (Expo SDK 57)»* — **en el canon**, en un
+archivo que existe para que nadie vuelva a medir.
+
+**Lo medí antes de que lo escribiera, y no se sostenía:**
+
+```
+expo@57.0.4 · expo-router@57.0.4   typescript en peerDeps: —   en devDeps: —
+                                   ⇒ Expo NO lo exige
+
+git log -L de la línea en apps/cliente  →  UN SOLO commit: 98e14c97, el scaffold
+apps/cliente ~6.0.3 · apps/prestador ~6.0.3 · raíz ~5.9.0 · packages ~5.9.0
+                                   ⇒ los cuatro del MISMO commit, hace dos meses
+```
+
+*No era una decisión: era lo que dejó `create-expo-app` y nadie miró.*
+
+> ***Un hedge es contexto, y el contexto no sobrevive a un traspaso.*** Lo que cruza de
+> una sesión a otra es la frase que sirve para actuar — **«deliberada (Expo SDK 57)»**—,
+> no el párrafo donde vivía con su «puede». Y del otro lado llega **sin la marca y con la
+> autoridad de venir de quien midió el resto.**
+
+⚠️ **Y lo que lo vuelve un tipo propio y no un descuido: no hubo error de medición.** No
+medí de más ni de menos, y marqué bien. *El defecto ocurrió enteramente en el traspaso* —
+que es el único lugar donde ningún gate mira, porque **con seis pistas y un solo canal
+humano el «puede» se cae y queda el «es».**
+
+## El corolario, y su tercera salida
+
+**Una inferencia que va a viajar a otra pista se manda con lo que haría falta para
+medirla.** En este caso eran diez palabras:
+`cat node_modules/expo/package.json | grep typescript`. *Con eso, la pista receptora lo
+resuelve en dos segundos y no escribe nada falso.*
+
+🔴 **Pero «o no se manda» sería peor que el defecto que cura**, y por eso la regla tiene
+tres salidas y no dos:
+
+| | |
+|---|---|
+| **va con su instrumento** | lo normal — y casi siempre es un comando de una línea |
+| **va marcada `SIN INSTRUMENTO`** | cuando medirla es caro. *Una hipótesis sin forma de medirla sigue valiendo como pista; lo que no vale es que llegue como hecho* |
+| **no se manda** | sólo cuando ni siquiera se puede decir qué la mediría — o sea, cuando ni el que la emite sabe qué está afirmando |
+
+**Y el matiz operativo, que es lo que falló acá: el hedge va PEGADO a la frase que va a
+viajar, no en su contexto.** Yo lo puse en el cuerpo del documento y en una sección
+aparte; **lo que la otra pista extrajo fue la frase**. *Si la marca no está adentro de la
+oración que alguien va a copiar, no está.*
+
+*(Pariente de [[L-166]] —todo dato vivo se relee al usarlo— pero de la otra punta: allá
+el receptor confía en un dato que envejeció; acá **el emisor marca bien y la marca se cae
+sola en el camino**. Y de [[L-158]]: una tabla de hallazgos no se vuelve orden sin el
+literal — acá el literal existía y no viajó.)*
+
+---
+
+
+### `L-516` — Una racha de observaciones no prueba una regla si la ventana la elegí yo
+
+**S114-F.** Tres commits seguidos no produjeron deployment. Sondeé cada uno **5 minutos**
+—un número que no era arbitrario: **5× el peor caso medido**, 26 s · 33 s · ~60 s— y con
+esas tres observaciones escribí *«el camino `push → deployment` está ROTO»* **en tres
+archivos del repo**.
+
+🔴 **El cuarto commit construyó en 26 segundos y tiró abajo la conclusión.**
+
+```
+bf6bf9b   ✅ 2 m 21 s
+f3171cc   🔴 ninguno   ⎫
+b5716d1   🔴 ninguno   ⎬ tres seguidos ⇒ «está roto»
+66cf314   🔴 ninguno   ⎭
+2b777e3   ✅ 26 s      ← lo desmiente
+```
+
+**Dónde estuvo el error, y es fino:** mi ventana salió de **deployments que sí
+ocurrieron**. Eso mide *cuánto tarda uno que va a salir*, **no cuánto puede tardar uno
+que va a salir tarde** — o cuánto hay que esperar antes de decir que no va a salir.
+***Es sesgo de supervivencia en la elección del umbral***, y produce un umbral que se
+siente medido porque cada uno de sus números lo está.
+
+> ***Tres «no» seguidos se leen como una regla, y son tres muestras con el mismo sesgo.***
+> La repetición no agrega evidencia cuando el instrumento es el mismo y su límite es el
+> que está en duda.
+
+⇒ **Una racha autoriza a decir «pasó tres veces», jamás «siempre pasa».** Para la segunda
+hace falta **una observación de otra clase**: el mecanismo, el panel del otro lado, o un
+caso que la regla prohíba y sin embargo ocurra.
+
+⚠️ **Y el corolario que la vuelve exigible: el costo de la conclusión decide cuánta
+evidencia hace falta.** Ésta se escribió en `DEPLOY.md`, en el `README` y en el
+`CLAUDE.md` del repo — tres lugares que existen para que alguien **no vuelva a medir**.
+*Una conclusión prematura en un lugar de consulta no se equivoca una vez: se equivoca cada
+vez que alguien la lee.* Por eso se retiró con su historia, no se borró
+(mismo trato que la enmienda de [[L-518]] el mismo día).
+
+**Lo que sobrevive de la medición, que no es poco:** los tres commits **efectivamente** no
+tienen deployment. El hecho era verdadero; la regla que le colgué encima, no. *Y la
+distinción tiene nombre: lo que había era una **intermitencia**, no un corte* — y las dos
+producen exactamente las mismas tres observaciones.
+
+> 🔴 **ENMIENDA 2 (9-sep, y cierra el caso): «intermitencia sin explicar» YA NO RIGE —
+> tiene causa, y no es una regresión.** El `Ignored Build Step` de Vercel vive en **dos
+> capas**: *Project Settings* (donde el founder puso `Custom` + `exit 1`, **y sigue puesto**)
+> y ***Production Overrides*, ligado a un deployment concreto, con el Command VACÍO.**
+> ***El override manda en producción y su comando vacío termina con `exit 0`: saltear.***
+>
+> ⇒ **Los siete commits sin deployment no son una racha ni una intermitencia: son el mismo
+> override actuando.** Y explica por qué «funcionó» una vez: *el deployment que salió creó
+> su propio override, y desde entonces todo se saltea.*
+>
+> **✅ CAUSA COMPLETA (9-sep, cierra el caso):** el «Production Override» **no es un ajuste
+> fantasma ni un valor de Vercel: ES EL `vercel.json` DEL DEPLOYMENT, CONGELADO.** El
+> changelog de Vercel lo dice — los *configuration overrides per-deployment* **son las seis
+> propiedades del `vercel.json`**, `ignoreCommand` entre ellas.
+>
+> ⇒ **El override vacío es mi propio archivo:** yo retiré el campo en `66cf314`, y **los DIEZ
+> deployments que existen vienen de commits sin él** (medido, uno por uno). *Los dos únicos
+> commits que sí lo llevaban —`f3171cc`, `b5716d1`— **nunca construyeron**, así que **no hay
+> ningún deployment con el override lleno para promover**.*
+>
+> 🔴 **Y de ahí sale la trampa que cierra la lección: el override vacío saltea el build, así
+> que la cura no puede entrar por la puerta que ella misma abre.** El commit que traería el
+> `ignoreCommand` **no llega a construirse**, así que nunca crea su propio override.
+> ***Una configuración que se auto-perpetúa porque su remedio necesita justamente lo que
+> ella impide.***
+>
+> **La salida, para la próxima:** el campo se pone en el `vercel.json` **ANTES del primer
+> deployment del proyecto** — ahí no hay círculo, porque todavía no hay override que romper.
+> *Ejecutado en `apps/admin` el mismo día.*
+>
+> **Lo que sobrevive de esta lección es su núcleo y se refuerza:** una racha no prueba una
+> regla — *y acá ni siquiera era una racha: era **una sola causa** produciendo siete
+> observaciones idénticas.* **El caso NO va a soporte.** Ver [[L-526]] y [[L-527]].
+>
+> ⏹️ **Y el caso se cierra sin curar, por firma del founder:** *Placas queda rota en el
+> legado — es una pantalla de un repo que se va a apagar, el diagnóstico está completo, y
+> **el costo de seguir supera al defecto**.* **Saber cuándo dejar de perseguir un defecto
+> también es una decisión de ingeniería.**
+
+> ✅ **ENMIENDA (mismo día): se intentó fundar el umbral de verdad, y el intento
+> FALLÓ por la misma razón — que es lo que vuelve exigible la lección.**
+>
+> El umbral gobierna un gate cableado, así que se re-midió con la muestra más
+> grande disponible (cruce de push events × deployments del monorepo):
+>
+> ```
+> n = 17     mín 39 s · p50 47 s · p90 55 s · p95 63 s · MÁXIMO 92 s
+> 0 de 17 superan los 300 s  (que son 3,3× el máximo observado)
+> ```
+>
+> La muestra pasó de **3 a 17** y el máximo de 60 s a 92 s. **Y el sesgo persiste
+> igual**, porque no puede no persistir: ***un deployment que nunca se creó no tiene
+> latencia***, así que **la muestra de «los que tardaron» no existe** y no se puede
+> construir desde afuera. *Más datos del mismo tipo no curan un sesgo de selección.*
+>
+> ⇒ **La salida, cuando el umbral no se puede fundar, no es afinarlo: es dejar de
+> hacerlo decidir solo.** El gate ahora separa **«el proyecto no despliega»** (rojo)
+> de **«despliega y esta punta quedó saltada»** (no concluyente), con un
+> discriminador que no depende del reloj: *si existe algún deployment posterior al
+> commit, el corte no es del proyecto.* **Y lo declara en su salida** — *un gate que
+> puede gritar en falso y no lo dice entrena a ignorarlo.*
+
+*(Cierra la familia del día con [[L-519]], [[L-504]], [[L-505]] y [[L-506]]: cinco formas
+de que un dato verdadero sostenga una conclusión falsa — la brecha entre aceptar y hacer,
+el texto que describe el caso típico, la sonda parada en el eslabón anterior, la prosa que
+participa, y ahora la racha con la ventana propia.)*
+
+---
+
+### `L-517` — El hedge no viaja entre sesiones: viaja la conclusión
+
+**S114-F, firma del founder.** Le pasé a otra pista un hallazgo con su hipótesis
+**bien marcada**: *«puede ser deliberada — Expo SDK 57 puede exigir TS 6, **es la
+explicación más probable***»*. Escrito con «puede», con «más probable», y con una
+sección aparte titulada **«lo que NO se midió»**.
+
+🔴 **Volvió como hecho.** La pista integradora contestó que iba a *«agregar la línea
+que declara que la divergencia es deliberada (Expo SDK 57)»* — **en el canon**, en un
+archivo que existe para que nadie vuelva a medir.
+
+**Lo medí antes de que lo escribiera, y no se sostenía:**
+
+```
+expo@57.0.4 · expo-router@57.0.4   typescript en peerDeps: —   en devDeps: —
+                                   ⇒ Expo NO lo exige
+
+git log -L de la línea en apps/cliente  →  UN SOLO commit: 98e14c97, el scaffold
+apps/cliente ~6.0.3 · apps/prestador ~6.0.3 · raíz ~5.9.0 · packages ~5.9.0
+                                   ⇒ los cuatro del MISMO commit, hace dos meses
+```
+
+*No era una decisión: era lo que dejó `create-expo-app` y nadie miró.*
+
+> ***Un hedge es contexto, y el contexto no sobrevive a un traspaso.*** Lo que cruza de
+> una sesión a otra es la frase que sirve para actuar — **«deliberada (Expo SDK 57)»**—,
+> no el párrafo donde vivía con su «puede». Y del otro lado llega **sin la marca y con la
+> autoridad de venir de quien midió el resto.**
+
+⚠️ **Y lo que lo vuelve un tipo propio y no un descuido: no hubo error de medición.** No
+medí de más ni de menos, y marqué bien. *El defecto ocurrió enteramente en el traspaso* —
+que es el único lugar donde ningún gate mira, porque **con seis pistas y un solo canal
+humano el «puede» se cae y queda el «es».**
+
+## El corolario, y su tercera salida
+
+**Una inferencia que va a viajar a otra pista se manda con lo que haría falta para
+medirla.** En este caso eran diez palabras:
+`cat node_modules/expo/package.json | grep typescript`. *Con eso, la pista receptora lo
+resuelve en dos segundos y no escribe nada falso.*
+
+🔴 **Pero «o no se manda» sería peor que el defecto que cura**, y por eso la regla tiene
+tres salidas y no dos:
+
+| | |
+|---|---|
+| **va con su instrumento** | lo normal — y casi siempre es un comando de una línea |
+| **va marcada `SIN INSTRUMENTO`** | cuando medirla es caro. *Una hipótesis sin forma de medirla sigue valiendo como pista; lo que no vale es que llegue como hecho* |
+| **no se manda** | sólo cuando ni siquiera se puede decir qué la mediría — o sea, cuando ni el que la emite sabe qué está afirmando |
+
+**Y el matiz operativo, que es lo que falló acá: el hedge va PEGADO a la frase que va a
+viajar, no en su contexto.** Yo lo puse en el cuerpo del documento y en una sección
+aparte; **lo que la otra pista extrajo fue la frase**. *Si la marca no está adentro de la
+oración que alguien va a copiar, no está.*
+
+*(Pariente de [[L-166]] —todo dato vivo se relee al usarlo— pero de la otra punta: allá
+el receptor confía en un dato que envejeció; acá **el emisor marca bien y la marca se cae
+sola en el camino**. Y de [[L-158]]: una tabla de hallazgos no se vuelve orden sin el
+literal — acá el literal existía y no viajó.)*
+
+---
+
+---
+
+### `L-506` — La prosa no es inerte cuando vive adentro de algo que se EJECUTA
+
+**S114-F.** Firmé una cura para que un repo construyera siempre: `vercel.json` con
+`ignoreCommand`, que en Vercel devuelve un código de salida — `0` saltea el build,
+`1` lo construye. Y le puse una explicación adentro, para que quien lo mirara
+entendiera:
+
+```json
+"ignoreCommand": "echo 'construir SIEMPRE — ver README, seccion \"Por que este repo construye siempre\"'; exit 1"
+```
+
+🔴 **Ese commit fue el único de la tanda que NO produjo deployment.** El anterior,
+sin `ignoreCommand`, había construido trece minutos antes. *La cura escrita para
+garantizar el build fue lo único que lo impidió.*
+
+**Lo que se descartó antes de tocar nada**, contra el schema oficial
+(`https://openapi.vercel.sh/vercel.json`) y no contra la intuición:
+
+```
+ignoreCommand existe como propiedad raíz          ✅ válido
+type string|null · maxLength 256 · mi valor 92    ✅ dentro
+additionalProperties: false → sin keys de más     ✅ limpio
+```
+
+⇒ **El archivo no violaba el schema. La causa no era la forma, era el contenido.**
+Las comillas **dobles** adentro del comando lo rompen cuando Vercel lo envuelve
+para ejecutarlo, y un comando roto puede salir con `0` — que en ese campo
+significa *saltear*.
+
+> ***Un texto puesto para explicar terminó cambiando el comportamiento, y en la
+> dirección exactamente contraria a la que explicaba.***
+
+⇒ **Un campo cuyo único trabajo es devolver un código de salida se deja PELADO.**
+La explicación va donde se lee sin ejecutarse — el README, un comentario del
+código, el canon. **Adentro del ejecutable, la prosa es un participante.**
+
+⚠️ **Y el precedente que la vuelve familia y no anécdota: la propia cura llevaba
+adentro el defecto que venía a curar** — igual que la cura de `D-731` en S92-BIS,
+cuyo ensayo de fallo encontró el defecto dentro de la cura misma. *La disciplina
+que las cierra a las dos es la misma: **una cura no está entregada hasta que su
+efecto se midió en el objeto**, no hasta que se escribió bien.*
+
+✅ **Y lo bueno del día: no lo encontré yo — lo encontró el gate que había cableado
+quince minutos antes.** La Action puso una ✗ roja en ese commit por «la punta no
+tiene deployment», que es literalmente el caso para el que fue construida. *Un
+instrumento que estrena su rojo sobre un error de su propio autor es un
+instrumento que sirve* ([[L-459]]).
+
+---
+
+
+### `L-505` — Una sonda puede ser verdadera y medir el eslabón ANTERIOR al que importa
+
+**S114-F.** Verifiqué que «Entrar con Google» estuviera curado en producción.
+El bundle publicado tenía el `redirectTo` correcto y literal, y una sonda al
+endpoint de OAuth devolvió **302 hacia `accounts.google.com`** con la URL
+canónica intacta. Dos verdes, los dos verdaderos. **Iba a reportarlo cerrado.**
+
+Corrí el discriminador antes:
+
+```
+① canónica  admin.epetplace.com          → accounts.google.com  ✅
+② una URL INVENTADA que no existe         → accounts.google.com  ✅  ← acá se cae
+③ la URL vieja que rompía                 → accounts.google.com  ✅
+```
+
+🔴 **Las tres pasan.** La sonda no mide la lista de URLs permitidas: mide que el
+endpoint **despache**. La validación de la allow-list ocurre en el **callback**,
+cuando el usuario vuelve de Google — un eslabón más adelante del que yo miraba.
+
+> ***El 302 era verdadero. Falsa era mi lectura de qué probaba.*** Y esa forma
+> no se parece a un error: se parece a una medición limpia, con su código de
+> estado y su header, sobre el sistema real.
+
+⇒ **Antes de concluir de una sonda, se le pasa el caso que TIENE que rechazar.**
+Si no lo rechaza, la sonda mide otra cosa — y hay que decir cuál, porque *«el
+endpoint despacha»* y *«la URL está permitida»* son dos hechos distintos y sólo
+uno estaba en el encargo.
+
+⚠️ **Y el corolario de honestidad, que es la mitad que se olvida:** lo que la
+sonda no alcanzó **se declara**, no se completa con la conclusión que uno
+esperaba. Acá quedó sin medir la vuelta desde Google, que exige credenciales del
+founder — *y no medirla es correcto; lo incorrecto habría sido no decirlo.*
+
+*(Familia de [[L-459]] — la primera prueba de un guard es su rojo, no su verde.
+El matiz propio: acá el instrumento no era un guard sino una sonda de
+diagnóstico, y el defecto no estaba en el instrumento sino **en qué eslabón de
+la cadena estaba parado**.)*
+
+---
+
+
+### `L-504` — El texto de una interfaz describe el caso TÍPICO; el contrato son los bordes, y no está escrito
+
+**S114-F.** Tres pushes seguidos a `main` no produjeron deployment y producción
+sirvió el bundle viejo **2 h 20 min**, con un camino de entrada roto adentro.
+La causa era el `Ignored Build Step` de Vercel en `Automatic`, cuyo texto dice
+—en la pantalla, con esas palabras— que **salta el build si no cambió nada
+relevante**.
+
+🔴 **Y los tres árboles eran distintos entre sí. Medido, no supuesto.** O sea que
+la heurística compara **algo más que el contenido del repo**, y ese «algo más»
+no está declarado en ninguna parte que se pueda leer.
+
+> ***El texto de una interfaz de terceros está escrito para tranquilizar sobre el
+> caso típico. El contrato es lo que el sistema hace en los bordes — y los bordes
+> no se documentan porque el que escribe el texto tampoco los tiene a la vista.***
+
+**Lo que esto cambia en el momento del diagnóstico:** cuando una conducta
+contradice el texto de la pantalla, la conclusión correcta **no** es *«esto no
+puede estar pasando»* —que fue la mía, y me costó cinco hipótesis descartadas—
+sino ***«el texto describe menos de lo que el sistema hace»***. Lo primero
+protege al texto; lo segundo protege al que va a decidir.
+
+⇒ **Corolario, y es el que se ejecuta:** *una decisión que importa no se deja en
+manos de una heurística ajena cuya regla exacta no se puede leer.* No es
+desconfianza — es que **no hay forma de auditarla**, así que su acierto y su
+error son igual de invisibles. La cura no es entender la heurística: es **sacarla
+del camino** (`vercel.json` con `"ignoreCommand": "… exit 1"`, en el repo y no en
+el dashboard, para que quede versionada y se revise en un diff).
+
+⚠️ **Su modo de falla es el peor de todos: SILENCIO.** No hubo error, ni
+deployment en estado *Skipped*, ni línea en el Activity log — *el build moría
+antes de existir*. Y un silencio se lee exactamente igual que «todavía no llegó»
+([[L-518]] y su enmienda).
+
+*(Pariente invertida de [[L-439]]: allá una limitación estaba declarada en un
+comentario y no protegía a nadie; acá el texto declara MENOS de lo que el sistema
+hace, y confiar en él manda a buscar la causa a cinco lugares equivocados.)*
+
+---
+
+
+### `L-519` — Una respuesta de éxito dice que el pedido se ACEPTÓ, no que el trabajo vaya a ocurrir
+
+**S114-F.** Con el deploy trabado, disparé el Deploy Hook de Vercel a mano. El
+POST devolvió **200** con un cuerpo perfectamente sano:
+
+```json
+{ "job": { "id": "…", "state": "PENDING", "createdAt": … } }
+```
+
+**Y nunca construyó.** `PENDING` no es un problema del sistema: es literalmente
+lo que dice — *encolado*. El éxito del POST describe **la recepción del pedido**,
+y yo estaba a punto de leerlo como **la ejecución del trabajo**.
+
+> ***Entre «lo acepté» y «lo hice» hay una brecha, y las APIs contestan del lado
+> barato de la brecha.*** Un `200` con `PENDING` es una promesa; el hecho es el
+> artefacto que aparece después, y hay que ir a buscarlo.
+
+⇒ **De un `2xx` asíncrono no se concluye nada sobre el resultado: se anota el id,
+se define qué artefacto tiene que aparecer y en cuánto tiempo, y se verifica ESO.**
+
+🔴 **Y el corolario es lo que más rinde, porque da vuelta la lección:** *esa misma
+brecha es un punto de MEDICIÓN.* El `PENDING` sin build posterior fue el
+discriminador que **partió la cadena en dos** y movió la causa aguas abajo del
+disparo — descartó de un saque la conexión con GitHub, el webhook y la GitHub App,
+que eran tres de mis cinco candidatos. *Un sistema que acepta y no ejecuta te está
+diciendo dónde NO está el corte.*
+
+**Precedente directo en la casa, y por eso es familia y no caso aislado:** S107
+curó un actuador que *«ignoraba en silencio lo que no conocía — `ok: true`, sin
+escribir nada»*; S109 dejó firmado que el estado se consulta en las tablas
+*«jamás por el `ok:true` de la edge, que es una señal optimista y no un hecho»*.
+**Esta es la misma ley aplicada a un tercero**, donde además no se puede abrir la
+tabla y hay que elegir el artefacto observable de antemano.
+
+---
+
+
+### `L-518` — Cuando la espera deja de discriminar entre las hipótesis, la espera terminó
+
+**S114-F.** Un deploy no salía. Sondeé **1 h 21 min**. El deploy anterior había
+tardado ~50, así que «todavía puede estar en cola» seguía siendo razonable —
+y era falso: **el deployment no existía**. El webhook de GitHub nunca llegó a
+Vercel.
+
+🔴 **Lo que lo hizo durar no fue el tiempo: fue que las dos hipótesis producían
+el mismo hecho.**
+
+```
+cola larga        → producción sirve el commit anterior
+webhook perdido   → producción sirve el commit anterior
+```
+
+**No hay diferencia observable** — ni en el status, ni en los headers, ni en el
+bundle, ni en el reloj. *Un deploy en cola y un deploy que no existe son
+indistinguibles desde el lado del que espera.*
+
+> ***Y la trampa es que esperar es la respuesta CORRECTA para una de las dos.***
+> Cada minuto sin cambio confirma la hipótesis equivocada **exactamente igual
+> que la correcta**. La espera se siente como diligencia y no aporta un bit.
+
+⇒ **La pregunta no es «¿cuánto llevo esperando?» sino «¿lo que estoy viendo
+distingue entre mis hipótesis?».** Si la respuesta es no, **esperar dejó de ser
+medir** — y lo que sigue no es esperar más: es **pedir el dato que sólo existe
+del otro lado**. Acá era la lista de deployments, que vive en el dashboard, o
+sea **fuera de todo instrumento propio**.
+
+**El corolario operativo, para no depender del juicio en el momento:** un
+proceso asíncrono que no aparece en **2× su tiempo observado** se mira en su
+panel, no se sigue sondeando. *El anterior tardó ~50 min; a los ~100 ya había
+que preguntar.*
+
+⚠️ **Y el costo de no tener la regla, medido:** el sondeo agresivo de esa espera
+**disparó el anti-bot de Vercel** y me dejó el dominio en 403 — o sea que
+esperar mal no fue neutro: **degradó el sujeto que estaba midiendo.**
+
+*(Cierra la familia del día con [[L-510]], [[L-511]] y [[L-512]]: las cuatro son
+sobre medir bien lo que uno cree que mide — **la capa**, **la rama**, **el
+momento**, y ahora **si la observación discrimina algo**. Las tres primeras dan
+un dato falso; ésta da un dato verdadero que no sirve para decidir, que es la
+forma más cara porque no se siente como un error.)*
+
+> 🔴 **ENMIENDA (8-sep-2026, misma sesión): la premisa fáctica de arriba es
+> FALSA, y el hecho verdadero REFUERZA la lección en vez de debilitarla.**
+> Donde dice ~~«El webhook de GitHub nunca llegó a Vercel»~~, léase: **el evento
+> llegaba, y el `Ignored Build Step` en `Automatic` mataba el build tan temprano
+> que no dejaba NI UN registro** — ni deployment en estado *Skipped*, ni error,
+> ni una línea en el Activity log. *No era un evento perdido: era un evento
+> descartado sin dejar rastro, que desde afuera se ve idéntico.*
+>
+> **Y el matiz que la vuelve más filosa: la lección subestimaba su propio caso.**
+> No eran dos hipótesis indistinguibles: eran **tres**, y ***la verdadera no
+> estaba en la lista***. Se descartaron por medición el techo de deployments, el
+> webhook, la GitHub App, un force push y los límites de gasto — cinco candidatos,
+> ninguno correcto — porque **todos producían el mismo hecho observable**.
+> ⇒ *Cuando la observación no discrimina, el problema no es sólo que no sepas
+> cuál de tus hipótesis es: es que **no tenés forma de saber si la correcta está
+> entre ellas**.* Por eso la salida no era pensar mejor la lista, era **pedir el
+> dato del otro lado** — que es lo que esta lección ya decía y hay que obedecer
+> antes, no después de cinco descartes.
+
+---
+
+
+### `L-512` — Un instrumento que mide detrás de un caché declara su TTL o invalida
+
+**S114-F, ensayo de la placa.** Configuré el pasaporte (`configurar_pasaporte`
+→ `ok`) y **esperé 62 segundos antes de volver a pedir la página**. Sin esa
+espera habría leído la respuesta cacheada de la medición anterior —el pasaporte
+todavía mudo, con `max-age=60`— y habría concluido que **`configurar_pasaporte`
+no funcionó**.
+
+> ***El caché que había verificado como una virtud, diez minutos antes, es una
+> trampa para la medición siguiente.*** Es la misma pieza: cambia de rol según
+> si uno la está midiendo o midiendo a través de ella.
+
+🔴 **Y su modo de falla es el peor: no da error, da el valor ANTERIOR.** Una
+lectura cacheada es indistinguible de una lectura fresca — mismo status, mismo
+cuerpo, misma forma. *El único que las separa es un header que hay que ir a
+mirar (`x-vercel-cache`, `age`), y nadie lo mira cuando espera un cambio.*
+
+**Y el daño típico es doble, porque el instrumento miente en la dirección más
+convincente:** confirma que **el cambio no ocurrió** justo cuando uno acaba de
+hacerlo — así que la conclusión natural es «lo que escribí está mal», y se
+empieza a depurar una cura que funcionaba.
+
+⇒ **Todo instrumento que mida detrás de un caché hace UNA de estas tres:**
+1. **espera el TTL** (y lo dice: «esperé 62 s porque el `max-age` es 60»);
+2. **invalida** — cache-buster en la URL, `Cache-Control: no-cache` en el pedido,
+   purga;
+3. **lee el header y lo declara** (`x-vercel-cache: HIT` ⇒ *esto no es fresco* y
+   la medición no vale para lo que se acaba de cambiar).
+
+**Lo que NO vale es medir y no decir nada**: el resultado es correcto la mitad
+de las veces y no hay forma de saber cuál mitad.
+
+*(Hermana de [[L-511]] y [[L-510]] — las tres son sobre **medir bien lo que no
+es lo que uno cree que mide**: `L-510` la capa, `L-511` la rama, `L-512` el
+momento. Y de `L-166`: todo dato vivo se lee al momento de usarlo — acá el caché
+convierte un dato «de ahora» en uno de hace un minuto sin avisar.)*
+
+---
+
+
+### `L-511` — Medir una RAMA del código y concluir sobre la otra
+
+**S114-F, y lo incómodo es que pasó el mismo día que se escribió `L-510`.**
+
+`/p/[token]` del sitio público tiene un ternario:
+
+```js
+Cache-Control: estado === 'activo' ? 'public, max-age=60' : 'no-store'
+```
+
+Lo medí con un **token inexistente** —el que tenía a mano—, cayó en `no-store`,
+dio `x-vercel-cache: MISS`, y **reporté «cada lectura del pasaporte va al
+origen»**. Sobre ese reporte el founder firmó una tarea de cachear la página.
+
+**Medido después con un token REAL:**
+
+```
+request 1 → MISS · age 0
+request 2 → HIT  · age 3     (3 segundos después)
+```
+
+**Ya estaba cacheado, desde su primera versión, con su razón escrita al lado.**
+La rama que medí es justamente **la única que jamás se cachea, y con razón**: un
+404 cacheado escondería una placa recién activada.
+
+> ***El request fue verdadero. La afirmación que construí encima era falsa.***
+> No medí de menos: **medí bien el caso que no importaba.**
+
+🔴 **Y lo que lo vuelve peligroso: la rama que uno tiene a mano suele ser la de
+error**, porque es la que se alcanza sin datos —un id inventado, una tabla
+vacía, un token que no existe—. *Es la más fácil de probar y la menos
+representativa.* La rama feliz casi siempre pide sembrar algo, y por eso se
+saltea.
+
+⇒ **Antes de generalizar desde una medición, la pregunta es «¿por qué camino
+entró esto?»** — y si el código tiene un condicional en el medio, **la medición
+vale para esa rama y nada más.** Con un `if`, un ternario o un `switch` entre el
+estímulo y la respuesta, **hacen falta tantas mediciones como ramas decidan
+salidas distintas.**
+
+**El costo de haberlo evitado, medido:** un token válido era una consulta que ya
+había corrido tres veces esa tarde para otra cosa. **No fue falta de acceso:
+fue no preguntarme si el caso que tenía a mano era el caso que importaba.**
+
+*(Parienta de [[L-510]] —medir una capa y concluir sobre el sistema— pero cruza
+de eje: aquélla es sobre **capas** apiladas, ésta sobre **ramas** paralelas. Y
+de `L-459`: la primera prueba de algo no es que dé verde, es que dé el resultado
+correcto **sobre el caso real**.)*
+
+---
+
+
+### `L-510` — Medir sólo la capa que falla da un diagnóstico VERDADERO E INÚTIL
+
+**S114-F.** `admin.epetplace.com` no respondía. Lo medí con un `curl`, dio
+`HTTP 000`, y reporté **«el dominio no resuelve»**. Era **cierto**. El founder
+miró el dashboard y vio el dominio **asignado al proyecto y sirviendo**.
+
+Las dos cosas eran verdad al mismo tiempo, y la diferencia decide qué se hace:
+
+```
+DNS   → NXDOMAIN en 8.8.8.8, 1.1.1.1 y 9.9.9.9
+TLS   → SSL_ERROR_SYSCALL (no hay certificado)
+HTTP  → vía la IP del proveedor, con Host: admin.epetplace.com
+        200 · 466 bytes · ERA LA APP
+```
+
+⇒ El diagnóstico correcto no era «no existe» sino **«existe en el proveedor y no
+en el DNS»**, y la cura es **un registro CNAME en el registrador** —que ni
+siquiera está del lado que yo estaba mirando—.
+
+> ***«No responde» describe el síntoma en la capa donde uno lo tocó. La acción
+> vive en la capa donde está la causa, y no tienen por qué ser la misma.***
+
+**Por qué es peligroso y no sólo incompleto:** un diagnóstico verdadero **no se
+siente como un error**. Nadie lo va a verificar. *«No resuelve» habría mandado a
+revisar el proveedor —donde todo estaba bien— o a dar el dominio por perdido,
+cuando faltaba una línea en otro lado.* Un diagnóstico falso se choca contra la
+realidad; **uno verdadero-e-inútil se archiva.**
+
+⇒ **La regla: ante una capa que falla, se mide la de arriba y la de abajo antes
+de nombrar la causa.** En red eso es DNS · TLS · HTTP, y la técnica que lo
+separa es **pedirle al servidor con el `Host` correcto salteando el DNS**
+(`curl --resolve`, o HTTP plano cuando el TLS es justamente lo que falta). *Si
+la capa de abajo contesta bien, el problema no está donde uno miró.*
+
+**Corolario que no es de red:** vale para toda pila donde un síntoma puede nacer
+en varios pisos — una RPC que «no existe» (¿no está, o no tiene permiso, o el
+esquema no la expone?), una pantalla vacía (¿no hay datos, o la RLS los filtra,
+o el lector falló?), un deploy que «no sale» (¿no disparó, falló, o está en
+cola?). **En todos, la respuesta de una sola capa es verdadera y no alcanza.**
+
+*(Emparenta con `L-321` —«el permiso está revocado» es una lectura, «rebotó con
+42501» es un hecho— pero mira al otro lado: ahí el problema era **no medir**;
+acá el problema es **medir una sola capa y creer que se midió el sistema**.)*
+
+---
+
+
+### `L-509` — Un tipo declarado sobre un `jsonb` es cierto para el compilador y falso para la pantalla
+
+**S114-F, hallazgo al medir un commit ajeno antes de empujarlo.** `Placas.tsx`
+del admin declaraba:
+
+```ts
+type Placa = { token: string; serie: number; activada_en: string | null; mascota_id: string | null }
+```
+
+y `listar_placas_de_lote` devuelve —medido contra la base viva, no leído de la
+migración— exactamente esto:
+
+```sql
+jsonb_build_object('serie', serie, 'token', token, 'activada', activada_en is not null)
+```
+
+**`mascota_id` no viaja. `activada_en` tampoco** (el campo se llama `activada`).
+Pero **TypeScript no valida la forma de un `jsonb` en runtime**: el tipo describe
+lo que el autor cree que viene, y el compilador lo da por cierto. Efecto medido:
+
+- `placas.filter((p) => p.mascota_id === null).length` ⇒ `undefined === null` es
+  **false** ⇒ **el contador de placas libres daba 0 siempre**, aunque el lote
+  entero estuviera sin activar.
+- `{p.mascota_id ? '· activada' : ''}` ⇒ `undefined` es falsy ⇒ **el marcador no
+  aparecía nunca**, ni en una placa activada.
+
+> ***Escribir un campo en el tipo lo hace existir para todos menos para el
+> usuario.*** El compilador lo ve, el editor lo autocompleta, el revisor lo lee
+> como si viniera — y la única que sabe la verdad es la pantalla, que no habla.
+
+🔴 **Y lo que la vuelve difícil de cazar: no falla.** No hay excepción, no hay
+`undefined is not an object`, no hay rojo. Hay **dos números plausibles**, y un
+`0` en «placas libres» se lee como un dato, no como un síntoma. Es la familia de
+*verosímil-falso* (L-139) entrando por una puerta nueva: **no por lo que el
+modelo inventa, sino por lo que el tipo promete.**
+
+⚠️ **Ningún gate de esta casa lo ve, y hay que decirlo:** el typecheck da verde
+—el tipo es coherente consigo mismo—, el build sale, y `verify:diseno` no mira
+contratos. Lo cazó **cotejar el `jsonb_build_object` de la función contra los
+campos que la pantalla consume**, a mano.
+
+⇒ **La regla: el tipo de un retorno `jsonb` se COPIA del `jsonb_build_object`
+de la función, no se escribe de memoria.** Si la función construye tres claves,
+el tipo tiene tres. *Y cuando el tipo tiene un campo que la función no arma, no
+es un tipo incompleto: es un tipo que miente con la autoridad del compilador.*
+
+**Corolario que no es sobre `jsonb`:** vale para toda frontera donde el tipo lo
+declara el consumidor y no el productor — `RETURNS jsonb`, `RETURNS record`, un
+`as` sobre un `fetch`, un `JSON.parse`. **Donde el tipo se escribe a mano, el
+contrato se mide contra el productor o no se mide.**
+
+*(Origen: el commit `c0aee5e` del admin legado, S113 fase 3. La función y la
+pantalla nacieron el mismo día ⇒ **el defecto es de origen, no deriva**: no fue
+que el modelo se moviera debajo. Curado en S114-F como excepción nombrada al
+«cero cambios al legado», con firma del founder.)*
 
 ---
 
@@ -29227,6 +31085,325 @@ dejando las puertas.
 
 ---
 
+### `D-1053` 🔴 · EL TECHO de reserva de saldo (24h) — expirar + escalar + soltar, como UNA unidad ACOPLADA
+
+**Firma del founder (S114-A):** una reserva de saldo no puede quedar colgada
+eternamente. Cuando el barrido no alcanza a resolver un intento que se queda
+`pendiente` para siempre (la pasarela nunca contesta), a las **24 h** (umbral único
+en `app_config`, firmado — NO uno por riel) el intento se transiciona a **`expirado`**
+con un **hallazgo durable** (`expirado_sin_resolucion`), se **escala a la casa por el
+motor de avisos** (tipo propio + productor, JAMÁS un `console.error`), y **recién
+entonces** la condición del reloj (`D-1052`) suelta la reserva.
+
+**🔴 EL RELEASE ESTÁ ACOPLADO AL ESCALADO — no se implementa suelto.** *Soltar el
+saldo sin avisar sería asumir «no cobró», que es justo lo que no sabemos* (el riel
+pudo haber cobrado tarde). El escalado es lo único que vuelve aceptable el release;
+por eso van en el mismo acto o no van.
+
+**Por qué no entró en S114-A:** el escalado exige una **clase de audiencia «casa»**
+que hoy no existe (**`D-1054`**, dueño F). Medido: `cat_notificacion_tipos` sólo
+admite `cliente|prestador|ambas`, y no hay superficie donde la casa lea sus avisos.
+
+**🔴 DISPARO:** `D-1054` (la audiencia casa + su superficie). El día que exista, se
+construye esta unidad entera —`expirado` + hallazgo + tipo de aviso + productor +
+release— con su cinturón de dos rojos: ② intento `pendiente` más viejo que el umbral
+→ `expirado` + escalado → reserva soltada; ③ intento que resuelve DENTRO del umbral
+→ NO se expira (el techo no mata lo que el barrido iba a salvar). **Dueño:** A.
+
+---
+
+
+### `D-1056` 🟡 · El registro del token de push es SCREEN-COUPLED (Hogar) y no escucha rotación — dueño C
+
+**Medido (S114-A):** la lógica de refresco YA existe —`sincronizarTokenSiHayPermiso`
+(getDevicePushTokenAsync → `registrarTokenDeAparato`)— pero **sólo se la llama desde el
+componente `InvitacionAvisos`**, que monta en la pantalla **Hogar**. No hay llamada
+desde el `_layout` raíz (arranque garantizado), y **no hay `addPushTokenListener`** para
+la rotación mientras la app corre. Verificado: cero llamadores fuera de `invitacion-avisos`
+en las dos apps.
+
+**Por qué importa:** FCM rota tokens por su cuenta (actualización de app, restauración de
+backup, expiración). Si el refresco no corre en cada arranque y no se escucha la rotación,
+un aparato **se vuelve fantasma con el tiempo** — y por `D-1055` (sin ACK) no hay forma de
+notarlo: el tablero dice `aceptada_transporte`. *El registro corre robusto sólo alrededor
+de la primera vez; después depende de que el usuario pase por Hogar y de que el token no
+haya rotado en un momento no cubierto.*
+
+**Cura de RAÍZ (reinstalar es la del síntoma), costo medido:** llamar
+`sincronizarTokenSiHayPermiso()` desde el `_layout` raíz de las DOS apps (cada arranque,
+con permiso concedido) + cablear `addPushTokenListener` (expo-notifications) para
+re-registrar en caliente cuando el SO rota. La función ya existe; es cablearla en el
+arranque + un listener — un puñado de líneas por app. **Dueño: C** (apps). **Disparo:**
+antes del soft launch de octubre.
+
+---
+
+
+### `D-1058` 🟢 · El canal de notificación de Android — deliberadamente ausente; NO es causa de no-entrega (medido y confirmado)
+
+**Medido (S114-A + C):** las dos apps **no crean ningún canal** (`setNotificationChannelAsync`
+= 0) y el plugin `expo-notifications` no declara `defaultChannel` — sólo ícono y color.
+Fue **una decisión de D con su razón en el código de `despachar-push`:** se manda
+`notification` payload (no data-only, «para que se MUESTRE con la app cerrada») y **sin
+`channel_id` A PROPÓSITO** —«nombrar un canal inexistente hace que Android descarte el
+aviso en silencio, la peor falla posible acá»—.
+
+**Por qué NO es la causa de «no llega» (corrección de C, confirmada por el gate):** con
+`notification` + sin `channel_id`, **Android usa su canal por defecto y el aviso SE
+MUESTRA**. El push #4 llegó con token fresco + permiso dado ⇒ el fallback funciona en un
+aparato real. La ausencia de canal explica, como mucho, que el aviso caiga en
+«Miscellaneous» —un tema de **aspecto** y de que la persona pueda tenerlo silenciado—,
+**jamás de entrega.**
+
+**⚠️ Si algún día se construye un canal propio (por aspecto), el ORDEN es en piedra
+(riesgo que D ya nombró):** primero la app crea el canal y llega a los aparatos, DESPUÉS
+el despachador lo nombra — **nunca en el mismo tren, nunca al revés.** Un despachador que
+nombra un canal que el aparato todavía no creó = descarte silencioso, justo el modo de
+falla que la decisión original evita.
+
+**🔴 DISPARO (firma founder):** «un aparato donde el push NO llegue con token fresco y
+permiso dado» — sólo entonces el canal vuelve a ser candidato; hoy NO lo es. **Dueño:**
+C (apps), si se decide por aspecto. Hoy no hay nada que construir.
+
+---
+
+
+### `D-1057` 🔴 · El permiso de notificaciones denegado/descartado es SILENCIOSO — nadie se entera, ni la familia ni nosotros
+
+**Medido (S114-A, incidente founder):** la app SÍ pide el permiso —`InvitacionAvisos`
+muestra una Hoja de la casa que explica antes del diálogo del SO, y en «Sí» llama
+`requestPermissionsAsync`—. **Pero el camino de NO es pasivo e invisible:** si el SO
+está `denied`, el componente retorna sin insistir («el camino vive en Preferencias»);
+dos «ahora no» lo apagan; una invitación por versión nativa. ⇒ una familia que deniega,
+descarta, o cuyo Android nace bloqueado (como el founder al reinstalar) **queda sin push
+y sin que se lo vuelva a ofrecer**, y **nadie se entera** —ni ella (no hay señal visible
+de «avisos apagados») ni nosotros (no hay ACK, `D-1055`)—.
+
+**La consecuencia de producto:** en octubre, una familia real que instala y no concede
+**no recibe NADA** y el tablero dice `aceptada_transporte`. Es la clase que se acaba de
+vivir, con una familia real en vez del founder.
+
+**Forma propuesta (espera firma del founder — dónde/cómo):** un indicador VISIBLE de
+«avisos apagados — activalos» cuando el permiso está `denied`, que haga deep-link a los
+ajustes del SO (el SO ya no deja re-preguntar tras la primera denegación). Hoy el estado
+`notifPermisoNegado` existe en Preferencias (pasivo); la cura lo vuelve **visible donde
+la familia lo vea**, no escondido en un menú. **Dueño: C + diseño.** **Disparo:** firma
+del founder sobre dónde va el indicador.
+
+---
+
+
+### `D-1055` 🟡 · No se puede distinguir un token de push VIVO de uno FANTASMA — CERRADA PARA WHATSAPP (S114), ABIERTA PARA PUSH (FCM v1 no da receipt)
+
+**Medido (S114-A, incidente founder 10-sep):** el founder tenía un token `activo`
+(27-ago) al que FCM devolvía 200 y marcábamos `entregada`/`aceptada_transporte`, y su
+teléfono no recibía NADA — un **token fantasma** (FCM acepta una registración que el
+aparato ya no tiene, y no la 404-ea hasta pasado un tiempo). **FCM v1 NO da receipt de
+entrega por-mensaje al emisor**: el 200 es aceptación, no recepción. Server-side es
+**imposible** distinguir un token vivo de un fantasma no-reapado.
+
+**La consecuencia, escrita:** en octubre, **una familia que no recibe nada se ve igual
+que una que sí** — el tablero dice «aceptada por transporte» para las dos. Push es el
+canal por defecto de todo el motor; un fantasma silencioso = una familia que deja de
+recibir sin que nadie se entere.
+
+**La cura y su costo, medido (NO se construye acá):** lo único que confirma recepción
+es un **ACK desde la app** — un handler que, al recibir el push, avisa al servidor.
+Costo: handler en las DOS apps (cliente + prestador) + un RPC + su wrapper + una
+columna/estado de «recibida_en_aparato». **Cobertura PARCIAL**: confiable con la app en
+primer plano; en background, para mensajes `notification` (los que mandamos, para que
+se muestren con la app cerrada), el JS no corre y el ACK no llega — así que un ACK
+ausente no probaría fantasma, sólo «no confirmado». Una cobertura mejor exigiría
+mensajes `data` + handler de fondo, que en Android es poco fiable (ya declarado en
+`despachar-push`).
+
+**VINDICACIÓN (S114, 10-sep):** el incidente del founder confirmó la clase por partida
+doble — un permiso de Android BLOQUEADO da el MISMO síntoma que un token fantasma (FCM
+200, aparato sin mostrar nada), y **los fantasmas se generan solos** (FCM rota tokens;
+ver `D-1056`). Sin ACK no se distingue ninguno de los tres (fantasma · permiso off ·
+vivo), y los tres se ven `aceptada_transporte`.
+
+**CIERRE CON EVIDENCIA (S114, 10-sep):** el push del founder no llegaba, y resultó
+ser **DOS causas juntas** con el MISMO síntoma —token fantasma + permiso de Android
+bloqueado—, más una TERCERA candidata (canal inexistente) que se descartó por medición.
+**Las tres dan exactamente `FCM 200` y nada mostrado, y NINGUNA es medible desde el
+servidor.** Distinguirlas costó ~2 horas de prueba a mano (reinstalar para token fresco,
+conceder el permiso, y descartar el canal por el otro lado). *Ésa es la prueba de esta
+ficha: sin ACK no se distingue fantasma de permiso-off de no-mostrado — y hoy fueron dos
+a la vez.* La cura de raíz del token (para que no se regenere el fantasma) es `D-1056`
+(ya en main); la del permiso silencioso es `D-1057` (ya en main); el ACK sigue abierto.
+
+**CERRADA PARA WHATSAPP (S114, firma founder):** WhatsApp SÍ da receipt por webhook
+—a diferencia de FCM v1—. Se guardó el `wamid` en el éxito del envío
+(`notificacion_entrega.proveedor_msg_id`) y se cableó el webhook de estado de Meta
+(edge `whatsapp-estado`) que sube la entrega por lo que Meta CONFIRMA:
+`aceptada_transporte` (Meta aceptó) → `entregada_aparato` (DELIVERED, entrega real) →
+`leida` (READ). Es el único lugar del motor donde «entregado» se puede decir con
+verdad. **ABIERTA PARA PUSH:** FCM v1 **no da receipt por mensaje** al emisor, y un
+ACK de la app es parcial (foreground sí, background no) — ahí `aceptada_transporte`
+sigue siendo lo máximo que se sabe, y la mitigación es sólo el nombre honesto + la
+cura del token (`D-1056`). *La asimetría es del transporte, no nuestra: WhatsApp
+confirma, FCM no.*
+
+**VALIDADO E2E (S114, 10-sep):** el canal whatsapp se caminó de punta a punta
+—productor → ensamblado → ruteo → entrega → **recepción real en el teléfono**—. El
+mensaje que parecía cortado **era DEMORA** (2xx + wamid, llegó más tarde); ver `L-530`.
+Confirma la asimetría: con el webhook wired, whatsapp distingue demorado de perdido;
+push no puede.
+
+**🔴 DISPARO:** antes del soft launch de octubre (cuando haya familias reales cuya
+falta de push sea invisible), o el primer reporte de «no me llegan las notificaciones»
+que no se explique por permisos. **Dueño:** A (motor) + C (handlers de app). Mientras
+no exista, el estado honesto `aceptada_transporte` (D-… del rename) es la mitigación:
+al menos el nombre ya no promete recepción.
+
+---
+
+
+### `D-1054` 🟡 · NO EXISTE una audiencia «casa» en el motor de avisos, ni superficie donde la casa lea — dueño F
+
+**Hallazgo (S114-A, medido):** `cat_notificacion_tipos.audiencia` tiene CHECK que sólo
+admite `cliente | prestador | ambas` — **no hay `admin`/`casa`**. Y no hay pantalla
+donde la casa (hoy, el founder) lea sus avisos: las apps son cliente/prestador,
+`notificacion_intencion` con audiencia casa no la consume nadie, y `transporte_vivo=false`
++ la veda cierran el push. ⇒ **un aviso dirigido a la casa quedaría escrito y sin
+llegar** — peor que un log honesto.
+
+**Por qué importa y quién es dueño:** es la pieza que falta para que la casa pueda ser
+avisada de CUALQUIER cosa — y el primer cliente concreto es `D-1053` (el escalado del
+techo de saldo), pero no el único (todo escalado de pagos, conciliación, seguridad
+querrá esta audiencia). **Es su propio arco** (clase de audiencia entera): el CHECK,
+el/los tipo(s), la resolución de destinatario de la casa, y **una superficie de avisos
+de la casa en `apps/admin`** (territorio de F). **Dueño: F.** **Disparo:** cuando se
+decida construir el canal de avisos de la casa.
+
+---
+
+
+### `D-1052` 🟡 · LA CARRERA · el reloj de reserva de saldo soltaba por TIEMPO sin preguntar si el riel ya cobró — FORMA FIRMADA, condición del reloj EN MOTOR, techo split a `D-1053`
+
+**El defecto, medido (incidente founder 9-sep):** `liberar_reservas_saldo_vencidas()`
+(cron cada 15 min) suelta **toda** compra `esperando_pago` con `saldo_aplicado>0` y
+`saldo_reservado_hasta < now()` — **sin mirar si hay un cobro en vuelo o aprobado**.
+En sandbox no costó plata; **en producción, una reserva que vence mientras la
+pasarela aprueba deja a la familia pagando de más**: el riel cobró `total − saldo`,
+el reloj devuelve el saldo, y `confirmar_pago_compra` después rebota `monto_no_coincide`
+(porque `total − 0 ≠ lo cobrado`) ⇒ compra cobrada por el riel, saldo devuelto,
+pedido sin entregar. **Es el estado que no puede existir en octubre.**
+
+**🔴 FORMA PROPUESTA (medida, NO curada a ojo — espera firma del founder):** el
+reloj NO suelta una reserva mientras haya un cobro VIVO para esa compra. «Vivo» =
+un intento en `estado IN ('pendiente','aprobado')`. Concretamente, al WHERE de
+`liberar_reservas_saldo_vencidas`:
+```
+AND NOT EXISTS (SELECT 1 FROM pagos_intentos pi
+                WHERE pi.compra_id = compras.id
+                  AND pi.estado IN ('pendiente','aprobado'))
+```
+**Por qué (a) «consultar el intento» y no (b) «no vencer una vez que salió al riel»:**
+(a) subsume a (b) sin su riesgo. Con (a), las dos responsabilidades quedan
+separadas y medidas contra el código vivo:
+- **el RELOJ** suelta sólo reservas de checkouts MUERTOS —los que nunca dispararon,
+  o cuyos intentos están todos `rechazado`—;
+- **el BARRIDO** (`pagos-conciliar` → `aplicar_consulta_activa_nuvei`, que YA existe
+  y resuelve intentos `pendiente`) le pregunta a la pasarela por los VIVOS y
+  confirma (consume saldo) o los marca `rechazado` — y **recién entonces** el
+  siguiente tick del reloj los suelta.
+(b) sola dejaría una reserva colgada para siempre si el riel rechazó async y ese
+rechazo nunca se registró; (a) igual la suelta cuando el intento pasa a `rechazado`.
+
+**FIRMADO Y CONSTRUIDO (parcial, S114-A):** la **condición del reloj** ya está en el
+motor (`liberar_reservas_saldo_vencidas` no suelta si hay intento `pendiente`/`aprobado`;
+mig. `20260912110000`, cinturón sonda-ROLLBACK con rojo ① + verde). **El TECHO de 24h
+NO** — se fichó como unidad acoplada en **`D-1053`** porque su release depende de un
+escalado a la casa que hoy no tiene por dónde llegar (**`D-1054`**). **Interino declarado
+en `LETRA_SALDO` §8:** un intento que nunca resuelve deja su reserva RETENIDA
+indefinidamente, recuperable a mano con `liberar_reserva_saldo_compra`.
+
+**Alcance:** sólo `liberar_reservas_saldo_vencidas` (el cron). `liberar_reserva_saldo_compra`
+(la que llama pagos-cobro en el rebote SÍNCRONO) NO se toca: se invoca justo cuando
+el riel dijo que no, que es correcto. **Dueño:** A. **Disparo:** firma del founder
+sobre esta forma → migración con su cinturón (rojo: una compra con intento `pendiente`
+y reserva vencida NO se suelta; verde: sin intento vivo, sí).
+
+---
+
+
+### `D-1051` 🟡 · El pago mixto sobre una compra GRAVADA rebota (`mixto_gravado_no_soportado`) — falta la regla de reparto de Erick
+
+**Qué pasa:** cuando el saldo del hogar cubre parte de una compra **con IVA > 0**,
+`pagos-cobro` **rebota antes de la pasarela** con `mixto_gravado_no_soportado` en
+vez de mandar un triple `amount/taxable_amount/vat` mal armado. Es la decisión
+firmada del founder (S114-A): *no se inventa el reparto proporcional de
+`taxable_amount`/`vat` sobre un cobro parcial — es criterio fiscal.* Un cobro que
+rebota con nombre es mejor que uno mal armado que Nuvei rechaza.
+
+**Por qué es deuda y no está cerrado:** bloquea un caso real —**una familia con
+saldo pagando una compra con IVA**— que **en octubre va a existir** cuando la
+despensa tenga producto gravado. Hoy el IVA-0 (mixto) ya cobra; el gravado mixto
+no.
+
+**El número que lo dimensiona (medido S114, 9-sep):** hoy hay **4 compras con
+IVA ≠ 0, máximo $2,01**. Es chico ahora y no lo va a ser cuando la despensa crezca.
+
+**🔴 DISPARO:** *la regla de reparto de `taxable_amount`/`vat` de Erick* — la misma
+familia abierta de S105 (el guard de IVA que espera su respuesta). El día que Erick
+conteste cómo se declara el IVA de una venta pagada en parte con saldo, se implementa
+el reparto en `pagos-cobro` (donde hoy está el rebote ②) y se retira este código.
+**Dueño:** A (motor de pagos). Sin este disparo escrito, se descubre con una familia
+adelante.
+
+---
+
+
+### `D-1050` ☠️ RESUELTA (S114, main `127922e7`) · `scripts/censo-voseo.mjs` era ciego a la app del admin (React web sin i18n) y su 0 se leía como salud
+
+Hallazgo de F, medido con discriminador (mismo texto en los dos casos):
+
+| forma | censo |
+|---|---|
+| `const t = 'Decidís vos y elegí bien'` | **1** |
+| `<p>Decidís vos y elegí bien</p>` | **0** |
+
+En las apps móviles **todo** el texto va por i18n (o sea en literales), así que el
+ciego no tenía dónde manifestarse. **El admin es React web sin i18n: su texto
+visible vive suelto en JSX** ⇒ el gate de voz de la casa está **estructuralmente
+ciego a la app del admin entera**, y su 0 se lee como salud. Es la clase de
+`L-459`/`L-490`: *un instrumento que da 0 sobre algo que no puede ver es peor que
+no tener instrumento, porque el 0 ya está publicado.*
+
+**Estado (enmendado S114 con dato): el instrumento LO CURÓ B** en `pista/s114-b-1.0`
+(`3cf8d6e6`) — `censo-voseo` gana lectura de JSX (extrae el texto entre etiquetas y
+lo pasa por el mismo matcher) y R66 gana `apps/admin` en su corpus. La cura vive en
+la punta de B, **no en main todavía**. Y al ver por primera vez, R66 **revela DOS
+voseos REALES** que el instrumento ciego no podía ver y que **YA están en main**
+(entraron con el merge de F, `apps/admin`): `Casos.tsx` «lo que te pidieron a vos» y
+`HojaCaso.tsx:245` «Es información para vos». **La cura de esos dos es de F, SIN
+baseline** — un baseline ahí congelaría voseo en la única app sin diccionario que lo
+contenga. 🔴 **Consecuencia de orden de merge (dueño A, conducción):** B NO entra a
+main verde hasta que la cura de F de los dos voseos esté en main primero (o con ella).
+Mergear B antes pone `verify:diseno` en rojo. **Cierra cuando** la cura de F + el
+instrumento de B lleguen a main. Es la prueba viva de esta misma ficha: el 0 del
+censo se leía como salud y escondía dos voseos reales.
+
+**CIERRE (S114, main `127922e7`):** B curó el instrumento en DOS pisos —de leer sólo
+texto entrecomillado a leer JSX, y de leer JSX inline a leer nodos de texto en su
+propia línea (techo 6 renglones, L-501)— y, con cruce de territorio declarado, curó
+los voseos de apps/admin. **Eran CUATRO, no dos** — el freno de A (verificación
+independiente, condición 3) los destapó de a uno: `Casos.tsx:42` y `:48`,
+`HojaCaso.tsx:245`, y el que nadie había visto, `App.tsx:93` (la pantalla del admin
+SIN permisos, el peor momento, con tres formas: figurás/creés/pedí →
+figuras/crees/pide). **La verificación de A no fue el matcher de B ni un grep crudo,
+y ninguno de los dos habría bastado:** el grep marca «motiVOS» y «pedía» como falsos
+positivos, y el matcher de B era justo el que no veía su propio ciego. A inspeccionó
+**a ojo cada candidato** — la única vara que ve el ciego y descarta el falso positivo
+a la vez. Cero voseo real en apps/admin. *Un instrumento que certifica su propio
+territorio limpio es exactamente el que no puede ver su propio ciego; el segundo par
+de ojos lo encontró dos veces (D-1050 y el cuarto voseo).*
+
+---
+
+
 ### `D-1047` 🟡 · `extract-papel` sólo está medido contra papeles SINTÉTICOS: el número que hay es un piso, no una exactitud
 
 **Firma del founder (7-sep-2026):** *los 38 de `documentos_clinicos_muestra` son
@@ -29519,7 +31696,7 @@ constancia de que fue por la pantalla la deja quien lo hace, en el parte.
 
 ---
 
-### `L-498` 🔴 · UN PIPE SE COME EL CÓDIGO DE SALIDA, Y EL `&&` DE ATRÁS PREMIA AL QUE FALLÓ
+### `L-513` 🔴 · UN PIPE SE COME EL CÓDIGO DE SALIDA, Y EL `&&` DE ATRÁS PREMIA AL QUE FALLÓ
 
 **S114-A, 7-sep-2026. Error propio, cazado en la corrida siguiente.**
 
@@ -29570,7 +31747,7 @@ razón equivocada* (L-321).
 
 ---
 
-### `L-499` 🔴 · UN INSTRUMENTO QUE PREGUNTA POR LA **FORMA** EN QUE LA LEY SUELE ESCRIBIRSE NO MIDE LA LEY
+### `L-514` 🔴 · UN INSTRUMENTO QUE PREGUNTA POR LA **FORMA** EN QUE LA LEY SUELE ESCRIBIRSE NO MIDE LA LEY
 
 **S114-A, 7-sep-2026. Tres casos el mismo día, en tres subsistemas distintos.**
 
@@ -29615,10 +31792,10 @@ como una.
 
 ### Su hermana, y en qué se diferencian
 
-**`L-498`** es sobre un instrumento que lee **la señal equivocada** (el exit
+**`L-513`** es sobre un instrumento que lee **la señal equivocada** (el exit
 code del pipe, el `>= 400` que no distingue un CHECK de un permiso). **Ésta es
 sobre uno que lee la señal correcta de la fuente equivocada.** Las dos producen
-salidas creíbles; la de `L-498` se caza corriendo el control negativo, y ésta
+salidas creíbles; la de `L-513` se caza corriendo el control negativo, y ésta
 **sólo se caza preguntándole al objeto en vez de al catálogo que lo describe.**
 
 **☠️ Condición de muerte:** ninguna — es de método.
@@ -29626,7 +31803,40 @@ salidas creíbles; la de `L-498` se caza corriendo el control negativo, y ésta
 
 ---
 
-### `L-500` 🔴 · UN DATO MEDIDO LLEVA SU **HORA**, NO SÓLO SU FECHA
+### `L-520` — UN CENSO POR EL NOMBRE QUE EL EQUIPO USA HOY, NO POR EL HECHO, REPORTA AUSENCIA SOBRE ALGO ENTERO
+
+> **Firma del founder (S114, 8-sep-2026).** Es `L-499` en su forma MÁS CARA: esta
+> vez el costo no era un número inflado, era **construir dos veces lo mismo**.
+
+**El caso.** La mesa pidió construir el memorial (`cambiar_estado_vida` / la puerta
+de fallecida): *«MEMORIAL NO TIENE PUERTA NI MOTOR — C midió cero funciones en
+`packages/api`, cero superficies».* Medido antes de escribir una línea, el memorial
+estaba **entero**: motor (`registrar_fin_de_vida`, con fecha, dueño-adulto,
+idempotente, y el un-solo-sentido enforced en `marcar_perdida` con
+`RAISE 'mascota_en_memorial'`), wrapper (`registrarFinDeVida`, `perfilMascota.ts`),
+y superficie (`despedida.tsx`). **Construir la puerta habría duplicado una feature
+completa** — y dos lugares decidiendo lo mismo es la clase que este arco cazó todo
+el tiempo.
+
+**La causa del censo falso, medida.** C grepeó **`memorial`**. La feature se llama
+**`finDeVida`** (función y wrapper) y **`despedida`** (pantalla). **Ninguna contiene
+la palabra `memorial`** — vive sólo en los comentarios. *El censo preguntó por el
+NOMBRE que el equipo usa al hablar del hecho, y el código nombra el hecho de otra
+manera; así un grep del nombre-de-conversación reporta CERO sobre algo que está
+entero y andando.*
+
+**La cura.** Un censo de existencia se hace por el HECHO, no por el nombre de
+conversación: por la TABLA que toca (`estado_vida`, `eventos_mascota` tipo
+`fin_vida`), por la COLUMNA, por la INTENCIÓN (el enum `'fallecida'`), y se cruza
+con la puerta única (`packages/api/index.ts`). *Preguntar «¿hay algo que se llame
+X?» y concluir «no existe la feature» son dos cosas distintas, y la distancia entre
+ellas se paga construyendo el duplicado.* Hermana de [[L-499]] (lo que parece
+cuidado impide mirar) y de [[L-459]] (un gate atado a un NOMBRE mide la convención,
+no el hecho). Y su corolario operativo es la regla de la casa ya firmada: *antes de
+escribir una función se lista lo que ya toca esa intención — por cuerpo en el motor
+y por import en la puerta — y la lista va al cierre AUNQUE ESTÉ VACÍA.*
+
+### `L-515` 🔴 · UN DATO MEDIDO LLEVA SU **HORA**, NO SÓLO SU FECHA
 
 **Hallazgo de E, depositado por A (S114, 7-sep-2026). Y se cobró sobre A el
 mismo día, en el mismo turno en que lo escribía.**
@@ -29675,7 +31885,7 @@ decidir.
 
 - **`L-166`** dice *todo dato vivo se lee al momento de usarlo*. Ésta agrega
   **cuánto dura «al momento»** cuando hay paralelo: menos de lo que uno cree.
-- **`L-499`** es sobre un instrumento que mira la forma equivocada. Ésta es
+- **`L-514`** es sobre un instrumento que mira la forma equivocada. Ésta es
   sobre uno que **miró bien y hace rato**.
 
 **☠️ Condición de muerte:** ninguna — es de método. Su recordatorio útil es que

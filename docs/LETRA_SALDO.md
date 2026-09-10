@@ -94,9 +94,48 @@ clientes), nunca ingreso. Ver §7.
     S101-B toma de acá es **la costura** — el monto a debitar entra como dato del
     desglose y jamás como total hardcodeado, para que el día que el saldo exista se
     enchufe sin reformar el cobro (`PLAN_S101B_SUPERFICIE_PAGO` §8).
-- **Reverso de una compra mixta**: cada porción vuelve por donde vino — la porción saldo
-  vuelve como crédito nuevo (movimiento, no edición), la porción tarjeta sigue la
-  política de reembolsos vigente.
+  - ✅ **CONSTRUIDO — S114-A (8-sep-2026), con la mecánica firmada por el founder.**
+    La familia con $13 y un pedido de $20 aplica $13 de saldo y el riel cobra $7.
+    · **`compras.saldo_aplicado`** guarda cuánto del total cubre el saldo; el riel cobra
+      `total − saldo_aplicado` (`pagos-cobro` lo recorta server-side, jamás desde el
+      cliente). · **`aplicar_saldo_a_compra`** RESERVA el saldo (o lo aplica entero si
+      cubre todo) y deja la compra en `esperando_pago`; mientras está reservado,
+      `saldo_hogar_disponible` lo RESTA (no se puede gastar dos veces entre reservar y
+      confirmar). · 🔴 **El saldo se CONSUME después de que el riel confirma** — el
+      movimiento de consumo lo escribe `confirmar_pago_compra` al confirmar el webhook;
+      si el riel rebota, el saldo queda intacto (la familia no pierde nada). ·
+      **Atomicidad todo-o-nada** sobre los N pedidos de la compra, igual que el riel.
+      *«Primero el saldo» es orden de APLICACIÓN (cubre lo suyo, la tarjeta el resto);
+      «se consume después de confirmar» es la TIMING de la escritura — no se contradicen.*
+- **Reverso / devolución de una compra mixta**: cada porción vuelve por donde vino, **a
+  prorrata de `saldo_aplicado / total`** — la porción saldo vuelve como crédito nuevo al
+  hogar (movimiento, no edición: `acreditar_saldo_hogar`, idempotente por el caso), la
+  porción tarjeta sigue la política de reembolsos vigente (el ledger se reversa
+  proporcional, §7.14 de `MODELO_FINANCIERO`). **El reembolso PARCIAL usa el mismo
+  factor**: si se devuelve la mitad, vuelve la mitad de cada porción. *(S114-A ④:
+  `caso_resolver` reparte cuando el caso es sobre un pedido cuya compra tuvo saldo.)*
+
+## §5bis · EL INTERINO DE LA RESERVA DE SALDO (S114 — decisión tomada, no olvido)
+
+En el pago mixto, el saldo que la familia aplica a una compra se **reserva** mientras
+el riel cobra el resto (`compras.saldo_aplicado` sobre `esperando_pago`, restando del
+disponible). Esa reserva se resuelve por tres caminos: el riel **confirma** (se
+consume el saldo), el riel **rechaza síncrono** (se suelta en el acto), o el checkout
+queda **muerto** y el reloj lo suelta al vencer.
+
+**🔴 EL HUECO DECLARADO, con su costo:** desde S114, el reloj **no suelta una reserva
+si hay un cobro vivo** (intento `pendiente`/`aprobado`) — para no devolverle el saldo
+a una familia cuya tarjeta el riel ya cobró (la carrera, `D-1052`). La contracara es
+que **un intento que NUNCA se resuelve —la pasarela jamás contesta— deja su reserva
+RETENIDA indefinidamente.** El **techo** que la soltaría a las 24 h con aviso a la casa
+está **fichado y NO construido** (`D-1053`), porque soltar sin avisar sería asumir «no
+cobró», y el canal de avisos a la casa todavía no existe (`D-1054`).
+
+**Mientras el techo no exista, el destrabe es MANUAL y por el motor, jamás por un
+UPDATE:** se llama `liberar_reserva_saldo_compra('<compra_id>')` — idempotente, sólo
+suelta una reserva viva (`esperando_pago` + saldo > 0), nunca des-consume una pagada.
+El costo del interino es **saldo inmovilizado de una familia** hasta que alguien lo
+destrabe a mano; se declara acá para que ese alguien sepa que existe y cómo se hace.
 
 ## §6 · SI SE PUEDE RETIRAR
 
@@ -136,6 +175,7 @@ al cliente por recuperar su plata). Si el volumen lo vuelve caro, se revisa con 
 | 3 | Plazo de prescripción real para el reconocimiento de §7 | Contador |
 | 4 | La promesa del camino al medio de pago original en los T&C | Respuesta de Nuvei (refund diferido sí/no) |
 | 5 | El esquema exacto de tablas (¿extiende el motor financiero o nace tabla propia?) | Censo de S102 contra la base — esta letra fija el contrato, no los nombres |
+| 6 | El **techo** de la reserva de saldo (soltar a las 24 h un intento que nunca resuelve) — acoplado a un aviso a la casa que hoy no existe. Interino en §5bis: se destraba a mano con `liberar_reserva_saldo_compra` | A (`D-1053`) + F (`D-1054`, la audiencia casa) |
 
 ---
 

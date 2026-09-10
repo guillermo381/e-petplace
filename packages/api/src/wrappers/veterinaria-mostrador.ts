@@ -402,7 +402,7 @@ const MENSAJES_COBRO: Record<CodigoCobroPresencial | 'error_desconocido', string
   // genérico (Ley 13). Misma familia que el resto del mostrador.
   acceso_denegado: 'No tienes permiso para registrar el cobro.',
   cita_no_existe: 'Esa atención ya no existe.',
-  no_opera_cuenta: 'No operás este negocio.',
+  no_opera_cuenta: 'No operas este negocio.',
   monto_invalido: 'El monto no es válido.',
   medio_invalido: 'Elige un medio de cobro válido.',
   cobro_ya_registrado: 'Esta atención ya tiene un cobro registrado.',

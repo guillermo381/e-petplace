@@ -172,6 +172,56 @@ todo lo que toque.
 
 ---
 
+## §3.4 · **UN GATE QUE ES UN `WHERE` NO DISTINGUE «VACÍO» DE «PROHIBIDO»**
+
+*(Firma del founder, 8-sep-2026. Nace de un caso real y se escribe como ley porque **es la
+clase, no el conteo**.)*
+
+**Toda función de LECTURA del admin rebota explícitamente cuando el que llama no es la
+casa. No alcanza con filtrar.**
+
+```sql
+-- ❌ el gate como filtro: un no-admin recibe [] y cree que no hay nada
+SELECT … FROM pasaporte_lote l WHERE is_admin();
+
+-- ✅ el gate como rebote: «no podés» y «no hay» quedan separados
+IF NOT COALESCE(is_admin(), false) THEN
+  RETURN jsonb_build_object('ok', false, 'codigo', 'sin_permiso');
+END IF;
+```
+
+🔴 **Por qué importa, y no es teoría:** con el `WHERE`, **«no hay lotes» y «no podés
+verlos» llegan a la pantalla como el MISMO valor.** La superficie no puede distinguirlos
+—ni con el mejor diseño— porque *la diferencia se perdió en la base*. Y el estado vacío que
+dibuje va a decir una de las dos cosas: **si acierta, es casualidad**.
+
+⚠️ **Y la razón por la que se escribe hoy, con el caso todavía inofensivo:** al portal sólo
+se entra por el login de admin, así que **hoy el no-admin no puede llegar**. *Esa
+protección no es del gate: es de quién puede abrir la puerta de al lado.* **Deja de ser
+cierta el día que alguien agregue un rol** —un operador, una vista de sólo lectura, un
+soporte— y ese día **no falla nada: la pantalla dice «todavía no hay ningún lote» a alguien
+que sí los tiene.**
+
+> ***Un permiso que se pierde en silencio no se descubre cuando se rompe: se descubre
+> cuando alguien toma una decisión con el dato equivocado.***
+
+**El estado medido (8-sep-2026), para que la ley no se lea más grande de lo que es:** de
+**33** funciones de lectura con `is_admin()`, **una sola** tiene el gate como `WHERE` —
+`listar_lotes()`— y **una** rebota explícitamente. Las 31 restantes son **helpers de
+policy** que devuelven `boolean`, donde `false` **es** la respuesta correcta y esta ley no
+aplica. *El censo se corre así:*
+
+```sql
+SELECT p.proname FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+WHERE n.nspname = 'public' AND pg_get_functiondef(p.oid) ~* 'WHERE\s+is_admin\(\)';
+```
+
+**Y lo que corresponde hacer con `listar_lotes()` no lo decide esta letra:** es de A, y la
+elección es entre rebotar tipado —lo que esta ley pide— o dejarlo y **declarar en su cuerpo
+que su vacío es ambiguo**. *Lo que no vale es que quede sin decidir.*
+
+---
+
 ## §4 · Lo que esta letra NO decide
 
 - **El diseño de las pantallas.** Se decide con su dirección, escrita antes de construir, y se

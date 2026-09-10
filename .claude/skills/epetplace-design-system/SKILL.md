@@ -16,8 +16,8 @@ description: >-
 
 # epetplace-design-system — el sistema es exigible, no sugerido
 
-Fuente de verdad: `packages/ui` (tokens v4 + **81 componentes** + 3 temas).
-*(⏪ **RE-MEDIDO S103-A contra el objeto — decía 52, y la brecha era de 29.** Método: `ls src/components/*.tsx` = **85**, menos **3** variantes `.web` y la infra `capturaFoto` = **81**. 🔴 **El exigible NO es éste: es `R17` del lint** — hoy `exportaciones=106 · en-galería=97`—, **y cuando discrepen gana R17.** Esta cifra vive acá para orientar, no para citarse: **una skill se carga en TODA tarea de UI, así que un número viejo acá no desinforma a un lector — desinforma a cada construcción.** **Cruce de territorio declarado:** la skill es de B, que ya cerró.)*
+Fuente de verdad: `packages/ui` (tokens v4 + 3 temas). **El número de piezas NO SE ESCRIBE ACÁ — se pide:** `node scripts/verify-contador-piezas.mjs`.
+*(🔴 **S114-B · SE RETIRA EL NÚMERO, y la razón es una medición: decía `81` y eran `171`.** Casi cien de brecha, once sesiones después de su última «re-medición». ⏪ **Su nota vieja —conservada porque predijo exactamente lo que pasó— decía:** *«RE-MEDIDO S103-A contra el objeto — decía 52, y la brecha era de 29… Esta cifra vive acá para orientar, no para citarse: **una skill se carga en TODA tarea de UI, así que un número viejo acá no desinforma a un lector — desinforma a cada construcción**»*. **Se cumplió, y la nota no lo evitó: la hizo más creíble** — un contador con «re-medido» al lado se lee como un dato ya verificado, así que nadie lo va a ir a mirar. **Tercer cobro de la clase en esta casa** (el de migraciones cayó cuatro veces, el de fichas seis), y las tres veces la cura no fue corregirlo otra vez: fue sacarlo. **Lo exigible sigue siendo `R17` del lint**, que crece solo. ⚠️ **Y son TRES ESCALAS distintas, que confundirlas es la mitad del lío:** piezas (lo que mide el gate) · filas del índice de esta skill (documenta un subconjunto) · exportaciones (lo que cuenta R17).)*
 *(Contador RE-MEDIDO S88 contra el objeto — L-141: 55 `.tsx` en `src/components/` menos las 2 variantes `.web` y la infra `capturaFoto`. El exigible es R17 del lint: `exportaciones=75 · pendientes=0`. La cifra anterior decía 48, de S85.)*
 Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 `@epetplace/ui`, no existe en el producto.
@@ -877,6 +877,47 @@ comprar es lo último, y lo que compra combina con TODO.*
 ```
 
 ## 3. ÍNDICE — los componentes (import de `@epetplace/ui`)
+
+> **➕ LAS PIEZAS DE LA POSTVENTA (S114-B) — al índice con su regla.**
+> Letra: `docs/DIRECCION_POSTVENTA.md`. **Cinco de las ocho no son piezas
+> nuevas: son la de despensa o la de adopción con otro vocabulario** — y eso
+> es la letra, no economía (*«es la misma escalera del pedido de la despensa y
+> el mismo chat de la adopción — no aprendo nada nuevo»*, §3).
+>
+> | Export | Cuándo |
+> |---|---|
+> | `EscaleraCaso` | **`EscaleraEstados` con los cinco glifos del caso**, igual que `EscaleraSolicitud` para adopción. Los finales alternos **no son etapas**: reemplazan la línea. 🔴 **`GLIFO` es un `Record` completo ⇒ una etapa sin glifo no compila**, y `R72` cierra lo que el tipo no ve: **una etapa que exista en la unión y falte en `ORDEN_CASO` desaparece de la escalera sin que nada falle** |
+> | `CabeceraCaso` | El objeto (foto chica + nombre + **fecha en voz de máquina**) y la contraparte. 🔴 **El monto es INEXPRESABLE: ni prop ni slot `ReactNode`** — y el slot es la mitad que importa, porque es por donde el monto entra sin llamarse monto (`R74`) |
+> | `SelectorMotivo` | Lista vertical de motivos, cada uno con **glifo obligatorio**, **sin scroll interno**. 🔴 **La última fila la pone LA PIEZA** (`MOTIVO_CONTAME`): un catálogo no puede traer su propio «Otro» (`R75`). No es `SelectorOpcion`: sus cuatro disposiciones son de CHIPS y un motivo es una frase entera |
+> | `TarjetaDestinoPlata` | 🔴 **Dibuja LAS DOS**, con UNA receta de estilo y `alignItems: 'stretch'`. Si dibujara una, la simetría sería del consumidor. Ninguna preseleccionada, los dos tiempos por el MISMO campo. `R73` prohíbe toda rama por destino |
+> | `BannerPlazo` | «Te quedan 14 horas». **Jamás rojo** (no pasó nada malo) y **sin reloj adentro** — cero `setInterval`, cero estado propio (`R76`). `tabular` para que la línea no tiemble al bajar el número |
+> | `FilaBandejaCaso` | Objeto · contraparte · motivo · reloj, los cuatro de §5. **Memoizada** con `mismoCaso`, que **compara DOS cosas**: el caso Y el `onPress` — la bandeja da un callback por fila |
+> | `LineaAlgoSalioDistinto` | La puerta del §1, en la **última fila** del detalle del objeto. Tres voces (disponible · fuera de ventana · caso abierto). 🔴 **En memorial devuelve `null`** — piso estructural, no un recordatorio |
+> | `CARA_EN_HILO` | El ancho de la cara en el hilo. **NÚMERO, no pieza** (misma clase que `ALTO_PIE_CAMPO`): se exporta para que quien monte el avatar lo PIDA y no lo teclee |
+>
+> **➕ Y DOS ENMIENDAS ADITIVAS (76(d), cero cambio para los consumidores):**
+> · **`Texto` gana `tabular`** — cifras de ancho fijo **en una frase sans**. No
+>   es «poner el número en mono»: la Ley 3 reserva la mono para metadata, y
+>   esto es voz humana con una cifra que cambia. Su MATIZ ya resolvió el caso
+>   hermano a escala display.
+> · **`BurbujaMensaje` gana `cara` en la rama AJENA** — el tercer asiento
+>   (§3.3). 🔴 **Vive sólo del lado ajeno, y eso cierra un invariante: la casa
+>   no puede hablar desde la derecha.**
+>   ⚠️ **Y su superficie NO es un tercer color, POR MEDICIÓN:** en memorial
+>   `bg.card`, `elevated`, `overlay` y `hundido` son **el mismo color** ⇒
+>   cualquier tercera superficie colapsa ahí. *Una distinción que existe en dos
+>   temas de tres es un defecto en el tema donde menos se mira.* Lo que separa
+>   los tres asientos es **la cara y el nombre**, que es literal lo que §3.3
+>   pide.
+>
+> 🔴 **Y una lección de contraste que vale para toda pieza nueva:** el gate
+> tumbó `text.tertiary` sobre el tinte de la elección — **2,11 en claro, 3,22
+> en oscuro, contra un piso de 4,5**. `text.tertiary` es *placeholder y
+> decorativo* por doctrina de esta casa, **y un plazo, un tiempo declarado o
+> el estado de un caso no son decoración**. Tres piezas de esta tanda lo
+> usaban y las tres pasaron a `secondary`. *Si hubiera asumido en vez de
+> medir, el dato que §4 puso para que la opción lenta no quedara escondida
+> habría sido el menos legible de la tarjeta.*
 
 > **➕ LAS PIEZAS DE S88 — al índice con su regla:**
 >

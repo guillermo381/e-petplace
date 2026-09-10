@@ -156,7 +156,8 @@ export interface CasoDetalle {
   final: FinalAlterno | null;
   cerrado: boolean;
   plazoHasta: string | null;
-  objeto: { tipo: ObjetoPostventa; id: string; titulo: string | null; fecha: string | null };
+  objeto: { tipo: ObjetoPostventa; id: string; titulo: string | null; fecha: string | null;
+            total: number | null; disponibleDevolver: number | null };
   resolucion: {
     alcance: 'total' | 'parcial' | 'sin_devolucion' | null;
     monto: number | null;
@@ -187,6 +188,8 @@ export async function leerCaso(casoId: string): Promise<ResultadoWrapper<CasoDet
     objeto: {
       tipo: o.tipo as ObjetoPostventa, id: o.id as string,
       titulo: (o.titulo as string | null) ?? null, fecha: (o.fecha as string | null) ?? null,
+      total: o.total != null ? Number(o.total) : null,
+      disponibleDevolver: o.disponible_devolver != null ? Number(o.disponible_devolver) : null,
     },
     resolucion: {
       alcance: (r.alcance as CasoDetalle['resolucion']['alcance']) ?? null,
@@ -326,13 +329,17 @@ export interface ServicioSinCerrar {
 }
 
 export async function obtenerServiciosSinCerrar(): Promise<
-  ResultadoWrapper<{ cantidad: number; items: ServicioSinCerrar[] }, 'error_lectura'>
+  // `cantidad`/`items` son SÓLO lo accionable (fin >= el corte de F1, lo que el
+  // reloj puede tocar). `fueraDeCorte` es el backlog viejo, aparte, para
+  // diagnóstico — NUNCA se mezcla en el número que ve el prestador (S114-A ⑥).
+  ResultadoWrapper<{ cantidad: number; items: ServicioSinCerrar[]; fueraDeCorte: number }, 'error_lectura'>
 > {
   const { data, error } = await getClient().rpc('obtener_servicios_sin_cerrar');
   if (error) return { ok: false, codigo: 'error_lectura', mensaje: ERR };
-  const d = (data ?? {}) as { cantidad?: number; items?: Record<string, unknown>[] };
+  const d = (data ?? {}) as { cantidad?: number; items?: Record<string, unknown>[]; fuera_de_corte?: number };
   return { ok: true, data: {
     cantidad: d.cantidad ?? 0,
+    fueraDeCorte: d.fuera_de_corte ?? 0,
     items: (d.items ?? []).map((i) => ({
       objetoId: i.objeto_id as string, objetoTipo: i.objeto_tipo as ObjetoPostventa,
       servicio: i.servicio as string, mascotaNombre: (i.mascota_nombre as string | null) ?? null,
@@ -354,15 +361,42 @@ export async function responderCaso(casoId: string, texto: string) {
  * escribiría un reembolso declarado sobre un servicio que sí devengó, y la
  * casa pagaría la diferencia sin que nadie lo vea.
  */
+export type CodigoReconocer =
+  | 'no_podes_resolver' | 'alcance_invalido' | 'monto_requerido_en_parcial'
+  | 'razon_requerida' | 'monto_supera_total';
+
+/** El rebote por tope LLEVA sus números (patrón de la casa: un error tipado
+ *  trae el dato para componer el mensaje). En una carrera —alguien devolvió
+ *  mientras la Hoja estaba abierta— `disponible` del rebote es el número FRESCO;
+ *  el de `leerCaso` quedó viejo. El resto de los códigos van sin datos. */
+export type ErrorReconocer =
+  | { ok: false; codigo: 'monto_supera_total'; mensaje: string; total: number | null; disponible: number | null }
+  | { ok: false; codigo: Exclude<CodigoReconocer, 'monto_supera_total'>; mensaje: string };
+
 export async function reconocerYResolver(
-  casoId: string, p: { alcance: 'total' | 'parcial' | 'sin_devolucion'; monto?: number },
-): Promise<ResultadoWrapper<{ camino: string | null; teniaDevengo: boolean; etapa: EtapaCaso }, 'no_podes_resolver' | 'alcance_invalido' | 'monto_requerido_en_parcial'>> {
+  casoId: string, p: { alcance: 'total' | 'parcial' | 'sin_devolucion'; monto?: number; motivo?: string },
+): Promise<{ ok: true; data: { camino: string | null; teniaDevengo: boolean; etapa: EtapaCaso } } | ErrorReconocer> {
   const { data, error } = await getClient().rpc('caso_reconocer_y_resolver', {
-    p_caso_id: casoId, p_alcance: p.alcance, p_monto: p.monto ?? undefined,
+    p_caso_id: casoId, p_alcance: p.alcance,
+    p_monto: p.monto ?? undefined,
+    p_motivo: p.motivo ?? undefined,
   });
   if (error) return { ok: false, codigo: 'no_podes_resolver', mensaje: ERR };
   const d = (data ?? {}) as Record<string, unknown>;
-  if (d.ok !== true) return { ok: false, codigo: (d.codigo as 'no_podes_resolver') ?? 'no_podes_resolver', mensaje: ERR };
+  if (d.ok !== true) {
+    const CODES = ['no_podes_resolver','alcance_invalido','monto_requerido_en_parcial',
+                   'razon_requerida','monto_supera_total'] as const;
+    const raw = typeof d.codigo === 'string' ? d.codigo : 'no_podes_resolver';
+    const cod: CodigoReconocer = (CODES as readonly string[]).includes(raw)
+      ? (raw as CodigoReconocer) : 'no_podes_resolver';
+    if (cod === 'monto_supera_total') {
+      // los números FRESCOS del motor, para el mensaje en la carrera
+      return { ok: false, codigo: 'monto_supera_total', mensaje: ERR,
+        total: d.total != null ? Number(d.total) : null,
+        disponible: d.disponible != null ? Number(d.disponible) : null };
+    }
+    return { ok: false, codigo: cod, mensaje: ERR };
+  }
   return { ok: true, data: {
     camino: (d.camino as string | null) ?? null,
     teniaDevengo: d.tenia_devengo === true,

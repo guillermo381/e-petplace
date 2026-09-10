@@ -15,6 +15,26 @@ el NFC adentro.** Hasta entonces:
   siempre. Su verde es lo único que dice que el OTA que estás por publicar
   **puede** aplicarse sobre el binario que la gente ya tiene.
 
+### 🔴 FIRMA DEL FOUNDER (8-sep-2026) — TAMPOCO SE PIDE EL BUILD PARA VERIFICAR
+
+**Todos los despliegues son por OTA, sin excepción. Ninguna pista pide un build
+por ningún motivo — ni siquiera para desbloquear una verificación propia.** Lo
+que pida binario se anota en la tabla de abajo y NO se instala (eso ya regía); lo
+nuevo es que **tampoco se pide el build para verificar.**
+
+**La consecuencia, escrita, porque es donde se cae:** si algo no se puede caminar
+sin un dev client, **NO queda como «pendiente de build».** Se verifica en el
+aparato con la app publicada, **o se declara como NO VERIFICADO con su razón.**
+*«Pendiente de build» es una deuda que nadie salda y que se lee como que va a
+pasar; «no verificado, porque X» es un hecho que el founder puede decidir.*
+
+Ya pasó **dos veces en el arco de postventa** y las dos se declaran así, no como
+pendientes:
+- **C8 — el «servicios sin cerrar» en el Hoy del prestador.**
+- **El dictado** (`expo-speech-recognition`, sólo en `apps/prestador`, es build).
+
+---
+
 ### 🔴 SI NECESITÁS ALGO NATIVO: SE ANOTA ACÁ, NO SE INSTALA
 
 **Cualquier pista que necesite una capacidad nativa agrega su fila a la tabla de

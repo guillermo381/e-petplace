@@ -3038,6 +3038,7 @@ export type Database = {
           en_sombra: boolean
           ignora_techo: boolean
           plantilla_idioma: string
+          plantilla_variables: Json | null
           plantilla_whatsapp: string | null
         }
         Insert: {
@@ -3050,6 +3051,7 @@ export type Database = {
           en_sombra?: boolean
           ignora_techo?: boolean
           plantilla_idioma?: string
+          plantilla_variables?: Json | null
           plantilla_whatsapp?: string | null
         }
         Update: {
@@ -3062,6 +3064,7 @@ export type Database = {
           en_sombra?: boolean
           ignora_techo?: boolean
           plantilla_idioma?: string
+          plantilla_variables?: Json | null
           plantilla_whatsapp?: string | null
         }
         Relationships: [
@@ -4669,6 +4672,8 @@ export type Database = {
           id: string
           impuesto_total: number
           moneda: string
+          saldo_aplicado: number
+          saldo_reservado_hasta: string | null
           subtotal: number
           total: number
           updated_at: string
@@ -4682,6 +4687,8 @@ export type Database = {
           id?: string
           impuesto_total?: number
           moneda?: string
+          saldo_aplicado?: number
+          saldo_reservado_hasta?: string | null
           subtotal?: number
           total?: number
           updated_at?: string
@@ -4695,6 +4702,8 @@ export type Database = {
           id?: string
           impuesto_total?: number
           moneda?: string
+          saldo_aplicado?: number
+          saldo_reservado_hasta?: string | null
           subtotal?: number
           total?: number
           updated_at?: string
@@ -14000,6 +14009,7 @@ export type Database = {
       }
       mascotas: {
         Row: {
+          bienvenida_regreso_pendiente: boolean
           country_code: string
           creado_por_sistema: string | null
           created_at: string
@@ -14036,6 +14046,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          bienvenida_regreso_pendiente?: boolean
           country_code?: string
           creado_por_sistema?: string | null
           created_at?: string
@@ -14072,6 +14083,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          bienvenida_regreso_pendiente?: boolean
           country_code?: string
           creado_por_sistema?: string | null
           created_at?: string
@@ -14531,6 +14543,50 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      notificacion_entrega: {
+        Row: {
+          actualizado_en: string
+          canal: string
+          cerrado_en: string | null
+          creado_en: string
+          estado: string
+          id: string
+          intencion_id: string
+          motivo: string | null
+          proveedor_msg_id: string | null
+        }
+        Insert: {
+          actualizado_en?: string
+          canal: string
+          cerrado_en?: string | null
+          creado_en?: string
+          estado?: string
+          id?: string
+          intencion_id: string
+          motivo?: string | null
+          proveedor_msg_id?: string | null
+        }
+        Update: {
+          actualizado_en?: string
+          canal?: string
+          cerrado_en?: string | null
+          creado_en?: string
+          estado?: string
+          id?: string
+          intencion_id?: string
+          motivo?: string | null
+          proveedor_msg_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacion_entrega_intencion_id_fkey"
+            columns: ["intencion_id"]
+            isOneToOne: false
+            referencedRelation: "notificacion_intencion"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notificacion_intencion: {
         Row: {
@@ -23564,6 +23620,10 @@ export type Database = {
         Args: { p_presupuesto_id: string }
         Returns: string
       }
+      _asunto_del_caso: {
+        Args: { p_id: string; p_tipo: string }
+        Returns: string
+      }
       _atencion_en_estados: {
         Args: { p_atencion_id: string; p_estados: string[] }
         Returns: Record<string, unknown>
@@ -23603,6 +23663,10 @@ export type Database = {
           titulo: string
         }[]
       }
+      _caso_monto_objeto: {
+        Args: { p_id: string; p_tipo: string }
+        Returns: number
+      }
       _caso_mover: {
         Args: {
           p_actor: string
@@ -23616,6 +23680,10 @@ export type Database = {
       _caso_tiene_devengo: {
         Args: { p_id: string; p_tipo: string }
         Returns: string
+      }
+      _caso_ya_devuelto: {
+        Args: { p_excluir: string; p_id: string; p_tipo: string }
+        Returns: number
       }
       _categoria_es_apagable: {
         Args: { p_categoria: string }
@@ -23732,6 +23800,15 @@ export type Database = {
       _empleado_matricula_ok: {
         Args: { p_empleado_id: string; p_tipo_servicio: string }
         Returns: boolean
+      }
+      _ensamblar_plantilla: {
+        Args: {
+          p_datos: Json
+          p_destinatario: string
+          p_plantilla: string
+          p_spec: Json
+        }
+        Returns: Json
       }
       _es_repartidor_del_pedido: {
         Args: { p_pedido_id: string }
@@ -24353,6 +24430,10 @@ export type Database = {
         }
         Returns: string
       }
+      aplicar_saldo_a_compra: {
+        Args: { p_compra_id: string; p_monto_saldo?: number }
+        Returns: Json
+      }
       aprobar_presupuesto_familia: {
         Args: { p_presupuesto_id: string }
         Returns: Json
@@ -24465,8 +24546,8 @@ export type Database = {
         Args: {
           p_alcance: string
           p_caso_id: string
-          p_destino?: string
           p_monto?: number
+          p_motivo?: string
         }
         Returns: Json
       }
@@ -25612,6 +25693,12 @@ export type Database = {
         }
         Returns: Json
       }
+      liberar_reserva_saldo_compra: {
+        Args: { p_compra_id: string }
+        Returns: Json
+      }
+      liberar_reservas_saldo_vencidas: { Args: never; Returns: number }
+      listar_lotes: { Args: never; Returns: Json }
       listar_memoria_coach: { Args: { p_mascota_id: string }; Returns: Json }
       listar_placas_de_lote: { Args: { p_lote_id: string }; Returns: Json }
       listar_propuestas_memoria: {
@@ -26751,6 +26838,7 @@ export type Database = {
         Args: { p_cuenta_comercial_id: string; p_motivo?: string }
         Returns: Json
       }
+      pagar_compra_con_saldo: { Args: { p_compra_id: string }; Returns: Json }
       pagos_aprobados_sin_sujeto_movido: { Args: never; Returns: Json }
       pagos_conciliacion_cobertura: { Args: never; Returns: Json }
       pagos_huerfanos_por_sujeto: {
@@ -27632,6 +27720,7 @@ export type Database = {
         Args: { p_email?: string; p_invite_code?: string }
         Returns: Json
       }
+      vencer_casos_sin_respuesta: { Args: never; Returns: Json }
       vencer_links_mensuales: { Args: never; Returns: Json }
       vencer_paquetes_salidas: { Args: never; Returns: Json }
       vencer_programas_adiestramiento: { Args: never; Returns: Json }

@@ -100,7 +100,11 @@ async function _citasActivas(
     // `NULL >= hoy` no es verdadero, así que el dueño aprobaba y su
     // procedimiento desaparecía de todas sus superficies. Entra también
     // la sin-fecha CON presupuesto (jamás una sin fecha huérfana).
-    .or(`fecha.gte.${hoyLocal()},and(fecha.is.null,presupuesto_id.not.is.null)`)
+    // 🔴 S114-A (hueco que C midió): `en_curso` entra SIEMPRE, aunque su fecha
+    //    sea de un día pasado — una atención abierta y nunca cerrada es activa,
+    //    no historia. Sin esta rama, la query la excluía por fecha y el historial
+    //    no lista `en_curso` ⇒ quedaba invisible en las dos listas (Thor tenía 1).
+    .or(`fecha.gte.${hoyLocal()},and(fecha.is.null,presupuesto_id.not.is.null),estado.eq.en_curso`)
     // nullsFirst: las sin fecha PRESIDEN — son las que esperan acción
     // (ley de la casa del prestador, aplicada a la casa del dueño).
     .order('fecha', { ascending: true, nullsFirst: true })
@@ -259,4 +263,125 @@ export async function obtenerCitasActivasHogar(
 ): Promise<ResultadoWrapper<CitaActivaHogar[], 'error_citas_mascota'>> {
   if (mascotaIds.length === 0) return { ok: true, data: [] };
   return _citasActivas(mascotaIds);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   S114-A · EL LECTOR DE HISTORIAL — la puerta de las citas PASADAS (pedido de C)
+   ───────────────────────────────────────────────────────────────────────────
+   El hub filtra `fecha.gte.<hoy>` y el timeline excluye `cita_servicio`, así que
+   una cita pasada no está en NINGUNA superficie — y son 265 de 379 en la familia
+   del founder, 142 «confirmada» sin atención («el paseador no vino»), el reclamo
+   más frecuente. Este lector es su superficie.
+
+   Mismo shape que `CitaActivaMascota` (la pantalla ya sabe dibujarlo) + dos cosas:
+   · `atencion_id` para las PASADAS (no sólo en_curso): sin él una cita atendida
+     no abre su recorrido;
+   · `cerrada_en` = anchor de la ventana de reclamo, consistente con el motor
+     (`_caso_dueno_del_objeto`: COALESCE(atencion.cerrada_en, fecha+hora)). Con
+     esto la app deja de depender del límite de día: una cita que terminó hoy ya
+     tiene su ventana, en vez de ganarla mañana.
+
+   Paginado por CURSOR compuesto `fecha|id`, jamás offset (S99: la página
+   siguiente se saltea filas cuando llega una nueva — 55 de 62). Incluye
+   canceladas y no_show: son historia, y la familia pregunta por ellas; que se
+   abran o no lo decide la pantalla. */
+export interface CitaHistorialMascota extends CitaActivaMascota {
+  /** El desenlace REAL de la cita pasada. La unión `estado` heredada es de
+   *  ACTIVAS; el `estado` de una fila de historia queda en 'firme' como valor
+   *  neutro y el desenlace verdadero se lee ACÁ. */
+  estado_historial: 'completada' | 'confirmada' | 'cancelada' | 'no_show' | 'pendiente';
+  /** ISO. Instante de fin = anchor de la ventana (motor-consistente). null si
+   *  la cita no tiene fecha. */
+  cerrada_en: string | null;
+}
+
+export async function obtenerHistorialCitasMascota(
+  mascotaId: string,
+  opciones?: { limite?: number; cursor?: string },
+): Promise<ResultadoWrapper<{ citas: CitaHistorialMascota[]; cursor: string | null }, 'error_citas_mascota'>> {
+  const cliente = getClient();
+  const limite = Math.min(Math.max(opciones?.limite ?? 20, 1), 50);
+
+  let q = cliente
+    .from('evento_cita_servicio')
+    .select(
+      'id, mascota_id, fecha, hora, duracion_minutos, tipo_servicio, estado, prestador_id, presupuesto_id, prestadores ( nombre_comercial ), presupuesto:presupuesto!evento_cita_servicio_presupuesto_id_fkey(items:presupuesto_item(id, descripcion_libre, created_at))',
+    )
+    .eq('mascota_id', mascotaId)
+    // Estrictamente PASADAS por día; el instante fino de la ventana lo da
+    // `cerrada_en`. Una cita de hoy vive en el hub activo, no acá.
+    .lt('fecha', hoyLocal())
+    .in('estado', ['confirmada', 'completada', 'cancelada', 'no_show', 'pendiente'])
+    // El orden del cursor DEBE ser el de la consulta: fecha desc, id desc (id
+    // es UUID plano, no cronológico — desempata estable; la hora es display y
+    // la pantalla ordena dentro del día si quiere).
+    .order('fecha', { ascending: false })
+    .order('id', { ascending: false })
+    .limit(limite + 1);
+
+  if (opciones?.cursor) {
+    const partes = opciones.cursor.split('|');
+    const cf = partes[0];
+    const cid = partes[1];
+    if (cf && cid) {
+      // La página siguiente: estrictamente "menor" en (fecha, id) desc.
+      q = q.or(`fecha.lt.${cf},and(fecha.eq.${cf},id.lt.${cid})`);
+    }
+  }
+
+  const citas = await q;
+  if (citas.error) {
+    return { ok: false, codigo: 'error_citas_mascota', mensaje: MENSAJE_ERROR };
+  }
+
+  const hayMas = citas.data.length > limite;
+  const filas = hayMas ? citas.data.slice(0, limite) : citas.data;
+
+  // atencion_id + cerrada_en para TODAS las pasadas (un fallo deja null y la
+  // fila se dibuja sin el salto al recorrido — voz honesta, Ley 13).
+  const atencionPorCita = new Map<string, { id: string; cerrada_en: string | null }>();
+  const ids = filas.map((c) => c.id);
+  if (ids.length > 0) {
+    const at = await cliente
+      .from('evento_atencion')
+      .select('id, cita_id, cerrada_en')
+      .in('cita_id', ids);
+    if (!at.error) {
+      for (const a of at.data) {
+        if (a.cita_id !== null) atencionPorCita.set(a.cita_id, { id: a.id, cerrada_en: a.cerrada_en });
+      }
+    }
+  }
+
+  const data: CitaHistorialMascota[] = [];
+  for (const c of filas) {
+    // Narrow honesto del desenlace (regla 34: cero `as` forzado). El .in lo
+    // garantiza, pero el tipo generado dice nullable.
+    const eh = c.estado;
+    if (
+      eh !== 'completada' && eh !== 'confirmada' &&
+      eh !== 'cancelada' && eh !== 'no_show' && eh !== 'pendiente'
+    ) continue;
+    const at = atencionPorCita.get(c.id) ?? null;
+    const finComputado =
+      c.fecha !== null ? `${c.fecha}T${(c.hora ?? '00:00:00').slice(0, 8)}` : null;
+    data.push({
+      cita_id: c.id,
+      fecha: c.fecha,
+      hora: c.hora !== null ? c.hora.slice(0, 5) : null,
+      tipo_servicio: c.tipo_servicio,
+      estado: 'firme', // shape heredado; el desenlace va en estado_historial
+      prestador_id: c.prestador_id,
+      prestador_nombre: c.prestadores?.nombre_comercial ?? null,
+      negocio_nombre: null,
+      atencion_id: at?.id ?? null,
+      descripcion_presupuesto: descripcionDePresupuesto(c.presupuesto),
+      estado_historial: eh,
+      cerrada_en: at?.cerrada_en ?? finComputado,
+    });
+  }
+
+  const ultima = data[data.length - 1];
+  const cursor = hayMas && ultima !== undefined ? `${ultima.fecha}|${ultima.cita_id}` : null;
+  return { ok: true, data: { citas: data, cursor } };
 }

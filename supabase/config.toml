@@ -416,3 +416,7 @@ enabled = true
 [functions.pasaporte]
 # el token ES la autorización, como en los papeles de la casa
 verify_jwt = false
+
+[functions.whatsapp-estado]
+# Meta llama sin JWT nuestro; la firma X-Hub-Signature-256 es la autenticación.
+verify_jwt = false

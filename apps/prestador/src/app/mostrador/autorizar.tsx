@@ -59,8 +59,14 @@ import { useTraduccion } from '@/i18n';
 
 // Espejo del filtro de nueva.tsx: solo los códigos que el AvatarMascota /
 // SelectorEspecie saben pintar entran a la grilla del alta.
+/* 🔴 S114-B · FALTABAN `otro` y `equino` — 9 de los 11 de `cat_especies`.
+   `readonly AvatarMascotaEspecie[]` **compila con nueve**, así que nada fallaba:
+   un caballo o un «otro» llegaba al mostrador y este guard decía que su especie
+   no existe. La copia buena vive en `apps/cliente/src/lib/params.ts` (los 11,
+   con su comentario) — *eran tres copias del mismo guard y dos habían quedado
+   atrás.* Lo destapó ampliar `R77` a `apps/`. */
 const CODIGOS_ESPECIE_UI: readonly AvatarMascotaEspecie[] = [
-  'perro', 'gato', 'conejo', 'ave', 'roedor', 'cobaya', 'pez', 'huron', 'reptil',
+  'perro', 'gato', 'conejo', 'ave', 'roedor', 'cobaya', 'pez', 'huron', 'reptil', 'otro', 'equino',
 ];
 function esEspecieUi(codigo: string): codigo is AvatarMascotaEspecie {
   return (CODIGOS_ESPECIE_UI as readonly string[]).includes(codigo);

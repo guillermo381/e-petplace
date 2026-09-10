@@ -1,0 +1,3 @@
+-- REVERSA de 20260911940000_s114a_listar_lotes_habla.sql — escrita ANTES.
+-- Re-aplicar listar_lotes de 20260911920000 (gate como WHERE, devuelve array).
+-- NO revierte datos: sólo la definición de la función de lectura.

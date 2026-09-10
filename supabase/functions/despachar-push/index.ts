@@ -120,12 +120,13 @@ Deno.serve(async (req) => {
   // ① Lo que la DB YA marcó para transporte por push. Esta función no decide
   //    nada: si una fila no está acá, es porque un gate la cortó y eso ya se
   //    escribió en su `resuelto_como`.
+  // S114 multicanal: la cola es la tabla de ENTREGAS por canal (una intención tiene
+  // N entregas). Este edge sólo ve las de 'push'. La intención viaja anidada.
   const { data: pendientes, error: errorSel } = await supabase
-    .from('notificacion_intencion')
-    .select('id, tipo, destinatario_user_id, datos, resuelto_como')
+    .from('notificacion_entrega')
+    .select('id, intencion_id, notificacion_intencion!inner(id, tipo, destinatario_user_id, datos)')
+    .eq('canal', 'push')
     .eq('estado', 'encolada')
-    .eq('resuelto_como->>despacho', 'para_transporte')
-    .eq('resuelto_como->>canal_elegido', 'push')
     .limit(50);
   if (errorSel) {
     return Response.json({ error: 'lectura_fallo', causa: errorSel.message }, { status: 500 });
@@ -172,10 +173,11 @@ Deno.serve(async (req) => {
   let tokensRetirados = 0;
 
   for (const i of pendientes ?? []) {
+    const n = (i as { notificacion_intencion: { id: string; tipo: string; destinatario_user_id: string; datos: Datos } }).notificacion_intencion;
     const { data: tokens } = await supabase
       .from('push_tokens')
       .select('id, token, plataforma')
-      .eq('user_id', i.destinatario_user_id)
+      .eq('user_id', n.destinatario_user_id)
       .eq('activo', true);
 
     // ⚠️ SOLO ANDROID, Y SE DICE POR QUÉ. `getDevicePushTokenAsync()` en iOS
@@ -195,17 +197,18 @@ Deno.serve(async (req) => {
       //   (Medido contra el body vivo, 7-ago.)
       const soloIos = (tokens ?? []).length > 0;
       await supabase
-        .from('notificacion_intencion')
+        .from('notificacion_entrega')
         .update({
           estado: 'fallida',
           motivo: soloIos ? 'sin_token_entregable_ios' : 'sin_token_activo',
+          cerrado_en: new Date().toISOString(),
         })
         .eq('id', i.id);
       fallidas++;
       continue;
     }
 
-    const datos = (i.datos ?? {}) as Datos;
+    const datos = (n.datos ?? {}) as Datos;
     const titulo = datos.titulo ?? 'Tienes una novedad en e-PetPlace';
     const cuerpoMsg = datos.mensaje ?? 'Abre la app para verla.';
 
@@ -253,7 +256,7 @@ Deno.serve(async (req) => {
             // VACÍO, NO `/`: *un tipo sin destino tiene que verse como sin
             // destino, no como «el home a propósito»* — el que no navega y lo
             // declara es el consumidor, y para eso necesita poder distinguirlo.
-            data: { intencion_id: i.id, tipo: i.tipo, ruta: datos.ruta ?? '' },
+            data: { intencion_id: n.id, tipo: n.tipo, ruta: datos.ruta ?? '' },
           },
         }),
       });
@@ -284,17 +287,22 @@ Deno.serve(async (req) => {
 
     if (algunaOk) {
       await supabase
-        .from('notificacion_intencion')
-        .update({ estado: 'entregada' })
+        .from('notificacion_entrega')
+        .update({ estado: 'aceptada_transporte', cerrado_en: new Date().toISOString() })
         .eq('id', i.id);
+      // bump de la intención: aceptada por transporte si algún canal la aceptó
+      await supabase
+        .from('notificacion_intencion')
+        .update({ estado: 'aceptada_transporte' })
+        .eq('id', n.id).eq('estado', 'encolada');
       entregadas++;
     } else if (algunaReintentable) {
       // Queda ENCOLADA tal cual: el próximo tick la vuelve a intentar.
       reintentables++;
     } else {
       await supabase
-        .from('notificacion_intencion')
-        .update({ estado: 'fallida', motivo: ultimaCausa || 'fcm_sin_causa' })
+        .from('notificacion_entrega')
+        .update({ estado: 'fallida', motivo: ultimaCausa || 'fcm_sin_causa', cerrado_en: new Date().toISOString() })
         .eq('id', i.id);
       fallidas++;
     }

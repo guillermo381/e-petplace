@@ -49,6 +49,7 @@ import {
   FilaDato,
   Icono,
   Insignia,
+  LineaAlgoSalioDistinto,
   PieRevelar,
   Separador,
   Tarjeta,
@@ -60,14 +61,22 @@ import {
 import {
   aprobarPresupuestoFamilia,
   obtenerCitasActivasMascota,
+  obtenerHistorialCitasMascota,
   obtenerPresupuestosFamilia,
   rechazarPresupuesto,
   type CitaActivaMascota,
+  type CitaHistorialMascota,
   type PresupuestoFamilia,
 } from '@epetplace/api';
 import { fechaCortaMono, fechaLargaHumana } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
+import { esMemorial } from '@/lib/memorial';
+import { vozDeEstadoDeCaso } from '@/lib/postventa/voz-de-etapa';
+import { destinoDeLaPuerta, veredictoDeLaPuerta } from '@/lib/postventa/puerta';
+import { useCasosPorObjeto } from '@/lib/postventa/useCasosPorObjeto';
+import { useEstadoVida } from '@/lib/postventa/useEstadoVida';
+import { useVentanaDeCaso } from '@/lib/postventa/useVentanaDeCaso';
 import { vozServicio } from '@/lib/voz-servicio';
 
 /**
@@ -147,12 +156,65 @@ export default function CitasDeMascota() {
   const [itemsAbiertos, setItemsAbiertos] = useState<Record<string, boolean>>({});
   const [procesando, setProcesando] = useState<string | null>(null);
 
+  /* ═══ ① EL HISTORIAL — la mitad que faltaba, y era `L-318` puro ═══════════
+     🔴 **El lector existía y esta pantalla no lo llamaba.** A lo entregó
+     (`obtenerHistorialCitasMascota`) y tenía CERO consumidores: *motor sin
+     puerta, con la puerta de este lado.* Sin esto el founder camina y ve sólo
+     lo que viene, que es exactamente el hueco que el censo del 8-sep midió:
+     **265 citas pasadas de su familia, 142 de ellas «confirmada» que nadie
+     atendió**, sin superficie en ningún lado.
+
+     Se carga APARTE de las activas y no en el mismo `Promise.all`: son dos
+     preguntas distintas —qué viene y qué pasó— y **un fallo del historial no
+     puede llevarse puesta la lista de lo que viene** (Ley 13). */
+  const [pasadas, setPasadas] = useState<CitaHistorialMascota[]>([]);
+  const [cursorPasadas, setCursorPasadas] = useState<string | null>(null);
+  const [fasePasadas, setFasePasadas] = useState<'cargando' | 'listo' | 'error'>('cargando');
+  const [trayendoMas, setTrayendoMas] = useState(false);
+
+  /* ═══ S114-C · LA PUERTA EN LA FILA (firma del founder, 8-sep) ═══════════
+     🔴 **EL HALLAZGO QUE LA ORDENA, MEDIDO Y NO SUPUESTO.** El founder no
+     encontró «¿Algo salió distinto?» en ningún lado, y el censo dijo por qué:
+     la puerta vivía SÓLO dentro de `/paseo/[atencionId]` —la pantalla de la
+     ATENCIÓN— y a esa pantalla **una cita pasada casi nunca llega**.
+
+     Los números de su propia familia, medidos contra la base:
+       · 265 citas ya pasadas · **142 «confirmada» que nadie atendió**
+       · esas 142 **están listadas acá** (el lector filtra por ESTADO, jamás
+         por fecha) **y no eran tapeables**: sólo `en_vivo` abría.
+       · 36 con atención · 37 de 534 ítems del historial llevaban a algún lado.
+
+     *Una cita que el prestador nunca abrió NO TIENE atención, así que por el
+     camino de la atención esas 142 no iban a tener puerta jamás — y son
+     justamente «el paseador no vino», el reclamo más frecuente que existe.*
+
+     ⇒ La puerta se monta **en la fila**, que es donde una familia la busca.
+     Nadie entra a ver el recorrido de un paseo para avisar que no ocurrió. */
+  const diasDeVentana = useVentanaDeCaso();
+  const estadoVida = useEstadoVida(typeof mascotaId === 'string' ? mascotaId : null);
+  /* UNA lectura para toda la lista, jamás una por fila (N16 · L-223). */
+  const casosPorCita = useCasosPorObjeto('cita');
+
   useFocusEffect(
     useCallback(() => {
       let vivo = true;
       void (async () => {
         if (typeof mascotaId !== 'string' || mascotaId.length === 0) return;
-        const [rc, rp] = await Promise.all([obtenerCitasActivasMascota(mascotaId), obtenerPresupuestosFamilia()]);
+        /* El historial entra al MISMO `Promise.all`: son tres lecturas en una
+           ola, no tres olas encadenadas (`L-223` — el peaje es por petición). */
+        const [rc, rp, rh] = await Promise.all([
+          obtenerCitasActivasMascota(mascotaId),
+          obtenerPresupuestosFamilia(),
+          obtenerHistorialCitasMascota(mascotaId),
+        ]);
+        if (!vivo) return;
+        if (rh.ok) {
+          setPasadas(rh.data.citas);
+          setCursorPasadas(rh.data.cursor);
+          setFasePasadas('listo');
+        } else {
+          setFasePasadas('error');
+        }
         if (!vivo) return;
         setEstado(rc.ok ? rc.data : 'error');
         setPresupuestos(
@@ -231,6 +293,78 @@ export default function CitasDeMascota() {
       : d.primera;
   };
 
+  /**
+   * La puerta de UNA fila. Devuelve `null` cuando no corresponde, y los
+   * silencios son los del veredicto: memorial, sin cerrar, o sin la ventana
+   * del motor — ése último ahora **se declara en consola** en vez de apagarse
+   * mudo (la cura de `sin_ventana`).
+   */
+  const puertaDeLaFila = (c: CitaActivaMascota) => {
+    /* 🔴 **EL ANCLA ES `cerrada_en` CUANDO EXISTE, y eso CURA una limitación
+       que yo había declarado.** Escribí que «una cita de hoy gana su puerta
+       mañana» porque `fecha` es día sin hora y no podía distinguir «no vino»
+       de «todavía no es la hora». A entregó `cerrada_en` —el instante de fin,
+       **consistente con el motor** (`COALESCE(atencion.cerrada_en, fecha+hora)`)—
+       así que **una cita que terminó hace un rato ya tiene su puerta**.
+
+       El fallback a `fecha < hoy` queda para las activas, que no traen el
+       campo: ahí sigue rigiendo el criterio conservador y su razón. */
+    const cerradaEn = 'cerrada_en' in c ? (c as CitaHistorialMascota).cerrada_en : null;
+    if (cerradaEn !== null) {
+      if (Date.parse(cerradaEn) > Date.now()) return null;
+    } else {
+      const hoy = new Date().toISOString().slice(0, 10);
+      if (c.fecha === null || c.fecha >= hoy) return null;
+    }
+
+    const caso = casosPorCita?.get(c.cita_id);
+    const v = veredictoDeLaPuerta({
+      cerradaEn: cerradaEn ?? c.fecha,
+      estadoVida,
+      diasDeVentana,
+      /* La VOZ la pone quien dibuja (Ley 3): el hook entrega el código del
+         motor y acá pasa por el riel. Sin esto salía `resuelto_entre_partes`
+         crudo en la fila — lo vi caminando. */
+      ...(caso !== undefined
+        ? { casoAbierto: { casoId: caso.casoId, vozEstado: vozDeEstadoDeCaso(t, caso.estadoDelMotor) } }
+        : null),
+      voces: {
+        disponible: t('postventa.puerta'),
+        fueraDeVentana: t('postventa.puertaFueraDeVentana'),
+        casoAbierto: t('postventa.puertaCasoAbierto'),
+      },
+    });
+    if (!v.hay) return null;
+
+    return (
+      /* Sin `Separador`: N3 — entre secciones separa el ESPACIO, no la línea.
+         El `gap` de la tarjeta ya lo da, igual que en las otras dos puertas. */
+      <View style={{ marginTop: spacing[1] }}>
+        <LineaAlgoSalioDistinto
+          estado={v.estado}
+          sujeto="mascota"
+          /* 🔴 La SEÑAL, jamás un `false` de comodidad — B lo dejó escrito:
+             pasar `false` reintroduce el guard apagado que la prop vino a
+             curar. El veredicto ya devolvió `hay:false` en memorial, así que
+             acá nunca llega encendida; se pasa igual porque un piso que
+             depende de que el llamador se acuerde no es un piso. */
+          enMemorial={esMemorial(estadoVida)}
+          onPress={() => {
+            /* `casoAbierto` no tiene destino en `destinoDeLaPuerta` —nació
+               cuando los casos no existían— así que el caso se navega acá,
+               que es donde SÍ tenemos su id. Lo demás va por la función. */
+            if (v.estado.tipo === 'casoAbierto' && v.casoId !== null) {
+              router.push({ pathname: '/postventa/caso/[casoId]', params: { casoId: v.casoId } });
+              return;
+            }
+            const destino = destinoDeLaPuerta(v, 'cita', c.cita_id);
+            if (destino !== null) router.push(destino);
+          }}
+        />
+      </View>
+    );
+  };
+
   const detalleHero = (c: CitaActivaMascota) => {
     const servicio = nombreVisibleCita(c);
     const icono = iconoOficio(c.tipo_servicio);
@@ -307,6 +441,17 @@ export default function CitasDeMascota() {
               <Celda titulo={c.prestador_nombre} subtitulo={t('citasMascota.quienAtiende')} />
             </>
           ) : null}
+          {/* ── LA PUERTA, ÚLTIMA (§1: «la última fila del detalle») ────────
+              Sólo sobre una cita que YA PASÓ. `cerradaEn` sale de `c.fecha`,
+              que es día sin hora, así que se exige **estrictamente anterior a
+              hoy**: sin la hora de fin no se puede distinguir «no vino» de
+              «todavía no es la hora», y ofrecer un reclamo sobre algo que aún
+              puede ocurrir es peor que ofrecerlo un día después.
+
+              ⚠️ **La consecuencia se declara: una cita de HOY gana su puerta
+              mañana.** Es la salida conservadora, y la cura de raíz es la hora
+              de fin en el lector — está pedido a A. */}
+          {puertaDeLaFila(c)}
         </View>
       </Tarjeta>
     );
@@ -343,6 +488,30 @@ export default function CitasDeMascota() {
             {tarjeta}
           </Pressable>
         </CitaEnVivo>
+      );
+    }
+    /* ── ① S114-C · UNA CITA QUE YA OCURRIÓ SE ABRE (firma del founder) ────
+       ⏪ **Acá terminaba en `return tarjeta` sin `Pressable`, y ése era el
+       defecto de fondo**: una cita pasada quedaba LISTADA Y MUERTA AL TACTO.
+       El único brazo tapeable era `en_vivo`, así que el recorrido de un paseo
+       que ocurrió ayer no se podía abrir desde su propia lista.
+
+       *No es de postventa: es de producto.* Una familia entra a ver el parte,
+       las fotos y el acta de un servicio que pasó — reclamar es sólo uno de
+       los motivos, y el menos frecuente.
+
+       Se abre **si hay a dónde ir**: con atención, al recorrido. Sin atención
+       —las 142 que nadie atendió— no hay pantalla que abrir, y por eso la
+       puerta va EN LA FILA y no detrás de un toque. */
+    if (c.atencion_id !== null) {
+      const atencionId = c.atencion_id;
+      return (
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.push({ pathname: '/paseo/[atencionId]', params: { atencionId } })}
+        >
+          {tarjeta}
+        </Pressable>
       );
     }
     return tarjeta;
@@ -485,8 +654,76 @@ export default function CitasDeMascota() {
             {otras.length > 0 ? (
               <PieRevelar n={otras.length} revelado={desplegado} onPress={() => setDesplegado((d) => !d)} />
             ) : null}
+
           </>
         )}
+
+        {/* ═══ 🔴 EL HISTORIAL VIVÍA DENTRO DE LA RAMA DEL HERO ═══════════════
+            **Medido con el discriminador que sirvió el founder** —«con Thor
+            sólo futuras, con Zeus todas»— y los conteos que trajo A:
+
+            · **Thor: CERO citas activas futuras** (0 confirmadas, 0 pendientes,
+              0 en curso) y **154 pasadas**.
+            · **Zeus: 5 confirmadas futuras** y 58 pasadas.
+
+            Con Thor, `hero === undefined` ⇒ la pantalla caía en el vacío
+            honesto **y el historial —que estaba en la rama `else`— no se
+            dibujaba nunca**. Con Zeus había hero ⇒ se dibujaban las dos.
+
+            *O sea: la sección que se construyó para las 265 citas pasadas
+            quedaba escondida exactamente en el caso donde es LO ÚNICO que hay.*
+            Y el síntoma se lee al revés de lo que es —parece que a Thor le
+            faltan las pasadas por un filtro— cuando lo que pasa es que **la
+            pantalla entera se cortó antes de llegar a ellas**.
+
+            ⇒ el historial sale de la rama y se dibuja **siempre que la carga
+            terminó**, con o sin citas por venir. La voz de arriba ya lo
+            permitía sin tocarla: dice *«Sin citas por venir»*, que sigue siendo
+            verdad con el historial debajo. */}
+          {/* ═══ ① LO QUE YA PASÓ — la sección que faltaba ════════════════
+              Va DESPUÉS de lo que viene, y ése es el orden correcto: la
+              familia entra a esta pantalla por su próxima cita. *Lo pasado
+              se lee después, no compite con lo que hay que hacer.*
+
+              🔴 **Y no es sólo para reclamar.** Acá vive el parte, las
+              fotos y el acta de un servicio que ocurrió — el reclamo es UNO
+              de los motivos y el menos frecuente. Que no existiera es lo que
+              el founder encontró caminando. */}
+          {fasePasadas === 'error' ? (
+            /* Ley 13: el error del historial NO se disfraza de «no hay
+               historial», y no se lleva puesto lo de arriba. */
+            <EstadoVacio titulo={t('citasMascota.historialNoSePudo')} registro="seccion" />
+          ) : pasadas.length > 0 ? (
+            <View style={{ gap: spacing[3] }}>
+              <Texto variante="seccion">{t('citasMascota.yaPasaron')}</Texto>
+              {pasadas.map((c) => (
+                <View key={c.cita_id}>{detalleHero(c)}</View>
+              ))}
+              {/* El paginado es por CURSOR y lo dice el motor: `cursor:
+                  null` = no hay más, así que el pie DESAPARECE en vez de
+                  ofrecer una carga que no trae nada. */}
+              {cursorPasadas !== null ? (
+                <Boton
+                  variante="apoyada"
+                  etiqueta={t('citasMascota.verMasPasadas')}
+                  cargando={trayendoMas}
+                  onPress={() => {
+                    if (typeof mascotaId !== 'string') return;
+                    setTrayendoMas(true);
+                    void obtenerHistorialCitasMascota(mascotaId, { cursor: cursorPasadas }).then((r) => {
+                      setTrayendoMas(false);
+                      if (!r.ok) return;
+                      /* Se AGREGA al final: el motor entrega de más nuevo a
+                         más viejo, así que la página siguiente es más
+                         vieja y va abajo. */
+                      setPasadas((prev) => [...prev, ...r.data.citas]);
+                      setCursorPasadas(r.data.cursor);
+                    });
+                  }}
+                />
+              ) : null}
+            </View>
+          ) : null}
       </ScrollView>
     </SafeAreaView>
   );

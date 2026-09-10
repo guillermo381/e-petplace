@@ -65,6 +65,8 @@ export const clienteEs = {
    * exactamente la clase de defecto que ningún typecheck ve* (el riel exige
    * que la KEY exista, jamás que los NOMBRES de las variables coincidan). */
   nexo: {
+    /* En memorial Nexo no pide nada: dice lo que hay y se calla. */
+    enMemorial: 'Acá no hay nada que preguntar.',
     titulo: 'Nexo',
     autor: 'Nexo',
     enviar: 'Enviar',
@@ -389,6 +391,8 @@ export const clienteEs = {
     entradaDetalle: 'Cada quien con su propia historia.',
   },
   hogar: {
+    sinAvisosTitulo: 'No podemos avisarte de nada.',
+    sinAvisosDetalle: 'Activa los avisos para que te lleguen las citas y los casos.',
     proximaPlagaCorta: '{{plaga}} · {{fecha}}',
     proximaVacunaCorta: '{{nombre}} · {{fecha}}',
     // S91-C · LAS VOCES POR RAMA (orden de mesa, hallazgo de D). Tres
@@ -734,6 +738,17 @@ export const clienteEs = {
     descargarCarnet: 'Descargar el carnet',
     descargarHistoria: 'Descargar la historia clínica',
     documentos: 'Documentos',
+    laVida: 'Su vida',
+    sePerdio: 'Se perdió',
+    perdidaQuePasa: 'Vamos a ayudarte a buscarlo. Su pasaporte va a mostrar tus datos para que quien lo encuentre te llame.',
+    perdidaConfirmar: 'Marcar que se perdió',
+    perdidaListo: 'Listo. Su pasaporte ya muestra tus datos.',
+    perdidaYaEstaba: 'Ya estaba marcado como perdido.',
+    perdidaRevisarContacto: 'Revisar qué muestra su pasaporte',
+    aparecio: 'Apareció',
+    aparecioCuerpo: 'Qué bueno. Volvemos a dejar todo como estaba.',
+    aparecioConfirmar: 'Apareció',
+    aparecioListo: '{{nombre}} está en casa.',
     // S96-D · la puerta de la despensa desde el expediente (§5.1)
     suAlimento: 'El alimento de {{nombre}}',
     // S91-C — la entrada a la bitácora desde el perfil. La voz habla de
@@ -2187,6 +2202,8 @@ export const clienteEs = {
     activada: 'Lista: la placa es de {{nombre}}.',
   },
   busqueda: {
+    nexoCargando: 'Un momento, estoy viendo a quién le puedo preguntar.',
+    nexoSinMascota: 'Nexo conversa sobre una mascota, y ahora mismo no hay ninguna activa.',
     grupo_mascotas: 'Mascotas',
     grupo_citas: 'Citas',
     grupo_papeles: 'Papeles',
@@ -2478,6 +2495,8 @@ export const clienteEs = {
     terminosTitulo: 'Términos y condiciones',
     privacidadTitulo: 'Política de privacidad',
     /* La puerta ÚNICA al índice legal del sitio (A, con la fuente de B). */
+    misCasosTitulo: 'Mis casos',
+    misCasosDetalle: 'Lo que abriste cuando algo salió distinto',
     legalesTitulo: 'Términos y privacidad',
     /* ☠️ `legalPlaceholder` MURIÓ (S103-C, mesa 104). Decía, publicado:
        «Esta app está en fase de pruebas: NO SE COBRA DINERO REAL…».
@@ -2910,6 +2929,10 @@ export const clienteEs = {
     biometricoRechazado: 'No pudimos confirmarlo. Prueba de nuevo.',
   },
   despensa: {
+    usarMiSaldo: 'Usar mi saldo de {{saldo}} en este pedido',
+    saldoCubreTodo: 'Tu saldo cubre todo: {{saldo}}.',
+    saldoMixto: 'Se pagan {{saldo}} con tu saldo y {{resto}} con tu tarjeta.',
+    saldoNoAlcanza: 'Tu saldo no alcanza: faltan {{falta}}.',
     titulo: 'Despensa',
     tituloProducto: 'Producto',
 
@@ -2917,6 +2940,8 @@ export const clienteEs = {
     // motor devuelve lo que pasó, no lo que quedó afuera.
     criterioPara: 'Para {{nombre}}',
     criterioSinAlergenos: 'Dejamos fuera lo que lleva {{lista}}, porque su expediente lo registra.',
+    criterioSinAlergenosRecortado: 'Dejamos fuera lo que lleva {{lista}} y {{n}} alérgenos más, porque su expediente lo registra.',
+    criterioListaCompleta: 'Todo lo que dejamos fuera',
     criterioSinAlergias: 'Su expediente dice que no tiene alergias conocidas.',
     criterioCondicion: 'Incluimos dietas de prescripción por la condición que tiene registrada.',
     elegiMascota: 'Elige una mascota y te mostramos solo lo que puede comer.',
@@ -3439,7 +3464,13 @@ export const clienteEs = {
     cancelarConfirmar: 'Sí, cancelar',
     cancelarNo: 'No, lo dejo',
     canceladoOk: 'El pedido quedó cancelado.',
-    tengoUnProblema: 'Tengo un problema',
+    /* 🔴 S114-C · «Tengo un problema» MURIÓ COMO ETIQUETA (mesa, 7-sep).
+       Convive con «¿Algo salió distinto?» —la puerta del reclamo— y **dos
+       puertas con nombres que compiten obligan a la familia a adivinar cuál
+       le toca; la que elija mal la deja sin lo que la letra le prometió.**
+       Ésta es AYUDA GENERAL: «¿dónde está mi pedido?», que la letra dice
+       explícitamente que NO es un caso. El nombre ahora lo dice. */
+    necesitoAyudaPedido: 'Necesito ayuda con este pedido',
     // 🔏 Horario FIRMADO por el founder (12-ago-2026, vía A): 8:00–21:00.
     problemaDetalle: 'Te lleva al WhatsApp del equipo de e-PetPlace. Contestamos de 8:00 a 21:00.',
     problemaMensaje: 'Hola, tengo un problema con mi pedido {{numero}}.',
@@ -3509,6 +3540,9 @@ export const clienteEs = {
     coordinaranSinNombre: 'Te van a contactar para agendar',
     quienAtiende: 'Quien la atiende',
     otrasActivas: 'Sus otras citas',
+    yaPasaron: 'Lo que ya pasó',
+    verMasPasadas: 'Ver citas anteriores',
+    historialNoSePudo: 'No pudimos cargar lo que ya pasó. Prueba de nuevo.',
     /* S106-C t3 · la señal de que la tarjeta de una teleconsulta NAVEGA.
        «Ver» y no «Entrar»: la antesala puede decir que todavía no se puede,
        y prometer entrada desde acá sería prometer lo que no controlamos. */
@@ -4454,4 +4488,110 @@ export const clienteEs = {
     anotado: 'Anotado en la vida de {{nombre}}',
     noSePudo: 'No pudimos anotarlo. Prueba de nuevo en un rato.',
   },
+  /* ── S114-C · LA POSTVENTA (§1 y §2 de `DIRECCION_POSTVENTA`) ──────────
+     🔴 TUTEO NEUTRO, y la puerta NO es un botón de alarma (§1): «¿Algo salió
+     distinto?» es una pregunta, no un reproche al prestador. */
+  postventa: {
+    // §1 · LA PUERTA, sus tres voces
+    puerta: '¿Algo salió distinto?',
+    puertaFueraDeVentana: 'Este servicio ya pasó su ventana. Si quieres, habla con nosotros.',
+    puertaCasoAbierto: 'Tienes un caso sobre este servicio',
+    // §2 · CONTAR QUÉ PASÓ
+    tituloMotivo: '¿Qué pasó?',
+    /* La última fila. Sale del catálogo cuando el catálogo la trae; esto es
+       el respaldo para que la pantalla nunca quede muda. */
+    contame: 'Es otra cosa · contame',
+    placeholderRelato: 'Cuéntame qué pasó, con tus palabras',
+    /* §2: la foto AYUDA y no es requisito — la frase lo dice entera para que
+       nadie la lea como un paso obligatorio. */
+    fotoOpcional: 'Si tienes una foto, ayuda. Si no, seguimos igual.',
+    agregarFoto: 'Agregar una foto',
+    seguirSinFoto: 'Seguir sin foto',
+    continuar: 'Continuar',
+    /* §2 · LA CONFIRMACIÓN. **Nada se crea sin el sí.** */
+    entendi: 'Entendí: {{resumen}}. ¿Está bien?',
+    esEso: 'Sí, es eso',
+    corregilo: 'No, corrígelo',
+    errorCatalogo: 'No pudimos cargar los motivos. Prueba de nuevo.',
+    // §3.4 · siempre alcanzable
+    /* Los rebotes del motor, uno por código. **Cada uno dice QUÉ pasó**, no
+       «algo salió mal»: el motor sabe explicarse y esconderlo sería tirar la
+       explicación que ya existe. */
+    reboteFueraDeVentana: 'Este servicio ya pasó su ventana para abrir un caso. Si quieres, habla con nosotros.',
+    reboteMotivo: 'Ese motivo no corresponde a este servicio. Elige otro de la lista.',
+    reboteYaAbierto: 'Ya tienes un caso abierto sobre este servicio.',
+    reboteNoEsTuyo: 'Este servicio no está en tu familia.',
+    reboteNoExiste: 'No encontramos este servicio.',
+    /* 🔴 En memorial el motor rebota, y la voz NO pide nada ni explica
+       mecanismos: dice lo que hay y se calla. */
+    reboteMemorial: 'No vamos a pedirte nada sobre este servicio.',
+    reboteSinSesion: 'Vuelve a entrar a tu cuenta y prueba de nuevo.',
+    reboteGenerico: 'No pudimos abrir el caso. Prueba de nuevo.',
+    hablarConAlguien: '¿Prefieres que te atienda una persona?',
+    pedirLaCasa: 'Pedir que intervenga e-PetPlace',
+    misCasosTitulo: 'Mis casos',
+    misCasosIntro: 'Lo que abriste y en qué quedó.',
+    misCasosVacio: 'No tienes casos.',
+    filtroTodos: 'Todos',
+    filtroAbiertos: 'Abiertos',
+    filtroCerrados: 'Terminados',
+    fechaTodos: 'Siempre',
+    fechaSemana: 'Esta semana',
+    fechaMes: 'Este mes',
+    filtroSinNada: 'No hay casos con esos filtros.',
+    abrirHilo: 'Abrir chat',
+    abrirHiloConCuenta: 'Abrir chat · {{n}} sin leer',
+    asaHilo: 'La conversación',
+    misCasosNoSePudo: 'No pudimos cargar tus casos. Prueba de nuevo.',
+    objeto_cita: 'Un servicio',
+    objeto_estadia: 'Una estadía',
+    objeto_pedido: 'Un pedido',
+    // §3 · LA PANTALLA DEL CASO
+    tituloCaso: 'Tu caso',
+    casoNoEsTuyo: 'Este caso no es de tu familia.',
+    casoNoSePudo: 'No pudimos abrir el caso. Prueba de nuevo.',
+    objetoSinNombre: 'El servicio',
+    escaleraAlternar: 'Ver o esconder los pasos',
+    etapaRecibido: 'Recibido',
+    etapaConPrestador: 'Con el prestador',
+    etapaConCasa: 'Con e-PetPlace',
+    etapaResuelto: 'Resuelto',
+    etapaCerrado: 'Cerrado',
+    estasEn: 'Estás en: {{etapa}}',
+    final_resuelto_entre_partes: 'Resuelto entre ustedes',
+    final_retirado: 'Lo retiraste',
+    final_sin_lugar: 'Sin lugar',
+    asientoCasa: 'e-PetPlace',
+    asientoPrestador: 'El prestador',
+    asientoFamilia: 'Tú',
+    escribirPlaceholder: 'Escribe tu mensaje',
+    conversacionCerrada: 'Esta conversación quedó en lectura',
+    /* ⓶ El permiso, en contexto. **Este texto ES la evidencia**: se guarda
+       tal cual, así que cambiarlo no reescribe lo que leyó quien ya dijo sí. */
+    whatsappPregunta: '¿Quieres que te avisemos por WhatsApp de este caso?',
+    whatsappSi: 'Sí',
+    whatsappAhoraNo: 'Ahora no',
+    whatsappListo: 'Listo: te avisamos por WhatsApp. Puedes cambiarlo en Preferencias.',
+    noSeEnvio: 'No se envió · Reintentar',
+    enviarMensaje: 'Enviar',
+    reintentar: 'Reintentar',
+    // §4 · LA PLATA
+    montoTotal: 'Te devolvemos ${{monto}} — el total de este servicio.',
+    montoParcial: 'Te devolvemos ${{monto}} — la parte que no se hizo.',
+    bancoTitulo: 'A tu banco',
+    bancoVoz: 'Vuelve a la tarjeta con la que pagaste.',
+    bancoTiempo: 'Depende de tu banco: en promedio 15 días hábiles.',
+    /* 🔴 Camino manual: **jamás una fecha que no podemos cumplir** (§4). */
+    bancoTiempoManual: 'La hacemos a mano y te avisamos cuando salga.',
+    saldoTitulo: 'Saldo en e-PetPlace',
+    saldoVoz: 'Queda en tu cuenta para usar cuando quieras.',
+    saldoTiempo: 'Disponible en segundos.',
+    saldoTodaviaNoCorto: 'Todavía no está disponible.',
+    /* El rebote dice que es del MOTOR, no de la familia. */
+    saldoTodaviaNo: 'El saldo todavía no está funcionando. Elige tu banco y lo resolvemos igual.',
+    yaElegiste: 'Ya elegiste cómo te devolvemos.',
+    devolucionNoSePudo: 'No pudimos completar la devolución. Prueba de nuevo.',
+    confirmarDevolucion: 'Confirmar',
+  },
+
 } as const;

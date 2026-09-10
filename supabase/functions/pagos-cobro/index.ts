@@ -206,13 +206,20 @@ Deno.serve(async (req) => {
      sujetos. *Distinguirlas convertiría esto en un oráculo de compras o de
      citas ajenas.* */
   let moneda = 'USD';
+  let saldoAplicado = 0;   // 🔴 S114-A pago mixto: cuánto del total ya cubre el saldo del hogar
   if (hayCompra) {
     const { data: compra } = await db.from('compras')
-      .select('id, user_id, moneda').eq('id', compraId).maybeSingle();
+      .select('id, user_id, moneda, saldo_aplicado').eq('id', compraId).maybeSingle();
     if (!compra || compra.user_id !== userId) {
       return json({ ok: false, codigo: 'compra_no_existe' }, 409);
     }
     moneda = compra.moneda ?? 'USD';
+    /* 🔴 PAGO MIXTO (S114-A): si la compra tiene saldo del hogar aplicado, el
+       riel cobra SÓLO la diferencia (total - saldo_aplicado). El saldo ya está
+       RESERVADO por aplicar_saldo_a_compra y se consume al confirmar el webhook
+       (confirmar_pago_compra). El monto del riel se recorta más abajo, después
+       de sumar el desglose. */
+    saldoAplicado = Number(compra.saldo_aplicado ?? 0);
   }
   /* 🔴 ERA UN `else`, Y EL `else` SE COMIÓ AL BONO — medido contra la edge
      DESPLEGADA, no contra un arnés: un cobro real de paquete volvió
@@ -490,6 +497,22 @@ Deno.serve(async (req) => {
     iva = desglose.reduce((a, d) => a + Number(d.impuesto ?? 0), 0);
     base = desglose.reduce((a, d) => a + Number(d.subtotal ?? 0) + Number(d.envio ?? 0), 0);
     pedidoDelIntento = desglose[0].pedido_id;
+    /* 🔴 PAGO MIXTO — el riel cobra total - saldo_aplicado. `monto` es lo que se
+       cobra Y lo que queda escrito en el intento; confirmar_pago_compra valida a
+       nivel compra contra (total - saldo_aplicado), así que los dos coinciden.
+       ⚠️ El triple fiscal se RECONCILIA con este monto reducido más abajo, tras
+       el guard de IVA (S114-A): IVA 0 ⇒ taxable_amount = monto reducido; GRAVADO
+       + saldo ⇒ rebota `mixto_gravado_no_soportado` (criterio de Erick, no se
+       arma acá). Y un `③` propio reconcilia antes de la pasarela. */
+    if (saldoAplicado > 0) {
+      monto = Math.round((monto - saldoAplicado) * 100) / 100;
+      if (!(monto > 0)) {
+        /* saldo cubre todo (o más): esta compra no va por el riel — se paga con
+           aplicar_saldo_a_compra por el camino directo. Que llegue acá es un
+           llamado mal armado, no un cobro de 0. */
+        return json({ ok: false, codigo: 'compra_cubierta_por_saldo' }, 409);
+      }
+    }
   }
   /* 🔴 EL SEGUNDO `else` DE LA MISMA CLASE, en el mismo archivo — y apareció
      al medir otra vez DESPUÉS de curar el primero. Curado el `else` de la
@@ -664,6 +687,60 @@ Deno.serve(async (req) => {
     return json({ ok: false, codigo: vIva.codigo, detalle: vIva.detalle }, 409);
   }
 
+  /* ═══ 🔴 PAGO MIXTO · EL TRIPLE FISCAL RECONCILIA CON EL MONTO REDUCIDO ═══
+     Firma del founder (S114-A). Cuando el saldo del hogar cubre parte de la
+     compra, `amount` va recortado (total − saldo) pero `vat`/`taxable_amount`
+     salían del desglose COMPLETO ⇒ Nuvei rebotaba `order.amount Invalid`
+     («Check the parameters vat, taxable_amount and amount»): valida
+     `amount == taxable_amount + vat`, y 208,10 ≠ 283,60 + 0. Medido en vivo:
+     todo cobro FULL pasa; los tres REDUCIDOS rebotaban igual. */
+  const ordenVat = vIva.vat;
+  let ordenTaxable = vIva.taxable_amount;
+  const ordenPct = vIva.tax_percentage;
+  if (saldoAplicado > 0) {
+    if (vIva.vat === 0) {
+      /* ① IVA 0: taxable_amount = monto reducido ⇒ amount == taxable_amount + 0. */
+      ordenTaxable = Number(monto.toFixed(2));
+    } else {
+      /* ② GRAVADO + saldo: el reparto proporcional de vat/taxable sobre un cobro
+         parcial es criterio fiscal (Erick / S105, familia abierta). NO se
+         inventa — se rebota con nombre propio ANTES de la pasarela. *Un cobro
+         que rebota con nombre es mejor que uno mal armado.* */
+      await db.from('pagos_intentos').insert({
+        ...columnasDelSujeto(),
+        proveedor: 'nuvei', proveedor_referencia: sujeto, monto, moneda,
+        forma: 'tokenizacion', estado: 'rechazado',
+        motivo_rechazo: `mixto_gravado_no_soportado: saldo sobre compra con IVA>0 (vat=${vIva.vat}); el reparto es criterio fiscal (Erick), no se arma acá`,
+        cerrado_en: new Date().toISOString(),
+        clave_idempotencia: `cobro:mixtoiva:${sujeto}:${Date.now()}`,
+        pagador_user_id: userId, pagador_origen: 'sesion',
+      });
+      return json({ ok: false, codigo: 'mixto_gravado_no_soportado',
+        detalle: 'un cobro pagado en parte con saldo sobre una compra gravada necesita el criterio fiscal de Erick; no se manda un triple que no reconcilia' }, 409);
+    }
+
+    /* ③ 🔴 EL ROJO DE NUESTRO LADO, ANTES DE LA PASARELA — el triple reconcilia
+       como Nuvei lo valida (`amount == taxable_amount + vat`). Hoy lo cazaba
+       Nuvei y nos enterábamos por el rechazo; acá rebota antes, con nombre.
+       Sólo sobre el camino mixto: en el FULL, el triple sale del guard de Erick
+       y su forma gravada la valida la pasarela. */
+    const amt = Number(monto.toFixed(2));
+    const suma = Math.round((ordenTaxable + ordenVat) * 100) / 100;
+    if (Math.abs(amt - suma) > 0.005) {
+      await db.from('pagos_intentos').insert({
+        ...columnasDelSujeto(),
+        proveedor: 'nuvei', proveedor_referencia: sujeto, monto, moneda,
+        forma: 'tokenizacion', estado: 'rechazado',
+        motivo_rechazo: `triple_fiscal_no_reconcilia: amount=${amt} != taxable_amount(${ordenTaxable}) + vat(${ordenVat}) = ${suma}`,
+        cerrado_en: new Date().toISOString(),
+        clave_idempotencia: `cobro:triple:${sujeto}:${Date.now()}`,
+        pagador_user_id: userId, pagador_origen: 'sesion',
+      });
+      return json({ ok: false, codigo: 'triple_fiscal_no_reconcilia',
+        detalle: `amount=${amt} no reconcilia con taxable_amount+vat=${suma}` }, 409);
+    }
+  }
+
 
   // ── ④ COMPUERTAS SERVER-SIDE ──────────────────────────────────────────────
   /* 🔴 Las compuertas de la COMPRA son de la compra. **La cita ya trae las
@@ -766,9 +843,9 @@ Deno.serve(async (req) => {
           /* 🔴 LOS TRES SALEN DEL VEREDICTO, y `tax_percentage` es el NOMINAL
              (15), jamás el recalculado: *mandarle 14,98 al proveedor sería
              declararle una tasa que no existe en Ecuador.* */
-          vat: vIva.vat,
-          taxable_amount: vIva.taxable_amount,
-          tax_percentage: vIva.tax_percentage,
+          vat: ordenVat,
+          taxable_amount: ordenTaxable,
+          tax_percentage: ordenPct,
         },
         card: { token: tarjeta.token },
       }),
@@ -829,6 +906,17 @@ Deno.serve(async (req) => {
      dice el webhook, o el barrido. El estado del intento queda `pendiente`
      justamente por eso. */
   if (!aprobado) {
+    /* 🔴 EL RIEL REBOTÓ — SUELTA LA RESERVA DE SALDO EN EL ACTO (S114-A, incidente
+       del founder 9-sep). Un cobro mixto que rebota síncrono dejaba el saldo
+       RESERVADO (saldo_aplicado sobre esperando_pago) restando del disponible —
+       la familia veía «tu saldo no está» y nada lo soltaba hasta que otro cobrara
+       o alguien cancelara. El reloj (liberar_reservas_saldo_vencidas, cada 15 min)
+       cubre el rebote ASÍNCRONO / abandonado; acá se suelta YA, para que la
+       familia que sigue en la pantalla vea su saldo volver. Idempotente: si no
+       había reserva, no hace nada; nunca des-consume una pagada. */
+    if (hayCompra && saldoAplicado > 0) {
+      await db.rpc('liberar_reserva_saldo_compra', { p_compra_id: compraId });
+    }
     return json({
       ok: false,
       /* `rechazado` = el emisor dijo que no. `defecto_nuestro` = falló algo de

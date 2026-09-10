@@ -1,0 +1,3 @@
+-- REVERSA de 20260912020000: _caso_monto_objeto vuelve a la versión de
+-- 20260912010000 (cita = sólo cita_desglose.total, sin el fallback a precio).
+-- Recuperable por git.
