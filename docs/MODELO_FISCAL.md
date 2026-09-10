@@ -53,6 +53,35 @@
 > React Native / Expo con OTA. El disparador de la factura es `aplicar_evento_de_pago`
 > sobre `pagos_intentos`, punto único de los dos rieles (medido en S115-A).
 
+> **E7 (10-sep-2026, S115-A) — QUÉ PAPEL RESPALDA CADA PAGO AL PRESTADOR.** Firma del
+> founder sobre la compuerta de liquidación. *Una liquidación no pasa a `pagado` sin el
+> comprobante del período, y cuál es el comprobante DEPENDE DEL MODELO.*
+>
+> **En REVENTA** —Satori compra y revende— el prestador le factura **a Satori**. El papel
+> es su **`recibido · comprobante_proveedor`**, y su total tiene que cuadrar con el neto
+> a pagar.
+>
+> **En AGENCIA** la clínica **no le vende nada a Satori**: le vendió a la familia. Su
+> factura a Satori no existe y no va a existir — pedirla bloquearía el pago para siempre.
+> Lo que respalda esa plata son **DOS papeles, y su resta**:
+> 1. **`recibido · factura_tercero_cliente`** — la factura que la clínica le emitió a la
+>    familia, **con su clave de acceso validada contra el SRI** (no basta que alguien la
+>    marque autorizada: tiene que traer su número de autorización).
+> 2. **`emitido · comision_prestador`** — la comisión que Satori le facturó a la clínica.
+>
+> ⇒ **`Σ factura_tercero_cliente − Σ comision_prestador = monto_neto_a_pagar`.**
+> *No es una convención elegida: es la identidad contable de la agencia — la familia pagó
+> el bruto, Satori se quedó con su comisión, y lo que queda es del tercero.* Si los dos
+> papeles están y la resta no da, algo se cobró o se facturó mal, y es exactamente el
+> momento de verlo: antes de girar.
+>
+> **No hay override, en ningún modelo.** Si algún día hay que pagar sin papel, que se vea.
+>
+> Cierra un circuito que ya estaba construido y no se tocaban las puntas: la fila
+> `recibido · pendiente_manual` **ya nace** cuando el pago aprueba (outbox fiscal, E1), y
+> **`fiscal-validar-clave` ya la valida** contra el web service. Lo que faltaba era que
+> alguien exigiera las dos cosas antes de girar la plata.
+
 > **v0.3 — 9 de septiembre de 2026.** v0.2 + Anexo A (credenciales y encendido de la emisión automática, a pedido del founder). v0.2 reescribió el documento tras la decisión del founder (S-fiscal): *"si es la mejor opción, que sea Satori quien facture todo — hay que aceptarlo"*. Esta versión recomienda y desarrolla ese modelo. **Pendiente de ratificación por el contador** — las preguntas abiertas quedaron en cuatro (§9), una de ellas bloqueante para veterinaria.
 > Contexto que fija esta versión: **cero compras reales hasta hoy**; la app sale a producción el **1 de octubre de 2026** con **servicios (paseo, grooming, vet) y despensa**; **todo el cobro entra por e-PetPlace**, que captura el importe total del cliente.
 > v0.1 (misma fecha) desarrollaba el modelo de intermediación pura; queda superada por decisión expresa, no por error: el founder aclaró que el `MODELO_FINANCIERO.md` se escribió sin esta letra fiscal.
