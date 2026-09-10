@@ -31082,6 +31082,57 @@ release— con su cinturón de dos rojos: ② intento `pendiente` más viejo que
 ---
 
 
+### `D-1056` 🟡 · El registro del token de push es SCREEN-COUPLED (Hogar) y no escucha rotación — dueño C
+
+**Medido (S114-A):** la lógica de refresco YA existe —`sincronizarTokenSiHayPermiso`
+(getDevicePushTokenAsync → `registrarTokenDeAparato`)— pero **sólo se la llama desde el
+componente `InvitacionAvisos`**, que monta en la pantalla **Hogar**. No hay llamada
+desde el `_layout` raíz (arranque garantizado), y **no hay `addPushTokenListener`** para
+la rotación mientras la app corre. Verificado: cero llamadores fuera de `invitacion-avisos`
+en las dos apps.
+
+**Por qué importa:** FCM rota tokens por su cuenta (actualización de app, restauración de
+backup, expiración). Si el refresco no corre en cada arranque y no se escucha la rotación,
+un aparato **se vuelve fantasma con el tiempo** — y por `D-1055` (sin ACK) no hay forma de
+notarlo: el tablero dice `aceptada_transporte`. *El registro corre robusto sólo alrededor
+de la primera vez; después depende de que el usuario pase por Hogar y de que el token no
+haya rotado en un momento no cubierto.*
+
+**Cura de RAÍZ (reinstalar es la del síntoma), costo medido:** llamar
+`sincronizarTokenSiHayPermiso()` desde el `_layout` raíz de las DOS apps (cada arranque,
+con permiso concedido) + cablear `addPushTokenListener` (expo-notifications) para
+re-registrar en caliente cuando el SO rota. La función ya existe; es cablearla en el
+arranque + un listener — un puñado de líneas por app. **Dueño: C** (apps). **Disparo:**
+antes del soft launch de octubre.
+
+---
+
+
+### `D-1057` 🔴 · El permiso de notificaciones denegado/descartado es SILENCIOSO — nadie se entera, ni la familia ni nosotros
+
+**Medido (S114-A, incidente founder):** la app SÍ pide el permiso —`InvitacionAvisos`
+muestra una Hoja de la casa que explica antes del diálogo del SO, y en «Sí» llama
+`requestPermissionsAsync`—. **Pero el camino de NO es pasivo e invisible:** si el SO
+está `denied`, el componente retorna sin insistir («el camino vive en Preferencias»);
+dos «ahora no» lo apagan; una invitación por versión nativa. ⇒ una familia que deniega,
+descarta, o cuyo Android nace bloqueado (como el founder al reinstalar) **queda sin push
+y sin que se lo vuelva a ofrecer**, y **nadie se entera** —ni ella (no hay señal visible
+de «avisos apagados») ni nosotros (no hay ACK, `D-1055`)—.
+
+**La consecuencia de producto:** en octubre, una familia real que instala y no concede
+**no recibe NADA** y el tablero dice `aceptada_transporte`. Es la clase que se acaba de
+vivir, con una familia real en vez del founder.
+
+**Forma propuesta (espera firma del founder — dónde/cómo):** un indicador VISIBLE de
+«avisos apagados — activalos» cuando el permiso está `denied`, que haga deep-link a los
+ajustes del SO (el SO ya no deja re-preguntar tras la primera denegación). Hoy el estado
+`notifPermisoNegado` existe en Preferencias (pasivo); la cura lo vuelve **visible donde
+la familia lo vea**, no escondido en un menú. **Dueño: C + diseño.** **Disparo:** firma
+del founder sobre dónde va el indicador.
+
+---
+
+
 ### `D-1055` 🔴 · No se puede distinguir un token de push VIVO de uno FANTASMA — FCM v1 no da receipt, y no hay ACK de la app
 
 **Medido (S114-A, incidente founder 10-sep):** el founder tenía un token `activo`
@@ -31105,6 +31156,12 @@ se muestren con la app cerrada), el JS no corre y el ACK no llega — así que u
 ausente no probaría fantasma, sólo «no confirmado». Una cobertura mejor exigiría
 mensajes `data` + handler de fondo, que en Android es poco fiable (ya declarado en
 `despachar-push`).
+
+**VINDICACIÓN (S114, 10-sep):** el incidente del founder confirmó la clase por partida
+doble — un permiso de Android BLOQUEADO da el MISMO síntoma que un token fantasma (FCM
+200, aparato sin mostrar nada), y **los fantasmas se generan solos** (FCM rota tokens;
+ver `D-1056`). Sin ACK no se distingue ninguno de los tres (fantasma · permiso off ·
+vivo), y los tres se ven `aceptada_transporte`.
 
 **🔴 DISPARO:** antes del soft launch de octubre (cuando haya familias reales cuya
 falta de push sea invisible), o el primer reporte de «no me llegan las notificaciones»
