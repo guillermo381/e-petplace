@@ -31162,7 +31162,7 @@ del founder sobre dónde va el indicador.
 ---
 
 
-### `D-1055` 🔴 · No se puede distinguir un token de push VIVO de uno FANTASMA — FCM v1 no da receipt, y no hay ACK de la app
+### `D-1055` 🟡 · No se puede distinguir un token de push VIVO de uno FANTASMA — CERRADA PARA WHATSAPP (S114), ABIERTA PARA PUSH (FCM v1 no da receipt)
 
 **Medido (S114-A, incidente founder 10-sep):** el founder tenía un token `activo`
 (27-ago) al que FCM devolvía 200 y marcábamos `entregada`/`aceptada_transporte`, y su
@@ -31201,6 +31201,18 @@ conceder el permiso, y descartar el canal por el otro lado). *Ésa es la prueba 
 ficha: sin ACK no se distingue fantasma de permiso-off de no-mostrado — y hoy fueron dos
 a la vez.* La cura de raíz del token (para que no se regenere el fantasma) es `D-1056`
 (ya en main); la del permiso silencioso es `D-1057` (ya en main); el ACK sigue abierto.
+
+**CERRADA PARA WHATSAPP (S114, firma founder):** WhatsApp SÍ da receipt por webhook
+—a diferencia de FCM v1—. Se guardó el `wamid` en el éxito del envío
+(`notificacion_entrega.proveedor_msg_id`) y se cableó el webhook de estado de Meta
+(edge `whatsapp-estado`) que sube la entrega por lo que Meta CONFIRMA:
+`aceptada_transporte` (Meta aceptó) → `entregada_aparato` (DELIVERED, entrega real) →
+`leida` (READ). Es el único lugar del motor donde «entregado» se puede decir con
+verdad. **ABIERTA PARA PUSH:** FCM v1 **no da receipt por mensaje** al emisor, y un
+ACK de la app es parcial (foreground sí, background no) — ahí `aceptada_transporte`
+sigue siendo lo máximo que se sabe, y la mitigación es sólo el nombre honesto + la
+cura del token (`D-1056`). *La asimetría es del transporte, no nuestra: WhatsApp
+confirma, FCM no.*
 
 **🔴 DISPARO:** antes del soft launch de octubre (cuando haya familias reales cuya
 falta de push sea invisible), o el primer reporte de «no me llegan las notificaciones»
