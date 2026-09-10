@@ -9308,6 +9308,34 @@ founder y cura el mismo día.**
 
 #### D-662 — 🔴 UNA MIGRACIÓN DE MOTOR ROMPIÓ UN BUNDLE PUBLICADO, Y NADIE LO MIDIÓ
 
+> **🔴 ENMIENDA S115-A (10-sep-2026) — SE EXTIENDE DE COLUMNAS A TABLAS Y VISTAS, Y NACE SU GATE.**
+> La ficha nació sobre una COLUMNA que desapareció. **Se cobró igual sobre una TABLA:**
+> S115-A renombró `facturas` → `documentos_fiscales` y
+> `packages/api/src/wrappers/despensa-seguimiento.ts:667` hace `.from('facturas')`,
+> consumido por `apps/cliente/.../pedidos/pedido/[pedidoId].tsx` — **una pantalla viva
+> del bundle publicado**. Sin cura, el detalle de pedido devolvía 400.
+>
+> ⚠️ **Y lo que la vuelve exigible: lo cazó el typecheck POR CASUALIDAD**, porque ese
+> mismo lote agregaba un wrapper en `packages/api`. *Si el trabajo hubiera sido puro de
+> base, la migración salía VERDE y la pantalla rompía en producción.* Ningún gate de la
+> casa mira si una migración deja huérfano a un consumidor de `apps/`.
+>
+> **EL GATE, y corre ANTES del rename:** `pnpm verify:rename <tabla_o_vista>`
+> (`scripts/s115/verify-rename-seguro.mjs`). Censa `.from('<nombre>')` y el nombre
+> pelado entre comillas en `apps/` y `packages/`, excluyendo los tipos generados —que
+> nombran TODAS las tablas y darían rojo siempre—. **Tres códigos de salida (L-533):**
+> `0` sano · `1` hay consumidores · `2` no concluyente.
+> **Su rojo está probado sobre el caso REAL**, no sobre un fixture propio: `--control`
+> exige encontrar el `.from('facturas')` vivo, más un control NEGATIVO (un nombre
+> inventado da cero) y uno ANTI-SUBCADENA (`factura` no pesca `facturas`).
+> *Un gate cuyo primer rojo lo escribió el mismo que lo escribió a él comparte sus
+> supuestos (`L-459`); éste se prueba contra el defecto que ya ocurrió.*
+>
+> **La cura cuando el gate da 1** sigue siendo la de esta ficha: o el rename y su publish
+> son UN SOLO ACTO, o se renombra **compatible hacia atrás** —una vista con el nombre
+> viejo— y la vieja muere en una segunda pasada, DESPUÉS del publish. S115-A hizo lo
+> segundo (`20260912310000_s115a_compat_facturas`, con `security_invoker=true`).
+
 **El caso, con nombre y fecha:** `20260805000000_lote1_contrato_preferencias`
 (escrita por A, S87) cambió la clave de `user_notificacion_prefs` de
 `(user_id, tipo)` a `(user_id, categoria, canal)`. **La columna `tipo` dejó de
@@ -29381,6 +29409,72 @@ lo construye y la otra lo mide **sobre el objeto que ya existe**.
 
 ---
 
+
+### `L-534` — Un instrumento que grita ANTES de mirar el ALCANCE manda a curar lo que no está roto
+
+**Origen: E, S115 (los doce instrumentos del libro fiscal) — y los CUATRO casos son de
+sus propios instrumentos, cazados antes de que llegaran a un parte.** Ninguno lo habría
+frenado una revisión de código: los cuatro **corrieron, terminaron, y publicaron un
+hallazgo perfectamente creíble**.
+
+🔴 **La clase: el hallazgo era VERDADERO COMO TEXTO y FALSO COMO HECHO.** Y ésa es
+exactamente la razón por la que nadie lo cuestiona — un instrumento que «encontró algo»
+se lee como más confiable que uno que no encontró nada.
+
+**Los cuatro, con lo que cada uno midió de más o de menos:**
+
+| # | Gritó | Y el hecho era |
+|---|---|---|
+| ① | *«4 tablas fiscales abiertas a `anon` con SELECT/INSERT/UPDATE/DELETE»* | **cierto como GRANT**, falso como alcance: la RLS estaba activa en las cinco y todas las policies eran `TO authenticated` ⇒ `anon` no llegaba a ninguna fila |
+| ② | *«`validar_identificacion_fiscal` alcanzable por `anon`»* | el patrón `fiscal` pescó una **validación de FORMATO** contra una máscara regex — no dice si una identificación EXISTE (no es el oráculo que `S92` cerró) y el registro la necesita antes de que haya sesión |
+| ③ | *«`celcer` en los DOS bundles»* — el proveedor de firma en el teléfono | `grep -ril` lleva **`-i`**: lo que matcheaba era **`cancelCeremony`**, un identificador de Reanimated que en minúsculas contiene «celcer». Cero matches reales |
+| ④ | *«el IVA del 15 % no cierra: 1,01 contra 1,00»* | **el motor tenía razón**: 15 % de 6,70 es 1,005, que en `numeric` redondea a 1,01 y en float64 cae a 1,00 porque 1.005 no es representable. *El rojo era del instrumento* |
+
+*(Y un quinto al abrir la tanda, de la misma familia: «`facturas` dropeada, 6 filas
+perdidas» era un **RENAME con guard** que verificaba una por una que fueran fixtures.)*
+
+**Los cuatro comparten UNA forma: el instrumento midió una CAPA y concluyó sobre el
+SISTEMA.** El grant sin la RLS · el nombre sin el cuerpo · la cadena sin su contexto ·
+el número sin su aritmética. **Medir media cadena no da un resultado a medias: da uno
+COMPLETO y equivocado**, y con toda la autoridad de una medición.
+
+**El costo, que es lo que la vuelve exigible:** cada uno de los cuatro habría mandado a
+otra pista a curar algo que no estaba roto — y la pista habría ido, porque el hallazgo
+venía con su comando, su número y su archivo. *Un rojo falso no cuesta el tiempo de
+descubrirlo: cuesta el trabajo que alguien hace antes de descubrirlo.*
+
+**Exigible — antes de publicar un rojo, TRES preguntas, y ninguna es opcional:**
+
+1. **¿Medí el ALCANCE o sólo el permiso?** Un GRANT que la RLS neutraliza no es una
+   puerta abierta: es defensa en profundidad ausente. **Son dos severidades distintas y
+   sólo una corta.** ⇒ el veredicto lleva **dos niveles** (ROJO = alcance real ·
+   AVISO = permiso huérfano).
+2. **¿El patrón pesca lo que dice pescar?** Un patrón corto y sin delimitar cae dentro
+   de otra palabra, y `-i` lo empeora. **Sobre binario, extraer los bytes de contexto y
+   LEER qué lo produjo** antes de nombrarlo. *(Es `L-437` —un censo por patrón acota, no
+   cierra— y la lección `\b` del canon en su forma de subcadena.)*
+3. **¿Mi aritmética es la del motor?** Comparar `numeric` con float64 fabrica
+   diferencias de un centavo — *justo del tamaño que nadie va a cuestionar*. El dinero se
+   cuenta en **centavos enteros**, y el esperado se calcula **como lo calcula el motor**
+   (si él redondea por línea, se suman los esperados por línea).
+
+**Y el correctivo de forma, que es el que sobrevive a estos cuatro casos: todo hallazgo
+que nombre una pieza ajena declara CONTRA QUÉ se midió**, no sólo qué encontró. *Un rojo
+con su capa declarada se puede refutar en un minuto; uno sin ella se cura durante una
+tarde.* Hermana de `L-459` (la primera prueba de un guard no es que dé verde, es que dé
+rojo sobre un caso real) y de `L-321` (se prueba la defensa, no la lista).
+
+**⚠️ Lo que esta lección NO dice:** no dice «desconfiá de tus instrumentos hasta
+paralizarte». Los cuatro rojos se cazaron **en el minuto siguiente**, yendo a mirar el
+objeto — RLS, cuerpo de la función, bytes del binario, aritmética decimal. *El costo de
+verificar un rojo antes de publicarlo es una consulta; el de no verificarlo es una pista
+entera curando lo que no existe.*
+
+Los cuatro viven curados en `scripts/s115/i05-lineas-suman.mjs`,
+`i09-l140-proacl.mjs` e `i10-bundle-limpio.mjs`, cada uno con el defecto viejo declarado
+en su cabecera **para que la próxima versión no lo reintroduzca**.
+
+---
 
 ### `L-533` — Un instrumento que puede FALLAR con el mismo código que su HALLAZGO no está midiendo: está adivinando
 
