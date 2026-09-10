@@ -13,6 +13,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { router, Stack } from 'expo-router';
 import { destinoDePushDeEstaApp } from '@/lib/destino-de-push';
 import { escuchaDeToque } from '@/lib/toque-de-push';
+import { useTokenDeAvisosAlDia } from '@/lib/token-avisos';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Updates from 'expo-updates';
 import { useFonts } from 'expo-font';
@@ -80,6 +81,16 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, fontsError]);
 
+
+  /* ⭐ `D-1056` · EL TOKEN DEL APARATO, AL DÍA. Va acá arriba y **no dentro de
+     una pantalla**: el token no es de una pantalla, es del aparato — y su
+     dueño natural es el único lugar que vive lo que dura la app.
+     🔴 Su motor ya existía y **su propio JSDoc decía que se llama «en cada
+     arranque»**; medido, sus únicos llamadores eran los dos caminos de
+     conceder. *Un comentario que describe el cableado que falta se lee como
+     cableado* — y el modo de falla no tiene síntoma: el token rota, el motor
+     despacha «bien» a una dirección muerta, y el aparato se vuelve fantasma. */
+  useTokenDeAvisosAlDia();
 
   /**
    * ① · EL TOQUE DE LA PUSH — a dónde lleva (S111-C).
