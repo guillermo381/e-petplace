@@ -32090,3 +32090,54 @@ select distinct p.tablename, p.cmd, p.qual, p.with_check from pg_policies p
 decididas una por una, y `donaciones` con su forma firmada por la mesa.
 **Disparo: ANTES de producción.** Hoy el ambiente es sandbox de punta a punta; el día que
 la anon key sirva contra plata real, esto deja de ser defensa en profundidad.
+
+---
+
+### `L-535` · LO QUE ESCRIBE UN TERCERO SE GUARDA COMO LLEGA — Y NUNCA SE COMPARA CONTRA UN LITERAL NUESTRO
+
+**Se ganó con SIETE facturas reales de producción** (S115, medición de E). Todas
+válidas, todas autorizadas por el SRI, y **ninguna escribe igual que otra**:
+
+| Campo | Cómo llega, según quién lo emitió |
+|---|---|
+| Etiqueta del correo en la información adicional | `E-mail` · `Email` |
+| Ambiente | `PRODUCCIÓN` · `PRODUCCION` (con y sin tilde) |
+| `fechaAutorizacion` | **dos formatos distintos** |
+| `moneda` | `US Dollar` · `DOLAR` |
+
+*Las siete pasan la validación del SRI.* O sea: **la variación no es un error de
+nadie — es el rango que el estándar admite**, y cualquier comparación nuestra contra
+un literal iba a marcar como rota una factura perfectamente válida.
+
+#### La ley, y son dos mitades asimétricas
+
+- **AL LEER lo ajeno** —la contingencia del vet, los comprobantes del proveedor, el
+  XML que alguien nos manda— **el parser NORMALIZA y TOLERA**: quita tildes, unifica
+  mayúsculas, acepta los formatos de fecha conocidos, y **guarda el valor CRUDO tal
+  como llegó** junto al normalizado. *El crudo es la evidencia; el normalizado es
+  para comparar. Guardar sólo el normalizado destruye la única prueba de qué dijo el
+  tercero.*
+- **AL EMITIR lo nuestro** —lo que sale con nuestro RUC— **es ESTRICTO y sale del
+  DATO**, nunca de un literal en el generador: el catálogo, la fila del emisor, la
+  versión del esquema. Ahí no hay tolerancia que valga, porque el que responde
+  somos nosotros.
+
+#### Por qué esto no se descubre solo
+
+Un comparador contra literal **no falla: rechaza**. Y rechazar una factura ajena
+válida se lee como *«el proveedor mandó algo mal»*, que es la conclusión cómoda y la
+equivocada. **El defecto sobrevive porque su síntoma acusa a otro.**
+
+#### Su parentela en esta casa
+
+- **`L-514` / la familia del instrumento que mide la forma equivocada** — acá el
+  instrumento mide bien y la VARA está mal.
+- **El precedente vivo del mismo día:** el `idTransacionReference` de DeUna, un typo
+  del proveedor que el canon protege con todas las letras porque *quien lo escriba
+  «bien» rompe todas las consultas*. Misma ley, aplicada a un nombre de campo.
+- **Y su gemela que la sesión se cobró sola:** una sonda leyó `version="1.0"` del
+  prólogo `<?xml?>` creyendo que era la versión del esquema. *Comparar contra el
+  literal equivocado y comparar el campo equivocado producen el mismo rojo creíble.*
+
+**☠️ Condición de muerte:** ninguna — es de método. Su recordatorio útil es que hicieron
+falta **siete** facturas para verla: con dos o tres, la coincidencia parecía la regla.
