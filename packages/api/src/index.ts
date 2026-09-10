@@ -2019,3 +2019,15 @@ export {
 // motor, sin EXECUTE para authenticated (D-314).
 export { obtenerMiSaldo, aplicarSaldoACompra } from './wrappers/postventa-saldo';
 export type { ResultadoSaldoACompra, CodigoSaldoACompra } from './wrappers/postventa-saldo';
+
+export {
+  misDocumentos as fiscalMisDocumentos,
+  urlFirmada as fiscalUrlFirmada,
+  obtenerTaxProfile as fiscalObtenerTaxProfile,
+  guardarTaxProfile as fiscalGuardarTaxProfile,
+  adminListar as fiscalAdminListar,
+  adminCerrarManual as fiscalAdminCerrarManual,
+} from './wrappers/fiscal';
+export type {
+  DocumentoFiscalMio, TaxProfile, EstadoVisibleFiscal, CodigoFiscal,
+} from './wrappers/fiscal';
