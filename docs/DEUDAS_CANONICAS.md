@@ -32507,3 +32507,55 @@ vigente para siempre*.
 código que parece no estar commiteado, no se copia del disco ajeno — se pide o
 se espera. La enmienda es al paso previo, no a la conducta: *primero refrescá
 el objeto, después juzgá; y si igual no está, la cautela sigue siendo la misma.*
+
+---
+
+### `L-541` · UNA EXPLICACIÓN ESCRITA EN EL MOMENTO DE CURAR ES UNA HIPÓTESIS, NO UN HALLAZGO
+
+**Nombre del founder, 11-sep-2026.** Es el tercero de una serie y el más fino,
+porque no se comete por descuido: **se comete al explicar**.
+
+La letra muerta que esta casa persigue —un comentario que afirma una propiedad
+que el código no tiene— tiene dos orígenes, y sólo uno está vigilado:
+
+| origen | cómo se ve | quién lo caza |
+|---|---|---|
+| **por aspiración** | se escribe lo que el código *debería* hacer y no se construye | el censo, al buscar la pieza |
+| **por explicación** | se escribe la CAUSA de un defecto **en el mismo acto de curarlo** | **nadie** |
+
+El segundo no lo ve ningún gate, y por una razón estructural: **la explicación
+se escribe en el instante de menor evidencia** — justo después de encontrar el
+síntoma y justo antes de medir el efecto de la cura. *Y viene con la autoridad
+del que acaba de arreglarlo, que es la mayor que un comentario puede tener.*
+
+**Medido, S115-A, en el peor lugar posible.** Curando el `GET → 500` de
+`fiscal-webhook` escribí en el código: *«lo peor no era el 500: era que no
+dejaba rastro»*. **La medición siguiente —diez minutos después— lo desmintió:**
+sí dejaba rastro. El `insert` ocurre antes del espejo que lanzaba, así que cada
+GET escribía una fila con `delivery_id`, `evento`, `firma_verificada`, `motivo`
+y `resultado` **todos en NULL**. No era ausencia de rastro: era una fila que
+nadie puede interpretar, indistinguible de un aviso legítimo sin procesar.
+
+*Y lo escribí mientras curaba exactamente ese modo de falla, en el mismo
+archivo cuyo encabezado ya me había mentido una vez por la otra vía.*
+
+⇒ **Toda causa escrita en el acto de curar nace MARCADA como hipótesis, y se
+asciende a hallazgo sólo cuando algo la mide.** En la práctica:
+
+- se escribe **«hipótesis:»** o **«candidata:»**, y se dice **qué la
+  confirmaría** — *«se confirma si tras la cura no aparecen filas con
+  veredicto NULL»*;
+- el comentario definitivo se escribe **después** del control, no antes;
+- y lo que sí se puede afirmar sin medir es **el síntoma** (*«un GET devolvía
+  500»*) y **el mecanismo verificable** (*«`new Request` con GET y body
+  lanza»*): lo que no se puede afirmar es **la consecuencia**.
+
+⚠️ El corolario incómodo, y es lo que la vuelve una ley y no un consejo: **la
+explicación equivocada sobrevive a la cura.** El 500 duró veinte minutos; la
+frase que lo explicaba mal iba a quedar en el archivo para siempre, leída por
+todos los que vinieran después como el registro de lo que había pasado — *con
+la fecha, el detalle y el tono de algo medido*. Hermana de `L-166` (todo dato
+vivo se lee al usarlo) y de `L-158` (una fila de hipótesis nombra el trabajo,
+jamás el componente como hecho), pero más peligrosa que las dos: **acá el que
+escribe la hipótesis y el que la firma son la misma persona, en el mismo
+minuto.**
