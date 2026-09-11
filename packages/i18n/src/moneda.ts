@@ -49,6 +49,56 @@ export interface ConfigMoneda {
  *  Cuando CO se active, este fallback deja de ser inocuo. */
 export const MONEDA_FALLBACK: ConfigMoneda = { codigo: 'USD', simbolo: '$', decimales: 2 };
 
+/* ═══════════════════════════════════════════════════════════════════════════
+ * 🔴 MARCA S115-B — FIRMA DEL FOUNDER (10-sep-2026): **EL FORMATO DE LA PLATA
+ *    DE LA CASA ES PUNTO.** Su literal:
+ *
+ *    *«es lo que la gente ya ve en el checkout y en PrecioText, y migrar a
+ *    coma sería cambiar el número que el producto muestra sin que nadie lo
+ *    pida… un formateador que contradice al resto y espera a que alguien lo
+ *    llame de buena fe es justamente el modo de falla que acabamos de
+ *    nombrar.»*
+ *
+ * ⇒ **LA FUENTE DE VERDAD DEL FORMATO ES `formatearPrecio` de `PrecioText`**
+ *   (`packages/ui`). Si algún día se decide coma, **es una línea ahí** y lo
+ *   hereda todo el producto.
+ *
+ * ── PERO ESTA FUNCIÓN NO SE RETIRÓ, Y LA RAZÓN ES UNA MEDICIÓN ────────────
+ * La firma ofrecía *«retiralo o marcalo»* sobre la premisa de que **no lo
+ * llamaba nadie** — premisa que venía de un reporte MÍO de la tanda 1, y
+ * **era falsa**: lo que no llama nadie es el hook `useMoneda`, no este riel.
+ *
+ * Medido el 10-sep: **8 consumidores, 7 VIVOS y todos del prestador**:
+ *   `app/historico` · `app/ventas/facturacion` · `app/ventas/mostrador` ·
+ *   `app/ventas/pedido/[pedidoId]` · `app/ventas/producto/[productoId]` ·
+ *   `components/ventana-pedidos` · `components/vitrina-piezas`
+ * más `apps/cliente/src/lib/use-moneda.ts`, que sí está muerto.
+ * **Retirarlo rompía siete pantallas vivas.**
+ *
+ * ⚠️ Y el 8 **corrigió a mi propio censo, que había dicho 5**: mi `grep` medía
+ * el import en UNA línea y `grep` trabaja línea por línea, así que perdía los
+ * imports MULTILÍNEA. *Lo cazó el gate al correr sobre el corpus real* — un
+ * censo por patrón acota, no cierra.
+ *
+ * ── LA DIVERGENCIA ESTÁ VIVA HOY, Y NO ES SÓLO LA COMA ───────────────────
+ * ```
+ *                     $45        $1234.50
+ *   monto()  es  →  $45,00      $1.234,50
+ *   monto()  en  →  $45.00      $1,234.50
+ *   formatearPrecio  $45.00     $1234.50   ← sin separador de miles
+ * ```
+ * ⚠️ **Alinear esta función al punto NO es una línea inocua: le quita el
+ * separador de MILES al prestador**, justo en liquidaciones y facturación,
+ * que es donde viven los montos grandes. *Eso es una decisión de producto y
+ * no la toma un riel* — queda servida al founder, con estos números.
+ *
+ * ── QUÉ SOSTIENE LA FIRMA MIENTRAS TANTO ─────────────────────────────────
+ * **`R87` de `verify:diseno`, solo-baja desde 8.** Un consumidor NUEVO de
+ * esta función sale en rojo. *La marca sola sería «una regla que alguien
+ * tiene que acordarse de seguir», que es exactamente lo que la firma dice
+ * que no dura; el gate es lo que la hace durar.*
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
 /**
  * EL formato de plata del producto. Una sola función para las dos apps.
  *
