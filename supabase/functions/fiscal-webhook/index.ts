@@ -8,12 +8,28 @@
 //    de pruebas. Un webhook sin firma verificada no mueve un documento fiscal.
 // ═══════════════════════════════════════════════════════════════════════════
 import { createClient } from 'jsr:@supabase/supabase-js@2';
-import { resolverPuerto } from '../_shared/facturacion/mod.ts';
+import { resolverPuerto, resolverProveedorConProcedencia } from '../_shared/facturacion/mod.ts';
 
 Deno.serve(async (req) => {
   const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
   const { data: cfg } = await db.from('app_config').select('valor').eq('clave', 'fiscal_proveedor').maybeSingle();
-  const puerto = resolverPuerto(cfg?.valor ?? 'manual', Deno.env.get('FACTURACION_WEBHOOK_SECRET') ?? 'pruebas');
+  /* De dónde salió el proveedor, dicho — y el secreto homónimo, si
+     discrepa, gritado. `FACTURACION_PROVEEDOR` está cargado y NO manda. */
+  const prov = resolverProveedorConProcedencia(cfg?.valor);
+  if (prov.discrepancia) console.warn(`fiscal_proveedor_discrepancia: ${prov.discrepancia}`);
+  /* El contribuyente sale de la FILA, no de un literal (firma S115-A). */
+  const { data: emisor } = await db.from('fiscal_emisor').select('ruc').maybeSingle();
+  let puerto;
+  try {
+    puerto = resolverPuerto(prov.nombre, {
+      secretoWebhook: Deno.env.get('FACTURACION_WEBHOOK_SECRET') ?? '',
+      apiKey: Deno.env.get('FACTURACION_API_KEY') ?? undefined,
+      rucContribuyente: emisor?.ruc,
+    });
+  } catch (e) {
+    return Response.json({ ok: false, codigo: 'puerto_no_resuelto',
+                           proveedor: prov.nombre, motivo: String(e).slice(0, 200) }, { status: 409 });
+  }
 
   const r = await puerto.recibirWebhook(req);
   if (!r.verificado) {
@@ -40,8 +56,17 @@ Deno.serve(async (req) => {
     parche.xml_url = ruta;
   }
   if (r.ride) {
-    const ruta = `${doc.id}/ride.html`;
-    await db.storage.from('fiscal').upload(ruta, new Blob([r.ride], { type: 'text/html' }), { upsert: true });
+    /* 🔴 LA EXTENSIÓN Y EL `content-type` SALEN DEL PROVEEDOR, no de un
+       literal. El simulador entrega HTML y Factuplan un PDF: fijar `.html`
+       acá subiría el PDF con el tipo equivocado y **sin fallar** — un archivo
+       que pesa lo correcto y no abre, que nadie descubre hasta que una familia
+       lo pide. */
+    const ext = r.ride.mime === 'application/pdf' ? 'pdf' : 'html';
+    const cuerpo = r.ride.base64
+      ? Uint8Array.from(atob(r.ride.contenido), (ch) => ch.charCodeAt(0))
+      : r.ride.contenido;
+    const ruta = `${doc.id}/ride.${ext}`;
+    await db.storage.from('fiscal').upload(ruta, new Blob([cuerpo], { type: r.ride.mime }), { upsert: true });
     parche.pdf_url = ruta;
   }
 
@@ -50,5 +75,6 @@ Deno.serve(async (req) => {
      entrara primero y la subida fallara, quedaría una factura autorizada sin
      respaldo y sin forma de saberlo. */
   await db.from('documentos_fiscales').update(parche).eq('id', doc.id);
-  return Response.json({ ok: true, documento_id: doc.id, estado: r.estado });
+  return Response.json({ ok: true, documento_id: doc.id, estado: r.estado,
+                         proveedor: puerto.nombre, proveedor_fuente: prov.fuente });
 });

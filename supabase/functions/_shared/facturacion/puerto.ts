@@ -37,11 +37,27 @@ export interface ResultadoEmision {
   reintentable?: boolean;
 }
 
+/**
+ * EL RIDE, con su forma declarada.
+ *
+ * 🔴 NO ES SIEMPRE HTML. El simulador lo genera en HTML; Factuplan devuelve un
+ *    **PDF binario**. *Meter los dos en un `string` obliga a adivinar del otro
+ *    lado, y el modo de falla es mudo: un PDF leído como texto se sube igual,
+ *    con el `content-type` equivocado, y lo que se rompe es el archivo — que
+ *    nadie abre hasta que una familia lo pide.*
+ */
+export interface RideEntregado {
+  contenido: string;
+  mime: string;
+  /** `true` ⇒ `contenido` viene en base64 y hay que decodificar antes de subir. */
+  base64: boolean;
+}
+
 export interface ResultadoConsulta {
   estado: EstadoFiscal;
   autorizado_en?: string;
   xml?: string;
-  ride?: string;
+  ride?: RideEntregado;
   motivo?: string;
 }
 
@@ -50,7 +66,7 @@ export interface ResultadoWebhook {
   referencia: string | null;
   estado: EstadoFiscal | null;
   xml?: string;
-  ride?: string;
+  ride?: RideEntregado;
   motivo?: string;
 }
 

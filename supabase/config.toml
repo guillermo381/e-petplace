@@ -420,3 +420,18 @@ verify_jwt = false
 [functions.whatsapp-estado]
 # Meta llama sin JWT nuestro; la firma X-Hub-Signature-256 es la autenticación.
 verify_jwt = false
+
+[functions.fiscal-webhook]
+# 🔴 FACTUPLAN LLAMA SIN JWT NUESTRO. Sin esto, la compuerta de Supabase rebota
+# su POST con 401 ANTES de que corra una línea de nuestro código — y el
+# proveedor desactiva el webhook tras 10 fallos seguidos. La autenticación es
+# la firma `X-Factuplan-Signature` (HMAC-SHA256 sobre `{t}.{cuerpo crudo}`),
+# verificada adentro: mismo molde que `whatsapp-estado` con Meta.
+# ⚠️ Y no alcanzaría con dejarlo en `true`: la anon key es pública y viaja en el
+#    bundle, así que `verify_jwt` no es un guard — el guard va adentro (D-714).
+verify_jwt = false
+
+[functions.fiscal-sonda]
+# Sonda de operación, llamada por máquina con el secreto compartido de despacho.
+# No emite y no escribe: tres lecturas contra el proveedor.
+verify_jwt = false
