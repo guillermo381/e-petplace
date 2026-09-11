@@ -32,6 +32,32 @@ declare const EdgeRuntime: { waitUntil?: (p: Promise<unknown>) => void } | undef
 Deno.serve(async (req) => {
   const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
+  /* ⓪ 🔴 UN `GET` NO ES UN EVENTO — Y ANTES DE ESTO DABA 500.
+     Muchos paneles verifican el endpoint con un GET antes de habilitarlo, y
+     el espejo de más abajo —`new Request(url, { method, body })`— **lanza** si
+     el método es GET o HEAD: el estándar prohíbe cuerpo ahí. El resultado era
+     un `500 Internal Server Error` genérico, que del otro lado se lee como
+     «este endpoint está roto» y puede dejar el webhook marcado como fallando
+     sin que ninguna entrega llegue nunca.
+
+     *Y dejaba algo peor que nada: una fila HUÉRFANA.* El insert ocurre antes
+     del espejo, así que el GET alcanzaba a escribir su fila y recién después
+     lanzaba — quedaba un registro con `delivery_id`, `evento`,
+     `firma_verificada`, `motivo` y `resultado` todos en NULL. **Una fila que
+     nadie puede interpretar**: no dice que validó, no dice que falló, y no se
+     distingue de un aviso legítimo que todavía no se procesó.
+     (Medido: la fila de las 03:33:56 de esta tanda era exactamente eso, y era
+     mi propia sonda.)
+
+     ⚠️ La clase queda viva para cualquier excepción entre el insert y el
+     veredicto: se encuentran con el índice parcial `procesado_en IS NULL`, y
+     barrerlas es de `fiscal-reconciliar` (ficha aparte, no de esta tanda).
+
+     Se contesta vivo y nada más: sin proveedor, sin config, sin estado. */
+  if (req.method === 'GET' || req.method === 'HEAD') {
+    return Response.json({ ok: true, listo: true }, { status: 200 });
+  }
+
   /* ① El cuerpo, UNA sola vez. Es sobre ESTE texto que se calcula el HMAC: si
      se reparsea y se vuelve a serializar, la firma deja de coincidir — y el
      síntoma sería «firma inválida», que manda a revisar el secreto en vez del
