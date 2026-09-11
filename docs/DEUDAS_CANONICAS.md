@@ -32603,3 +32603,35 @@ ninguna clase se anota con su nombre literal en vez de caer a un default.
 cero rastro y sin instrumento del otro lado no produce información nueva.
 **Dueño:** A. **No bloquea nada hoy** — la emisión ya espera al contribuyente
 por otra razón.
+
+---
+
+### `L-542` · UN PROVEEDOR PUEDE REUSAR UN CÓDIGO DE ERROR PARA CAUSAS DISTINTAS — el código RAMIFICA, el status DIAGNOSTICA
+
+`L-535` firmó la ley y sigue entera: **se decide por el CÓDIGO, jamás por el
+texto** — *el día que cambien una palabra, el reintento deja de existir.* Lo
+que faltaba es qué hacer cuando el código no alcanza.
+
+**Medido, S115-A, 10 y 11 de septiembre, con el MISMO código:**
+
+```
+GENERAL_0002 · HTTP 400 · «Contribuyente con RUC … no encontrado en este workspace»
+GENERAL_0002 · HTTP 403 · «Este API key no tiene permiso para operar con el RUC …»
+```
+
+**Son dos problemas con dueños distintos y curas distintas** —dar de alta un
+contribuyente contra habilitar una credencial— y el proveedor les puso el mismo
+código. *Quien ramifique sólo por `GENERAL_0002` los trata igual y manda a
+resolver el que no es.*
+
+⇒ **El código sigue siendo lo único sobre lo que se RAMIFICA. Pero el error que
+se guarda lleva los TRES: código, status y texto** — porque el diagnóstico lo
+hace una persona y necesita distinguir lo que el código unificó. En el
+adaptador ya viaja así (`codigo`, `status`, `mensaje` por separado), y es lo
+que permitió ver que el alta de Satori **sí había funcionado**: la frase
+«no encontrado» desapareció aunque el código fuera idéntico.
+
+⚠️ Y el corolario para el instrumento: **la sonda que sólo imprima el código
+habría mostrado dos veces lo mismo y la conclusión habría sido «no cambió
+nada».** Un progreso real se habría leído como estancamiento — *la clase de
+error que no produce un rojo, produce una decisión equivocada.*
