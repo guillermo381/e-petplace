@@ -4807,4 +4807,18 @@ export const prestadorEs = {
     noDevolverConfirmar: 'Reconocer sin devolver',
   },
 
+  /* S115-C · LOS TRES NÚMEROS (MODELO_ECONOMICO v1.1 D-C: «lo que el prestador
+     ve al poner precio»). Ninguno se escribe acá: los tres salen del motor. */
+  tresNumeros: {
+    tuPrecio: 'Tu precio (sin IVA)',
+    loQueVeLaFamilia: 'Lo que ve la familia',
+    loQueRecibes: 'Lo que recibes',
+    /* 🔴 Sale SOLO cuando el motor dice que mandó el mínimo (`aplico`), jamás
+       comparando números acá. Sin esta línea la pantalla mostraría el neto del
+       piso sin decir por qué, y el prestador leería una comisión que no es la
+       suya. */
+    minimoAplica: 'En este precio aplica la comisión mínima de {{monto}}',
+    noSePudo: 'No pudimos calcular lo que recibes.',
+  },
+
 } as const;

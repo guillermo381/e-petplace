@@ -60,7 +60,6 @@ import {
   SliderPrecio,
   Tarjeta,
   Texto,
-  VozComision,
   spacing,
   typography,
   useAviso,
@@ -72,7 +71,6 @@ import {
   actualizarExtraPelajeLargo,
   actualizarRecargoDomicilio,
   guardarServicioGrooming,
-  obtenerComisionVigenteCita,
   obtenerFranjasDeServicios,
   obtenerFranjasHorario,
   obtenerMiCuentaComercial,
@@ -101,6 +99,8 @@ import {
 } from '@/components/seccion-horarios';
 import { parsearPrecio } from '@epetplace/i18n'
 
+import { TresNumerosDelPrecio, useComisionDelTaller } from '@/components/tres-numeros-precio';
+
 type Pantalla =
   | { estado: 'cargando' }
   | { estado: 'error' }
@@ -108,7 +108,6 @@ type Pantalla =
       estado: 'listo';
       prestadorId: string;
       cuentaActiva: boolean | null;
-      comisionPct: number | null;
     };
 
 type Seccion = 'servicios' | 'horarios';
@@ -251,11 +250,10 @@ export default function TallerGrooming() {
         setPantalla({ estado: 'error' });
         return;
       }
-      const [rOfertas, rFranjas, rCuenta, rComision, rModo] = await Promise.all([
+      const [rOfertas, rFranjas, rCuenta, rModo] = await Promise.all([
         obtenerOfertasGroomingPropias(prestador.data.id),
         obtenerFranjasHorario(prestador.data.id, empleadoJornada ?? undefined),
         obtenerMiCuentaComercial(),
-        obtenerComisionVigenteCita(),
         // D-386: la elección vigente decide QUÉ franjas se cargan
         obtenerModoHorarios(prestador.data.id),
       ]);
@@ -323,7 +321,6 @@ export default function TallerGrooming() {
         estado: 'listo',
         prestadorId: prestador.data.id,
         cuentaActiva: rCuenta.ok ? rCuenta.data?.estado === 'activa' : null,
-        comisionPct: rComision.ok ? rComision.data.porcentaje : null,
       });
     })();
     return () => {
@@ -332,7 +329,11 @@ export default function TallerGrooming() {
   }, [intento]);
 
   const listo = pantalla.estado === 'listo' && drafts !== null && especies !== null && franjas !== null;
-  const pct = pantalla.estado === 'listo' ? pantalla.comisionPct : null;
+  /* ☠️ `pct` murió con `VozComision` — ver la cabecera de `TresNumerosDelPrecio`. */
+  const comisionTaller = useComisionDelTaller(
+    pantalla.estado === 'listo' ? pantalla.prestadorId : null,
+    'grooming',
+  );
 
   const vozServicio = (s: ServicioGrooming): string =>
     s === 'grooming' ? t('tallerGrooming.servicioBano') : t('tallerGrooming.servicioBanoCorte');
@@ -669,7 +670,7 @@ export default function TallerGrooming() {
                             onCambio={(i) => actualizarTalla(s, talla, { precio: pasosServicio[i].toFixed(2) })}
                             registro="aa"
                           />
-                          <VozComision pct={pct} precio={precioDe(dt)} />
+                          <TresNumerosDelPrecio precioNeto={precioDe(dt)} comision={comisionTaller} />
                           {/* duración POR COMBINACIÓN (§6): letra dura de
                               DB 30–240 paso 15' — Celda-selector con Hoja
                               (regla del teclado; StepperCantidad no porta

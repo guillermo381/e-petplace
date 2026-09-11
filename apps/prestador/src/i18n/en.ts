@@ -3787,4 +3787,12 @@ export const prestadorEn = {
     noDevolverConfirmar: 'Acknowledge without refunding',
   },
 
+  tresNumeros: {
+    tuPrecio: 'Your price (before tax)',
+    loQueVeLaFamilia: 'What the family sees',
+    loQueRecibes: 'What you receive',
+    minimoAplica: 'This price falls under the {{monto}} minimum commission',
+    noSePudo: "We couldn't work out what you receive.",
+  },
+
 } as const satisfies Espejo<typeof prestadorEs>;
