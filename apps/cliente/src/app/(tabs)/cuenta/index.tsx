@@ -148,6 +148,14 @@ export default function Cuenta() {
        existía. Glifo propio por `D-877`: `pagos`, `bancario` y `preferencias`
        ya están tomados en esta misma lista. */
     { etiqueta: t('cuenta.recurrentes'), ruta: '/cuenta/recurrentes' as const, icono: 'mes' as const },
+    /* S115-C · TUS FACTURAS (④). Va junto a Pagos y Medios porque es la
+       misma familia —la plata— y ahí es donde alguien la va a buscar.
+       Glifo `fiscal`: existe en el registry desde S84 y es el suyo. */
+    { etiqueta: t('cuenta.facturas'), ruta: '/cuenta/facturas' as const, icono: 'fiscal' as const },
+    /* Junto a Facturas porque es su causa: estos datos son los que salen
+       impresos ahí. Glifo `documento` — el papel de la identidad, distinto
+       del `fiscal` de la factura emitida (Ley 12: marca lo que varía). */
+    { etiqueta: t('datosFacturacion.celda'), ruta: '/cuenta/datos-facturacion' as const, icono: 'documento' as const },
     /* 🔴 S103-C · LA PUERTA QUE FALTABA. El motor de contraseña vive en
        `packages/api` desde S84 y **su único consumidor era el prestador**:
        una familia no tenía NINGÚN camino para cambiar su clave. *No faltaba

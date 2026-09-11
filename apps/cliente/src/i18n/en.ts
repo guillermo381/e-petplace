@@ -1813,6 +1813,7 @@ export const clienteEn = {
     errorDetalle: 'Check your connection and try again.',
   },
   cuenta: {
+    facturas: 'Your invoices',
     recurrentes: 'Recurring payments and subscriptions',
     medios: 'Payment methods',
     mediosSub: 'How you pay on e-PetPlace',
@@ -3348,6 +3349,34 @@ export const clienteEn = {
     yaElegiste: 'You already chose how we return it.',
     devolucionNoSePudo: "We couldn't complete the return. Try again.",
     confirmarDevolucion: 'Confirm',
+  },
+
+  facturas: {
+    titulo: 'Your invoices',
+    vacioTitulo: "You don't have any invoices yet",
+    vacio: 'When you buy something on e-PetPlace, its invoice shows up here for you to download.',
+    errorTitulo: "We couldn't load your invoices",
+    reintentar: 'Try again',
+    descargarPdf: 'Download PDF',
+    descargarXml: 'Download XML',
+    errorDescarga: "We couldn't open the file. Try again.",
+    faltanTusDatos: 'We need your ID or tax number to issue it',
+    anulada: 'This invoice was voided',
+  },
+
+  datosFacturacion: {
+    titulo: 'Your billing details',
+    celda: 'Billing details',
+    intro: 'We use these details to issue your invoices. You can change them anytime.',
+    guardar: 'Save',
+    guardado: 'Done, we saved your details',
+    errorTitulo: "We couldn't load your details",
+    reintentar: 'Try again',
+    rucInvalido: "That tax number doesn't look valid. Check it and try again.",
+    cedulaInvalida: "That ID doesn't look valid. Check it and try again.",
+    rucSinRazonSocial: 'With a tax number we also need the legal name.',
+    tipoInvalido: 'Choose an ID type.',
+    errorGuardar: "We couldn't save your details. Try again.",
   },
 
 } as const satisfies Espejo<typeof clienteEs>;
