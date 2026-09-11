@@ -3379,4 +3379,10 @@ export const clienteEn = {
     errorGuardar: "We couldn't save your details. Try again.",
   },
 
+  facturacionCheckout: {
+    facturaA: 'Invoice to',
+    cambiar: 'Change',
+    quieresFactura: 'Want an invoice with your details?',
+  },
+
 } as const satisfies Espejo<typeof clienteEs>;

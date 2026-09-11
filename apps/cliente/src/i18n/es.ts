@@ -4636,4 +4636,17 @@ export const clienteEs = {
     errorGuardar: 'No pudimos guardar tus datos. Prueba de nuevo.',
   },
 
+  /* S115-C · LA SECCIÓN FISCAL DEL CHECKOUT. Sólo TRES claves: todo lo demás
+     —las dos opciones, la razón del tope, el switch de guardar, el microtexto de
+     deducibilidad— lo pone `SelectorFacturacion` desde el namespace `ui`. La voz
+     de una pieza vive adentro de la pieza (Ley 3). */
+  facturacionCheckout: {
+    facturaA: 'Factura a',
+    cambiar: 'Cambiar',
+    /* El enlace del caso bajo tope: se paga como consumidor final sin preguntar,
+       y esto queda a un lado por si alguien la quiere igual. Discreto a
+       propósito — preguntarlo sería volver a preguntar. */
+    quieresFactura: '¿Quieres factura con tus datos?',
+  },
+
 } as const;
