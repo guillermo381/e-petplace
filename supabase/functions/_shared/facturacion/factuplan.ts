@@ -96,6 +96,52 @@ async function hmacSha256Hex(secreto: string, mensaje: string): Promise<string> 
   return [...new Uint8Array(f)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
+/**
+ * El NOMBRE del evento → lo que significa. **Son TRES por tipo de documento,
+ * no dos** (medido por el founder en el panel: «Factura autorizada · Factura
+ * rechazada · Factura con error»).
+ *
+ * 🔴 «CON ERROR» NO ES «RECHAZADA», y confundirlas cuesta plata:
+ *    · **rechazada** — el SRI la evaluó y la rechazó. Es definitivo: se corrige
+ *      emitiendo un documento nuevo, y el secuencial viejo queda como hueco.
+ *    · **con error** — no llegó a evaluarse (firma, servicio caído, proceso).
+ *      El comprobante está intacto y **`invoices.retry(id)` lo reintenta sin
+ *      consumir cuota**. *Marcarla `no_autorizada` daría por perdido un
+ *      comprobante que sólo hay que volver a mandar.*
+ *
+ * 🔴 Y EL DESCONOCIDO NO SE TRAGA. Los nombres exactos de la API no están
+ *    documentados —la doc muestra UN ejemplo, `invoice.authorized`, y el panel
+ *    once eventos con nombres visibles en español— así que acá se reconoce por
+ *    subcadena y **lo que no entra en ninguna clase se ANOTA con su nombre
+ *    literal**. *Un evento desconocido que cae en el mismo balde que «con
+ *    error» pierde la única información que tenía: cómo se llama.* El primero
+ *    que llegue nos enseña el string, en vez de desaparecer en un default.
+ */
+export function traducirEventoWebhook(nombre: string): {
+  estado: ResultadoWebhook['estado'];
+  clase: 'autorizada' | 'rechazada' | 'con_error' | 'desconocido';
+  reintentable: boolean;
+  motivo?: string;
+} {
+  const n = (nombre ?? '').toLowerCase();
+  if (n.includes('authorized') || n.includes('autorizad')) {
+    return { estado: 'autorizada', clase: 'autorizada', reintentable: false };
+  }
+  if (n.includes('rejected') || n.includes('rechazad') ||
+      n.includes('returned') || n.includes('devuelt') ||
+      n.includes('voided')   || n.includes('anulad')) {
+    return { estado: 'no_autorizada', clase: 'rechazada', reintentable: false };
+  }
+  if (n.includes('error') || n.includes('failed') || n.includes('fallid')) {
+    /* Queda EN VUELO: el comprobante conserva su número y su clave, y lo que
+       corresponde es `retry`, no un documento nuevo. */
+    return { estado: 'emitiendo', clase: 'con_error', reintentable: true,
+             motivo: `con_error_del_proveedor: ${nombre} — reintentable con invoices.retry` };
+  }
+  return { estado: 'emitiendo', clase: 'desconocido', reintentable: false,
+           motivo: `evento_desconocido: ${nombre}` };
+}
+
 export function crearFactuplan(o: OpcionesFactuplan): PuertoFacturacion {
   if (!o.apiKey) throw new Error('factuplan_sin_api_key');
   if (!/^\d{13}$/.test(o.rucContribuyente ?? '')) {
@@ -333,14 +379,13 @@ export function crearFactuplan(o: OpcionesFactuplan): PuertoFacturacion {
       /* 🔴 El aviso NO trae el XML ni el RIDE — sólo el `receiptId` y la clave
          (medido en `WebhookReceiptData` del SDK). Se traen acá, en caliente,
          porque el enlace vive 5 minutos y en Pruebas el documento una hora. */
-      const evento = (ev.event ?? '').toLowerCase();
-      const estado: ResultadoWebhook['estado'] =
-        evento.includes('authorized') ? 'autorizada'
-        : evento.includes('rejected') || evento.includes('returned') || evento.includes('voided')
-          ? 'no_autorizada' : 'emitiendo';
-
-      const archivos = estado === 'autorizada' ? await traerArchivos(id) : {};
-      return { verificado: true, referencia: id, estado, ...archivos };
+      const clasif = traducirEventoWebhook(ev.event ?? '');
+      const archivos = clasif.estado === 'autorizada' ? await traerArchivos(id) : {};
+      return {
+        verificado: true, referencia: id, estado: clasif.estado,
+        ...(clasif.motivo ? { motivo: clasif.motivo } : {}),
+        ...archivos,
+      };
     },
   };
 }
