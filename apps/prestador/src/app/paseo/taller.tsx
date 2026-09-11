@@ -98,6 +98,7 @@ import {
   type DraftFranja,
   type OfertaParaHorarios,
 } from '@/components/seccion-horarios';
+import { parsearPrecio } from '@epetplace/i18n'
 
 type Pantalla =
   | { estado: 'cargando' }
@@ -148,7 +149,7 @@ function monto(valor: number): string {
 // de ESA duración, redondeado al paso del riel — jamás un campo vacío
 // (factores founder S59; corrían 90/85 desde v3.2)
 function sugerido(precioTexto: string, factor: number): string {
-  const p = Number.parseFloat(precioTexto.replace(',', '.'));
+  const p = parsearPrecio(precioTexto);
   const base = Number.isFinite(p) && p > 0 ? p : 5;
   const v = Math.max(PASO_PRECIO, Math.round((base * factor) / PASO_PRECIO) * PASO_PRECIO);
   return v.toFixed(2);
@@ -165,14 +166,14 @@ function sugerido(precioTexto: string, factor: number): string {
 // original (÷4) con otra ropa. NO curado acá: registrado en el acta.
 const PASO_MES = PASO_PRECIO * 4;
 function sugeridoMes(precioTexto: string): string {
-  const p = Number.parseFloat(precioTexto.replace(',', '.'));
+  const p = parsearPrecio(precioTexto);
   const base = Number.isFinite(p) && p > 0 ? p : 5;
   const v = Math.max(PASO_MES, Math.round((base * 2.4) / PASO_MES) * PASO_MES);
   return v.toFixed(2);
 }
 
 function leerPrecio(texto: string): number | null {
-  const v = Number.parseFloat(texto.replace(',', '.'));
+  const v = parsearPrecio(texto);
   if (!Number.isFinite(v) || v <= 0) return null;
   return Math.round(v * 100) / 100;
 }
@@ -180,7 +181,7 @@ function leerPrecio(texto: string): number | null {
 // Plan y paquete: vacío = SIN oferta (null honesto) · número · inválido
 function leerPorSalida(texto: string): number | null | 'invalido' {
   if (texto.trim() === '') return null;
-  const v = Number.parseFloat(texto.replace(',', '.'));
+  const v = parsearPrecio(texto);
   if (!Number.isFinite(v) || v <= 0) return 'invalido';
   return Math.round(v * 100) / 100;
 }

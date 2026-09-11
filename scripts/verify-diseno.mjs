@@ -2335,6 +2335,22 @@ const FIXTURES = {
       src: "import { monto } from '@epetplace/i18n'\nexport const x = monto\n",
     })),
   ],
+  /* R88 · el parseo de plata a mano: devuelve 1.234 sobre «1.234,50»,
+     **finito**, y por eso el guard de `isFinite` no dispara. */
+  R88: [
+    ...Array.from({ length: 6 }, (_, i) => ({
+      path: `apps/prestador/src/app/relleno${i}.tsx`,
+      src: "const precio = Number(texto.replace(',', '.'))\n",
+    })),
+  ],
+  /* R89 · un monto FORMATEADO viajando a un payload: el defecto más caro que
+     la unificación podría introducir. */
+  R89: [
+    ...Array.from({ length: 6 }, (_, i) => ({
+      path: `apps/cliente/src/app/relleno${i}.tsx`,
+      src: "await rpc('cobrar', { p_monto: formatearPrecio(total) })\n",
+    })),
+  ],
   /* R85 · la voz suelta en el JSX, sin pasar por el riel: el typecheck la
      deja pasar porque es un string perfectamente válido. */
   R85: [{
@@ -8289,6 +8305,12 @@ function r86(archivos) {
 
 /** R87 · EL FORMATO DE LA PLATA ES UNO SOLO (S115-B · firma del founder).
  *
+ *  ⏪ **La firma se enmendó el mismo día y esta regla sobrevivió sin cambiar de
+ *  trabajo**: primero decía «punto en toda la casa», después **«coma decimal y
+ *  punto de miles»**. Lo que la regla mide no era el separador —era **que haya
+ *  UNA sola fuente**—, y por eso el cambio de firma no la tocó. *Una regla
+ *  atada al valor habría muerto con la enmienda; atada al invariante, no.*
+ *
  *  *«un formateador que contradice al resto y espera a que alguien lo llame de
  *  buena fe es justamente el modo de falla que acabamos de nombrar»*.
  *
@@ -8331,7 +8353,7 @@ function r87(archivos) {
     for (const c of consumidores) {
       fallos.push(
         `R87 **\`${c}\` formatea plata con el riel de la COMA.** La firma del founder ` +
-        `(10-sep-2026) dice **punto en toda la casa**, y la fuente es \`formatearPrecio\` de ` +
+        `(10-sep-2026) dice **coma decimal y punto de miles**, y la fuente única es \`formatearPrecio\` de ` +
         `\`PrecioText\`. Los ${BASELINE} del baseline son del prestador (+ el hook muerto) y están ` +
         `declarados en \`packages/i18n/src/moneda.ts\`; este entró después.`,
       )
@@ -8347,7 +8369,114 @@ function r87(archivos) {
   }
 }
 
-const REGLAS = { R87: r87, R86: r86, R85: r85, R84: r84, R83: r83, R82: r82, R81: r81, R80: r80, R79: r79, R78: r78, R77: r77, R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+
+/** R88 · LA PLATA NO SE PARSEA A MANO (S115-B · firma del founder).
+ *
+ *  🔴 QUÉ MIDE, y es un defecto MEDIDO: `.replace(',', '.')` + `parseFloat`
+ *  sobre «1.234,50» devuelve **1.234** — plausible, equivocado y **FINITO**.
+ *  `SliderPrecio` se protegía con `Number.isFinite` y ese guard **no
+ *  disparaba**, así que la edición quedaba activa sobre un riel mal numerado.
+ *  La cura es `parsearPrecio` del riel, que devuelve `NaN` ante un formato
+ *  ajeno — *lo que vuelve a hacer útil al guard que ya existía*.
+ *
+ *  ⚠️ **LOS CUATRO EXENTOS SON POR RUTA Y NO POR PATRÓN**, porque la regla
+ *  **no puede distinguir plata de peso mirando el texto**: dos son pesos en
+ *  kg, uno son VITALES (temperatura, frecuencia) y otro `duracion_dias`.
+ *  *Aplicarles un parseo de PRECIO sería trasplantar un criterio correcto a
+ *  otra pregunta* — y un kilo no lleva separador de miles ni símbolo. */
+function r88(archivos) {
+  const EXENTOS_NO_PLATA = [
+    'apps/cliente/src/components/registrar-peso-hoja.tsx',      // peso en kg
+    'apps/prestador/src/app/ventas/pedido/[pedidoId].tsx',      // peso
+    'apps/prestador/src/app/veterinaria/consulta/[citaId].tsx', // vitales + duracion_dias
+  ]
+  const RE_PARSEO = /\.replace\(\s*['"],['"]\s*,\s*['"]\.['"]\s*\)/
+  const vistos = new Set()
+  const ofensores = []
+  for (const { path, src } of archivos) {
+    if (vistos.has(path)) continue
+    vistos.add(path)
+    if (EXENTOS_NO_PLATA.some((e) => path.endsWith(e))) continue
+    const limpio = sinComentarios(src ?? '')
+    for (const m of limpio.matchAll(new RegExp(RE_PARSEO.source, 'g'))) {
+      ofensores.push(`${path}:${lineaDe(limpio, m.index)}`)
+    }
+  }
+  /* 🔴 ANCLA: sin corpus no se mide nada y el cero diría «no miré». */
+  const fallos = [...ancla('R88', vistos.size, 100, 'archivo(s) de apps en el corpus')]
+  if (fallos.length > 0) return { fallos, info: 'corpus incompleto' }
+
+  for (const o of ofensores) {
+    fallos.push(
+      `R88 **plata parseada a mano en \`${o}\`.** Sobre «1.234,50» devuelve **1.234** — ` +
+      `plausible, equivocado y FINITO, así que \`Number.isFinite\` no lo frena. ` +
+      `Usá \`parsearPrecio\` de \`@epetplace/i18n\`, que devuelve \`NaN\` ante un formato ajeno.`,
+    )
+  }
+  return {
+    fallos,
+    info:
+      `${ofensores.length} parseo(s) de plata a mano · DURA EN 0 · ${EXENTOS_NO_PLATA.length} ruta(s) exenta(s) ` +
+      `por NO ser plata (dos pesos, vitales, duración) · alcance: ${vistos.size} archivo(s) · ` +
+      `su verde dice «nadie parsea plata a mano», JAMÁS «los exentos están bien» (no los mira) ` +
+      `ni «el número que se guarda es el correcto»`,
+  }
+}
+
+/** R89 · UN MONTO FORMATEADO NO VIAJA A UN PAYLOAD (S115-B · firma del founder).
+ *
+ *  🔴 **ES PREVENTIVA, Y ESE ES SU VALOR.** Hoy el terreno está limpio —cero
+ *  casos medidos—, y la firma es explícita: *«un precio formateado viajando a
+ *  un payload es el defecto que esta unificación podría introducir, y sería el
+ *  más caro de todos… la única forma de que nunca aparezca es que algo lo
+ *  vigile desde el día cero»*.
+ *
+ *  El riesgo es concreto: con el formato nuevo, `'$1.234,50'` mandado a un
+ *  campo numérico llega como basura o como **1.234** — y del otro lado hay
+ *  plata. **Los montos que van al riel o al XML fiscal siguen siendo
+ *  numéricos, con punto decimal**; el formateador es SÓLO de presentación.
+ *
+ *  ⚠️ LO QUE NO MIDE, declarado: mira **por línea**, no sigue el flujo de una
+ *  variable. Un monto formateado guardado en una constante y mandado tres
+ *  líneas abajo se le escapa. *Su verde dice «no hay un formateador dentro de
+ *  un campo de payload en la misma línea», jamás «ningún texto llega al
+ *  motor».* */
+function r89(archivos) {
+  const FORMATEADORES = ['formatearPrecio', 'montoConCodigo', 'precioPorKg', 'monto']
+  const RE_PAYLOAD = new RegExp(
+    `(p_[a-z_]+\\s*:|body\\s*:|JSON\\.stringify\\(|\\.rpc\\()[^\\n]*\\b(${FORMATEADORES.join('|')})\\s*\\(`,
+  )
+  const vistos = new Set()
+  const ofensores = []
+  for (const { path, src } of archivos) {
+    if (vistos.has(path)) continue
+    vistos.add(path)
+    const limpio = sinComentarios(src ?? '')
+    for (const m of limpio.matchAll(new RegExp(RE_PAYLOAD.source, 'g'))) {
+      ofensores.push(`${path}:${lineaDe(limpio, m.index)} — \`${m[2]}\` dentro de \`${m[1].trim()}\``)
+    }
+  }
+  const fallos = [...ancla('R89', vistos.size, 100, 'archivo(s) de apps en el corpus')]
+  if (fallos.length > 0) return { fallos, info: 'corpus incompleto' }
+
+  for (const o of ofensores) {
+    fallos.push(
+      `R89 **un monto FORMATEADO viaja a un payload** (${o}). El formateador es de PRESENTACIÓN: ` +
+      `al motor y al XML fiscal la plata va **numérica, con punto decimal**. ` +
+      `Con el formato de la casa, «$1.234,50» llega como basura o como 1.234 — y del otro lado hay plata.`,
+    )
+  }
+  return {
+    fallos,
+    info:
+      `${ofensores.length} monto(s) formateado(s) en payload · DURA EN 0 (nació preventiva, terreno limpio) · ` +
+      `${FORMATEADORES.length} formateador(es) vigilados · alcance: ${vistos.size} archivo(s) · ` +
+      `su verde dice «no hay un formateador dentro de un campo de payload en la MISMA LÍNEA», ` +
+      `JAMÁS «ningún texto llega al motor» (no sigue el flujo de una variable)`,
+  }
+}
+
+const REGLAS = { R89: r89, R88: r88, R87: r87, R86: r86, R85: r85, R84: r84, R83: r83, R82: r82, R81: r81, R80: r80, R79: r79, R78: r78, R77: r77, R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -8824,6 +8953,10 @@ corridas.push(['R85 (la voz fiscal pasa por el riel, en los dos idiomas)', r85(u
 corridas.push(['R86 (el error del SRI no llega a la familia)', r86(uiCodigo)])
 /* R87 corre sobre las APPS (ahí viven los consumidores), no sobre `ui`. */
 corridas.push(['R87 (el formato de la plata es uno solo)', r87([...apps, ...appsCodigo])])
+/* R88 y R89 corren sobre TODO: `apps` + su lógica + las piezas de `ui`, porque
+   el parseo a mano vivía en las dos casas (`SliderPrecio` era uno de ellos). */
+corridas.push(['R88 (la plata no se parsea a mano)', r88([...apps, ...appsCodigo, ...uiCodigo])])
+corridas.push(['R89 (un monto formateado no viaja a un payload)', r89([...apps, ...appsCodigo, ...uiCodigo])])
 corridas.push(['R71 (un wrapper sin exportar es un motor sin puerta)', r71(leer(['packages/api/src/index.ts', ...archivosCodigo('packages/api/src/wrappers')]))])
 corridas.push(['R69 (nada absoluto despues de SuperficieLlamada)', r69([...apps, ...appsCodigo])]);
 corridas.push(['R68 (nada del componente dentro de un worklet de gesto)', r68([...ui, ...apps, ...appsCodigo, ...leer(archivosCodigo('packages/ui/src'))])]);

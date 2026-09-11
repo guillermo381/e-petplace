@@ -99,6 +99,7 @@ import {
   type DraftFranja,
   type OfertaParaHorarios,
 } from '@/components/seccion-horarios';
+import { parsearPrecio } from '@epetplace/i18n'
 
 type Pantalla =
   | { estado: 'cargando' }
@@ -157,7 +158,7 @@ function monto(valor: number): string {
 }
 
 function leerPrecio(texto: string): number | null {
-  const v = Number.parseFloat(texto.replace(',', '.'));
+  const v = parsearPrecio(texto);
   if (!Number.isFinite(v) || v <= 0) return null;
   return Math.round(v * 100) / 100;
 }

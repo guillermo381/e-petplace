@@ -52,6 +52,7 @@ import { spacing } from '../tokens/spacing'
 import { useTheme } from '../ThemeProvider'
 import { useTraduccionUi } from '../i18n'
 import type { IconoRegistro } from './Icono'
+import { parsearPrecio } from '@epetplace/i18n'
 
 const ALTO_RIEL = 4
 const THUMB = 28      // target táctil real: el detector cubre alto 44
@@ -82,7 +83,7 @@ export interface SliderPrecioProps {
 // los valores numéricos derivados de las etiquetas ("$25.00" → 25) —
 // si alguna no parsea, la edición se apaga sola (jamás valor ilegal)
 function numeroDeEtiqueta(etiqueta: string): number {
-  return Number.parseFloat(etiqueta.replace(/[^0-9.,-]/g, '').replace(',', '.'))
+  return parsearPrecio(etiqueta)
 }
 
 export function SliderPrecio({
@@ -207,7 +208,7 @@ export function SliderPrecio({
 
   const confirmarEdicion = () => {
     setEditando(false)
-    const v = Number.parseFloat(texto.replace(',', '.'))
+    const v = parsearPrecio(texto)
     if (!Number.isFinite(v)) return // entrada vacía/ilegal = se cancela sereno
     // clamp al riel + redondeo al paso MÁS CERCANO — jamás valor ilegal
     let mejor = 0

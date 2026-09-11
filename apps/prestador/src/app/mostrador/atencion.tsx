@@ -64,7 +64,7 @@ import {
 import { EvitaTeclado } from '@/components/evita-teclado';
 import { verificarSesion } from '@/lib/api';
 import { vozErrorVet } from '@/lib/voz-error-vet';
-import { diaSemanaCorto } from '@epetplace/i18n';
+import { parsearPrecio, diaSemanaCorto } from '@epetplace/i18n';
 import { REGLA_OFICIO, type OficioMostrador } from '@/lib/oficio-mostrador';
 import { useTraduccion } from '@/i18n';
 
@@ -346,7 +346,7 @@ export default function AtencionMostrador() {
     };
   }, [verbo, fecha, servicioCodigo, mascotaId]);
 
-  const precioNum = Number(precio.replace(',', '.'));
+  const precioNum = parsearPrecio(precio);
   /* S86-C ② — la elección de tratante se OFRECE solo si hay a quién
      elegir. Sin personas legibles no se exige (la ventanilla no se
      bloquea por un lector caído) y la pantalla lo dice abajo. */
@@ -442,7 +442,7 @@ export default function AtencionMostrador() {
     setFase('cobro');
   }
 
-  const montoNum = Number(monto.replace(',', '.'));
+  const montoNum = parsearPrecio(monto);
   const puedeCobrar = citaId !== null && Number.isFinite(montoNum) && montoNum > 0 && !ocupado;
   const esVacunacion = servicioCodigo === 'vacunacion';
   // La verdad del server (RLS) preside; el param queda de puente de carga.

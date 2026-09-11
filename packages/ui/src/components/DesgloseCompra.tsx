@@ -39,15 +39,15 @@
  * sería exactamente la divergencia que `PrecioText` nació para cerrar (53
  * sitios con `toFixed(2)` a mano).
  *
- * ⚠️ **HALLAZGO DECLARADO, no resuelto acá:** la orden pedía *«coma decimal
- * como ya hace la puerta de pago»*. **Medido: la puerta de pago NO usa
- * coma.** `despensa/checkout.tsx:832` escribe `` `$ ${v.toFixed(2)}` `` y
- * `PrecioText` escribe `$45.00` — las dos con PUNTO. El riel que sí produce
- * coma (`monto()` de `packages/i18n`) **no lo consume nadie**: su propio hook
- * declara «cero llamadores». ⇒ *pintar esta pieza con coma fabricaría una
- * isla: el desglose diría `$45,00` tres centímetros arriba de un total que
- * dice `$45.00`.* Migrar la casa entera es UNA línea en `formatearPrecio`, y
- * es decisión del founder — no de esta pieza.
+ * ✅ **EL FORMATO YA ES UNO SOLO (S115-B, firma del founder):** coma decimal y
+ * punto de miles — `$45,00` · `$1.234,50`. `PrecioText` re-exporta la fuente
+ * única, que vive en `packages/i18n` (ahí y no en `ui`, porque `ui` ya depende
+ * del riel y al revés sería un ciclo).
+ *
+ * ⏪ *Esta cabecera decía que la puerta de pago usaba coma y que migrar era una
+ * línea. Lo primero era falso —usaba punto, medido— y lo segundo resultó ser
+ * una decisión de producto: el separador de MILES. El arco entero quedó
+ * escrito en `packages/i18n/src/moneda.ts`.*
  */
 
 import { View } from 'react-native'

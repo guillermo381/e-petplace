@@ -50,54 +50,145 @@ export interface ConfigMoneda {
 export const MONEDA_FALLBACK: ConfigMoneda = { codigo: 'USD', simbolo: '$', decimales: 2 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
- * 🔴 MARCA S115-B — FIRMA DEL FOUNDER (10-sep-2026): **EL FORMATO DE LA PLATA
- *    DE LA CASA ES PUNTO.** Su literal:
+ * ⏪☠️ MARCA S115-B · **ENMENDADA POR EL FOUNDER EL MISMO DÍA — y se deja
+ *    escrita, no borrada, porque el arco es lo que evita que la próxima mesa
+ *    lo vuelva a decidir sin los números.**
  *
- *    *«es lo que la gente ya ve en el checkout y en PrecioText, y migrar a
- *    coma sería cambiar el número que el producto muestra sin que nadie lo
- *    pida… un formateador que contradice al resto y espera a que alguien lo
- *    llame de buena fe es justamente el modo de falla que acabamos de
- *    nombrar.»*
+ * **① Primera firma (10-sep): «EL FORMATO DE LA CASA ES PUNTO»**, con su
+ *    razón: *«es lo que la gente ya ve en el checkout y en PrecioText, y
+ *    migrar a coma sería cambiar el número que el producto muestra sin que
+ *    nadie lo pida»*.
  *
- * ⇒ **LA FUENTE DE VERDAD DEL FORMATO ES `formatearPrecio` de `PrecioText`**
- *   (`packages/ui`). Si algún día se decide coma, **es una línea ahí** y lo
- *   hereda todo el producto.
+ * **② El dato que la dio vuelta**, medido al ir a ejecutarla: la premisa era
+ *    que **este riel no lo llamaba nadie** —premisa que venía de un reporte
+ *    MÍO de la tanda 1, y era falsa: lo que no llama nadie es el hook
+ *    `useMoneda`—. Medido: **8 consumidores, 7 VIVOS y todos del prestador**
+ *    (`historico` · `ventas/facturacion` · `ventas/mostrador` ·
+ *    `ventas/pedido` · `ventas/producto` · `ventana-pedidos` ·
+ *    `vitrina-piezas`). Y la diferencia **no era sólo el separador decimal**:
+ *    `formatearPrecio` **no tenía separador de MILES**.
  *
- * ── PERO ESTA FUNCIÓN NO SE RETIRÓ, Y LA RAZÓN ES UNA MEDICIÓN ────────────
- * La firma ofrecía *«retiralo o marcalo»* sobre la premisa de que **no lo
- * llamaba nadie** — premisa que venía de un reporte MÍO de la tanda 1, y
- * **era falsa**: lo que no llama nadie es el hook `useMoneda`, no este riel.
+ * **③ ☠️ LA ENMIENDA — el founder firma al revés**, con su razón:
+ *    *«un payout sin separador de miles se lee mal justo donde el prestador
+ *    mira cuánto cobra… y no hay un solo cliente real todavía: hoy es gratis,
+ *    en octubre no»*. Y después la cerró: **COMA DECIMAL Y PUNTO DE MILES,
+ *    sin excepciones**, *«es el formato ecuatoriano y el de los RIDE que el
+ *    cliente va a recibir del SRI — la app no puede decir un número distinto
+ *    del que dice su factura»*.
  *
- * Medido el 10-sep: **8 consumidores, 7 VIVOS y todos del prestador**:
- *   `app/historico` · `app/ventas/facturacion` · `app/ventas/mostrador` ·
- *   `app/ventas/pedido/[pedidoId]` · `app/ventas/producto/[productoId]` ·
- *   `components/ventana-pedidos` · `components/vitrina-piezas`
- * más `apps/cliente/src/lib/use-moneda.ts`, que sí está muerto.
- * **Retirarlo rompía siete pantallas vivas.**
+ * ⇒ **`formatearPrecio` no se retiró ni se alineó al punto: ADOPTÓ el formato
+ *   y bajó acá como fuente única** (ver el bloque de abajo). *Retirar este
+ *   riel habría roto siete pantallas vivas; alinearlo al punto le habría
+ *   quitado los miles a liquidaciones.*
  *
  * ⚠️ Y el 8 **corrigió a mi propio censo, que había dicho 5**: mi `grep` medía
  * el import en UNA línea y `grep` trabaja línea por línea, así que perdía los
- * imports MULTILÍNEA. *Lo cazó el gate al correr sobre el corpus real* — un
- * censo por patrón acota, no cierra.
+ * MULTILÍNEA. *Lo cazó el gate al correr sobre el corpus real.*
  *
- * ── LA DIVERGENCIA ESTÁ VIVA HOY, Y NO ES SÓLO LA COMA ───────────────────
- * ```
- *                     $45        $1234.50
- *   monto()  es  →  $45,00      $1.234,50
- *   monto()  en  →  $45.00      $1,234.50
- *   formatearPrecio  $45.00     $1234.50   ← sin separador de miles
- * ```
- * ⚠️ **Alinear esta función al punto NO es una línea inocua: le quita el
- * separador de MILES al prestador**, justo en liquidaciones y facturación,
- * que es donde viven los montos grandes. *Eso es una decisión de producto y
- * no la toma un riel* — queda servida al founder, con estos números.
- *
- * ── QUÉ SOSTIENE LA FIRMA MIENTRAS TANTO ─────────────────────────────────
- * **`R87` de `verify:diseno`, solo-baja desde 8.** Un consumidor NUEVO de
- * esta función sale en rojo. *La marca sola sería «una regla que alguien
- * tiene que acordarse de seguir», que es exactamente lo que la firma dice
- * que no dura; el gate es lo que la hace durar.*
+ * **Lo que sostiene la firma:** `R87` (nadie formatea con otro riel), `R88`
+ * (nadie parsea plata a mano) y `R89` (ningún monto formateado viaja a un
+ * payload), más `verify:plata`, que mide este archivo.
  * ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * LA FUENTE ÚNICA DEL FORMATO DE PLATA — firma del founder (10-sep-2026).
+ *
+ * **COMA DECIMAL Y PUNTO DE MILES, en toda la casa, sin excepciones:**
+ * `$45,00` · `$1.234,50` · `$0,99`.
+ *
+ * 🔴 **LA RAZÓN NO ES ESTÉTICA:** *«es el formato ecuatoriano y el de los RIDE
+ * que el cliente va a recibir del SRI — la app no puede decir un número
+ * distinto del que dice su factura»*. Y el separador de miles **no puede
+ * faltar en liquidaciones**, que es donde el prestador mira cuánto cobra.
+ *
+ * ⚠️ **NO DEPENDE DEL IDIOMA, y está firmado:** *«la factura dice el mismo
+ * número en los dos idiomas, y la app tiene que decir lo mismo que la
+ * factura»*. Antes `monto()` daba `$1,234.50` en inglés; ahora da
+ * `$1.234,50` en los dos.
+ *
+ * ── POR QUÉ VIVE ACÁ Y NO EN `packages/ui` ────────────────────────────────
+ * La firma pedía que `formatearPrecio` (de `PrecioText`) fuera la fuente y que
+ * `monto()` delegara en ella. **Medido: `packages/ui` YA depende de
+ * `packages/i18n`** —su `package.json` lo declara— así que un import al revés
+ * sería un **CICLO**. ⇒ el formato baja al riel, que es donde ya vive el de
+ * las fechas, y **`PrecioText.formatearPrecio` pasa a re-exportarlo**: los
+ * consumidores no cambian una línea y la fuente sigue siendo una sola.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/** Los decimales de la casa. Vive acá y no repetido en cada llamada. */
+const DECIMALES = 2
+
+/**
+ * EL formato de plata. **Recibe un número y devuelve el texto** — nunca al
+ * revés, y nunca convierte moneda (ver `monto` para eso).
+ *
+ * `es-EC` produce exactamente el formato firmado; **se fija el locale y no se
+ * lee el del usuario**, porque el número tiene que coincidir con el de la
+ * factura en los dos idiomas.
+ */
+export function formatearPrecio(valor: number, simbolo = '$', decimales = DECIMALES): string {
+  const numero = new Intl.NumberFormat('es-EC', {
+    minimumFractionDigits: decimales,
+    maximumFractionDigits: decimales,
+  }).format(valor);
+  return `${simbolo}${numero}`;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * `parsearPrecio` — EL PAR INVERSO. Una verdad leída en las dos direcciones.
+ *
+ * 🔴 **POR QUÉ NACE, y es un defecto MEDIDO, no una precaución:** con el
+ * separador de miles, el parseo que la casa tenía —`.replace(',', '.')` y
+ * `parseFloat`— devuelve **un número plausible y equivocado**:
+ * ```
+ *   '1.234,50' → replace(',', '.') → '1.234.50' → parseFloat → 1.234
+ * ```
+ * Y lo caro no es el número: **`SliderPrecio` se protege con
+ * `Number.isFinite`, y `1.234` ES finito** ⇒ la protección no se disparaba y
+ * la edición quedaba activa sobre un riel mal numerado. *El guard existía y el
+ * defecto pasaba por debajo.*
+ *
+ * ── LO QUE SE HACE INEXPRESABLE (firma del founder) ──────────────────────
+ * *«que un parseo fallido devuelva algo que NO es finito, para que
+ * `Number.isFinite` vuelva a servir de guard»*.
+ *
+ * ⇒ **se valida la FORMA antes de parsear.** En el formato de la casa el punto
+ * SIEMPRE separa grupos de TRES dígitos y la coma SIEMPRE es decimal, así que
+ * un texto cuyo punto no separe un grupo de tres **no es un precio de esta
+ * casa** y devuelve `NaN`:
+ * ```
+ *   '1.234,50' → 1234.5   ✓   (el punto separa un grupo de 3)
+ *   '1234,50'  → 1234.5   ✓   (sin separador de miles, también legal)
+ *   '25,00'    → 25       ✓
+ *   '1234.50'  → NaN      ✓   ← formato AJENO (punto decimal): se RECHAZA
+ * ```
+ * **El último es el que importa.** Sin la validación de forma daría `123450`
+ * —cien veces el valor— y `Number.isFinite` lo dejaría pasar otra vez.
+ * *Entre rebotar una entrada de formato ajeno y aceptar un número cien veces
+ * más grande, se rebota.*
+ *
+ * ⚠️ **Y por eso NO hay dos helpers, uno estricto y otro tolerante:** el
+ * tolerante sería exactamente el que devuelve el número plausible. La app
+ * MUESTRA el formato en pantalla, así que quien tipea tiene la guía a la
+ * vista; y un campo que rebota es un campo que se corrige, mientras que un
+ * número equivocado se cobra.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/** Con separador de miles: grupos de 3 tras el primero. O sin él. */
+const FORMA_DE_PRECIO = /^-?\d{1,3}(\.\d{3})*(,\d{1,2})?$|^-?\d+(,\d{1,2})?$/
+
+/**
+ * El texto a número. **`NaN` cuando el texto no es un precio de esta casa** —
+ * jamás un número plausible (ver el bloque de arriba).
+ *
+ * Tolera el símbolo, los espacios y el signo; **no tolera otro formato**.
+ */
+export function parsearPrecio(texto: string): number {
+  // Se quitan símbolo y espacios, no los separadores: la forma se juzga con ellos.
+  const limpio = texto.replace(/[^0-9.,-]/g, '').trim();
+  if (limpio === '' || !FORMA_DE_PRECIO.test(limpio)) return Number.NaN;
+  return Number.parseFloat(limpio.replace(/\./g, '').replace(',', '.'));
+}
 
 /**
  * EL formato de plata del producto. Una sola función para las dos apps.
@@ -110,13 +201,15 @@ export const MONEDA_FALLBACK: ConfigMoneda = { codigo: 'USD', simbolo: '$', deci
  * el separador lo pone `Intl` según el idioma — el mismo motor que ya
  * gobierna las fechas del riel, así que no se suma dependencia.
  */
-export function monto(valor: number, config: ConfigMoneda, idioma: IdiomaSoportado): string {
-  const locale = idioma === 'en' ? 'en-US' : 'es-EC';
-  const numero = new Intl.NumberFormat(locale, {
-    minimumFractionDigits: config.decimales,
-    maximumFractionDigits: config.decimales,
-  }).format(valor);
-  return `${config.simbolo}${numero}`;
+export function monto(valor: number, config: ConfigMoneda, _idioma?: IdiomaSoportado): string {
+  /* 🔴 DELEGA — no duplica el formato. Era la segunda implementación del mismo
+     formateo y por eso divergía del resto de la casa.
+     ⚠️ `_idioma` queda en la firma **a propósito**: sus siete consumidores vivos
+     lo pasan, y sacarlo obligaría a tocar siete pantallas para un parámetro que
+     ya no decide nada. **Deja de usarse, y eso ES la firma**: la factura dice el
+     mismo número en los dos idiomas. Lo que SÍ sigue siendo del país son el
+     símbolo y los decimales, que es lo que este riel existe para resolver. */
+  return formatearPrecio(valor, config.simbolo, config.decimales);
 }
 
 /**
