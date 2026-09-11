@@ -32744,3 +32744,40 @@ sí necesitamos ver, y de paso contando hacia las diez fallas que desactivan.
 
 **Lo que ya nos protege igual:** un aviso cuyo `receiptId` no exista en nuestras
 filas anota `documento_no_encontrado` y **no toca un solo documento fiscal**.
+
+---
+
+### `L-543` · PL/pgSQL COMPILA PEREZOSO: UN `db push` VERDE NO DICE QUE LA FUNCIÓN CORRA
+
+`L-114` firmó la forma en TypeScript —*build verde ≠ contrato real*— y ésta es
+la misma ley un piso más abajo, en el motor, donde el instrumento engaña más
+porque **el `Finished` se parece mucho más a un verde que un `tsc` sin errores**.
+
+**Medido, S115-A, 11-sep-2026.** Declaré `v_mail` dentro de un bloque anidado
+(`DECLARE … BEGIN … END;`) y lo usé **después** del `END`. La migración aplicó
+limpia, `db push` dijo `Finished`, y la función reventó con
+`42703: column "v_mail" does not exist` **la primera vez que un pago se
+aprobó** — no antes.
+
+*PL/pgSQL valida la sintaxis al crear y resuelve los identificadores al
+ejecutar.* Un error de ALCANCE no es un error de sintaxis: el cuerpo está bien
+formado y la variable simplemente no existe donde se la nombra. **Nada lo
+encuentra hasta que alguien la corre.**
+
+⇒ **El cinturón de una migración que toca una función la EJECUTA, no la
+inspecciona.** Verificar que existe, que su `proacl` está bien o que su
+`pg_get_functiondef` contiene lo esperado **no prueba que corra**: las tres
+cosas son ciertas de una función rota. La corrida tiene que pasar por el camino
+donde las variables se resuelven de verdad.
+
+⚠️ **Y la causa de que llegara a aplicarse está declarada: la migración anterior
+fue SIN CINTURÓN.** No fue mala suerte — *el único paso que habría encontrado
+esto es el que salteé.* La correctiva trae el que faltaba, con su rojo (un
+invitado sin correo tiene que ESPERAR, no salir con una casilla inventada) y
+con un brazo que discrimina (por encima del tope sigue mandando la falta de
+identificación, para que un motivo no tape al otro).
+
+✅ **Lo que sí funcionó, y conviene no perderlo de vista:** el respaldo del
+outbox atrapó el rebote, **el pago NO se cayó**, y el error quedó escrito en
+`sri_error` con su SQLSTATE. *La defensa en profundidad convirtió un defecto de
+motor en una fila que dice qué pasó, en vez de en una compra que falla.*
