@@ -32441,3 +32441,69 @@ lo lea — la clase que esta casa ya pagó tres veces.
 identidades, o la primera vez que operaciones tenga que reconstruir a quién se
 le facturó antes de un cambio. **Dueño:** A (motor + puerta) · C (el selector).
 **No frena octubre.**
+
+---
+
+### `L-539` · UNA POLICY POR BANDERA NO NIEGA: DEVUELVE VACÍO
+
+Con RLS, un `SELECT` que la policy no deja pasar **no da error**: da cero filas.
+Desde el consumidor, **«no tengo permiso» y «no existe» son el mismo resultado**
+— y la conclusión natural, la barata, la que uno saca sin pensarlo, es *«falta
+el dato»*. Ahí se va el tiempo: buscando una fila que está.
+
+**Medido, S115-A, 10-sep-2026.** `app_config.fiscal_tope_consumidor_final = 50`
+existía desde la tanda 1 y el motor la leía —`resolver_receptor_fiscal`, su
+único lector—. Nació con `es_publico = false`, y la policy de lectura para
+`authenticated` es exactamente `USING (es_publico = true)`. **C la buscó dos
+veces y las dos veces su consulta contestó vacío.** *No falló su instrumento:
+el instrumento dijo la verdad que podía decir.*
+
+Lo que lo vuelve una clase y no un caso: **la bandera es invisible desde el
+lado que consulta.** Una policy por `user_id` al menos se sospecha —«no soy el
+dueño»—; una por bandera de fila no tiene ninguna pista del otro lado. El
+consumidor no puede distinguirla ni pidiéndola de otra forma.
+
+⇒ **Ante un vacío inesperado sobre una tabla con RLS, se mide la policy ANTES
+de concluir que falta el dato:**
+
+```sql
+select policyname, cmd, qual from pg_policies
+ where schemaname='public' and tablename='<tabla>';
+-- y después, la fila cruda por una vía sin RLS
+```
+
+⚠️ **Y el corolario para quien ESCRIBE la fila, que es donde de verdad se
+arregla:** *una fila de configuración nace con la bandera que su lector
+necesita, o nace inútil.* La que la creó (`20260912210000`) la dejó privada sin
+decidirlo — el default hizo la elección. **Toda fila nueva en una tabla con
+policy por bandera declara su bandera con su razón**, igual que toda función
+nueva declara su audiencia (`L-140`) y toda columna nueva de `prestadores`
+declara su grant.
+
+---
+
+### `L-540` · `origin/main` EN UN CLON LOCAL ES UNA CACHÉ, NO EL REMOTO
+
+Hermana de la de arriba, del mismo hecho y de la misma hora.
+
+C midió `main = origin/main = 8cbae3ff`, concluyó que el código vivía sólo en el
+disco del árbol primario, y **se negó a copiarlo** — decisión correcta, es el
+caso que la casa ya se cobró (`L-217`). Pero el dato era viejo: **el commit
+existía desde las 21:52:29** y estaba en el remoto. Su `origin/main` era el de
+su último `fetch`.
+
+*No es que C midiera mal: midió bien un objeto que no era el que creía.*
+`origin/main` no se actualiza solo — sólo lo mueven `fetch`, `pull` o `push`
+propios. Con cinco pistas empujando, **un `origin/main` sin refrescar vence en
+minutos**, y lo hace en silencio: no hay aviso, no hay error, y el sha que
+devuelve es un sha real de un commit real.
+
+⇒ **Todo veredicto sobre «esto no está en el canon» abre con `git fetch
+origin`.** Y el veredicto se escribe con **su hora**, porque a los diez minutos
+puede ser falso — *un dato medido lleva su hora, y sin ella se lee como
+vigente para siempre*.
+
+⚠️ Lo que NO cambia: **la cautela de C fue correcta y se conserva entera.** Ante
+código que parece no estar commiteado, no se copia del disco ajeno — se pide o
+se espera. La enmienda es al paso previo, no a la conducta: *primero refrescá
+el objeto, después juzgá; y si igual no está, la cautela sigue siendo la misma.*
