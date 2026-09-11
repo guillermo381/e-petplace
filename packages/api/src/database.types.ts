@@ -1560,6 +1560,13 @@ export type Database = {
             referencedRelation: "prestador_servicios"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "bonos_prestador_servicio_id_fkey"
+            columns: ["prestador_servicio_id"]
+            isOneToOne: false
+            referencedRelation: "v_catalogo_precio_final"
+            referencedColumns: ["prestador_servicio_id"]
+          },
         ]
       }
       busquedas_sin_resultado: {
@@ -2250,6 +2257,42 @@ export type Database = {
           pais_codigo?: string | null
           sujetos_aplicables?: string[] | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      cat_costos_riel: {
+        Row: {
+          activo: boolean
+          created_at: string
+          forma: string
+          fuente: string | null
+          id: string
+          parametros: Json
+          proveedor: string
+          vigencia_desde: string
+          vigencia_hasta: string | null
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          forma: string
+          fuente?: string | null
+          id?: string
+          parametros: Json
+          proveedor: string
+          vigencia_desde?: string
+          vigencia_hasta?: string | null
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          forma?: string
+          fuente?: string | null
+          id?: string
+          parametros?: Json
+          proveedor?: string
+          vigencia_desde?: string
+          vigencia_hasta?: string | null
         }
         Relationships: []
       }
@@ -5688,12 +5731,19 @@ export type Database = {
           nombre_comercial: string
           owner_profile_id: string
           razon_social: string
+          regimen_tributario:
+            | Database["public"]["Enums"]["regimen_tributario_enum"]
+            | null
           saldo_arrastre: number
           suspendido_en: string | null
           suspension_motivo: string | null
+          tipo_comprobante_emite:
+            | Database["public"]["Enums"]["tipo_comprobante_enum"]
+            | null
           tipo_fiscal: Database["public"]["Enums"]["tipo_fiscal_enum"]
           updated_at: string
           venta_mostrador_activa: boolean
+          verificado_emisor_en: string | null
         }
         Insert: {
           activado_en?: string | null
@@ -5713,12 +5763,19 @@ export type Database = {
           nombre_comercial: string
           owner_profile_id: string
           razon_social: string
+          regimen_tributario?:
+            | Database["public"]["Enums"]["regimen_tributario_enum"]
+            | null
           saldo_arrastre?: number
           suspendido_en?: string | null
           suspension_motivo?: string | null
+          tipo_comprobante_emite?:
+            | Database["public"]["Enums"]["tipo_comprobante_enum"]
+            | null
           tipo_fiscal: Database["public"]["Enums"]["tipo_fiscal_enum"]
           updated_at?: string
           venta_mostrador_activa?: boolean
+          verificado_emisor_en?: string | null
         }
         Update: {
           activado_en?: string | null
@@ -5738,12 +5795,19 @@ export type Database = {
           nombre_comercial?: string
           owner_profile_id?: string
           razon_social?: string
+          regimen_tributario?:
+            | Database["public"]["Enums"]["regimen_tributario_enum"]
+            | null
           saldo_arrastre?: number
           suspendido_en?: string | null
           suspension_motivo?: string | null
+          tipo_comprobante_emite?:
+            | Database["public"]["Enums"]["tipo_comprobante_enum"]
+            | null
           tipo_fiscal?: Database["public"]["Enums"]["tipo_fiscal_enum"]
           updated_at?: string
           venta_mostrador_activa?: boolean
+          verificado_emisor_en?: string | null
         }
         Relationships: [
           {
@@ -6258,6 +6322,260 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cat_documentos_mascota"
             referencedColumns: ["codigo"]
+          },
+        ]
+      }
+      documentos_fiscales: {
+        Row: {
+          archivo_url: string | null
+          autorizado_en: string | null
+          canonico: Json | null
+          canonico_version: number | null
+          clave_acceso: string | null
+          country_code: string
+          created_at: string
+          cuenta_comercial_id: string | null
+          descuento: number | null
+          direccion: string | null
+          direccion_emisor: string | null
+          documento_referencia_id: string | null
+          email: string | null
+          emitida_por_tercero: boolean
+          establecimiento: string | null
+          estado: Database["public"]["Enums"]["fiscal_estado_enum"]
+          fecha_emision: string
+          id: string
+          identificacion: string | null
+          items: Json
+          iva: number | null
+          moneda: string
+          motivo_rechazo: string | null
+          numero_factura: string | null
+          pago_intento_id: string | null
+          pdf_url: string | null
+          pedido_id: string | null
+          proveedor: string | null
+          punto_emision: string | null
+          razon_social: string | null
+          razon_social_emisor: string | null
+          referencia_proveedor: string | null
+          rol: Database["public"]["Enums"]["fiscal_rol_enum"]
+          ruc_emisor: string | null
+          secuencial: string | null
+          sentido: Database["public"]["Enums"]["fiscal_sentido_enum"]
+          sri_ambiente: string | null
+          sri_error: string | null
+          sri_fecha_autorizacion: string | null
+          sri_numero_autorizacion: string | null
+          subtotal_0: number | null
+          subtotal_12: number | null
+          subtotal_15: number | null
+          suscripcion_id: string | null
+          tax_profile_id: string | null
+          tipo: Database["public"]["Enums"]["fiscal_tipo_enum"]
+          tipo_identificacion: string | null
+          total: number
+          updated_at: string
+          user_id: string | null
+          xml_url: string | null
+        }
+        Insert: {
+          archivo_url?: string | null
+          autorizado_en?: string | null
+          canonico?: Json | null
+          canonico_version?: number | null
+          clave_acceso?: string | null
+          country_code?: string
+          created_at?: string
+          cuenta_comercial_id?: string | null
+          descuento?: number | null
+          direccion?: string | null
+          direccion_emisor?: string | null
+          documento_referencia_id?: string | null
+          email?: string | null
+          emitida_por_tercero?: boolean
+          establecimiento?: string | null
+          estado?: Database["public"]["Enums"]["fiscal_estado_enum"]
+          fecha_emision?: string
+          id?: string
+          identificacion?: string | null
+          items?: Json
+          iva?: number | null
+          moneda?: string
+          motivo_rechazo?: string | null
+          numero_factura?: string | null
+          pago_intento_id?: string | null
+          pdf_url?: string | null
+          pedido_id?: string | null
+          proveedor?: string | null
+          punto_emision?: string | null
+          razon_social?: string | null
+          razon_social_emisor?: string | null
+          referencia_proveedor?: string | null
+          rol?: Database["public"]["Enums"]["fiscal_rol_enum"]
+          ruc_emisor?: string | null
+          secuencial?: string | null
+          sentido?: Database["public"]["Enums"]["fiscal_sentido_enum"]
+          sri_ambiente?: string | null
+          sri_error?: string | null
+          sri_fecha_autorizacion?: string | null
+          sri_numero_autorizacion?: string | null
+          subtotal_0?: number | null
+          subtotal_12?: number | null
+          subtotal_15?: number | null
+          suscripcion_id?: string | null
+          tax_profile_id?: string | null
+          tipo?: Database["public"]["Enums"]["fiscal_tipo_enum"]
+          tipo_identificacion?: string | null
+          total: number
+          updated_at?: string
+          user_id?: string | null
+          xml_url?: string | null
+        }
+        Update: {
+          archivo_url?: string | null
+          autorizado_en?: string | null
+          canonico?: Json | null
+          canonico_version?: number | null
+          clave_acceso?: string | null
+          country_code?: string
+          created_at?: string
+          cuenta_comercial_id?: string | null
+          descuento?: number | null
+          direccion?: string | null
+          direccion_emisor?: string | null
+          documento_referencia_id?: string | null
+          email?: string | null
+          emitida_por_tercero?: boolean
+          establecimiento?: string | null
+          estado?: Database["public"]["Enums"]["fiscal_estado_enum"]
+          fecha_emision?: string
+          id?: string
+          identificacion?: string | null
+          items?: Json
+          iva?: number | null
+          moneda?: string
+          motivo_rechazo?: string | null
+          numero_factura?: string | null
+          pago_intento_id?: string | null
+          pdf_url?: string | null
+          pedido_id?: string | null
+          proveedor?: string | null
+          punto_emision?: string | null
+          razon_social?: string | null
+          razon_social_emisor?: string | null
+          referencia_proveedor?: string | null
+          rol?: Database["public"]["Enums"]["fiscal_rol_enum"]
+          ruc_emisor?: string | null
+          secuencial?: string | null
+          sentido?: Database["public"]["Enums"]["fiscal_sentido_enum"]
+          sri_ambiente?: string | null
+          sri_error?: string | null
+          sri_fecha_autorizacion?: string | null
+          sri_numero_autorizacion?: string | null
+          subtotal_0?: number | null
+          subtotal_12?: number | null
+          subtotal_15?: number | null
+          suscripcion_id?: string | null
+          tax_profile_id?: string | null
+          tipo?: Database["public"]["Enums"]["fiscal_tipo_enum"]
+          tipo_identificacion?: string | null
+          total?: number
+          updated_at?: string
+          user_id?: string | null
+          xml_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documentos_fiscales_documento_referencia_id_fkey"
+            columns: ["documento_referencia_id"]
+            isOneToOne: false
+            referencedRelation: "documentos_fiscales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documentos_fiscales_documento_referencia_id_fkey"
+            columns: ["documento_referencia_id"]
+            isOneToOne: false
+            referencedRelation: "facturas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documentos_fiscales_pago_intento_id_fkey"
+            columns: ["pago_intento_id"]
+            isOneToOne: false
+            referencedRelation: "pagos_intentos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documentos_fiscales_tax_profile_id_fkey"
+            columns: ["tax_profile_id"]
+            isOneToOne: false
+            referencedRelation: "tax_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "facturas_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "cuentas_comerciales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "facturas_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "facturas_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_eventos_resumen_cuenta"
+            referencedColumns: ["cuenta_comercial_id"]
+          },
+          {
+            foreignKeyName: "facturas_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "pedidos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "facturas_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "v_dashboard_logistico"
+            referencedColumns: ["pedido_id"]
+          },
+          {
+            foreignKeyName: "facturas_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "v_pedidos_narrativa"
+            referencedColumns: ["pedido_id"]
+          },
+          {
+            foreignKeyName: "facturas_suscripcion_id_fkey"
+            columns: ["suscripcion_id"]
+            isOneToOne: false
+            referencedRelation: "suscripciones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "facturas_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "facturas_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_daas_eligible_users"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -10723,6 +11041,7 @@ export type Database = {
           notas_admin: string | null
           origen_id: string
           origen_tipo: string
+          pago_intento_id: string | null
           parent_evento_id: string | null
           revenue_stream: Database["public"]["Enums"]["revenue_stream_enum"]
           reversado_por_evento_id: string | null
@@ -10752,6 +11071,7 @@ export type Database = {
           notas_admin?: string | null
           origen_id: string
           origen_tipo: string
+          pago_intento_id?: string | null
           parent_evento_id?: string | null
           revenue_stream: Database["public"]["Enums"]["revenue_stream_enum"]
           reversado_por_evento_id?: string | null
@@ -10781,6 +11101,7 @@ export type Database = {
           notas_admin?: string | null
           origen_id?: string
           origen_tipo?: string
+          pago_intento_id?: string | null
           parent_evento_id?: string | null
           revenue_stream?: Database["public"]["Enums"]["revenue_stream_enum"]
           reversado_por_evento_id?: string | null
@@ -10828,6 +11149,13 @@ export type Database = {
             columns: ["fee_config_id"]
             isOneToOne: false
             referencedRelation: "fee_configs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eventos_economicos_pago_intento_id_fkey"
+            columns: ["pago_intento_id"]
+            isOneToOne: false
+            referencedRelation: "pagos_intentos"
             referencedColumns: ["id"]
           },
           {
@@ -11316,190 +11644,6 @@ export type Database = {
         }
         Relationships: []
       }
-      facturas: {
-        Row: {
-          archivo_url: string | null
-          clave_acceso: string | null
-          country_code: string
-          created_at: string
-          cuenta_comercial_id: string | null
-          descuento_total: number | null
-          direccion: string | null
-          direccion_emisor: string | null
-          email: string | null
-          emitida_por_tercero: boolean
-          estado: string
-          fecha_emision: string
-          id: string
-          identificacion: string | null
-          items: Json
-          iva_valor: number | null
-          moneda: string
-          numero_factura: string
-          pdf_url: string | null
-          pedido_id: string | null
-          razon_social: string | null
-          razon_social_emisor: string | null
-          ruc_emisor: string | null
-          sri_ambiente: string | null
-          sri_error: string | null
-          sri_fecha_autorizacion: string | null
-          sri_numero_autorizacion: string | null
-          subtotal_0: number | null
-          subtotal_12: number | null
-          subtotal_15: number | null
-          suscripcion_id: string | null
-          tipo: string
-          tipo_identificacion: string | null
-          total: number
-          updated_at: string
-          user_id: string
-          xml_url: string | null
-        }
-        Insert: {
-          archivo_url?: string | null
-          clave_acceso?: string | null
-          country_code?: string
-          created_at?: string
-          cuenta_comercial_id?: string | null
-          descuento_total?: number | null
-          direccion?: string | null
-          direccion_emisor?: string | null
-          email?: string | null
-          emitida_por_tercero?: boolean
-          estado?: string
-          fecha_emision?: string
-          id?: string
-          identificacion?: string | null
-          items?: Json
-          iva_valor?: number | null
-          moneda?: string
-          numero_factura: string
-          pdf_url?: string | null
-          pedido_id?: string | null
-          razon_social?: string | null
-          razon_social_emisor?: string | null
-          ruc_emisor?: string | null
-          sri_ambiente?: string | null
-          sri_error?: string | null
-          sri_fecha_autorizacion?: string | null
-          sri_numero_autorizacion?: string | null
-          subtotal_0?: number | null
-          subtotal_12?: number | null
-          subtotal_15?: number | null
-          suscripcion_id?: string | null
-          tipo?: string
-          tipo_identificacion?: string | null
-          total: number
-          updated_at?: string
-          user_id: string
-          xml_url?: string | null
-        }
-        Update: {
-          archivo_url?: string | null
-          clave_acceso?: string | null
-          country_code?: string
-          created_at?: string
-          cuenta_comercial_id?: string | null
-          descuento_total?: number | null
-          direccion?: string | null
-          direccion_emisor?: string | null
-          email?: string | null
-          emitida_por_tercero?: boolean
-          estado?: string
-          fecha_emision?: string
-          id?: string
-          identificacion?: string | null
-          items?: Json
-          iva_valor?: number | null
-          moneda?: string
-          numero_factura?: string
-          pdf_url?: string | null
-          pedido_id?: string | null
-          razon_social?: string | null
-          razon_social_emisor?: string | null
-          ruc_emisor?: string | null
-          sri_ambiente?: string | null
-          sri_error?: string | null
-          sri_fecha_autorizacion?: string | null
-          sri_numero_autorizacion?: string | null
-          subtotal_0?: number | null
-          subtotal_12?: number | null
-          subtotal_15?: number | null
-          suscripcion_id?: string | null
-          tipo?: string
-          tipo_identificacion?: string | null
-          total?: number
-          updated_at?: string
-          user_id?: string
-          xml_url?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "facturas_cuenta_comercial_id_fkey"
-            columns: ["cuenta_comercial_id"]
-            isOneToOne: false
-            referencedRelation: "cuentas_comerciales"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "facturas_cuenta_comercial_id_fkey"
-            columns: ["cuenta_comercial_id"]
-            isOneToOne: false
-            referencedRelation: "v_adoptables_publicos"
-            referencedColumns: ["publicador_id"]
-          },
-          {
-            foreignKeyName: "facturas_cuenta_comercial_id_fkey"
-            columns: ["cuenta_comercial_id"]
-            isOneToOne: false
-            referencedRelation: "v_eventos_resumen_cuenta"
-            referencedColumns: ["cuenta_comercial_id"]
-          },
-          {
-            foreignKeyName: "facturas_pedido_id_fkey"
-            columns: ["pedido_id"]
-            isOneToOne: false
-            referencedRelation: "pedidos"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "facturas_pedido_id_fkey"
-            columns: ["pedido_id"]
-            isOneToOne: false
-            referencedRelation: "v_dashboard_logistico"
-            referencedColumns: ["pedido_id"]
-          },
-          {
-            foreignKeyName: "facturas_pedido_id_fkey"
-            columns: ["pedido_id"]
-            isOneToOne: false
-            referencedRelation: "v_pedidos_narrativa"
-            referencedColumns: ["pedido_id"]
-          },
-          {
-            foreignKeyName: "facturas_suscripcion_id_fkey"
-            columns: ["suscripcion_id"]
-            isOneToOne: false
-            referencedRelation: "suscripciones"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "facturas_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "facturas_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_daas_eligible_users"
-            referencedColumns: ["user_id"]
-          },
-        ]
-      }
       familia: {
         Row: {
           avisos_nexo_desde: string | null
@@ -11677,6 +11821,7 @@ export type Database = {
           created_by: string | null
           cuenta_comercial_id: string | null
           id: string
+          minimo_por_transaccion: number
           notas: string | null
           parametros: Json
           prioridad: number
@@ -11697,6 +11842,7 @@ export type Database = {
           created_by?: string | null
           cuenta_comercial_id?: string | null
           id?: string
+          minimo_por_transaccion?: number
           notas?: string | null
           parametros: Json
           prioridad?: number
@@ -11717,6 +11863,7 @@ export type Database = {
           created_by?: string | null
           cuenta_comercial_id?: string | null
           id?: string
+          minimo_por_transaccion?: number
           notas?: string | null
           parametros?: Json
           prioridad?: number
@@ -11813,6 +11960,87 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      fiscal_emisor: {
+        Row: {
+          actualizado_en: string
+          agente_retencion: boolean
+          ambiente: number
+          certificado_alias: string | null
+          certificado_vence_en: string | null
+          contribuyente_especial: string | null
+          direccion_matriz: string
+          establecimiento: string
+          id: boolean
+          leyenda_regimen: string | null
+          nombre_comercial: string | null
+          obligado_contabilidad: boolean
+          punto_emision: string
+          razon_social: string
+          ruc: string
+        }
+        Insert: {
+          actualizado_en?: string
+          agente_retencion?: boolean
+          ambiente: number
+          certificado_alias?: string | null
+          certificado_vence_en?: string | null
+          contribuyente_especial?: string | null
+          direccion_matriz: string
+          establecimiento: string
+          id?: boolean
+          leyenda_regimen?: string | null
+          nombre_comercial?: string | null
+          obligado_contabilidad: boolean
+          punto_emision: string
+          razon_social: string
+          ruc: string
+        }
+        Update: {
+          actualizado_en?: string
+          agente_retencion?: boolean
+          ambiente?: number
+          certificado_alias?: string | null
+          certificado_vence_en?: string | null
+          contribuyente_especial?: string | null
+          direccion_matriz?: string
+          establecimiento?: string
+          id?: boolean
+          leyenda_regimen?: string | null
+          nombre_comercial?: string | null
+          obligado_contabilidad?: boolean
+          punto_emision?: string
+          razon_social?: string
+          ruc?: string
+        }
+        Relationships: []
+      }
+      fiscal_sequences: {
+        Row: {
+          actualizado_en: string
+          establecimiento: string
+          punto_emision: string
+          ruc: string
+          tipo_documento: Database["public"]["Enums"]["fiscal_tipo_enum"]
+          ultimo_secuencial: number
+        }
+        Insert: {
+          actualizado_en?: string
+          establecimiento: string
+          punto_emision: string
+          ruc: string
+          tipo_documento: Database["public"]["Enums"]["fiscal_tipo_enum"]
+          ultimo_secuencial?: number
+        }
+        Update: {
+          actualizado_en?: string
+          establecimiento?: string
+          punto_emision?: string
+          ruc?: string
+          tipo_documento?: Database["public"]["Enums"]["fiscal_tipo_enum"]
+          ultimo_secuencial?: number
+        }
+        Relationships: []
       }
       grooming_talla_discrepancias: {
         Row: {
@@ -12594,6 +12822,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "prestador_servicios"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_suscripciones_prestador_servicio_id_fkey"
+            columns: ["prestador_servicio_id"]
+            isOneToOne: false
+            referencedRelation: "v_catalogo_precio_final"
+            referencedColumns: ["prestador_servicio_id"]
           },
           {
             foreignKeyName: "guarderia_suscripciones_tarjeta_id_fkey"
@@ -14920,6 +15155,96 @@ export type Database = {
           },
         ]
       }
+      pagos_desglose_lineas: {
+        Row: {
+          base: number
+          cantidad: number
+          codigo_iva: string
+          created_at: string
+          cuenta_comercial_id: string | null
+          descripcion: string
+          descuento: number
+          id: string
+          linea: number
+          origen_id: string | null
+          origen_tipo: string
+          pago_intento_id: string
+          precio_unitario: number
+          tarifa_pct: number
+          valor_iva: number
+        }
+        Insert: {
+          base: number
+          cantidad?: number
+          codigo_iva: string
+          created_at?: string
+          cuenta_comercial_id?: string | null
+          descripcion: string
+          descuento?: number
+          id?: string
+          linea: number
+          origen_id?: string | null
+          origen_tipo: string
+          pago_intento_id: string
+          precio_unitario: number
+          tarifa_pct: number
+          valor_iva: number
+        }
+        Update: {
+          base?: number
+          cantidad?: number
+          codigo_iva?: string
+          created_at?: string
+          cuenta_comercial_id?: string | null
+          descripcion?: string
+          descuento?: number
+          id?: string
+          linea?: number
+          origen_id?: string | null
+          origen_tipo?: string
+          pago_intento_id?: string
+          precio_unitario?: number
+          tarifa_pct?: number
+          valor_iva?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagos_desglose_lineas_codigo_iva_fkey"
+            columns: ["codigo_iva"]
+            isOneToOne: false
+            referencedRelation: "cat_tasas_impuesto"
+            referencedColumns: ["codigo"]
+          },
+          {
+            foreignKeyName: "pagos_desglose_lineas_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "cuentas_comerciales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pagos_desglose_lineas_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "pagos_desglose_lineas_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_eventos_resumen_cuenta"
+            referencedColumns: ["cuenta_comercial_id"]
+          },
+          {
+            foreignKeyName: "pagos_desglose_lineas_pago_intento_id_fkey"
+            columns: ["pago_intento_id"]
+            isOneToOne: false
+            referencedRelation: "pagos_intentos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pagos_eventos: {
         Row: {
           clave_idempotencia: string
@@ -14977,6 +15302,7 @@ export type Database = {
           codigo_numerico: string | null
           compra_id: string | null
           confirmado_por: string | null
+          costo_riel: number | null
           creado_en: string
           estado: string
           forma: string
@@ -15001,6 +15327,9 @@ export type Database = {
           recurrencia_id: string | null
           recurrencia_periodo: string | null
           referencia_corta: string | null
+          retencion_iva: number | null
+          retencion_renta: number | null
+          retenido_en: string | null
           suscripcion_periodo: string | null
           suscripcion_servicio_id: string | null
           transfer_number: string | null
@@ -15019,6 +15348,7 @@ export type Database = {
           codigo_numerico?: string | null
           compra_id?: string | null
           confirmado_por?: string | null
+          costo_riel?: number | null
           creado_en?: string
           estado?: string
           forma: string
@@ -15043,6 +15373,9 @@ export type Database = {
           recurrencia_id?: string | null
           recurrencia_periodo?: string | null
           referencia_corta?: string | null
+          retencion_iva?: number | null
+          retencion_renta?: number | null
+          retenido_en?: string | null
           suscripcion_periodo?: string | null
           suscripcion_servicio_id?: string | null
           transfer_number?: string | null
@@ -15061,6 +15394,7 @@ export type Database = {
           codigo_numerico?: string | null
           compra_id?: string | null
           confirmado_por?: string | null
+          costo_riel?: number | null
           creado_en?: string
           estado?: string
           forma?: string
@@ -15085,6 +15419,9 @@ export type Database = {
           recurrencia_id?: string | null
           recurrencia_periodo?: string | null
           referencia_corta?: string | null
+          retencion_iva?: number | null
+          retencion_renta?: number | null
+          retenido_en?: string | null
           suscripcion_periodo?: string | null
           suscripcion_servicio_id?: string | null
           transfer_number?: string | null
@@ -16748,6 +17085,13 @@ export type Database = {
             referencedRelation: "prestador_servicios"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "prestador_empleado_servicios_servicio_id_fkey"
+            columns: ["servicio_id"]
+            isOneToOne: false
+            referencedRelation: "v_catalogo_precio_final"
+            referencedColumns: ["prestador_servicio_id"]
+          },
         ]
       }
       prestador_empleados: {
@@ -16979,6 +17323,13 @@ export type Database = {
             referencedRelation: "prestador_servicios"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "prestador_horarios_servicio_id_fkey"
+            columns: ["servicio_id"]
+            isOneToOne: false
+            referencedRelation: "v_catalogo_precio_final"
+            referencedColumns: ["prestador_servicio_id"]
+          },
         ]
       }
       prestador_minimos_aceptados: {
@@ -17080,6 +17431,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "prestador_servicios"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestador_programas_prestador_servicio_id_fkey"
+            columns: ["prestador_servicio_id"]
+            isOneToOne: false
+            referencedRelation: "v_catalogo_precio_final"
+            referencedColumns: ["prestador_servicio_id"]
           },
         ]
       }
@@ -17287,6 +17645,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "prestador_servicios"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestador_servicio_tallas_prestador_servicio_id_fkey"
+            columns: ["prestador_servicio_id"]
+            isOneToOne: false
+            referencedRelation: "v_catalogo_precio_final"
+            referencedColumns: ["prestador_servicio_id"]
           },
         ]
       }
@@ -17971,6 +18336,7 @@ export type Database = {
           precio_referencia: number | null
           presentacion: string
           producto_id: string
+          tarifa_estado: Database["public"]["Enums"]["tarifa_estado_enum"]
           updated_at: string
         }
         Insert: {
@@ -17989,6 +18355,7 @@ export type Database = {
           precio_referencia?: number | null
           presentacion: string
           producto_id: string
+          tarifa_estado?: Database["public"]["Enums"]["tarifa_estado_enum"]
           updated_at?: string
         }
         Update: {
@@ -18007,6 +18374,7 @@ export type Database = {
           precio_referencia?: number | null
           presentacion?: string
           producto_id?: string
+          tarifa_estado?: Database["public"]["Enums"]["tarifa_estado_enum"]
           updated_at?: string
         }
         Relationships: [
@@ -18466,6 +18834,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "prestador_servicios"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "programas_contratados_prestador_servicio_id_fkey"
+            columns: ["prestador_servicio_id"]
+            isOneToOne: false
+            referencedRelation: "v_catalogo_precio_final"
+            referencedColumns: ["prestador_servicio_id"]
           },
           {
             foreignKeyName: "programas_contratados_programa_id_fkey"
@@ -20983,6 +21358,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "suscripciones_servicio_prestador_servicio_id_fkey"
+            columns: ["prestador_servicio_id"]
+            isOneToOne: false
+            referencedRelation: "v_catalogo_precio_final"
+            referencedColumns: ["prestador_servicio_id"]
+          },
+          {
             foreignKeyName: "suscripciones_servicio_tarjeta_id_fkey"
             columns: ["tarjeta_id"]
             isOneToOne: false
@@ -20990,6 +21372,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tarifas_iva_historial: {
+        Row: {
+          cambiado_en: string
+          cambiado_por: string | null
+          codigo: string
+          id: string
+          motivo: string | null
+          operacion: string
+          valor_anterior: Json | null
+          valor_nuevo: Json | null
+        }
+        Insert: {
+          cambiado_en?: string
+          cambiado_por?: string | null
+          codigo: string
+          id?: string
+          motivo?: string | null
+          operacion: string
+          valor_anterior?: Json | null
+          valor_nuevo?: Json | null
+        }
+        Update: {
+          cambiado_en?: string
+          cambiado_por?: string | null
+          codigo?: string
+          id?: string
+          motivo?: string | null
+          operacion?: string
+          valor_anterior?: Json | null
+          valor_nuevo?: Json | null
+        }
+        Relationships: []
       }
       tarjetas_guardadas: {
         Row: {
@@ -21047,6 +21462,66 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      tax_profiles: {
+        Row: {
+          created_at: string
+          direccion: string | null
+          email: string | null
+          es_predeterminado: boolean
+          id: string
+          identificacion: string
+          razon_social: string | null
+          telefono: string | null
+          tipo_identificacion: Database["public"]["Enums"]["tipo_identificacion_enum"]
+          updated_at: string
+          user_id: string | null
+          verificado_en: string | null
+        }
+        Insert: {
+          created_at?: string
+          direccion?: string | null
+          email?: string | null
+          es_predeterminado?: boolean
+          id?: string
+          identificacion: string
+          razon_social?: string | null
+          telefono?: string | null
+          tipo_identificacion: Database["public"]["Enums"]["tipo_identificacion_enum"]
+          updated_at?: string
+          user_id?: string | null
+          verificado_en?: string | null
+        }
+        Update: {
+          created_at?: string
+          direccion?: string | null
+          email?: string | null
+          es_predeterminado?: boolean
+          id?: string
+          identificacion?: string
+          razon_social?: string | null
+          telefono?: string | null
+          tipo_identificacion?: Database["public"]["Enums"]["tipo_identificacion_enum"]
+          updated_at?: string
+          user_id?: string | null
+          verificado_en?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tax_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tax_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_daas_eligible_users"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       test_data_registry: {
         Row: {
@@ -21301,6 +21776,7 @@ export type Database = {
           admite_atencion_local: boolean
           categoria: string
           codigo: string
+          codigo_iva: string
           concurrencia: string
           country_codes: Json | null
           created_at: string
@@ -21318,6 +21794,7 @@ export type Database = {
           requiere_validacion_admin: boolean
           reserva_solo_hoy: boolean
           reservable: boolean
+          tarifa_estado: Database["public"]["Enums"]["tarifa_estado_enum"]
           ventana_cancelacion_minutos: number
         }
         Insert: {
@@ -21325,6 +21802,7 @@ export type Database = {
           admite_atencion_local?: boolean
           categoria: string
           codigo: string
+          codigo_iva: string
           concurrencia?: string
           country_codes?: Json | null
           created_at?: string
@@ -21342,6 +21820,7 @@ export type Database = {
           requiere_validacion_admin?: boolean
           reserva_solo_hoy?: boolean
           reservable?: boolean
+          tarifa_estado?: Database["public"]["Enums"]["tarifa_estado_enum"]
           ventana_cancelacion_minutos?: number
         }
         Update: {
@@ -21349,6 +21828,7 @@ export type Database = {
           admite_atencion_local?: boolean
           categoria?: string
           codigo?: string
+          codigo_iva?: string
           concurrencia?: string
           country_codes?: Json | null
           created_at?: string
@@ -21366,9 +21846,18 @@ export type Database = {
           requiere_validacion_admin?: boolean
           reserva_solo_hoy?: boolean
           reservable?: boolean
+          tarifa_estado?: Database["public"]["Enums"]["tarifa_estado_enum"]
           ventana_cancelacion_minutos?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tipos_servicio_codigo_iva_fkey"
+            columns: ["codigo_iva"]
+            isOneToOne: false
+            referencedRelation: "cat_tasas_impuesto"
+            referencedColumns: ["codigo"]
+          },
+        ]
       }
       transacciones_puntos: {
         Row: {
@@ -22532,6 +23021,190 @@ export type Database = {
       }
     }
     Views: {
+      facturas: {
+        Row: {
+          archivo_url: string | null
+          clave_acceso: string | null
+          country_code: string | null
+          created_at: string | null
+          cuenta_comercial_id: string | null
+          descuento_total: number | null
+          direccion: string | null
+          direccion_emisor: string | null
+          email: string | null
+          emitida_por_tercero: boolean | null
+          estado: string | null
+          fecha_emision: string | null
+          id: string | null
+          identificacion: string | null
+          items: Json | null
+          iva_valor: number | null
+          moneda: string | null
+          numero_factura: string | null
+          pdf_url: string | null
+          pedido_id: string | null
+          razon_social: string | null
+          razon_social_emisor: string | null
+          ruc_emisor: string | null
+          sri_ambiente: string | null
+          sri_error: string | null
+          sri_fecha_autorizacion: string | null
+          sri_numero_autorizacion: string | null
+          subtotal_0: number | null
+          subtotal_12: number | null
+          subtotal_15: number | null
+          suscripcion_id: string | null
+          tipo: string | null
+          tipo_identificacion: string | null
+          total: number | null
+          updated_at: string | null
+          user_id: string | null
+          xml_url: string | null
+        }
+        Insert: {
+          archivo_url?: string | null
+          clave_acceso?: string | null
+          country_code?: string | null
+          created_at?: string | null
+          cuenta_comercial_id?: string | null
+          descuento_total?: number | null
+          direccion?: string | null
+          direccion_emisor?: string | null
+          email?: string | null
+          emitida_por_tercero?: boolean | null
+          estado?: never
+          fecha_emision?: string | null
+          id?: string | null
+          identificacion?: string | null
+          items?: Json | null
+          iva_valor?: number | null
+          moneda?: string | null
+          numero_factura?: string | null
+          pdf_url?: string | null
+          pedido_id?: string | null
+          razon_social?: string | null
+          razon_social_emisor?: string | null
+          ruc_emisor?: string | null
+          sri_ambiente?: string | null
+          sri_error?: string | null
+          sri_fecha_autorizacion?: string | null
+          sri_numero_autorizacion?: string | null
+          subtotal_0?: number | null
+          subtotal_12?: number | null
+          subtotal_15?: number | null
+          suscripcion_id?: string | null
+          tipo?: never
+          tipo_identificacion?: string | null
+          total?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+          xml_url?: string | null
+        }
+        Update: {
+          archivo_url?: string | null
+          clave_acceso?: string | null
+          country_code?: string | null
+          created_at?: string | null
+          cuenta_comercial_id?: string | null
+          descuento_total?: number | null
+          direccion?: string | null
+          direccion_emisor?: string | null
+          email?: string | null
+          emitida_por_tercero?: boolean | null
+          estado?: never
+          fecha_emision?: string | null
+          id?: string | null
+          identificacion?: string | null
+          items?: Json | null
+          iva_valor?: number | null
+          moneda?: string | null
+          numero_factura?: string | null
+          pdf_url?: string | null
+          pedido_id?: string | null
+          razon_social?: string | null
+          razon_social_emisor?: string | null
+          ruc_emisor?: string | null
+          sri_ambiente?: string | null
+          sri_error?: string | null
+          sri_fecha_autorizacion?: string | null
+          sri_numero_autorizacion?: string | null
+          subtotal_0?: number | null
+          subtotal_12?: number | null
+          subtotal_15?: number | null
+          suscripcion_id?: string | null
+          tipo?: never
+          tipo_identificacion?: string | null
+          total?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+          xml_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "facturas_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "cuentas_comerciales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "facturas_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "facturas_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_eventos_resumen_cuenta"
+            referencedColumns: ["cuenta_comercial_id"]
+          },
+          {
+            foreignKeyName: "facturas_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "pedidos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "facturas_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "v_dashboard_logistico"
+            referencedColumns: ["pedido_id"]
+          },
+          {
+            foreignKeyName: "facturas_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "v_pedidos_narrativa"
+            referencedColumns: ["pedido_id"]
+          },
+          {
+            foreignKeyName: "facturas_suscripcion_id_fkey"
+            columns: ["suscripcion_id"]
+            isOneToOne: false
+            referencedRelation: "suscripciones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "facturas_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "facturas_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_daas_eligible_users"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       v_adoptables_publicos: {
         Row: {
           bono_destino: string | null
@@ -22606,6 +23279,49 @@ export type Database = {
             columns: ["especie"]
             isOneToOne: false
             referencedRelation: "cat_especies"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
+      v_catalogo_precio_final: {
+        Row: {
+          activo: boolean | null
+          codigo_iva: string | null
+          mensual_final: number | null
+          mensual_neto: number | null
+          paquete_final: number | null
+          paquete_neto: number | null
+          precio_final: number | null
+          precio_neto: number | null
+          prestador_id: string | null
+          prestador_servicio_id: string | null
+          servicio: string | null
+          tarifa_estado:
+            | Database["public"]["Enums"]["tarifa_estado_enum"]
+            | null
+          tarifa_pct: number | null
+          tipo_servicio: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prestador_servicios_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestador_servicios_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tipos_servicio_codigo_iva_fkey"
+            columns: ["codigo_iva"]
+            isOneToOne: false
+            referencedRelation: "cat_tasas_impuesto"
             referencedColumns: ["codigo"]
           },
         ]
@@ -24026,6 +24742,7 @@ export type Database = {
           absorbe_descuento_default: Database["public"]["Enums"]["quien_absorbe_descuento_enum"]
           es_default: boolean
           fee_config_id: string
+          minimo_por_transaccion: number
           parametros: Json
           tipo_calculo: Database["public"]["Enums"]["tipo_calculo_fee_enum"]
         }[]
@@ -24616,6 +25333,18 @@ export type Database = {
         }
         Returns: Json
       }
+      comision_aplicable: {
+        Args: {
+          p_fecha?: string
+          p_prestador_id: string
+          p_tipo_servicio: string
+        }
+        Returns: Json
+      }
+      comision_efectiva: {
+        Args: { p_base: number; p_minimo: number; p_pct: number }
+        Returns: Json
+      }
       completar_cita_servicio: {
         Args: {
           p_cita_id: string
@@ -24797,6 +25526,15 @@ export type Database = {
         Returns: Json
       }
       convertir_horarios_a_por_servicio: { Args: never; Returns: Json }
+      costo_riel: {
+        Args: {
+          p_fecha?: string
+          p_forma: string
+          p_monto: number
+          p_proveedor: string
+        }
+        Returns: Json
+      }
       cotizar_envio_despensa: {
         Args: {
           p_ciudad_destino?: string
@@ -25345,6 +26083,10 @@ export type Database = {
       escenario_grooming_confirmado_persistente: { Args: never; Returns: Json }
       escenario_grooming_iniciado: { Args: never; Returns: Json }
       escenario_paseo_iniciado: { Args: never; Returns: Json }
+      escribir_lineas_del_intento: {
+        Args: { p_intento_id: string }
+        Returns: Json
+      }
       estado_correo_invitacion: {
         Args: { p_invitacion_id: string }
         Returns: Json
@@ -25407,6 +26149,151 @@ export type Database = {
           p_solicitud_id: string
         }
         Returns: Json
+      }
+      fiscal_admin_cerrar_manual: {
+        Args: {
+          p_autorizado_en?: string
+          p_clave_acceso: string
+          p_documento_id: string
+          p_numero_autorizacion?: string
+        }
+        Returns: Json
+      }
+      fiscal_admin_listar: {
+        Args: { p_desde?: string; p_estado?: string; p_hasta?: string }
+        Returns: {
+          archivo_url: string | null
+          autorizado_en: string | null
+          canonico: Json | null
+          canonico_version: number | null
+          clave_acceso: string | null
+          country_code: string
+          created_at: string
+          cuenta_comercial_id: string | null
+          descuento: number | null
+          direccion: string | null
+          direccion_emisor: string | null
+          documento_referencia_id: string | null
+          email: string | null
+          emitida_por_tercero: boolean
+          establecimiento: string | null
+          estado: Database["public"]["Enums"]["fiscal_estado_enum"]
+          fecha_emision: string
+          id: string
+          identificacion: string | null
+          items: Json
+          iva: number | null
+          moneda: string
+          motivo_rechazo: string | null
+          numero_factura: string | null
+          pago_intento_id: string | null
+          pdf_url: string | null
+          pedido_id: string | null
+          proveedor: string | null
+          punto_emision: string | null
+          razon_social: string | null
+          razon_social_emisor: string | null
+          referencia_proveedor: string | null
+          rol: Database["public"]["Enums"]["fiscal_rol_enum"]
+          ruc_emisor: string | null
+          secuencial: string | null
+          sentido: Database["public"]["Enums"]["fiscal_sentido_enum"]
+          sri_ambiente: string | null
+          sri_error: string | null
+          sri_fecha_autorizacion: string | null
+          sri_numero_autorizacion: string | null
+          subtotal_0: number | null
+          subtotal_12: number | null
+          subtotal_15: number | null
+          suscripcion_id: string | null
+          tax_profile_id: string | null
+          tipo: Database["public"]["Enums"]["fiscal_tipo_enum"]
+          tipo_identificacion: string | null
+          total: number
+          updated_at: string
+          user_id: string | null
+          xml_url: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "documentos_fiscales"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      fiscal_mis_documentos: {
+        Args: never
+        Returns: {
+          clave_acceso: string
+          estado: string
+          estado_visible: string
+          fecha_emision: string
+          id: string
+          moneda: string
+          numero: string
+          tiene_ride: boolean
+          tiene_xml: boolean
+          tipo: string
+          total: number
+        }[]
+      }
+      fiscal_ruta_archivo: {
+        Args: { p_cual: string; p_documento_id: string }
+        Returns: string
+      }
+      fiscal_tax_profile_mio: {
+        Args: never
+        Returns: {
+          created_at: string
+          direccion: string | null
+          email: string | null
+          es_predeterminado: boolean
+          id: string
+          identificacion: string
+          razon_social: string | null
+          telefono: string | null
+          tipo_identificacion: Database["public"]["Enums"]["tipo_identificacion_enum"]
+          updated_at: string
+          user_id: string | null
+          verificado_en: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tax_profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      fiscal_tax_profile_upsert: {
+        Args: {
+          p_direccion?: string
+          p_email?: string
+          p_identificacion: string
+          p_predeterminado?: boolean
+          p_razon_social?: string
+          p_telefono?: string
+          p_tipo_identificacion: string
+        }
+        Returns: {
+          created_at: string
+          direccion: string | null
+          email: string | null
+          es_predeterminado: boolean
+          id: string
+          identificacion: string
+          razon_social: string | null
+          telefono: string | null
+          tipo_identificacion: Database["public"]["Enums"]["tipo_identificacion_enum"]
+          updated_at: string
+          user_id: string | null
+          verificado_en: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tax_profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       generar_avisos_coach: { Args: never; Returns: number }
       generar_eventos_diferidos: {
@@ -26839,6 +27726,16 @@ export type Database = {
         Returns: Json
       }
       pagar_compra_con_saldo: { Args: { p_compra_id: string }; Returns: Json }
+      pagos_aprobados_sin_documento: {
+        Args: { p_desde?: string }
+        Returns: {
+          aprobado_en: string
+          intento_id: string
+          monto: number
+          proveedor: string
+          sujeto: string
+        }[]
+      }
       pagos_aprobados_sin_sujeto_movido: { Args: never; Returns: Json }
       pagos_conciliacion_cobertura: { Args: never; Returns: Json }
       pagos_huerfanos_por_sujeto: {
@@ -26879,6 +27776,10 @@ export type Database = {
         Returns: Json
       }
       poner_pedido_primero: { Args: { p_pedido_id: string }; Returns: Json }
+      precio_final: {
+        Args: { p_codigo_iva: string; p_neto: number }
+        Returns: number
+      }
       preferencia_efectiva: {
         Args: { p_canal: string; p_categoria: string; p_user_id: string }
         Returns: boolean
@@ -27035,6 +27936,10 @@ export type Database = {
       recolectar_urls_legales: { Args: never; Returns: Json }
       reconciliar_inventario_sku: {
         Args: { p_motivo: string; p_sku_id: string }
+        Returns: Json
+      }
+      reconciliar_lineas_con_congelado: {
+        Args: { p_intento_id: string }
         Returns: Json
       }
       recurrencias_vencidas_pendientes: { Args: never; Returns: Json }
@@ -27470,6 +28375,7 @@ export type Database = {
           absorbe_descuento_default: Database["public"]["Enums"]["quien_absorbe_descuento_enum"]
           es_default: boolean
           fee_config_id: string
+          minimo_por_transaccion: number
           parametros: Json
           tipo_calculo: Database["public"]["Enums"]["tipo_calculo_fee_enum"]
         }[]
@@ -27478,7 +28384,15 @@ export type Database = {
         Args: { p_especie: string; p_raza_declarada: string }
         Returns: Json
       }
+      resolver_pago_del_origen: {
+        Args: { p_origen_id: string; p_origen_tipo: string }
+        Returns: string
+      }
       resolver_plantilla_whatsapp: { Args: { p_tipo: string }; Returns: Json }
+      resolver_receptor_fiscal: {
+        Args: { p_monto: number; p_user_id: string }
+        Returns: Json
+      }
       responder_socializacion_paseo: {
         Args: { p_mascota_id: string; p_ok: boolean }
         Returns: Json
@@ -27619,6 +28533,7 @@ export type Database = {
         Args: { p_cuenta_comercial_id: string; p_tipo_actor: string }
         Returns: Json
       }
+      tarifa_servicio_vigente: { Args: { p_fecha?: string }; Returns: Json }
       tengo_aceptado_documento: { Args: { p_codigo: string }; Returns: boolean }
       terminar_atencion_adiestramiento: {
         Args: { p_adiestramiento_id: string }
@@ -27655,6 +28570,19 @@ export type Database = {
       }
       test_sb1_transversales_genericas: { Args: never; Returns: Json }
       tomar_cita: { Args: { p_cita_id: string }; Returns: Json }
+      tomar_secuencial_fiscal: {
+        Args: {
+          p_establecimiento: string
+          p_punto_emision: string
+          p_ruc: string
+          p_tipo: Database["public"]["Enums"]["fiscal_tipo_enum"]
+        }
+        Returns: string
+      }
+      totales_fiscales_del_intento: {
+        Args: { p_intento_id: string }
+        Returns: Json
+      }
       traspasar_mascota_a_familia: {
         Args: {
           p_acta_codigo?: string
@@ -27854,14 +28782,34 @@ export type Database = {
         | "pagado"
         | "en_disputa"
         | "anulada"
+      fiscal_estado_enum:
+        | "borrador"
+        | "esperando_receptor"
+        | "emitiendo"
+        | "autorizada"
+        | "no_autorizada"
+        | "pendiente_manual"
+        | "anulada"
+      fiscal_rol_enum:
+        | "venta_cliente"
+        | "comision_prestador"
+        | "comprobante_proveedor"
+        | "factura_tercero_cliente"
+      fiscal_sentido_enum: "emitido" | "recibido"
+      fiscal_tipo_enum: "factura" | "nota_credito"
       modelo_comercial_enum: "marketplace_fachada" | "reventa_pura" | "mixto"
       quien_absorbe_descuento_enum: "plataforma" | "seller" | "compartido"
+      regimen_tributario_enum:
+        | "general"
+        | "rimpe_emprendedor"
+        | "rimpe_negocio_popular"
       revenue_stream_enum:
         | "transaccional"
         | "recurrente"
         | "eventual"
         | "publicitario"
         | "passthrough"
+      tarifa_estado_enum: "vigente" | "pendiente_ratificacion"
       tipo_actor_enum:
         | "seller_productos"
         | "prestador_servicios"
@@ -27876,6 +28824,7 @@ export type Database = {
         | "escalonado"
         | "passthrough_kushki"
         | "personalizado"
+      tipo_comprobante_enum: "factura_electronica" | "nota_venta" | "ninguno"
       tipo_evento_economico_enum:
         | "pedido_pagado"
         | "cita_pagada"
@@ -27896,6 +28845,11 @@ export type Database = {
         | "persona_natural_obligada"
         | "persona_juridica"
         | "entidad_sin_fines_lucro"
+      tipo_identificacion_enum:
+        | "ruc"
+        | "cedula"
+        | "pasaporte"
+        | "consumidor_final"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -28045,8 +28999,30 @@ export const Constants = {
         "en_disputa",
         "anulada",
       ],
+      fiscal_estado_enum: [
+        "borrador",
+        "esperando_receptor",
+        "emitiendo",
+        "autorizada",
+        "no_autorizada",
+        "pendiente_manual",
+        "anulada",
+      ],
+      fiscal_rol_enum: [
+        "venta_cliente",
+        "comision_prestador",
+        "comprobante_proveedor",
+        "factura_tercero_cliente",
+      ],
+      fiscal_sentido_enum: ["emitido", "recibido"],
+      fiscal_tipo_enum: ["factura", "nota_credito"],
       modelo_comercial_enum: ["marketplace_fachada", "reventa_pura", "mixto"],
       quien_absorbe_descuento_enum: ["plataforma", "seller", "compartido"],
+      regimen_tributario_enum: [
+        "general",
+        "rimpe_emprendedor",
+        "rimpe_negocio_popular",
+      ],
       revenue_stream_enum: [
         "transaccional",
         "recurrente",
@@ -28054,6 +29030,7 @@ export const Constants = {
         "publicitario",
         "passthrough",
       ],
+      tarifa_estado_enum: ["vigente", "pendiente_ratificacion"],
       tipo_actor_enum: [
         "seller_productos",
         "prestador_servicios",
@@ -28070,6 +29047,7 @@ export const Constants = {
         "passthrough_kushki",
         "personalizado",
       ],
+      tipo_comprobante_enum: ["factura_electronica", "nota_venta", "ninguno"],
       tipo_evento_economico_enum: [
         "pedido_pagado",
         "cita_pagada",
@@ -28091,6 +29069,12 @@ export const Constants = {
         "persona_natural_obligada",
         "persona_juridica",
         "entidad_sin_fines_lucro",
+      ],
+      tipo_identificacion_enum: [
+        "ruc",
+        "cedula",
+        "pasaporte",
+        "consumidor_final",
       ],
     },
   },

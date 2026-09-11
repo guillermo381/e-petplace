@@ -1,5 +1,87 @@
 # MODELO_FISCAL.md — e-PetPlace (Ecuador)
 
+> **v0.4 — 10 de septiembre de 2026 (S115, mesa + founder).** Enmiendas fechadas sobre
+> v0.3 tras el relevamiento de A (S115-A), el certificado de RUC de Satori Inov y la
+> verificación de fuentes de la mesa. Donde esta nota contradiga a v0.3, manda esta nota;
+> el texto de v0.3 queda abajo, íntegro, como historia.
+>
+> **E1 — El modelo es dato por cuenta, no ley de la plataforma (§1, §1.2, §3 flujo 3).**
+> Reventa con margen (B2) es el modelo BASE: default de toda cuenta comercial nueva
+> (`modelo_comercial = reventa_pura`). Las cuentas en `marketplace_fachada` operan en
+> AGENCIA: el proveedor factura al cliente, la plataforma captura y valida su clave de
+> acceso, y Satori le factura la comisión mensual con IVA. Al lanzamiento, en fachada
+> quedan las clínicas veterinarias; el resto en reventa. El «flujo 3 — contingencia» deja
+> de ser contingencia: es el modo de arranque de veterinaria. **D-419 (S66) queda
+> ACOTADA** a las cuentas en fachada, no derogada. Razón: la cohorte fuera de las clínicas
+> no va a facturarle a cada familia, y la plata ya entra a nombre de e-PetPlace.
+>
+> **E2 — Régimen de Satori (§1.3, §5, §9 F4).** El RUC 1793240435001 está en **RIMPE
+> Emprendedor** (certificado del 14-ago-2026) con una sola actividad, J631200 (portales
+> web), sin actualización desde la constitución. Bajo RIMPE la renta se calcula sobre
+> ingresos brutos sin deducir costos; con reventa, el bruto es el GMV. Las actividades de
+> comisión, mandato y representación están excluidas del RIMPE, y registrar una actividad
+> excluida pasa al contribuyente al régimen general (renta sobre utilidad, arrastre de
+> pérdidas). **Acción del founder antes de la primera factura real:** actualizar el RUC
+> con las actividades reales — venta por internet, servicios de cuidado de mascotas y
+> comisión/mandato — y registrar medios de contacto. F4 se reformula: desde cuándo rige
+> la exclusión, y qué obligaciones cambian ese día (IVA mensual, ATS).
+>
+> **E3 — La tarifa de veterinaria está en disputa, no solo «pendiente» (§4, §9 F1).** El
+> 0 % se apoya en el oficio NAC-DNJOGEC22-00000003 (may-2022). Con posterioridad, el
+> SRI sostuvo públicamente que los servicios veterinarios gravan la tarifa general y que
+> el 0 % en salud alcanza solo a personas, con reclasificación retroactiva denunciada por
+> el gremio (2022–2023). **F1 pasa a ser: «¿qué tarifa rige HOY para servicios
+> veterinarios, con referencia normativa vigente?»** Hasta respuesta escrita, la tarifa
+> vet es dato con `tarifa_estado = pendiente_ratificacion`. Si resulta 15 %, la reventa
+> de vet es neutra en IVA y las clínicas siguen en fachada por lo regulatorio y la
+> responsabilidad profesional, no por el IVA; si resulta 0 %, rige v0.3 tal como está.
+>
+> **E4 — La retención del 2 % (§5).** Es la misma plata en todos los modelos: cae sobre
+> lo cobrado con tarjeta a nombre de e-PetPlace. Lo que cambia con reventa es la
+> coherencia contable, no la caja. Se tacha «el descuadre estructural de v0.1 desaparece».
+>
+> **E5 — Un solo libro fiscal (§8).** `documentos_fiscales` nace de la tabla `facturas`
+> existente, con `direccion` (emitido | recibido) y `rol` (venta_cliente ·
+> comision_prestador · comprobante_proveedor · factura_tercero_cliente) como dato.
+> `comprobantes_proveedor` no es tabla aparte: es `rol = comprobante_proveedor`. La
+> compuerta del payout (§1.3, §2) se sostiene igual. Los datos del emisor (razón social,
+> RUC, dirección matriz, establecimiento 001, punto de emisión 002, obligado a
+> contabilidad, leyenda de régimen) son DATO, nunca constantes.
+>
+> **E6 — Nombres.** Donde v0.3 dice «Kushki», léase «la pasarela»: los rieles vivos son
+> Nuvei/Paymentez y DeUna, certificados el 1-sep-2026. Donde dice «React + Ionic», léase
+> React Native / Expo con OTA. El disparador de la factura es `aplicar_evento_de_pago`
+> sobre `pagos_intentos`, punto único de los dos rieles (medido en S115-A).
+
+> **E7 (10-sep-2026, S115-A) — QUÉ PAPEL RESPALDA CADA PAGO AL PRESTADOR.** Firma del
+> founder sobre la compuerta de liquidación. *Una liquidación no pasa a `pagado` sin el
+> comprobante del período, y cuál es el comprobante DEPENDE DEL MODELO.*
+>
+> **En REVENTA** —Satori compra y revende— el prestador le factura **a Satori**. El papel
+> es su **`recibido · comprobante_proveedor`**, y su total tiene que cuadrar con el neto
+> a pagar.
+>
+> **En AGENCIA** la clínica **no le vende nada a Satori**: le vendió a la familia. Su
+> factura a Satori no existe y no va a existir — pedirla bloquearía el pago para siempre.
+> Lo que respalda esa plata son **DOS papeles, y su resta**:
+> 1. **`recibido · factura_tercero_cliente`** — la factura que la clínica le emitió a la
+>    familia, **con su clave de acceso validada contra el SRI** (no basta que alguien la
+>    marque autorizada: tiene que traer su número de autorización).
+> 2. **`emitido · comision_prestador`** — la comisión que Satori le facturó a la clínica.
+>
+> ⇒ **`Σ factura_tercero_cliente − Σ comision_prestador = monto_neto_a_pagar`.**
+> *No es una convención elegida: es la identidad contable de la agencia — la familia pagó
+> el bruto, Satori se quedó con su comisión, y lo que queda es del tercero.* Si los dos
+> papeles están y la resta no da, algo se cobró o se facturó mal, y es exactamente el
+> momento de verlo: antes de girar.
+>
+> **No hay override, en ningún modelo.** Si algún día hay que pagar sin papel, que se vea.
+>
+> Cierra un circuito que ya estaba construido y no se tocaban las puntas: la fila
+> `recibido · pendiente_manual` **ya nace** cuando el pago aprueba (outbox fiscal, E1), y
+> **`fiscal-validar-clave` ya la valida** contra el web service. Lo que faltaba era que
+> alguien exigiera las dos cosas antes de girar la plata.
+
 > **v0.3 — 9 de septiembre de 2026.** v0.2 + Anexo A (credenciales y encendido de la emisión automática, a pedido del founder). v0.2 reescribió el documento tras la decisión del founder (S-fiscal): *"si es la mejor opción, que sea Satori quien facture todo — hay que aceptarlo"*. Esta versión recomienda y desarrolla ese modelo. **Pendiente de ratificación por el contador** — las preguntas abiertas quedaron en cuatro (§9), una de ellas bloqueante para veterinaria.
 > Contexto que fija esta versión: **cero compras reales hasta hoy**; la app sale a producción el **1 de octubre de 2026** con **servicios (paseo, grooming, vet) y despensa**; **todo el cobro entra por e-PetPlace**, que captura el importe total del cliente.
 > v0.1 (misma fecha) desarrollaba el modelo de intermediación pura; queda superada por decisión expresa, no por error: el founder aclaró que el `MODELO_FINANCIERO.md` se escribió sin esta letra fiscal.
@@ -138,7 +220,7 @@ Reglas de diseño:
 
 | Quién | Qué pasa | Efecto en e-PetPlace |
 |---|---|---|
-| Emisoras de tarjeta (vía Kushki) | **2% de renta** sobre pagos al establecimiento afiliado (Res. NAC-DGERCGC26-00000009, mar-2026) + retención de IVA cuando aplica; Kushki lo descuenta de la liquidación de fondos | Ahora cae sobre ingreso que **sí es de Satori** — el descuadre estructural de v0.1 desaparece. Queda el efecto de margen delgado: 2% del bruto puede superar el impuesto sobre la utilidad → crédito acumulado, recuperable por reclamo de pago en exceso. Presupuestarlo como capital de trabajo (**F4**, dimensionarlo) |
+| Emisoras de tarjeta (vía Kushki) | **2% de renta** sobre pagos al establecimiento afiliado (Res. NAC-DGERCGC26-00000009, mar-2026) + retención de IVA cuando aplica; Kushki lo descuenta de la liquidación de fondos | Ahora cae sobre ingreso que **sí es de Satori** — ~~el descuadre estructural de v0.1 desaparece~~ **[tachado por v0.4 · E4: es la misma plata en todos los modelos — cae sobre lo cobrado con tarjeta a nombre de e-PetPlace; lo que cambia con reventa es la coherencia contable, no la caja]**. Queda el efecto de margen delgado: 2% del bruto puede superar el impuesto sobre la utilidad → crédito acumulado, recuperable por reclamo de pago en exceso. Presupuestarlo como capital de trabajo (**F4**, dimensionarlo) |
 | Satori hoy | No retiene | Payouts sin retención: liquidaciones simples |
 | Satori como contribuyente especial (probable a futuro por volumen de brutos) | Deberá retener renta e IVA en sus compras — incluidas las facturas de los proveedores | El motor de retenciones (modelo financiero §6.1, hoy TODO) pasa a "diseñado y apagado": campos listos, se enciende con la designación |
 | Proveedores agentes de retención (clínicas grandes) | Retendrían sobre facturas que Satori les emita | En B2 casi no existen facturas de Satori a proveedores (no hay factura de comisión) — efecto mínimo; solo aplicaría en la contingencia veterinaria |
