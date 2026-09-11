@@ -32559,3 +32559,47 @@ vivo se lee al usarlo) y de `L-158` (una fila de hipótesis nombra el trabajo,
 jamás el componente como hecho), pero más peligrosa que las dos: **acá el que
 escribe la hipótesis y el que la firma son la misma persona, en el mismo
 minuto.**
+
+---
+
+### `D-1064` 🟡 · EL WEBHOOK DE FACTUPLAN NO ENTREGA EN PRUEBAS — con nuestro lado eliminado como causa
+
+**Medido el 10-11 sep 2026.** El founder disparó el botón de envío de prueba
+del panel **tres veces**. `fiscal_webhook_eventos`: **cero filas**, las tres.
+
+**Lo que está ELIMINADO como causa, y por qué no hay que volver a medirlo:**
+
+| | cómo se probó |
+|---|---|
+| La compuerta de Supabase | `verify_jwt = false` declarado; un POST **sin `Authorization`** entra y recibe **nuestro** 401 con nuestro vocabulario (antes era `UNAUTHORIZED_NO_AUTH_HEADER`) |
+| Nuestro escritor | **control corrido**: POST externo → fila escrita con su veredicto. *Un cero sin su control no dice nada; éste lo tiene* |
+| El guard de firma | rojo probado: sin firma · firma basura · `t` vencido → 401 con tres motivos distintos |
+| El secreto cargado | la respuesta es `firma_no_coincide`, **no** `sin_secreto_de_webhook` ⇒ está cargado y se está leyendo (medido sin imprimirlo) |
+| `GET → 500` | era real y **era mío** (el espejo `new Request` lanza con GET); curado y verificado. **No era la causa**: se curó antes del segundo disparo y siguió sin llegar |
+| Webhook desactivado | descartado por el founder: **activo**, URL exacta, once eventos suscritos |
+
+**Lo que NO se pudo medir, y es la razón de la ficha:** el panel **no tiene
+historial de entregas**. No hay código de respuesta, ni intentos, ni nada.
+*Esa ausencia es el hallazgo: el botón de prueba no sirve como instrumento —
+no se puede distinguir «despachó y no llegó» de «nunca despachó».*
+
+**Hipótesis viva, marcada como tal (`L-541`):** el disparo de prueba podría
+exigir un comprobante real, y por lo tanto un contribuyente válido. **Lo que la
+sostiene es el TIPO, no la prosa**: en el SDK el cuerpo de todo evento es
+`WebhookReceiptData` —`receiptId`, `accessKey`, `authorizationNumber`,
+`documentNumber`, `total`, `customerName`, `customerIdentification`— y **no
+existe ninguna variante de ping o test en ningún tipo**. *Un evento de prueba
+tendría que fabricar ocho campos de un documento que no hay.* La doc no
+menciona el botón, así que no hay letra que consultar.
+
+**Disparo: el primer comprobante real, con Satori Inov dada de alta.** Ese
+evento confirma o desmiente la hipótesis y de paso entrega las cuatro
+mediciones pendientes (coincidencia del secreto · nombre y forma real del
+evento · si el `t` viene en segundos · cuánto tarda la tanda) **más los nombres
+de los once eventos**, que el adaptador ahora aprende solo: lo que no entra en
+ninguna clase se anota con su nombre literal en vez de caer a un default.
+
+**Lo que NO hay que hacer mañana:** volver a apretar el botón. Tres veces con
+cero rastro y sin instrumento del otro lado no produce información nueva.
+**Dueño:** A. **No bloquea nada hoy** — la emisión ya espera al contribuyente
+por otra razón.
