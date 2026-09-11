@@ -148,6 +148,45 @@ export interface TresNumeros {
   fechaVigencia: string;
 }
 
+
+/**
+ * El día en que un precio configurado HOY va a empezar a regir.
+ *
+ * 🔴 NACIÓ PORQUE UNA FECHA EN LA PANTALLA ES PLATA. `tresNumerosDelPrestador`
+ *    tiene razón en exigir la fecha —pide la comisión del día en que el precio
+ *    VA A REGIR, no la de hoy— y la pantalla tiene razón en no inventarla:
+ *    `'2026-10-01'` escrito en un bundle es una fecha de plata que no se
+ *    corrige el día que la apertura se mueve. Sale de `app_config`.
+ *
+ * `max(hoy, apertura)`: antes de abrir, lo que se configura rige desde la
+ * apertura; después, desde hoy. Las dos son ISO, así que comparar texto es
+ * comparar fechas.
+ *
+ * 🔴 FAIL-CLOSED: sin la fila NO cae a hoy. *Caer a hoy daría la comisión
+ *    vigente ahora para un precio que se va a cobrar en octubre, y el número
+ *    equivocado se vería perfectamente normal.*
+ */
+export async function fechaDeVigenciaPorDefecto(): Promise<ResultadoWrapper<string>> {
+  const { data, error } = await getClient()
+    .from('app_config').select('valor').eq('clave', 'fecha_apertura_comercial').maybeSingle();
+  if (error) return fallo('no_se_pudo', 'No pudimos leer la fecha de apertura.');
+  const apertura = data?.valor;
+  if (!apertura || !/^\d{4}-\d{2}-\d{2}$/.test(apertura)) {
+    return fallo('sin_configuracion', 'No hay fecha de apertura configurada.');
+  }
+  /* El «hoy» del negocio es el de Guayaquil, que es donde se opera — el mismo
+     criterio con el que la casa fecha un comprobante. Si el aparato no soporta
+     zonas en `Intl`, cae a su fecha local: se diferencia como mucho en un día
+     y sólo alrededor de la medianoche, y se declara acá en vez de esconderse. */
+  let hoy: string;
+  try {
+    hoy = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Guayaquil' }).format(new Date());
+  } catch {
+    hoy = new Date().toISOString().slice(0, 10);
+  }
+  return { ok: true, data: hoy > apertura ? hoy : apertura };
+}
+
 /**
  * Los tres números, para la FECHA en que el precio va a regir.
  *
@@ -161,11 +200,24 @@ export interface TresNumeros {
  * descontado). Migrá a ésta al tocar cada taller.
  */
 export async function tresNumerosDelPrestador(args: {
-  prestadorId: string; tipoServicio: string; precioNeto: number; fechaVigencia: string;
+  prestadorId: string; tipoServicio: string; precioNeto: number;
+  /**
+   * OPCIONAL desde S115-A (firma del founder). Sin ella, la puerta la resuelve
+   * con `fechaDeVigenciaPorDefecto()`. **La pantalla no conoce ninguna fecha** —
+   * y no debe: una fecha escrita en una pantalla es una fecha de plata dentro
+   * de un bundle.
+   */
+  fechaVigencia?: string;
 }): Promise<ResultadoWrapper<TresNumeros>> {
+  let fecha = args.fechaVigencia;
+  if (!fecha) {
+    const f = await fechaDeVigenciaPorDefecto();
+    if (!f.ok) return f;
+    fecha = f.data;
+  }
   const c = await comisionAplicable({
     prestadorId: args.prestadorId, tipoServicio: args.tipoServicio,
-    fechaVigencia: args.fechaVigencia,
+    fechaVigencia: fecha,
   });
   if (!c.ok) return c;
 

@@ -2027,6 +2027,7 @@ export {
   guardarTaxProfile as fiscalGuardarTaxProfile,
   adminListar as fiscalAdminListar,
   adminCerrarManual as fiscalAdminCerrarManual,
+  fiscalTopeConsumidorFinal,
 } from './wrappers/fiscal';
 export type {
   DocumentoFiscalMio, TaxProfile, EstadoVisibleFiscal, CodigoFiscal,
@@ -2038,5 +2039,5 @@ export {
 export type {
   TarifaServicio, ComisionAplicable, CodigoEconomico,
 } from './wrappers/economico';
-export { tresNumerosDelPrestador, configuracionPago } from './wrappers/economico';
+export { tresNumerosDelPrestador, configuracionPago, fechaDeVigenciaPorDefecto } from './wrappers/economico';
 export type { TresNumeros, ConfiguracionPago } from './wrappers/economico';

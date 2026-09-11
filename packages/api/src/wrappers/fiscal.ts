@@ -206,3 +206,36 @@ export async function adminCerrarManual(args: {
   const f = (data ?? {}) as Record<string, unknown>;
   return { ok: true, data: { documentoId: String(f.documento_id ?? args.documentoId), contraSri: false } };
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// EL TOPE DEL CONSUMIDOR FINAL — el umbral que decide si hay que pedir datos
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * El monto a partir del cual el SRI exige identificar al comprador.
+ *
+ * 🔴 EXISTÍA Y NO SE PODÍA LEER, que no es lo mismo que faltar. La fila
+ *    `fiscal_tope_consumidor_final` vive en `app_config` desde la tanda 1 y el
+ *    motor la usa —`resolver_receptor_fiscal` es su ÚNICO lector, así que el
+ *    valor **no está en dos lugares**—; lo que faltaba era su puerta y su
+ *    bandera `es_publico`. *Una policy por bandera no contesta «no tenés
+ *    permiso»: contesta «no hay», y desde el otro lado las dos se leen igual.*
+ *
+ * 🔴 FAIL-CLOSED Y HABLADO: sin el valor NO se devuelve un default. Un tope
+ *    inventado decide, en cada compra, si a alguien se le piden sus datos o
+ *    no — de más es fricción inútil; de menos es un comprobante que el SRI
+ *    puede observar. La pantalla muestra su estado de fallo; no adivina.
+ */
+export async function fiscalTopeConsumidorFinal(): Promise<ResultadoWrapper<number>> {
+  const { data, error } = await getClient()
+    .from('app_config').select('valor').eq('clave', 'fiscal_tope_consumidor_final').maybeSingle();
+  if (error) {
+    return { ok: false, codigo: 'no_se_pudo', mensaje: 'No pudimos leer la configuración de facturación.' };
+  }
+  const n = Number(data?.valor);
+  if (!data || !Number.isFinite(n) || n <= 0) {
+    return { ok: false, codigo: 'sin_configuracion',
+             mensaje: 'No hay tope de consumidor final configurado.' };
+  }
+  return { ok: true, data: n };
+}

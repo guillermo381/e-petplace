@@ -32415,3 +32415,29 @@ que puede divergir de la primera sin que nada lo note.*
 ⇒ **Antes de eximir un guard se pregunta cuánto de lo que vigila sigue siendo
 propio.** La respuesta casi nunca es «todo» ni «nada», y el punto medio es
 justo donde vive el defecto que la exención total dejaría entrar.
+
+---
+
+### `D-1063` 🟢 · UN SOLO PERFIL DE FACTURACIÓN POR PERSONA — firmado así, listar varios queda para después
+
+**Firma del founder, 10-sep-2026:** `fiscalObtenerTaxProfile()` devuelve **uno**
+y así queda; «Cambiar» **sobrescribe**. Medido: el wrapper ya tiene esa forma
+(`ResultadoWrapper<TaxProfile | null>`) y la RPC `fiscal_tax_profile_mio`
+también — **no hay nada construido de más ni de menos**.
+
+**Por qué es ficha y no un pendiente:** el caso real existe —una persona que
+factura a veces a su nombre y a veces al de su empresa, o una familia donde dos
+adultos facturan distinto— y **hoy pierde el dato anterior al sobrescribir**.
+No es un defecto: es un alcance elegido. *Lo que lo vuelve barato hoy y caro
+después es el dato: mientras haya un perfil por persona, ampliar a N es agregar
+una fila y un selector; con miles de perfiles sobrescritos, el histórico que se
+perdió no vuelve.*
+
+**Lo que NO hay que hacer mientras tanto:** guardar el perfil viejo «por las
+dudas» en otra columna. Sería un segundo lugar para el mismo dato sin nadie que
+lo lea — la clase que esta casa ya pagó tres veces.
+
+**Disparo:** el primer pedido real de una persona que factura a dos
+identidades, o la primera vez que operaciones tenga que reconstruir a quién se
+le facturó antes de un cambio. **Dueño:** A (motor + puerta) · C (el selector).
+**No frena octubre.**
