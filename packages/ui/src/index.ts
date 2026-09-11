@@ -1516,3 +1516,10 @@ export {
 // CampoClaveAcceso — 49 dígitos para PEGAR, agrupados de a cuatro como en el
 // papel. No son 49 cajitas: la forma se elige por el número, no se hereda.
 export { CampoClaveAcceso, type CampoClaveAccesoProps } from './components/CampoClaveAcceso'
+
+// esCorreoValido — S115-B · LA validación de correo de la casa, una sola.
+// Su caso fundante es real: `karina charry@gmail.com` (S105) entró con un
+// espacio y murió en una cola que nadie leía. Había TRES regex sueltos en el
+// prestador y ninguno acá. Se exporta porque quien use `CampoIdentificacion`
+// con `sinCorreo` tiene que validar con la MISMA función.
+export { esCorreoValido } from './components/correo'

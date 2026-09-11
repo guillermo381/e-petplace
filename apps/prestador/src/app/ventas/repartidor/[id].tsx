@@ -77,7 +77,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { Image, ScrollView, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
+import { esCorreoValido,
   Boton,
   Campo,
   Celda,
@@ -304,7 +304,7 @@ export default function FichaRepartidor() {
     // Piso honesto, no una validación de RFC: hay algo, un @ en el medio y
     // un punto después. Rechazar direcciones raras pero válidas sería peor
     // que aceptar una mal tipeada — el motor normaliza y el vendedor mira.
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    return esCorreoValido(v);
   }, [correo]);
 
   /** QUÉ FALTA — en el orden en que se lee la pantalla, para que el aviso

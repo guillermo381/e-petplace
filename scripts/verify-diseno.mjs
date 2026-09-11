@@ -2366,6 +2366,13 @@ const FIXTURES = {
       src: "await rpc('cobrar', { p_monto: formatearPrecio(total) })\n",
     })),
   ],
+  /* R90 · un regex de correo suelto: el que dejó pasar «karina charry@…». */
+  R90: [
+    ...Array.from({ length: 6 }, (_, i) => ({
+      path: `apps/prestador/src/app/relleno${i}.tsx`,
+      src: "const ok = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(v)\n",
+    })),
+  ],
   /* R85 · la voz suelta en el JSX, sin pasar por el riel: el typecheck la
      deja pasar porque es un string perfectamente válido. */
   R85: [{
@@ -8491,7 +8498,62 @@ function r89(archivos) {
   }
 }
 
-const REGLAS = { R89: r89, R88: r88, R87: r87, R86: r86, R85: r85, R84: r84, R83: r83, R82: r82, R81: r81, R80: r80, R79: r79, R78: r78, R77: r77, R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+
+/** R90 · EL CORREO SE VALIDA EN UN SOLO LUGAR (S115-B · pedido de C).
+ *
+ *  🔴 SU CASO FUNDANTE ES REAL Y TIENE FECHA: **`karina charry@gmail.com`**
+ *  entró en S105 con un espacio en el medio —el validador de entonces sólo
+ *  buscaba una `@`— y **murió veinte minutos después en una cola que nadie
+ *  leía**. *Un validador que sólo busca `@` no valida un correo: confirma que
+ *  alguien escribió una arroba.*
+ *
+ *  QUÉ MIDE: que **no nazca un cuarto regex**. Había TRES sueltos en el
+ *  prestador —dos coincidían **por copia**, la forma más frágil de coincidir—
+ *  y ninguno en `packages/ui`. Los tres migraron a `esCorreoValido`.
+ *
+ *  ⚠️ **Atada a la FORMA y no al VALOR (`L-534`):** no mide *cuál* es el regex
+ *  —eso puede cambiar y de hecho cambió, ganó el más estricto de los tres—
+ *  sino que **haya UNA sola fuente**. *Si midiera el regex exacto, afinarlo
+ *  una vez la dejaría midiendo lo contrario de lo vigente.*
+ *
+ *  Lo que NO mide, declarado: que el buzón exista. Ningún regex puede; eso lo
+ *  prueba un envío que no rebota. */
+function r90(archivos) {
+  /* Un regex es «de correo» si tiene una `@` literal dentro de una clase o
+     fuera: alcanza para los cuatro que vivían en la casa, y no marca los de
+     otras cosas. */
+  const RE_REGEX_CORREO = /\/\^?\[?\^?[^/\n]*@[^/\n]*\/(?:[gimsuy]*)\s*\.?\s*test\(|new RegExp\([^)]*@[^)]*\)/
+  const vistos = new Set()
+  const ofensores = []
+  for (const { path, src } of archivos) {
+    if (vistos.has(path)) continue
+    vistos.add(path)
+    if (/components\/correo\.ts$/.test(path)) continue // el que la define
+    const limpio = sinComentarios(src ?? '')
+    for (const m of limpio.matchAll(new RegExp(RE_REGEX_CORREO.source, 'g'))) {
+      ofensores.push(`${path}:${lineaDe(limpio, m.index)}`)
+    }
+  }
+  const fallos = [...ancla('R90', vistos.size, 100, 'archivo(s) en el corpus')]
+  if (fallos.length > 0) return { fallos, info: 'corpus incompleto' }
+
+  for (const o of ofensores) {
+    fallos.push(
+      `R90 **un regex de correo suelto en \`${o}\`.** La validación de la casa es UNA: ` +
+      `\`esCorreoValido\` de \`@epetplace/ui\`. Había tres sueltos y el de S105 dejó pasar ` +
+      `\`karina charry@gmail.com\` — un espacio que mató el correo en una cola que nadie leía.`,
+    )
+  }
+  return {
+    fallos,
+    info:
+      `${ofensores.length} regex de correo suelto(s) · DURA EN 0 (nació con los 3 ya migrados) · ` +
+      `alcance: ${vistos.size} archivo(s) · atada a la FORMA («una sola fuente»), no al valor del regex (L-534) · ` +
+      `su verde dice «no hay un cuarto regex», JAMÁS «el correo existe» ni «la validación es la correcta»`,
+  }
+}
+
+const REGLAS = { R90: r90, R89: r89, R88: r88, R87: r87, R86: r86, R85: r85, R84: r84, R83: r83, R82: r82, R81: r81, R80: r80, R79: r79, R78: r78, R77: r77, R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -8972,6 +9034,7 @@ corridas.push(['R87 (el formato de la plata es uno solo)', r87([...apps, ...apps
    el parseo a mano vivía en las dos casas (`SliderPrecio` era uno de ellos). */
 corridas.push(['R88 (la plata no se parsea a mano)', r88([...apps, ...appsCodigo, ...uiCodigo])])
 corridas.push(['R89 (un monto formateado no viaja a un payload)', r89([...apps, ...appsCodigo, ...uiCodigo])])
+corridas.push(['R90 (el correo se valida en un solo lugar)', r90([...apps, ...appsCodigo, ...uiCodigo])])
 corridas.push(['R71 (un wrapper sin exportar es un motor sin puerta)', r71(leer(['packages/api/src/index.ts', ...archivosCodigo('packages/api/src/wrappers')]))])
 corridas.push(['R69 (nada absoluto despues de SuperficieLlamada)', r69([...apps, ...appsCodigo])]);
 corridas.push(['R68 (nada del componente dentro de un worklet de gesto)', r68([...ui, ...apps, ...appsCodigo, ...leer(archivosCodigo('packages/ui/src'))])]);

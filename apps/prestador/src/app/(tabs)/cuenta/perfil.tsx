@@ -50,7 +50,7 @@ import { useCallback, useRef, useState } from 'react';
 import { Image, Pressable, ScrollView, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
+import { esCorreoValido,
   Boton,
   Campo,
   Celda,
@@ -786,7 +786,7 @@ export default function PerfilV2() {
        exactamente para lo que sirve. */
     const crudo = v.trim();
     if (crudo.length === 0) return null;
-    const ok = /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/.test(crudo);
+    const ok = esCorreoValido(crudo);
     return { ok, voz: ok ? t('perfilNegocio.correoOk') : t('perfilNegocio.correoMal') };
   }
   /** Normaliza el sitio: sin esquema le pone `https://`. `www.` es

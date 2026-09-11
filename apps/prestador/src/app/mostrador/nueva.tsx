@@ -21,7 +21,7 @@ import { useEffect, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
+import { esCorreoValido,
   Boton,
   Campo,
   Encabezado,
@@ -66,7 +66,8 @@ function esEspecieUi(codigo: string): codigo is AvatarMascotaEspecie {
   return (CODIGOS_ESPECIE_UI as readonly string[]).includes(codigo);
 }
 
-const RE_EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+/* ⏪ S115-B · el regex propio murió: la validación de correo es UNA para toda
+   la casa (`esCorreoValido`). Eran TRES sueltos y dos coincidían por copia. */
 
 export default function AltaMostrador() {
   const router = useRouter();
@@ -82,7 +83,7 @@ export default function AltaMostrador() {
 
   // Pre-llenado desde M2: '@' → email · dígitos → teléfono · resto → mascota.
   const qTrim = q.trim();
-  const qEsEmail = RE_EMAIL.test(qTrim);
+  const qEsEmail = esCorreoValido(qTrim);
   const qEsTel = !qEsEmail && /^[+\d][\d\s()+-]{4,}$/.test(qTrim);
   const [nombreMascota, setNombreMascota] = useState(qEsEmail || qEsTel ? '' : q);
   const [especie, setEspecie] = useState<AvatarMascotaEspecie | undefined>(undefined);
@@ -133,7 +134,7 @@ export default function AltaMostrador() {
     };
   }, []);
 
-  const emailValido = RE_EMAIL.test(email.trim());
+  const emailValido = esCorreoValido(email.trim());
   const telValido = telefono.trim().length >= 5;
   const contactoValido = contacto === 'email' ? emailValido : telValido;
   const puedeGuardar =

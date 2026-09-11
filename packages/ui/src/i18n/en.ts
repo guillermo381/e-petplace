@@ -233,6 +233,7 @@ export const uiEn = {
     email: 'Email',
     emailFormato: 'you@email.com',
     emailAyuda: "That's where your invoice arrives",
+    emailInvalido: 'Check the email: make sure it has no spaces',
   },
   facturacion: {
     titulo: 'Invoice details',

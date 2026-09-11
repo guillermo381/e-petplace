@@ -10057,6 +10057,13 @@ function BloqueFiscalS115() {
     direccion: 'Av. Portugal E11-20',
     email: 'facturacion@shyris.ec',
   })
+  const [conCorreoMalo, setConCorreoMalo] = useState<DatosIdentificacion>({
+    tipo: 'cedula',
+    identificacion: '1712345675',
+    razonSocial: '',
+    direccion: 'Av. Shyris N34-120',
+    email: 'karina charry@gmail.com',
+  })
   const [modo, setModo] = useState<ModoFacturacion>('consumidorFinal')
   const [modoTope, setModoTope] = useState<ModoFacturacion>('misDatos')
   const [guardar, setGuardar] = useState(true)
@@ -10082,6 +10089,14 @@ function BloqueFiscalS115() {
       <View style={{ gap: spacing[3] }}>
         {rotulo('· RUC · aparece «Razon social», que con cedula ni se dibuja')}
         <CampoIdentificacion valor={conRuc} onCambiar={setConRuc} />
+      </View>
+      <View style={{ gap: spacing[3] }}>
+        {rotulo('· sinCorreo (pedido de C) · la pantalla pregunta el correo ARRIBA y siempre, porque quien paga como consumidor final tambien necesita comprobante')}
+        <CampoIdentificacion valor={ok} onCambiar={setOk} sinCorreo />
+      </View>
+      <View style={{ gap: spacing[3] }}>
+        {rotulo('· correo INVALIDO · el caso real de S105: «karina charry@gmail.com» entro con un espacio y murio en una cola que nadie leia')}
+        <CampoIdentificacion valor={conCorreoMalo} onCambiar={setConCorreoMalo} />
       </View>
 
       {/* (2) EL SELECTOR - bajo el tope y por encima */}
