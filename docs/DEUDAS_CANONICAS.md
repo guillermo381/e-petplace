@@ -31981,3 +31981,437 @@ decidir.
 
 **☠️ Condición de muerte:** ninguna — es de método. Su recordatorio útil es que
 la escribió A el mismo día que la rompió.
+
+---
+
+### `D-1059` 🔴 · 218 objetos de `public` con grant de ESCRITURA para `anon` — y el número que decide no es 218, es 1
+
+**Abierta:** S115-A, 10-sep-2026. **Dueño:** A (pasada propia de seguridad).
+**Alcance:** los grants heredados de `anon` sobre `public`, INSERT/UPDATE/DELETE.
+**NO es de una tanda fiscal** — va **ANTES de producción**, en su propia pasada.
+
+#### Lo medido (10-sep-2026, comandos abajo)
+
+| Qué | Número |
+|---|---|
+| Objetos distintos con INSERT/UPDATE/DELETE para `anon` | **218** |
+| Grants (3 privilegios × objeto) | **651** |
+| De ésos, con RLS activa | **206** |
+| De ésos, VISTAS sin RLS | **12** — las doce con `security_invoker` ON y **`is_updatable = NO`** |
+| **Tablas con una policy de escritura que ALCANZA a `anon`** | **5** |
+| **Tablas donde `anon` ESCRIBE de verdad (probado)** | **1** |
+
+**El número grande describe la herencia; el número chico es el trabajo.** Es la misma
+forma que `D-686` en S92: *861 grants sobre 217 tablas parecía inabarcable, y el trabajo
+real eran cuatro tablas.*
+
+#### Las cinco con policy que alcanza a `anon`, y por qué cuatro no muerden
+
+Las cinco tienen policies declaradas `TO public` —y `public` incluye a `anon`—, pero
+**cuatro gatean por `auth.uid()`**, que sin sesión es `NULL`:
+`profiles` (INSERT/UPDATE `auth.uid() = id`) · `solicitudes_adopcion`
+(`auth.uid() = user_id`) · `evento_cita_servicio` (UPDATE por prestador del `auth.uid()`)
+· `prestador_empleado_servicios` (INSERT/DELETE por el mismo camino).
+*Aciertan por cómo SQL trata los nulos, no por diseño* (`L-424`) — y eso es
+exactamente lo que las vuelve frágiles: **el día que alguien agregue un `OR` a
+cualquiera de esas cuatro, el grant ya está puesto.** No son un agujero: son defensa en
+profundidad ausente.
+
+#### 🔴 La que SÍ muerde, y no es lectura de predicado: es un INSERT que pasó
+
+`donaciones · INSERT · TO public · WITH CHECK ((auth.uid() = user_id) OR (user_id IS NULL))`
+
+La segunda rama **no mira la sesión**. Probado por camino real, **con `SET LOCAL ROLE anon`
+dentro de una transacción con `ROLLBACK`** (residuo verificado en 0; la tabla tiene 0 filas
+antes y después):
+
+```
+anon_inserta_donacion → PASO — anon escribió la fila ca618ccf-…
+```
+
+⇒ **cualquiera con la anon key —que viaja en el bundle y es pública— puede escribir filas
+en `donaciones` sin cuenta.** *Que una policy exista no prueba que niegue; lo prueba
+verla negar* (`L-321`).
+
+**✅ CERRADA POR FIRMA DEL FOUNDER (10-sep-2026) — migración `20260912520000`.**
+El `OR` sale de las **DOS** policies (el censo encontró que el SELECT tenía el mismo
+defecto: `anon` también podía LEER). *No dejaba pasar donaciones anónimas: dejaba pasar
+cualquier fila sin dueño.* Si el producto necesita donar sin cuenta, se resuelve con una
+función `SECURITY DEFINER` con su propio guard, jamás relajando una policy.
+Censo previo, porque revocar de más rompe un camino legítimo y ningún typecheck lo dice:
+**0 consumidores** en el monorepo y en las cuatro webs del legado, **0 filas** en la tabla.
+Y un hallazgo que refuerza la firma: el `chat-ayuda` del legado ya le dice a la gente
+*«las donaciones también requieren cuenta»* — **la policy contradecía la letra publicada.**
+Cinturón con sus tres brazos: `anon` no escribe · `anon` no lee · **el dueño SÍ dona**
+(el discriminador que impide el verde por la razón equivocada).
+
+**Lo que sigue abierto de esta ficha:** los **651 grants** y las **otras cuatro policies**
+—`profiles`, `solicitudes_adopcion`, `evento_cita_servicio`, `prestador_empleado_servicios`—
+que **aciertan por accidente** y quedan como deuda declarada, no como cura de esta tanda.
+
+**⚠️ Y la pregunta que la ficha ya no responde, porque la mesa la contestó:**
+`MODELO_DESPENSA` firma *«donación sin destino elegible»* y una donación anónima sin
+cuenta es un caso de producto legítimo. **La decisión es de la mesa, no de esta pista:**
+si es deliberado, la policy se reescribe para que lo DIGA (rate limit, monto máximo, y
+`user_id IS NULL` como intención declarada y no como agujero de un `OR`); si no lo es, se
+cierra. *Lo que no puede quedar es que una puerta abierta a internet lo esté por el
+descuido de un predicado.*
+
+#### Lo que esta pasada tiene que hacer (no se construyó nada hoy)
+
+1. **Revocar los 651 grants de escritura** que nadie decidió, con el discriminador de
+   S92: `has_table_privilege('anon', …)` antes y después, **y el control de que el
+   camino legítimo sigue vivo** — el precedente de los tres catálogos, donde revocar de
+   más habría dejado a la gente sin poder crear cuenta y *ningún typecheck lo habría dicho*.
+2. **Las 12 vistas:** el grant no alcanza nada hoy (`is_updatable = NO`), pero se revoca
+   igual — *una vista que mañana se vuelve actualizable no avisa*.
+3. **Las 5 policies `TO public`:** pasan a `TO authenticated`, salvo la decisión de mesa
+   sobre `donaciones`.
+4. **El cinturón:** que la migración ABORTE si `anon` conserva escritura sobre algo no
+   declarado en una lista blanca — el molde de S92, con sus tres brazos probados EN ROJO
+   antes de confiarle la primera migración (`L-216`: un `REVOKE … FROM anon` que deja
+   `PUBLIC` intacto **no cierra nada**).
+
+#### Cómo se re-mide (el comando, no el número — `D-1015`)
+
+```sql
+select count(distinct table_name) from information_schema.role_table_grants
+ where grantee='anon' and table_schema='public'
+   and privilege_type in ('INSERT','UPDATE','DELETE');
+```
+y las que de verdad alcanzan algo:
+```sql
+select distinct p.tablename, p.cmd, p.qual, p.with_check from pg_policies p
+ where p.schemaname='public' and ('anon'=any(p.roles) or 'public'=any(p.roles))
+   and p.cmd in ('INSERT','UPDATE','DELETE','ALL');
+```
+
+**☠️ Condición de muerte:** los 651 grants en 0 con su cinturón vigilando, las 5 policies
+decididas una por una, y `donaciones` con su forma firmada por la mesa.
+**Disparo: ANTES de producción.** Hoy el ambiente es sandbox de punta a punta; el día que
+la anon key sirva contra plata real, esto deja de ser defensa en profundidad.
+
+---
+
+### `L-535` · LO QUE ESCRIBE UN TERCERO SE GUARDA COMO LLEGA — Y NUNCA SE COMPARA CONTRA UN LITERAL NUESTRO
+
+**Se ganó con SIETE facturas reales de producción** (S115, medición de E). Todas
+válidas, todas autorizadas por el SRI, y **ninguna escribe igual que otra**:
+
+| Campo | Cómo llega, según quién lo emitió |
+|---|---|
+| Etiqueta del correo en la información adicional | `E-mail` · `Email` |
+| Ambiente | `PRODUCCIÓN` · `PRODUCCION` (con y sin tilde) |
+| `fechaAutorizacion` | **dos formatos distintos** |
+| `moneda` | `US Dollar` · `DOLAR` |
+
+*Las siete pasan la validación del SRI.* O sea: **la variación no es un error de
+nadie — es el rango que el estándar admite**, y cualquier comparación nuestra contra
+un literal iba a marcar como rota una factura perfectamente válida.
+
+#### La ley, y son dos mitades asimétricas
+
+- **AL LEER lo ajeno** —la contingencia del vet, los comprobantes del proveedor, el
+  XML que alguien nos manda— **el parser NORMALIZA y TOLERA**: quita tildes, unifica
+  mayúsculas, acepta los formatos de fecha conocidos, y **guarda el valor CRUDO tal
+  como llegó** junto al normalizado. *El crudo es la evidencia; el normalizado es
+  para comparar. Guardar sólo el normalizado destruye la única prueba de qué dijo el
+  tercero.*
+- **AL EMITIR lo nuestro** —lo que sale con nuestro RUC— **es ESTRICTO y sale del
+  DATO**, nunca de un literal en el generador: el catálogo, la fila del emisor, la
+  versión del esquema. Ahí no hay tolerancia que valga, porque el que responde
+  somos nosotros.
+
+#### Por qué esto no se descubre solo
+
+Un comparador contra literal **no falla: rechaza**. Y rechazar una factura ajena
+válida se lee como *«el proveedor mandó algo mal»*, que es la conclusión cómoda y la
+equivocada. **El defecto sobrevive porque su síntoma acusa a otro.**
+
+#### Su parentela en esta casa
+
+- **`L-514` / la familia del instrumento que mide la forma equivocada** — acá el
+  instrumento mide bien y la VARA está mal.
+- **El precedente vivo del mismo día:** el `idTransacionReference` de DeUna, un typo
+  del proveedor que el canon protege con todas las letras porque *quien lo escriba
+  «bien» rompe todas las consultas*. Misma ley, aplicada a un nombre de campo.
+- **Y su gemela que la sesión se cobró sola:** una sonda leyó `version="1.0"` del
+  prólogo `<?xml?>` creyendo que era la versión del esquema. *Comparar contra el
+  literal equivocado y comparar el campo equivocado producen el mismo rojo creíble.*
+
+**☠️ Condición de muerte:** ninguna — es de método. Su recordatorio útil es que hicieron
+falta **siete** facturas para verla: con dos o tres, la coincidencia parecía la regla.
+
+---
+
+### `D-1060` 🟡 · CUATRO SECUENCIALES FISCALES QUEMADOS EN S115 — declarados, no borrados
+
+**Medido 10-sep-2026 23:55 UTC:** `fiscal_sequences.ultimo_secuencial = 4` para
+`1793240435001 · 001-002 · factura`, con **`documentos_fiscales` en CERO filas**.
+Los cuatro números **no viven en ninguna fila**, y eso ante el SRI es un hueco en la
+numeración que hay que poder explicar.
+
+**Firma del founder: se declaran, no se borran.** *Retroceder un contador de
+numeración fiscal para que el número «cierre» es reescribir el pasado; declararlo es
+poder contarlo.*
+
+#### De dónde salió cada uno
+
+| # | Quién | Por qué |
+|---|---|---|
+| 1, 2 | el e2e de **E** contra la edge real | la edge **desplegada** (v1, de la tanda 1) no escribía `ruc_emisor`, y el trigger `clave_sin_insumos` —que A aplicó el mismo día— rechazaba su UPDATE. Nadie leía el error: la edge informaba `emitiendo` y la fila quedaba en `borrador`. |
+| 3 | el **cinturón** de `20260912600000` | su brazo verde reserva un número real y borra el documento. *El cinturón que prueba que no se queman números, quemó uno.* |
+| 4 | el **e2e de cierre** de A | el documento se emitió, se autorizó, y se borró: **una factura de prueba sin marca dentro del libro fiscal es peor que un hueco declarado** (precedente S92 — el 80 % de las familias eran sonda y toda métrica anterior estaba inflada tres veces). |
+
+#### La causa raíz de 1 y 2, que es lo que vale de esta ficha
+
+**Una migración invalidó las escrituras de una edge function viva, y la función no se
+movió.** Es `D-662` un piso más arriba: el canon la escribió para BUNDLES —*el repo y
+el teléfono son dos versiones de la verdad y una migración mueve sólo una*— y una edge
+desplegada es exactamente lo mismo. Ver **`L-536`**.
+
+#### Curado en la misma sesión (para que no vuelva a pasar)
+
+- `fiscal_reservar_numero` toma el número, deriva la clave y escribe la fila **en la
+  misma transacción**: o la fila queda con su número, o el número no se consume. Es
+  idempotente, así que un reintento reusa el suyo.
+- Todo `update` del pipeline fiscal exige **una fila afectada**: cero es un rojo.
+- El parte de la edge se arma **releyendo la fila**, no de variables locales.
+- Ejercido contra la edge real: seis corridas, un solo número (`000000004`), y la
+  sexta devolvió `procesados: 0`.
+
+**⚠️ Lo que NO está curado y por eso la ficha queda abierta:** el patrón del cinturón.
+Un brazo verde que reserva un número real y borra su documento **quema uno cada vez que
+la migración se aplica**. La forma correcta es que el brazo verde corra en una
+subtransacción que se deshace sola, como los fixtures de la casa.
+
+**☠️ Condición de muerte:** cuando el patrón del cinturón esté curado **y** la primera
+conciliación real con el SRI declare estos cuatro huecos. **Disparo:** la primera
+emisión en ambiente de producción — antes de eso, los cuatro son de `pruebas` y no le
+deben explicación a nadie.
+
+---
+
+### `L-536` · UNA MIGRACIÓN Y UNA EDGE FUNCTION SON DOS VERSIONES DE LA VERDAD, Y UN `db push` MUEVE UNA SOLA
+
+**`D-662` escrita un piso más arriba.** El canon ya dice que *una migración que renombra
+o mueve columnas declara qué BUNDLES vivos la consultan*, porque el repo y el teléfono
+son dos verdades y una migración mueve sólo una. **Una edge function desplegada es
+exactamente lo mismo, y eso no estaba escrito** — por eso volvió a pasar.
+
+#### El caso, medido (S115-A, 10-sep-2026)
+
+`20260912440000` puso un trigger que exige que una clave de acceso traiga sus siete
+insumos. En el repo, `fiscal-emitir` ya escribía `ruc_emisor`; **en producción corría la
+versión 1, de la tanda 1, que no lo escribe**. Resultado reproducido en una transacción
+con `ROLLBACK`:
+
+```
+UPDATE de la edge v1 → REBOTO — 23514: clave_sin_insumos
+la fila quedó en     → borrador
+```
+
+⇒ **dos secuenciales consumidos y ninguna fila con ellos** (`D-1060`). *Y el typecheck
+estaba verde, `deno check` estaba verde, y la migración aplicó sin una advertencia:
+ninguno de los tres mira lo que está desplegado.*
+
+#### Por qué es peor que su hermana de bundles
+
+Un bundle viejo **lee** y rompe una pantalla: se ve. Una edge vieja **escribe**, y si
+además no lee el error de su escritura, **informa éxito** — la edge devolvía
+`{"estado":"emitiendo"}` mientras la fila se quedaba en `borrador`. *El síntoma no fue
+una falla: fue un parte optimista y un contador que subía solo.*
+
+#### La regla
+
+**Toda migración que agregue una restricción o una columna que una edge escriba declara
+qué EDGE FUNCTIONS la tocan, y su despliegue es parte del mismo acto** — igual que la
+regla del bundle: *renombrar y publicar son un solo acto*.
+
+Se mide, no se recuerda:
+```bash
+npx supabase functions list          # versión y fecha de cada una
+grep -rln "<tabla>" supabase/functions --include=index.ts
+```
+*Una función cuya versión desplegada es anterior a la migración que la afecta es una
+bomba con fecha: no falla hasta que alguien la llama.*
+
+#### Sus dos hermanas de la misma sesión
+
+- **`L-535`** — lo que escribe un tercero se guarda como llega. Ésta es sobre lo que
+  escribe **una versión vieja de uno mismo**.
+- Y la que la deja pasar: **un `update` de supabase-js que afecta cero filas NO es un
+  error**. Sin eso, esto habría sido un rebote ruidoso en el primer intento.
+
+**☠️ Condición de muerte:** ninguna — es de método. Su recordatorio útil es que la pista
+que la escribió tenía `D-662` citada en su propio canon y no la vio aplicar acá, porque
+decía «bundles».
+
+---
+
+### `D-1061` 🔴 · VEINTIDÓS EDGES DESPLEGADAS HASTA 64 DÍAS POR DETRÁS DEL REPO — alcance, fecha y dueño
+
+**Medido** el 10-sep-2026 con `pnpm verify:edge-desplegada` (camino heurístico:
+fecha de despliegue contra la del último commit que toca su cierre transitivo;
+ventana declarada de 60 min, con bucket no concluyente aparte).
+
+```
+edges en el repo: 48 · desplegadas: 47 · con firma registrada: 4
+al día: 8 · VIEJAS: 22 · no concluyentes: 17
+```
+
+**Por qué es 🔴 y no higiene:** una edge vieja **escribe con las reglas de ayer
+contra una base con las de hoy**, y si no lee el error de su escritura
+**informa éxito igual**. No es hipotético — es exactamente lo que pasó con
+`fiscal-emitir` v1 (`L-536` · `D-1060`): typecheck verde, `deno check` verde,
+`db push` verde, **y la fila se quedaba en `borrador` mientras la edge
+respondía `emitiendo`**. *Ninguno de los tres gates mira lo que está corriendo.*
+
+**Las 22, por dueño y atraso** (dueño = la pista cuyo commit dejó el código
+adelante; el atraso se re-mide, no se cita):
+
+| Edge | Desplegada | Atraso | Dueño probable |
+|---|---|---|---|
+| `crear_cliente_walkin` | 2026-05-06 | **~1.538 h (64 d)** | histórico / sin dueño vivo |
+| `lugares` | 2026-08-09 | ~640 h | histórico |
+| `documento-certificado` · `documento-historia-clinica` · `documento-receta` | 2026-08-08 | ~700 h | S113-A (el pasaporte) |
+| `pagos-conciliar` | 2026-08-20 | ~250 h | S109-B |
+| `pagos-cobro-recurrente` | 2026-08-31 | ~241 h | S115-A (T2) |
+| `video-consumo` | 2026-08-26 | ~127 h | S110-A |
+| `pagos-deuna-barrido` | 2026-08-25 | ~126 h | S108-B2 |
+| `escribir-presencia` · `estructurar-nota-clinica` · `extract-documento` | 2026-09-04 | ~92 h | S114-D |
+| `coach-parte` | 2026-09-06 | ~51 h | S114-D |
+| `sugerir-raza` | 2026-09-06 | ~47 h | S114-D |
+| `extract-vacuna` | 2026-09-06 | ~46 h | S114-D |
+| `extract-papel` | 2026-09-06 | ~33 h | S114-D |
+| `pagos-cobro` | 2026-09-10 | ~13 h | S115-A (T2) |
+| `postventa-intake` · `postventa-hoja` | 2026-09-08 | ~12 h | candidato s114-2 |
+| **`fiscal-webhook`** · **`fiscal-reconciliar`** | 2026-09-10 13:04 | **~10 h** | **S115-A — MÍAS** |
+| `buscar-intencion` | 2026-09-07 | ~8 h | S114 |
+
+**🔴 Las dos últimas son mías y son las más urgentes pese a ser las más nuevas:**
+`fiscal-webhook` es **la edge que Factuplan va a llamar**. Quedaron fuera del
+redespliegue del cierre de S115-A, que alcanzó a `fiscal-emitir`, `fiscal-ride`,
+`fiscal-validar-clave` y `despachar-correo` y **no a ellas** — la firma
+registrada en `edge_despliegues` lo prueba: cuatro filas, no seis. *Se
+redespliegan en la misma tanda en que se registre la URL en el panel del
+proveedor; no esperan a que esta ficha se pague entera.*
+
+**Alcance de la ficha:** las 20 restantes. **No se curan adentro de otra tanda**
+(orden del founder) y **van ANTES de producción**. La cura de cada una es una
+línea — `pnpm edge:desplegar <slug>`, que despliega **y** deja su firma — pero
+**precedida de leer el diff**: una edge de 64 días puede haberse quedado atrás
+*a propósito* (`L-536` no dice «desplegá todo», dice «medí si lo desplegado es
+del repo»), y `crear_cliente_walkin` es la primera candidata a eso.
+
+**Disparo:** antes del primer comprobante en producción. **Dueño:** la pista que
+conduce el tren de despliegue de cada frente; la conducción coordina el orden.
+**Cierra** cuando `verify:edge-desplegada` dé VERDE o cuando cada una de las 20
+tenga su razón escrita para quedarse donde está.
+
+---
+
+### `D-1062` 🔴 · EL RUC DE `fiscal_emisor` NO ES EL CONTRIBUYENTE DEL WORKSPACE DE FACTUPLAN — y los dos son plausibles por separado
+
+**Medido** el 10-sep-2026:
+
+```
+fiscal_emisor.ruc = 1793240435001 · SATORI INOV LATAM S.A.S. · ambiente 1 · 001-002
+contribuyente del workspace Factuplan (hoy) = el RUC PERSONAL del founder
+```
+
+**Satori Inov y su certificado de persona jurídica se dan de alta mañana**
+(palabra del founder). Hasta entonces los dos valores existen, los dos son
+reales, y **ninguno de los dos es evidentemente el equivocado mirándolo solo** —
+que es lo que vuelve a esto una ficha y no un pendiente.
+
+**Qué rompe si nadie lo nombra:** el adaptador manda `x-taxpayer-ruc` desde
+`fiscal_emisor`. Con los dos RUC distintos, el proveedor puede **rechazar**
+(caso bueno: se ve) o **emitir bajo el contribuyente que él tiene registrado**
+(caso malo: **la clave de acceso vuelve con OTRO RUC adentro y el documento
+parece autorizado**). *El segundo no tiene síntoma en la respuesta: tiene
+síntoma tres semanas después, en el SRI.*
+
+**Ya está cerrado por construcción, y por eso esto es ficha y no defecto:**
+`fiscal_anotar_numero_ajeno` (migración `20260912620000`) compara el segmento
+11-23 de la clave contra `ruc_emisor` de la fila y devuelve
+`clave_con_ruc_ajeno` **sin escribir**. El documento no avanza.
+
+**Consecuencia operativa, declarada:** **la primera factura de prueba va a
+rebotar fail-closed hasta que la fila y el workspace digan el mismo RUC.** Eso
+es el comportamiento correcto, no un bloqueo a destrabar aflojando el guard.
+Las dos salidas legítimas: (a) poner el RUC personal en `fiscal_emisor`
+mientras dure el sandbox, o (b) esperar al alta de Satori. **Es decisión del
+founder** — cambia qué contribuyente queda en los comprobantes de prueba.
+
+**Lo que NO cambia con ninguna de las dos:** `documentos_fiscales.ruc_emisor`
+se guarda **por fila**, así que cambiar `fiscal_emisor` mañana **no rompe la
+reconstrucción de los documentos de hoy** — los viejos conservan el suyo.
+*Verificado leyendo el CHECK: usa `ruc_emisor` de la fila, jamás el del
+emisor vivo.* **Cambiar de contribuyente es cambiar una fila, como pidió el
+founder, y eso ya rige.**
+
+**Disparo:** la primera emisión real en sandbox. **Dueño:** founder (la
+decisión) · A (la fila).
+
+---
+
+### `L-537` · UN GUARD DE DOS CAPAS SE ENMIENDA DOS VECES, O MANDA LA CAPA QUE NO APRENDIÓ
+
+`L-424` firmó la forma: **el CHECK es el piso que no se puede saltear; el
+trigger EXPLICA**. Lo que no decía —y se cobró hoy sobre sí misma— es qué pasa
+cuando llega una regla nueva.
+
+**Medido, S115-A, 10-sep-2026.** La numeración ajena (el proveedor elige el
+código numérico de la clave) entró como tercera rama del CHECK
+`chk_documento_fiscal_clave_reconstruible`. El cinturón **abortó la migración**
+escribiendo una clave que **el CHECK aceptaba y el trigger rechazaba** con
+`clave_no_reconstruible`: `_trg_documento_fiscal_clave_coherente` seguía
+exigiendo los 49 dígitos derivados.
+
+*Las dos piezas eran correctas por separado y juntas eran incompatibles.* Y el
+modo de falla no es simétrico: **la capa estricta gana siempre**, así que el
+síntoma no es «el guard dejó pasar algo» —que se buscaría— sino **«no puedo
+escribir algo que debería poder»**, que se lee como un bug del código que
+escribe y manda a buscar en el lugar equivocado.
+
+**Lo que lo hizo barato acá y hay que conservar:** el cinturón corre **dentro de
+la misma migración y ANTES de que se registre**, así que el rebote lo produjo
+un fixture y no un comprobante real. *Un guard nuevo sin cinturón en su propia
+migración habría descubierto esto en la primera factura de sandbox — o peor, en
+la primera de producción, donde el documento queda a medio emitir.*
+
+⇒ **Toda enmienda a una regla que vive en dos capas nombra las dos en su
+encabezado y las toca en el mismo acto.** Mismo molde que el corolario de
+`L-536` para migración↔edge: *las dos mitades de una verdad se mueven juntas o
+la que quedó atrás decide.* Y el cinturón de esa migración tiene que ejercer el
+camino **feliz**, no sólo el rojo: el rojo lo daban las dos capas por igual —
+**lo que discriminó fue el verde.**
+
+---
+
+### `L-538` · UNA EXENCIÓN SE MIDE EN DÍGITOS, NO EN CAMPOS
+
+El pedido fue *«si la clave la ponen ellos, declaramos exento el CHECK de
+reconstrucción para documentos de proveedor externo, igual que con la factura
+recibida de la clínica»*. Medido, **no es igual**, y tratarlo igual salía caro.
+
+| | qué es nuestro | qué se puede verificar |
+|---|---|---|
+| Factura **recibida** de la clínica | nada | sólo el dígito verificador |
+| Factura **nuestra** que numera el proveedor | fecha · tipo · **RUC** · ambiente · serie · secuencial · tipo de emisión | **41 de 49 dígitos** |
+
+El proveedor elige **ocho**: el código numérico, posiciones 40-47. *Declararla
+exenta entera habría aceptado en silencio una clave con el RUC de otro
+contribuyente* — que con el workspace de Factuplan apuntando a un RUC distinto
+del de `fiscal_emisor` (`D-1062`) **no es hipotético: es el caso de hoy**.
+
+**La forma de la cura importa tanto como el alcance:** el prefijo esperado sale
+de `left(fiscal_clave_acceso(...), 39)` —**la misma función que verifica la rama
+estricta**— porque los primeros 39 dígitos no dependen del código numérico. *Una
+segunda implementación del formato de la clave, aunque naciera idéntica, es una
+que puede divergir de la primera sin que nada lo note.*
+
+⇒ **Antes de eximir un guard se pregunta cuánto de lo que vigila sigue siendo
+propio.** La respuesta casi nunca es «todo» ni «nada», y el punto medio es
+justo donde vive el defecto que la exención total dejaría entrar.

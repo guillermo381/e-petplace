@@ -1,0 +1,7 @@
+-- REVERSA de 20260912580000 · escrita ANTES.
+-- ⚠️ Vuelve la rama de AGENCIA a pedir un solo papel (la comisión emitida) y a
+--    NO exigir la factura de la clínica al cliente ni su clave validada contra
+--    el SRI. Revertir esto deja girar plata de un tercero con la mitad del
+--    respaldo — y la mitad que se pierde es justamente la que prueba que la
+--    venta existió.
+-- El cuerpo anterior vive en 20260912470000; para revertir se re-aplica ése.

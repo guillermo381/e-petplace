@@ -1560,6 +1560,13 @@ export type Database = {
             referencedRelation: "prestador_servicios"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "bonos_prestador_servicio_id_fkey"
+            columns: ["prestador_servicio_id"]
+            isOneToOne: false
+            referencedRelation: "v_catalogo_precio_final"
+            referencedColumns: ["prestador_servicio_id"]
+          },
         ]
       }
       busquedas_sin_resultado: {
@@ -2250,6 +2257,42 @@ export type Database = {
           pais_codigo?: string | null
           sujetos_aplicables?: string[] | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      cat_costos_riel: {
+        Row: {
+          activo: boolean
+          created_at: string
+          forma: string
+          fuente: string | null
+          id: string
+          parametros: Json
+          proveedor: string
+          vigencia_desde: string
+          vigencia_hasta: string | null
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          forma: string
+          fuente?: string | null
+          id?: string
+          parametros: Json
+          proveedor: string
+          vigencia_desde?: string
+          vigencia_hasta?: string | null
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          forma?: string
+          fuente?: string | null
+          id?: string
+          parametros?: Json
+          proveedor?: string
+          vigencia_desde?: string
+          vigencia_hasta?: string | null
         }
         Relationships: []
       }
@@ -10998,6 +11041,7 @@ export type Database = {
           notas_admin: string | null
           origen_id: string
           origen_tipo: string
+          pago_intento_id: string | null
           parent_evento_id: string | null
           revenue_stream: Database["public"]["Enums"]["revenue_stream_enum"]
           reversado_por_evento_id: string | null
@@ -11027,6 +11071,7 @@ export type Database = {
           notas_admin?: string | null
           origen_id: string
           origen_tipo: string
+          pago_intento_id?: string | null
           parent_evento_id?: string | null
           revenue_stream: Database["public"]["Enums"]["revenue_stream_enum"]
           reversado_por_evento_id?: string | null
@@ -11056,6 +11101,7 @@ export type Database = {
           notas_admin?: string | null
           origen_id?: string
           origen_tipo?: string
+          pago_intento_id?: string | null
           parent_evento_id?: string | null
           revenue_stream?: Database["public"]["Enums"]["revenue_stream_enum"]
           reversado_por_evento_id?: string | null
@@ -11103,6 +11149,13 @@ export type Database = {
             columns: ["fee_config_id"]
             isOneToOne: false
             referencedRelation: "fee_configs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eventos_economicos_pago_intento_id_fkey"
+            columns: ["pago_intento_id"]
+            isOneToOne: false
+            referencedRelation: "pagos_intentos"
             referencedColumns: ["id"]
           },
           {
@@ -11768,6 +11821,7 @@ export type Database = {
           created_by: string | null
           cuenta_comercial_id: string | null
           id: string
+          minimo_por_transaccion: number
           notas: string | null
           parametros: Json
           prioridad: number
@@ -11788,6 +11842,7 @@ export type Database = {
           created_by?: string | null
           cuenta_comercial_id?: string | null
           id?: string
+          minimo_por_transaccion?: number
           notas?: string | null
           parametros: Json
           prioridad?: number
@@ -11808,6 +11863,7 @@ export type Database = {
           created_by?: string | null
           cuenta_comercial_id?: string | null
           id?: string
+          minimo_por_transaccion?: number
           notas?: string | null
           parametros?: Json
           prioridad?: number
@@ -11910,6 +11966,8 @@ export type Database = {
           actualizado_en: string
           agente_retencion: boolean
           ambiente: number
+          certificado_alias: string | null
+          certificado_vence_en: string | null
           contribuyente_especial: string | null
           direccion_matriz: string
           establecimiento: string
@@ -11925,6 +11983,8 @@ export type Database = {
           actualizado_en?: string
           agente_retencion?: boolean
           ambiente: number
+          certificado_alias?: string | null
+          certificado_vence_en?: string | null
           contribuyente_especial?: string | null
           direccion_matriz: string
           establecimiento: string
@@ -11940,6 +12000,8 @@ export type Database = {
           actualizado_en?: string
           agente_retencion?: boolean
           ambiente?: number
+          certificado_alias?: string | null
+          certificado_vence_en?: string | null
           contribuyente_especial?: string | null
           direccion_matriz?: string
           establecimiento?: string
@@ -12760,6 +12822,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "prestador_servicios"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_suscripciones_prestador_servicio_id_fkey"
+            columns: ["prestador_servicio_id"]
+            isOneToOne: false
+            referencedRelation: "v_catalogo_precio_final"
+            referencedColumns: ["prestador_servicio_id"]
           },
           {
             foreignKeyName: "guarderia_suscripciones_tarjeta_id_fkey"
@@ -15233,6 +15302,7 @@ export type Database = {
           codigo_numerico: string | null
           compra_id: string | null
           confirmado_por: string | null
+          costo_riel: number | null
           creado_en: string
           estado: string
           forma: string
@@ -15257,6 +15327,9 @@ export type Database = {
           recurrencia_id: string | null
           recurrencia_periodo: string | null
           referencia_corta: string | null
+          retencion_iva: number | null
+          retencion_renta: number | null
+          retenido_en: string | null
           suscripcion_periodo: string | null
           suscripcion_servicio_id: string | null
           transfer_number: string | null
@@ -15275,6 +15348,7 @@ export type Database = {
           codigo_numerico?: string | null
           compra_id?: string | null
           confirmado_por?: string | null
+          costo_riel?: number | null
           creado_en?: string
           estado?: string
           forma: string
@@ -15299,6 +15373,9 @@ export type Database = {
           recurrencia_id?: string | null
           recurrencia_periodo?: string | null
           referencia_corta?: string | null
+          retencion_iva?: number | null
+          retencion_renta?: number | null
+          retenido_en?: string | null
           suscripcion_periodo?: string | null
           suscripcion_servicio_id?: string | null
           transfer_number?: string | null
@@ -15317,6 +15394,7 @@ export type Database = {
           codigo_numerico?: string | null
           compra_id?: string | null
           confirmado_por?: string | null
+          costo_riel?: number | null
           creado_en?: string
           estado?: string
           forma?: string
@@ -15341,6 +15419,9 @@ export type Database = {
           recurrencia_id?: string | null
           recurrencia_periodo?: string | null
           referencia_corta?: string | null
+          retencion_iva?: number | null
+          retencion_renta?: number | null
+          retenido_en?: string | null
           suscripcion_periodo?: string | null
           suscripcion_servicio_id?: string | null
           transfer_number?: string | null
@@ -17004,6 +17085,13 @@ export type Database = {
             referencedRelation: "prestador_servicios"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "prestador_empleado_servicios_servicio_id_fkey"
+            columns: ["servicio_id"]
+            isOneToOne: false
+            referencedRelation: "v_catalogo_precio_final"
+            referencedColumns: ["prestador_servicio_id"]
+          },
         ]
       }
       prestador_empleados: {
@@ -17235,6 +17323,13 @@ export type Database = {
             referencedRelation: "prestador_servicios"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "prestador_horarios_servicio_id_fkey"
+            columns: ["servicio_id"]
+            isOneToOne: false
+            referencedRelation: "v_catalogo_precio_final"
+            referencedColumns: ["prestador_servicio_id"]
+          },
         ]
       }
       prestador_minimos_aceptados: {
@@ -17336,6 +17431,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "prestador_servicios"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestador_programas_prestador_servicio_id_fkey"
+            columns: ["prestador_servicio_id"]
+            isOneToOne: false
+            referencedRelation: "v_catalogo_precio_final"
+            referencedColumns: ["prestador_servicio_id"]
           },
         ]
       }
@@ -17543,6 +17645,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "prestador_servicios"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestador_servicio_tallas_prestador_servicio_id_fkey"
+            columns: ["prestador_servicio_id"]
+            isOneToOne: false
+            referencedRelation: "v_catalogo_precio_final"
+            referencedColumns: ["prestador_servicio_id"]
           },
         ]
       }
@@ -18725,6 +18834,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "prestador_servicios"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "programas_contratados_prestador_servicio_id_fkey"
+            columns: ["prestador_servicio_id"]
+            isOneToOne: false
+            referencedRelation: "v_catalogo_precio_final"
+            referencedColumns: ["prestador_servicio_id"]
           },
           {
             foreignKeyName: "programas_contratados_programa_id_fkey"
@@ -21242,6 +21358,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "suscripciones_servicio_prestador_servicio_id_fkey"
+            columns: ["prestador_servicio_id"]
+            isOneToOne: false
+            referencedRelation: "v_catalogo_precio_final"
+            referencedColumns: ["prestador_servicio_id"]
+          },
+          {
             foreignKeyName: "suscripciones_servicio_tarjeta_id_fkey"
             columns: ["tarjeta_id"]
             isOneToOne: false
@@ -23160,6 +23283,49 @@ export type Database = {
           },
         ]
       }
+      v_catalogo_precio_final: {
+        Row: {
+          activo: boolean | null
+          codigo_iva: string | null
+          mensual_final: number | null
+          mensual_neto: number | null
+          paquete_final: number | null
+          paquete_neto: number | null
+          precio_final: number | null
+          precio_neto: number | null
+          prestador_id: string | null
+          prestador_servicio_id: string | null
+          servicio: string | null
+          tarifa_estado:
+            | Database["public"]["Enums"]["tarifa_estado_enum"]
+            | null
+          tarifa_pct: number | null
+          tipo_servicio: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prestador_servicios_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestador_servicios_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tipos_servicio_codigo_iva_fkey"
+            columns: ["codigo_iva"]
+            isOneToOne: false
+            referencedRelation: "cat_tasas_impuesto"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
       v_conversion_funnel: {
         Row: {
           carritos: number | null
@@ -24576,6 +24742,7 @@ export type Database = {
           absorbe_descuento_default: Database["public"]["Enums"]["quien_absorbe_descuento_enum"]
           es_default: boolean
           fee_config_id: string
+          minimo_por_transaccion: number
           parametros: Json
           tipo_calculo: Database["public"]["Enums"]["tipo_calculo_fee_enum"]
         }[]
@@ -25166,6 +25333,18 @@ export type Database = {
         }
         Returns: Json
       }
+      comision_aplicable: {
+        Args: {
+          p_fecha?: string
+          p_prestador_id: string
+          p_tipo_servicio: string
+        }
+        Returns: Json
+      }
+      comision_efectiva: {
+        Args: { p_base: number; p_minimo: number; p_pct: number }
+        Returns: Json
+      }
       completar_cita_servicio: {
         Args: {
           p_cita_id: string
@@ -25347,6 +25526,15 @@ export type Database = {
         Returns: Json
       }
       convertir_horarios_a_por_servicio: { Args: never; Returns: Json }
+      costo_riel: {
+        Args: {
+          p_fecha?: string
+          p_forma: string
+          p_monto: number
+          p_proveedor: string
+        }
+        Returns: Json
+      }
       cotizar_envio_despensa: {
         Args: {
           p_ciudad_destino?: string
@@ -27588,6 +27776,10 @@ export type Database = {
         Returns: Json
       }
       poner_pedido_primero: { Args: { p_pedido_id: string }; Returns: Json }
+      precio_final: {
+        Args: { p_codigo_iva: string; p_neto: number }
+        Returns: number
+      }
       preferencia_efectiva: {
         Args: { p_canal: string; p_categoria: string; p_user_id: string }
         Returns: boolean
@@ -28183,6 +28375,7 @@ export type Database = {
           absorbe_descuento_default: Database["public"]["Enums"]["quien_absorbe_descuento_enum"]
           es_default: boolean
           fee_config_id: string
+          minimo_por_transaccion: number
           parametros: Json
           tipo_calculo: Database["public"]["Enums"]["tipo_calculo_fee_enum"]
         }[]
@@ -28190,6 +28383,10 @@ export type Database = {
       resolver_ficha_de_raza: {
         Args: { p_especie: string; p_raza_declarada: string }
         Returns: Json
+      }
+      resolver_pago_del_origen: {
+        Args: { p_origen_id: string; p_origen_tipo: string }
+        Returns: string
       }
       resolver_plantilla_whatsapp: { Args: { p_tipo: string }; Returns: Json }
       resolver_receptor_fiscal: {
@@ -28336,6 +28533,7 @@ export type Database = {
         Args: { p_cuenta_comercial_id: string; p_tipo_actor: string }
         Returns: Json
       }
+      tarifa_servicio_vigente: { Args: { p_fecha?: string }; Returns: Json }
       tengo_aceptado_documento: { Args: { p_codigo: string }; Returns: boolean }
       terminar_atencion_adiestramiento: {
         Args: { p_adiestramiento_id: string }

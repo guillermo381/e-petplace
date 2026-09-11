@@ -108,6 +108,13 @@ function agrupar(codigo: string): string {
 
 type Datos = {
   titulo?: string;
+  /* Adjuntos declarados por la INTENCIÓN. El despachador los baja de Storage y
+     los manda; si alguno no está, el correo no sale (ver el bloque de adjuntos).
+     ⚠️ La clave es `objeto` y NO `ruta` a propósito: en esta casa `ruta` significa
+     «a dónde navega un aviso», y `verify:rutas-de-aviso` lee esa palabra en los
+     productores. Un objeto de Storage llamado `ruta` volvía ciego al gate — y el
+     gate lo dijo en vez de callarse, que es por lo que se ve acá. */
+  adjuntos?: { nombre: string; bucket: string; objeto: string }[];
   // S104-D · los dos correos de privacidad (contrato para el productor)
   url_copia?: string;
   copia_vence?: string;
@@ -510,6 +517,37 @@ Deno.serve(async (req) => {
       .eq('user_id', i.destinatario_user_id)
       .maybeSingle();
     const idioma = pref?.idioma === 'en' ? 'en' : 'es';
+
+    /* ── ADJUNTOS ─────────────────────────────────────────────────────────
+       🔴 GENÉRICO A PROPÓSITO: nace con «Tu factura» (RIDE + XML) y sirve para
+          el próximo papel sin volver a tocar el despachador. La intención dice
+          QUÉ adjuntar (`datos.adjuntos`), no CÓMO — el despachador es el único
+          que sabe hablar con el transporte.
+
+       🔴 Y ES FAIL-CLOSED: si un adjunto declarado no se puede bajar, el correo
+          NO SALE. *Un mail que dice «Tu factura» y llega sin la factura es peor
+          que uno que no llegó: el que lo recibe cree que ya la tiene.* */
+    const adjuntos: { filename: string; content: string }[] = [];
+    let adjuntoFallido: string | null = null;
+    for (const a of (datos.adjuntos ?? [])) {
+      const { data: blob, error } = await supabase.storage.from(a.bucket).download(a.objeto);
+      if (error || !blob) { adjuntoFallido = `${a.bucket}/${a.objeto}`; break; }
+      const buf = new Uint8Array(await blob.arrayBuffer());
+      let bin = '';
+      for (let k = 0; k < buf.length; k += 0x8000) {
+        bin += String.fromCharCode(...buf.subarray(k, k + 0x8000));
+      }
+      adjuntos.push({ filename: a.nombre, content: btoa(bin) });
+    }
+    if (adjuntoFallido) {
+      await supabase.from('notificacion_entrega')
+        .update({ estado: 'fallida', motivo: `adjunto_no_disponible: ${adjuntoFallido}`.slice(0, 180),
+                  cerrado_en: new Date().toISOString() })
+        .eq('id', i.entregaId);
+      fallidas++;
+      continue;
+    }
+
     const r = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
@@ -519,6 +557,7 @@ Deno.serve(async (req) => {
         subject: datos.titulo ?? 'Tienes una novedad en e-PetPlace',
         html: plantillaHtml(datos, i.tipo, idioma),
         text: plantillaTexto(datos),
+        ...(adjuntos.length ? { attachments: adjuntos } : {}),
       }),
     });
 

@@ -2031,3 +2031,12 @@ export {
 export type {
   DocumentoFiscalMio, TaxProfile, EstadoVisibleFiscal, CodigoFiscal,
 } from './wrappers/fiscal';
+
+export {
+  tarifaServicio, comisionAplicable, netoDelPrestador,
+} from './wrappers/economico';
+export type {
+  TarifaServicio, ComisionAplicable, CodigoEconomico,
+} from './wrappers/economico';
+export { tresNumerosDelPrestador, configuracionPago } from './wrappers/economico';
+export type { TresNumeros, ConfiguracionPago } from './wrappers/economico';

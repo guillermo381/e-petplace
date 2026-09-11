@@ -18,6 +18,23 @@ export interface ResultadoEmision {
   estado: EstadoFiscal;
   clave_acceso: string | null;
   motivo?: string;
+  /**
+   * 🔴 EL CÓDIGO, NO EL MENSAJE. Un motivo es para que lo lea un humano; el
+   *    motor decide por esto. *Decidir por `motivo.includes('cupo')` es la
+   *    misma clase que comparar contra un literal ajeno (`L-535`): el día que
+   *    el proveedor cambie una palabra, el reintento deja de existir.*
+   */
+  codigo?: 'cupo_agotado' | 'proveedor_caido' | 'rechazo_del_sri' | 'otro';
+  /**
+   * ¿Se puede volver a intentar CON EL MISMO documento?
+   *
+   * Un rechazo por CUPO o un proveedor caído no son un rechazo del comprobante:
+   * el comprobante nunca llegó a evaluarse. **El documento conserva su
+   * secuencial y su clave y vuelve a la cola** — porque tomarle un secuencial
+   * nuevo dejaría un hueco en la numeración que hay que explicarle al SRI, y
+   * emitirlo dos veces sería peor.
+   */
+  reintentable?: boolean;
 }
 
 export interface ResultadoConsulta {

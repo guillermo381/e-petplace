@@ -55,6 +55,21 @@ export interface ComisionVigenteCita {
  * porcentual, error tipado — la superficie muestra su voz honesta, jamás
  * un número inventado (regla 36).
  */
+/**
+ * @deprecated S115 · MODELO_ECONOMICO v1.1.
+ *
+ * 🔴 DEVUELVE EL MODELO VIEJO y por eso puede MENTIR:
+ *   · no aplica el **mínimo por transacción** ⇒ dice «18 %» sobre un paseo de $6 que
+ *     en realidad paga el piso de $1,50;
+ *   · nace de cuando el riel se descontaba al prestador (D-C lo cambió);
+ *   · y resuelve con **HOY**, no con la fecha en que el precio va a regir — hoy da
+ *     10 % y desde el 1-oct 18 %.
+ *
+ * **Usá `tresNumerosDelPrestador()` de `economico.ts`.** Esta se conserva porque cuatro
+ * talleres publicados la consumen (paseo · grooming · adiestramiento · veterinaria) y
+ * renombrarla sin publicar en el mismo acto rompería el bundle vivo (D-662).
+ * Muere cuando los cuatro migren.
+ */
 export async function obtenerComisionVigenteCita(): Promise<
   ResultadoWrapper<ComisionVigenteCita, CodigoErrorFees>
 > {

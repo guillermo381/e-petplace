@@ -1,0 +1,5 @@
+-- REVERSA de 20260912590000 · vuelve a bloquear la escritura de la respuesta del
+-- SRI sobre un documento ya autorizado. ⚠️ Con eso, `fiscal-validar-clave` deja
+-- de poder anotar el número de autorización de un documento que el webhook marcó
+-- autorizada primero — y la compuerta de agencia, que exige ese número, se
+-- vuelve imposible de satisfacer por ese camino.

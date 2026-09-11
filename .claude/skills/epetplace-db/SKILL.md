@@ -57,6 +57,43 @@ Las migraciones las **escribe y ejecuta Claude Code** con el schema completo a l
 - `CREATE OR REPLACE FUNCTION` con firma distinta NO reemplaza: crea sobrecarga y deja la vieja zombi. Al cambiar parámetros, `DROP FUNCTION` explícito de la firma vieja (L-119).
 - **⚠️ TODA MIGRACIÓN QUE RENOMBRE O MUEVA COLUMNAS DECLARA QUÉ BUNDLES VIVOS LA CONSULTAN** (D-662, S88) — igual que declara su veda 76(g) y su reversa. **El repo y el teléfono son DOS versiones de la verdad y una migración mueve solo una**: typecheck, `gen:types` y fixtures pueden estar TODOS verdes porque el repo ya tiene el wrapper nuevo, mientras el bundle publicado consulta la columna que acaba de morir. *El caso: `20260805000000` mató `user_notificacion_prefs.tipo`; el bundle S86 la pedía → 400 permanente en la pantalla de preferencias del cliente — y arrastró la sync de idioma, que viajaba en el mismo `Promise.all` sin haber sido tocada.* **Corolario: si algún bundle vivo la consulta, la migración y su publish son UN SOLO ACTO** — o espera al publish, o se aplica compatible-hacia-atrás y la columna vieja muere en una segunda pasada, después. Misma forma que el acoplamiento del cron de S80: *encender el reloj y aplicar la enmienda son el mismo acto*.
 
+## Toda migración declara las EDGE FUNCTIONS que hay que desplegar con ella (S115, `L-536`)
+
+**El repo y lo DESPLEGADO son dos versiones de la verdad, y un `db push` mueve una
+sola.** El canon ya lo dice para bundles (`D-662`); una edge function es lo mismo y
+**peor**: un bundle viejo LEE y rompe una pantalla, que se ve; una edge vieja
+**ESCRIBE**, y si no lee el error de su escritura **informa éxito**.
+
+**El caso, medido:** `20260912440000` puso un trigger que exige que una clave de acceso
+traiga sus siete insumos. En el repo `fiscal-emitir` ya escribía `ruc_emisor`; en
+producción corría la versión anterior, que no. Resultado: `clave_sin_insumos`, la fila
+quedó en `borrador`, la edge devolvió `{"estado":"emitiendo"}` y **dos secuenciales
+fiscales quedaron consumidos sin vivir en ninguna fila** (`D-1060`). *Typecheck verde,
+`deno check` verde, `db push` sin una advertencia: ninguno de los tres mira lo que
+está corriendo.*
+
+Lo exigible, en tres piezas:
+
+1. **La migración las NOMBRA en su encabezado** — igual que declara su veda 76(g) y su
+   reversa. Se miden, no se recuerdan:
+   ```bash
+   grep -rln "<tabla>" supabase/functions --include=index.ts
+   npx supabase functions list        # versión y fecha de cada una
+   ```
+2. **El despliegue es parte del MISMO acto.** Si la migración invalida lo que una
+   función viva escribe, aplicar sin desplegar deja el sistema roto e informando éxito.
+   Se despliega con **`pnpm edge:desplegar <slug>`**, que además deja la firma del
+   contenido en `edge_despliegues` — `supabase functions deploy` a secas no deja rastro
+   comparable.
+3. **El gate: `pnpm verify:edge-desplegada`** (con `--control`, que reproduce el rojo
+   histórico). Contesta por FIRMA cuando hay registro y por FECHAS cuando no, y **dice
+   por cuál de los dos contestó**. ⚠️ **NO va al hook de pre-commit**: hace dos llamadas
+   de red, igual que `verify:edge-deno`. Corre en el paso ⓪ y al cerrar.
+
+⚠️ **Y su límite, que se declara en la salida:** el camino por fechas compara tiempos y
+no contenido — un despliegue desde un árbol sucio se ve al día. Por eso el registro de
+firma guarda `arbol_limpio`.
+
 ## Wrappers TS (packages/api)
 
 - **Discriminated unions obligatorias**: `ResultadoWrapper<T> = { ok: true; data } | { ok: false; codigo; mensaje }`. Sin string matching de mensajes (regla 35), sin `as` forzados (regla 34), sin `@ts-expect-error` (regla 33).

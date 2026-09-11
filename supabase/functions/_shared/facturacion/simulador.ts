@@ -28,18 +28,20 @@ export function xmlDesdeCanonico(c: DocumentoCanonico, claveAcceso: string): str
       <precioUnitario>${i.precio_unitario.toFixed(2)}</precioUnitario>
       <descuento>${i.descuento.toFixed(2)}</descuento>
       <precioTotalSinImpuesto>${i.base.toFixed(2)}</precioTotalSinImpuesto>
-      <impuesto><codigoPorcentaje>${esc(i.codigo_iva)}</codigoPorcentaje>` +
+      <impuesto><codigo>${esc(i.codigo_sri ?? '')}</codigo><codigoPorcentaje>${esc(i.codigo_porcentaje_sri ?? '')}</codigoPorcentaje>` +
       `<tarifa>${i.tarifa_pct}</tarifa><baseImponible>${i.base.toFixed(2)}</baseImponible>` +
       `<valor>${i.valor_iva.toFixed(2)}</valor></impuesto>
     </detalle>`).join('');
 
   const grupos = c.subtotales_por_tarifa.map((g) =>
-    `<totalImpuesto><codigoPorcentaje>${esc(g.codigo_iva)}</codigoPorcentaje>` +
-    `<baseImponible>${g.base.toFixed(2)}</baseImponible><valor>${g.valor_iva.toFixed(2)}</valor></totalImpuesto>`
+    `<totalImpuesto><codigo>${esc(c.items.find((i) => i.codigo_iva === g.codigo_iva)?.codigo_sri ?? '')}</codigo><codigoPorcentaje>${esc(c.items.find((i) => i.codigo_iva === g.codigo_iva)?.codigo_porcentaje_sri ?? '')}</codigoPorcentaje>` +
+    `<baseImponible>${g.base.toFixed(2)}</baseImponible>` +
+    /* 2.1.0 · la tarifa TAMBIÉN va en el total por grupo, no sólo en el detalle */
+    `<tarifa>${g.tarifa_pct}</tarifa><valor>${g.valor_iva.toFixed(2)}</valor></totalImpuesto>`
   ).join('');
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<${c.tipo === 'factura' ? 'factura' : 'notaCredito'} id="comprobante" version="1.0.0">
+<${c.tipo === 'factura' ? 'factura' : 'notaCredito'} id="comprobante" version="${esc(c.emisor.version_esquema)}">
   <!-- ${MARCA_PRUEBAS} -->
   <infoTributaria>
     <ambiente>${c.emisor.ambiente}</ambiente><tipoEmision>1</tipoEmision>
@@ -48,14 +50,25 @@ export function xmlDesdeCanonico(c: DocumentoCanonico, claveAcceso: string): str
     <ruc>${esc(c.emisor.ruc)}</ruc>
     <claveAcceso>${esc(claveAcceso)}</claveAcceso>
     <estab>${esc(c.emisor.establecimiento)}</estab><ptoEmi>${esc(c.emisor.punto_emision)}</ptoEmi>
-    <dirMatriz>${esc(c.emisor.direccion_matriz)}</dirMatriz>
+    <dirMatriz>${esc(c.emisor.direccion_matriz)}</dirMatriz>${
+      /* 2.1.0 · sólo si el SRI designó: el campo lleva la RESOLUCIÓN, no un sí. */
+      c.emisor.agente_retencion_resolucion
+        ? `\n    <agenteRetencion>${esc(c.emisor.agente_retencion_resolucion)}</agenteRetencion>`
+        : ''}
+    <dirEstablecimiento>${esc(c.emisor.direccion_establecimiento)}</dirEstablecimiento>
   </infoTributaria>
   <infoComprobante>
     <obligadoContabilidad>${c.emisor.obligado_contabilidad ? 'SI' : 'NO'}</obligadoContabilidad>
-    <tipoIdentificacionComprador>${esc(c.receptor.tipo_identificacion)}</tipoIdentificacionComprador>
+    <tipoIdentificacionComprador>${esc(c.receptor.tipo_identificacion_sri ?? '')}</tipoIdentificacionComprador>
+    <fechaEmision>${esc(c.fecha_emision_sri)}</fechaEmision>
     <razonSocialComprador>${esc(c.receptor.razon_social)}</razonSocialComprador>
     <identificacionComprador>${esc(c.receptor.identificacion)}</identificacionComprador>
     <totalDescuento>${c.descuento_total.toFixed(2)}</totalDescuento>
+    <propina>${c.propina.toFixed(2)}</propina>
+    <!-- la moneda la pone el generador de cada proveedor; el simulador
+         escribe el literal del SRI para que el XML esté completo -->
+    <moneda>US Dollar</moneda>
+    <pagos><pago><formaPago>${esc(c.forma_pago_sri)}</formaPago><total>${c.total.toFixed(2)}</total></pago></pagos>
     ${grupos}
     <importeTotal>${c.total.toFixed(2)}</importeTotal>
   </infoComprobante>
@@ -101,7 +114,16 @@ export function rideDesdeCanonico(c: DocumentoCanonico, claveAcceso: string): st
 <p style="color:#7a736a">${MARCA_PRUEBAS}</p>`;
 }
 
-export function crearSimulador(secretoWebhook: string): PuertoFacturacion {
+export function crearSimulador(
+  secretoWebhook: string,
+  /**
+   * 🔴 EL ROJO DEL CUPO SE PUEDE PRODUCIR SIN TOCAR CÓDIGO. Entra como
+   *    argumento porque su fuente es `app_config.fiscal_simular_cupo_agotado`:
+   *    *un rechazo que sólo se puede ensayar editando el simulador es un
+   *    rechazo que nadie va a ensayar.*
+   */
+  simularCupoAgotado = false,
+): PuertoFacturacion {
   return {
     nombre: 'simulador',
     capacidades(): Capacidades {
@@ -121,6 +143,17 @@ export function crearSimulador(secretoWebhook: string): PuertoFacturacion {
       if (!clave) {
         return { referencia: null, estado: 'no_autorizada', clave_acceso: null,
                  motivo: 'sin_clave_acceso: la casa pone el número y no llegó' };
+      }
+      /* El proveedor elegido no renueva solo: avisa y reactiva al instante,
+         pero con el cupo agotado la emisión se DETIENE. Eso NO es un rechazo
+         del comprobante —nunca llegó a evaluarse— así que vuelve a la cola con
+         su secuencial y su clave intactos. */
+      if (simularCupoAgotado) {
+        return {
+          referencia: null, estado: 'emitiendo', clave_acceso: clave,
+          codigo: 'cupo_agotado', reintentable: true,
+          motivo: 'cupo_agotado: el plan del proveedor no admite más documentos en el período',
+        };
       }
       return { referencia: `sim_${clave.slice(-12)}`, estado: 'emitiendo', clave_acceso: clave };
     },

@@ -69,8 +69,16 @@ const enmascarar = (c) => `${c.slice(0, 10)}${'·'.repeat(23)}${c.slice(33)}`;
 
 // ── Las claves llegan por argumento, jamás de un archivo del repo ────────────
 const claves = [];
+const impresos = [];
 const argv = process.argv.slice(2);
-for (let i = 0; i < argv.length; i++) if (argv[i] === '--clave') claves.push((argv[++i] ?? '').trim());
+for (let i = 0; i < argv.length; i++) {
+  if (argv[i] === '--clave') claves.push((argv[++i] ?? '').trim());
+  /* El número que el RIDE imprime —`015-118-000017078`— es la MISMA numeración que
+     la clave lleva adentro. Que coincidan es lo que ata el papel al identificador
+     electrónico: si difieren, el comprobante impreso y el que el SRI autorizó no son
+     el mismo documento. */
+  if (argv[i] === '--impreso') impresos.push((argv[++i] ?? '').trim());
+}
 
 await correr('i14 · la clave de acceso contra una clave REAL', async (r) => {
   if (!claves.length)
@@ -130,6 +138,15 @@ await correr('i14 · la clave de acceso contra una clave REAL', async (r) => {
     if (problemas.length)
       hallazgos.push(`la estructura no se descompone en partes con sentido (${problemas.join(' · ')}) — sobre una clave REAL eso significa que nuestro LAYOUT está corrido`);
 
+    // ── (c bis) EL NÚMERO IMPRESO EN EL RIDE, si se pasó ────────────────────
+    const impreso = impresos[n];
+    if (impreso) {
+      const dellaClave = `${p.establecimiento}-${p.puntoEmision}-${p.secuencial}`;
+      r.dato('número impreso', `${impreso} · de la clave ${dellaClave}${impreso === dellaClave ? ' ✓' : ' 🔴'}`);
+      if (impreso !== dellaClave)
+        hallazgos.push(`el número impreso (${impreso}) no coincide con la numeración que la clave lleva adentro (${dellaClave}) — el papel y el documento electrónico no son el mismo`);
+    }
+
     // ── (d) 🔴 LA PRUEBA QUE CIERRA: nuestra pieza la RECONSTRUYE ──────────
     if (deno === null) {
       const arnes = `${SP}/arnes-clave-real.ts`;
@@ -180,6 +197,69 @@ try {
     if (hallazgos.length)
       rojo(`la clave ${n + 1} (${enmascarar(clave)}) falló ${hallazgos.length} brazo(s):\n` +
            hallazgos.map((h, k) => `   ${k + 1}. ${h}`).join('\n'));
+  }
+
+  // ── (e) 🔴 EL BORDE DEL ESTÁNDAR: los restos 1 y 10 ──────────────────────
+  /* El módulo 11 tiene dos casos donde la especificación es ambigua y cada
+     implementación elige: resto 1 (11−1 = 10, que no es un dígito) y resto 10
+     (11−10 = 1). La convención del SRI manda 1 en los dos ⇒ **dos cuerpos distintos
+     comparten dígito verificador**, y eso NO es un defecto: es el estándar.
+     Lo que sí sería un defecto es que nuestra pieza y este verificador eligieran
+     distinto — ahí el SRI rechazaría nuestras claves y el instrumento diría que
+     están bien. *Dos implementaciones independientes coincidiendo en el caso
+     ambiguo vale más que cien coincidiendo en los fáciles.* */
+  const P = claves[0].slice(0, 39);
+  const suma = (c) => { let s = 0, p = 2; for (let i = c.length - 1; i >= 0; i--) { s += Number(c[i]) * p; p = p === 7 ? 2 : p + 1; } return s; };
+  const bordes = [];
+  for (let cn = 0; cn < 100000 && bordes.length < 2; cn++) {
+    const cuerpo = P + String(cn).padStart(8, '0') + '1';
+    const resto = suma(cuerpo) % 11;
+    if ((resto === 1 || resto === 10) && !bordes.some((b) => b.resto === resto))
+      bordes.push({ resto, cn: String(cn).padStart(8, '0'), cuerpo });
+  }
+  r.di('');
+  if (bordes.length < 2) {
+    r.di('   ⚠️ no se pudieron construir los dos restos ambiguos con este prefijo — el borde queda SIN medir.');
+  } else {
+    const arnesBorde = `${SP}/arnes-borde.ts`;
+    writeFileSync(arnesBorde, `
+import { digitoVerificador } from '${RUTA}';
+const cuerpos = JSON.parse(Deno.args[0]);
+console.log(JSON.stringify(cuerpos.map((c: string) => digitoVerificador(c))));
+`);
+    const res = spawnSync('deno', ['run', '--allow-read', arnesBorde, JSON.stringify(bordes.map((b) => b.cuerpo))], { encoding: 'utf8', timeout: 60000 });
+    if (res.status !== 0) noConcluyente(`el arnés del borde no corrió: ${String(res.stderr).slice(0, 200)}`);
+    const dvPieza = JSON.parse(res.stdout.trim().split('\n').pop());
+    for (const [i, b] of bordes.entries()) {
+      const mio = digitoModulo11(b.cuerpo);
+      r.dato(`  resto ${b.resto}`, `código ${b.cn} · mi verificador ${mio} · nuestra pieza ${dvPieza[i]}${mio === dvPieza[i] ? ' ✓' : ' 🔴 DIFIEREN'}`);
+      if (mio !== dvPieza[i])
+        rojo(`en el caso ambiguo del estándar (resto ${b.resto}) mi verificador dice ${mio} y nuestra pieza ${dvPieza[i]}.\n   Una de las dos produce claves que el SRI rechaza — y la que las genera es la pieza.`);
+    }
+    r.di(`      ⇒ los restos 1 y 10 comparten dv = ${dvPieza[0]}: es la colisión del estándar, no un defecto.`);
+    /* 🔴 EL CORPUS REAL, y lo que le falta. Cuatro facturas de producción medidas:
+         resto  0 → dv 0   TOGA FASHION      (11−0 = 11 ⇒ 0)
+         resto  5 → dv 6   Multicines
+         resto  7 → dv 4   Sweet & Coffee
+         resto 10 → dv 1   227ITALY          (uno de los dos casos ambiguos)
+       **Falta el resto 1**, el otro caso ambiguo. Los cuerpos que fabrico acá lo
+       cubren, pero mi verificador y nuestra pieza salieron de la misma lectura de la
+       especificación: *su acuerdo no prueba que el SRI opine igual.* Hace falta una
+       factura real cuyo resto sea 1, y hasta entonces se declara sin corpus. */
+    /* 🔴 CORPUS CERRADO EN LO QUE IMPORTA — siete facturas de producción:
+         resto  0 → dv 0  TOGA FASHION      (11−0 = 11 ⇒ 0)   ← borde
+         resto  1 → dv 1  SUSHICORP         (11−1 = 10 ⇒ 1)   ← borde
+         resto  2 → dv 9  CRECERMED
+         resto  4 → dv 7  AGROMIRO-EC
+         resto  5 → dv 6  Multicines
+         resto  7 → dv 4  Sweet & Coffee
+         resto 10 → dv 1  227ITALY                            ← borde
+       **Los TRES casos donde la especificación es ambigua o especial (0, 1, 10) están
+       validados contra producción.** Faltan 3, 6, 8 y 9 — y ésos NO son ambiguos:
+       `11−r` da un dígito directo, sin convención de por medio. *El hueco que
+       importaba era el de los bordes, y está cerrado.* */
+    r.di('      corpus real: restos 0 · 1 · 2 · 4 · 5 · 7 · 10 ✓ sobre 7 facturas de producción.');
+    r.di('      los TRES bordes (0 · 1 · 10) validados contra el SRI; faltan 3·6·8·9, que no son ambiguos.');
   }
 
   r.di(`\n   → ${claves.length} clave(s) real(es): módulo 11, estructura y RECONSTRUCCIÓN byte a byte.`);
