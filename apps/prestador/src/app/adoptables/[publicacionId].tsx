@@ -92,6 +92,7 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { parsearPrecio } from '@epetplace/i18n'
 
 type Estado =
   | { fase: 'cargando' }
@@ -414,7 +415,7 @@ export default function EditarAdoptable() {
           label={t('editarAdoptable.bonoMonto')}
           value={f.bonoMonto === null ? '' : String(f.bonoMonto)}
           onChangeText={(v) => {
-            const n = Number(v.replace(',', '.'));
+            const n = parsearPrecio(v);
             poner('bonoMonto', v.trim() === '' || Number.isNaN(n) ? null : n);
           }}
           keyboardType="decimal-pad"

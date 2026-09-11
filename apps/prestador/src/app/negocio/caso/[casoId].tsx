@@ -54,7 +54,7 @@ import {
   type CasoDetalle,
   type MensajeCaso,
 } from '@epetplace/api';
-import { horaCortaDeMensaje } from '@epetplace/i18n';
+import { parsearPrecio, horaCortaDeMensaje } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
 
@@ -109,7 +109,7 @@ export default function CasoDelPrestador() {
    *  eso devuelve 12 sin quejarse: **doce dólares en vez de doce cincuenta**,
    *  silencioso y con la coma a la vista.* */
   const montoNumero = (() => {
-    const n = Number.parseFloat(montoTexto.replace(',', '.'));
+    const n = parsearPrecio(montoTexto);
     return Number.isFinite(n) && n > 0 ? Math.round(n * 100) / 100 : null;
   })();
 

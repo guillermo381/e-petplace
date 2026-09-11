@@ -45,6 +45,7 @@ import { EvitaTeclado } from '@/components/evita-teclado';
 import { verificarSesion } from '@/lib/api';
 import { vozErrorVet } from '@/lib/voz-error-vet';
 import { useTraduccion } from '@/i18n';
+import { parsearPrecio } from '@epetplace/i18n'
 
 type ItemLocal = { key: string; nombre: string; precio: number; cantidad: number };
 
@@ -116,7 +117,7 @@ export default function NuevoPresupuesto() {
     setItems((xs) => [...xs, { key: nuevaKey(), nombre: p.nombre, precio: p.precio, cantidad: 1 }]);
   }
   function agregarLibre() {
-    const precio = Number(precioLibre.replace(',', '.'));
+    const precio = parsearPrecio(precioLibre);
     if (nombreLibre.trim().length === 0 || !Number.isFinite(precio) || precio <= 0) return;
     setItems((xs) => [...xs, { key: nuevaKey(), nombre: nombreLibre.trim(), precio, cantidad: 1 }]);
     setNombreLibre('');

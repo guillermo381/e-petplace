@@ -17,6 +17,21 @@
  * (el modo de fallo que L-192 existe para matar); en las dos, se
  * contradice. Cualquiera de los dos casos invalida el lint entero.
  *
+ * 🔴 `L-534` — **CÓMO SE ELIGE LO QUE UNA REGLA MIDE** (firma del founder,
+ * 10-sep-2026). ***Una regla atada al VALOR muere con la firma; una atada a la
+ * FORMA sobrevive.***
+ *
+ * El caso que la funda es `R87`: se escribió con la firma *«el formato de la
+ * plata es PUNTO»* y **el founder la enmendó el mismo día a COMA**. La regla
+ * **no se tocó** — porque lo que mide no es el separador, es **que haya UNA
+ * sola fuente de formato**. *Si hubiera medido «que diga punto», la enmienda
+ * la habría dejado midiendo lo contrario de lo firmado, y en verde.*
+ *
+ * ⇒ Antes de escribir una regla nueva: **«¿esto sigue siendo cierto si el
+ * founder cambia de opinión sobre el valor?»** Si la respuesta es no, la regla
+ * está atada al valor y hay que subir un nivel hasta el invariante — que casi
+ * siempre es *una sola fuente*, *una sola forma*, *nadie lo escribe a mano*.
+ *
  * El exit se lee del COMANDO, jamás del pipe (L-191).
  */
 
@@ -2322,6 +2337,35 @@ const FIXTURES = {
     path: 'packages/ui/src/components/DesgloseCompra.tsx',
     src: "const rotulo = 'IVA 15 %'\nconst tope = '$50'\nexport function DesgloseCompra() { return rotulo + tope }\n",
   }],
+  /* ⚠️ El BRAZO DE FECHAS de R84 **no se prueba con este fixture**: lee los
+     diccionarios REALES del disco, no el corpus que se le pasa. Su rojo se
+     probó a mano agregando una tercera fecha a un diccionario vivo (queda
+     registrado en el acta de S115-B) y su ancla —los 6 diccionarios
+     legibles— grita si alguno desaparece. */
+  /* R87 · una pantalla NUEVA que importa el riel de la coma. Compila, se ve
+     bien, y deja el producto con dos formatos de plata conviviendo. */
+  R87: [
+    ...Array.from({ length: 6 }, (_, i) => ({
+      path: `apps/prestador/src/app/ventas/relleno${i}.tsx`,
+      src: "import { monto } from '@epetplace/i18n'\nexport const x = monto\n",
+    })),
+  ],
+  /* R88 · el parseo de plata a mano: devuelve 1.234 sobre «1.234,50»,
+     **finito**, y por eso el guard de `isFinite` no dispara. */
+  R88: [
+    ...Array.from({ length: 6 }, (_, i) => ({
+      path: `apps/prestador/src/app/relleno${i}.tsx`,
+      src: "const precio = Number(texto.replace(',', '.'))\n",
+    })),
+  ],
+  /* R89 · un monto FORMATEADO viajando a un payload: el defecto más caro que
+     la unificación podría introducir. */
+  R89: [
+    ...Array.from({ length: 6 }, (_, i) => ({
+      path: `apps/cliente/src/app/relleno${i}.tsx`,
+      src: "await rpc('cobrar', { p_monto: formatearPrecio(total) })\n",
+    })),
+  ],
   /* R85 · la voz suelta en el JSX, sin pasar por el riel: el typecheck la
      deja pasar porque es un string perfectamente válido. */
   R85: [{
@@ -7979,6 +8023,73 @@ function r69(archivos) {
  * y no entra a esta lista, las tres reglas la ignoran en silencio — por eso el
  * ancla de cada una exige encontrarlas TODAS y grita si falta alguna.
  * ═══════════════════════════════════════════════════════════════════════════ */
+/** Los diccionarios de las tres casas.
+ *
+ *  🔴 **SE LLAMA `DICCIONARIOS_R84` Y NO `DICCIONARIOS`, y no es estilo: ese
+ *  nombre YA EXISTE en este archivo** (línea ~814) **y apunta a OTRA COSA —
+ *  sólo los dos del cliente.** Lo cazó el parser («Identifier already
+ *  declared»), pero el daño real no era el choque: **si hubiera reusado la
+ *  constante existente, este brazo no habría mirado nunca el prestador — que
+ *  es exactamente donde vive el caso real que vino a cazar.** Habría dado
+ *  VERDE sin mirar donde estaba el defecto.
+ *  *Dos vocabularios distintos que se llaman igual no son el mismo
+ *  vocabulario* — segunda vez en esta sesión (la primera fue `TRAZO`).
+ *
+ *  **Se nombran a mano y no se derivan**:
+ *  si un diccionario nuevo no entra acá, el ancla no lo nota —no es un archivo
+ *  faltante, es uno que nunca existió para la regla—. El día que nazca una
+ *  cuarta casa, esta lista es lo que hay que tocar.
+ *  ⚠️ `packages/i18n/src/fechas.ts` queda AFUERA a propósito: ahí los meses son
+ *  el riel de formato, o sea exactamente lo legítimo. */
+const DICCIONARIOS_R84 = [
+  'apps/cliente/src/i18n/es.ts',
+  'apps/cliente/src/i18n/en.ts',
+  'apps/prestador/src/i18n/es.ts',
+  'apps/prestador/src/i18n/en.ts',
+  'packages/ui/src/i18n/es.ts',
+  'packages/ui/src/i18n/en.ts',
+]
+
+/** 🔴 LÍMITE DE PALABRA **UNICODE**, jamás `\b`: `\b` es ASCII y en español no
+ *  cierra después de una vocal acentuada. Y acá el costo del límite malo es
+ *  concreto y MEDIDO — sin él, la regla marca cinco falsos positivos por
+ *  substring que ya viven en la casa:
+ *    «M**ayo**r» · «en m**arch**a» · «**Abril**a y ajustalo» · «m**ayo**r a cero»
+ *  *Un rojo por la razón equivocada está tan roto como un verde por la razón
+ *  equivocada* — y esta regla ya se cobró uno así en su primera corrida.
+ *
+ *  ⚠️ **`may` NO entra a la lista, y es un hueco DECLARADO**: en inglés es
+ *  también el verbo «poder», así que marcaría para siempre nuestra propia key
+ *  `facturacion.deducible` («pet expenses **may** be tax-deductible»).
+ *  *Entre un falso positivo permanente y un mes que no se caza, se declara el
+ *  segundo.* */
+const MESES_R84 = [
+  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto',
+  'septiembre', 'octubre', 'noviembre', 'diciembre',
+  'january', 'february', 'march', 'april', 'june', 'july', 'august',
+  'september', 'october', 'november', 'december',
+]
+const RE_MES = new RegExp(`(?<![\\p{L}\\p{N}])(${MESES_R84.join('|')})(?![\\p{L}\\p{N}])`, 'iu')
+/** 15/08/2026 · 2026-08-15 · 15-08-2026. Con año: un `12/5` suelto es casi
+ *  siempre otra cosa (una fracción, un rango), y marcarlo sería ruido. */
+const RE_FECHA_NUMERICA = /\b\d{1,4}[/-]\d{1,2}[/-]\d{2,4}\b/
+/** LA EXENCIÓN DEL VOCABULARIO DE FORMATO — control negativo pedido en la firma.
+ *
+ *  Un mes dentro de una key **que existe PARA nombrar meses** no es un dato que
+ *  caduca: es vocabulario. `mesLargo: 'enero'` traduce la palabra «enero», no
+ *  afirma que algo pasa en enero.
+ *
+ *  ⚠️ **Hoy no hay ninguna** —los meses los pone `Intl` en `fechas.ts`, que
+ *  está fuera del corpus—, así que esto protege un caso FUTURO: sin la
+ *  exención, el día que alguien traduzca meses a mano el gate lo marcaría mal,
+ *  y un gate que marca mal es un gate que alguien apaga entero.
+ *
+ *  🔴 **Discrimina por la KEY, no por el valor**, y eso es lo que impide que
+ *  sea un agujero: `mesLargo: 'enero'` queda exenta y `promoVence: 'enero'`
+ *  —mismo valor, otra key— sigue marcando. Probado en las dos direcciones. */
+const RE_KEY_DE_FORMATO =
+  /(?:^|[{,\s])(mes|meses|month|months|dia|dias|day|days|fecha|fechas|date|dates|formato|format)[A-Za-z]*\s*:\s*$/i
+
 const PIEZAS_FISCALES = [
   'CampoIdentificacion',
   'SelectorFacturacion',
@@ -8047,11 +8158,65 @@ function r84(archivos) {
       }
     }
   }
+  /* ══ BRAZO B · LAS FECHAS EN LOS DICCIONARIOS (firma del founder, 10-sep) ══
+     *«una fecha escrita en el diccionario es una fecha que caduca en silencio»*.
+     Es la MISMA clase que las tarifas del brazo A —un dato con fecha de
+     vencimiento escrito donde nadie lo va a ir a mirar— y por eso vive en la
+     misma regla en vez de en una nueva: **el gate que caza porcentajes y
+     montos y no fechas deja la mitad afuera.** */
+  let literalesDic = 0
+  const conFecha = []
+  for (const path of DICCIONARIOS_R84) {
+    let crudo
+    try {
+      crudo = readFileSync(join(RAIZ_REPO, path), 'utf8')
+    } catch {
+      fallos.push(`R84: ANCLA ROTA — no pude leer \`${path}\`. Un cero acá diría «no miré», no «no hay fechas».`)
+      continue
+    }
+    /* 🔴 SIN COMENTARIOS, y no es prolijidad: el primer censo dio TRES hits y
+       uno era del parser cruzando comillas dentro de un comentario con
+       apóstrofe (`L-170`: un censo por texto lee los comentarios como código).
+       Los comentarios de esta casa están llenos de fechas legítimas — cada
+       cabecera lleva la suya. */
+    const src = sinComentarios(crudo)
+    for (const m of src.matchAll(/(['"`])((?:(?!\1)[^\\]|\\.)*)\1/g)) {
+      const texto = m[2]
+      literalesDic += 1
+      if (!RE_MES.test(texto) && !RE_FECHA_NUMERICA.test(texto)) continue
+      /* La exención del vocabulario de formato (ver `RE_KEY_DE_FORMATO`). Se
+         mira lo que hay JUSTO ANTES del literal —la key que lo introduce— y no
+         una ventana ancha: una ventana arrastra las keys vecinas y bastaría un
+         `fecha:` tres líneas arriba para eximir a todo el bloque. */
+      const antes = src.slice(Math.max(0, m.index - 60), m.index)
+      if (RE_KEY_DE_FORMATO.test(antes)) continue
+      conFecha.push(`${path}:${lineaDe(src, m.index)} — «${texto.slice(0, 70)}»`)
+    }
+  }
+  /* SOLO-BAJA: los 2 heredados son el par es/en de la matrícula profesional
+     («Desde el 15 de agosto…»), que **NO es mío y vive en territorio de las
+     apps**. Congelarlo deja el caso VISIBLE sin bloquear a nadie, y la regla
+     sí frena el siguiente. Muere cuando llegue a 0. */
+  const BASELINE_FECHAS = 2
+  if (conFecha.length > BASELINE_FECHAS) {
+    for (const d of conFecha) {
+      fallos.push(
+        `R84 **una FECHA escrita en un diccionario** (${d}). ` +
+        `Firma del founder: *«una fecha escrita en el diccionario es una fecha que caduca en silencio»* — ` +
+        `la FRASE va al riel con su \`{{placeholder}}\`, el DATO llega por props (el reparto de \`IVA {{tarifa}} %\`).`,
+      )
+    }
+  }
+
   return {
     fallos,
     info:
       `0 tarifa(s) escrita(s) adentro · alcance: ${PIEZAS_FISCALES.length} pieza(s), ${literales} literal(es) mirado(s) · ` +
-      `su verde dice «la tarifa llega por props», JAMÁS «el cálculo del IVA está bien» ni «ninguna pantalla la teclea»`,
+      `BRAZO FECHAS: ${conFecha.length} fecha(s) en diccionarios · baseline ${BASELINE_FECHAS} solo-baja (el par es/en de la matrícula, dueño: apps) · ` +
+      `${DICCIONARIOS_R84.length} diccionario(s), ${literalesDic} literal(es) mirado(s) · ` +
+      `su verde dice «la tarifa llega por props y no nacieron fechas nuevas», JAMÁS «el cálculo del IVA está bien», ` +
+      `«ninguna pantalla la teclea» ni «las 2 heredadas están bien» · ` +
+      `⚠️ NO mide «may» (en inglés es también el verbo, y marcaría nuestra propia key \`deducible\` para siempre)`,
   }
 }
 
@@ -8152,7 +8317,181 @@ function r86(archivos) {
   }
 }
 
-const REGLAS = { R86: r86, R85: r85, R84: r84, R83: r83, R82: r82, R81: r81, R80: r80, R79: r79, R78: r78, R77: r77, R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+
+/** R87 · EL FORMATO DE LA PLATA ES UNO SOLO (S115-B · firma del founder).
+ *
+ *  ⏪ **La firma se enmendó el mismo día y esta regla sobrevivió sin cambiar de
+ *  trabajo**: primero decía «punto en toda la casa», después **«coma decimal y
+ *  punto de miles»**. Lo que la regla mide no era el separador —era **que haya
+ *  UNA sola fuente**—, y por eso el cambio de firma no la tocó. *Una regla
+ *  atada al valor habría muerto con la enmienda; atada al invariante, no.*
+ *
+ *  *«un formateador que contradice al resto y espera a que alguien lo llame de
+ *  buena fe es justamente el modo de falla que acabamos de nombrar»*.
+ *
+ *  🔴 QUÉ MIDE: **cuántos archivos importan `monto` del riel de `@epetplace/i18n`**
+ *  —el que produce coma— contra la fuente firmada, que es `formatearPrecio` de
+ *  `PrecioText`. **SOLO-BAJA desde 5**: los cinco vivos son del mundo VENTAS
+ *  del prestador y **no se tocaron** (retirarlos rompía pantallas; alinear el
+ *  riel al punto le quita el separador de miles a liquidaciones — decisión de
+ *  producto, servida al founder con sus números en `moneda.ts`).
+ *
+ *  ⇒ **su trabajo es que no CREZCA.** Muere cuando llegue a 0.
+ *
+ *  ⚠️ LO QUE NO MIDE, declarado: no mira los `toFixed(2)` escritos a mano
+ *  —que son el otro formato, y son decenas— ni juzga cuál de los dos está
+ *  bien. *Su verde dice «no entró un consumidor nuevo del riel de la coma»,
+ *  jamás «el producto muestra un solo formato».* */
+function r87(archivos) {
+  const RE_IMPORT = /import\s*\{[^}]*\bmonto\b[^}]*\}\s*from\s*['"]@epetplace\/i18n['"]/
+  const vistos = new Set()
+  const consumidores = []
+  for (const { path, src } of archivos) {
+    if (vistos.has(path)) continue
+    vistos.add(path)
+    if (RE_IMPORT.test(sinComentarios(src ?? ''))) consumidores.push(path)
+  }
+  /* 🔴 ANCLA: sin un corpus de apps no se mide nada, y un cero acá diría «no
+     miré», no «nadie lo importa» — que es el verde flojo que esta casa pasó
+     una sesión entera cazando. */
+  const fallos = [...ancla('R87', vistos.size, 100, 'archivo(s) de apps en el corpus')]
+  if (fallos.length > 0) return { fallos, info: 'corpus incompleto' }
+
+  /* 🔴 8 Y NO 5, y lo corrigió ESTE GATE a mi censo previo. Mi `grep` medía
+     `import {...} from '...'` **en UNA línea**, y `grep` trabaja línea por
+     línea: los imports MULTILÍNEA se le escapaban —`historico.tsx` y
+     `ventana-pedidos.tsx`—. El regex de acá es el mismo patrón, pero en JS
+     `[^}]*` cruza saltos de línea. *Un censo por patrón acota, no cierra* —y
+     el patrón más pobre erró por dos.* */
+  const BASELINE = 8
+  if (consumidores.length > BASELINE) {
+    for (const c of consumidores) {
+      fallos.push(
+        `R87 **\`${c}\` formatea plata con el riel de la COMA.** La firma del founder ` +
+        `(10-sep-2026) dice **coma decimal y punto de miles**, y la fuente única es \`formatearPrecio\` de ` +
+        `\`PrecioText\`. Los ${BASELINE} del baseline son del prestador (+ el hook muerto) y están ` +
+        `declarados en \`packages/i18n/src/moneda.ts\`; este entró después.`,
+      )
+    }
+  }
+  return {
+    fallos,
+    info:
+      `${consumidores.length} consumidor(es) del riel de la coma · baseline ${BASELINE} solo-baja ` +
+      `(7 vivos del prestador + el hook muerto del cliente) · muere en 0 · alcance: ${vistos.size} archivo(s) mirados · ` +
+      `su verde dice «no entró uno nuevo», JAMÁS «el producto muestra un solo formato» ` +
+      `(no mide los \`toFixed(2)\` a mano, que son el otro formato)`,
+  }
+}
+
+
+/** R88 · LA PLATA NO SE PARSEA A MANO (S115-B · firma del founder).
+ *
+ *  🔴 QUÉ MIDE, y es un defecto MEDIDO: `.replace(',', '.')` + `parseFloat`
+ *  sobre «1.234,50» devuelve **1.234** — plausible, equivocado y **FINITO**.
+ *  `SliderPrecio` se protegía con `Number.isFinite` y ese guard **no
+ *  disparaba**, así que la edición quedaba activa sobre un riel mal numerado.
+ *  La cura es `parsearPrecio` del riel, que devuelve `NaN` ante un formato
+ *  ajeno — *lo que vuelve a hacer útil al guard que ya existía*.
+ *
+ *  ⚠️ **LOS CUATRO EXENTOS SON POR RUTA Y NO POR PATRÓN**, porque la regla
+ *  **no puede distinguir plata de peso mirando el texto**: dos son pesos en
+ *  kg, uno son VITALES (temperatura, frecuencia) y otro `duracion_dias`.
+ *  *Aplicarles un parseo de PRECIO sería trasplantar un criterio correcto a
+ *  otra pregunta* — y un kilo no lleva separador de miles ni símbolo. */
+function r88(archivos) {
+  const EXENTOS_NO_PLATA = [
+    'apps/cliente/src/components/registrar-peso-hoja.tsx',      // peso en kg
+    'apps/prestador/src/app/ventas/pedido/[pedidoId].tsx',      // peso
+    'apps/prestador/src/app/veterinaria/consulta/[citaId].tsx', // vitales + duracion_dias
+  ]
+  const RE_PARSEO = /\.replace\(\s*['"],['"]\s*,\s*['"]\.['"]\s*\)/
+  const vistos = new Set()
+  const ofensores = []
+  for (const { path, src } of archivos) {
+    if (vistos.has(path)) continue
+    vistos.add(path)
+    if (EXENTOS_NO_PLATA.some((e) => path.endsWith(e))) continue
+    const limpio = sinComentarios(src ?? '')
+    for (const m of limpio.matchAll(new RegExp(RE_PARSEO.source, 'g'))) {
+      ofensores.push(`${path}:${lineaDe(limpio, m.index)}`)
+    }
+  }
+  /* 🔴 ANCLA: sin corpus no se mide nada y el cero diría «no miré». */
+  const fallos = [...ancla('R88', vistos.size, 100, 'archivo(s) de apps en el corpus')]
+  if (fallos.length > 0) return { fallos, info: 'corpus incompleto' }
+
+  for (const o of ofensores) {
+    fallos.push(
+      `R88 **plata parseada a mano en \`${o}\`.** Sobre «1.234,50» devuelve **1.234** — ` +
+      `plausible, equivocado y FINITO, así que \`Number.isFinite\` no lo frena. ` +
+      `Usá \`parsearPrecio\` de \`@epetplace/i18n\`, que devuelve \`NaN\` ante un formato ajeno.`,
+    )
+  }
+  return {
+    fallos,
+    info:
+      `${ofensores.length} parseo(s) de plata a mano · DURA EN 0 · ${EXENTOS_NO_PLATA.length} ruta(s) exenta(s) ` +
+      `por NO ser plata (dos pesos, vitales, duración) · alcance: ${vistos.size} archivo(s) · ` +
+      `su verde dice «nadie parsea plata a mano», JAMÁS «los exentos están bien» (no los mira) ` +
+      `ni «el número que se guarda es el correcto»`,
+  }
+}
+
+/** R89 · UN MONTO FORMATEADO NO VIAJA A UN PAYLOAD (S115-B · firma del founder).
+ *
+ *  🔴 **ES PREVENTIVA, Y ESE ES SU VALOR.** Hoy el terreno está limpio —cero
+ *  casos medidos—, y la firma es explícita: *«un precio formateado viajando a
+ *  un payload es el defecto que esta unificación podría introducir, y sería el
+ *  más caro de todos… la única forma de que nunca aparezca es que algo lo
+ *  vigile desde el día cero»*.
+ *
+ *  El riesgo es concreto: con el formato nuevo, `'$1.234,50'` mandado a un
+ *  campo numérico llega como basura o como **1.234** — y del otro lado hay
+ *  plata. **Los montos que van al riel o al XML fiscal siguen siendo
+ *  numéricos, con punto decimal**; el formateador es SÓLO de presentación.
+ *
+ *  ⚠️ LO QUE NO MIDE, declarado: mira **por línea**, no sigue el flujo de una
+ *  variable. Un monto formateado guardado en una constante y mandado tres
+ *  líneas abajo se le escapa. *Su verde dice «no hay un formateador dentro de
+ *  un campo de payload en la misma línea», jamás «ningún texto llega al
+ *  motor».* */
+function r89(archivos) {
+  const FORMATEADORES = ['formatearPrecio', 'montoConCodigo', 'precioPorKg', 'monto']
+  const RE_PAYLOAD = new RegExp(
+    `(p_[a-z_]+\\s*:|body\\s*:|JSON\\.stringify\\(|\\.rpc\\()[^\\n]*\\b(${FORMATEADORES.join('|')})\\s*\\(`,
+  )
+  const vistos = new Set()
+  const ofensores = []
+  for (const { path, src } of archivos) {
+    if (vistos.has(path)) continue
+    vistos.add(path)
+    const limpio = sinComentarios(src ?? '')
+    for (const m of limpio.matchAll(new RegExp(RE_PAYLOAD.source, 'g'))) {
+      ofensores.push(`${path}:${lineaDe(limpio, m.index)} — \`${m[2]}\` dentro de \`${m[1].trim()}\``)
+    }
+  }
+  const fallos = [...ancla('R89', vistos.size, 100, 'archivo(s) de apps en el corpus')]
+  if (fallos.length > 0) return { fallos, info: 'corpus incompleto' }
+
+  for (const o of ofensores) {
+    fallos.push(
+      `R89 **un monto FORMATEADO viaja a un payload** (${o}). El formateador es de PRESENTACIÓN: ` +
+      `al motor y al XML fiscal la plata va **numérica, con punto decimal**. ` +
+      `Con el formato de la casa, «$1.234,50» llega como basura o como 1.234 — y del otro lado hay plata.`,
+    )
+  }
+  return {
+    fallos,
+    info:
+      `${ofensores.length} monto(s) formateado(s) en payload · DURA EN 0 (nació preventiva, terreno limpio) · ` +
+      `${FORMATEADORES.length} formateador(es) vigilados · alcance: ${vistos.size} archivo(s) · ` +
+      `su verde dice «no hay un formateador dentro de un campo de payload en la MISMA LÍNEA», ` +
+      `JAMÁS «ningún texto llega al motor» (no sigue el flujo de una variable)`,
+  }
+}
+
+const REGLAS = { R89: r89, R88: r88, R87: r87, R86: r86, R85: r85, R84: r84, R83: r83, R82: r82, R81: r81, R80: r80, R79: r79, R78: r78, R77: r77, R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -8627,6 +8966,12 @@ corridas.push(['R76 (el plazo no es una alarma ni un contador)', r76(ui)])
 corridas.push(['R84 (ninguna tarifa vive adentro de una pieza)', r84(uiCodigo)])
 corridas.push(['R85 (la voz fiscal pasa por el riel, en los dos idiomas)', r85(uiCodigo)])
 corridas.push(['R86 (el error del SRI no llega a la familia)', r86(uiCodigo)])
+/* R87 corre sobre las APPS (ahí viven los consumidores), no sobre `ui`. */
+corridas.push(['R87 (el formato de la plata es uno solo)', r87([...apps, ...appsCodigo])])
+/* R88 y R89 corren sobre TODO: `apps` + su lógica + las piezas de `ui`, porque
+   el parseo a mano vivía en las dos casas (`SliderPrecio` era uno de ellos). */
+corridas.push(['R88 (la plata no se parsea a mano)', r88([...apps, ...appsCodigo, ...uiCodigo])])
+corridas.push(['R89 (un monto formateado no viaja a un payload)', r89([...apps, ...appsCodigo, ...uiCodigo])])
 corridas.push(['R71 (un wrapper sin exportar es un motor sin puerta)', r71(leer(['packages/api/src/index.ts', ...archivosCodigo('packages/api/src/wrappers')]))])
 corridas.push(['R69 (nada absoluto despues de SuperficieLlamada)', r69([...apps, ...appsCodigo])]);
 corridas.push(['R68 (nada del componente dentro de un worklet de gesto)', r68([...ui, ...apps, ...appsCodigo, ...leer(archivosCodigo('packages/ui/src'))])]);

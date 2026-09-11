@@ -53,7 +53,7 @@ await page.screenshot({ path: `${S}/s55-negocio-oferta.png`, fullPage: true });
 await page.getByText('Servicios y precios', { exact: true }).first().click();
 t = await esperar('Tus paseos');
 check(t.includes('[DEMO S44] Paseo 30 min'), 'Servicios: la oferta REAL del seed');
-check(t.includes('$10.00'), 'Servicios: precio en mono');
+check(t.includes('$10,00'), 'Servicios: precio en mono');
 check(t.includes('Ofrecer otra duración'), 'Servicios: CTA de bloque nuevo');
 check(t.includes('Paquetes y paseos recurrentes llegan más adelante.'), 'Servicios: peldaño 2 declarado (hueco honesto)');
 await page.screenshot({ path: `${S}/s55-servicios.png`, fullPage: true });

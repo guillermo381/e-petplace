@@ -250,6 +250,8 @@ export const uiEn = {
     subtotalConIva: 'Subtotal (with {{tarifa}}% VAT)',
     descuento: 'Discount',
     iva: '{{tarifa}}% VAT',
+    tarifaServicio: 'Service fee',
+    tarifaPromocion: 'Free until {{hasta}}',
     total: 'Total',
     porQue: "Pet food is VAT-free; treats and accessories aren't.",
   },

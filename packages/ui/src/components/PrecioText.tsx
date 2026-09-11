@@ -136,10 +136,25 @@ const RECETA: Record<PrecioRegistro, { size: number; familia: string; leading: n
   linea: { size: typography.size.base, familia: typography.family.sans.regular, leading: 24 },
 }
 
-/** El formateo, en UN lugar. Ver la cabecera: recibe número, no texto. */
-export function formatearPrecio(valor: number): string {
-  return `$${valor.toFixed(2)}`
-}
+/* 🔴 S115-B · EL FORMATEO SE MUDÓ AL RIEL, y esta línea es la fuente única.
+ *
+ * **Firma del founder (10-sep-2026): coma decimal y punto de miles en toda la
+ * casa** — `$45,00` · `$1.234,50` · `$0,99`. *«es el formato ecuatoriano y el
+ * de los RIDE que el cliente va a recibir del SRI — la app no puede decir un
+ * número distinto del que dice su factura»*.
+ *
+ * ⚠️ **Vive en `packages/i18n` y no acá, por una MEDICIÓN:** `packages/ui` ya
+ * depende de `packages/i18n`, así que hacer que `monto()` delegara en esta
+ * función habría creado un **CICLO** entre paquetes. El formato baja al riel
+ * —donde ya vive el de las fechas— y acá queda su re-export: **los
+ * consumidores no cambian una línea y la fuente sigue siendo una sola.**
+ *
+ * ⏪ Lo que decía antes: `` `$${valor.toFixed(2)}` `` — punto decimal y **sin
+ * separador de miles**. Ese segundo detalle es el que dio vuelta la firma
+ * original: quitarle los miles al prestador en liquidaciones era peor que
+ * cambiarle el separador decimal al cliente. */
+import { formatearPrecio } from '@epetplace/i18n'
+export { formatearPrecio }
 
 export function PrecioText({
   valor,
