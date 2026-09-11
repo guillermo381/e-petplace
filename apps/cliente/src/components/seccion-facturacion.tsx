@@ -45,6 +45,7 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import {
   Boton,
+  Campo,
   CampoIdentificacion,
   SelectorFacturacion,
   Texto,
@@ -64,6 +65,17 @@ const VACIO: DatosIdentificacion = {
   email: '',
 };
 
+/* 🔴 EL CORREO SE VALIDA POR FORMA MÍNIMA, NO POR REGEX DE ESPECIFICACIÓN.
+   *Un validador que sólo busca «@» no valida un correo: confirma que alguien
+   escribió una arroba* (`S105`, un correo con un espacio adentro entró y su
+   mensaje murió 20 minutos después en una cola que nadie leía). Se exige algo
+   antes, algo después, un punto en el dominio y CERO espacios — el resto lo
+   dice el rebote real del envío, que es la única autoridad.
+   No se re-implementa acá la validación del servidor: esto sólo evita el caso
+   obvio antes de cobrar. */
+const CORREO_MINIMO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const correoSirve = (v: string) => CORREO_MINIMO.test(v.trim());
+
 export interface SeccionFacturacionProps {
   /** El perfil guardado. `null` = todavía no declaró ninguno. */
   perfil: TaxProfile | null;
@@ -79,6 +91,11 @@ export interface SeccionFacturacionProps {
   mostrarDeducible?: boolean;
   /** Para la línea compacta: el nombre de la persona cuando el perfil no es RUC. */
   nombrePersona?: string | null;
+  /** 🔴 El correo al que va la factura. **Obligatorio para poder cobrar** — sin
+   *  él la compra se paga y el comprobante no tiene a dónde ir. Se precarga con
+   *  el de la cuenta y la persona puede cambiarlo. */
+  correo: string;
+  onCorreo: (v: string) => void;
 }
 
 export function SeccionFacturacion({
@@ -89,6 +106,8 @@ export function SeccionFacturacion({
   onCambiar,
   mostrarDeducible = false,
   nombrePersona,
+  correo,
+  onCorreo,
 }: SeccionFacturacionProps) {
   const { t } = useTraduccion();
 
@@ -114,6 +133,37 @@ export function SeccionFacturacion({
   );
 
   const sobreElTope = total > topeConsumidorFinal;
+  /* `tocado` separa «todavía no lo escribió» de «lo escribió mal»: sin él el
+     campo nace en rojo al montarse vacío (mismo criterio que la pieza de B). */
+  const [correoTocado, setCorreoTocado] = useState(false);
+  const correoMal = correoTocado && !correoSirve(correo);
+
+  /* 🔴 VA SIEMPRE, ELIJA LO QUE ELIJA — y ése es el punto entero. El email que
+     `CampoIdentificacion` trae adentro vive DENTRO de «Con mis datos»: quien
+     paga como consumidor final no pasa por él y se quedaría sin comprobante.
+     *El correo no es un dato fiscal: es la dirección a la que va el papel.*
+
+     ⚠️ Con «Con mis datos» elegido, la pieza de B dibuja su propio campo de
+     correo y se ve dos veces. **No divergen** —los dos escriben el mismo
+     estado— pero es redundancia visible: pedido a B una prop para apagar el
+     suyo, y el día que llegue esta nota se borra con ella. */
+  const campoCorreo = (
+    <View style={{ gap: spacing[2] }}>
+      <Texto variante="seccion">{t('correoFactura.pregunta')}</Texto>
+      <Campo
+        label={t('correoFactura.etiqueta')}
+        placeholder={t('correoFactura.formato')}
+        value={correo}
+        onChangeText={onCorreo}
+        onBlur={() => setCorreoTocado(true)}
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoCorrect={false}
+        error={correoMal ? t('correoFactura.invalido') : undefined}
+        ayuda={correoMal ? undefined : t('correoFactura.ayuda')}
+      />
+    </View>
+  );
 
   const avisar = (parche: Partial<{ modo: ModoFacturacion; datos: DatosIdentificacion; guardar: boolean }>) => {
     const m = parche.modo ?? modo;
@@ -129,6 +179,8 @@ export function SeccionFacturacion({
        la línea muestra sólo la identificación, que es el dato que sí existe. */
     const nombre = perfil.razonSocial ?? nombrePersona ?? null;
     return (
+      <View style={{ gap: spacing[5] }}>
+      {campoCorreo}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
         <View style={{ flex: 1 }}>
           <Texto variante="apoyo">{t('facturacionCheckout.facturaA')}</Texto>
@@ -142,12 +194,15 @@ export function SeccionFacturacion({
           onPress={() => setEditando(true)}
         />
       </View>
+      </View>
     );
   }
 
   /* ③ BAJO EL TOPE Y SIN DATOS — no se pregunta nada. */
   if (!perfil && !sobreElTope && !editando) {
     return (
+      <View style={{ gap: spacing[4] }}>
+      {campoCorreo}
       <Boton
         variante="ghost"
         etiqueta={t('facturacionCheckout.quieresFactura')}
@@ -157,6 +212,7 @@ export function SeccionFacturacion({
           avisar({ modo: 'misDatos' });
         }}
       />
+      </View>
     );
   }
 
@@ -165,6 +221,8 @@ export function SeccionFacturacion({
      razón con el número que le pasamos. No se puede pagar sin declararlos, y la
      pieza lo explica en vez de dejar un control muerto. */
   return (
+    <View style={{ gap: spacing[5] }}>
+    {campoCorreo}
     <SelectorFacturacion
       elegido={modo}
       onElegir={(m) => {
@@ -191,5 +249,6 @@ export function SeccionFacturacion({
         acento="control"
       />
     </SelectorFacturacion>
+    </View>
   );
 }

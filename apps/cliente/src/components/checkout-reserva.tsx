@@ -55,7 +55,7 @@ import {
 import {
   BotonPagar, SeccionMedioDePago, useMedioDePago,
 } from '@/components/seccion-medio-de-pago';
-import { SeccionFacturacion } from '@/components/seccion-facturacion';
+import { SeccionFacturacion, correoSirve } from '@/components/seccion-facturacion';
 import {
   fiscalTopeConsumidorFinal,
   fiscalObtenerTaxProfile,
@@ -192,6 +192,11 @@ export function CheckoutReserva({
   const [tope, setTope] = useState<number | 'cargando' | 'sinTope'>('cargando');
   const [perfilFiscal, setPerfilFiscal] = useState<TaxProfile | null>(null);
   const [nombrePersona, setNombrePersona] = useState<string | null>(null);
+  /* 🔴 EL CORREO DE LA FACTURA. Se precarga con el de la cuenta y **se puede
+     cambiar**: alguien puede querer su comprobante en otra casilla. Nace vacío
+     y NO se rellena con nada «probable» — si la cuenta no tiene correo, la
+     persona lo escribe, que es justamente el caso que esta cura viene a cerrar. */
+  const [correoFactura, setCorreoFactura] = useState('');
   /* Lo que la sección devolvió. `null` = todavía no tocó nada, que NO es lo
      mismo que «eligió consumidor final». */
   const [eleccionFiscal, setEleccionFiscal] = useState<
@@ -210,7 +215,15 @@ export function CheckoutReserva({
       if (!vigente) return;
       setTope(t.ok ? t.data : 'sinTope');
       if (p.ok) setPerfilFiscal(p.data);
-      if (yo.ok) setNombrePersona(yo.data.nombre);
+      if (yo.ok) {
+        setNombrePersona(yo.data.nombre);
+        /* Precarga: sólo si está vacío, para no pisar lo que la persona ya
+           escribió si la lectura llega tarde. */
+        if (yo.data.email) setCorreoFactura((v) => (v.trim().length > 0 ? v : yo.data.email ?? ''));
+      }
+      /* El correo del perfil fiscal manda sobre el de la cuenta: es el que la
+         persona eligió PARA SUS FACTURAS. */
+      if (p.ok && p.data?.email) setCorreoFactura((v) => (v.trim().length > 0 ? v : p.data!.email ?? ''));
     })();
     return () => { vigente = false; };
   }, [fase]);
@@ -271,6 +284,16 @@ export function CheckoutReserva({
   const pagar = useCallback(async () => {
     if (trabajando) return;
 
+    /* 🔴 SIN CORREO NO SE COBRA — la cura de raíz de S115-C.
+       *Una compra pagada cuyo comprobante no tiene a dónde ir no es un problema
+       fiscal: es una familia que no recibe su factura*, y el día que lo note ya
+       pagó. El freno vive ACÁ, en el acto de cobrar, y no sólo en el botón:
+       deshabilitar el botón es cortesía, esto es la garantía. */
+    if (!correoSirve(correoFactura)) {
+      mostrar({ variante: 'error', texto: t('correoFactura.falta') });
+      return;
+    }
+
     /* 🔴 EL PERFIL SE GUARDA ANTES DE COBRAR, y no después: el motor resuelve
        el receptor del comprobante al confirmar el pago (`resolver_receptor_fiscal`).
        *Guardarlo después sería emitir con lo viejo y corregir un papel que ya
@@ -282,7 +305,7 @@ export function CheckoutReserva({
         identificacion: eleccionFiscal.datos.identificacion,
         razonSocial: eleccionFiscal.datos.razonSocial.trim() || null,
         direccion: eleccionFiscal.datos.direccion.trim() || null,
-        email: eleccionFiscal.datos.email.trim() || null,
+        email: correoFactura.trim(),
         predeterminado: true,
       });
       /* Si el servidor rebota, NO se cobra: la familia pidió factura con sus
@@ -597,6 +620,8 @@ export function CheckoutReserva({
             topeConsumidorFinal={tope}
             topeFormateado={formatearPrecio(tope)}
             nombrePersona={nombrePersona}
+            correo={correoFactura}
+            onCorreo={setCorreoFactura}
             onCambiar={setEleccionFiscal}
           />
         ) : null}

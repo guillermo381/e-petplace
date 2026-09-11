@@ -4649,4 +4649,19 @@ export const clienteEs = {
     quieresFactura: '¿Quieres factura con tus datos?',
   },
 
+  /* S115-C · EL CORREO DE LA FACTURA. Su voz NO es la de un campo de formulario:
+     dice PARA QUÉ se pide. «Correo electrónico» a secas se lee como un trámite
+     más y se completa con cualquier cosa; «¿a dónde te la enviamos?» dice que
+     ese dato tiene un destinatario y una consecuencia. */
+  correoFactura: {
+    pregunta: '¿A dónde te enviamos tu factura?',
+    etiqueta: 'Correo electrónico',
+    /* Se dice ANTES de que falle, no como error: es la razón de que sea
+       obligatorio, y explicarla evita el rebote en vez de justificarlo. */
+    ayuda: 'Te mandamos ahí el comprobante de esta compra.',
+    formato: 'tu@correo.com',
+    falta: 'Necesitamos un correo para enviarte la factura.',
+    invalido: 'Ese correo no parece válido. Revísalo.',
+  },
+
 } as const;

@@ -3385,4 +3385,13 @@ export const clienteEn = {
     quieresFactura: 'Want an invoice with your details?',
   },
 
+  correoFactura: {
+    pregunta: 'Where should we send your invoice?',
+    etiqueta: 'Email',
+    ayuda: "We'll send this purchase's invoice there.",
+    formato: 'you@email.com',
+    falta: 'We need an email to send you the invoice.',
+    invalido: "That email doesn't look valid. Check it.",
+  },
+
 } as const satisfies Espejo<typeof clienteEs>;
