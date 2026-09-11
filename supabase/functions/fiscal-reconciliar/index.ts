@@ -6,7 +6,7 @@
 //    reloj es lo que convierte ese silencio en un número.
 // ═══════════════════════════════════════════════════════════════════════════
 import { createClient } from 'jsr:@supabase/supabase-js@2';
-import { resolverPuerto } from '../_shared/facturacion/mod.ts';
+import { resolverPuerto, resolverProveedorConProcedencia } from '../_shared/facturacion/mod.ts';
 
 Deno.serve(async (req) => {
   const secreto = Deno.env.get('DESPACHO_SECRET') ?? '';
@@ -15,7 +15,23 @@ Deno.serve(async (req) => {
   }
   const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
   const { data: cfg } = await db.from('app_config').select('valor').eq('clave', 'fiscal_proveedor').maybeSingle();
-  const puerto = resolverPuerto(cfg?.valor ?? 'manual', Deno.env.get('FACTURACION_WEBHOOK_SECRET') ?? 'pruebas');
+  /* De dónde salió el proveedor, dicho — y el secreto homónimo, si
+     discrepa, gritado. `FACTURACION_PROVEEDOR` está cargado y NO manda. */
+  const prov = resolverProveedorConProcedencia(cfg?.valor);
+  if (prov.discrepancia) console.warn(`fiscal_proveedor_discrepancia: ${prov.discrepancia}`);
+  /* El contribuyente sale de la FILA, no de un literal (firma S115-A). */
+  const { data: emisor } = await db.from('fiscal_emisor').select('ruc').maybeSingle();
+  let puerto;
+  try {
+    puerto = resolverPuerto(prov.nombre, {
+      secretoWebhook: Deno.env.get('FACTURACION_WEBHOOK_SECRET') ?? '',
+      apiKey: Deno.env.get('FACTURACION_API_KEY') ?? undefined,
+      rucContribuyente: emisor?.ruc,
+    });
+  } catch (e) {
+    return Response.json({ ok: false, codigo: 'puerto_no_resuelto',
+                           proveedor: prov.nombre, motivo: String(e).slice(0, 200) }, { status: 409 });
+  }
 
   const ahora = Date.now();
   const hace = (min: number) => new Date(ahora - min * 60_000).toISOString();

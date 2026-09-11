@@ -9,7 +9,7 @@
 //    que explicarle al SRI.*
 // ═══════════════════════════════════════════════════════════════════════════
 import { createClient } from 'jsr:@supabase/supabase-js@2';
-import { resolverPuerto } from '../_shared/facturacion/mod.ts';
+import { resolverPuerto, resolverProveedorConProcedencia } from '../_shared/facturacion/mod.ts';
 // La clave y el secuencial los resuelve `fiscal_reservar_numero` del lado de la
 // base, en un solo hecho: acá ya no se construyen.
 import { construirCanonico, CONSUMIDOR_FINAL, CANONICO_VERSION,
@@ -52,15 +52,40 @@ Deno.serve(async (req) => {
 
   const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
+  /* 🔴 `fiscal_ambiente` SALIÓ DE ESTA LECTURA: se traía y NO SE USABA.
+     El ambiente vive en `fiscal_emisor.ambiente` —de ahí lo toma
+     `fiscal_reservar_numero` y de ahí sale el dígito de la clave—, así que la
+     fila de `app_config` era una tercera fuente declarada y muerta. *Un valor
+     que se lee y no se usa es peor que uno que no se lee: el próximo lo
+     encuentra en la consulta y concluye que manda.* */
   const { data: cfg } = await db.from('app_config').select('clave,valor')
-    .in('clave', ['fiscal_proveedor', 'fiscal_ambiente', 'fiscal_simular_cupo_agotado']);
-  const proveedor = cfg?.find((c) => c.clave === 'fiscal_proveedor')?.valor ?? 'manual';
+    .in('clave', ['fiscal_proveedor', 'fiscal_simular_cupo_agotado']);
+  const prov = resolverProveedorConProcedencia(
+    cfg?.find((c) => c.clave === 'fiscal_proveedor')?.valor);
+  if (prov.discrepancia) console.warn(`fiscal_proveedor_discrepancia: ${prov.discrepancia}`);
   const simularCupo = cfg?.find((c) => c.clave === 'fiscal_simular_cupo_agotado')?.valor === 'true';
-  const puerto = resolverPuerto(proveedor,
-    Deno.env.get('FACTURACION_WEBHOOK_SECRET') ?? 'pruebas', simularCupo);
-
+  /* 🔴 EL EMISOR SE LEE ANTES DEL PUERTO, y el orden es la regla: el
+     contribuyente (`x-taxpayer-ruc`) sale de `fiscal_emisor.ruc`. *Resolver el
+     puerto primero obligaría a sacarlo de un literal o de un secreto, que es
+     justo lo que la firma del founder prohíbe: cambiar de contribuyente tiene
+     que ser cambiar una fila.* */
   const { data: emisor } = await db.from('fiscal_emisor').select('*').single();
   if (!emisor) return json({ ok: false, codigo: 'sin_emisor_configurado' }, 409);
+
+  let puerto;
+  try {
+    puerto = resolverPuerto(prov.nombre, {
+      secretoWebhook: Deno.env.get('FACTURACION_WEBHOOK_SECRET') ?? '',
+      apiKey: Deno.env.get('FACTURACION_API_KEY') ?? undefined,
+      rucContribuyente: emisor.ruc,
+      simularCupoAgotado: simularCupo,
+    });
+  } catch (e) {
+    /* Fail-closed HABLADO: sin puerto no se emite, y se dice por qué en vez de
+       caer a un default que emitiría contra otro. */
+    return json({ ok: false, codigo: 'puerto_no_resuelto', proveedor: prov.nombre,
+                  proveedor_fuente: prov.fuente, motivo: String(e).slice(0, 200) }, 409);
+  }
 
   /* ── LOS CÓDIGOS DEL SRI SON DATO ─────────────────────────────────────────
      Se leen UNA vez por corrida y se pasan al canónico, que los CONGELA en el
@@ -256,5 +281,10 @@ Deno.serve(async (req) => {
       hechos.push({ id: d.id, error: String(e).slice(0, 120) });
     }
   }
-  return json({ ok: true, proveedor: puerto.nombre, procesados: hechos.length, hechos });
+  /* El reporte DICE de dónde salió el proveedor. *Sin esto, «proveedor:
+     simulador» no distingue «así está configurado» de «no había config y cayó
+     al default» — dos situaciones con la misma cara y consecuencias opuestas.* */
+  return json({ ok: true, proveedor: puerto.nombre, proveedor_fuente: prov.fuente,
+                ...(prov.discrepancia ? { proveedor_discrepancia: prov.discrepancia } : {}),
+                procesados: hechos.length, hechos });
 });

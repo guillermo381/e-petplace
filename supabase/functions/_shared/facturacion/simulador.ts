@@ -178,7 +178,7 @@ export function crearSimulador(
         verificado: true,
         referencia: body.referencia ?? null,
         estado: body.estado ?? null,
-        xml: body.xml, ride: body.ride, motivo: body.motivo,
+        xml: body.xml, ride: { contenido: body.ride, mime: 'text/html', base64: false }, motivo: body.motivo,
       };
     },
   };
