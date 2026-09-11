@@ -17,6 +17,21 @@
  * (el modo de fallo que L-192 existe para matar); en las dos, se
  * contradice. Cualquiera de los dos casos invalida el lint entero.
  *
+ * 🔴 `L-534` — **CÓMO SE ELIGE LO QUE UNA REGLA MIDE** (firma del founder,
+ * 10-sep-2026). ***Una regla atada al VALOR muere con la firma; una atada a la
+ * FORMA sobrevive.***
+ *
+ * El caso que la funda es `R87`: se escribió con la firma *«el formato de la
+ * plata es PUNTO»* y **el founder la enmendó el mismo día a COMA**. La regla
+ * **no se tocó** — porque lo que mide no es el separador, es **que haya UNA
+ * sola fuente de formato**. *Si hubiera medido «que diga punto», la enmienda
+ * la habría dejado midiendo lo contrario de lo firmado, y en verde.*
+ *
+ * ⇒ Antes de escribir una regla nueva: **«¿esto sigue siendo cierto si el
+ * founder cambia de opinión sobre el valor?»** Si la respuesta es no, la regla
+ * está atada al valor y hay que subir un nivel hasta el invariante — que casi
+ * siempre es *una sola fuente*, *una sola forma*, *nadie lo escribe a mano*.
+ *
  * El exit se lee del COMANDO, jamás del pipe (L-191).
  */
 

@@ -167,6 +167,18 @@ export function formatearPrecio(valor: number, simbolo = '$', decimales = DECIMA
  * *Entre rebotar una entrada de formato ajeno y aceptar un número cien veces
  * más grande, se rebota.*
  *
+ * 🔴 `L-535` — **LA LEY DEL PARSEO TOLERANTE** (firma del founder,
+ * 10-sep-2026). ***Un parseo tolerante es el que devuelve el número
+ * plausible.*** Por eso `NaN` ante un formato ajeno **es la cura**, y no un
+ * helper permisivo al lado.
+ *
+ * Y es **la misma forma** con la que en esta sesión se hizo inexpresable una
+ * promoción sin su precio tachado (`TarjetaServicio`, unión discriminada) y el
+ * motivo de rechazo del SRI en `TarjetaFactura`: *cuando un estado no debe
+ * poder existir, no se documenta que no debe existir — se hace que no se pueda
+ * escribir.* Acá el estado prohibido es «un número plausible salido de un texto
+ * que no entendimos».
+ *
  * ⚠️ **Y por eso NO hay dos helpers, uno estricto y otro tolerante:** el
  * tolerante sería exactamente el que devuelve el número plausible. La app
  * MUESTRA el formato en pantalla, así que quien tipea tiene la guía a la
