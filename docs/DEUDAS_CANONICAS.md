@@ -32862,3 +32862,64 @@ su compra?* **Es otra tanda.**
 
 **Disparo:** el primer alta de mostrador sin correo que llegue a pagar.
 **Dueño:** la pista que toque el mostrador · founder (la pregunta de arriba).
+
+---
+
+### `D-1068` 🔴 · NUVEI NO MANDA EL TIPO DE FINANCIACIÓN — y el campo que parece decirlo no discrimina
+
+**Medido sobre los 162 avisos de Nuvei guardados, 11-sep-2026.** El founder
+pidió mirar el payload completo antes de buscar un dataset de BINs: *puede que
+el dato ya esté y nadie lo lea*. Está mirado, y **no está**.
+
+Las cuatro claves candidatas, con sus valores REALES:
+
+| campo | valores | qué es |
+|---|---|---|
+| `card.type` | `vi` · `di` | **la MARCA** (Visa, Diners) — el nombre engaña |
+| `transaction.payment_method_type` | `0` | constante en las 162 |
+| `card.origin` | `Paymentez` | el procesador |
+| `transaction.installments_type` | **`Revolving credit`** | ver abajo |
+
+🔴 **`installments_type` dice «credit» y NO SIRVE, por una razón medible:** toma
+ese valor en **el 100 %** de las filas con BIN. Y no puede ser de otro modo —
+**en toda la base hay DOS BINs** (`411111` Visa de prueba · `364170` Diners) y
+**cero transacciones de débito**. *Un campo que toma un solo valor sobre un
+conjunto sin variación no es un discriminador: es una constante disfrazada.*
+Concluir «Nuvei manda crédito» desde acá sería medir el corpus, no el campo.
+
+**Lo que se puede afirmar:** el payload **no trae un campo de *funding type***.
+**Lo que NO se puede afirmar:** que no exista uno habilitable — eso lo contesta
+Nuvei.
+
+⚠️ **Y por eso la pregunta a Nuvei tiene que NOMBRAR el campo**, o se contesta
+sola y mal: *«`card.type` nos llega con la marca (`vi`/`di`). ¿Hay un campo de
+funding type —credit / debit / prepaid— que se pueda habilitar en la respuesta
+de autorización, o un BIN lookup en su API?»* **Preguntar «¿mandan el tipo de
+tarjeta?» se contesta con «sí, `card.type`», y `card.type` no es eso.**
+
+**Dónde debería vivir la derivación, medido:**
+
+```
+tarjetas_guardadas   3 de 3 con bin      ← completo
+pagos_intentos      27 de 89 con bin     ← incompleto, y el hueco es RECIENTE
+                                            (último sin bin: 8-sep)
+```
+
+⇒ **en `tarjetas_guardadas`, no en el intento**: ahí el BIN está completo, se
+resuelve **una vez por tarjeta** en vez de una por cobro, y **vale retroactivo
+sin backfill**. *El `bin` lo escriben `pagos-alta-tarjeta` y `pagos-tarjetas`;
+`pagos-cobro` no lo escribe — por eso el intento lo tiene a medias.*
+**Pendiente de verificar antes de construir: por dónde ata el intento a su
+tarjeta** (`pagos_intentos` no tiene columna `tarjeta_id`).
+
+🔴 **Y el freno que hay que decir en voz alta: esto NO se puede medir en
+sandbox.** `411111` y `424242` son BINs de prueba universales; ningún dataset
+de rangos los resuelve a crédito o débito de forma significativa. **El verde de
+esta derivación exige una tarjeta real de débito y una de crédito.**
+
+**Lo que queda rigiendo mientras tanto, y está bien que rija:** BIN que no
+resuelve → `medio_de_pago_no_declarado` → **el documento espera**. Nunca un
+`<formaPago>` inventado.
+
+**Disparo:** la respuesta de Nuvei. **Dueño:** founder (la pregunta) · B (el
+origen del dato) · A (la derivación y el catálogo).
