@@ -32696,6 +32696,22 @@ estado `COMPLETED` y el evento `webhook.test`.
 motor de avisos, con un RIDE que no es el nuestro y que ningún gate de la casa
 puede verificar.
 
+**⏪ CORRECCIÓN (11-sep, la pidió C): el «14 de 107 invitados reales» que esta
+ficha citaba NO eran invitados.** La consulta corría sobre `pagos_intentos` y
+esos 14 son intentos **sin sujeto** —ni compra, ni cita, ni bono— del 12 al 18
+de agosto, que violarían `chk_intento_un_solo_sujeto` si se insertaran hoy:
+restos de arnés. Medido por C y confirmado por A: **182 profiles, cero sin
+email, cero fantasmas.** *El número era real y la etiqueta era mía* (`L-544`).
+
+**🔴 El camino que SÍ produce personas sin correo es otro, y es hallazgo de C:**
+el alta del **mostrador** (`crear_cliente_walkin`) acepta `email` **o**
+`telefono`. A quien el veterinario da de alta por teléfono le falta el correo,
+y **esa persona no pasa por el checkout del cliente**, así que la cura de C no
+la alcanza. **Hoy son CERO** — el camino existe y nadie lo transitó sin correo
+todavía. *Cero observaciones no es cero productores*, así que la rama
+fail-closed se queda: es prevención, no reparación. **Su arreglo vive en el
+mostrador del prestador y es otra tanda.**
+
 **Y su hermana, del mismo intento:** el proveedor **exige `customer.email`
 incluso para consumidor final** —«customer.email is required and must be a
 valid email address»—, cosa que el SRI no pide. *Eso convierte una pregunta
@@ -32781,3 +32797,68 @@ identificación, para que un motivo no tape al otro).
 outbox atrapó el rebote, **el pago NO se cayó**, y el error quedó escrito en
 `sri_error` con su SQLSTATE. *La defensa en profundidad convirtió un defecto de
 motor en una fila que dice qué pasó, en vez de en una compra que falla.*
+
+---
+
+### `L-544` · UN NÚMERO SE ETIQUETA CON LA POBLACIÓN QUE SE CONSULTÓ, NO CON LA QUE UNO CREE QUE REPRESENTA
+
+Hermana de `L-541` —*la explicación escrita al medir es una hipótesis*— pero de
+un error más chico y más difícil de ver: acá **no se explica de más, se nombra
+mal**. El número es correcto, la consulta es correcta, y **la etiqueta viene de
+otra tabla**.
+
+**Medido, S115-A, 11-sep-2026.** Escribí *«14 de 107 invitados reales, sin
+usuario por ninguna vía»* — en una ficha y **adentro de una función del
+motor**. La consulta corría sobre **`pagos_intentos`**; la etiqueta hablaba de
+**compras**. Los 14 son intentos **sin sujeto** —ni compra, ni cita, ni bono—
+del 12 al 18 de agosto, que **violarían `chk_intento_un_solo_sujeto` si se
+insertaran hoy**: restos de arnés, no personas.
+
+*Lo encontró C al no poder reproducirlo —0 compras sin `user_id` de 86, 0
+profiles sin email de 182— y al **pedir la consulta en vez de asumir que estaba
+mal**.* Las dos mediciones eran verdaderas: medían poblaciones distintas.
+
+⇒ **Al publicar un conteo se nombra la TABLA y el FILTRO, no el concepto:**
+*«14 `pagos_intentos` aprobados sin sujeto»*, no *«14 invitados»*. El concepto
+es una interpretación y va aparte, donde se pueda discutir sin arrastrar al
+número.
+
+⚠️ **Y el corolario que lo vuelve caro, porque es lo que casi pasa:** ese número
+justificaba una rama de código. *Una etiqueta equivocada no sólo desinforma —
+funda decisiones, y la rama sobrevive con su razón falsa adentro.* La rama
+resultó necesaria igual, **pero por otro motivo**: el alta del mostrador, que
+acepta teléfono sin correo. **Acertar por la razón equivocada es tan frágil
+como equivocarse**: el día que alguien revise ese motivo y lo vea falso, va a
+borrar una defensa que sí hacía falta.
+
+---
+
+### `D-1067` 🟡 · EL ALTA DEL MOSTRADOR ACEPTA TELÉFONO SIN CORREO — y a esa persona no la alcanza ninguna cura del cliente
+
+**Hallazgo de C, 11-sep-2026.** `crear_cliente_walkin` acepta `email` **o**
+`telefono`: el veterinario puede dar de alta a alguien que llegó caminando
+usando sólo su teléfono. **Esa persona no pasa por el checkout del cliente**,
+así que la cura de ese lado —que el checkout de invitado pida correo— **no la
+alcanza**.
+
+**Medido hoy: CERO.** 182 profiles, ninguno sin email, ninguno fantasma —
+verificado por C y por A, por separado, sobre `profiles` y sobre `auth.users`.
+
+🔴 **Y eso NO cierra la ficha: `cero observaciones no es cero productores`.** El
+camino existe en el código y nadie lo transitó sin correo todavía. *Medir el
+efecto y concluir que no hay causa es exactamente el error que esta casa ya
+pagó* — lo que hay que censar es el productor, y el productor está vivo.
+
+**Qué pasa el día que exista el primero, y por eso no urge pero tampoco se
+olvida:** si esa persona paga algo, `resolver_receptor_fiscal` devuelve
+`sin_correo_para_el_receptor` y **el documento espera** en vez de salir con una
+casilla inventada. *No se pierde plata ni se emite mal: se frena, visible.*
+
+**Dónde va el arreglo:** en el **mostrador del prestador**, no en el cliente. Y
+la pregunta que hay que contestar antes de construir no es técnica: *¿se le
+exige el correo al veterinario en el momento del alta —cuando la persona está
+enfrente y se lo puede pedir— o se le pide después a la familia cuando reclama
+su compra?* **Es otra tanda.**
+
+**Disparo:** el primer alta de mostrador sin correo que llegue a pagar.
+**Dueño:** la pista que toque el mostrador · founder (la pregunta de arriba).
