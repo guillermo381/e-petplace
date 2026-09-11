@@ -55,6 +55,15 @@ import {
 import {
   BotonPagar, SeccionMedioDePago, useMedioDePago,
 } from '@/components/seccion-medio-de-pago';
+import { SeccionFacturacion } from '@/components/seccion-facturacion';
+import {
+  fiscalTopeConsumidorFinal,
+  fiscalObtenerTaxProfile,
+  fiscalGuardarTaxProfile,
+  obtenerMiPerfil,
+  type TaxProfile,
+} from '@epetplace/api';
+import { formatearPrecio } from '@epetplace/i18n';
 import { cobrar } from '@/lib/pagos/cobro';
 import { useEsperaDeConfirmacion } from '@/lib/pagos/espera-confirmacion';
 import { EsperaDeUna } from '@/components/espera-deuna';
@@ -171,6 +180,41 @@ export function CheckoutReserva({
      `null` = todavía no se tocó nada. **No hay default**: *un riel por omisión
      es exactamente la clase de decisión que alguien toma en nombre de otro y
      no queda registrada.* */
+  /* ═══ LOS DATOS PARA LA FACTURA ════════════════════════════════════════
+     🔴 **El tope se LEE, no se escribe.** `fiscalTopeConsumidorFinal()` es
+     fail-closed a propósito: sin valor NO cae a 50. *Un tope inventado decide
+     en cada compra si a alguien se le piden sus datos — de más es fricción
+     inútil, de menos es un comprobante que el SRI puede observar.*
+
+     ⚠️ Por eso `'sinTope'` es un estado propio y no un número: mientras no se
+     sepa el tope, la sección NO se monta. Preguntar con un tope inventado es
+     peor que no preguntar todavía. */
+  const [tope, setTope] = useState<number | 'cargando' | 'sinTope'>('cargando');
+  const [perfilFiscal, setPerfilFiscal] = useState<TaxProfile | null>(null);
+  const [nombrePersona, setNombrePersona] = useState<string | null>(null);
+  /* Lo que la sección devolvió. `null` = todavía no tocó nada, que NO es lo
+     mismo que «eligió consumidor final». */
+  const [eleccionFiscal, setEleccionFiscal] = useState<
+    { modo: 'consumidorFinal' | 'misDatos'; datos: null | { tipo: 'cedula' | 'ruc' | 'pasaporte'; identificacion: string; razonSocial: string; direccion: string; email: string }; guardar: boolean } | null
+  >(null);
+
+  useEffect(() => {
+    if (fase !== 'resumen') return;
+    let vigente = true;
+    void (async () => {
+      const [t, p, yo] = await Promise.all([
+        fiscalTopeConsumidorFinal(),
+        fiscalObtenerTaxProfile(),
+        obtenerMiPerfil(),
+      ]);
+      if (!vigente) return;
+      setTope(t.ok ? t.data : 'sinTope');
+      if (p.ok) setPerfilFiscal(p.data);
+      if (yo.ok) setNombrePersona(yo.data.nombre);
+    })();
+    return () => { vigente = false; };
+  }, [fase]);
+
   const [riel, setRiel] = useState<'tarjeta' | 'deuna' | null>(null);
 
   /* ═══ EL CÓDIGO DE DEUNA ════════════════════════════════════════════════
@@ -226,6 +270,28 @@ export function CheckoutReserva({
    */
   const pagar = useCallback(async () => {
     if (trabajando) return;
+
+    /* 🔴 EL PERFIL SE GUARDA ANTES DE COBRAR, y no después: el motor resuelve
+       el receptor del comprobante al confirmar el pago (`resolver_receptor_fiscal`).
+       *Guardarlo después sería emitir con lo viejo y corregir un papel que ya
+       salió.* Sólo si lo declaró en ESTA compra y pidió recordarlo — si no, el
+       motor cae a consumidor final, que es lo correcto bajo el tope. */
+    if (eleccionFiscal?.modo === 'misDatos' && eleccionFiscal.datos && eleccionFiscal.guardar) {
+      const g = await fiscalGuardarTaxProfile({
+        tipoIdentificacion: eleccionFiscal.datos.tipo,
+        identificacion: eleccionFiscal.datos.identificacion,
+        razonSocial: eleccionFiscal.datos.razonSocial.trim() || null,
+        direccion: eleccionFiscal.datos.direccion.trim() || null,
+        email: eleccionFiscal.datos.email.trim() || null,
+        predeterminado: true,
+      });
+      /* Si el servidor rebota, NO se cobra: la familia pidió factura con sus
+         datos y cobrar igual emitiría a consumidor final sin avisarle. */
+      if (!g.ok) {
+        mostrar({ variante: 'error', texto: g.mensaje });
+        return;
+      }
+    }
 
     /* ── 🔴 EL RIEL DE DEUNA NO PASA POR `cobrar()`, y no es un atajo ───────
        `cobrar()` **debita una tarjeta**: es el riel de Nuvei entero. En DeUna
@@ -517,6 +583,23 @@ export function CheckoutReserva({
 
         {/* la sección propia del servicio (dirección del hogar / el dónde) */}
         {seccionExtra}
+
+        {/* LOS DATOS PARA LA FACTURA — se pregunta UNA vez y se recuerda.
+            🔴 No se monta mientras el tope no se sepa (`'cargando'` o
+            `'sinTope'`): los dos bordes de la firma —deshabilitar «Consumidor
+            final» sobre el tope, no preguntar nada bajo el tope— son el MISMO
+            `if` contra ese número, y sin él la sección no puede decidir cuál
+            de los dos mostrar. */}
+        {typeof tope === 'number' ? (
+          <SeccionFacturacion
+            perfil={perfilFiscal}
+            total={precio}
+            topeConsumidorFinal={tope}
+            topeFormateado={formatearPrecio(tope)}
+            nombrePersona={nombrePersona}
+            onCambiar={setEleccionFiscal}
+          />
+        ) : null}
 
         {/* ②③④⑤ LA SECCIÓN DE PAGO — **la misma pieza que monta la despensa**.
             Ya no es «igual a»: es LA MISMA. */}
