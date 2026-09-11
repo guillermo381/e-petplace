@@ -32562,7 +32562,44 @@ minuto.**
 
 ---
 
-### `D-1064` 🟡 · EL WEBHOOK DE FACTUPLAN NO ENTREGA EN PRUEBAS — con nuestro lado eliminado como causa
+### `D-1064` ☠️ CERRADA · EL WEBHOOK SÍ ENTREGA — y mi hipótesis era falsa, la desmintió el dato
+
+**Cerrada el 11-sep-2026 por medición.** Los dos avisos de prueba **SÍ
+llegaron**, a las `04:01:25` y `04:02:16` UTC — **unos 28 minutos después de mi
+última consulta**, que es toda la explicación del «cero»:
+
+```
+evento  webhook.test   ·  firma_verificada: TRUE  ·  rechazado por sin_receiptId
+{"message":"Entrega de prueba de Factuplan. Si verificas la firma,
+  tu integración está lista."}
+```
+
+*Verificaron su firma y fueron rechazados por no traer comprobante, que es
+exactamente lo correcto.* El camino entero funcionaba; lo que falló fue
+**cuándo miré**.
+
+**Mi hipótesis —que el disparo exigía un comprobante real— era FALSA.** La
+sostenía un argumento razonable (el tipo `WebhookReceiptData` no tiene variante
+de ping) y resultó que **sí hay un evento `webhook.test` con su propio `data`,
+que ningún tipo del SDK declara**. *El SDK enumeraba menos de lo que el
+servidor manda, igual que con el estado `COMPLETED`.*
+
+⚠️ **Lo que esta ficha deja como lección de método, y es el motivo de
+conservarla:** la hipótesis estaba **marcada como hipótesis** (`L-541`), con lo
+que la confirmaría escrito al lado. Por eso el dato la corrigió en una línea en
+vez de quedar en el canon como causa. *Si la hubiera escrito como hallazgo —y
+tenía con qué: un tipo, un argumento y ninguna contradicción a la vista— el
+próximo habría leído «el botón necesita un comprobante» y no habría vuelto a
+mirar.*
+
+**Y la que sí era causa, medida en la misma vuelta:** el aviso de Satori
+(`invoice.authorized`) llegó con `firma_no_coincide` mientras los del
+contribuyente personal verificaban ⇒ **el secreto ES distinto por
+contribuyente**. Sigue en `D-1066`.
+
+<!-- texto original conservado abajo: la medición lo desmiente, no lo borra -->
+
+### ~~`D-1064` (texto original)~~ 🟡 · EL WEBHOOK DE FACTUPLAN NO ENTREGA EN PRUEBAS — con nuestro lado eliminado como causa
 
 **Medido el 10-11 sep 2026.** El founder disparó el botón de envío de prueba
 del panel **tres veces**. `fiscal_webhook_eventos`: **cero filas**, las tres.
@@ -32635,3 +32672,75 @@ que permitió ver que el alta de Satori **sí había funcionado**: la frase
 habría mostrado dos veces lo mismo y la conclusión habría sido «no cambió
 nada».** Un progreso real se habría leído como estancamiento — *la clase de
 error que no produce un rojo, produce una decisión equivocada.*
+
+---
+
+### `D-1065` 🔴 · EL PROVEEDOR MANDA SU PROPIO CORREO Y NO SE PUEDE APAGAR — decisión de producto, no detalle técnico
+
+**Medido contra la API real, 11-sep-2026.** El founder firmó `sendEmail: false`
+para que el correo «Tu factura» lo mande **nuestro** motor de avisos, con
+nuestro RIDE y nuestro XML, y con el instrumento que vigila que el destinatario
+sea el receptor. **La API desplegada rechaza el campo:**
+
+```
+400 · «property sendEmail should not exist»     (validación por lista blanca)
+```
+
+La documentación y el `.d.ts` del SDK `0.15.0` lo declaran como opción de
+primer nivel con default `true`. **El SDK va adelante de la API que corre, y
+manda la que contesta.** *Tercera vez en la misma tanda que el contrato
+publicado enumera algo distinto de lo que el servidor hace* — junto con el
+estado `COMPLETED` y el evento `webhook.test`.
+
+⇒ **Hoy, cada factura dispara un correo del proveedor al receptor**, fuera del
+motor de avisos, con un RIDE que no es el nuestro y que ningún gate de la casa
+puede verificar.
+
+**Y su hermana, del mismo intento:** el proveedor **exige `customer.email`
+incluso para consumidor final** —«customer.email is required and must be a
+valid email address»—, cosa que el SRI no pide. *Eso convierte una pregunta
+técnica en una de producto: **a qué correo se factura cuando la familia no dio
+ninguno**.* Un correo inventado hace que el comprobante viaje a una dirección
+que no es de nadie; uno de la casa hace que reciba facturas de terceros.
+
+**Las tres salidas, y son del founder:**
+1. pedir a Factuplan que habilite `sendEmail` en la API (es lo que su propia doc
+   promete);
+2. aceptar que el correo lo manden ellos y **retirar el nuestro**, para no
+   mandar dos por la misma factura;
+3. convivir a propósito, declarándolo —*dos correos por una factura confunde, y
+   la familia no tiene forma de saber cuál es el bueno*.
+
+**Disparo: antes del primer comprobante con un receptor real.** En ensayo no
+importa; con una familia de por medio, sí. **Dueño:** founder (la decisión) ·
+A (lo que haya que construir o retirar).
+
+---
+
+### `D-1066` 🔴 · EL SECRETO DEL WEBHOOK ES POR CONTRIBUYENTE — y el cargado es el que NO nos sirve
+
+**Medido, 11-sep-2026, con los dos casos en la misma tabla:**
+
+| aviso | contribuyente | firma |
+|---|---|---|
+| `webhook.test` ×2 | personal del founder | **verificó** |
+| `invoice.authorized` | **Satori (el nuestro)** | **`firma_no_coincide`** |
+
+⇒ **el secreto es por contribuyente**, y `FACTURACION_WEBHOOK_SECRET` tiene hoy
+el del contribuyente personal. *No es una conjetura de diseño: es el mismo
+secreto validando uno y fallando el otro, en dos filas consecutivas.*
+
+**La cura es de una línea y es del founder:** cargar el `whsec_` **del webhook
+de Satori** en `FACTURACION_WEBHOOK_SECRET`, reemplazando el actual.
+
+**Y lo que NO hay que hacer, con su razón:** aceptar varios secretos. La casa
+tiene **un solo emisor por construcción** (`chk_fiscal_emisor_una_fila`), así
+que aceptar dos sería prepararnos para recibir comprobantes de un contribuyente
+que no es el nuestro — *una capacidad que no queremos tener*. Además, el
+webhook personal debe **dejar de apuntar a nuestra URL**: sus avisos van a
+rebotar `401`, y esos 401 son **indistinguibles de un problema real de firma
+con los de Satori** — estaríamos fabricando el ruido que taparía la falla que
+sí necesitamos ver, y de paso contando hacia las diez fallas que desactivan.
+
+**Lo que ya nos protege igual:** un aviso cuyo `receiptId` no exista en nuestras
+filas anota `documento_no_encontrado` y **no toca un solo documento fiscal**.

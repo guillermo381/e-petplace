@@ -59,9 +59,32 @@ export interface EstadoCertificado { hasCertificate: boolean; isExpired?: boolea
  *    afirma algo que nadie midió* — uno da por perdido un comprobante vivo, el
  *    otro da por bueno uno que no lo está. Se queda en vuelo y se consulta.
  */
-function traducirEstado(s: string): { estado: ResultadoEmision['estado']; conocido: boolean } {
+function traducirEstado(
+  s: string,
+  /**
+   * ¿El comprobante trae número de autorización? Es el DESEMPATE de `COMPLETED`.
+   *
+   * 🔴 `COMPLETED` NO ESTÁ EN LA DOCUMENTACIÓN — el `.d.ts` del SDK enumera
+   *    `DRAFT | PENDING | PROCESSING | AUTHORIZED | REJECTED | VOIDED`, y el
+   *    servidor devuelve un séptimo. *Lo encontró el fail-closed, no un gate:
+   *    la consulta contestó `estado_desconocido_del_proveedor: COMPLETED` y
+   *    dejó el documento en vuelo en vez de afirmar nada.* Si el default
+   *    hubiera sido «autorizada» habríamos dado por buena una factura sin
+   *    mirarla; si hubiera sido «no autorizada», habríamos dado por perdida una
+   *    que estaba bien. **Las dos se habrían visto perfectamente normales.**
+   *
+   *    Y tampoco se traduce `COMPLETED` a secas: «completado» puede ser el fin
+   *    del proceso con CUALQUIER desenlace. Manda el número de autorización,
+   *    que es un hecho del SRI y no una palabra del proveedor.
+   */
+  tieneAutorizacion = false,
+): { estado: ResultadoEmision['estado']; conocido: boolean } {
   switch (s?.toUpperCase()) {
     case 'AUTHORIZED': return { estado: 'autorizada', conocido: true };
+    case 'COMPLETED':
+      return tieneAutorizacion
+        ? { estado: 'autorizada', conocido: true }
+        : { estado: 'emitiendo', conocido: false };
     case 'REJECTED':
     case 'RETURNED':
     case 'VOIDED':     return { estado: 'no_autorizada', conocido: true };
@@ -177,14 +200,23 @@ export function crearFactuplan(o: OpcionesFactuplan): PuertoFacturacion {
     let j: Record<string, unknown> = {};
     try { j = txt ? JSON.parse(txt) : {}; } catch { /* cuerpo no-JSON: se dice abajo */ }
     if (!r.ok) {
+      /* 🔴 EL ERROR VIENE ANIDADO — medido contra el proveedor real, no leído:
+         `{ data: null, meta: {...}, error: { code, message, statusCode, details } }`.
+         La v1 hacía `j.code ?? j.error`, y como `j.code` no existe caía al
+         OBJETO `j.error` y lo pasaba por `String()`: el motivo quedaba
+         literalmente `[object Object]`.
+         *Y el daño real no era el texto feo: `codigo` nunca iba a valer
+         `API_10002`, así que **la guarda de cupo agotado no habría disparado
+         jamás** — un rechazo por cuota se habría tratado como rechazo del SRI,
+         marcando `no_autorizada` un comprobante que sólo había que reencolar.*
+         Es `L-535` mordiendo por donde no la esperaba: tenía razón en decidir
+         por el código, y el código estaba un piso más adentro. */
+      const err = (j.error ?? {}) as Record<string, unknown>;
       return {
         ok: false, status: r.status,
-        /* 🔴 EL CÓDIGO, NO EL MENSAJE (`L-535`). `API_10002` es la señal de cuota
-           agotada; decidir por `mensaje.includes('quota')` deja de funcionar el
-           día que cambien una palabra. */
-        codigo: String(j.code ?? j.error ?? `http_${r.status}`),
-        mensaje: String(j.message ?? txt).slice(0, 300),
-        detalles: j.details,
+        codigo: String(err.code ?? j.code ?? `http_${r.status}`),
+        mensaje: String(err.message ?? j.message ?? txt).slice(0, 400),
+        detalles: (err.details ?? j.details) as unknown,
       };
     }
     return { ok: true, data: (j.data ?? j) as T };
@@ -235,10 +267,20 @@ export function crearFactuplan(o: OpcionesFactuplan): PuertoFacturacion {
       items,
       payments: pagos,
       additionalInfo: c.informacion_adicional,
-      /* 🔴 EL CORREO LO MANDA LA CASA. Viene en `true` por defecto: dejarlo
-         manda un correo que nuestro motor de avisos no registró, sin RIDE ni
-         XML nuestros, y que ningún instrumento nuestro puede verificar. */
-      sendEmail: false,
+      /* 🔴 `sendEmail` NO VA, y no es una decisión nuestra: **la API desplegada
+         lo RECHAZA**. Medido contra el proveedor real:
+           «property sendEmail should not exist»  (400, validación por lista
+            blanca)
+         La documentación y el `.d.ts` del SDK 0.15.0 lo declaran como opción de
+         primer nivel con default `true`. *El SDK va adelante de la API que está
+         corriendo, y el que manda es la que contesta.*
+
+         ⚠️ CONSECUENCIA QUE HAY QUE DECIR EN VOZ ALTA: sin poder apagarlo, **el
+         proveedor manda su propio correo al receptor**, con su RIDE y no el
+         nuestro, y fuera del motor de avisos de la casa — que es exactamente lo
+         que el founder quería evitar. Es decisión suya, no un detalle técnico:
+         o se pide a Factuplan que lo habilite, o el correo «Tu factura» de la
+         casa convive con el de ellos. Queda declarado en `D-1065`. */
     };
   }
 
@@ -318,10 +360,16 @@ export function crearFactuplan(o: OpcionesFactuplan): PuertoFacturacion {
       }
 
       const t = traducirEstado(r.data.status);
+      /* `sequential` sólo viene en `create` —en `sign-and-authorize` el número
+         es nuestro y ya está en la fila—. Se pasa tal cual: normalizarlo acá
+         (rellenar a 9, recortar) escondería una discrepancia que el cotejo
+         contra la fila existe para encontrar. */
+      const sec = (r.data as { sequential?: string }).sequential ?? null;
       return {
         referencia: r.data.id,
         estado: t.estado,
         clave_acceso: r.data.accessKey ?? null,
+        ...(sec ? { secuencial_proveedor: sec } : {}),
         ...(t.conocido ? {} : { motivo: `estado_desconocido_del_proveedor: ${r.data.status}` }),
       };
     },
@@ -331,7 +379,7 @@ export function crearFactuplan(o: OpcionesFactuplan): PuertoFacturacion {
       if (!r.ok) {
         return { estado: 'emitiendo', motivo: `consulta_fallo ${r.codigo}: ${r.mensaje}` };
       }
-      const t = traducirEstado(r.data.status);
+      const t = traducirEstado(r.data.status, Boolean(r.data.authorizationNumber));
       const res: ResultadoConsulta = {
         estado: t.estado,
         ...(r.data.authorizationDate ? { autorizado_en: r.data.authorizationDate } : {}),

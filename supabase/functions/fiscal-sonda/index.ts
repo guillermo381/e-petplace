@@ -31,9 +31,32 @@ Deno.serve(async (req) => {
   /* 🔴 NO SE IMPRIME LA CLAVE — ni enmascarada. Lo único que se reporta es su
      PREFIJO de ambiente (`ak_test_` / `ak_live_`), que es la pregunta que
      importa —«¿estoy apuntando a pruebas o a producción?»— y no es el valor. */
-  const prefijo = apiKey.startsWith('ak_live_') ? 'ak_live_'
-                : apiKey.startsWith('ak_test_') ? 'ak_test_'
-                : apiKey ? 'desconocido' : 'ausente';
+  /* 🔴 EL PREFIJO ES LA ÚNICA FORMA DE SABER A QUÉ AMBIENTE APUNTAMOS, y
+     «desconocido» no alcanza: deja la pregunta sin contestar justo cuando la
+     respuesta decide si un comprobante es de prueba o es real.
+     Se reportan los SEGMENTOS DE NAMESPACE —lo que va antes de la parte de
+     entropía— y sólo si hay al menos tres separados por `_`, de modo que el
+     valor nunca viaja. Si el formato no se reconoce, se dice eso y su LARGO:
+     *un largo no es la clave y sirve para saber si está truncada.* */
+  const partes = apiKey.split('_');
+  const bajo = apiKey.toLowerCase();
+  /* Sólo el primer segmento, y sólo si es corto y alfabético: un namespace no
+     es entropía. Si no hay separador, no se reporta NADA de la clave. */
+  const ns = (partes.length >= 2 && /^[A-Za-z]{1,10}$/.test(partes[0])) ? partes[0] : null;
+  const prefijo = !apiKey ? 'ausente'
+    : `segmentos=${partes.length} · largo=${apiKey.length}${ns ? ` · ns="${ns}"` : ' · sin namespace legible'}`;
+
+  /* 🔴 DOS BITS, Y SON LOS QUE DECIDEN. No se reporta la clave: se reporta si
+     contiene «test» o «live». Es la única pregunta que importa acá —¿a qué
+     ambiente apunto?— y la respuesta no reconstruye nada.
+     Si ninguno aparece, NO se degrada a «probablemente pruebas»: se declara no
+     concluyente y la emisión se frena. *Adivinar acá es la diferencia entre un
+     comprobante de ensayo y uno que el SRI considera real.* */
+  const diceTest = bajo.includes('test');
+  const diceLive = bajo.includes('live') || bajo.includes('prod');
+  const ambienteDeLaClave = diceTest && !diceLive ? 'pruebas'
+                          : diceLive && !diceTest ? 'PRODUCCION'
+                          : 'no_concluyente';
 
   const salida: Record<string, unknown> = {
     ok: true,
@@ -41,6 +64,7 @@ Deno.serve(async (req) => {
     proveedor_fuente: prov.fuente,
     ...(prov.discrepancia ? { proveedor_discrepancia: prov.discrepancia } : {}),
     api_key: prefijo,
+    api_key_ambiente: ambienteDeLaClave,
     webhook_secreto_cargado: Boolean(Deno.env.get('FACTURACION_WEBHOOK_SECRET')),
     emisor_de_la_fila: emisor ?? null,
   };

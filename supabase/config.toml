@@ -435,3 +435,8 @@ verify_jwt = false
 # Sonda de operación, llamada por máquina con el secreto compartido de despacho.
 # No emite y no escribe: tres lecturas contra el proveedor.
 verify_jwt = false
+
+[functions.fiscal-ensayo]
+# Ensayo del proveedor real. Llamada por máquina con el secreto de despacho;
+# rebota si el emisor no está en ambiente de PRUEBAS.
+verify_jwt = false
