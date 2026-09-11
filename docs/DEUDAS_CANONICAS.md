@@ -32246,3 +32246,172 @@ bomba con fecha: no falla hasta que alguien la llama.*
 **☠️ Condición de muerte:** ninguna — es de método. Su recordatorio útil es que la pista
 que la escribió tenía `D-662` citada en su propio canon y no la vio aplicar acá, porque
 decía «bundles».
+
+---
+
+### `D-1061` 🔴 · VEINTIDÓS EDGES DESPLEGADAS HASTA 64 DÍAS POR DETRÁS DEL REPO — alcance, fecha y dueño
+
+**Medido** el 10-sep-2026 con `pnpm verify:edge-desplegada` (camino heurístico:
+fecha de despliegue contra la del último commit que toca su cierre transitivo;
+ventana declarada de 60 min, con bucket no concluyente aparte).
+
+```
+edges en el repo: 48 · desplegadas: 47 · con firma registrada: 4
+al día: 8 · VIEJAS: 22 · no concluyentes: 17
+```
+
+**Por qué es 🔴 y no higiene:** una edge vieja **escribe con las reglas de ayer
+contra una base con las de hoy**, y si no lee el error de su escritura
+**informa éxito igual**. No es hipotético — es exactamente lo que pasó con
+`fiscal-emitir` v1 (`L-536` · `D-1060`): typecheck verde, `deno check` verde,
+`db push` verde, **y la fila se quedaba en `borrador` mientras la edge
+respondía `emitiendo`**. *Ninguno de los tres gates mira lo que está corriendo.*
+
+**Las 22, por dueño y atraso** (dueño = la pista cuyo commit dejó el código
+adelante; el atraso se re-mide, no se cita):
+
+| Edge | Desplegada | Atraso | Dueño probable |
+|---|---|---|---|
+| `crear_cliente_walkin` | 2026-05-06 | **~1.538 h (64 d)** | histórico / sin dueño vivo |
+| `lugares` | 2026-08-09 | ~640 h | histórico |
+| `documento-certificado` · `documento-historia-clinica` · `documento-receta` | 2026-08-08 | ~700 h | S113-A (el pasaporte) |
+| `pagos-conciliar` | 2026-08-20 | ~250 h | S109-B |
+| `pagos-cobro-recurrente` | 2026-08-31 | ~241 h | S115-A (T2) |
+| `video-consumo` | 2026-08-26 | ~127 h | S110-A |
+| `pagos-deuna-barrido` | 2026-08-25 | ~126 h | S108-B2 |
+| `escribir-presencia` · `estructurar-nota-clinica` · `extract-documento` | 2026-09-04 | ~92 h | S114-D |
+| `coach-parte` | 2026-09-06 | ~51 h | S114-D |
+| `sugerir-raza` | 2026-09-06 | ~47 h | S114-D |
+| `extract-vacuna` | 2026-09-06 | ~46 h | S114-D |
+| `extract-papel` | 2026-09-06 | ~33 h | S114-D |
+| `pagos-cobro` | 2026-09-10 | ~13 h | S115-A (T2) |
+| `postventa-intake` · `postventa-hoja` | 2026-09-08 | ~12 h | candidato s114-2 |
+| **`fiscal-webhook`** · **`fiscal-reconciliar`** | 2026-09-10 13:04 | **~10 h** | **S115-A — MÍAS** |
+| `buscar-intencion` | 2026-09-07 | ~8 h | S114 |
+
+**🔴 Las dos últimas son mías y son las más urgentes pese a ser las más nuevas:**
+`fiscal-webhook` es **la edge que Factuplan va a llamar**. Quedaron fuera del
+redespliegue del cierre de S115-A, que alcanzó a `fiscal-emitir`, `fiscal-ride`,
+`fiscal-validar-clave` y `despachar-correo` y **no a ellas** — la firma
+registrada en `edge_despliegues` lo prueba: cuatro filas, no seis. *Se
+redespliegan en la misma tanda en que se registre la URL en el panel del
+proveedor; no esperan a que esta ficha se pague entera.*
+
+**Alcance de la ficha:** las 20 restantes. **No se curan adentro de otra tanda**
+(orden del founder) y **van ANTES de producción**. La cura de cada una es una
+línea — `pnpm edge:desplegar <slug>`, que despliega **y** deja su firma — pero
+**precedida de leer el diff**: una edge de 64 días puede haberse quedado atrás
+*a propósito* (`L-536` no dice «desplegá todo», dice «medí si lo desplegado es
+del repo»), y `crear_cliente_walkin` es la primera candidata a eso.
+
+**Disparo:** antes del primer comprobante en producción. **Dueño:** la pista que
+conduce el tren de despliegue de cada frente; la conducción coordina el orden.
+**Cierra** cuando `verify:edge-desplegada` dé VERDE o cuando cada una de las 20
+tenga su razón escrita para quedarse donde está.
+
+---
+
+### `D-1062` 🔴 · EL RUC DE `fiscal_emisor` NO ES EL CONTRIBUYENTE DEL WORKSPACE DE FACTUPLAN — y los dos son plausibles por separado
+
+**Medido** el 10-sep-2026:
+
+```
+fiscal_emisor.ruc = 1793240435001 · SATORI INOV LATAM S.A.S. · ambiente 1 · 001-002
+contribuyente del workspace Factuplan (hoy) = el RUC PERSONAL del founder
+```
+
+**Satori Inov y su certificado de persona jurídica se dan de alta mañana**
+(palabra del founder). Hasta entonces los dos valores existen, los dos son
+reales, y **ninguno de los dos es evidentemente el equivocado mirándolo solo** —
+que es lo que vuelve a esto una ficha y no un pendiente.
+
+**Qué rompe si nadie lo nombra:** el adaptador manda `x-taxpayer-ruc` desde
+`fiscal_emisor`. Con los dos RUC distintos, el proveedor puede **rechazar**
+(caso bueno: se ve) o **emitir bajo el contribuyente que él tiene registrado**
+(caso malo: **la clave de acceso vuelve con OTRO RUC adentro y el documento
+parece autorizado**). *El segundo no tiene síntoma en la respuesta: tiene
+síntoma tres semanas después, en el SRI.*
+
+**Ya está cerrado por construcción, y por eso esto es ficha y no defecto:**
+`fiscal_anotar_numero_ajeno` (migración `20260912620000`) compara el segmento
+11-23 de la clave contra `ruc_emisor` de la fila y devuelve
+`clave_con_ruc_ajeno` **sin escribir**. El documento no avanza.
+
+**Consecuencia operativa, declarada:** **la primera factura de prueba va a
+rebotar fail-closed hasta que la fila y el workspace digan el mismo RUC.** Eso
+es el comportamiento correcto, no un bloqueo a destrabar aflojando el guard.
+Las dos salidas legítimas: (a) poner el RUC personal en `fiscal_emisor`
+mientras dure el sandbox, o (b) esperar al alta de Satori. **Es decisión del
+founder** — cambia qué contribuyente queda en los comprobantes de prueba.
+
+**Lo que NO cambia con ninguna de las dos:** `documentos_fiscales.ruc_emisor`
+se guarda **por fila**, así que cambiar `fiscal_emisor` mañana **no rompe la
+reconstrucción de los documentos de hoy** — los viejos conservan el suyo.
+*Verificado leyendo el CHECK: usa `ruc_emisor` de la fila, jamás el del
+emisor vivo.* **Cambiar de contribuyente es cambiar una fila, como pidió el
+founder, y eso ya rige.**
+
+**Disparo:** la primera emisión real en sandbox. **Dueño:** founder (la
+decisión) · A (la fila).
+
+---
+
+### `L-537` · UN GUARD DE DOS CAPAS SE ENMIENDA DOS VECES, O MANDA LA CAPA QUE NO APRENDIÓ
+
+`L-424` firmó la forma: **el CHECK es el piso que no se puede saltear; el
+trigger EXPLICA**. Lo que no decía —y se cobró hoy sobre sí misma— es qué pasa
+cuando llega una regla nueva.
+
+**Medido, S115-A, 10-sep-2026.** La numeración ajena (el proveedor elige el
+código numérico de la clave) entró como tercera rama del CHECK
+`chk_documento_fiscal_clave_reconstruible`. El cinturón **abortó la migración**
+escribiendo una clave que **el CHECK aceptaba y el trigger rechazaba** con
+`clave_no_reconstruible`: `_trg_documento_fiscal_clave_coherente` seguía
+exigiendo los 49 dígitos derivados.
+
+*Las dos piezas eran correctas por separado y juntas eran incompatibles.* Y el
+modo de falla no es simétrico: **la capa estricta gana siempre**, así que el
+síntoma no es «el guard dejó pasar algo» —que se buscaría— sino **«no puedo
+escribir algo que debería poder»**, que se lee como un bug del código que
+escribe y manda a buscar en el lugar equivocado.
+
+**Lo que lo hizo barato acá y hay que conservar:** el cinturón corre **dentro de
+la misma migración y ANTES de que se registre**, así que el rebote lo produjo
+un fixture y no un comprobante real. *Un guard nuevo sin cinturón en su propia
+migración habría descubierto esto en la primera factura de sandbox — o peor, en
+la primera de producción, donde el documento queda a medio emitir.*
+
+⇒ **Toda enmienda a una regla que vive en dos capas nombra las dos en su
+encabezado y las toca en el mismo acto.** Mismo molde que el corolario de
+`L-536` para migración↔edge: *las dos mitades de una verdad se mueven juntas o
+la que quedó atrás decide.* Y el cinturón de esa migración tiene que ejercer el
+camino **feliz**, no sólo el rojo: el rojo lo daban las dos capas por igual —
+**lo que discriminó fue el verde.**
+
+---
+
+### `L-538` · UNA EXENCIÓN SE MIDE EN DÍGITOS, NO EN CAMPOS
+
+El pedido fue *«si la clave la ponen ellos, declaramos exento el CHECK de
+reconstrucción para documentos de proveedor externo, igual que con la factura
+recibida de la clínica»*. Medido, **no es igual**, y tratarlo igual salía caro.
+
+| | qué es nuestro | qué se puede verificar |
+|---|---|---|
+| Factura **recibida** de la clínica | nada | sólo el dígito verificador |
+| Factura **nuestra** que numera el proveedor | fecha · tipo · **RUC** · ambiente · serie · secuencial · tipo de emisión | **41 de 49 dígitos** |
+
+El proveedor elige **ocho**: el código numérico, posiciones 40-47. *Declararla
+exenta entera habría aceptado en silencio una clave con el RUC de otro
+contribuyente* — que con el workspace de Factuplan apuntando a un RUC distinto
+del de `fiscal_emisor` (`D-1062`) **no es hipotético: es el caso de hoy**.
+
+**La forma de la cura importa tanto como el alcance:** el prefijo esperado sale
+de `left(fiscal_clave_acceso(...), 39)` —**la misma función que verifica la rama
+estricta**— porque los primeros 39 dígitos no dependen del código numérico. *Una
+segunda implementación del formato de la clave, aunque naciera idéntica, es una
+que puede divergir de la primera sin que nada lo note.*
+
+⇒ **Antes de eximir un guard se pregunta cuánto de lo que vigila sigue siendo
+propio.** La respuesta casi nunca es «todo» ni «nada», y el punto medio es
+justo donde vive el defecto que la exención total dejaría entrar.
