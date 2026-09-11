@@ -341,6 +341,10 @@ export const uiEs = {
     subtotalConIva: 'Subtotal (con IVA {{tarifa}} %)',
     descuento: 'Descuento',
     iva: 'IVA {{tarifa}} %',
+    tarifaServicio: 'Tarifa de servicio',
+    /* El mes llega por props: «diciembre» caduca igual que la tarifa del IVA.
+       Acá vive la FRASE —que es lo que cambia entre idiomas— y el dato no. */
+    tarifaPromocion: 'Gratis hasta {{hasta}}',
     total: 'Total',
     /* La única línea del recorrido donde la regla se puede aprender. */
     porQue: 'El alimento balanceado no paga IVA; los snacks y accesorios sí.',

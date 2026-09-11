@@ -10113,9 +10113,31 @@ function BloqueFiscalS115() {
         </SelectorFacturacion>
       </View>
 
-      {/* (3) EL DESGLOSE - mixto, una tarifa, y el cero honesto */}
+      {/* (3) EL DESGLOSE - mixto, una tarifa, el cero honesto y la tarifa de servicio */}
       <View style={{ gap: spacing[3] }}>
-        {rotulo('DesgloseCompra · MIXTO 0/15 · los dos subtotales con su etiqueta y la frase que ensena')}
+        {rotulo('DesgloseCompra · MIXTO 0/15 + TARIFA PROMOCIONADA · EL CASO QUE MAS SE VA A VER')}
+        <DesgloseCompra
+          subtotal_0={24.5}
+          subtotal_15={12}
+          iva={1.8}
+          total={38.3}
+          tarifaIva={15}
+          tarifaServicio={{ promocionada: true, monto: 0, montoLista: 2.5, hasta: 'diciembre' }}
+        />
+      </View>
+      <View style={{ gap: spacing[3] }}>
+        {rotulo('· la MISMA fila con la tarifa ya cobrandose · los montos NO se movieron de sitio: lo que desaparece es el tachado y la nota')}
+        <DesgloseCompra
+          subtotal_0={24.5}
+          subtotal_15={12}
+          iva={1.8}
+          total={40.8}
+          tarifaIva={15}
+          tarifaServicio={{ promocionada: false, monto: 2.5 }}
+        />
+      </View>
+      <View style={{ gap: spacing[3] }}>
+        {rotulo('· SIN tarifa (prop ausente) · la linea NO se dibuja: cero inventado seria afirmar que existe y es gratis')}
         <DesgloseCompra subtotal_0={24.5} subtotal_15={12} iva={1.8} total={38.3} tarifaIva={15} />
       </View>
       <View style={{ gap: spacing[3] }}>
