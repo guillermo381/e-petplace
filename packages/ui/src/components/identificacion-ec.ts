@@ -165,26 +165,62 @@ function modulo11(digitos: string, coeficientes: readonly number[]): number {
   return 11 - resto === 10 ? 1 : 11 - resto
 }
 
+/** Persona natural: los diez primeros son una cédula válida y el
+ *  establecimiento no puede ser `000`. **El establecimiento son los TRES
+ *  últimos** — `slice(10)` —, que es lo que da «001» y no «6001». */
+function esRucDePersonaNatural(valor: string): boolean {
+  return esCedulaValida(valor.slice(0, 10)) && valor.slice(10) !== '000'
+}
+
+/** Sector público: módulo 11 sobre los OCHO primeros, verificador en el noveno
+ *  y establecimiento de CUATRO dígitos. */
+function esRucDeSectorPublico(valor: string): boolean {
+  return modulo11(valor, COEF_PUBLICO) === Number(valor[8]) && valor.slice(9) !== '0000'
+}
+
+/** Sociedad privada: módulo 11 sobre los NUEVE primeros, verificador en el
+ *  décimo y establecimiento de tres. */
+function esRucDeSociedadPrivada(valor: string): boolean {
+  return modulo11(valor, COEF_PRIVADO) === Number(valor[9]) && valor.slice(10) !== '000'
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * ⏪☠️ **LA RAMA YA NO SE ELIGE POR EL TERCER DÍGITO: SE PRUEBAN LAS TRES Y
+ *    ALCANZA CON QUE UNA CIERRE** (firma del founder, 11-sep-2026).
+ *
+ * Su razón: *«es exactamente lo que acabamos de retirar de la cédula. Una
+ * convención que decide QUÉ algoritmo aplicar es más frágil que la aritmética
+ * que valida — y ya demostró estar vencida.»*
+ *
+ * **El caso:** `1762613006001` es un RUC activo de persona natural, derivado de
+ * una cédula impresa en siete facturas autorizadas. Su tercer dígito es 6, así
+ * que la convención lo mandaba a **sector público** y lo rechazaba —por módulo
+ * 11 (dv 7 contra el 0 impreso) y de paso por establecimiento («6001» en vez de
+ * «001»)—. Con las tres ramas **cierra por persona natural**, y el
+ * establecimiento sale **«001»** ✓.
+ *
+ * ── EL COSTO DEL ENSANCHE, MEDIDO Y NO ESTIMADO ─────────────────────────
+ * Sobre 585 mutaciones de un dígito de cinco RUC reales: **de 104 aceptadas a
+ * 192 · factor 1,85×.** *Probar tres puertas en vez de una casi duplica lo que
+ * pasa, y se dice en vez de descubrirse después.* Se acepta porque **el costo
+ * de rechazar a un contribuyente real es mayor que el de aceptar un número
+ * malformado que el SRI va a rebotar igual** — la misma razón con la que cayó
+ * la regla del tercer dígito de la cédula.
+ * ⚠️ Y buena parte de ese 1,85× **ya existía**: el establecimiento (los tres
+ * últimos) **no lo protege ningún verificador**, así que sus mutaciones pasaban
+ * antes y siguen pasando.
+ * ═══════════════════════════════════════════════════════════════════════════ */
 export function esRucValido(valor: string): boolean {
   if (!/^\d{13}$/.test(valor)) return false
 
   const provincia = Number(valor.slice(0, 2))
   if ((provincia < 1 || provincia > 24) && provincia !== 30) return false
 
-  const tercero = Number(valor[2])
-
-  // Persona natural: la cédula manda, y el establecimiento no puede ser 000.
-  if (tercero < 6) return esCedulaValida(valor.slice(0, 10)) && valor.slice(10) !== '000'
-
-  if (tercero === 6) {
-    return modulo11(valor, COEF_PUBLICO) === Number(valor[8]) && valor.slice(9) !== '0000'
-  }
-
-  if (tercero === 9) {
-    return modulo11(valor, COEF_PRIVADO) === Number(valor[9]) && valor.slice(10) !== '000'
-  }
-
-  return false
+  return (
+    esRucDePersonaNatural(valor) ||
+    esRucDeSectorPublico(valor) ||
+    esRucDeSociedadPrivada(valor)
+  )
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
