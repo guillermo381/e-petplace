@@ -780,6 +780,62 @@ literal de su orden y el depósito llegó después. **Funcionó por suerte, no
 por diseño:** si el depósito hubiera diferido de lo construido, gana la
 letra y C reconstruye.
 
+## 6quinquies · ANTES DE DEPOSITAR LETRA SE CENSA LA LETRA SIN COMMITEAR DEL ÁRBOL *(S115, 10-sep-2026 — hermana de §6quater, y apunta al revés)*
+
+> **Quien va a depositar letra corre `git status --porcelain` y ABRE lo que
+> aparezca como canónico nuevo o modificado, antes de escribir.** Otra pista pudo
+> firmar esa misma mañana lo que vos estás por depositar — y **el modo de falla es
+> silencioso**: tu letra sale plausible, ningún gate la mira (no hay typecheck de
+> prosa), y queda en el canon contradiciendo una firma de hace cuatro horas.
+
+**El caso, medido:** al depositar el dictado del tablero económico en
+`LETRA_PORTAL_ADMIN` §6, se midió **el motor vivo** (censos contra la base) y **la
+letra fiscal** (`MODELO_FISCAL` v0.4). Correcto, y **insuficiente**: en el árbol
+había `docs/MODELO_ECONOMICO.md` **v1.1, mesa + founder, firmado esa misma
+mañana** — el contexto directo del dictado — **sin commitear**.
+
+**Lo que costó:** §6.3 afirmó que el número de la retención era *«el que el
+contador todavía no ratificó»*. **Estaba verificado desde esa mañana** — 2 % de
+renta + 30/70 % del IVA, con fuente, en `MODELO_ECONOMICO` §1 hecho 2. *Una
+afirmación falsa depositada en el canon, con cuatro horas de vencimiento, escrita
+por quien acababa de medir todo lo demás contra el objeto.*
+
+### Las dos trampas, las dos medidas
+
+1. **El snapshot de git del arranque dice `(clean)` y no lo está.** No es del
+   método: **es del harness**, viene fechado y envejece desde el primer minuto. Ese
+   día decía `(clean)` y el árbol tenía **13 archivos en vuelo**.
+2. 🔴 **Un archivo sin trackear (`??`) es invisible a `git log` y a `git diff`.**
+   Quien busque *«¿qué letra nueva hay?»* con `git log --stat` **no lo ve**, y el
+   comando le contesta con toda normalidad. `MODELO_ECONOMICO.md` era untracked:
+   **el único comando que lo muestra es `git status`.**
+
+### La asimetría con §6quater — se escriben juntas o se leen como contradictorias
+
+| | §6quater | ésta |
+|---|---|---|
+| **Dice** | **no se CITA** letra que no esté en origin | **sí se MIRA** la letra que está en el árbol |
+| **Protege** | a quien recibe la orden — no puede leer lo que no existe en origin | al canon — no se deposita algo que ya fue contradicho |
+| **Para efectos de…** | **exigirle algo a otro**: lo no depositado **no existe** | **no contradecir**: lo que está en el árbol **ya es una firma** |
+
+*Una es sobre qué podés pedir; la otra sobre qué tenés que saber antes de
+escribir.* **No se tocan: una mira hacia afuera, la otra hacia adentro.**
+
+### Lo que esta regla NO autoriza
+
+**Ni tocar, ni citar como fuente, ni construir contra ese trabajo en vuelo** —
+sigue rigiendo §6quater y sigue siendo territorio ajeno. **Se LEE para no
+contradecirlo**, se declara que se leyó y que estaba sin commitear, y **si
+contradice, se declara el choque en vez de elegir en silencio.**
+
+**Y el corolario, que es la mitad que se olvida:** si la letra en vuelo te
+**enmienda**, la enmienda se escribe **fechada, con el tachado puesto EN el lugar
+afectado** — jamás reescribiendo en silencio. *Precedente de la casa, cobrado tres
+veces: el magenta en S83, la plata en S88, la telemedicina en S113. Acá se aplicó
+sobre la letra propia, minutos después de escribirla* (`LETRA_PORTAL_ADMIN` §6.7).
+
+---
+
 ## 7 · LO QUE ESTE MÉTODO NO CUBRE
 
 - **El reparto de trabajo lo hace la mesa**, sesión por sesión. Este documento
