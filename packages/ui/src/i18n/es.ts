@@ -321,6 +321,9 @@ export const uiEs = {
     email: 'Correo',
     emailFormato: 'tu@correo.com',
     emailAyuda: 'Ahí te llega la factura',
+    /* El caso real: `karina charry@gmail.com` (S105) entró con un espacio y
+       murió en una cola que nadie leía. La voz DIRIGE (Ley 17.4). */
+    emailInvalido: 'Revisa el correo: fíjate que no tenga espacios',
   },
   facturacion: {
     titulo: 'Datos para tu factura',

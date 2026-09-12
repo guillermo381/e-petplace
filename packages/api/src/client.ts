@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { fetchConTecho } from './red';
 import type { Database } from './database.types';
 
 export type EpetplaceClient = SupabaseClient<Database>;
@@ -29,6 +30,15 @@ export function initApi(url: string, anonKey: string, opciones?: OpcionesApi): E
     throw new Error('initApi: faltan EXPO_PUBLIC_SUPABASE_URL o EXPO_PUBLIC_SUPABASE_ANON_KEY');
   }
   cliente = createClient<Database>(url, anonKey, {
+    /* 🔴 EL TECHO DE TIEMPO (`D-1070`). Sin esto, una consulta que sale y no
+       vuelve **no vuelve nunca**: no hay error, no hay `catch`, el `await`
+       queda colgado y la pantalla se queda en el esqueleto para siempre.
+       Medido el 11-sep-2026 con el síntoma delante, y con el contraste que lo
+       prueba: en las edges hay `AbortSignal.timeout` en cinco lugares; en la
+       puerta que usan las dos apps no había ninguno.
+       ⚠️ El camino del pago (`/functions/v1/`) queda SIN techo a propósito —
+       ver `claseDeLlamada` y `D-1069`. */
+    global: { fetch: fetchConTecho() },
     auth: {
       persistSession: true,
       autoRefreshToken: true,

@@ -1,0 +1,4 @@
+-- REVERSA de 20260912670000_s115a_vmail_scope.sql — escrita ANTES.
+-- ⚠️ Revertir REINTRODUCE el error de alcance: `resolver_receptor_fiscal`
+--    vuelve a rebotar 42703 y todo pago aprobado cae al respaldo del outbox.
+--    El cuerpo anterior hay que recrearlo desde 20260912660000.

@@ -1,0 +1,5 @@
+-- REVERSA de 20260912680000_s115a_etiqueta_14.sql — escrita ANTES.
+-- ⚠️ Sólo cambia COMENTARIOS dentro de `resolver_receptor_fiscal`: su
+--    comportamiento es idéntico antes y después. Revertir devuelve una
+--    explicación que la medición desmintió. El cuerpo previo está en
+--    20260912670000.

@@ -108,6 +108,11 @@ Deno.serve(async (req) => {
     identificacion: Object.fromEntries(identRows.map((i) => [i.codigo, i.codigo_sri])),
   };
 
+  /* 🔴 LA CAPACIDAD SE PREGUNTA UNA VEZ Y SE DECLARA EN EL PARTE. Un proveedor
+     que acepta nuestro secuencial y otro que numera él son dos motores, y la
+     diferencia **no tiene síntoma**: los dos contestan «autorizada». */
+  const numeraLaCasa = puerto.capacidades().aceptaSecuencialPropio;
+
   /* 🔴 LA COLA INCLUYE LOS `emitiendo`, y sin eso la retriabilidad que el
      encabezado promete no existía: un documento que quedó en vuelo —timeout,
      proveedor caído, cupo agotado— **no lo levantaba nadie**. Ahora vuelve, y
@@ -231,13 +236,41 @@ Deno.serve(async (req) => {
         p_subtotal_15: canonico.subtotales_por_tarifa.find((g) => g.tarifa_pct !== 0)?.base ?? 0,
         p_iva: canonico.subtotales_por_tarifa.reduce((a, g) => a + g.valor_iva, 0),
         p_total: canonico.total,
+        /* 🔴 QUIÉN NUMERA SE PREGUNTA, NO SE SUPONE (`Capacidades`). Sin esto
+           la base tomaba un secuencial NUESTRO y derivaba NUESTRA clave, y
+           acto seguido el proveedor devolvía los suyos: un secuencial quemado
+           por emisión —`D-1060` sistematizado— y una clave en la fila que no
+           es la del comprobante real. *Y no habría fallado: los dos números
+           son plausibles y nadie los compara hasta la conciliación del mes.* */
+        p_numeracion_origen: numeraLaCasa ? 'casa' : 'proveedor',
       });
       if (eRes) throw new Error(`reservar_numero: ${eRes.message}`);
       if (!reserva?.ok) throw new Error(`reservar_numero: ${JSON.stringify(reserva)}`);
-      const clave: string = reserva.clave_acceso;
+      const clave: string | null = reserva.clave_acceso ?? null;
 
       // ⑤ recién ahora, afuera
-      const r = await puerto.emitir({ ...canonico, clave_acceso: clave });
+      const r = await puerto.emitir(clave ? { ...canonico, clave_acceso: clave } : canonico);
+
+      /* ⑤bis SI NUMERÓ EL PROVEEDOR, SE ANOTA LO QUE DEVOLVIÓ — y se coteja.
+         `fiscal_anotar_numero_ajeno` verifica los 41 dígitos que siguen siendo
+         nuestros y rebota por segmento: `clave_con_ruc_ajeno` no es lo mismo
+         que `clave_y_secuencial_no_coinciden`. */
+      let anotacion: unknown = null;
+      if (!numeraLaCasa && r.clave_acceso && r.secuencial_proveedor) {
+        const { data: an, error: eAn } = await db.rpc('fiscal_anotar_numero_ajeno', {
+          p_documento_id: d.id,
+          p_clave: r.clave_acceso,
+          p_secuencial: r.secuencial_proveedor,
+        });
+        if (eAn) throw new Error(`anotar_numero_ajeno: ${eAn.message}`);
+        anotacion = an;
+        /* 🔴 Si el número ajeno NO cuadra con la fila, el documento NO avanza.
+           *Guardar un estado «autorizada» sobre una clave que no es la nuestra
+           sería exactamente el silencio que el CHECK existe para impedir.* */
+        if (!(an as { ok?: boolean })?.ok) {
+          throw new Error(`numero_ajeno_rechazado: ${JSON.stringify(an)}`);
+        }
+      }
 
       /* Un rechazo REINTENTABLE no pierde la factura: queda en `emitiendo` con
          su secuencial y su clave, y el reconciliador la vuelve a tomar. */
@@ -261,6 +294,8 @@ Deno.serve(async (req) => {
         estado: fila?.estado ?? '(no se pudo releer)',
         secuencial: fila?.secuencial ?? null,
         tiene_clave: !!fila?.clave_acceso,
+        numera: numeraLaCasa ? 'la casa' : 'el proveedor',
+        ...(anotacion ? { anotacion } : {}),
         ...(reintentable ? { en_cola_por: r.codigo ?? 'reintentable' } : {}),
         ...(fila?.estado !== (reintentable ? 'emitiendo' : r.estado)
             ? { divergencia: `el puerto dijo ${r.estado} y la fila dice ${fila?.estado}` }
@@ -285,6 +320,7 @@ Deno.serve(async (req) => {
      simulador» no distingue «así está configurado» de «no había config y cayó
      al default» — dos situaciones con la misma cara y consecuencias opuestas.* */
   return json({ ok: true, proveedor: puerto.nombre, proveedor_fuente: prov.fuente,
+                numera: numeraLaCasa ? 'la casa' : 'el proveedor',
                 ...(prov.discrepancia ? { proveedor_discrepancia: prov.discrepancia } : {}),
                 procesados: hechos.length, hechos });
 });

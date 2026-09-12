@@ -239,3 +239,41 @@ export async function fiscalTopeConsumidorFinal(): Promise<ResultadoWrapper<numb
   }
   return { ok: true, data: n };
 }
+
+/**
+ * Declara a mano el medio de pago de un documento frenado, con su huella.
+ *
+ * 🔴 NO AFLOJA LA RESTRICCIÓN: le da una salida. El motor sigue sin poder
+ *    derivar crédito de débito con Nuvei (`D-1068`) y sigue frenando el
+ *    documento en vez de inventar un `<formaPago>`. Esto es la puerta para que
+ *    una PERSONA lo declare — *y la diferencia con tocar la fila a mano no es
+ *    la comodidad: es que un dato fiscal declarado por alguien tiene que poder
+ *    decir por quién.*
+ *
+ * El que declara elige el MEDIO —lo que de verdad pasó—; el código del SRI lo
+ * pone el catálogo. Y el documento vuelve a `borrador`: **esta puerta no
+ * emite**, emite el pipeline, con su secuencial atómico y su orden.
+ */
+export async function fiscalDeclararMedioDePago(args: {
+  documentoId: string;
+  /** `credito` · `debito` · `deuna` — los que el catálogo tenga activos. */
+  medio: string;
+  nota?: string;
+}): Promise<ResultadoWrapper<{ medio: string; codigoSri: string }>> {
+  const { data, error } = await getClient().rpc('fiscal_declarar_medio_de_pago', {
+    p_documento_id: args.documentoId, p_medio: args.medio, p_nota: args.nota,
+  });
+  if (error) {
+    return { ok: false, codigo: codigoDe(error.message),
+             mensaje: 'No pudimos declarar el medio de pago.' };
+  }
+  const r = data as Record<string, unknown>;
+  if (!r?.ok) {
+    /* El código del motor viaja tal cual: `medio_sin_codigo_sri`,
+       `el_medio_ya_estaba` y `documento_ya_autorizado` son tres situaciones
+       distintas, y la superficie tiene que poder decir cuál. */
+    return { ok: false, codigo: String(r?.codigo ?? 'no_se_pudo'),
+             mensaje: 'No se pudo declarar el medio de pago.' };
+  }
+  return { ok: true, data: { medio: String(r.medio), codigoSri: String(r.codigo_sri) } };
+}

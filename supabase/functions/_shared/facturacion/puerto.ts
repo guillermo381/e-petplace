@@ -17,6 +17,16 @@ export interface ResultadoEmision {
   referencia: string | null;
   estado: EstadoFiscal;
   clave_acceso: string | null;
+  /**
+   * El secuencial que eligió EL PROVEEDOR, cuando es él quien numera.
+   *
+   * 🔴 VIAJA APARTE DE LA CLAVE aunque esté adentro de ella (posiciones 31-39).
+   *    *Extraerlo de la clave sería derivar un dato de otro y perder la forma
+   *    de cotejarlos:* `fiscal_anotar_numero_ajeno` compara los dos y rebota
+   *    `clave_y_secuencial_no_coinciden` si el proveedor se contradice a sí
+   *    mismo. Con un solo valor esa verificación no existe.
+   */
+  secuencial_proveedor?: string | null;
   motivo?: string;
   /**
    * 🔴 EL CÓDIGO, NO EL MENSAJE. Un motivo es para que lo lea un humano; el

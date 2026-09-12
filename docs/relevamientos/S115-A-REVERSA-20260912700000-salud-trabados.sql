@@ -1,0 +1,3 @@
+-- REVERSA de 20260912700000_s115a_salud_trabados.sql — escrita ANTES.
+-- ⚠️ Revertir devuelve una señal de salud que dice `puede_emitir: true` con
+--    documentos trabados invisibles. El cuerpo previo está en 20260912560000.

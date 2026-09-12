@@ -77,6 +77,7 @@
     "verify:diseno": "node scripts/verify-diseno.mjs",
     "verify:identificacion-ec": "node scripts/verify-identificacion-ec.mjs",
     "verify:plata": "tsx scripts/verify-plata.ts",
+    "verify:correo": "node scripts/verify-correo.mjs",
     "verify:edge-deno": "node scripts/verify-edge-deno.mjs",
     "verify:fila-memoizada": "tsx scripts/verify-fila-memoizada.mjs",
     "verify:frenos": "node scripts/verify-frenos-por-sujeto.mjs",
@@ -139,7 +140,8 @@
     "verify:voz-sin-hueco": "tsx apps/cliente/scripts/verify-voz-sin-hueco.mts",
     "verify:rename": "node scripts/s115/verify-rename-seguro.mjs",
     "verify:edge-desplegada": "node scripts/verify-edge-desplegada.mjs",
-    "edge:desplegar": "node scripts/edge-desplegar.mjs"
+    "edge:desplegar": "node scripts/edge-desplegar.mjs",
+    "verify:techo-de-red": "tsx scripts/verify-techo-de-red.ts"
   },
   "devDependencies": {
     "eslint": "^10.9.1",

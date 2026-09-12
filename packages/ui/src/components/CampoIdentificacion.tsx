@@ -59,6 +59,7 @@ import { View } from 'react-native'
 import { Campo } from './Campo'
 import { SelectorOpcion } from './SelectorOpcion'
 import { Tilde } from './tilde'
+import { esCorreoValido } from './correo'
 import {
   LARGO,
   esIdentificacionValida,
@@ -89,18 +90,42 @@ export interface CampoIdentificacionProps {
   onCambiar: (valor: DatosIdentificacion) => void
   /** `'control'` (familia) · `'oficio'` (negocio). Ley 22. */
   acento?: 'control' | 'oficio'
+  /**
+   * **Apaga el campo de correo, porque lo pide la PANTALLA más arriba** (pedido
+   * de C, 11-sep): quien paga como consumidor final no entra a «Con mis datos»
+   * y se quedaría sin comprobante, así que el correo se pregunta SIEMPRE y
+   * antes. Con esta pieza adentro, sin la prop se ven dos campos de correo.
+   *
+   * Precedente exacto: **`Campo.sinPie`** — *el elemento pertenece al control,
+   * y un control puede estar compuesto por más de una pieza.*
+   *
+   * 🔴 **SU MODO DE FALLA ES SILENCIOSO, y se dice por eso:** con `sinCorreo`
+   * esta pieza deja de pedirlo Y de validarlo. Si la pantalla que lo monta no
+   * usa `esCorreoValido`, **la factura sale hacia un correo mal escrito y nadie
+   * se entera hasta que no llega** — que es exactamente el caso de S105
+   * (`karina charry@gmail.com`, muerto en una cola que nadie leía).
+   * ⇒ **quien pasa `sinCorreo` valida con `esCorreoValido`**, que se exporta
+   * desde `@epetplace/ui` justamente para eso.
+   */
+  sinCorreo?: boolean
 }
 
 /** El orden del selector: cédula primero **porque es el caso de casi toda
  *  familia**, no por alfabeto. */
 const TIPOS: readonly TipoIdentificacion[] = ['cedula', 'ruc', 'pasaporte']
 
-export function CampoIdentificacion({ valor, onCambiar, acento = 'control' }: CampoIdentificacionProps) {
+export function CampoIdentificacion({
+  valor,
+  onCambiar,
+  acento = 'control',
+  sinCorreo = false,
+}: CampoIdentificacionProps) {
   const { theme } = useTheme()
   const { t } = useTraduccionUi()
   /* `tocado` es lo que separa «todavía no terminó» de «terminó y está mal».
      Sin él, el campo nacería en rojo al montarse vacío. */
   const [tocado, setTocado] = useState(false)
+  const [correoTocado, setCorreoTocado] = useState(false)
 
   const largo = LARGO[valor.tipo]
   const completo = largo === null ? valor.identificacion.trim().length > 0 : valor.identificacion.length === largo
@@ -201,18 +226,31 @@ export function CampoIdentificacion({ valor, onCambiar, acento = 'control' }: Ca
         autoCapitalize="sentences"
       />
 
-      <Campo
-        label={t('identificacion.email')}
-        placeholder={t('identificacion.emailFormato')}
-        value={valor.email}
-        onChangeText={(email) => cambiar({ email })}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        autoCorrect={false}
-        /* El correo es a dónde LLEGA la factura, y por eso lo dice acá y no
-           en una pantalla de ayuda: es la consecuencia de lo que escribe. */
-        ayuda={t('identificacion.emailAyuda')}
-      />
+      {sinCorreo ? null : (
+        <Campo
+          label={t('identificacion.email')}
+          placeholder={t('identificacion.emailFormato')}
+          value={valor.email}
+          onChangeText={(email) => cambiar({ email })}
+          onBlur={() => setCorreoTocado(true)}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoCorrect={false}
+          /* 🔴 SE VALIDA, y con la MISMA función que usa la pantalla de C
+             (`esCorreoValido`): tres regex distintos vivían sueltos en el
+             prestador y ninguno en esta casa. El caso que lo funda es real —
+             `karina charry@gmail.com`, S105. Se juzga al SALIR del campo,
+             nunca tecla por tecla: el criterio de toda esta pieza. */
+          error={
+            correoTocado && valor.email.trim() !== '' && !esCorreoValido(valor.email)
+              ? t('identificacion.emailInvalido')
+              : undefined
+          }
+          /* El correo es a dónde LLEGA la factura, y por eso lo dice acá y no
+             en una pantalla de ayuda: es la consecuencia de lo que escribe. */
+          ayuda={t('identificacion.emailAyuda')}
+        />
+      )}
     </View>
   )
 }

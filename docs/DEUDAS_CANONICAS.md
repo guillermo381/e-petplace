@@ -32562,7 +32562,44 @@ minuto.**
 
 ---
 
-### `D-1064` 🟡 · EL WEBHOOK DE FACTUPLAN NO ENTREGA EN PRUEBAS — con nuestro lado eliminado como causa
+### `D-1064` ☠️ CERRADA · EL WEBHOOK SÍ ENTREGA — y mi hipótesis era falsa, la desmintió el dato
+
+**Cerrada el 11-sep-2026 por medición.** Los dos avisos de prueba **SÍ
+llegaron**, a las `04:01:25` y `04:02:16` UTC — **unos 28 minutos después de mi
+última consulta**, que es toda la explicación del «cero»:
+
+```
+evento  webhook.test   ·  firma_verificada: TRUE  ·  rechazado por sin_receiptId
+{"message":"Entrega de prueba de Factuplan. Si verificas la firma,
+  tu integración está lista."}
+```
+
+*Verificaron su firma y fueron rechazados por no traer comprobante, que es
+exactamente lo correcto.* El camino entero funcionaba; lo que falló fue
+**cuándo miré**.
+
+**Mi hipótesis —que el disparo exigía un comprobante real— era FALSA.** La
+sostenía un argumento razonable (el tipo `WebhookReceiptData` no tiene variante
+de ping) y resultó que **sí hay un evento `webhook.test` con su propio `data`,
+que ningún tipo del SDK declara**. *El SDK enumeraba menos de lo que el
+servidor manda, igual que con el estado `COMPLETED`.*
+
+⚠️ **Lo que esta ficha deja como lección de método, y es el motivo de
+conservarla:** la hipótesis estaba **marcada como hipótesis** (`L-541`), con lo
+que la confirmaría escrito al lado. Por eso el dato la corrigió en una línea en
+vez de quedar en el canon como causa. *Si la hubiera escrito como hallazgo —y
+tenía con qué: un tipo, un argumento y ninguna contradicción a la vista— el
+próximo habría leído «el botón necesita un comprobante» y no habría vuelto a
+mirar.*
+
+**Y la que sí era causa, medida en la misma vuelta:** el aviso de Satori
+(`invoice.authorized`) llegó con `firma_no_coincide` mientras los del
+contribuyente personal verificaban ⇒ **el secreto ES distinto por
+contribuyente**. Sigue en `D-1066`.
+
+<!-- texto original conservado abajo: la medición lo desmiente, no lo borra -->
+
+### ~~`D-1064` (texto original)~~ 🟡 · EL WEBHOOK DE FACTUPLAN NO ENTREGA EN PRUEBAS — con nuestro lado eliminado como causa
 
 **Medido el 10-11 sep 2026.** El founder disparó el botón de envío de prueba
 del panel **tres veces**. `fiscal_webhook_eventos`: **cero filas**, las tres.
@@ -32603,3 +32640,377 @@ ninguna clase se anota con su nombre literal en vez de caer a un default.
 cero rastro y sin instrumento del otro lado no produce información nueva.
 **Dueño:** A. **No bloquea nada hoy** — la emisión ya espera al contribuyente
 por otra razón.
+
+---
+
+### `L-542` · UN PROVEEDOR PUEDE REUSAR UN CÓDIGO DE ERROR PARA CAUSAS DISTINTAS — el código RAMIFICA, el status DIAGNOSTICA
+
+`L-535` firmó la ley y sigue entera: **se decide por el CÓDIGO, jamás por el
+texto** — *el día que cambien una palabra, el reintento deja de existir.* Lo
+que faltaba es qué hacer cuando el código no alcanza.
+
+**Medido, S115-A, 10 y 11 de septiembre, con el MISMO código:**
+
+```
+GENERAL_0002 · HTTP 400 · «Contribuyente con RUC … no encontrado en este workspace»
+GENERAL_0002 · HTTP 403 · «Este API key no tiene permiso para operar con el RUC …»
+```
+
+**Son dos problemas con dueños distintos y curas distintas** —dar de alta un
+contribuyente contra habilitar una credencial— y el proveedor les puso el mismo
+código. *Quien ramifique sólo por `GENERAL_0002` los trata igual y manda a
+resolver el que no es.*
+
+⇒ **El código sigue siendo lo único sobre lo que se RAMIFICA. Pero el error que
+se guarda lleva los TRES: código, status y texto** — porque el diagnóstico lo
+hace una persona y necesita distinguir lo que el código unificó. En el
+adaptador ya viaja así (`codigo`, `status`, `mensaje` por separado), y es lo
+que permitió ver que el alta de Satori **sí había funcionado**: la frase
+«no encontrado» desapareció aunque el código fuera idéntico.
+
+⚠️ Y el corolario para el instrumento: **la sonda que sólo imprima el código
+habría mostrado dos veces lo mismo y la conclusión habría sido «no cambió
+nada».** Un progreso real se habría leído como estancamiento — *la clase de
+error que no produce un rojo, produce una decisión equivocada.*
+
+---
+
+### `D-1065` 🔴 · EL PROVEEDOR MANDA SU PROPIO CORREO Y NO SE PUEDE APAGAR — decisión de producto, no detalle técnico
+
+**Medido contra la API real, 11-sep-2026.** El founder firmó `sendEmail: false`
+para que el correo «Tu factura» lo mande **nuestro** motor de avisos, con
+nuestro RIDE y nuestro XML, y con el instrumento que vigila que el destinatario
+sea el receptor. **La API desplegada rechaza el campo:**
+
+```
+400 · «property sendEmail should not exist»     (validación por lista blanca)
+```
+
+La documentación y el `.d.ts` del SDK `0.15.0` lo declaran como opción de
+primer nivel con default `true`. **El SDK va adelante de la API que corre, y
+manda la que contesta.** *Tercera vez en la misma tanda que el contrato
+publicado enumera algo distinto de lo que el servidor hace* — junto con el
+estado `COMPLETED` y el evento `webhook.test`.
+
+⇒ **Hoy, cada factura dispara un correo del proveedor al receptor**, fuera del
+motor de avisos, con un RIDE que no es el nuestro y que ningún gate de la casa
+puede verificar.
+
+**⏪ CORRECCIÓN (11-sep, la pidió C): el «14 de 107 invitados reales» que esta
+ficha citaba NO eran invitados.** La consulta corría sobre `pagos_intentos` y
+esos 14 son intentos **sin sujeto** —ni compra, ni cita, ni bono— del 12 al 18
+de agosto, que violarían `chk_intento_un_solo_sujeto` si se insertaran hoy:
+restos de arnés. Medido por C y confirmado por A: **182 profiles, cero sin
+email, cero fantasmas.** *El número era real y la etiqueta era mía* (`L-544`).
+
+**🔴 El camino que SÍ produce personas sin correo es otro, y es hallazgo de C:**
+el alta del **mostrador** (`crear_cliente_walkin`) acepta `email` **o**
+`telefono`. A quien el veterinario da de alta por teléfono le falta el correo,
+y **esa persona no pasa por el checkout del cliente**, así que la cura de C no
+la alcanza. **Hoy son CERO** — el camino existe y nadie lo transitó sin correo
+todavía. *Cero observaciones no es cero productores*, así que la rama
+fail-closed se queda: es prevención, no reparación. **Su arreglo vive en el
+mostrador del prestador y es otra tanda.**
+
+**Y su hermana, del mismo intento:** el proveedor **exige `customer.email`
+incluso para consumidor final** —«customer.email is required and must be a
+valid email address»—, cosa que el SRI no pide. *Eso convierte una pregunta
+técnica en una de producto: **a qué correo se factura cuando la familia no dio
+ninguno**.* Un correo inventado hace que el comprobante viaje a una dirección
+que no es de nadie; uno de la casa hace que reciba facturas de terceros.
+
+**Las tres salidas, y son del founder:**
+1. pedir a Factuplan que habilite `sendEmail` en la API (es lo que su propia doc
+   promete);
+2. aceptar que el correo lo manden ellos y **retirar el nuestro**, para no
+   mandar dos por la misma factura;
+3. convivir a propósito, declarándolo —*dos correos por una factura confunde, y
+   la familia no tiene forma de saber cuál es el bueno*.
+
+**Disparo: antes del primer comprobante con un receptor real.** En ensayo no
+importa; con una familia de por medio, sí. **Dueño:** founder (la decisión) ·
+A (lo que haya que construir o retirar).
+
+---
+
+### `D-1066` 🔴 · EL SECRETO DEL WEBHOOK ES POR CONTRIBUYENTE — y el cargado es el que NO nos sirve
+
+**Medido, 11-sep-2026, con los dos casos en la misma tabla:**
+
+| aviso | contribuyente | firma |
+|---|---|---|
+| `webhook.test` ×2 | personal del founder | **verificó** |
+| `invoice.authorized` | **Satori (el nuestro)** | **`firma_no_coincide`** |
+
+⇒ **el secreto es por contribuyente**, y `FACTURACION_WEBHOOK_SECRET` tiene hoy
+el del contribuyente personal. *No es una conjetura de diseño: es el mismo
+secreto validando uno y fallando el otro, en dos filas consecutivas.*
+
+**La cura es de una línea y es del founder:** cargar el `whsec_` **del webhook
+de Satori** en `FACTURACION_WEBHOOK_SECRET`, reemplazando el actual.
+
+**Y lo que NO hay que hacer, con su razón:** aceptar varios secretos. La casa
+tiene **un solo emisor por construcción** (`chk_fiscal_emisor_una_fila`), así
+que aceptar dos sería prepararnos para recibir comprobantes de un contribuyente
+que no es el nuestro — *una capacidad que no queremos tener*. Además, el
+webhook personal debe **dejar de apuntar a nuestra URL**: sus avisos van a
+rebotar `401`, y esos 401 son **indistinguibles de un problema real de firma
+con los de Satori** — estaríamos fabricando el ruido que taparía la falla que
+sí necesitamos ver, y de paso contando hacia las diez fallas que desactivan.
+
+**Lo que ya nos protege igual:** un aviso cuyo `receiptId` no exista en nuestras
+filas anota `documento_no_encontrado` y **no toca un solo documento fiscal**.
+
+---
+
+### `L-543` · PL/pgSQL COMPILA PEREZOSO: UN `db push` VERDE NO DICE QUE LA FUNCIÓN CORRA
+
+`L-114` firmó la forma en TypeScript —*build verde ≠ contrato real*— y ésta es
+la misma ley un piso más abajo, en el motor, donde el instrumento engaña más
+porque **el `Finished` se parece mucho más a un verde que un `tsc` sin errores**.
+
+**Medido, S115-A, 11-sep-2026.** Declaré `v_mail` dentro de un bloque anidado
+(`DECLARE … BEGIN … END;`) y lo usé **después** del `END`. La migración aplicó
+limpia, `db push` dijo `Finished`, y la función reventó con
+`42703: column "v_mail" does not exist` **la primera vez que un pago se
+aprobó** — no antes.
+
+*PL/pgSQL valida la sintaxis al crear y resuelve los identificadores al
+ejecutar.* Un error de ALCANCE no es un error de sintaxis: el cuerpo está bien
+formado y la variable simplemente no existe donde se la nombra. **Nada lo
+encuentra hasta que alguien la corre.**
+
+⇒ **El cinturón de una migración que toca una función la EJECUTA, no la
+inspecciona.** Verificar que existe, que su `proacl` está bien o que su
+`pg_get_functiondef` contiene lo esperado **no prueba que corra**: las tres
+cosas son ciertas de una función rota. La corrida tiene que pasar por el camino
+donde las variables se resuelven de verdad.
+
+⚠️ **Y la causa de que llegara a aplicarse está declarada: la migración anterior
+fue SIN CINTURÓN.** No fue mala suerte — *el único paso que habría encontrado
+esto es el que salteé.* La correctiva trae el que faltaba, con su rojo (un
+invitado sin correo tiene que ESPERAR, no salir con una casilla inventada) y
+con un brazo que discrimina (por encima del tope sigue mandando la falta de
+identificación, para que un motivo no tape al otro).
+
+✅ **Lo que sí funcionó, y conviene no perderlo de vista:** el respaldo del
+outbox atrapó el rebote, **el pago NO se cayó**, y el error quedó escrito en
+`sri_error` con su SQLSTATE. *La defensa en profundidad convirtió un defecto de
+motor en una fila que dice qué pasó, en vez de en una compra que falla.*
+
+---
+
+### `L-544` · UN NÚMERO SE ETIQUETA CON LA POBLACIÓN QUE SE CONSULTÓ, NO CON LA QUE UNO CREE QUE REPRESENTA
+
+Hermana de `L-541` —*la explicación escrita al medir es una hipótesis*— pero de
+un error más chico y más difícil de ver: acá **no se explica de más, se nombra
+mal**. El número es correcto, la consulta es correcta, y **la etiqueta viene de
+otra tabla**.
+
+**Medido, S115-A, 11-sep-2026.** Escribí *«14 de 107 invitados reales, sin
+usuario por ninguna vía»* — en una ficha y **adentro de una función del
+motor**. La consulta corría sobre **`pagos_intentos`**; la etiqueta hablaba de
+**compras**. Los 14 son intentos **sin sujeto** —ni compra, ni cita, ni bono—
+del 12 al 18 de agosto, que **violarían `chk_intento_un_solo_sujeto` si se
+insertaran hoy**: restos de arnés, no personas.
+
+*Lo encontró C al no poder reproducirlo —0 compras sin `user_id` de 86, 0
+profiles sin email de 182— y al **pedir la consulta en vez de asumir que estaba
+mal**.* Las dos mediciones eran verdaderas: medían poblaciones distintas.
+
+⇒ **Al publicar un conteo se nombra la TABLA y el FILTRO, no el concepto:**
+*«14 `pagos_intentos` aprobados sin sujeto»*, no *«14 invitados»*. El concepto
+es una interpretación y va aparte, donde se pueda discutir sin arrastrar al
+número.
+
+⚠️ **Y el corolario que lo vuelve caro, porque es lo que casi pasa:** ese número
+justificaba una rama de código. *Una etiqueta equivocada no sólo desinforma —
+funda decisiones, y la rama sobrevive con su razón falsa adentro.* La rama
+resultó necesaria igual, **pero por otro motivo**: el alta del mostrador, que
+acepta teléfono sin correo. **Acertar por la razón equivocada es tan frágil
+como equivocarse**: el día que alguien revise ese motivo y lo vea falso, va a
+borrar una defensa que sí hacía falta.
+
+---
+
+### `D-1067` 🟡 · EL ALTA DEL MOSTRADOR ACEPTA TELÉFONO SIN CORREO — y a esa persona no la alcanza ninguna cura del cliente
+
+**Hallazgo de C, 11-sep-2026.** `crear_cliente_walkin` acepta `email` **o**
+`telefono`: el veterinario puede dar de alta a alguien que llegó caminando
+usando sólo su teléfono. **Esa persona no pasa por el checkout del cliente**,
+así que la cura de ese lado —que el checkout de invitado pida correo— **no la
+alcanza**.
+
+**Medido hoy: CERO.** 182 profiles, ninguno sin email, ninguno fantasma —
+verificado por C y por A, por separado, sobre `profiles` y sobre `auth.users`.
+
+🔴 **Y eso NO cierra la ficha: `cero observaciones no es cero productores`.** El
+camino existe en el código y nadie lo transitó sin correo todavía. *Medir el
+efecto y concluir que no hay causa es exactamente el error que esta casa ya
+pagó* — lo que hay que censar es el productor, y el productor está vivo.
+
+**Qué pasa el día que exista el primero, y por eso no urge pero tampoco se
+olvida:** si esa persona paga algo, `resolver_receptor_fiscal` devuelve
+`sin_correo_para_el_receptor` y **el documento espera** en vez de salir con una
+casilla inventada. *No se pierde plata ni se emite mal: se frena, visible.*
+
+**Dónde va el arreglo:** en el **mostrador del prestador**, no en el cliente. Y
+la pregunta que hay que contestar antes de construir no es técnica: *¿se le
+exige el correo al veterinario en el momento del alta —cuando la persona está
+enfrente y se lo puede pedir— o se le pide después a la familia cuando reclama
+su compra?* **Es otra tanda.**
+
+**Disparo:** el primer alta de mostrador sin correo que llegue a pagar.
+**Dueño:** la pista que toque el mostrador · founder (la pregunta de arriba).
+
+---
+
+### `D-1068` 🔴 · NUVEI NO MANDA EL TIPO DE FINANCIACIÓN — y el campo que parece decirlo no discrimina
+
+**Medido sobre los 162 avisos de Nuvei guardados, 11-sep-2026.** El founder
+pidió mirar el payload completo antes de buscar un dataset de BINs: *puede que
+el dato ya esté y nadie lo lea*. Está mirado, y **no está**.
+
+Las cuatro claves candidatas, con sus valores REALES:
+
+| campo | valores | qué es |
+|---|---|---|
+| `card.type` | `vi` · `di` | **la MARCA** (Visa, Diners) — el nombre engaña |
+| `transaction.payment_method_type` | `0` | constante en las 162 |
+| `card.origin` | `Paymentez` | el procesador |
+| `transaction.installments_type` | **`Revolving credit`** | ver abajo |
+
+🔴 **`installments_type` dice «credit» y NO SIRVE, por una razón medible:** toma
+ese valor en **el 100 %** de las filas con BIN. Y no puede ser de otro modo —
+**en toda la base hay DOS BINs** (`411111` Visa de prueba · `364170` Diners) y
+**cero transacciones de débito**. *Un campo que toma un solo valor sobre un
+conjunto sin variación no es un discriminador: es una constante disfrazada.*
+Concluir «Nuvei manda crédito» desde acá sería medir el corpus, no el campo.
+
+**Lo que se puede afirmar:** el payload **no trae un campo de *funding type***.
+**Lo que NO se puede afirmar:** que no exista uno habilitable — eso lo contesta
+Nuvei.
+
+⚠️ **Y por eso la pregunta a Nuvei tiene que NOMBRAR el campo**, o se contesta
+sola y mal: *«`card.type` nos llega con la marca (`vi`/`di`). ¿Hay un campo de
+funding type —credit / debit / prepaid— que se pueda habilitar en la respuesta
+de autorización, o un BIN lookup en su API?»* **Preguntar «¿mandan el tipo de
+tarjeta?» se contesta con «sí, `card.type`», y `card.type` no es eso.**
+
+**Dónde debería vivir la derivación, medido:**
+
+```
+tarjetas_guardadas   3 de 3 con bin      ← completo
+pagos_intentos      27 de 89 con bin     ← incompleto, y el hueco es RECIENTE
+                                            (último sin bin: 8-sep)
+```
+
+⇒ **en `tarjetas_guardadas`, no en el intento**: ahí el BIN está completo, se
+resuelve **una vez por tarjeta** en vez de una por cobro, y **vale retroactivo
+sin backfill**. *El `bin` lo escriben `pagos-alta-tarjeta` y `pagos-tarjetas`;
+`pagos-cobro` no lo escribe — por eso el intento lo tiene a medias.*
+**Pendiente de verificar antes de construir: por dónde ata el intento a su
+tarjeta** (`pagos_intentos` no tiene columna `tarjeta_id`).
+
+🔴 **Y el freno que hay que decir en voz alta: esto NO se puede medir en
+sandbox.** `411111` y `424242` son BINs de prueba universales; ningún dataset
+de rangos los resuelve a crédito o débito de forma significativa. **El verde de
+esta derivación exige una tarjeta real de débito y una de crédito.**
+
+**Lo que queda rigiendo mientras tanto, y está bien que rija:** BIN que no
+resuelve → `medio_de_pago_no_declarado` → **el documento espera**. Nunca un
+`<formaPago>` inventado.
+
+**Disparo:** la respuesta de Nuvei. **Dueño:** founder (la pregunta) · B (el
+origen del dato) · A (la derivación y el catálogo).
+
+---
+
+### `D-1069` 🔴 · DIECISÉIS SUJETOS NO SE PUEDEN PAGAR DESDE HACE DOS SEMANAS — el guard correcto con la conciliación que no barre · **FECHA LÍMITE: 25-sep-2026**
+
+**Medido el 11-sep-2026:**
+
+```
+8 compras  ·  16,2 días de edad media
+8 citas    ·  15,1 días        el más viejo: 21-ago-2026
+todos en estado `pendiente`
+```
+
+`pagos-cobro` frena con `pago_en_proceso` (409) cuando el sujeto tiene un
+intento en `iniciado` o `pendiente` — **el guard es correcto y evita el doble
+débito**. Su contracara es que **un intento que nunca se resuelve bloquea a ese
+sujeto para siempre**: esas 8 compras y esas 8 citas **no se pueden volver a
+pagar**, y la familia recibe un rechazo que no explica nada.
+
+**Los dos relojes de conciliación corren todos los días** —`pagos-conciliar`
+17:00 y 21:15 UTC— **y no los están barriendo.** Por qué, no está medido: es el
+trabajo de la ficha.
+
+⚠️ **Y estaba anunciado.** El comentario de `pagos-cobro` (S108-B), sobre la
+otra mitad del mismo problema, dice: *«arreglar la clave sin el índice parcial
+cambia un cobro doble por un bloqueo permanente»*. **Acá no fue la clave: fue el
+guard con una conciliación que no cierra — y produjo exactamente eso.**
+
+**🔴 BLOQUEA EL TECHO DE TIEMPO DEL CAMINO DEL PAGO** (firma del founder,
+11-sep): un timeout del lado de la app deja el intento en `pendiente`, y con
+esta ficha viva eso convierte **un cuelgue de red de 30 segundos en una familia
+que no puede pagar dos semanas**. *El orden firmado es: la conciliación barre
+primero, el techo entra después.*
+
+**Lo que NO hay que hacer, y es el voto que el founder ratificó:** liberar los
+16 a mano. *Curar el síntoma sin entender por qué la conciliación no los barrió
+deja viva la causa* — y la causa va a producir los próximos 16.
+
+**Qué tiene que contestar la pasada, en orden:**
+1. ¿`pagos-conciliar` los MIRA y no los cierra, o ni siquiera los selecciona?
+   (su filtro es lo primero que hay que leer)
+2. ¿El proveedor sabe qué pasó con cada uno? La consulta activa lo puede decir.
+3. ¿Falta un vencimiento por tiempo —un intento sin resolver a las N horas se
+   cierra `expirado`— o falta que la conciliación los alcance?
+
+**FECHA LÍMITE: 25-sep-2026**, firmada por el founder: *son familias reales que
+hoy no pueden comprar, y no puede quedar esperando indefinidamente.* Si llega esa
+fecha sin cura, se libera a mano **y la causa queda como ficha propia** — pero
+ése es el peor final, no el plan.
+
+**Dueño:** la pista del motor de pagos. **Disparo: ya.**
+
+---
+
+### `D-1070` 🔴 · EL CLIENTE DE LA CASA NO TIENE TECHO DE TIEMPO — cualquier cuelgue de red es un esqueleto eterno
+
+**Medido el 11-sep-2026, con el síntoma delante.** `createClient` no pasa un
+`fetch` propio: **cero `AbortSignal` en toda `packages/api`**. Una consulta que
+sale y no vuelve **no vuelve nunca** — no hay error, no hay `catch`, el `await`
+queda colgado y la pantalla se queda en el esqueleto.
+
+*El contraste lo prueba: en las edges hay `AbortSignal.timeout` en cinco
+lugares. En la puerta que usan las dos apps, ninguno.*
+
+**Firmado por el founder el 11-sep**, con los valores como DATO en `app_config`:
+
+| clase | techo | de dónde sale |
+|---|---|---|
+| lectura de pantalla | **8 s** | 10 consultas en paralelo dieron 0,56 s la peor · peaje fijo ~150 ms (S94-PERF) ⇒ ~14× lo normal |
+| escritura de negocio | **20 s** | no es plata, pero se pierde trabajo escrito si se rinde antes |
+| auth | **20 s** | el login real midió < 1 s; el margen es por la red |
+| subida de archivos | **120 s** | `D-734` midió 5 MB = **44 s** ⇒ ~3× el peor caso conocido |
+| **camino del pago** | **🔴 NO ENTRA TODAVÍA** | bloqueado por `D-1069`; cuando entre, **90 s**, y **midiendo antes la llamada HTTP sola** |
+
+**Lo que el techo tiene que producir, y es la mitad que importa:** un **error de
+red honesto** que la pantalla pueda decir. *Nunca más un `await` colgado: o
+vuelve con datos, o vuelve con un error.* La voz y la forma son de C con B —
+pedido en el buzón como «la pantalla tiene que poder decir que no cargó y
+ofrecer reintentar».
+
+**El rojo del instrumento, exigido por el founder:** una consulta que nunca
+responde **termina en error antes del techo + margen**, no cuelga. Con su
+control positivo: **una consulta normal no se aborta de más.**
+
+⚠️ **Sobre el 27,8 s de mediana del ciclo de pago: mide de `creado_en` a
+`cerrado_en` —el ciclo entero, webhook incluido—, NO la llamada HTTP.** Se
+declara con ese límite y **no funda los 90 s**: eso se mide aparte cuando el
+techo del pago entre.
+
+**Disparo:** ya, para las cuatro clases firmadas. **Dueño:** A (el cliente y los
+wrappers) · C con B (la voz).
