@@ -442,7 +442,16 @@ export function useFacturacion(activo: boolean): FacturacionLista {
 
      *Se cura acá y no pidiéndole deps a cinco pantallas: una regla que hay que
      recordar en cada consumidor es una regla que alguien va a olvidar — y su
-     modo de falla es que no se puede cobrar.* */
+     modo de falla es que no se puede cobrar.*
+
+     ⚠️ **Y LA LECCIÓN DEL ARNÉS QUE LO PROBÓ, porque el primero NO SERVÍA:**
+     simulé el ciclo con una variable compartida y dio VERDE en los dos casos.
+     *El defecto vivía justo en que React **no** deja ver el cambio —el closure
+     captura el VALOR del render— y una variable de JS sí lo deja ver.* El arnés
+     reproducía la forma del bug y no su MECANISMO, así que probaba otra cosa.
+     ⇒ **Antes de confiar en un arnés hay que preguntarle si reproduce el
+     mecanismo, no si se parece al síntoma** — el segundo simuló renders con sus
+     closures y ahí sí discriminó. */
   const correoVivo = useRef('');
   const nombreVivo = useRef('');
   const topeVivo = useRef<number | 'cargando' | 'noCargo'>('cargando');
