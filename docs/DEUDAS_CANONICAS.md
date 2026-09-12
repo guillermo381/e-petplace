@@ -33267,11 +33267,19 @@ edges estén al día antes de dejar cerrar.
 
 ⚠️ **Atenuante medido, y cambia la urgencia sin borrarla: `<ambiente>1</ambiente>` es PRUEBAS.** Ningún documento con este defecto tiene efecto fiscal todavía. **Pero el mismo error en producción es un dato falso en un comprobante firmado**, y el campo es obligatorio en el esquema del SRI.
 
-**Dos salidas, y la segunda ya está construida:**
-1. **Corregir la configuración del contribuyente en el panel de Factuplan** (es donde vive el dato).
-2. **Cambiar a modo `factuplan_xml`** — ahí el XML lo armamos nosotros y el campo sale de `fiscal_emisor`: `simulador.ts:61` ya escribe `${c.emisor.obligado_contabilidad ? 'SI' : 'NO'}` ⇒ **diría `SI` sin tocar una línea.** *El adaptador nació con los dos modos justamente para esto.*
+### ✅ CAUSA ACLARADA POR FACTUPLAN (founder, 11-sep) — BAJA DE URGENCIA, **NO SE CIERRA**
 
-**Gate de no-repetición:** antes de emitir en producción, un cinturón compara los campos del XML autorizado contra `fiscal_emisor`. *Un dato del emisor que sale de la configuración de un tercero se verifica contra la nuestra en cada emisión, o no se verifica nunca.*
+**No es un límite del plan sobre el DATO: la PANTALLA donde se configura el emisor está detrás del plan pago.** Al contratar se habilita y el campo se pone en `SÍ`.
+
+*Es una distinción que cambia la cura entera, y por eso vale anotarla: «el proveedor no deja poner el dato» habría mandado a armar el XML nosotros; «la pantalla está detrás del plan» se resuelve contratando.* **El síntoma era idéntico en los dos casos.**
+
+- **Disparo:** el momento de contratar el plan.
+- **Verificación:** la **primera emisión después de configurarlo** — no antes, porque hasta entonces el campo no puede estar bien.
+- 🔴 **NO se construye el modo `factuplan_xml` para esto** — firma del founder: *«no vamos a armar el XML nosotros para arreglar un campo de su formulario.»* El modo existe y queda donde estaba: como el camino del día que necesitemos numerar nosotros, **jamás como rodeo de una configuración ajena.**
+
+**Y queda en la lista de encendido de producción:** la primera factura real se mira **campo por campo contra el certificado de RUC, empezando por `obligadoContabilidad`. Si sale `NO`, se frena antes de la segunda.** Depositado en `MODELO_FISCAL` §Paso 7.4 — ⚠️ *la lista existía y ese chequeo NO estaba en ella: decía «verificar de punta a punta», que es una instrucción que cada uno cumple a su manera.*
+
+**Gate de no-repetición, PROPUESTO y sin firma:** un cinturón que compare los campos del emisor del XML autorizado contra `fiscal_emisor` en cada emisión. *Un dato del emisor que sale de la configuración de un tercero se verifica contra la nuestra en cada emisión, o no se verifica nunca* — y hoy el único que lo vio fue el founder leyendo el PDF. **No se construye hasta que se firme:** con el plan contratado el campo va a estar bien, y un gate para un defecto ya corregido es andamio.
 
 ---
 
