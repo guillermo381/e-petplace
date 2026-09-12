@@ -523,9 +523,16 @@ Deno.serve(async (req) => {
      mitad estaba tres bloques abajo, con un código distinto y también
      plausible. El censo de `} else {` en los dos rieles se corrió recién
      entonces: eran exactamente dos, uno por archivo. */
+  let tasaDeLaCita: number | null = null;
+  let codigoDeLaCita: string | null = null;
   if (hayCita) {
     const { data: d } = await db.from('cita_desglose')
-      .select('subtotal, impuesto, total, moneda').eq('cita_id', citaId).maybeSingle();
+      /* 🔴 `codigo_iva` y `tarifa_pct` SE LEEN DEL DESGLOSE, no del catálogo.
+         Son parte de lo que se congeló con el precio: *una tasa resuelta al
+         cobrar cambia bajo los pies y produce un comprobante que no cuadra con
+         lo que la familia aceptó.* */
+      .select('subtotal, impuesto, total, moneda, codigo_iva, tarifa_pct')
+      .eq('cita_id', citaId).maybeSingle();
     /* 🔴 FAIL-CLOSED, igual que la compra: **sin desglose congelado no hay
        cobro.** *El desglose es lo que se le prometió al cliente al reservar;
        cobrar sin él sería cobrar un número que nadie le mostró.* */
@@ -533,6 +540,8 @@ Deno.serve(async (req) => {
     monto = Number(d.total ?? 0);
     iva = Number(d.impuesto ?? 0);
     base = Number(d.subtotal ?? 0);
+    tasaDeLaCita = d.tarifa_pct != null ? Number(d.tarifa_pct) : null;
+    codigoDeLaCita = (d.codigo_iva as string | null) ?? null;
     moneda = d.moneda ?? 'USD';
   }
 
@@ -667,10 +676,16 @@ Deno.serve(async (req) => {
         pct: i.impuesto_pct != null ? Number(i.impuesto_pct) : null,
         codigo: (i.impuesto_codigo as string) ?? null,
       }))
-    /* Sin ítems —una CITA— no hay tasa declarada: `cita_desglose` guarda
-       `subtotal/impuesto/total/moneda` y **ningún código**. Con IVA 0 pasa
-       igual; con IVA > 0 rebota `iva_sin_tasa_declarada`, que es la verdad. */
-    : [{ subtotal: base, impuesto: iva, pct: null, codigo: null }];
+    /* 🔴 LA CITA YA DECLARA SU TASA (`D-1071`). Hasta el 11-sep-2026 esto
+       mandaba `pct: null` y `codigo: null` porque `cita_desglose` no los
+       guardaba — y con eso **la mitad gravada del catálogo no podía cobrar**:
+       15 de 30 tipos activos rebotaban `iva_sin_tasa_declarada`. *Lo destapó el
+       founder comprando un paseo, no un gate.*
+
+       ⚠️ El guard NO se aflojó: si el desglose sigue sin tasa —una cita vieja
+       sin backfillear, un tipo que salió del catálogo— sigue rebotando, y eso
+       es lo correcto. Lo que se curó es que la tasa LLEGUE. */
+    : [{ subtotal: base, impuesto: iva, pct: tasaDeLaCita, codigo: codigoDeLaCita }];
 
   const vIva = verificarIva(lineasIva);
   if (!vIva.ok) {

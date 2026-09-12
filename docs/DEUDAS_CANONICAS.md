@@ -33043,3 +33043,148 @@ encontró **C**, que le pasó a B el control que lo reproducía (`S115-C-para-B-
 R90-no-caza-el-regex-en-constante.md`). *El instrumento lo arregló su dueño con
 el rojo que le trajo quien lo sufría* — que es la forma que esta casa ya firmó
 en `L-459` y acá se cumplió sola.
+
+---
+
+### `D-1071` ☠️ CERRADA EN EL MISMO DÍA · LA MITAD DEL CATÁLOGO DE SERVICIOS NO SE PODÍA COBRAR
+
+**Lo destapó el founder COMPRANDO, no un gate** — y eso es lo que la ficha
+conserva.
+
+**Medido el 12-sep-2026:** `pagos-cobro` exige que alguna línea declare su tasa
+nominal. `cita_desglose` guardaba `subtotal · impuesto · total · moneda` y
+**ningún código** ⇒ toda cita con IVA > 0 rebotaba `iva_sin_tasa_declarada`.
+
+```
+EC_IVA_0    15 tipos activos   ✓ cobraban   (consulta, cirugía, laboratorio…)
+EC_IVA_15   15 tipos activos   🔴 NO        (paseo, grooming, guardería, hotel,
+                                             adiestramiento…)
+```
+
+**La mitad exacta.** Y la despensa funcionaba porque sus líneas salen de
+`pedido_items`, que sí traen `impuesto_pct` — *por eso el defecto se veía como
+«reserva no cobra y despensa sí», que apunta al lugar equivocado.*
+
+🔴 **POR QUÉ NINGÚN INSTRUMENTO LO VIO, que es lo que hay que no repetir:** los
+15 que pasaban eran los **exentos**. Un cobro de consulta médica anda perfecto y
+un gate que prueba «el cobro funciona» sale verde. *El instrumento medía la
+mitad del catálogo y su verde se leía como salud del todo.*
+
+**La cura, y lo que la vuelve incómoda:** el trigger `_trg_cita_congela_desglose`
+**ya resolvía `codigo_iva` y `tarifa_pct`** —los usa para calcular el impuesto—
+**y los descartaba.** El dato estaba a una línea de distancia.
+
+**Firma del founder sobre la forma:** la tasa **se congela con el precio**, no
+se resuelve al cobrar. *Una tasa resuelta al cobrar cambia bajo los pies y
+produce un comprobante que no cuadra con lo que la familia aceptó.* Mismo molde
+que `pedido_items`.
+
+**Y el guard NO se aflojó:** sin tasa declarada sigue sin cobrar. *Aflojarlo
+habría hecho pasar el mismo comprobante sin tasa — el defecto con otra cara.*
+
+**Backfill declarado con su conteo:** `0 de 71 → 71 (+71)`, con la tarifa
+vigente **a la fecha del servicio** y no la de hoy — *backfillear con la tarifa
+actual reescribiría el pasado con un número que en su momento no regía.*
+
+**El control que nace con la ficha:** `pnpm verify:tasa-cobrable` mide que
+**TODOS** los tipos activos resuelvan su tasa, no sólo los exentos — con el
+brazo que discrimina (*si el catálogo fuera todo exento, el gate pasaría sin
+medir nada*).
+
+**Cierra** con la migración `20260912730000`, la edge `pagos-cobro` desplegada y
+el gate verde: `30 de 30 tipos · 15 gravados · 71 de 71 desgloses con tasa`.
+
+⚠️ **Lo que NO cierra con ella y va aparte:** la voz. Un rechazo determinista
+decía *«probá de nuevo en otro momento»* e hizo que el founder intentara **tres
+veces** sobre algo que no iba a funcionar nunca. Partición de los 31 códigos en
+el buzón a C.
+
+---
+
+### `D-1072` 🔴 · NADA SE EMITE SOLO — el disparo del camino feliz no existe · **PRERREQUISITO DEL 1-OCT**
+
+**Medido el 12-sep-2026: `cero` crones fiscales.** Un pago aprobado crea su
+documento en `borrador` y **ahí se queda** hasta que alguien corra
+`fiscal-emitir` a mano. Hoy ese alguien soy yo, con el secreto de despacho.
+
+> **En octubre nadie va a correr comandos.** Firma del founder.
+
+**La consecuencia que la familia vive hoy y nadie nombra:** compró, se le cobró,
+y **no le llega el correo ni aparece en «Tus facturas»** — no porque el envío
+falle, sino porque **la factura todavía no existe**.
+
+**Alcance de la ficha, en el orden en que hay que contestarlo:**
+
+1. **QUÉ dispara.** Un reloj cada N minutos sobre la cola —el molde de la casa,
+   como `despachar-*`— o un disparo desde el trigger del outbox. *El reloj es
+   más simple y no acopla la emisión a la transacción del pago; el trigger es
+   más inmediato y arrastra el riesgo de que un fallo fiscal toque el cobro.*
+   **Voto: reloj**, por la misma razón por la que el outbox ya atrapa sus
+   propios errores sin dejar caer el pago.
+2. **CADA CUÁNTO.** No está medido. Lo que sí: la autorización de Factuplan
+   tardó **~1 minuto** en el ensayo. Un reloj de 5 minutos deja a la familia sin
+   su factura menos de 10; uno horario, hasta 60.
+3. **LOS QUE QUEDAN EN `borrador`** porque el proveedor no contestó: hoy los
+   toma la misma cola (`fiscal-emitir` incluye `borrador` y `emitiendo`), y el
+   que ya tiene `referencia_proveedor` **consulta en vez de re-emitir** — eso ya
+   está resuelto y no hay que rehacerlo.
+4. **CÓMO SE REINTENTA.** El cupo y el proveedor caído ya vuelven a la cola con
+   su número intacto (`reintentable`). Lo que falta es el **techo**: un
+   documento que lleva N intentos sin salir tiene que dejar de intentar y
+   **gritar**, en vez de golpear la puerta para siempre.
+
+🔴 **Y un hueco que apareció emitiendo, y va acá porque es del mismo camino: un
+documento puede llegar a `autorizada` SIN su XML ni su RIDE, y no hay forma de
+traérselos.** Medido: el archivado vivía sólo en el webhook; con la firma sin
+validar (`D-1066`) el comprobante quedó autorizado y sin respaldo. *Curé el
+camino de consulta para que archive lo que ya trae* —traía los archivos y los
+tiraba— **pero eso sólo alcanza a los `emitiendo`**: el trigger de inmutabilidad
+impide volver de `autorizada`, y hace bien. **Falta un camino que complete el
+respaldo de un autorizado sin archivos**, y es de `fiscal-reconciliar`.
+
+**Prerrequisito del encendido de pagos reales**, igual que el pipeline entero.
+**Dueño:** A. **Disparo: ya.**
+
+---
+
+### `D-1073` 🔴 · EL DESPLIEGUE DE LAS EDGES QUE UNA MIGRACIÓN INVALIDA NO PUEDE DEPENDER DE QUE ALGUIEN SE ACUERDE
+
+**Tercera vez de `L-536`, y la que la convierte en ficha: la escribí yo,
+construí su gate, y no lo corrí.**
+
+> *«Una regla que hay que recordar es una que alguien va a olvidar — y acá el
+> olvido cuesta un secuencial fiscal.»* — founder, 12-sep-2026.
+
+**Lo que costó, medido:** emití con `fiscal-emitir` vieja. La edge desplegada
+todavía mandaba `sendEmail` —que la API rechaza— y **no tenía el cableado de
+`numeracion_origen`**, así que **tomó el secuencial `000000005` de NUESTRO
+contador** para un documento que numera Factuplan. El 5 **queda quemado**: en
+modo proveedor nuestro contador no se toca, así que no vuelve a usarse. Va a
+`D-1060` con los otros cuatro. **El contador no se retrocede.**
+
+⚠️ **Y lo que lo vuelve una ficha y no un descuido: el gate SABÍA.**
+`verify:edge-desplegada` decía *«la firma del repo NO es la registrada»* en el
+momento exacto. *El instrumento estaba construido, desplegado y contestando — y
+la decisión de consultarlo vivía en mi memoria.*
+
+**Alcance: que el gate corra solo donde duele.** Tres lugares, y no son
+excluyentes:
+
+| dónde | qué atrapa | costo |
+|---|---|---|
+| **antes de emitir** (dentro de `fiscal-emitir`) | el caso exacto de hoy | una consulta por tick |
+| **antes de publicar** un candidato | el bundle contra edges viejas | ya hay gates ahí |
+| **en el hook** | todo, siempre | ⚠️ **dos llamadas de red** — por eso se dejó afuera |
+
+**Voto: el primero, y con el molde que ya existe.** `fiscal-emitir` puede
+comparar la firma de su propio cierre transitivo contra `edge_despliegues` y
+**negarse a emitir si no coincide** — *un motor que sabe que está corriendo
+código viejo y emite igual es peor que uno que no sabe.* El tercero sigue
+afuera por su costo, medido.
+
+**Y el corolario que ya rige y hay que mecanizar:** toda migración nombra en su
+encabezado las edges que hay que desplegar con ella. **Eso se puede verificar
+solo**: un gate que lea el encabezado de las migraciones nuevas y exija que esas
+edges estén al día antes de dejar cerrar.
+
+**Dueño:** A. **Disparo: ya — va antes de octubre.**
