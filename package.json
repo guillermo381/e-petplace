@@ -149,7 +149,8 @@
     "verify:error-no-pegado": "node scripts/s115/verify-error-no-pegado.mjs",
     "verify:fee-por-fecha-servicio": "node scripts/s115/verify-fee-por-fecha-servicio.mjs",
     "verify:rename-seguro": "node scripts/s115/verify-rename-seguro.mjs",
-    "verify:sin-invocador": "node scripts/verify-sin-invocador.mjs"
+    "verify:sin-invocador": "node scripts/verify-sin-invocador.mjs",
+    "verify:presupuesto-refresco": "tsx scripts/s115/verify-presupuesto-refresco.mjs"
   },
   "devDependencies": {
     "eslint": "^10.9.1",

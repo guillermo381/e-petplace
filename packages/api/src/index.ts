@@ -2,7 +2,7 @@
 // Regla: ningún app hace supabase.from()/rpc() directo — siempre a través de wrappers de este paquete.
 
 export type { Database, Json } from './database.types';
-export { initApi, getClient, type EpetplaceClient, type OpcionesApi, type StorageSesion } from './client';
+export { initApi, getClient, estadoDeSesion, type EstadoDeSesion, type EpetplaceClient, type OpcionesApi, type StorageSesion } from './client';
 export {
   registrarse,
   iniciarSesion,
@@ -2046,5 +2046,6 @@ export { tresNumerosDelPrestador, configuracionPago, fechaDeVigenciaPorDefecto }
 export type { TresNumeros, ConfiguracionPago } from './wrappers/economico';
 
 /* El techo de tiempo de la red (`D-1070`) y su lector. */
-export { SIN_RED, esSinRed, fijarTechosDeRed, techosVigentes, claseDeLlamada, cargarTechosDeRed } from './red';
+export { SIN_RED, esSinRed, fijarTechosDeRed, techosVigentes, claseDeLlamada, cargarTechosDeRed,
+         refrescoCaidoHace } from './red';
 export type { ClaseDeLlamada } from './red';
