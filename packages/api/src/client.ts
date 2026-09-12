@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { fetchConTecho } from './red';
+import { fetchConTecho, cargarTechosDeRed } from './red';
 import type { Database } from './database.types';
 
 export type EpetplaceClient = SupabaseClient<Database>;
@@ -61,6 +61,41 @@ export function initApi(url: string, anonKey: string, opciones?: OpcionesApi): E
       ...(opciones?.storageSesion ? { storage: opciones.storageSesion } : null),
     },
   });
+
+  /* ── `D-1080` · LOS CUATRO TECHOS SE LEEN DE `app_config` ─────────────────
+     🔴 LO QUE HABÍA: `cargarTechosDeRed()` existía, estaba exportada, y **no
+        la llamaba NADIE** (medido: cero consumidores fuera de su propio
+        `export`). Los techos que regían eran los del código. Hoy el efecto era
+        NULO —las cuatro filas dicen los mismos números— *y por eso nadie lo
+        iba a ver*: la perilla se movía y la app no cambiaba, y el día del
+        incendio eso se lee como «el problema es otro».
+
+     🔴 POR QUÉ VA ATADO A LA SESIÓN Y NO AL ARRANQUE, y es la parte que casi
+        me sale mal: medí la lectura de `app_config` por rol antes de cablear
+        nada — **`authenticated` ve las 4 filas y `anon` ve 0**. Llamarlo acá
+        mismo, al crear el cliente, habría leído CERO filas, devuelto
+        `ok:false` **sin lanzar**, y dejado la perilla igual de muerta con una
+        línea de código encima. *La cura habría reproducido el defecto que
+        viene a curar, y con mejor cara.*
+
+     Y por eso no se le pide a nadie que se acuerde de llamarla: se engancha
+     sola al primer momento en que hay sesión. *Una regla que hay que recordar
+     es una que alguien va a olvidar.*
+
+     Su fallo NO es grave y por eso no lanza: los valores de arranque siguen
+     rigiendo. Lo único que se pierde es poder moverlos sin publicar — que es
+     exactamente para lo que son dato. */
+  let techosPedidos = false;
+  cliente.auth.onAuthStateChange((_evento, sesion) => {
+    if (!sesion || techosPedidos) return;
+    techosPedidos = true;
+    void cargarTechosDeRed(async () => {
+      const { data } = await cliente!.from('app_config')
+        .select('clave, valor').like('clave', 'red_techo%');
+      return data ?? null;
+    });
+  });
+
   return cliente;
 }
 

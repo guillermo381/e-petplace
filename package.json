@@ -143,7 +143,8 @@
     "verify:rename": "node scripts/s115/verify-rename-seguro.mjs",
     "verify:edge-desplegada": "node scripts/verify-edge-desplegada.mjs",
     "edge:desplegar": "node scripts/edge-desplegar.mjs",
-    "verify:techo-de-red": "tsx scripts/verify-techo-de-red.ts"
+    "verify:techo-de-red": "tsx scripts/verify-techo-de-red.ts",
+    "verify:techo-vive": "tsx scripts/s115/verify-techo-vive.mjs"
   },
   "devDependencies": {
     "eslint": "^10.9.1",
