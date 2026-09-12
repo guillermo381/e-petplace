@@ -382,6 +382,9 @@ export interface FacturacionLista {
   /** 🔴 `true` = la consulta no volvió. **Es distinto de «todavía no»**, y la
    *  pantalla tiene que poder decirlo y ofrecer reintentar. */
   noCargo: boolean;
+  /** 🔴 `true` mientras un reintento está en vuelo: **el aviso se queda y el
+   *  botón gira**. Un reintento sin señal es indistinguible de un botón roto. */
+  reintentando: boolean;
   reintentar: () => void;
   /** 🔴 Se llama ANTES de cobrar. `false` = no se cobra, y ya avisó por qué. */
   /** 🔴 Recibe el TOTAL: sobre el tope, sin datos, **no deja cobrar**. */
@@ -398,6 +401,12 @@ export function useFacturacion(activo: boolean): FacturacionLista {
      reintentar. */
   const [tope, setTope] = useState<number | 'cargando' | 'noCargo'>('cargando');
   const [intento, setIntento] = useState(0);
+  /* 🔴 «Reintentando» NO es «cargando»: la primera carga no dibuja nada (el
+     resumen ya está a la vista y la sección aparece cuando llega), pero un
+     reintento SÍ tiene que verse. *Sin esta distinción el aviso desaparece al
+     tocar el botón y la pantalla queda vacía hasta el techo — desde afuera,
+     idéntico a un botón muerto, y la persona lo toca cinco veces.* */
+  const [reintentando, setReintentando] = useState(false);
   const [perfil, setPerfil] = useState<TaxProfile | null>(null);
   const [nombrePersona, setNombrePersona] = useState<string | null>(null);
   const [correo, setCorreo] = useState('');
@@ -447,6 +456,7 @@ export function useFacturacion(activo: boolean): FacturacionLista {
       /* Fail-closed en el VALOR (sin tope no se cae a 50) y hablado en la
          FORMA: el fallo se dice, no se queda en silencio. */
       setTope(rTope.ok ? rTope.data : 'noCargo');
+      setReintentando(false);
       if (rPerfil.ok) setPerfil(perfilUsable(rPerfil.data));
       if (rYo.ok) setNombrePersona(rYo.data.nombre);
       /* La precarga NO pisa lo ya escrito si la lectura llega tarde, y el correo
@@ -531,7 +541,13 @@ export function useFacturacion(activo: boolean): FacturacionLista {
     /* `noCargo` viaja como props: la sección lo dibuja con su reintento. Antes
        `null` significaba las dos cosas y la pantalla no podía distinguirlas. */
     noCargo: tope === 'noCargo',
-    reintentar: () => { setTope('cargando'); setIntento((n) => n + 1); },
+    reintentar: () => {
+      setReintentando(true);
+      setTope('cargando');
+      setIntento((n) => n + 1);
+    },
+    /* Mientras es true el aviso SE QUEDA, con su botón en «cargando». */
+    reintentando: reintentando && tope === 'cargando',
     props:
       typeof tope !== 'number'
         ? null

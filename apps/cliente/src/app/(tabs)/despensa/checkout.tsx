@@ -1524,7 +1524,9 @@ export default function DespensaCheckout() {
                 de dónde sacar una versión propia.* */}
             <View style={{ paddingHorizontal: spacing[5] }}>
               {facturacion.props === null || compraTotal === null ? (
-                facturacion.noCargo ? <AvisoNoCargo onReintentar={facturacion.reintentar} /> : null
+                facturacion.noCargo || facturacion.reintentando ? (
+              <AvisoNoCargo onReintentar={facturacion.reintentar} reintentando={facturacion.reintentando} />
+            ) : null
               ) : (
                 <SeccionFacturacion {...facturacion.props} total={compraTotal} />
               )}

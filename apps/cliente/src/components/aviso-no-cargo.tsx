@@ -31,7 +31,16 @@ import { Boton, Texto, spacing } from '@epetplace/ui';
 
 import { useTraduccion } from '@/i18n';
 
-export function AvisoNoCargo({ onReintentar }: { onReintentar: () => void }) {
+export function AvisoNoCargo({
+  onReintentar,
+  reintentando = false,
+}: {
+  onReintentar: () => void;
+  /** 🔴 Mientras es true el botón GIRA y el aviso se queda. Sin esto, tocar
+   *  reintentar hacía desaparecer todo y dejaba la pantalla vacía hasta el
+   *  techo — 8 segundos que se leen como «el botón no hace nada». */
+  reintentando?: boolean;
+}) {
   const { t } = useTraduccion();
   return (
     <View style={{ gap: spacing[3] }}>
@@ -39,7 +48,12 @@ export function AvisoNoCargo({ onReintentar }: { onReintentar: () => void }) {
         <Texto variante="seccion">{t('noCargo.titulo')}</Texto>
         <Texto variante="apoyo">{t('noCargo.detalle')}</Texto>
       </View>
-      <Boton variante="secundario" etiqueta={t('noCargo.reintentar')} onPress={onReintentar} />
+      <Boton
+        variante="secundario"
+        etiqueta={t('noCargo.reintentar')}
+        cargando={reintentando}
+        onPress={onReintentar}
+      />
     </View>
   );
 }

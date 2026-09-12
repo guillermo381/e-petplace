@@ -297,7 +297,9 @@ export default function CheckoutPlanPaseo() {
             — y `cobro_link_mensual` ya tiene `suscripcion_servicio_id` en su
             XOR, así que el destino del link existe. Reportado a B. */}
         {facturacion.props === null ? (
-            facturacion.noCargo ? <AvisoNoCargo onReintentar={facturacion.reintentar} /> : null
+            facturacion.noCargo || facturacion.reintentando ? (
+              <AvisoNoCargo onReintentar={facturacion.reintentar} reintentando={facturacion.reintentando} />
+            ) : null
           ) : (
           <SeccionFacturacion {...facturacion.props} total={precio} />
         )}
