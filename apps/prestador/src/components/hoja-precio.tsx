@@ -38,6 +38,7 @@ import { Boton, Campo, Hoja, HojaScroll, Texto, spacing, useAviso } from '@epetp
 import { actualizarPrecioOferta, type SkuDelVendedor } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { parsearPrecio } from '@epetplace/i18n'
 
 export interface HojaPrecioProps {
   /** `null` = la Hoja no se monta. */
@@ -60,7 +61,7 @@ export function HojaPrecio({ ofertaId, sku, plata, onCerrar, onGuardado }: HojaP
   const max = sku?.banda_max ?? null;
   const hayBanda = min !== null && max !== null;
 
-  const valor = Number(texto.replace(',', '.'));
+  const valor = parsearPrecio(texto);
   const valido = Number.isFinite(valor) && valor > 0;
   /* 🔴 EL CÁLCULO QUE LA APP HACE POR ÉL. Sin banda **todo** cae afuera —
      fail-closed: *«todavía no calibramos» no puede leerse como «no hay

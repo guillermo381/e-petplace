@@ -26,4 +26,7 @@ export {
   horaCortaDeMensaje,
 } from './fechas';
 // S82-A r15 — EL RIEL DE MONEDA (el país manda la moneda, el idioma el formato)
-export { monto, montoConCodigo, precioPorKg, MONEDA_FALLBACK, type ConfigMoneda } from './moneda';
+export { monto, montoConCodigo, precioPorKg, MONEDA_FALLBACK, type ConfigMoneda,
+  formatearPrecio,
+  parsearPrecio,
+} from './moneda';

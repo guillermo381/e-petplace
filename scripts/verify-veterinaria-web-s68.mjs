@@ -206,7 +206,7 @@ if ((await switchVac.getAttribute('aria-checked')) !== 'true') {
   await page.waitForTimeout(500);
 }
 t = await texto();
-check(t.includes('$2.00'), 'T23 el riel de vacunación arranca en $2 (decisión founder del gate)');
+check(t.includes('$2,00'), 'T23 el riel de vacunación arranca en $2 (decisión founder del gate)');
 
 // ── B9 — duración vet: menú curado + "Otra duración" clampeando ──
 check(t.includes('Toca el valor para escribirlo'), 'T25 la affordance VISIBLE del precio editable (hint + punteado)');

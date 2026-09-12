@@ -1453,3 +1453,73 @@ export { CARA_EN_HILO } from './components/BurbujaMensaje'
 // le pasa. El default sigue siendo el LEGADO 12 (los cuatro `nodo*` de
 // despensa nacieron dibujados para ese tamaño); lo nuevo pasa `'delNodo'`.
 export type { TamanoDelGlifo } from './components/EscaleraIconos'
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * S115-B · LAS PIEZAS DE LA FACTURA.
+ *
+ * Vocabulario alineado con la tabla `facturas` que YA existe en la base
+ * (`tipo_identificacion` · `identificacion` · `razon_social` · `clave_acceso`
+ * · `subtotal_0` · `subtotal_15` · `iva_valor`) — **no se inventó ninguno**.
+ *
+ * ⚠️ `tilde.tsx` NO se exporta, mismo criterio que `chevron`: es geometría
+ * interna. Quien necesite decir «válido» monta la PIEZA que lo porta.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+// Los tres algoritmos del SRI, sin React: probables sin montar una pantalla.
+// Su control vive en `scripts/verify-identificacion-ec.mjs`.
+/* `LARGO` NO se exporta, y la pregunta la hizo `R17`: la agarró por el nombre
+   —todo mayúsculas, sin guión bajo, o sea con forma de pieza— y al ir a
+   contestarle «no es una pieza, es una tabla interna» quedó claro que tampoco
+   tenía por qué salir. **Quien necesite juzgar una identificación tiene
+   `esIdentificacionValida`**; el largo es cómo lo hace, no qué ofrece.
+   *Un gate que pregunta por qué algo está exportado suele estar señalando que
+   no debería estarlo.* */
+export {
+  LARGO_CLAVE_ACCESO,
+  agrupar,
+  esCedulaValida,
+  esClaveAccesoValida,
+  esIdentificacionValida,
+  esRucValido,
+  soloAlfanumerico,
+  soloDigitos,
+  type TipoIdentificacion,
+} from './components/identificacion-ec'
+
+// CampoIdentificacion — el tipo se ELIGE, jamás se adivina por el largo.
+export {
+  CampoIdentificacion,
+  type CampoIdentificacionProps,
+  type DatosIdentificacion,
+} from './components/CampoIdentificacion'
+
+// SelectorFacturacion — la opción que no se puede elegir se ve APAGADA con
+// su razón, jamás escondida: un límite invisible no se aprende.
+export {
+  SelectorFacturacion,
+  type SelectorFacturacionProps,
+  type ModoFacturacion,
+} from './components/SelectorFacturacion'
+
+// DesgloseCompra — 🔴 el IVA en CERO se dibuja; el IVA en `null` no. Son dos
+// estados distintos y la ley del nulo (19.9) habla del segundo.
+export { DesgloseCompra, type DesgloseCompraProps } from './components/DesgloseCompra'
+
+// TarjetaFactura — el error del SRI es INEXPRESABLE: ni prop ni slot (R86).
+export {
+  TarjetaFactura,
+  FacturasVacio,
+  type TarjetaFacturaProps,
+  type EstadoFactura,
+} from './components/TarjetaFactura'
+
+// CampoClaveAcceso — 49 dígitos para PEGAR, agrupados de a cuatro como en el
+// papel. No son 49 cajitas: la forma se elige por el número, no se hereda.
+export { CampoClaveAcceso, type CampoClaveAccesoProps } from './components/CampoClaveAcceso'
+
+// esCorreoValido — S115-B · LA validación de correo de la casa, una sola.
+// Su caso fundante es real: `karina charry@gmail.com` (S105) entró con un
+// espacio y murió en una cola que nadie leía. Había TRES regex sueltos en el
+// prestador y ninguno acá. Se exporta porque quien use `CampoIdentificacion`
+// con `sinCorreo` tiene que validar con la MISMA función.
+export { esCorreoValido } from './components/correo'

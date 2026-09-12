@@ -290,4 +290,87 @@ export const uiEs = {
     camara: 'Sacar una foto',
     galeria: 'Elegir de la galería',
   },
+  /* ═══════════════════════════════════════════════════════════════════════
+   * S115-B · LAS PIEZAS DE LA FACTURA.
+   *
+   * ⚠️ **Ninguna tarifa vive acá.** Los `{{tarifa}}` y `{{tope}}` los pone
+   * quien monta la pieza, porque son números que la ley mueve — en Ecuador el
+   * IVA ya pasó de 12 a 15, y la base todavía tiene la columna `subtotal_12`
+   * al lado de `subtotal_15` como cicatriz de ese cambio. Lo vigila `R84`.
+   * ═══════════════════════════════════════════════════════════════════════ */
+  identificacion: {
+    aNombreDe: '¿A nombre de quién?',
+    tipo: { cedula: 'Cédula', ruc: 'RUC', pasaporte: 'Pasaporte' },
+    etiqueta: {
+      cedula: 'Número de cédula',
+      ruc: 'Número de RUC',
+      pasaporte: 'Número de pasaporte',
+    },
+    /* El placeholder enseña el FORMATO (N11′), jamás repite la etiqueta. */
+    formato: { cedula: '1712345678', ruc: '1712345678001', pasaporte: 'AB123456' },
+    /* «no parece» y no «no existe»: un dígito verificador prueba forma, no
+       existencia — ver la cabecera de `identificacion-ec.ts`. */
+    cedulaInvalida: 'Revisa el número: no parece una cédula válida',
+    rucInvalido: 'Revisa el número: no parece un RUC válido',
+    /* Dirige, no se lamenta (Ley 17.4): dice qué hacer y dónde. */
+    pareceRuc: '¿Es un RUC? Cámbialo arriba',
+    razonSocial: 'Razón social',
+    razonSocialFormato: 'Como aparece en el RUC',
+    direccion: 'Dirección',
+    direccionFormato: 'Av. Shyris N34-120 y Portugal',
+    email: 'Correo',
+    emailFormato: 'tu@correo.com',
+    emailAyuda: 'Ahí te llega la factura',
+    /* El caso real: `karina charry@gmail.com` (S105) entró con un espacio y
+       murió en una cola que nadie leía. La voz DIRIGE (Ley 17.4). */
+    emailInvalido: 'Revisa el correo: fíjate que no tenga espacios',
+  },
+  facturacion: {
+    titulo: 'Datos para tu factura',
+    consumidorFinal: 'Consumidor final',
+    consumidorFinalVoz: 'Sin datos, más rápido',
+    misDatos: 'Con mis datos',
+    misDatosVoz: 'A nombre tuyo o de tu empresa',
+    /* El número llega por props: la ley lo mueve. */
+    topeRazon: 'Las compras de más de {{tope}} llevan factura con tus datos',
+    guardar: 'Guardar para próximas compras',
+    /* Se enciende desde afuera — afirmar que un gasto es deducible es una
+       afirmación fiscal, y esta pieza no tiene con qué sostenerla. */
+    deducible: 'Con tu cédula, tus gastos de mascota pueden ser deducibles',
+  },
+  desglose: {
+    subtotal: 'Subtotal',
+    subtotalSinIva: 'Subtotal (sin IVA)',
+    subtotalConIva: 'Subtotal (con IVA {{tarifa}} %)',
+    descuento: 'Descuento',
+    iva: 'IVA {{tarifa}} %',
+    tarifaServicio: 'Tarifa de servicio',
+    /* El mes llega por props: «diciembre» caduca igual que la tarifa del IVA.
+       Acá vive la FRASE —que es lo que cambia entre idiomas— y el dato no. */
+    tarifaPromocion: 'Gratis hasta {{hasta}}',
+    total: 'Total',
+    /* La única línea del recorrido donde la regla se puede aprender. */
+    porQue: 'El alimento balanceado no paga IVA; los snacks y accesorios sí.',
+  },
+  factura: {
+    titulo: {
+      preparando: 'Preparando tu factura',
+      lista: 'Tu factura está lista',
+      /* Tono neutro: en Ecuador la factura electrónica falla seguido, así
+         que esto es un estado normal del sistema, no una falla de nadie. */
+      corrigiendo: 'Estamos corrigiendo tu factura',
+      notaCredito: 'Nota de crédito por tu devolución',
+    },
+    corrigiendoVoz: 'No tienes que hacer nada: te avisamos cuando esté.',
+    descargarPdf: 'Descargar PDF',
+    descargarXml: 'XML',
+    vacioTitulo: 'Aquí van a aparecer tus facturas',
+    vacioVoz: 'Cada compra genera la suya.',
+  },
+  claveAcceso: {
+    etiqueta: 'Clave de acceso',
+    formato: '1009 2026 0117 9001 …',
+    invalida: 'Revisa la clave: no es válida',
+    progreso: '{{n}} de {{total}} dígitos',
+  },
 } as const;
