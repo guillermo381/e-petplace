@@ -57,6 +57,7 @@ import { simula } from '@/lib/pagos/simulado';
 import { cobrar } from '@/lib/pagos/cobro';
 import { useEsperaDeConfirmacion } from '@/lib/pagos/espera-confirmacion';
 import { useMedioDePago, SeccionMedioDePago } from '@/components/seccion-medio-de-pago';
+import { SeccionFacturacion, useFacturacion } from '@/components/seccion-facturacion';
 import { useTraduccion } from '@/i18n';
 
 export default function CheckoutPlanPaseo() {
@@ -90,6 +91,8 @@ export default function CheckoutPlanPaseo() {
      🔴 *El mandato existe desde que se firma; lo que todavía no existe es el
      débito.* Son dos cosas distintas y la banda dice exactamente la segunda. */
   const medio = useMedioDePago(fase === 'resumen');
+  /* S115-C · la facturación, la MISMA pieza que las citas y la despensa. */
+  const facturacion = useFacturacion(fase === 'resumen');
 
   /* ⭐ **S109-C · UN SOLO INTERRUPTOR GOBIERNA LA BANDA Y EL COBRO.**
      *Si el cobro se enciende antes que la banda se apague, la pantalla cobra de
@@ -120,6 +123,11 @@ export default function CheckoutPlanPaseo() {
   }, [espera, t]);
 
   const contratar = useCallback(async () => {
+    /* 🔴 SIN CORREO Y SIN SUS DATOS NO SE COBRA — el mismo freno de las citas y
+       la despensa. Va al PRINCIPIO y no junto a `cobrar`: más abajo ya se creó
+       el sujeto, y frenar ahí dejaría una compra a medias esperando su hold. */
+    if (!(await facturacion.validarYGuardar())) return;
+
     if (fase !== 'resumen') return;
     /* 🔴 **ACÁ EL MEDIO ES SIEMPRE TARJETA, y el guard lo dice sin excepción.**
        DeUna no se puede elegir en esta pantalla (`deunaCobraEsteSujeto={false}`,
@@ -287,6 +295,10 @@ export default function CheckoutPlanPaseo() {
             ⭐ El día que `plan` entre a `SujetoDeuna`, esto es borrar una prop
             — y `cobro_link_mensual` ya tiene `suscripcion_servicio_id` en su
             XOR, así que el destino del link existe. Reportado a B. */}
+        {facturacion.props === null ? null : (
+          <SeccionFacturacion {...facturacion.props} total={precio} />
+        )}
+
         <SeccionMedioDePago medio={medio} recurrente deunaCobraEsteSujeto={false} />
         {/* ☠️ **LA BANDA SE SUMA, NO REEMPLAZA — y no se contradice con la
             sección de arriba**: el mandato se firma hoy, el débito todavía no

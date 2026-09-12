@@ -4643,10 +4643,6 @@ export const clienteEs = {
   facturacionCheckout: {
     facturaA: 'Factura a',
     cambiar: 'Cambiar',
-    /* El enlace del caso bajo tope: se paga como consumidor final sin preguntar,
-       y esto queda a un lado por si alguien la quiere igual. Discreto a
-       propósito — preguntarlo sería volver a preguntar. */
-    quieresFactura: '¿Quieres factura con tus datos?',
   },
 
   /* S115-C · EL CORREO DE LA FACTURA. Su voz NO es la de un campo de formulario:

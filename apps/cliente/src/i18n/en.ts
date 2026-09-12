@@ -3382,7 +3382,6 @@ export const clienteEn = {
   facturacionCheckout: {
     facturaA: 'Invoice to',
     cambiar: 'Change',
-    quieresFactura: 'Want an invoice with your details?',
   },
 
   correoFactura: {

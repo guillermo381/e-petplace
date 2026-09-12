@@ -10,18 +10,25 @@
  * │ trámite de una vez en un peaje permanente.*                             │
  * └─────────────────────────────────────────────────────────────────────────┘
  *
- * **LOS TRES ESTADOS, y el tope decide entre dos de ellos:**
+ * **LOS TRES ESTADOS (firma ENMENDADA por el founder, 11-sep):**
  *
  * | hay perfil | total vs tope | qué se ve |
  * |---|---|---|
- * | **sí** | — | la línea compacta + «Cambiar» |
- * | no | **sobre** el tope | el selector, con «Consumidor final» DESHABILITADA y su razón — no se puede pagar sin declararlos |
- * | no | **bajo** el tope | nada; se paga como consumidor final + enlace discreto |
+ * | **sí** | — | la línea compacta + «Cambiar». **No se vuelve a pedir.** |
+ * | no | bajo el tope | **el selector: se PREGUNTA si quiere factura con sus datos** |
+ * | no | **sobre** el tope | el selector con «Consumidor final» DESHABILITADA y su razón — **se le PIDEN**, y sin ellos no se cobra |
  *
- * 🔴 **EL CASO BAJO EL TOPE NO PREGUNTA NADA.** Es la mitad que se olvida:
- * *ofrecer el formulario «por si acaso» en una compra de $12 es exactamente la
- * fricción que la regla madre viene a matar.* El enlace queda a un lado para
- * quien lo quiera, y no interrumpe a nadie.
+ * ⏪ **ENMIENDA, y la letra vieja queda acá porque explica qué se probó:** hasta
+ * hoy, bajo el tope **no se preguntaba nada** y quedaba un enlace discreto al
+ * costado. La razón era buena —*ofrecer el formulario «por si acaso» en una
+ * compra de $12 es fricción*— **y el founder la corrigió sobre el producto: el
+ * enlace no alcanza.** Alguien que quiere su factura no debería tener que
+ * descubrir un enlace para pedirla.
+ *
+ * ⇒ **Sin perfil, el selector se muestra SIEMPRE.** Lo único que cambia con el
+ * tope es si «Consumidor final» está disponible — y eso ya lo resuelve la pieza
+ * de B con su razón escrita. *Un solo camino en vez de dos, que además es menos
+ * código.*
  *
  * ───────────────────────────────────────────────────────────────────────
  * ⚠️ **EL TOPE VIENE POR PROPS Y ESO ES DELIBERADO.** No lo lee esta pieza ni
@@ -41,11 +48,12 @@
  * Con una sola línea que ya dice «Factura a», un encabezado arriba sería el
  * elemento que rotula lo que el contenido ya dijo (Ley 17.6).
  */
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import {
   Boton,
   Campo,
+  useAviso,
   CampoIdentificacion,
   SelectorFacturacion,
   Texto,
@@ -53,7 +61,14 @@ import {
   type DatosIdentificacion,
   type ModoFacturacion,
 } from '@epetplace/ui';
-import type { TaxProfile } from '@epetplace/api';
+import {
+  fiscalTopeConsumidorFinal,
+  fiscalObtenerTaxProfile,
+  fiscalGuardarTaxProfile,
+  obtenerMiPerfil,
+  type TaxProfile,
+} from '@epetplace/api';
+import { formatearPrecio } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
 
@@ -132,7 +147,6 @@ export function SeccionFacturacion({
       : VACIO,
   );
 
-  const sobreElTope = total > topeConsumidorFinal;
   /* `tocado` separa «todavía no lo escribió» de «lo escribió mal»: sin él el
      campo nace en rojo al montarse vacío (mismo criterio que la pieza de B). */
   const [correoTocado, setCorreoTocado] = useState(false);
@@ -198,25 +212,7 @@ export function SeccionFacturacion({
     );
   }
 
-  /* ③ BAJO EL TOPE Y SIN DATOS — no se pregunta nada. */
-  if (!perfil && !sobreElTope && !editando) {
-    return (
-      <View style={{ gap: spacing[4] }}>
-      {campoCorreo}
-      <Boton
-        variante="ghost"
-        etiqueta={t('facturacionCheckout.quieresFactura')}
-        onPress={() => {
-          setEditando(true);
-          setModo('misDatos');
-          avisar({ modo: 'misDatos' });
-        }}
-      />
-      </View>
-    );
-  }
-
-  /* ② EL SELECTOR — primera compra sobre el tope, o «Cambiar», o el enlace.
+  /* ② EL SELECTOR — toda primera compra, y «Cambiar».
      🔴 Sobre el tope, `SelectorFacturacion` apaga «Consumidor final» y DICE su
      razón con el número que le pasamos. No se puede pagar sin declararlos, y la
      pieza lo explica en vez de dejar un control muerto. */
@@ -251,4 +247,135 @@ export function SeccionFacturacion({
     </SelectorFacturacion>
     </View>
   );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EL HOOK — porque son SEIS pantallas de cobro, no una.
+
+   🔴 **El censo encontró seis puertas al mismo hueco**, y el mandato nombraba
+   una: despensa, paquete de paseo, plan de paseo, guardería (×2), programa de
+   adiestramiento, y las citas de los cuatro oficios. *Curar la que se reportó y
+   no censar la clase es media cura — y la otra mitad se descubre con plata de
+   por medio.*
+
+   Cablear seis veces el mismo estado, la misma carga y el mismo freno es la
+   receta exacta de la divergencia que esta casa ya se cobró con los cuatro logs
+   (19.9: «lo que se copia, diverge»). ⇒ **una pieza, seis consumidores.**
+
+   Lo que la pantalla hace es: `const f = useFacturacion(activo)` · montar
+   `<SeccionFacturacion {...f.props} />` · y llamar `await f.validarYGuardar()`
+   antes de cobrar. Nada más.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+export interface FacturacionLista {
+  /** `null` mientras el tope no se sepa: la sección NO se monta (fail-closed). */
+  props: Omit<SeccionFacturacionProps, 'total'> | null;
+  /** 🔴 Se llama ANTES de cobrar. `false` = no se cobra, y ya avisó por qué. */
+  validarYGuardar: () => Promise<boolean>;
+}
+
+export function useFacturacion(activo: boolean): FacturacionLista {
+  const { t } = useTraduccion();
+  const { mostrar } = useAviso();
+  const [tope, setTope] = useState<number | null>(null);
+  const [perfil, setPerfil] = useState<TaxProfile | null>(null);
+  const [nombrePersona, setNombrePersona] = useState<string | null>(null);
+  const [correo, setCorreo] = useState('');
+  const [eleccion, setEleccion] = useState<Parameters<SeccionFacturacionProps['onCambiar']>[0] | null>(null);
+
+  /* ═══ 🔴 EL ESPEJO VIVO — la cura del defecto que el founder encontró pagando
+     ═══ (11-sep-2026). **El correo estaba en pantalla y el guard lo veía vacío.**
+
+     La causa NO era la precarga: el estado se escribía bien y el campo lo
+     pintaba. Era un **closure capturado**. `pagar` de la pantalla es un
+     `useCallback` que no lista `facturacion` en sus deps, así que conserva el
+     `validarYGuardar` del PRIMER render — el que cerró sobre `correo = ''`. La
+     precarga llega después, el estado cambia, el campo se repinta… *y el guard
+     sigue mirando la foto del primer render.*
+
+     ⇒ **Los guards leen un espejo vivo, jamás el render capturado** (la cura
+     que S92 firmó para el P0 del paseo, misma clase). Con el `ref`, la función
+     es inmune a quién la haya capturado y cuándo.
+
+     *Se cura acá y no pidiéndole deps a cinco pantallas: una regla que hay que
+     recordar en cada consumidor es una regla que alguien va a olvidar — y su
+     modo de falla es que no se puede cobrar.* */
+  const correoVivo = useRef('');
+  const eleccionVivo = useRef<Parameters<SeccionFacturacionProps['onCambiar']>[0] | null>(null);
+  correoVivo.current = correo;
+  eleccionVivo.current = eleccion;
+
+  useEffect(() => {
+    if (!activo) return;
+    let vigente = true;
+    void (async () => {
+      const [rTope, rPerfil, rYo] = await Promise.all([
+        fiscalTopeConsumidorFinal(),
+        fiscalObtenerTaxProfile(),
+        obtenerMiPerfil(),
+      ]);
+      if (!vigente) return;
+      /* Fail-closed: sin tope NO se cae a 50. Un tope inventado decide en cada
+         compra si a alguien se le piden sus datos. */
+      if (rTope.ok) setTope(rTope.data);
+      if (rPerfil.ok) setPerfil(rPerfil.data);
+      if (rYo.ok) setNombrePersona(rYo.data.nombre);
+      /* La precarga NO pisa lo ya escrito si la lectura llega tarde, y el correo
+         del perfil FISCAL manda sobre el de la cuenta: es el que la persona
+         eligió para sus facturas. */
+      const sugerido = (rPerfil.ok && rPerfil.data?.email) || (rYo.ok && rYo.data.email) || '';
+      if (sugerido) setCorreo((v) => (v.trim().length > 0 ? v : sugerido));
+    })();
+    return () => { vigente = false; };
+  }, [activo]);
+
+  const validarYGuardar = useCallback(async () => {
+    /* ① El correo, siempre. Sin él la compra se paga y el comprobante no tiene
+       a dónde ir. */
+    const correoAhora = correoVivo.current;
+    if (!correoSirve(correoAhora)) {
+      mostrar({ variante: 'error', texto: t('correoFactura.falta') });
+      return false;
+    }
+    /* ② El perfil, sólo si lo declaró en ESTA compra y pidió recordarlo. Se
+       guarda ANTES de cobrar porque el motor resuelve el receptor al confirmar
+       el pago: después sería emitir con lo viejo. */
+    const eleccionAhora = eleccionVivo.current;
+    if (eleccionAhora?.modo === 'misDatos' && eleccionAhora.datos && eleccionAhora.guardar) {
+      const g = await fiscalGuardarTaxProfile({
+        tipoIdentificacion: eleccionAhora.datos.tipo,
+        identificacion: eleccionAhora.datos.identificacion,
+        razonSocial: eleccionAhora.datos.razonSocial.trim() || null,
+        direccion: eleccionAhora.datos.direccion.trim() || null,
+        email: correoAhora.trim(),
+        predeterminado: true,
+      });
+      /* Si el servidor rebota NO se cobra: la familia pidió factura con sus
+         datos y cobrar igual emitiría a consumidor final sin avisarle. */
+      if (!g.ok) {
+        mostrar({ variante: 'error', texto: g.mensaje });
+        return false;
+      }
+    }
+    return true;
+    /* Sin `correo` ni `eleccion` en deps A PROPÓSITO: se leen del espejo. Si
+       estuvieran, la función se recrearía y volveríamos a depender de que cada
+       pantalla la vuelva a capturar — que es exactamente el defecto. */
+  }, [mostrar, t]);
+
+  return {
+    props:
+      tope === null
+        ? null
+        : {
+            perfil,
+            topeConsumidorFinal: tope,
+            topeFormateado: formatearPrecio(tope),
+            nombrePersona,
+            correo,
+            onCorreo: setCorreo,
+            onCambiar: setEleccion,
+          },
+    validarYGuardar,
+  };
 }

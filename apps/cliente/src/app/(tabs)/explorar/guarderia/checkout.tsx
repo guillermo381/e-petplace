@@ -58,6 +58,8 @@ import { CheckoutReserva } from '@/components/checkout-reserva';
 import { cobrar } from '@/lib/pagos/cobro';
 import { useEsperaDeConfirmacion, type SujetoEnEspera } from '@/lib/pagos/espera-confirmacion';
 import { SeccionMedioDePago, useMedioDePago } from '@/components/seccion-medio-de-pago';
+import { SeccionFacturacion, useFacturacion } from '@/components/seccion-facturacion';
+import { parsearPrecio } from '@epetplace/i18n';
 import { EsperaDeUna } from '@/components/espera-deuna';
 import { urlWhatsApp } from '@/lib/contacto';
 import { topeDeEspera, useEstadoDeUna } from '@/lib/pagos/deuna-estado';
@@ -85,6 +87,9 @@ export default function CheckoutGuarderia() {
      con `pago_simulado`. Desde que el cobro es real, **una compra sin medio no
      es una compra**. */
   const medio = useMedioDePago(esMensual || esPaquete);
+  /* S115-C · la facturación. Se activa donde se cobra: mensual y paquete. **El
+     día NO** — llega con su hold ya pagado desde la lista. */
+  const facturacion = useFacturacion(esMensual || esPaquete);
   /**
    * ⭐ **DE DÓNDE LO PASAN A BUSCAR.** La pieza extraída de despensa — la
    * pregunta es la misma (a qué dirección va alguien) y sólo cambia la voz.
@@ -180,6 +185,18 @@ export default function CheckoutGuarderia() {
     })();
     return () => { vigente = false; };
   }, [esPaquete, esReanudacion, tamanoElegido]);
+
+  /* El total, de la MISMA fuente que el número que la pantalla pinta arriba: el
+     paquete lo resuelve la pantalla, las otras dos vienen exactas del lugar.
+     `parsearPrecio` es el riel de la casa — no un parseo propio de plata. */
+  const totalAFacturar = esPaquete
+    ? precioPaquete.fase === 'listo'
+      ? precioPaquete.precio
+      : null
+    : (() => {
+        const v = parsearPrecio(texto('precio'));
+        return Number.isFinite(v) && v > 0 ? v : null;
+      })();
 
   const [enviando, setEnviando] = useState(false);
   const [rebote, setRebote] = useState<string | null>(null);
@@ -432,6 +449,10 @@ export default function CheckoutGuarderia() {
   }, [dir.direccionId, t]);
 
   const pagar = useCallback(async () => {
+    /* 🔴 SIN CORREO Y SIN SUS DATOS NO SE COBRA — el mismo freno de las citas,
+       la despensa y los prepagos. */
+    if (!(await facturacion.validarYGuardar())) return;
+
     if (enviando) return;
     /* Ni el paquete ni la mensualidad se tocan sin medio: los dos cobran.
        ⭐ S109-C · **DeUna es medio**: antes este guard sólo miraba la tarjeta y
@@ -737,6 +758,10 @@ export default function CheckoutGuarderia() {
             rotulo={t('checkoutGuarderia.dondeRecogen')}
             apoyo={esMensual ? t('checkoutGuarderia.dondeRecogenMensual') : undefined}
           />
+
+          {facturacion.props === null || totalAFacturar === null ? null : (
+            <SeccionFacturacion {...facturacion.props} total={totalAFacturar} />
+          )}
 
           {esMensual ? (
             <>
