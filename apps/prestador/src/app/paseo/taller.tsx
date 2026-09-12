@@ -53,7 +53,6 @@ import {
   SliderPrecio,
   Tarjeta,
   Texto,
-  VozComision,
   spacing,
   typography,
   useAviso,
@@ -65,7 +64,6 @@ import {
   agregarZonaCobertura,
   crearOfertaPaseo,
   obtenerCatalogoCiudades,
-  obtenerComisionVigenteCita,
   obtenerFranjasDeServicios,
   obtenerFranjasHorario,
   obtenerMiCuentaComercial,
@@ -99,6 +97,7 @@ import {
   type OfertaParaHorarios,
 } from '@/components/seccion-horarios';
 import { parsearPrecio } from '@epetplace/i18n'
+import { TresNumerosDelPrecio, useComisionDelTaller } from '@/components/tres-numeros-precio';
 
 type Pantalla =
   | { estado: 'cargando' }
@@ -108,7 +107,6 @@ type Pantalla =
       prestadorId: string;
       countryCode: string;
       cuentaActiva: boolean | null;
-      comisionPct: number | null;
     };
 
 type Seccion = 'duraciones' | 'horarios' | 'zonas';
@@ -284,14 +282,13 @@ export default function TallerPaseo() {
         setPantalla({ estado: 'error' });
         return;
       }
-      const [rOfertas, rFranjas, rZonas, rCiudades, rPaises, rCuenta, rComision, rModo] = await Promise.all([
+      const [rOfertas, rFranjas, rZonas, rCiudades, rPaises, rCuenta, rModo] = await Promise.all([
         obtenerOfertasPaseoPropias(prestador.data.id),
         obtenerFranjasHorario(prestador.data.id, empleadoJornada ?? undefined),
         obtenerZonasDePrestador(prestador.data.id),
         obtenerCatalogoCiudades(),
         obtenerPaisesActivos(),
         obtenerMiCuentaComercial(),
-        obtenerComisionVigenteCita(),
         // D-386: la elección vigente decide QUÉ franjas se cargan
         obtenerModoHorarios(prestador.data.id),
       ]);
@@ -335,7 +332,6 @@ export default function TallerPaseo() {
         prestadorId: prestador.data.id,
         countryCode: prestador.data.country_code,
         cuentaActiva: rCuenta.ok ? rCuenta.data?.estado === 'activa' : null,
-        comisionPct: rComision.ok ? rComision.data.porcentaje : null,
       });
     })();
     return () => {
@@ -344,7 +340,12 @@ export default function TallerPaseo() {
   }, [intento]);
 
   const listo = pantalla.estado === 'listo' && drafts !== null && franjas !== null && zonas !== null;
-  const pct = pantalla.estado === 'listo' ? pantalla.comisionPct : null;
+  /* ☠️ `pct` MURIÓ con `VozComision`: decía el porcentaje sobre un ticket que
+     podía estar pagando el mínimo. Lo reemplaza el veredicto del motor. */
+  const comisionTaller = useComisionDelTaller(
+    pantalla.estado === 'listo' ? pantalla.prestadorId : null,
+    'paseo',
+  );
 
   const etiquetaCorta = (b: BloquePaseo): string => t(`taller.d${b}` as const);
   const etiquetaBloque = (duracion: number): string => {
@@ -654,7 +655,7 @@ export default function TallerPaseo() {
                             onCambio={(i) => actualizarDraft(b, { precio: pasos[i].toFixed(2) })}
                             registro="aa"
                           />
-                          <VozComision pct={pct} precio={leerPrecio(d.precio)} />
+                          <TresNumerosDelPrecio precioNeto={leerPrecio(d.precio)} comision={comisionTaller} />
 
                           {/* ── PLAN por interruptor (v3.2: la regla del
                               teclado los alcanzó al fin; el contrato POR
@@ -684,7 +685,7 @@ export default function TallerPaseo() {
                                 onCambio={(i) => actualizarDraft(b, { plan: pasosMes[i]!.toFixed(2) })}
                                 registro="aa"
                               />
-                              <VozComision pct={pct} precio={leerPrecio(d.plan) ?? 0} />
+                              <TresNumerosDelPrecio precioNeto={leerPrecio(d.plan)} comision={comisionTaller} />
                               {/* T4-B2: la voz dice el MODELO, no solo el número —
                                   y la equivalencia por salida MURIÓ (cero
                                   derivación por salida en esta pantalla). */}
@@ -724,7 +725,7 @@ export default function TallerPaseo() {
                                 onCambio={(i) => actualizarDraft(b, { paquete: pasos[i].toFixed(2) })}
                                 registro="aa"
                               />
-                              <VozComision pct={pct} precio={leerPrecio(d.paquete)} />
+                              <TresNumerosDelPrecio precioNeto={leerPrecio(d.paquete)} comision={comisionTaller} />
                               <Texto variante="apoyo">{t('servicios.paqueteExplica')}</Texto>
                             </>
                           )}

@@ -55,7 +55,6 @@ import {
   StepperCantidad,
   Tarjeta,
   Texto,
-  VozComision,
   spacing,
   typography,
   useAviso,
@@ -65,7 +64,6 @@ import {
   RANGO_SUGERIDO_POR_NIVEL,
   guardarOfertaAdiestramiento,
   guardarProgramaAdiestramiento,
-  obtenerComisionVigenteCita,
   obtenerFranjasDeServicios,
   obtenerFranjasHorario,
   obtenerMiCuentaComercial,
@@ -159,6 +157,8 @@ function draftNivelBase(nivel: NivelTroncal): DraftNivel {
     abierto: false,
   };
 }
+
+import { TresNumerosDelPrecio, useComisionDelTaller } from '@/components/tres-numeros-precio';
 
 type Pantalla =
   | { estado: 'cargando' }
@@ -256,8 +256,12 @@ export default function TallerAdiestramiento() {
   const [cuentaComercialId, setCuentaComercialId] = useState<string | null>(null);
   const [ofertasHorarios, setOfertasHorarios] = useState<OfertaParaHorarios[]>([]);
   const [guardandoHorarios, setGuardandoHorarios] = useState(false);
-  // S68-B (D-412): el neto visible — el % es DATO leído (7.15)
-  const [comisionPct, setComisionPct] = useState<number | null>(null);
+  /* S115-C · los tres números. ☠️ Acá vivía `comisionPct` con `VozComision`:
+     decía el % sobre un ticket que podía estar pagando el mínimo. */
+  const comisionTaller = useComisionDelTaller(
+    pantalla.estado === 'listo' ? pantalla.prestadorId : null,
+    'adiestramiento',
+  );
 
   const cargar = useCallback(async (silencioso = false) => {
     if (!silencioso) setPantalla({ estado: 'cargando' });
@@ -270,13 +274,11 @@ export default function TallerAdiestramiento() {
     // S68-B: horarios (D-426) + comisión (D-412) — la comisión y el modo
     // refrescan siempre; el BORRADOR de franjas solo se puebla si está
     // vacío (el refetch-en-focus no pisa trabajo sin guardar)
-    const [rComision, rModo, rFranjas, rCuenta] = await Promise.all([
-      obtenerComisionVigenteCita(),
+    const [rModo, rFranjas, rCuenta] = await Promise.all([
       obtenerModoHorarios(prestador.data.id),
       obtenerFranjasHorario(prestador.data.id, empleadoJornada ?? undefined),
       obtenerMiCuentaComercial(),
     ]);
-    if (rComision.ok) setComisionPct(rComision.data.porcentaje);
     setCuentaComercialId(rCuenta.ok ? (rCuenta.data?.id ?? null) : null);
     if (rModo.ok && rFranjas.ok) {
       setModoHorarios(rModo.data);
@@ -570,7 +572,7 @@ export default function TallerAdiestramiento() {
                     />
                     {/* D-412 pagada (S68-B): el neto visible junto al
                         precio — la compartida de packages/ui */}
-                    <VozComision pct={comisionPct} precio={PASOS_SESION[precioIndice]} />
+                    <TresNumerosDelPrecio precioNeto={PASOS_SESION[precioIndice]} comision={comisionTaller} />
                   </View>
                   {/* S65 cura chica (captura founder): 5 chips no entran
                       en 'fila' — el 90 min quedaba inalcanzable. 'tira'
@@ -693,7 +695,7 @@ export default function TallerAdiestramiento() {
                                     registro="aa"
                                   />
                                   {/* D-412 pagada (S68-B) */}
-                                  <VozComision pct={comisionPct} precio={PASOS_PROGRAMA[d.precioIndice]} />
+                                  <TresNumerosDelPrecio precioNeto={PASOS_PROGRAMA[d.precioIndice]} comision={comisionTaller} />
                                 </View>
 
                                 <Campo
@@ -881,8 +883,7 @@ export default function TallerAdiestramiento() {
                 onCambio={(i) => setDraft((d) => ({ ...d, precioIndice: i }))}
                 registro="aa"
               />
-              {/* D-412 pagada (S68-B) */}
-              <VozComision pct={comisionPct} precio={PASOS_PROGRAMA[draft.precioIndice]} />
+              <TresNumerosDelPrecio precioNeto={PASOS_PROGRAMA[draft.precioIndice]} comision={comisionTaller} />
             </View>
 
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>

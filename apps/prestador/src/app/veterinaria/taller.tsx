@@ -49,7 +49,6 @@ import {
   SliderPrecio,
   Tarjeta,
   Texto,
-  VozComision,
   spacing,
   useAviso,
   useTheme,
@@ -61,7 +60,6 @@ import {
   guardarServicioVeterinaria,
   obtenerCatalogoEspecialidadesVet,
   obtenerCatalogoVeterinaria,
-  obtenerComisionVigenteCita,
   obtenerEspecialidadesPrestador,
   obtenerFranjasDeServicios,
   obtenerFranjasHorario,
@@ -95,6 +93,8 @@ import {
 } from '@/components/seccion-horarios';
 import { parsearPrecio } from '@epetplace/i18n'
 
+import { TresNumerosPorTipo } from '@/components/tres-numeros-precio';
+
 type Pantalla =
   | { estado: 'cargando' }
   | { estado: 'error' }
@@ -102,7 +102,6 @@ type Pantalla =
       estado: 'listo';
       prestadorId: string;
       cuentaActiva: boolean | null;
-      comisionPct: number | null;
     };
 
 type Seccion = 'servicios' | 'horarios';
@@ -278,13 +277,12 @@ export default function TallerVeterinaria() {
          y el estado equivocado acá dice "publicada" sobre algo que no lo
          está. */
       const rMinimos = prestadorAceptoMinimos(prestador.data.id, 'telemedicina');
-      const [rCat, rMundo, rFranjas, rModo, rCuenta, rComision, rCatEsp, rEspPropias] = await Promise.all([
+      const [rCat, rMundo, rFranjas, rModo, rCuenta, rCatEsp, rEspPropias] = await Promise.all([
         obtenerCatalogoVeterinaria(),
         obtenerMundoVeterinariaPropio(prestador.data.id),
         obtenerFranjasHorario(prestador.data.id, empleadoJornada ?? undefined),
         obtenerModoHorarios(prestador.data.id),
         obtenerMiCuentaComercial(),
-        obtenerComisionVigenteCita(),
         obtenerCatalogoEspecialidadesVet(),
         obtenerEspecialidadesPrestador(prestador.data.id),
       ]);
@@ -351,7 +349,6 @@ export default function TallerVeterinaria() {
         estado: 'listo',
         prestadorId: prestador.data.id,
         cuentaActiva: rCuenta.ok ? rCuenta.data?.estado === 'activa' : null,
-        comisionPct: rComision.ok ? rComision.data.porcentaje : null,
       });
     })();
     return () => {
@@ -362,7 +359,10 @@ export default function TallerVeterinaria() {
 
   const listo =
     pantalla.estado === 'listo' && drafts !== null && catalogo !== null && franjas !== null && catalogoEsp !== null;
-  const pct = pantalla.estado === 'listo' ? pantalla.comisionPct : null;
+  /* ☠️ `pct` murió con `VozComision`. Acá NO hay una comisión por taller:
+     el menú mezcla `veterinario` (mínimo $3,00) con `telemedicina` ($2,00),
+     así que cada fila lee la suya — ver `TresNumerosPorTipo`. */
+  const prestadorIdVet = pantalla.estado === 'listo' ? pantalla.prestadorId : null;
 
   // el ancla del lápiz (?item=): al quedar listo, la tarjeta ya midió
   useEffect(() => {
@@ -777,7 +777,11 @@ export default function TallerVeterinaria() {
                               onCambio={(idx) => actualizarItem(i, { precio: pasosDe(i)[idx].toFixed(2) })}
                               registro="aa"
                             />
-                            <VozComision pct={pct} precio={precioDe(i, d)} />
+                            <TresNumerosPorTipo
+                              prestadorId={prestadorIdVet}
+                              tipoServicio={TIPO_POR_ITEM[i]}
+                              precioNeto={precioDe(i, d)}
+                            />
 
                             {/* duración — pasos de 15', default del catálogo */}
                             <Separador />

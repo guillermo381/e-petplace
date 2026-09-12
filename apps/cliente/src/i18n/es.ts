@@ -2273,6 +2273,7 @@ export const clienteEs = {
     errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
   },
   cuenta: {
+    facturas: 'Tus facturas',
     // ── S101-B · FASE 5 · LOS MEDIOS DE PAGO ───────────────────────────
     // 🔴 «Medio de pago», no «tarjeta»: DeUna entra como otro medio sobre el
     //    mismo contrato, y el nombre de la pantalla es la decisión de
@@ -4592,6 +4593,75 @@ export const clienteEs = {
     yaElegiste: 'Ya elegiste cómo te devolvemos.',
     devolucionNoSePudo: 'No pudimos completar la devolución. Prueba de nuevo.',
     confirmarDevolucion: 'Confirmar',
+  },
+
+  /* S115-C · TUS FACTURAS (④ del mandato · MODELO_ECONOMICO v1.1).
+     La voz nunca dice «documento fiscal» ni «comprobante electrónico»: son
+     nombres del SRI y del motor, no del lado del usuario (Ley 17.2). Para la
+     familia esto son SUS facturas. */
+  facturas: {
+    titulo: 'Tus facturas',
+    vacioTitulo: 'Todavía no tienes facturas',
+    vacio: 'Cuando compres algo en e-PetPlace, su factura aparece aquí para que la descargues.',
+    errorTitulo: 'No pudimos traer tus facturas',
+    reintentar: 'Probar de nuevo',
+    descargarPdf: 'Descargar PDF',
+    descargarXml: 'Descargar XML',
+    /* Ley 17.4: qué pasó + qué hacer. «Revisa tu conexión» queda RESERVADO a
+       errores de red (precedente S47) — acá el fallo es del archivo. */
+    errorDescarga: 'No pudimos abrir el archivo. Prueba de nuevo.',
+    /* Los dos estados que `TarjetaFactura` todavía no expresa (pedido a B en
+       el buzón). Se dicen en voz propia en vez de disfrazarse de otro estado. */
+    faltanTusDatos: 'Necesitamos tu cédula o RUC para emitirla',
+    anulada: 'Esta factura fue anulada',
+  },
+
+  /* S115-C · TUS DATOS DE FACTURACIÓN (la mitad de ① que SÍ tiene puerta hoy).
+     Es la captura de cédula/RUC fuera del checkout: sin total, no hay tope que
+     leer, así que no depende de la clave que falta. */
+  datosFacturacion: {
+    titulo: 'Tus datos de facturación',
+    celda: 'Datos de facturación',
+    intro: 'Con estos datos emitimos tus facturas. Puedes cambiarlos cuando quieras.',
+    guardar: 'Guardar',
+    guardado: 'Listo, guardamos tus datos',
+    errorTitulo: 'No pudimos traer tus datos',
+    reintentar: 'Probar de nuevo',
+    /* Los cuatro que REBOTAN del servidor. Se leen de su código, jamás se
+       re-valida acá (el buzón de A §4 lo pide así). */
+    rucInvalido: 'Ese RUC no parece válido. Revísalo y prueba otra vez.',
+    cedulaInvalida: 'Esa cédula no parece válida. Revísala y prueba otra vez.',
+    rucSinRazonSocial: 'Con RUC necesitamos también la razón social.',
+    tipoInvalido: 'Elige un tipo de identificación.',
+    errorGuardar: 'No pudimos guardar tus datos. Prueba de nuevo.',
+  },
+
+  /* S115-C · LA SECCIÓN FISCAL DEL CHECKOUT. Sólo TRES claves: todo lo demás
+     —las dos opciones, la razón del tope, el switch de guardar, el microtexto de
+     deducibilidad— lo pone `SelectorFacturacion` desde el namespace `ui`. La voz
+     de una pieza vive adentro de la pieza (Ley 3). */
+  facturacionCheckout: {
+    facturaA: 'Factura a',
+    cambiar: 'Cambiar',
+    /* El enlace del caso bajo tope: se paga como consumidor final sin preguntar,
+       y esto queda a un lado por si alguien la quiere igual. Discreto a
+       propósito — preguntarlo sería volver a preguntar. */
+    quieresFactura: '¿Quieres factura con tus datos?',
+  },
+
+  /* S115-C · EL CORREO DE LA FACTURA. Su voz NO es la de un campo de formulario:
+     dice PARA QUÉ se pide. «Correo electrónico» a secas se lee como un trámite
+     más y se completa con cualquier cosa; «¿a dónde te la enviamos?» dice que
+     ese dato tiene un destinatario y una consecuencia. */
+  correoFactura: {
+    pregunta: '¿A dónde te enviamos tu factura?',
+    etiqueta: 'Correo electrónico',
+    /* Se dice ANTES de que falle, no como error: es la razón de que sea
+       obligatorio, y explicarla evita el rebote en vez de justificarlo. */
+    ayuda: 'Te mandamos ahí el comprobante de esta compra.',
+    formato: 'tu@correo.com',
+    falta: 'Necesitamos un correo para enviarte la factura.',
+    invalido: 'Ese correo no parece válido. Revísalo.',
   },
 
 } as const;
