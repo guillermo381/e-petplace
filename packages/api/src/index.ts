@@ -2029,9 +2029,11 @@ export {
   adminCerrarManual as fiscalAdminCerrarManual,
   fiscalTopeConsumidorFinal,
   fiscalDeclararMedioDePago,
+  fiscalQuienEmite,
 } from './wrappers/fiscal';
 export type {
   DocumentoFiscalMio, TaxProfile, EstadoVisibleFiscal, CodigoFiscal,
+  QuienEmite, EmisorDeLaCompra,
 } from './wrappers/fiscal';
 
 export {
