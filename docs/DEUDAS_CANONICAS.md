@@ -33188,3 +33188,188 @@ solo**: un gate que lea el encabezado de las migraciones nuevas y exija que esas
 edges estén al día antes de dejar cerrar.
 
 **Dueño:** A. **Disparo: ya — va antes de octubre.**
+
+---
+
+## `D-1074` 🔴 — LA APP QUEDA SIN RESPONDER DESPUÉS DE UN OTA · DOS OCURRENCIAS EL MISMO DÍA
+
+**Estado:** ABIERTA · **medida, NO curada** (orden del founder: *«no la cures hoy: medila. Es de octubre»*).
+**Dueño:** A · **Fecha límite:** antes del soft launch (1-oct-2026).
+
+### Las dos ocurrencias, con sus horas (todas -05)
+
+| # | Tras el OTA | Publicado | Ancla | Síntoma | Cómo se salió |
+|---|---|---|---|---|---|
+| ① | `36ad853a` *«checkout fiscal cableado…»* | **20:57** | `b65befcd` | la app deja de responder | **reinstalando** |
+| ② | `bd764ec6` *«el freno antes de cobrar…»* | **22:43** | `8a875d49` | idem | (reportado al cierre) |
+
+*Entre las dos hubo un tercer publish —`0405f710`, 21:57, ancla `74d81bf5`— sin incidente reportado.*
+
+### Lo medido (y lo que cada número descarta)
+
+**① `update:insights` de los tres grupos, plataforma android, último día:**
+
+| grupo | launches | **failed launches** | **crash rate** | usuarios | payload |
+|---|---|---|---|---|---|
+| `bd764ec6` | 2 | **0** | **0,00 %** | 2 | **6,41 MB** |
+| `0405f710` | 1 | **0** | **0,00 %** | 1 | 6,41 MB |
+| `36ad853a` | 2 | **0** | **0,00 %** | 2 | 6,40 MB |
+
+🔴 **Cero failed launches y cero crashes en los tres.** Eso **descarta** la hipótesis del bundle a medias y **sostiene** lo que dije ayer: expo-updates verifica el manifest y los assets ANTES de marcar un update como lanzable; si la verificación falla, no lanza y cae al anterior — y eso se contaría como *failed launch*, que acá es 0. **Lo que cuelga, cuelga DESPUÉS de un arranque exitoso.** No hay estado «a medias» del bundle: hay una app viva que deja de contestar.
+
+**② Los cuatro techos de red: `packages/api/src/red.ts`, commit `ee0b6cce`, 11-sep 21:44.** Ancestría medida contra las tres anclas:
+
+| OTA | ¿lleva los techos? |
+|---|---|
+| `36ad853a` (incidente ①) | **NO** |
+| `0405f710` | SÍ |
+| `bd764ec6` (incidente ②) | **SÍ** |
+
+⇒ **El incidente ① ocurrió SIN techos y el ② CON techos puestos.** *Los techos no evitaron el segundo cuelgue.* Y la explicación está medida, no supuesta: el único consumidor de `fetchConTecho()` es `client.ts:41`, el `global.fetch` del cliente de Supabase — **cubre las llamadas a Supabase y NADA MÁS**. La descarga del OTA la hace el **módulo nativo de expo-updates**, que no pasa por ese fetch. *Un techo sobre el fetch de JS no alcanza a una descarga nativa, igual que no alcanza a un websocket.*
+
+**③ La configuración de updates, leída del objeto (no de la doc):** `app.json` declara `updates: { url }` y **nada más** ⇒ rigen los defaults, verificados en el código nativo de `expo-updates@57.0.6` (`UpdatesConfiguration.kt`):
+
+- `checkOnLaunch` → **`ALWAYS`** (línea 101: `?: "ALWAYS"`) — **se consulta en cada arranque**.
+- `launchWaitMs` → **`0`** (línea 168) — **la app arranca YA con el bundle cacheado y la descarga sigue en segundo plano.**
+
+⇒ **Mecanismo candidato, y es exactamente el de tu punto ④:** en cada arranque frío que encuentra un update nuevo, **la app corre mientras se descargan ~6,4 MB por la misma conexión** que están usando las consultas de las pantallas. Sobre una red mala, la descarga puede acaparar el enlace. **Esto es una HIPÓTESIS con mecanismo medido, no una causa: falta reproducirla.**
+
+### Lo que falta para cerrar la causa (guion)
+
+1. **Reproducir con red degradada** (emulador: perfil GPRS/EDGE, o `adb shell` con *Network throttling*) — arrancar en frío con un update pendiente y ver si cuelga.
+2. **Distinguir «colgado» de «esperando»:** con el techo puesto, una consulta que no vuelve **tiene que** reventar en su tope y pintar «no cargó». Si la pantalla se queda muda igual, **lo que cuelga no es una consulta de Supabase** — y ahí el sospechoso es el hilo de JS o el nativo, no la red.
+3. **`adb logcat`** al momento del cuelgue: buscar `ANR`, `Skipped N frames`, `expo-updates`.
+
+### Curas candidatas, NO aplicadas
+
+- **`fallbackToCacheTimeout` explícito** — hoy es 0 por default, o sea el peor caso para la competencia; ponerlo en 0 *a propósito y escrito* no cambia nada, pero documenta la decisión.
+- **`checkAutomatically: ON_ERROR_RECOVERY` o `WIFI_ONLY`** — mata la competencia en datos móviles a cambio de que el update tarde más en llegar. **Es decisión de producto, no técnica.**
+- **Tomar el control en JS** (`checkForUpdateAsync`/`fetchUpdateAsync` a mano) para **diferir la descarga hasta que no haya pantallas cargando**. Medido: **hoy no hay una sola llamada a esas APIs en el repo** — el ciclo es 100 % automático.
+
+🔴 **Y la consecuencia que ordena la prioridad, con las palabras del founder:** *«si esto pasa en octubre, la familia no reinstala — desinstala.»*
+
+---
+
+## `D-1075` 🔴 — `obligadoContabilidad = NO` EN UN XML AUTORIZADO, Y SATORI SÍ LO ESTÁ
+
+**Estado:** ABIERTA · **lo más urgente de la tanda.** **Dueño:** founder (panel de Factuplan) + A (verificación).
+
+**Medido sobre el XML autorizado real** (`61668c3f…/comprobante.xml`, 9.498 bytes, bajado de Storage):
+
+```xml
+<razonSocial>SATORI INOV LATAM S A S</razonSocial>
+<ruc>1793240435001</ruc>
+<obligadoContabilidad>NO</obligadoContabilidad>   ← FALSO
+<ambiente>1</ambiente>                             ← PRUEBAS
+```
+
+**Nuestro dato está BIEN:** `fiscal_emisor.obligado_contabilidad = true`. **El `NO` no sale de nosotros:** el payload de `POST /developer/invoices` lleva del emisor **sólo** `establishment` y `emissionPoint` — en modo `create` el XML lo arma Factuplan con **la configuración del contribuyente en SU panel**.
+
+⚠️ **Atenuante medido, y cambia la urgencia sin borrarla: `<ambiente>1</ambiente>` es PRUEBAS.** Ningún documento con este defecto tiene efecto fiscal todavía. **Pero el mismo error en producción es un dato falso en un comprobante firmado**, y el campo es obligatorio en el esquema del SRI.
+
+**Dos salidas, y la segunda ya está construida:**
+1. **Corregir la configuración del contribuyente en el panel de Factuplan** (es donde vive el dato).
+2. **Cambiar a modo `factuplan_xml`** — ahí el XML lo armamos nosotros y el campo sale de `fiscal_emisor`: `simulador.ts:61` ya escribe `${c.emisor.obligado_contabilidad ? 'SI' : 'NO'}` ⇒ **diría `SI` sin tocar una línea.** *El adaptador nació con los dos modos justamente para esto.*
+
+**Gate de no-repetición:** antes de emitir en producción, un cinturón compara los campos del XML autorizado contra `fiscal_emisor`. *Un dato del emisor que sale de la configuración de un tercero se verifica contra la nuestra en cada emisión, o no se verifica nunca.*
+
+---
+
+## `D-1076` 🔴 — LA FAMILIA NO PUEDE FIRMAR SU PROPIA FACTURA: EL BUCKET `fiscal` SÓLO TIENE POLICY DE ADMIN
+
+**Estado:** ABIERTA · **es la causa real del «Descargar factura falla»** que midió C.
+
+**Lo medido.** Policies de `SELECT` sobre `storage.objects` para el bucket `fiscal`: **UNA sola.**
+
+```
+fiscal_admin_select · cmd=r · qual: (bucket_id = 'fiscal' AND is_admin())
+```
+
+⇒ **no existe ninguna policy que deje a la familia leer su propio archivo.** `createSignedUrl` desde el cliente autenticado rebota, y **Storage devuelve `not_found` / `NoSuchKey` cuando el fallo es de PERMISO** — por eso se lee como «el objeto no está».
+
+🔴 **Corrección a lo que reportó C, y es la parte que importa: el objeto SÍ está.** Cruce de `documentos_fiscales` contra `storage.objects`:
+
+| documento | `pdf_url` | objeto presente |
+|---|---|---|
+| `61668c3f` | `61668c3f…/ride.pdf` (28.797 B) | **sí** |
+| `61668c3f` | `61668c3f…/comprobante.xml` (9.498 B) | **sí** |
+
+**Cero rutas huérfanas en toda la tabla.** *El síntoma decía «falta el archivo» y lo que falta es el permiso — dos causas distintas con la misma cara, y curar la equivocada habría mandado a re-archivar documentos que ya estaban archivados.*
+
+**Y un hallazgo de paso: la migración se describe a sí misma mal.** `20260912300000` comenta *«la firma la hace el wrapper con service_role»* y `fiscal.ts:140` firma con `getClient()`, el cliente del usuario. **Letra muerta**: quien la lea da por hecha una arquitectura que no existe. *Se cura junto con la policy, en el mismo acto.*
+
+**Las dos curas posibles (a firmar):** (a) policy de SELECT por dueño sobre `storage.objects`, espejando el gate que `fiscal_ruta_archivo` ya tiene; (b) firmar desde una edge con `service_role`. **La (a) es la de la casa** —el gate ya existe del lado del servidor y no hay que inventar uno nuevo—; la (b) es la que el comentario prometía.
+
+---
+
+## `D-1077` 🟠 — «LISTA» SIN ARCHIVOS: EL ESTADO VISIBLE NO MIRA SI HAY ALGO PARA BAJAR
+
+**Estado:** ABIERTA. **Dueño:** A (motor) + C (voz).
+
+`fiscal_mis_documentos` deriva `estado_visible = 'lista'` de `estado = 'autorizada'` **y nada más** (`20260912300000:30`). Medido hoy: **2 documentos `autorizada`, sólo 1 con archivos.**
+
+| documento | estado | `pdf_url` | `xml_url` | lo que ve la familia |
+|---|---|---|---|---|
+| `61668c3f` | autorizada | sí | sí | «Lista» + dos botones ✓ |
+| `492bdafe` | autorizada | **NULL** | **NULL** | **«Lista» y ningún botón** |
+
+*Una factura que dice «lista» y no ofrece nada promete algo que no existe.* La pieza de C oculta el botón cuando falta el archivo —eso está bien, Ley 23— pero **el estado sigue diciendo que está lista**.
+
+**Causa de la ausencia, medida:** `492bdafe` tiene `estado='autorizada'` y **`autorizado_en = NULL`** ⇒ lo movió el camino de CONSULTA (`fiscal-emitir`), no el webhook. El archivado del camino de consulta **está construido y nunca se ejerció sobre un documento real** (declarado al cierre de la tanda anterior). **Éste es su primer caso vivo.**
+
+**Dos mitades, las dos hacen falta:** ① que el camino de consulta archive de verdad; ② que `estado_visible` no diga «lista» sin archivo — *o se archiva, o el estado dice la verdad.*
+
+---
+
+## `D-1078` 🟠 — SETENTA `as` SIN GUARDA EN `packages/api` AFIRMAN FORMA SOBRE DATOS DE LA BASE
+
+**Estado:** ABIERTA. **Dueño:** A. **Origen:** hallazgo de C sobre `TaxProfile.tipoIdentificacion`.
+
+**Censo medido** sobre `packages/api/src/wrappers` (excluyendo `Record`/`Obj`/`unknown`, que ensanchan y no prometen):
+
+| | |
+|---|---|
+| casts a un tipo **nombrado** sobre datos de la base | **115** |
+| con guarda en la misma línea (`includes` / `typeof` / `??` / ternario) | 45 |
+| **SIN guarda** | **70** |
+
+⚠️ **Lo que el número NO prueba:** que los 70 estén rotos. La mayoría cae sobre columnas `NOT NULL` con CHECK, donde el cast acierta. **El daño aparece cuando la fuente puede ser nula** — y eso hay que cruzarlo caso por caso contra la nulabilidad de cada columna. *Publicar «70 defectos» sería etiquetar un número con la población equivocada (L-544): son 70 CANDIDATOS de una clase, no 70 fallas.*
+
+**Lo que sí está probado es la clase**, con su caso vivo: `fiscal.ts:157` afirmaba `tipo_identificacion as TaxProfile['tipoIdentificacion']` sobre un valor que llegaba `NULL`, **con typecheck verde** — porque un cast es pedirle al compilador que no mire. Curado en esta tanda con verificación en runtime contra el vocabulario cerrado.
+
+**Cura de raíz propuesta (no aplicada): un gate.** `verify:casts-sin-guarda` con baseline solo-baja, que exija guarda o una lápida declarada. *Sin instrumento, esta clase vuelve en el próximo wrapper — nadie puede recordar 70 líneas.*
+
+---
+
+## `D-1079` 🟡 — EL RIDE QUE RECIBE LA FAMILIA LLEVA LA MARCA DE FACTUPLAN
+
+**Estado:** ABIERTA · **esperando la respuesta de Factuplan** sobre personalización.
+
+**Medido: el PDF es de ELLOS, no el nuestro.** `factuplan.ts:301` lo trae de `GET /developer/receipts/{id}/pdf` y archiva **los bytes tal cual**. El `ride.ts` propio (HTML) **nunca se usó para este documento** — y se comprueba sin abrir el archivo: la extensión sale del mime, y en Storage el objeto es `ride.pdf`; el nuestro habría quedado `ride.html`.
+
+**El XML, en cambio, está bien:** `razonSocial` y `ruc` son de Satori, y Factuplan aparece **sólo** en `<infoAdicional>` como `RUC Proveedor = 0993411372001`, que es exactamente donde corresponde. **Los tres campos adicionales del XML:** `Email`, `servicioPrestadoPor = [DEMO S44] Paseos Andres`, `RUC Proveedor`. ⇒ **El defecto es de RENDERIZADO de su RIDE, y el XML autorizado prueba qué debería decir el encabezado.** Va al reclamo.
+
+**El costo de usar el nuestro, medido antes de decidir:**
+
+| | RIDE de Factuplan | RIDE nuestro (`ride.ts`) |
+|---|---|---|
+| Marca del encabezado | **Factuplan** | e-PetPlace / Satori |
+| Número de autorización y fecha | del XML autorizado | **hay que leerlos del XML** |
+| Clave de acceso (49 dígitos) | sí | sí — está en el canónico |
+| **Código de barras de la clave** | **sí** | **NO — hay que construirlo** |
+| Formato | **PDF** | **HTML** |
+| `obligadoContabilidad` | **`NO` (falso)** | **correcto, sale de `fiscal_emisor`** |
+
+⇒ **No es «sólo cambiar qué PDF adjuntamos».** Falta el código de barras —que el SRI espera en el RIDE— y falta convertir HTML a PDF, que **no se puede hacer con lo que hay en el repo** (no hay motor de PDF; el `estructurar-nota-clinica` es texto). *Es trabajo real, no un cambio de adjunto.*
+
+**Mi voto, y coincide con tu lectura:** **preguntarles primero.** Si el RIDE se personaliza, esto muere sin costo. Si no, la decisión se vuelve interesante por otra razón: **su RIDE trae un dato fiscal falso** (`D-1075`) y el nuestro no — *ahí deja de ser una cuestión de marca y pasa a ser de exactitud*, que pesa más.
+
+---
+
+## `L-546` — UN FALLO DE PERMISO EN STORAGE SE DISFRAZA DE ARCHIVO AUSENTE
+
+`createSignedUrl` sobre un objeto que existe pero que la policy no deja leer devuelve **`not_found` / `NoSuchKey`**, idéntico a un objeto que de verdad no está. *No es un mensaje pobre: es la respuesta correcta de un sistema que no te confirma la existencia de lo que no podés ver.*
+
+⇒ **Ante un `NoSuchKey`, antes de re-archivar nada se pregunta si la fila del objeto EXISTE** (`storage.objects` por `bucket_id` + `name`) **y si hay una policy que la alcance.** Las dos preguntas son SQL y contestan en un segundo; sin ellas, el camino obvio —«faltan los archivos, hay que volver a subirlos»— cura lo que no está roto y deja el permiso cerrado.
+
+**Caso fundante:** `D-1076`. El objeto estaba, pesaba lo correcto, y la única policy del bucket exigía `is_admin()`.

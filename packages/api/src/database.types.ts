@@ -26582,12 +26582,12 @@ export type Database = {
           updated_at: string
           user_id: string | null
           verificado_en: string | null
-        }
+        }[]
         SetofOptions: {
           from: "*"
           to: "tax_profiles"
-          isOneToOne: true
-          isSetofReturn: false
+          isOneToOne: false
+          isSetofReturn: true
         }
       }
       fiscal_tax_profile_upsert: {
