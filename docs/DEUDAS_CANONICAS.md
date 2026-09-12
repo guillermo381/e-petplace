@@ -33495,3 +33495,54 @@ cinturon OK · dueño=1 · ajeno=0 (rojo probado) · anon=0
 **Hoy el efecto es NULO, y por eso es fácil que nadie lo vea:** las cuatro filas de `app_config` dicen exactamente los mismos números. ⇒ **una perilla que el motor no honra** — y la próxima vez que alguien la mueva para apagar un incendio, **va a mirar un valor cambiado y un comportamiento igual**.
 
 *Es la clase «escritor sin lector» al revés: el dato existe, es correcto, y no llega a ninguna parte.* La cura es una línea en el arranque de cada app — con su cuidado propio ya escrito en `red.ts:30`: **la petición que trae los techos necesita su propio techo**, y por eso los `ARRANQUE` no se borran nunca.
+
+---
+
+## `D-1081` 🔴 — DOS VALIDADORES DE IDENTIFICACIÓN QUE NO DICEN LO MISMO
+
+**Estado:** ABIERTA · **PRIORIDAD** (founder, 12-sep: *«no al final de la lista»*). **Dueño:** A + B.
+**Disparo:** antes de que cualquier superficie o motor cablee el de SQL.
+
+**Medido contra el objeto**, los tres RUC reales de comprobantes autorizados por el SRI:
+
+| RUC | `esRucValido` (TS, `packages/ui`) | `validar_identificacion_fiscal` (SQL) |
+|---|---|---|
+| `1793240435001` — **Satori, el nuestro** | **rechaza** | **acepta** |
+| `0993411372001` — SigniaDigital (Factuplan) | **rechaza** | **acepta** |
+| `1713744546001` — TOGA FASHION | **rechaza** | **rechaza** |
+
+Son **dos reglas distintas**: el de TS verifica el **módulo 11**; el de SQL verifica **la forma** (país + tipo) y no toca el dígito. *No es que uno esté roto: es que responden preguntas distintas con el mismo nombre.*
+
+🟢 **Hoy no hace daño, y por eso es fácil que se quede así:** `validar_identificacion_fiscal` **no tiene un solo invocador** — salió en el censo de `verify:sin-invocador`. La cadena fiscal no valida el RUC del emisor por ningún lado (medido: cero usos en edges y en SQL), así que **Satori nunca rebotó**.
+
+🔴 **El día que alguien lo cablee, la firma de B no lo alcanza.** B firmó que *el dígito verificador del RUC deja de bloquear y pasa a advertencia*; esa firma vive en el de TS. El de SQL nunca bloqueó por dígito **y sí bloquea por forma**, o sea que aplicaría un criterio que nadie firmó, en un lugar donde nadie lo va a ir a mirar.
+
+> *Es la misma clase que dos letras firmadas que se contradicen —cualquiera cita la que le conviene y está «en regla»— y esa clase ya costó una sesión entera al principio de S115 con el modelo fiscal.* **La diferencia acá es que no son dos textos: son dos funciones, y una de ellas se puede cablear sin leer la otra.**
+
+**Las dos salidas, y no son equivalentes:** (a) que el de SQL **delegue** en la misma regla que el de TS —una sola fuente, y la firma de B la alcanza—; (b) **jubilar** el de SQL si su pregunta ya la contesta la puerta de arriba. **Lo que NO vale es dejarlos conviviendo con una lápida**: una lápida no frena a quien escribe el `SELECT`.
+
+---
+
+## `D-1082` 🟠 — EL PAYLOAD TIENE CUATRO CAMPOS QUE PARECEN DECIR CRÉDITO/DÉBITO, Y NINGUNO SE PUEDE USAR TODAVÍA
+
+**Estado:** ABIERTA. **Dueño:** founder (la pregunta a Erick) + A. **Precondición de `D-1072`.**
+
+Buscando cerrar `D-1068` sin esperar a Nuvei, censé el `payload_crudo` entero. Aparecieron **cuatro candidatos**, y el más prometedor es semánticamente exacto:
+
+| campo | valor, en TODA la historia | n |
+|---|---|---|
+| `transaction.installments_type` | **`"Revolving credit"`** | **108 / 108** |
+| `transaction.payment_method_type` | `"0"` | 100 |
+| `transaction.installments` | `"0"` | 100 |
+| `transaction.carrier_code` | `"00"` | 100 |
+| `card.type` | `vi` (60) · `di` (40) | — **es la MARCA** |
+
+*«Revolving credit» es literalmente crédito rotativo: el nombre de la línea de una tarjeta de crédito.* Parece la respuesta.
+
+🔴 **Y no se puede usar, por una razón que vale para los cuatro: la muestra es de UNA persona y DOS tarjetas.** Medido: `installments_type` aparece 108 veces, con **2 BINs** y **1 pagador**. **Un campo constante sobre una población de una sola tarjeta no se distingue de un campo que siempre dice lo mismo.** Los cuatro son constantes a la vez, que es exactamente lo que se ve cuando nunca variaste la entrada.
+
+⚠️ **Y usarlo igual sería PEOR que la regla ④**, no mejor: la regla ④ marca `derivado:false` y se sabe cuáles se asumieron. Un campo que se lee como dato **entra al XML sin marca** — *la misma suposición, vestida de medición, y sin forma de encontrarla después.*
+
+**Lo que lo destraba es un solo pago con tarjeta de DÉBITO.** Si ahí `installments_type` dice otra cosa, el campo discrimina y `D-1068` se cierra sin Erick. Si dice `Revolving credit` igual, es una constante y no sirve.
+
+**Y mejora la pregunta a Erick**, que es lo barato de hoy: en vez de *«¿hay un campo de funding type?»* → **«¿`installments_type` dice `Revolving credit` para crédito y otra cosa para débito, o es constante?»** *Una pregunta que nombra el campo se contesta en una línea; una que pregunta si existe se contesta en una reunión.*
