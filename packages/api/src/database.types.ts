@@ -2761,6 +2761,33 @@ export type Database = {
           },
         ]
       }
+      cat_forma_pago_sri: {
+        Row: {
+          activo: boolean
+          codigo_sri: string
+          country_code: string
+          fuente_codigo: string | null
+          medio: string
+          nombre: string
+        }
+        Insert: {
+          activo?: boolean
+          codigo_sri: string
+          country_code: string
+          fuente_codigo?: string | null
+          medio: string
+          nombre: string
+        }
+        Update: {
+          activo?: boolean
+          codigo_sri?: string
+          country_code?: string
+          fuente_codigo?: string | null
+          medio?: string
+          nombre?: string
+        }
+        Relationships: []
+      }
       cat_guarderia_estados: {
         Row: {
           es_terminal: boolean
@@ -2854,6 +2881,33 @@ export type Database = {
           created_at?: string
           descripcion?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      cat_identificacion_sri: {
+        Row: {
+          activo: boolean
+          codigo: string
+          codigo_sri: string
+          country_code: string
+          fuente_codigo: string | null
+          nombre: string
+        }
+        Insert: {
+          activo?: boolean
+          codigo: string
+          codigo_sri: string
+          country_code: string
+          fuente_codigo?: string | null
+          nombre: string
+        }
+        Update: {
+          activo?: boolean
+          codigo?: string
+          codigo_sri?: string
+          country_code?: string
+          fuente_codigo?: string | null
+          nombre?: string
         }
         Relationships: []
       }
@@ -3607,8 +3661,11 @@ export type Database = {
         Row: {
           activo: boolean
           codigo: string
+          codigo_porcentaje_sri: string | null
+          codigo_sri: string | null
           country_code: string
           created_at: string
+          fuente_codigo: string | null
           nombre: string
           pct: number
           vigencia_desde: string
@@ -3617,8 +3674,11 @@ export type Database = {
         Insert: {
           activo?: boolean
           codigo: string
+          codigo_porcentaje_sri?: string | null
+          codigo_sri?: string | null
           country_code: string
           created_at?: string
+          fuente_codigo?: string | null
           nombre: string
           pct: number
           vigencia_desde?: string
@@ -3627,8 +3687,11 @@ export type Database = {
         Update: {
           activo?: boolean
           codigo?: string
+          codigo_porcentaje_sri?: string | null
+          codigo_sri?: string | null
           country_code?: string
           created_at?: string
+          fuente_codigo?: string | null
           nombre?: string
           pct?: number
           vigencia_desde?: string
@@ -6348,9 +6411,12 @@ export type Database = {
           identificacion: string | null
           items: Json
           iva: number | null
+          liquidacion_id: string | null
           moneda: string
           motivo_rechazo: string | null
+          numeracion_origen: string
           numero_factura: string | null
+          origen_reembolso: string | null
           pago_intento_id: string | null
           pdf_url: string | null
           pedido_id: string | null
@@ -6401,9 +6467,12 @@ export type Database = {
           identificacion?: string | null
           items?: Json
           iva?: number | null
+          liquidacion_id?: string | null
           moneda?: string
           motivo_rechazo?: string | null
+          numeracion_origen?: string
           numero_factura?: string | null
+          origen_reembolso?: string | null
           pago_intento_id?: string | null
           pdf_url?: string | null
           pedido_id?: string | null
@@ -6454,9 +6523,12 @@ export type Database = {
           identificacion?: string | null
           items?: Json
           iva?: number | null
+          liquidacion_id?: string | null
           moneda?: string
           motivo_rechazo?: string | null
+          numeracion_origen?: string
           numero_factura?: string | null
+          origen_reembolso?: string | null
           pago_intento_id?: string | null
           pdf_url?: string | null
           pedido_id?: string | null
@@ -6498,6 +6570,20 @@ export type Database = {
             columns: ["documento_referencia_id"]
             isOneToOne: false
             referencedRelation: "facturas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documentos_fiscales_liquidacion_id_fkey"
+            columns: ["liquidacion_id"]
+            isOneToOne: false
+            referencedRelation: "liquidaciones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documentos_fiscales_liquidacion_id_fkey"
+            columns: ["liquidacion_id"]
+            isOneToOne: false
+            referencedRelation: "v_liquidaciones_pendientes_pago"
             referencedColumns: ["id"]
           },
           {
@@ -6635,6 +6721,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      edge_despliegues: {
+        Row: {
+          arbol_limpio: boolean | null
+          archivos: number
+          desplegado_en: string
+          desplegado_por: string | null
+          firma: string
+          git_head: string | null
+          slug: string
+        }
+        Insert: {
+          arbol_limpio?: boolean | null
+          archivos: number
+          desplegado_en?: string
+          desplegado_por?: string | null
+          firma: string
+          git_head?: string | null
+          slug: string
+        }
+        Update: {
+          arbol_limpio?: boolean | null
+          archivos?: number
+          desplegado_en?: string
+          desplegado_por?: string | null
+          firma?: string
+          git_head?: string | null
+          slug?: string
+        }
+        Relationships: []
       }
       emergencia_eventos: {
         Row: {
@@ -11965,10 +12081,12 @@ export type Database = {
         Row: {
           actualizado_en: string
           agente_retencion: boolean
+          agente_retencion_resolucion: string | null
           ambiente: number
           certificado_alias: string | null
           certificado_vence_en: string | null
           contribuyente_especial: string | null
+          direccion_establecimiento: string | null
           direccion_matriz: string
           establecimiento: string
           id: boolean
@@ -11978,14 +12096,18 @@ export type Database = {
           punto_emision: string
           razon_social: string
           ruc: string
+          version_esquema: string
+          zona_horaria: string
         }
         Insert: {
           actualizado_en?: string
           agente_retencion?: boolean
+          agente_retencion_resolucion?: string | null
           ambiente: number
           certificado_alias?: string | null
           certificado_vence_en?: string | null
           contribuyente_especial?: string | null
+          direccion_establecimiento?: string | null
           direccion_matriz: string
           establecimiento: string
           id?: boolean
@@ -11995,14 +12117,18 @@ export type Database = {
           punto_emision: string
           razon_social: string
           ruc: string
+          version_esquema?: string
+          zona_horaria?: string
         }
         Update: {
           actualizado_en?: string
           agente_retencion?: boolean
+          agente_retencion_resolucion?: string | null
           ambiente?: number
           certificado_alias?: string | null
           certificado_vence_en?: string | null
           contribuyente_especial?: string | null
+          direccion_establecimiento?: string | null
           direccion_matriz?: string
           establecimiento?: string
           id?: boolean
@@ -12012,6 +12138,8 @@ export type Database = {
           punto_emision?: string
           razon_social?: string
           ruc?: string
+          version_esquema?: string
+          zona_horaria?: string
         }
         Relationships: []
       }
@@ -12041,6 +12169,60 @@ export type Database = {
           ultimo_secuencial?: number
         }
         Relationships: []
+      }
+      fiscal_webhook_eventos: {
+        Row: {
+          cuerpo_crudo: string
+          delivery_id: string | null
+          documento_id: string | null
+          evento: string | null
+          firma_verificada: boolean | null
+          id: string
+          motivo: string | null
+          procesado_en: string | null
+          recibido_en: string
+          resultado: string | null
+        }
+        Insert: {
+          cuerpo_crudo: string
+          delivery_id?: string | null
+          documento_id?: string | null
+          evento?: string | null
+          firma_verificada?: boolean | null
+          id?: string
+          motivo?: string | null
+          procesado_en?: string | null
+          recibido_en?: string
+          resultado?: string | null
+        }
+        Update: {
+          cuerpo_crudo?: string
+          delivery_id?: string | null
+          documento_id?: string | null
+          evento?: string | null
+          firma_verificada?: boolean | null
+          id?: string
+          motivo?: string | null
+          procesado_en?: string | null
+          recibido_en?: string
+          resultado?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fiscal_webhook_eventos_documento_id_fkey"
+            columns: ["documento_id"]
+            isOneToOne: false
+            referencedRelation: "documentos_fiscales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fiscal_webhook_eventos_documento_id_fkey"
+            columns: ["documento_id"]
+            isOneToOne: false
+            referencedRelation: "facturas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       grooming_talla_discrepancias: {
         Row: {
@@ -15312,6 +15494,9 @@ export type Database = {
           hallazgo_en: string | null
           id: string
           marca: string | null
+          medio_pago: string | null
+          medio_pago_declarado_en: string | null
+          medio_pago_declarado_por: string | null
           moneda: string
           monto: number
           motivo_rechazo: string | null
@@ -15358,6 +15543,9 @@ export type Database = {
           hallazgo_en?: string | null
           id?: string
           marca?: string | null
+          medio_pago?: string | null
+          medio_pago_declarado_en?: string | null
+          medio_pago_declarado_por?: string | null
           moneda?: string
           monto: number
           motivo_rechazo?: string | null
@@ -15404,6 +15592,9 @@ export type Database = {
           hallazgo_en?: string | null
           id?: string
           marca?: string | null
+          medio_pago?: string | null
+          medio_pago_declarado_en?: string | null
+          medio_pago_declarado_por?: string | null
           moneda?: string
           monto?: number
           motivo_rechazo?: string | null
@@ -24554,6 +24745,7 @@ export type Database = {
         Args: { p_country_code: string; p_fecha: string; p_tipo_actor: string }
         Returns: number
       }
+      _fiscal_dv_modulo11: { Args: { p_cuerpo48: string }; Returns: number }
       _generar_citas_plan: {
         Args: {
           p_pagado_en: string
@@ -24644,6 +24836,10 @@ export type Database = {
         Returns: {
           hora: string
         }[]
+      }
+      _intento_del_objeto: {
+        Args: { p_id: string; p_tipo: string }
+        Returns: string
       }
       _marcar_modo_captura_evento: {
         Args: {
@@ -25881,6 +26077,14 @@ export type Database = {
         }
         Returns: Json
       }
+      declarar_regimen_tributario: {
+        Args: {
+          p_cuenta_comercial_id: string
+          p_regimen: string
+          p_tipo_comprobante: string
+        }
+        Returns: Json
+      }
       declarar_sin_alergias_conocidas: {
         Args: { p_mascota_id: string }
         Returns: Json
@@ -26021,6 +26225,16 @@ export type Database = {
         Args: { p_periodo: string; p_sujeto: string; p_sujeto_id: string }
         Returns: Json
       }
+      emitir_nota_credito: {
+        Args: {
+          p_alcance: string
+          p_monto: number
+          p_motivo: string
+          p_origen_reembolso: string
+          p_pago_intento_id: string
+        }
+        Returns: Json
+      }
       emitir_pasaporte: { Args: { p_mascota_id: string }; Returns: Json }
       emitir_token_documento: {
         Args: { p_mascota_id: string; p_ref?: string; p_tipo?: string }
@@ -26150,6 +26364,10 @@ export type Database = {
         }
         Returns: Json
       }
+      fiscal_adjuntar_comprobante_liquidacion: {
+        Args: { p_documento_id: string; p_liquidacion_id: string }
+        Returns: Json
+      }
       fiscal_admin_cerrar_manual: {
         Args: {
           p_autorizado_en?: string
@@ -26183,9 +26401,12 @@ export type Database = {
           identificacion: string | null
           items: Json
           iva: number | null
+          liquidacion_id: string | null
           moneda: string
           motivo_rechazo: string | null
+          numeracion_origen: string
           numero_factura: string | null
+          origen_reembolso: string | null
           pago_intento_id: string | null
           pdf_url: string | null
           pedido_id: string | null
@@ -26221,6 +26442,63 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      fiscal_anotar_numero_ajeno: {
+        Args: {
+          p_clave: string
+          p_documento_id: string
+          p_establecimiento?: string
+          p_punto_emision?: string
+          p_secuencial: string
+        }
+        Returns: Json
+      }
+      fiscal_clave_acceso: {
+        Args: {
+          p_ambiente: string
+          p_establecimiento: string
+          p_fecha: string
+          p_punto_emision: string
+          p_ruc: string
+          p_secuencial: string
+          p_tipo: Database["public"]["Enums"]["fiscal_tipo_enum"]
+        }
+        Returns: string
+      }
+      fiscal_conciliacion_hallazgos: {
+        Args: { p_desde?: string; p_hasta?: string }
+        Returns: {
+          clase: string
+          cuando: string
+          monto: number
+          que_pasa: string
+          referencia: string
+        }[]
+      }
+      fiscal_conciliacion_relojes: {
+        Args: { p_desde?: string; p_hasta?: string }
+        Returns: {
+          cuenta: string
+          cuenta_comercial_id: string
+          divergencias: string[]
+          fiscal_acreditado: number
+          fiscal_facturado: number
+          ledger_devengado: number
+          ledger_reversado: number
+          liquidacion_pagada: number
+          periodo: string
+          riel_cobrado: number
+          riel_devuelto: number
+        }[]
+      }
+      fiscal_declarar_medio_de_pago: {
+        Args: { p_documento_id: string; p_medio: string; p_nota?: string }
+        Returns: Json
+      }
+      fiscal_forma_pago_del_intento: {
+        Args: { p_intento_id: string }
+        Returns: Json
+      }
+      fiscal_hoy: { Args: never; Returns: string }
       fiscal_mis_documentos: {
         Args: never
         Returns: {
@@ -26237,10 +26515,25 @@ export type Database = {
           total: number
         }[]
       }
+      fiscal_reservar_numero: {
+        Args: {
+          p_canonico: Json
+          p_canonico_version: number
+          p_documento_id: string
+          p_iva: number
+          p_numeracion_origen?: string
+          p_proveedor: string
+          p_subtotal_0: number
+          p_subtotal_15: number
+          p_total: number
+        }
+        Returns: Json
+      }
       fiscal_ruta_archivo: {
         Args: { p_cual: string; p_documento_id: string }
         Returns: string
       }
+      fiscal_salud_emision: { Args: never; Returns: Json }
       fiscal_tax_profile_mio: {
         Args: never
         Returns: {
@@ -26585,6 +26878,10 @@ export type Database = {
         Returns: Json
       }
       liberar_reservas_saldo_vencidas: { Args: never; Returns: number }
+      liquidacion_respaldo: {
+        Args: { p_liquidacion_id: string }
+        Returns: Json
+      }
       listar_lotes: { Args: never; Returns: Json }
       listar_memoria_coach: { Args: { p_mascota_id: string }; Returns: Json }
       listar_placas_de_lote: { Args: { p_lote_id: string }; Returns: Json }
@@ -27943,6 +28240,16 @@ export type Database = {
         Returns: Json
       }
       recurrencias_vencidas_pendientes: { Args: never; Returns: Json }
+      reembolsos_sin_nota_credito: {
+        Args: never
+        Returns: {
+          camino: string
+          cuando: string
+          monto: number
+          por_que: string
+          referencia: string
+        }[]
+      }
       reemplazar_franjas_guarderia: {
         Args: { p_franjas: Json; p_prestador_id: string; p_tipo: string }
         Returns: Json
@@ -28697,6 +29004,17 @@ export type Database = {
       verificar_compuertas_recurrencia: {
         Args: { p_periodo: string; p_recurrencia_id: string }
         Returns: Json
+      }
+      verificar_fee_por_fecha_servicio: {
+        Args: never
+        Returns: {
+          caso: string
+          motivo: string
+          ok: boolean
+          pct_confirmacion: string
+          pct_congelado: string
+          pct_esperado: string
+        }[]
       }
       verificar_identificacion_disponible: {
         Args: { p_country_code: string; p_identificacion: string }

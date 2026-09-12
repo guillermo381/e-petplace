@@ -2028,6 +2028,7 @@ export {
   adminListar as fiscalAdminListar,
   adminCerrarManual as fiscalAdminCerrarManual,
   fiscalTopeConsumidorFinal,
+  fiscalDeclararMedioDePago,
 } from './wrappers/fiscal';
 export type {
   DocumentoFiscalMio, TaxProfile, EstadoVisibleFiscal, CodigoFiscal,
