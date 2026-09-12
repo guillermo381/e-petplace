@@ -137,6 +137,17 @@ export async function urlFirmada(
   if (error) return fallo(codigoDe(error.message), 'No pudimos abrir ese archivo.');
   if (!ruta) return fallo('archivo_no_existe', 'Ese comprobante todavía no tiene archivo.');
 
+  /* 🔴 LA AUTORIZACIÓN VIVE EN LA BASE, NO ACÁ — y una corrección de letra
+     muerta: la migración `20260912300000` comenta *«la firma la hace el wrapper
+     con service_role»* y **nunca fue cierto**: esto firma con el cliente del
+     usuario. Quien leyera ese comentario daba por hecha una arquitectura que no
+     existe. Lo que gobierna de verdad es la policy `fiscal_dueno_select`
+     (`20260912770000`, con su rojo probado: otra familia ve 0 filas).
+
+     ⚠️ Y por eso el error de acá se lee con cuidado: **Storage devuelve
+     `not_found`/`NoSuchKey` cuando el fallo es de PERMISO**, idéntico a un
+     objeto ausente (L-546). Ante ese código, antes de re-archivar nada se
+     pregunta si la fila del objeto existe y si hay policy que la alcance. */
   const { data, error: e2 } = await cli.storage.from('fiscal')
     .createSignedUrl(String(ruta), segundos);
   if (e2 || !data?.signedUrl) {

@@ -33298,7 +33298,19 @@ fiscal_admin_select · cmd=r · qual: (bucket_id = 'fiscal' AND is_admin())
 
 **Y un hallazgo de paso: la migración se describe a sí misma mal.** `20260912300000` comenta *«la firma la hace el wrapper con service_role»* y `fiscal.ts:140` firma con `getClient()`, el cliente del usuario. **Letra muerta**: quien la lea da por hecha una arquitectura que no existe. *Se cura junto con la policy, en el mismo acto.*
 
-**Las dos curas posibles (a firmar):** (a) policy de SELECT por dueño sobre `storage.objects`, espejando el gate que `fiscal_ruta_archivo` ya tiene; (b) firmar desde una edge con `service_role`. **La (a) es la de la casa** —el gate ya existe del lado del servidor y no hay que inventar uno nuevo—; la (b) es la que el comentario prometía.
+### ✅ CURADA — firma del founder, 11-sep: **POLICY POR DUEÑO**
+
+*«La familia lee su propio archivo porque es suyo, y eso se dice en la base. Firmar desde una edge pone un salto de red en cada descarga y esconde la autorización donde nadie la busca.»*
+
+Migración `20260912770000`. El predicado compara contra **la ruta que el documento declara** (`pdf_url`/`xml_url`) — **la misma fuente que usa `fiscal_ruta_archivo`**, así que las dos puertas no pueden divergir. Las alternativas se descartaron por medición: `(storage.foldername(name))[1]::uuid` **revienta** con los objetos de `ensayo/…` que ya viven en el bucket (la carpeta ahí es texto, y un cast que falla en un `USING` mata la consulta entera), y comparar por prefijo dejaría leer cualquier objeto subido bajo una carpeta con nombre de documento ajeno.
+
+**Cinturón con su ROJO probado** (L-459 — la primera prueba de un guard no es que dé verde):
+
+```
+cinturon OK · dueño=1 · ajeno=0 (rojo probado) · anon=0
+```
+
+*Y el cinturón aborta si no encuentra un documento con archivo REAL en Storage o un segundo usuario contra el cual discriminar (L-437): un censo que no puede producir su rojo no está midiendo.*
 
 ---
 
@@ -33349,20 +33361,34 @@ fiscal_admin_select · cmd=r · qual: (bucket_id = 'fiscal' AND is_admin())
 
 **El XML, en cambio, está bien:** `razonSocial` y `ruc` son de Satori, y Factuplan aparece **sólo** en `<infoAdicional>` como `RUC Proveedor = 0993411372001`, que es exactamente donde corresponde. **Los tres campos adicionales del XML:** `Email`, `servicioPrestadoPor = [DEMO S44] Paseos Andres`, `RUC Proveedor`. ⇒ **El defecto es de RENDERIZADO de su RIDE, y el XML autorizado prueba qué debería decir el encabezado.** Va al reclamo.
 
-**El costo de usar el nuestro, medido antes de decidir:**
+### 🔴 CORRECCIÓN DE UNA MEDICIÓN PROPIA (misma tanda, antes de que la firma se apoyara en ella)
+
+**Reporté que el RIDE nuestro es HTML y que no hay motor de PDF en el repo. Las dos son FALSAS.** Lo deduje del `ext = mime === 'application/pdf' ? 'pdf' : 'html'` del webhook y de que el RIDE del simulador sí es HTML — *razoné desde el vecino en vez de abrir el archivo.* Lo que hay, medido:
+
+- **HAY DOS `rideDesdeCanonico`, y ése fue el engaño.** `simulador.ts:86` devuelve `string` (HTML) y **`ride.ts:28` devuelve `Uint8Array` (PDF)**. `mod.ts:10` re-exporta **la del simulador**, así que el nombre que se ve desde afuera es el que NO es el bueno. *Dos funciones con el mismo nombre y distinto tipo de retorno: quien lea el export cree que ya sabe cuál es.*
+- **Hay motor de PDF:** `papel.ts:34` importa `npm:pdf-lib@1.17.1`. Es `Papel`, el molde de los cinco papeles de la casa (S90) — marca de agua del isotipo, filete magenta, tinta, mono para el dato exacto.
+- **Hay QR real:** `qr.ts:32` `matrizQr()`, 91 líneas, y `Papel.qr()` lo dibuja. El RIDE ya lleva el QR de la clave de acceso.
+- **Y ya tiene su edge:** `fiscal-ride/index.ts`, 83 líneas, gateada por `DESPACHO_SECRET`, **idempotente por diseño** (el canónico está congelado ⇒ el PDF sale idéntico y `pdf_url` no cambia).
+
+**El costo real, entonces:**
 
 | | RIDE de Factuplan | RIDE nuestro (`ride.ts`) |
 |---|---|---|
 | Marca del encabezado | **Factuplan** | e-PetPlace / Satori |
-| Número de autorización y fecha | del XML autorizado | **hay que leerlos del XML** |
-| Clave de acceso (49 dígitos) | sí | sí — está en el canónico |
-| **Código de barras de la clave** | **sí** | **NO — hay que construirlo** |
-| Formato | **PDF** | **HTML** |
-| `obligadoContabilidad` | **`NO` (falso)** | **correcto, sale de `fiscal_emisor`** |
+| Formato | PDF | **PDF** (`pdf-lib`) |
+| Clave de acceso (49 díg.) | sí | **sí** |
+| QR de la clave | — | **sí, ya dibujado** |
+| Estado y fecha de autorización | sí | **sí** (`args.estado`, `args.autorizadoEn`) |
+| Detalle con IVA por línea | sí | **sí** |
+| Referencia de nota de crédito | sí | **sí** |
+| `obligadoContabilidad` | **`NO` (falso)** | **correcto — sale de `fiscal_emisor`** |
+| **Código de barras Code128 de la clave** | **sí** | **NO — es lo ÚNICO que falta** |
 
-⇒ **No es «sólo cambiar qué PDF adjuntamos».** Falta el código de barras —que el SRI espera en el RIDE— y falta convertir HTML a PDF, que **no se puede hacer con lo que hay en el repo** (no hay motor de PDF; el `estructurar-nota-clinica` es texto). *Es trabajo real, no un cambio de adjunto.*
+⇒ **El costo no es «motor de PDF + código de barras». Es sólo el código de barras**, más cablear el webhook para que archive el nuestro en vez del suyo. La pieza está construida, tiene su edge y es idempotente.
 
-**Mi voto, y coincide con tu lectura:** **preguntarles primero.** Si el RIDE se personaliza, esto muere sin costo. Si no, la decisión se vuelve interesante por otra razón: **su RIDE trae un dato fiscal falso** (`D-1075`) y el nuestro no — *ahí deja de ser una cuestión de marca y pasa a ser de exactitud*, que pesa más.
+⚠️ **Y la única pregunta abierta de verdad: si el SRI EXIGE el Code128 o si el QR alcanza.** No lo afirmo de memoria — se verifica contra la ficha técnica del SRI y contra las siete facturas reales que ya medimos (¿cuántas traen barcode, cuántas QR, cuántas las dos?). *De esa respuesta depende si «lo único que falta» es una tarde o es nada.*
+
+**Mi voto, con el número corregido:** sigue siendo **preguntarles primero** —si personalizan, esto muere sin costo—, pero si dicen que no, **usar el nuestro ya no es una decisión cara**. Y el eje que decide no es la marca: **su RIDE lleva un dato fiscal falso (`D-1075`) y el nuestro no.**
 
 ---
 
