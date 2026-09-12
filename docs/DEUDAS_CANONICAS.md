@@ -33236,7 +33236,48 @@ edges estén al día antes de dejar cerrar.
 **Estado:** ABIERTA · 🔴 **BLOQUEA PRODUCCIÓN** (subida de prioridad, founder 11-sep: *«tres de tres publishes con incidente. Va con lo que bloquea producción»*).
 **Dueño:** A (la red) + C (el botón) · **Fecha límite:** antes del soft launch (1-oct-2026).
 
-### 🔴 LA CURA SE CONSTRUYÓ, SE PUBLICÓ Y SE REVIRTIÓ — Y LAS DOS COSAS SON CIERTAS A LA VEZ
+### ✅ CAUSA CERRADA EN EL APARATO — Y NO ERA LA SESIÓN
+
+**El founder corrió `adb logcat` y trajo el literal (12-sep, 09:51):**
+
+```
+W okhttp.OkHttpClient: A connection to https://…supabase.co/ was leaked.
+                       Did you forget to close a response body?     ← nueve veces, mismo instante
+```
+
+Y alrededor: **DNS resolviendo en 1 ms cada 3 s, con éxito. CERO `lowmemorykiller`, cero `am_kill`, cero `ANR`, cero `FATAL`. La app viva y renderizando.**
+
+**La causa: cada consulta que el techo abortaba dejaba su conexión sin cerrar.** Cuando el pool se llenó, las consultas nuevas quedaron esperando una conexión libre que nunca llegó — esqueleto eterno — **y el reintento tampoco rescata porque espera el mismo pool.**
+
+**Ata los tres síntomas que ninguna otra hipótesis ataba:** por qué no es la red (DNS en 1 ms) · por qué el segundo intento es peor que el primero (el pool se agota) · y por qué la cura del refresco lo empeoró (**cuatro intentos fugan el doble que dos**).
+
+#### 🔑 Y LA SEPARACIÓN QUEDÓ CERRADA POR EL PROPIO LOGCAT
+
+**La corrida fue sobre el REPUBLICADO — o sea SIN la cura del refresco — y las fugas están ahí igual.**
+
+⇒ **las fugas NO las causó esa cura: existen desde antes.** `D-1074` lleva **cinco publishes** y la cura del refresco **sólo las aceleró**. *La sospecha del autor sobre su propia cura era razonable y era falsa: el cambio no creó el defecto, lo puso a correr al doble.* **No hizo falta una segunda corrida: el dato ya estaba en la primera y no se había usado.**
+
+#### LA CURA — y la conclusión fácil es la equivocada
+
+⚠️ **No es «saquemos el techo»** —sin techo vuelve el cuelgue mudo, que es lo que el techo vino a curar— **es «el techo tiene que cerrar lo que aborta»** (founder, antes que su autor).
+
+Abortar le dice a OkHttp que cancele. **Pero si la respuesta ya se materializó, su cuerpo queda abierto y nadie lo va a leer**: el que llama recibió una excepción y se fue. El techo ahora **se queda a cerrar el cuerpo** cuando la carrera la ganó el reloj. OTA `3205e708` @ `d2711c26`.
+
+#### 🔴 Y UNA SEGUNDA FUGA, QUE APARECIÓ BUSCANDO LA PRIMERA
+
+`previa.addEventListener('abort', …, { once: true })` — **`{ once: true }` lo quita cuando DISPARA, y el caso normal es que no dispare nunca.** Con una señal reusada, **cada consulta dejaba un oyente pegado con su `AbortController` adentro**. No es la fuga de conexiones; es real, es del mismo archivo, y crece con el uso.
+
+> **Una fuga tapa a la siguiente.**
+
+#### Lo que quedó sin medir, declarado
+
+**El Java de OkHttp no viene en `node_modules`** (RN lo trae precompilado) ⇒ **no se verificó ni el tamaño del pool ni si `xhr.abort()` cancela la llamada.** *Nueve fugas superarían el límite por host de la mayoría de los clientes HTTP, pero el número exacto de OkHttp en RN no se midió.*
+
+Y **`verify:techo-no-fuga` sale NO CONCLUYENTE a propósito**: undici cierra por su cuenta lo que OkHttp no, así que en Node la clase no se reproduce. *Un verde ahí sería «no pude medir» disfrazado de «está bien».* **El que cierra es el logcat.**
+
+---
+
+### 🔴 LA CURA DEL REFRESCO SE CONSTRUYÓ, SE PUBLICÓ Y SE REVIRTIÓ — Y LAS DOS COSAS SON CIERTAS A LA VEZ
 
 **Esta sección existe para que el próximo no vuelva a aplicarla igual.** *El razonamiento es correcto y el resultado en el aparato fue peor: sin las dos mitades escritas juntas, alguien lee la cura, la encuentra impecable, y la repite.*
 
