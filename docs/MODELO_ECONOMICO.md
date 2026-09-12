@@ -151,7 +151,9 @@ El precio que declaran es **sin IVA** y es su precio; la app le suma el IVA que 
 
 ## 6. ENMIENDA S115-CIERRE (12-sep-2026) — el riel barato deja de ser hipótesis, y la caja deja de confundirse con el costo
 
-### 6.1 DeUna, medido — **cierra la primera pregunta abierta de §5**
+### 6.1 DeUna — **cierra la primera pregunta abierta de §5**
+
+> **FUENTE, y no es el objeto:** dato del **proveedor**, traído por el founder el **12-sep-2026**. **No se puede medir contra nuestra base** —el costo del riel no vive en ninguna tabla nuestra— así que se cita con su origen y su fecha, no con un comando. *El día que haya cobros reales por DeUna, el costo efectivo se re-mide contra `pagos_intentos` y este número pasa de dicho a medido.*
 
 | dato | valor |
 |---|---|
