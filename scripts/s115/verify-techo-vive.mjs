@@ -26,7 +26,21 @@ import { readFileSync, existsSync } from 'node:fs';
 const VALOR_DE_PRUEBA = 7777;      // distinto de los 8000 del arranque, a propósito
 const CLAVE = 'red_techo_lectura_ms';
 
-const sal = (c, m) => { console.log(m); process.exit(c); };
+/**
+ * 🔴 `process.exit()` SE SALTA EL `finally` — y este arnés se lo cobró a sí
+ *    mismo en su primera corrida: dejó `red_techo_lectura_ms` en 7777 en la
+ *    base compartida. *Una sonda que deja residuo contamina la medición ajena*,
+ *    y acá el residuo era un techo de red movido para todo el que midiera
+ *    después.
+ *
+ *    Por eso no se sale desde adentro: se LANZA con el veredicto pegado, el
+ *    `finally` restaura, y recién entonces el proceso termina. **La limpieza no
+ *    puede depender de por dónde salga el control.**
+ */
+class Veredicto extends Error {
+  constructor(codigo, mensaje) { super(mensaje); this.codigo = codigo; }
+}
+const sal = (c, m) => { throw new Veredicto(c, m); };
 const noConcluyente = (m) => sal(2, `\n  ⚠️  NO CONCLUYENTE — ${m}\n`);
 
 function llavero(servicio) {
@@ -79,6 +93,7 @@ if (!cuenta) {
 }
 
 let original = null;
+let veredicto = new Veredicto(2, '\n  ⚠️  NO CONCLUYENTE — el arnés terminó sin veredicto\n');
 try {
   const { initApi, techosVigentes } = await import('../../packages/api/src/index.ts');
 
@@ -120,10 +135,28 @@ try {
   }
   sal(0, '  ✅ verify:techo-vive — VERDE · mover app_config mueve el techo de verdad\n');
 } catch (e) {
-  noConcluyente(`el arnés no pudo correr: ${String(e?.message ?? e).slice(0, 200)}`);
+  veredicto = e instanceof Veredicto ? e
+    : new Veredicto(2, `\n  ⚠️  NO CONCLUYENTE — el arnés no pudo correr: `
+        + `${String(e?.message ?? e).slice(0, 200)}\n`);
 } finally {
-  /* Restaurar SIEMPRE: una sonda que deja residuo contamina la medición ajena. */
+  /* Restaurar SIEMPRE, y VERIFICAR que se restauró: «lo intenté» no es «quedó
+     como estaba». Si la restauración falla, el veredicto pasa a rojo — porque
+     un gate que deja la base movida es peor que un gate que no corrió. */
   if (original !== null) {
-    try { sql(`update app_config set valor='${original}' where clave='${CLAVE}';`); } catch { /* */ }
+    try {
+      sql(`update app_config set valor='${original}' where clave='${CLAVE}';`);
+      const v = sql(`select valor from app_config where clave='${CLAVE}';`)?.rows?.[0]?.valor;
+      if (String(v) !== String(original)) {
+        veredicto = new Veredicto(1,
+          `\n  🔴 ROJO — el arnés NO pudo restaurar ${CLAVE}: quedó en ${v}, `
+          + `debía volver a ${original}. RESTAURALO A MANO antes de seguir.\n`);
+      }
+    } catch (e2) {
+      veredicto = new Veredicto(1,
+        `\n  🔴 ROJO — el arnés NO pudo restaurar ${CLAVE} (${String(e2?.message ?? e2).slice(0, 120)}). `
+        + `Debía volver a ${original}. RESTAURALO A MANO.\n`);
+    }
   }
+  console.log(veredicto.message);
+  process.exit(veredicto.codigo);
 }
