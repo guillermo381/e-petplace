@@ -13,10 +13,11 @@ import { useColorScheme } from 'react-native';
 // S106 · parchea los globales de WebRTC ANTES de que monte cualquier
 // pantalla de video. Import por efecto: no exporta nada que se use acá.
 import '@/lib/livekit';
-/* ⏳ SONDA TEMPORAL — `D-1074`. Censa AsyncStorage y lo dice por el log,
-   porque el APK de producción no es `debuggable` y `adb run-as` no puede
-   leerlo. **Se retira en cuanto el censo esté medido.** */
-import { censarAlmacenamiento } from '@/lib/censo-almacenamiento';
+/* ⏪ ACÁ VIVIÓ EL CENSO DE AsyncStorage (`D-1074`). Se retira por orden del
+   founder con el eje corregido: *la app está viva y sólo falla lo que viene
+   de la base; el heap y el almacenamiento son CONSECUENCIA de reintentar
+   contra algo que nunca responde.* El archivo queda por si el eje vuelve.
+   Lo que sí viaja es `@/lib/pulso-almacenamiento`, arriba de todo. */
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { router, Stack } from 'expo-router';
 import { destinoDePushDeEstaApp } from '@/lib/destino-de-push';
@@ -101,7 +102,6 @@ export default function RootLayout() {
   useTokenDeAvisosAlDia();
 
   /* ⏳ SONDA TEMPORAL `D-1074` — corre una vez, no bloquea, y se retira. */
-  useEffect(() => { void censarAlmacenamiento(); }, []);
 
   /**
    * ① · EL TOQUE DE LA PUSH — a dónde lleva (S111-C).

@@ -34,9 +34,18 @@
  */
 
 const VENTANA_MS = 10_000;
+/** Los primeros 30 s se loguea CADA petición, no sólo el agregado.
+ *  *El defecto vive en el arranque: ahí hace falta el detalle, y después no.* */
+const DETALLE_MS = 30_000;
+const t0 = Date.now();
+const enArranque = (): boolean => Date.now() - t0 < DETALLE_MS;
 
 type Conteos = {
   red: number;
+  /** Cuántas de las que salieron VOLVIERON (con respuesta, sea cual sea). */
+  vueltas: number;
+  /** Cuántas terminaron en error (techo incluido). */
+  fallos: number;
   sesion: number;
   puente: number;
   /** Ruta → veces. Sin query: un filtro de PostgREST lleva datos adentro. */
@@ -46,7 +55,7 @@ type Conteos = {
 };
 
 function vacio(): Conteos {
-  return { red: 0, sesion: 0, puente: 0, rutas: new Map(), ops: new Map() };
+  return { red: 0, vueltas: 0, fallos: 0, sesion: 0, puente: 0, rutas: new Map(), ops: new Map() };
 }
 
 let c = vacio();
@@ -71,12 +80,13 @@ function arrancar(): void {
   if (reloj) return;
   reloj = setInterval(() => {
     tick++;
-    const { red, sesion, puente } = c;
+    const { red, vueltas, fallos, sesion, puente } = c;
     /* Se imprime SIEMPRE, también en cero: *un brazo en cero es un dato, y el
        silencio de una sonda es indistinguible de una sonda que no corre.* */
     // eslint-disable-next-line no-console
     console.log(
-      `[pulso] t=${tick * (VENTANA_MS / 1000)}s · red=${red} sesion=${sesion} puente=${puente}` +
+      `[pulso] t=${tick * (VENTANA_MS / 1000)}s · salieron=${red} volvieron=${vueltas} ` +
+        `fallaron=${fallos} · pendientes=${red - vueltas - fallos} · sesion=${sesion} puente=${puente}` +
         (red ? ` · rutas: ${top(c.rutas)}` : '') +
         (puente ? ` · ops: ${top(c.ops)}` : ''),
     );
@@ -86,10 +96,8 @@ function arrancar(): void {
   (reloj as unknown as { unref?: () => void })?.unref?.();
 }
 
-/** ① Una petición salió. `url` se recorta a su ruta: el query lleva datos. */
-export function pulsoRed(url: string): void {
-  arrancar();
-  c.red++;
+/** La ruta sin query y sin host: **el query lleva datos adentro**. */
+function rutaCorta(url: string): string {
   let ruta = url;
   const q = ruta.indexOf('?');
   if (q >= 0) ruta = ruta.slice(0, q);
@@ -99,7 +107,35 @@ export function pulsoRed(url: string): void {
   const k = ruta.indexOf('/functions/v1/');
   const s = ruta.indexOf('/storage/v1/');
   const corte = [i, j, k, s].filter((x) => x >= 0)[0];
-  sumar(c.rutas, (corte === undefined ? ruta : ruta.slice(corte)).slice(0, 60));
+  return (corte === undefined ? ruta : ruta.slice(corte)).slice(0, 60);
+}
+
+/** ① Una petición SALIÓ. */
+export function pulsoRed(url: string): void {
+  arrancar();
+  c.red++;
+  sumar(c.rutas, rutaCorta(url));
+  if (enArranque()) {
+    // eslint-disable-next-line no-console
+    console.log(`[pulso] → ${rutaCorta(url)}`);
+  }
+}
+
+/**
+ * ① La petición TERMINÓ. **Éste es el brazo que faltaba y el que decide.**
+ *
+ * 🔴 Contar sólo las que SALEN no distingue los dos síntomas que el founder
+ *    describe distinto: *«no sale»* y *«sale y nunca vuelve»*. `pendientes` es
+ *    la resta, y **una `pendientes` que sube y no baja es el defecto con
+ *    nombre**: la consulta se fue y el resultado no llega jamás.
+ */
+export function pulsoRedFin(url: string, ok: boolean, ms: number): void {
+  if (ok) c.vueltas++;
+  else c.fallos++;
+  if (enArranque()) {
+    // eslint-disable-next-line no-console
+    console.log(`[pulso] ← ${ok ? 'ok' : 'FALLO'} ${ms}ms ${rutaCorta(url)}`);
+  }
 }
 
 /** ② Alguien pidió la sesión — cruce al puente aunque no salga red. */
@@ -113,4 +149,37 @@ export function pulsoPuente(operacion: string): void {
   arrancar();
   c.puente++;
   sumar(c.ops, operacion);
+}
+
+/**
+ * ③ **EL ARRANQUE DEL ACCESO A LA BASE — el instrumento que pidió el founder.**
+ *
+ * 🔴 Su tesis, y es la que reordena la ficha: *la app está VIVA —el contenido
+ *    estático carga, el menú navega— y sólo falla lo que viene de la BASE.* Si
+ *    en el arranque que aplica el OTA el cliente nace mal —sin URL, sin clave,
+ *    o con la sesión todavía sin leer del almacenamiento— **toda consulta queda
+ *    esperando sin error**, que es literalmente lo que se ve. Y el OOM de más
+ *    tarde deja de ser la causa para ser la consecuencia de reintentar.
+ *
+ * 🔴 **NO IMPRIME NI LA CLAVE NI EL TOKEN.** De la URL sale sólo el host —que
+ *    ya vive en el canon— y de la clave sólo su largo. *Un secreto enmascarado
+ *    sigue estando en el transcript, y un transcript no se edita después.*
+ */
+export function pulsoInicio(url: string, largoClave: number): void {
+  let host = '(vacía)';
+  try { host = new URL(url).host; } catch { host = url ? '(ilegible)' : '(vacía)'; }
+  // eslint-disable-next-line no-console
+  console.log(`[pulso-init] host=${host} clave=${largoClave > 0 ? `${largoClave} chars` : 'AUSENTE'}`);
+}
+
+/** ③ El resultado de leer la sesión del almacenamiento, con su demora. */
+export function pulsoSesionInicial(hay: boolean, ms: number, error: string | null): void {
+  // eslint-disable-next-line no-console
+  console.log(`[pulso-init] sesion=${hay ? 'sí' : 'NO'} en ${ms}ms${error ? ` · error=${error.slice(0, 80)}` : ''}`);
+}
+
+/** ③ El resultado de cargar los techos — el sospechoso de `D-1080`. */
+export function pulsoTechos(ok: boolean, aplicados: number, ms: number): void {
+  // eslint-disable-next-line no-console
+  console.log(`[pulso-init] techos=${ok ? 'sí' : 'NO'} aplicados=${aplicados} en ${ms}ms`);
 }

@@ -18,7 +18,7 @@
 //    `app_config` y los firmó el founder con su origen escrito.
 // ═══════════════════════════════════════════════════════════════════════════
 
-import { pulsoRed } from './pulso';
+import { pulsoRed, pulsoRedFin } from './pulso';
 
 /** El prefijo del mensaje cuando el techo se cumple. Estable a propósito. */
 export const SIN_RED = 'sin_red';
@@ -113,8 +113,16 @@ export function fetchConTecho(fetchBase: typeof fetch = fetch): typeof fetch {
     /* SONDA `D-1074` (temporal): cuenta el acto, jamás el contenido. Va ANTES
        del corte por `sin_techo` para que las edge también se cuenten. */
     pulsoRed(url);
+    const t0Pulso = Date.now();
 
-    if (clase === 'sin_techo') return fetchBase(entrada as RequestInfo, init);
+    if (clase === 'sin_techo') {
+      /* También se mide lo que va sin techo: es el camino del cobro, y si algo
+         queda colgado ahí hay que verlo igual que en el resto. */
+      return fetchBase(entrada as RequestInfo, init).then(
+        (r) => { pulsoRedFin(url, true, Date.now() - t0Pulso); return r; },
+        (e) => { pulsoRedFin(url, false, Date.now() - t0Pulso); throw e; },
+      );
+    }
 
     const ms = techos[clase];
     /* Se respeta una señal que ya venga: quien la mandó tiene su propia razón
@@ -170,12 +178,14 @@ export function fetchConTecho(fetchBase: typeof fetch = fetch): typeof fetch {
                    una promesa rechazada sin dueño. */ },
       );
       const r = await enVuelo;
+      pulsoRedFin(url, true, Date.now() - t0Pulso);
       return r;
     } catch (e) {
       /* 🔴 El error del techo se distingue del de red real, y los dos se
          devuelven con el MISMO prefijo: desde la pantalla son la misma cosa
          —no cargó y se puede reintentar—, y darles códigos distintos obligaría
          a cada superficie a manejar dos casos con la misma respuesta. */
+      pulsoRedFin(url, false, Date.now() - t0Pulso);
       const msg = String((e as Error)?.message ?? e);
       if (msg.startsWith(SIN_RED)) throw e;
       throw new Error(`${SIN_RED}: ${msg.slice(0, 160)}`);
