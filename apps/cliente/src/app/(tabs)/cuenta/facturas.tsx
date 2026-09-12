@@ -51,6 +51,14 @@
  * la pieza está pedido a B en el buzón; cuando llegue, esta rama muere y las
  * cinco viven en `TarjetaFactura` (Ley 37).
  *
+ * 🔴 **A NOMBRE DE QUIÉN SALIÓ — pendiente de A, con su voz YA FIRMADA.**
+ * `tipoIdentificacion`, `identificacion` y `razonSocial` están en la tabla y no
+ * en `DocumentoFiscalMio` (pedido en el buzón). **Cuando lleguen, la regla de voz
+ * es del founder (11-sep): si es `consumidor_final` se dice «Consumidor final»,
+ * JAMÁS `9999999999999`.** *Ese número es el código que el SRI define para una
+ * venta sin comprador identificado — no significa nada para nadie fuera del SRI,
+ * y mostrarlo es enseñar el vocabulario del motor* (Ley 17.2).
+ *
  * ⚠️ **Medido antes de construir: `documentos_fiscales` tiene CERO filas.** Lo
  * único que esta pantalla puede mostrar hoy es su vacío digno — el peldaño 0 de
  * su escalera. Las tres ramas con datos están escritas y **no verificadas

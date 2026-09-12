@@ -186,10 +186,10 @@ export function SeccionFacturacion({
      una pantalla que sólo muestra lo nuestro lo obliga a pedirlo por WhatsApp.
 
      **Medido antes de decidir qué entra acá** (182 perfiles): correo 100 % ·
-     nombre 94 % · **teléfono 13 %**. ⇒ **el teléfono NO se pide**: no hace falta
-     para facturar en EC y precargarlo habría mostrado un campo vacío al 87 %.
-     *Un campo precargado que casi nunca trae nada es un campo más, no una
-     ayuda.* */
+     nombre 94 % · **teléfono 13 %**. ⇒ **el teléfono queda AFUERA, firmado por
+     el founder sobre esta medición** (11-sep-2026): no hace falta para facturar
+     en EC y precargarlo habría mostrado un campo vacío al 87 %. *Un campo
+     precargado que casi nunca trae nada es un campo más, no una ayuda.* */
   const nombreMal = correoTocado && nombre.trim().length === 0;
   const campoNombre = (
     <Campo
@@ -273,9 +273,9 @@ export function SeccionFacturacion({
       {campoCorreo}
       <Texto variante="apoyo">{t('identidadFactura.editable')}</Texto>
     </View>
-    {/* 🔴 ARRIBA DEL TOPE SE DICE POR QUÉ. «Completá tus datos» es una orden;
-        «el SRI lo pide arriba de $50» es una razón — y una razón se entiende sin
-        que nadie la explique. */}
+    {/* 🔴 ARRIBA DEL TOPE SE DICE POR QUÉ — **firmado por el founder**
+        (11-sep-2026): *«una razón se entiende sola; una orden no»*. «Completá
+        tus datos» manda; «el SRI lo pide arriba de $50» explica. */}
     {total > topeConsumidorFinal ? (
       <Texto variante="apoyo">
         {t('identidadFactura.porqueSobreTope', { tope: topeFormateado })}
