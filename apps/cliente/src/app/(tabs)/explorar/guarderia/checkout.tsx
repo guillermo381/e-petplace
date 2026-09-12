@@ -452,7 +452,7 @@ export default function CheckoutGuarderia() {
   const pagar = useCallback(async () => {
     /* 🔴 SIN CORREO Y SIN SUS DATOS NO SE COBRA — el mismo freno de las citas,
        la despensa y los prepagos. */
-    if (!(await facturacion.validarYGuardar())) return;
+    if (!(await facturacion.validarYGuardar((totalAFacturar ?? Infinity)))) return;
 
     if (enviando) return;
     /* Ni el paquete ni la mensualidad se tocan sin medio: los dos cobran.

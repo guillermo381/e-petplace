@@ -4684,4 +4684,32 @@ export const clienteEs = {
     faltanDatosAccion: 'Completar mis datos',
   },
 
+  /* S115-C · el freno de arriba del tope. 🔴 Hasta hoy el guard frenaba el
+     DOCUMENTO y el cobro pasaba igual: la familia pagaba y su factura quedaba
+     trabada sin que se enterara. */
+  frenoFiscal: {
+    faltanDatos: 'Esta compra necesita tu cédula o RUC para poder facturarla.',
+  },
+
+  /* S115-C · LA IDENTIDAD DE LA FACTURA. Medido antes de escribir la voz:
+     correo 182/182 · nombre 172/182 · teléfono 24/182 · identificación 2/182.
+     ⇒ lo ÚNICO que falta de verdad es la identificación; el resto se precarga y
+     se puede cambiar. El teléfono NO se pide: no hace falta para facturar en EC
+     y sólo lo tiene el 13 %. */
+  identidadFactura: {
+    /* Arriba del tope: se dice POR QUÉ se pide, no sólo que se pide. Una razón
+       convierte un trámite en algo que se entiende. */
+    porqueSobreTope: 'Para facturar más de {{tope}} el SRI pide tu identificación.',
+    aNombreDe: 'A nombre de',
+    nombre: 'Nombre completo',
+    nombreFormato: 'Como va en tu factura',
+    /* Los 10 perfiles sin nombre (medido): para ellos el campo nace vacío y hay
+       que pedirlo, no inventarlo. */
+    nombreFalta: 'Necesitamos un nombre para la factura.',
+    cambiar: 'Cambiar',
+    /* La invitación a editar lo precargado: la persona puede querer facturar a
+       nombre de otro. Se muestra lo que tenemos; cambiarlo es un toque. */
+    editable: 'Puedes cambiarlos si esta factura va a otro nombre.',
+  },
+
 } as const;

@@ -622,7 +622,7 @@ export default function DespensaCheckout() {
     /* 🔴 SIN CORREO Y SIN SUS DATOS NO SE COBRA — el mismo freno que las citas.
        Va ANTES de todo lo demás: el perfil tiene que existir cuando el motor
        resuelva el receptor del comprobante, y eso pasa al confirmar el pago. */
-    if (!(await facturacion.validarYGuardar())) return;
+    if (!(await facturacion.validarYGuardar((compraTotal ?? Infinity)))) return;
 
     if (trabajando || compraId === null) return;
     setTrabajando(true);

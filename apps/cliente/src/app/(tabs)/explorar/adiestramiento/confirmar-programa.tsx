@@ -131,7 +131,7 @@ export default function ConfirmarPrograma() {
     /* 🔴 SIN CORREO Y SIN SUS DATOS NO SE COBRA — el mismo freno de las citas y
        la despensa. Va al PRINCIPIO y no junto a `cobrar`: más abajo ya se creó
        el sujeto, y frenar ahí dejaría una compra a medias esperando su hold. */
-    if (!(await facturacion.validarYGuardar())) return;
+    if (!(await facturacion.validarYGuardar(precio))) return;
 
     if (fase !== 'resumen') return;
     if (medio.elegido === null) { setRebote(t('pago.cobroElegiMedio')); return; }
