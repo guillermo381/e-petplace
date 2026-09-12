@@ -2366,11 +2366,21 @@ const FIXTURES = {
       src: "await rpc('cobrar', { p_monto: formatearPrecio(total) })\n",
     })),
   ],
-  /* R90 · un regex de correo suelto: el que dejó pasar «karina charry@…». */
+  /* R90 · un regex de correo suelto.
+     🔴 **EL FIXTURE ES LA FORMA DE C — constante arriba, uso abajo — y NO la
+     mía.** El primero usaba `/…/.test(v)` todo pegado, que es exactamente lo
+     que el detector viejo exigía ⇒ **pasaba su propia prueba compartiendo mis
+     supuestos** (`L-459`) y era ciego a la forma más común. Lo midió C con
+     control: copió su regex a un archivo de mi corpus, en la app donde vivían
+     los tres originales, y R90 siguió dando 0.
+     ⚠️ **Y uno de los tres que migré a mano era justo esta forma**
+     (`mostrador/nueva.tsx`): si no lo hubiera migrado, el gate no lo veía. */
   R90: [
     ...Array.from({ length: 6 }, (_, i) => ({
       path: `apps/prestador/src/app/relleno${i}.tsx`,
-      src: "const ok = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(v)\n",
+      src:
+        "const RE_EMAIL = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\n" +
+        "export function valido(v) {\n  return RE_EMAIL.test(v);\n}\n",
     })),
   ],
   /* R85 · la voz suelta en el JSX, sin pasar por el riel: el typecheck la
@@ -8519,10 +8529,26 @@ function r89(archivos) {
  *  Lo que NO mide, declarado: que el buzón exista. Ningún regex puede; eso lo
  *  prueba un envío que no rebota. */
 function r90(archivos) {
-  /* Un regex es «de correo» si tiene una `@` literal dentro de una clase o
-     fuera: alcanza para los cuatro que vivían en la casa, y no marca los de
-     otras cosas. */
-  const RE_REGEX_CORREO = /\/\^?\[?\^?[^/\n]*@[^/\n]*\/(?:[gimsuy]*)\s*\.?\s*test\(|new RegExp\([^)]*@[^)]*\)/
+  /* 🔴 EL DETECTOR, CURADO — el viejo exigía `.test(` PEGADO al literal.
+     Un regex asignado a una constante y usado en otra línea —**la forma más
+     común, y la de los tres originales**— no matcheaba. Lo midió C con
+     control: su regex en un archivo de mi corpus, y el gate daba 0.
+     *No era qué archivos miraba: era qué forma detectaba.*
+
+     Ahora se busca **el LITERAL DE REGEX, se use donde se use**, y el uso
+     deja de importar. */
+  const RE_LITERAL = /\/(?![/*])(?:\\.|\[(?:\\.|[^\]\\])*\]|[^/\\\n])+\/[gimsuy]*/g
+  /* Y de esos literales, **sólo los que VALIDAN UN CORREO**: tienen `@` y
+     además una clase negada o un punto escapado — la forma de una validación
+     de forma completa.
+     ⚠️ **`/@/` del mostrador queda AFUERA a propósito, y no es un olvido:**
+     su propio comentario dice que es una *heurística de ruteo* del campo único
+     (`'@' → email · dígitos → teléfono · resto → nombre de mascota`), **no una
+     validación**. Mandarlo a `esCorreoValido` sería trasplantar un criterio
+     correcto a otra pregunta: con «karina charry@gmail.com» la heurística
+     TIENE que rutear a email —para que la validación después lo rechace y
+     explique el espacio— y no mandarlo a «nombre de mascota». */
+  const esDeCorreo = (lit) => lit.includes('@') && (lit.includes('[^') || lit.includes('\\.'))
   const vistos = new Set()
   const ofensores = []
   for (const { path, src } of archivos) {
@@ -8530,8 +8556,9 @@ function r90(archivos) {
     vistos.add(path)
     if (/components\/correo\.ts$/.test(path)) continue // el que la define
     const limpio = sinComentarios(src ?? '')
-    for (const m of limpio.matchAll(new RegExp(RE_REGEX_CORREO.source, 'g'))) {
-      ofensores.push(`${path}:${lineaDe(limpio, m.index)}`)
+    for (const m of limpio.matchAll(RE_LITERAL)) {
+      if (!esDeCorreo(m[0])) continue
+      ofensores.push(`${path}:${lineaDe(limpio, m.index)} — \`${m[0].slice(0, 44)}\``)
     }
   }
   const fallos = [...ancla('R90', vistos.size, 100, 'archivo(s) en el corpus')]
@@ -8547,7 +8574,8 @@ function r90(archivos) {
   return {
     fallos,
     info:
-      `${ofensores.length} regex de correo suelto(s) · DURA EN 0 (nació con los 3 ya migrados) · ` +
+      `${ofensores.length} regex de correo suelto(s) · DURA EN 0 · ` +
+      `detector CURADO (medía \`.test(\` pegado y era ciego a la forma «constante + uso»; lo midió C con control) · ` +
       `alcance: ${vistos.size} archivo(s) · atada a la FORMA («una sola fuente»), no al valor del regex (L-534) · ` +
       `su verde dice «no hay un cuarto regex», JAMÁS «el correo existe» ni «la validación es la correcta»`,
   }

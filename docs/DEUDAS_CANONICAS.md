@@ -33014,3 +33014,32 @@ techo del pago entre.
 
 **Disparo:** ya, para las cuatro clases firmadas. **Dueño:** A (el cliente y los
 wrappers) · C con B (la voz).
+
+---
+
+### `L-545` · CUANDO UNA RAMA TRAE EL GATE QUE MIDE A LA OTRA, EL GATE ENTRA PRIMERO
+
+**Firma del founder, 11-sep-2026.** El orden de dos merges no es estilo cuando
+una de las ramas trae el **instrumento** con el que se va a medir la otra.
+
+**Medido, S115.** B traía **un solo commit** —la cura de `R90`, que *«era ciega
+a la forma más común»*— y C traía las ocho superficies de cobro. Mergeando C
+primero, `verify:diseno` habría corrido sobre las pantallas nuevas **con el
+detector roto**: verde, y ese verde no habría dicho nada.
+
+⇒ **Entre dos ramas, la que trae el gate va primero**, aunque sea la más chica
+y aunque parezca que el orden no importa porque no hay conflicto de archivos.
+*El conflicto no es de texto: es que el instrumento con el que se firma la
+segunda todavía no está curado.*
+
+⚠️ **Y es la misma forma que `L-459`, un piso más arriba.** Ahí: *el fixture de
+un guard lo escribe el mismo que escribió el guard, y comparte sus supuestos.*
+Acá: **el verde de una rama lo firma un gate que la otra rama todavía no
+arregló.** En los dos casos el instrumento y lo medido nacen del mismo lado, y
+en los dos el síntoma es idéntico — **un verde que se lee como salud.**
+
+**El caso lo cierra bien, además, por cómo se curó:** el falso verde de `R90` lo
+encontró **C**, que le pasó a B el control que lo reproducía (`S115-C-para-B-
+R90-no-caza-el-regex-en-constante.md`). *El instrumento lo arregló su dueño con
+el rojo que le trajo quien lo sufría* — que es la forma que esta casa ya firmó
+en `L-459` y acá se cumplió sola.
