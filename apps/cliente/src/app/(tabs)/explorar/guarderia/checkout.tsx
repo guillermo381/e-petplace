@@ -767,7 +767,11 @@ export default function CheckoutGuarderia() {
 
           {facturacion.props === null || totalAFacturar === null ? (
                 facturacion.noCargo || facturacion.reintentando ? (
-              <AvisoNoCargo onReintentar={facturacion.reintentar} reintentando={facturacion.reintentando} />
+              <AvisoNoCargo
+                onReintentar={facturacion.reintentar}
+                reintentando={facturacion.reintentando}
+                motivo={facturacion.motivo}
+              />
             ) : null
               ) : (
             <SeccionFacturacion {...facturacion.props} total={totalAFacturar} />

@@ -77,6 +77,7 @@
     "verify:diseno": "node scripts/verify-diseno.mjs",
     "verify:identificacion-ec": "tsx scripts/verify-identificacion-ec.ts",
     "verify:plata": "tsx scripts/verify-plata.ts",
+    "verify:voz-de-sesion": "node scripts/s115/verify-voz-de-sesion.mjs",
     "verify:reintento-visible": "node scripts/s115/verify-reintento-visible.mjs",
     "verify:perfil-fantasma": "node scripts/s115/verify-perfil-fantasma.mjs",
     "verify:siempre-se-pregunta": "node scripts/s115/verify-siempre-se-pregunta.mjs",

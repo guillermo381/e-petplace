@@ -4713,4 +4713,29 @@ export const clienteEs = {
     editable: 'Puedes cambiarlos si esta factura va a otro nombre.',
   },
 
+  /* S115-C · LA FACTURA EN CAMINO. Se dice en el momento en que la persona
+     TODAVÍA ESTÁ MIRANDO — si no, quien necesita su factura escribe
+     preguntando, o cree que no se la vamos a mandar. */
+  facturaEnCamino: {
+    /* Dos correos y se dice que son dos: el de pago llega ya, el del SRI
+       tarda. Sin eso, el segundo parece que no existe. */
+    llega: 'Tu factura electrónica llega por correo en unos minutos, aparte de este comprobante.',
+  },
+
+  /* S115-C · LA SESIÓN CORTADA. 🔴 «Cortada» NO es «te desconectamos»: es «el
+     refresco no está volviendo», y **puede revivir sola en la próxima vuelta**.
+     Por eso la voz dice que estamos reconectando y JAMÁS «vuelve a entrar»:
+     mandar a re-loguear a alguien cuya sesión va a volver sola le hace perder lo
+     que estaba haciendo por un problema que se iba a resolver. */
+  sesion: {
+    cortadaTitulo: 'Tu sesión se cortó',
+    /* El hecho, y la sospecha COMO sospecha — igual que en «no cargó». */
+    cortadaDetalle: 'Estamos reconectando. Puede volver sola en un momento.',
+    /* Sin sesión SÍ hay que entrar: no hay nada que reconectar. Son dos
+       situaciones distintas y por eso tienen dos voces. */
+    sinSesionTitulo: 'Necesitas volver a entrar',
+    sinSesionDetalle: 'Tu sesión ya no está activa.',
+    entrar: 'Entrar',
+  },
+
 } as const;

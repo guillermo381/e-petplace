@@ -24,6 +24,15 @@
  *      tope (la condición legítima es que el tope se haya LEÍDO y que el total
  *      exista).
  *
+ * ⚠️ **LA LECCIÓN DEL CENSO, que esta lista hace concreta:** su corpus es una
+ * lista ESCRITA A MANO, y eso es deliberado — pero el día que se censó «qué
+ * pantallas no tienen salida de error» se hizo por patrón, buscando `'error'`,
+ * `EstadoVacio` y `reintentar`, y marcó `guarderia/index.tsx` como si no la
+ * tuviera. **La tenía**: su fase se llama `noPudimos`.
+ * *Un censo por patrón encuentra MI vocabulario, no el de quien escribió el
+ * archivo* — y el falso positivo manda a curar algo que ya está bien. ⇒ cuando
+ * un censo marca algo, se abre el archivo antes de contarlo.
+ *
  * ⚠️ **Lo que NO mide, declarado:** un ternario JSX que envuelva el selector
  * entero. *Se podría escribir y este gate no lo vería* — mide `return`, que es
  * como se corta de verdad en esta pieza. Su verde tampoco dice que el selector
