@@ -200,10 +200,45 @@ La plataforma cobra cuando hay un evento económico que pasa por ella. El qué s
 | Suscripción Prime usuario | 100% (revenue puro plataforma) | Pago recurrente |
 | Publicidad / boosts (futuro) | 100% por servicio comercial | Compra del slot |
 
+### 2.2bis Las comisiones VIGENTES, leídas de la tabla (S115-CIERRE · 12-sep-2026)
+
+> **Comando que produce esta tabla** — se re-corre, no se transcribe:
+> ```sql
+> select revenue_stream, tipo_origen, categoria_origen, tipo_calculo, parametros,
+>        minimo_por_transaccion, prioridad, vigencia_desde::date, vigencia_hasta::date, activo
+>   from fee_configs order by activo desc, revenue_stream, prioridad, vigencia_desde;
+> ```
+> Medido contra `zyltipqscdsdsxnjclhp` el **12-sep-2026**. **18 filas.**
+
+🔴 **LO PRIMERO, porque cambia cómo se lee todo lo demás: el modelo nuevo está CARGADO Y CON FECHA, no vigente.** Las filas de 18/15/12 **arrancan el 2026-10-01**. **Hoy siguen rigiendo las del 10 %.** *Un documento que dijera «la comisión es 18 %» sería falso hasta el 1 de octubre.*
+
+| origen | categoría | pct | base | mínimo | prioridad | vigencia |
+|---|---|---|---|---|---|---|
+| `cita` | — | **10 %** | `subtotal` | 0 | 0 | 2026-08-25 → **2026-10-01** |
+| `estadia` | — | **10 %** | `subtotal` | 0 | 0 | 2026-08-25 → **2026-10-01** |
+| `pedido` | — | **10 %** | `total_con_impuesto` | 0 | 0 | 2026-08-11 → **2026-10-01** |
+| `cita` | — | **18 %** | `subtotal` | **1,50** | 0 | **2026-10-01** → — |
+| `estadia` | — | **18 %** | `subtotal` | **1,50** | 0 | **2026-10-01** → — |
+| `pedido` | — | **15 %** | `total_con_impuesto` | **1,00** | 0 | **2026-10-01** → — |
+| `cita` | `veterinario` | **12 %** | `subtotal` | **3,00** | **10** | **2026-10-01** → — |
+| `cita` | `telemedicina` | **12 %** | `subtotal` | **2,00** | **10** | **2026-10-01** → — |
+| `pedido` | `alimento` | **15 %** | `total_con_impuesto` | **2,00** | **10** | **2026-10-01** → — |
+| `donacion` | — | passthrough | `kushki 3,5 % + 0,30` | 0 | 0 | 2026-01-01 → — |
+
+**Las dos de clínicas llevan `"iva_pct": 15, "comision_lleva_iva": true`** en `parametros` — es el «+IVA» de la firma, y vive en el dato, no en el código.
+
+**La prioridad 10 es la que hace que la categoría gane a la general.** Sin ella, una consulta veterinaria pagaría el 18 % genérico.
+
+⚠️ **Tres observaciones medidas, ninguna curada en esta tanda** (orden del founder: al medir, anotar y avisar):
+1. **Cuatro filas `activo = true` con `vigencia_hasta` ya vencida** (2026-08-11 · 2026-08-25 ×3). No hacen daño —el resolutor filtra por fecha— pero **`activo` dejó de significar «rige»** y cualquiera que cuente filas activas va a contar de más.
+2. **Las dos filas de `donacion` son idénticas y están duplicadas.** El resolutor toma una por `ORDER BY … LIMIT 1`, así que hoy es inofensivo y mañana es una divergencia esperando.
+3. **`suscripcion_prime` ($4,99) y `suscripcion_prestador` ($9,99) existen con `activo = false`** — Prime preparado-apagado, como está firmado. *Se declara para que nadie lo lea como un olvido.*
+
 ### 2.3 White-label (modelo de marketplace de fachada)
 
 - Los productos se venden con marca del fabricante real (Royal Canin, Doglover, etc.).
 - La factura electrónica al cliente final la emite el seller original, no e-PetPlace.
+  > 🔴 **PENDIENTE DE ENMIENDA, NO APLICADA — verificado el 12-sep-2026.** `MODELO_FISCAL` §1.4 ordena que esta línea pase a *«la emite e-PetPlace; el seller factura a e-PetPlace el neto»*. **No se aplicó acá porque la enmienda es del founder**, y se marca en vez de dejarse muda: *un documento que afirma lo contrario de lo firmado no se desconfía, se obedece.* **Y el objeto ya está del lado nuevo:** `documentos_fiscales` tiene `sentido`/`rol` con `venta_cliente` **emitido** por la casa y `comprobante_proveedor` **recibido** del seller — que es exactamente el modelo que §1.4 describe.
 - Excepción: línea propia de wearables y bolsas/uniformes de delivery (e-PetPlace SÍ es seller directo).
 - Implicancia: cada producto tiene un seller asociado fiscalmente identificado.
 
@@ -274,13 +309,89 @@ Tres timestamps distintos: `fecha_devengo`, `fecha_cobro_kushki`, `fecha_liquida
 ### 3.1 Fórmula universal
 
 ```
-GMV = Kushki_fee + Plataforma_fee + Payout
+GMV = Pasarela + Plataforma + Payout
 ```
 
 - `GMV` = monto bruto pagado por el cliente final (`monto_bruto`).
-- `Kushki_fee` = lo que cobra la pasarela (`monto_kushki_fee`).
-- `Plataforma_fee` = revenue para e-PetPlace (`monto_plataforma`).
+- `Pasarela` = lo que cobra el riel (`monto_kushki_fee` — el nombre es histórico).
+- `Plataforma` = revenue para e-PetPlace (`monto_plataforma`).
 - `Payout` = lo que recibe el actor (`monto_payout`, NULL si revenue puro plataforma).
+
+Cualquier modelo de fee cabe en esta ecuación. Criaderos con fee fijo: `Plataforma = constante`. Refugios con donaciones: `Plataforma = 0` y la pasarela es passthrough.
+
+> ➕ **ENMIENDA S115-CIERRE (12-sep-2026) — EL RIEL DEJA DE DESCONTARSE AL ACTOR.**
+> **Medido contra el objeto**, no transcripto: `pg_get_functiondef` de `crear_evento_economico` dice, literal,
+> `v_monto_payout := p_monto_bruto - v_comision_bruta;` y
+> `v_monto_plataforma := v_comision_bruta - p_monto_kushki_fee;`
+> y estampa `'regla_payout', 'base_menos_comision_s115'` en `fee_calculo_detalle`.
+>
+> ~~`Payout = GMV − Pasarela − Plataforma`~~ ⇒ **`Payout = base − comisión`, punto.**
+>
+> **La identidad de arriba SE MANTIENE y se despeja sola:** si `payout = bruto − comisión`, entonces `plataforma = comisión − pasarela`. *Eso es, literalmente, «la pasarela es costo de la plataforma» escrito en álgebra.*
+>
+> 🔴 **Y su consecuencia incómoda, declarada en el propio cuerpo de la función: `monto_plataforma` PUEDE QUEDAR NEGATIVO** — una comisión chica con un riel caro deja a la casa poniendo plata. *No es un error a corregir: es el número diciendo la verdad, y es exactamente la razón por la que existe el mínimo por transacción.*
+>
+> **Por qué cambió:** bajo reventa el riel es costo de Satori y a la familia no se le puede recargar. El texto viejo le restaba la pasarela al prestador.
+>
+> **Comando que lo verifica:** `select pg_get_functiondef(oid) from pg_proc where proname='crear_evento_economico'` · medido el 12-sep-2026 contra `zyltipqscdsdsxnjclhp`.
+
+### 3.1bis La comisión se resuelve por la fecha en que el precio VA A REGIR
+
+**No por hoy, y no por la fecha del pago: por la fecha del SERVICIO.** Una cita reservada hoy para noviembre paga la comisión de noviembre.
+
+**Una sola fuente, y el reparto es el que evita las dos verdades:**
+- **La confirmación LEE el congelado** (`cita_desglose.fee_config_id`). Jamás re-resuelve.
+- **El congelador RE-CONGELA mientras la cita no esté pagada.** Una reagenda de octubre a noviembre re-congela contra la vigencia de noviembre; una cita ya pagada **no se toca nunca**.
+
+*Si la confirmación resolviera por su cuenta, una reagenda dejaría dos respuestas posibles para la misma cita y ganaría la que corriera último.*
+
+**Medido:** `comision_aplicable(prestador, tipo_servicio, fecha)` resuelve con `(p_fecha::timestamptz + interval '12 hours')` — **mediodía a propósito, para no rozar el borde de vigencia** — y es **fail-closed**: sin fee vigente devuelve `conocida:false` con motivo, jamás 0 %. *Decirle a un prestador «te queda el 100 %» es la mentira más cara que esa pantalla puede decir.*
+
+**Su gate:** `verificar_fee_por_fecha_servicio()`, que **mide DATO y no algoritmo** — compara el `fee_config_id` que el trigger realmente congeló contra el que corresponde a la fecha del servicio. *Su v1 comparaba contra la suposición del autor y daba rojo eterno; la corrección obvia —repetir la lógica adentro del gate— lo volvía tautológico.* Las citas sin desglose se reportan **no medibles**, no rojas.
+
+### 3.1ter El mínimo por transacción, y la regla de base cero
+
+**La comisión efectiva es `MAX(base × pct, mínimo)`.** El mínimo vive en `fee_configs.minimo_por_transaccion`, **jamás en el código**.
+
+**Por qué existe, con el número que lo obligó:** un paseo de $6 al 18 % deja **$1,08**, y el riel solo cuesta más que eso. Sin mínimo, la casa pone plata en cada transacción chica.
+
+🔴 **BASE CERO ⇒ COMISIÓN CERO**, y es regla firmada, no un borde. Un día de guardería consumido de un paquete tiene base 0 **porque su comisión ya se cobró al comprarse el paquete**; aplicarle el mínimo sería cobrar dos veces sobre la misma plata.
+
+**Medido:** `comision_efectiva(base, pct, minimo)` es `IMMUTABLE` y devuelve `aplico` ∈ `base_cero` · `porcentual` · `minimo`. *El `aplico` no es decoración: sin él, un mínimo que manda se lee como «el 18 % está mal calculado» — un número sin su razón manda a buscar un defecto que no existe.*
+
+### 3.1quater El carrito mixto de despensa — ⚠️ LETRA FIRMADA, **SIN CONSTRUIR**
+
+**La regla firmada:** un carrito que mezcla categorías aplica **el mínimo de la categoría con MAYOR BASE**.
+
+**Ejemplo:** carrito con $30 de alimento (mínimo $2,00) + $4 de higiene (mínimo $1,00). La base mayor es alimento ⇒ **rige el mínimo de $2,00 una sola vez sobre el carrito**, no uno por categoría ni el más chico.
+
+*El criterio: el mínimo existe para cubrir el costo fijo de UNA transacción, y un carrito es una transacción. Cobrar un mínimo por categoría convertiría un costo fijo en variable; cobrar el más chico dejaría que una línea de $4 fije el piso de un carrito de $34.*
+
+🔴 **MEDIDO EL 12-sep-2026: ESTO NO ESTÁ EN EL OBJETO.** `resolver_comision_despensa()` no mira categoría ni devuelve `minimo_por_transaccion`, y **tiene CERO consumidores** —ni en el motor ni en `packages/api`— o sea que además es `L-318`, motor sin puerta. *Se escribe como letra porque está firmada; se marca como no construida porque nadie la está cumpliendo.* Ficha: ver «LO QUE SIGUE ABIERTO».
+
+### 3.1quinquies `tarifa_servicio` — el ingreso propio de la plataforma
+
+**$0,99 con IVA por reserva o pedido.** No es comisión del actor: es un cargo de la casa al cliente final.
+
+**Medido en `app_config` (comando: `select clave, valor from app_config where clave like 'tarifa_servicio%'`, 12-sep-2026):**
+
+| clave | valor |
+|---|---|
+| `tarifa_servicio_monto` | `0.99` |
+| `tarifa_servicio_codigo_iva` | `EC_IVA_15` |
+| `tarifa_servicio_promo_hasta` | `2026-12-31` |
+
+`tarifa_servicio_vigente(fecha)` devuelve `base 0 + descuento 0,99 + promocionada:true` mientras la fecha esté dentro de la promo. 🔴 **En promoción la línea NO desaparece: se muestra en $0 con su descuento visible.** *Una línea que se esconde mientras es gratis hay que construirla el día que se cobra, y ese día el usuario ve aparecer un cargo nuevo.*
+
+**Sin configuración no se inventa una tarifa:** devuelve `vigente:false · motivo:'sin_configuracion'`. *Cobrarle $0,99 a una familia porque un default lo dijo es cobrar sin que nadie lo haya decidido.*
+
+⚠️ **DIVERGENCIA MEDIDA, y se declara en vez de corregirse de callado:** la enmienda del 10-sep de este documento dice *«ítem de catálogo de `plataforma_directa`»*. **`plataforma_directa` NO EXISTE.** `revenue_stream_enum` = `transaccional, recurrente, eventual, publicitario, passthrough`; lo que existe con ese sentido es **`venta_directa_plataforma`**, que es un valor de `tipo_evento_economico_enum`. *Y `tarifa_servicio` tampoco está en `tipos_servicio`: hoy vive en `app_config` y en su función, no en un catálogo.* Comando: `select enumlabel from pg_enum …`.
+
+### 3.1sexies La tasa de IVA es parte del precio congelado
+
+`cita_desglose` ganó **`codigo_iva`** y **`tarifa_pct`** (medido en `information_schema.columns`, 12-sep-2026). El impuesto deja de derivarse al cobrar y queda **congelado junto al precio**.
+
+**Es la cura de `D-1071`, y explica retroactivamente por qué la mitad del catálogo no se podía cobrar:** sin la tasa en el congelado, el cobro tenía que resolverla en el momento, y todo servicio cuyo código de IVA no resolviera rebotaba. *El defecto no estaba en el cobro: estaba en lo que el precio no había guardado.*
 
 Cualquier modelo de fee cabe en esta ecuación. Criaderos con fee fijo: `Plataforma_fee = constante`. Refugios con donaciones: `Plataforma_fee = 0`. ~~Sellers con 14%: `Plataforma_fee = GMV × 0.14`.~~ **ENMIENDA S115: los porcentajes vigentes son 18/15/12 con mínimo, y `Plataforma_fee` ABSORBE la pasarela (D-C). Ninguno vive en código: `fee_configs` los guarda (D-759).**
 
@@ -289,6 +400,44 @@ Cualquier modelo de fee cabe en esta ecuación. Criaderos con fee fijo: `Platafo
 Cuando se crea un evento, la regla de fee aplicada queda **fija** en el evento (`fee_config_id` + `fee_calculo_detalle`). Si después se cambia la regla, eventos viejos no se recalculan. Esto evita liquidaciones cuestionables y da auditoría completa.
 
 El snapshot también guarda `tipo_actor_resuelto` — el rol específico bajo el cual se cobró el evento. Esto permite desglose por rol en liquidaciones consolidadas.
+
+### 3.3 Las liquidaciones y su compuerta — **plata de terceros, y por eso se escribe fina** (S115-CIERRE · 12-sep-2026)
+
+**La regla, en una línea: una liquidación no pasa a `pagado` sin el papel que la respalda.** No hay override. *Pagar sin papel es una decisión que tiene que verse.*
+
+**Medido:** el trigger `_trg_liquidacion_exige_comprobante` corre en la transición a `pagado` y consulta `liquidacion_respaldo(id)`. Si no da `ok`, aborta con `liquidacion_sin_respaldo_fiscal` (`ERRCODE 42501`) y su `HINT` dice cómo atar los comprobantes. **El papel que pide depende del modelo comercial de la cuenta**, y sin modelo declarado **también aborta** (`cuenta_sin_modelo_comercial` — *sin saber si es reventa o agencia no se sabe qué papel pedir*).
+
+**En REVENTA — un papel:**
+- Se exige `sentido = 'recibido'` · `rol = 'comprobante_proveedor'` · `estado = 'autorizada'`.
+- **La suma de los comprobantes tiene que dar el neto a pagar**, con la tolerancia de `app_config.liquidacion_tolerancia_comprobante`.
+- Códigos: `sin_comprobante` · `no_cuadra` · `respaldada`.
+
+**En AGENCIA — dos papeles, y su RESTA:**
+```
+Σ recibido/factura_tercero_cliente  −  Σ emitido/comision_prestador  =  neto a pagar
+```
+- Códigos: `sin_factura_del_tercero` · `sin_factura_de_comision` · `no_cuadra` · `respaldada`.
+
+🔴 **LA DISTINCIÓN QUE HACE VÁLIDA LA COMPUERTA, y sin ella sería decorativa:** la factura del tercero exige **`sri_numero_autorizacion IS NOT NULL`**, no un estado. *Ese número lo escribe el web service del SRI cuando contesta; un `estado = 'autorizada'` lo puede poner cualquiera que tenga permiso de escritura.* **«Validada» significa «el SRI contestó», y eso no se puede tipear.**
+
+### 3.4 `medio_pago` y `forma_pago_asumida` — el dato y su honestidad
+
+**`pagos_intentos.medio_pago`** (`text`) es **el dato del intento**: con qué se pagó, tal como lo reportó el riel.
+
+**`documentos_fiscales.forma_pago_asumida`** (`boolean`) marca que la forma de pago del comprobante **se declaró sin poder derivarla**.
+
+**Por qué existen las dos y por qué la segunda es la importante:** el SRI exige declarar la forma de pago (tabla 24), y **no siempre se puede derivar del riel** — hoy no hay tabla BIN → tipo de tarjeta, así que un pago con tarjeta no dice por sí solo si fue crédito o débito. La regla ④ firmada resuelve el bloqueo: **si no se puede derivar, se declara TARJETA DE CRÉDITO (código 19) y el documento lleva su marca**.
+
+⇒ **`forma_pago_asumida = true` no es un defecto: es el documento diciendo «esto lo asumí».** *Un dato asumido que no se marca es indistinguible de uno medido, y el día que alguien audite no va a poder separar los dos.*
+
+**Sus dos llaves, medidas en `app_config` el 12-sep-2026:**
+
+| clave | valor | qué hace |
+|---|---|---|
+| `fiscal_forma_pago_asumida` | `true` | habilita la regla ④ en **pruebas** |
+| `fiscal_forma_pago_asumida_en_produccion` | `false` | **la segunda llave: producción es una decisión aparte** |
+
+*La segunda llave existe porque encender en pruebas y encender en producción no son el mismo acto, y una sola llave los habría hecho el mismo.*
 
 ---
 
@@ -994,6 +1143,8 @@ Humano sin empresa con DNI como `identificacion_fiscal`. Crea cuenta_comercial `
 VTEX webhook desglosa por vendor. e-PetPlace genera N eventos económicos. Liquidaciones separadas por cuenta_comercial.
 
 > **🔴 ACOTACIÓN S94-B (10 Ago 2026) — NO SE DEROGA, SE ACOTA.** Letra del founder: *lo decidido en S94 manda, PERO afecta solo a la DESPENSA — nada de esto toca servicios.*
+>
+> 🔴 **AVISO S115-CIERRE (12-sep-2026): LA NOTA DE ABAJO QUEDÓ VENCIDA Y NO SE BORRA.** El founder declara que **la Forma B quedó superada** — el cobro ya entra por e-PetPlace, así que *«él factura al cliente final»* dejó de ser cierto. **La enmienda de fondo es suya y no se aplica acá** (`MODELO_FISCAL` §1.4, segundo ítem). *Se marca en el lugar donde alguien la va a leer, no sólo en una ficha: dos letras firmadas que se contradicen son peores que una equivocada.*
 >
 > **§8.10 NO APLICA A LA DESPENSA v1.** Ahí rige la **Forma B** de `MODELO_DESPENSA` §2: hay **un solo vendedor** y **él factura al cliente final**. e-PetPlace **no cobra la venta ni la reparte** — cura la vitrina y cobra su comisión. No hay N eventos económicos por pedido ni liquidaciones a repartir, porque la plata no pasa por e-PetPlace.
 >

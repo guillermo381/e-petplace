@@ -1,5 +1,12 @@
 # MODELO_FISCAL.md — e-PetPlace (Ecuador)
 
+> **v0.5 — 12 de septiembre de 2026 (S115-CIERRE).** v0.4 + **E8, E9 y E10**, los tres
+> medidos contra el catálogo de Postgres y no transcriptos: el libro del emisor con sus
+> tres ejes y la exención de ocho dígitos · los códigos del SRI con `fuente_codigo`
+> separando lo confirmado en XML real de lo tomado de una ficha · y **lo que este
+> documento NO cierra**, que es la sección que más va a servir. **E8 corrige a E5 en un
+> nombre de columna que apunta a una columna real con otro significado.**
+>
 > **v0.4 — 10 de septiembre de 2026 (S115, mesa + founder).** Enmiendas fechadas sobre
 > v0.3 tras el relevamiento de A (S115-A), el certificado de RUC de Satori Inov y la
 > verificación de fuentes de la mesa. Donde esta nota contradiga a v0.3, manda esta nota;
@@ -105,6 +112,58 @@
 > `recibido · pendiente_manual` **ya nace** cuando el pago aprueba (outbox fiscal, E1), y
 > **`fiscal-validar-clave` ya la valida** contra el web service. Lo que faltaba era que
 > alguien exigiera las dos cosas antes de girar la plata.
+
+> **E8 (12-sep-2026, S115-CIERRE) — EL LIBRO DEL EMISOR, MEDIDO CONTRA EL CATÁLOGO DE POSTGRES.**
+> Todo lo de abajo salió de `information_schema.columns`, `pg_enum` y `pg_get_constraintdef`
+> el 12-sep-2026 contra `zyltipqscdsdsxnjclhp`. **Nada transcripto.**
+>
+> 🔴 **CORRECCIÓN A E5, y no es de estilo: E5 dice «con `direccion` (emitido | recibido)» y la columna se llama `sentido`.** `documentos_fiscales.direccion` **existe** y es **la dirección del comprador** — quien siga E5 al pie va a escribir el eje del documento en el campo del domicilio. *Un nombre equivocado que apunta a una columna inexistente se descubre al primer error; uno que apunta a una columna REAL con otro significado no se descubre nunca.*
+>
+> **Los tres ejes, con sus valores exactos:**
+>
+> | eje | tipo | valores |
+> |---|---|---|
+> | `sentido` | `fiscal_sentido_enum` | `emitido` · `recibido` |
+> | `rol` | `fiscal_rol_enum` | `venta_cliente` · `comision_prestador` · `comprobante_proveedor` · `factura_tercero_cliente` |
+> | `numeracion_origen` | `text` con CHECK | `casa` · `proveedor` |
+> | *(y además)* `tipo` | `fiscal_tipo_enum` | `factura` · `nota_credito` |
+> | *(y además)* `estado` | `fiscal_estado_enum` | `borrador` · `esperando_receptor` · `emitiendo` · `autorizada` · `no_autorizada` · `pendiente_manual` · `anulada` |
+>
+> **La coherencia no se pide: es inexpresable violarla.** `chk_documento_fiscal_tercero_coherente` obliga `emitida_por_tercero = (sentido = 'recibido')`, y `chk_documento_fiscal_nota_credito_referencia` obliga que toda nota de crédito apunte a su documento. *Cuando un estado no debe poder existir, no se documenta: se hace inexpresable.*
+>
+> **LA EXENCIÓN DE OCHO DÍGITOS, con su aritmética** (`chk_documento_fiscal_clave_reconstruible`):
+> - `numeracion_origen = 'casa'` ⇒ la clave se **reconstruye entera**: tiene que ser **idéntica** a `fiscal_clave_acceso(fecha, tipo, ruc, ambiente, establecimiento, punto_emision, secuencial)`.
+> - `numeracion_origen = 'proveedor'` ⇒ **numera el proveedor y sólo se exime el código numérico**. Se verifican: los **39 primeros** dígitos contra la clave reconstruida · el **dígito 48** (tipo de emisión) `= '1'` · el **dígito 49**, el verificador módulo 11. **41 de 49 verificados; los 8 exentos son las posiciones 40-47.**
+> - `sentido = 'recibido'` ⇒ 49 dígitos y su verificador módulo 11.
+>
+> *La exención existe porque el código numérico lo elige quien numera, y Factuplan numera. Lo que NO se cede es el resto: el RUC, la fecha, el ambiente, el establecimiento, el punto de emisión, el secuencial y el dígito verificador siguen teniendo que cerrar contra la fila.*
+>
+> **El secuencial tiene su propia compuerta:** `chk_documento_fiscal_emitido_declara_secuencial` exige establecimiento + punto de emisión + secuencial en todo documento `emitido`, **salvo** los estados que todavía no numeran (`borrador`, `esperando_receptor`, `pendiente_manual`, `anulada`, `no_autorizada`) y **salvo** la ventana en que numera el proveedor (`numeracion_origen='proveedor' AND estado='emitiendo'`). *Esa última excepción es la única puerta por la que un documento vive sin número, y está acotada a un estado.*
+
+> **E9 (12-sep-2026, S115-CIERRE) — LOS CÓDIGOS DEL SRI, Y DE DÓNDE SALIÓ CADA UNO.**
+> Medido: `select codigo, pct, codigo_sri, codigo_porcentaje_sri, fuente_codigo from cat_tasas_impuesto where activo`.
+>
+> | código | pct | `codigo` SRI | `codigoPorcentaje` | `fuente_codigo` |
+> |---|---|---|---|---|
+> | `EC_IVA_0` | 0,00 | **2** | **0** | `xml_real_produccion_2026` |
+> | `EC_IVA_15` | 15,00 | **2** | **4** | `xml_real_multicines_2026` |
+> | `EC_IVA_5` | 5,00 | **2** | **5** | `xml_real_labiferia_2026` |
+> | `CO_IVA_0` / `CO_IVA_19` | 0 / 19 | — | — | — *(Colombia: no hay SRI)* |
+>
+> 🔴 **`fuente_codigo` es la columna que separa lo CONFIRMADO de lo tomado de una ficha**, y existe porque no son la misma cosa. *Los tres códigos de Ecuador salieron de **XML reales de producción de terceros**, no de una tabla de referencia: alguien abrió una factura autorizada y leyó el número que el SRI aceptó.* Una ficha puede estar vieja; un XML autorizado es un hecho.
+>
+> **El 5 % existe y circula** — no es teórico: hay un XML real que lo prueba.
+>
+> **Dos formatos que no se derivan y por eso se escriben:** `fechaEmision` va en **`dd/mm/aaaa`** (no ISO), y `tipoIdentificacionComprador` va **por catálogo del SRI**, no por el nombre interno. *Los dos son la clase de dato que se ve bien en pantalla y rebota en el web service.*
+
+> **E10 (12-sep-2026, S115-CIERRE) — LO QUE ESTE DOCUMENTO **NO** CIERRA.**
+> *Un documento que da por resuelto lo que no se resolvió es peor que uno viejo: el viejo se desconfía, el falso se obedece.*
+>
+> - 🔴 **F1 SIGUE SIN RESPUESTA.** *¿Puede Satori revender un servicio de salud animal?* Es la pregunta que creó la agencia, y **es la única razón por la que el acto veterinario no va en reventa** (E1). Mientras no tenga respuesta del contador, la agencia por acto es una cobertura, no una conclusión.
+> - 🔴 **La tarifa de veterinaria sigue marcada «pendiente de ratificación»** (E3). El 12 % + IVA con mínimo de $3,00 está **cargado en `fee_configs` con vigencia 2026-10-01**, o sea que **va a regir sin que nadie vuelva a firmarlo si esa fecha llega primero.** *Un número con fecha futura no espera a nadie.*
+> - ⚠️ **La agencia por acto está FIRMADA y NO CONSTRUIDA** (`D-1084`). El objeto sigue decidiendo **por cuenta**: `cuentas_comerciales.modelo_comercial` tiene hoy **5 `marketplace_fachada` y 10 `reventa_pura`** (medido). ⇒ **la consecuencia aceptada —un carrito que mezcla consulta y baño produce DOS facturas— todavía no puede ocurrir**, porque el modelo lo decide la cuenta y no el ítem.
+> - ⚠️ **`MODELO_FISCAL` §1.4 quedó vencido en su último ítem.** Dice *«la fórmula universal (§3.1) no cambia»*, y **cambió el mismo 12-sep**: `payout = base − comisión`, con el riel como costo de plataforma. *Lo que sí sigue en pie de esa frase es la identidad `GMV = pasarela + plataforma + payout`, que se mantiene y se despeja sola.* Ver `MODELO_FINANCIERO` §3.1.
+> - ⚠️ **Dos enmiendas de §1.4 siguen SIN APLICAR, y son del founder:** §2.3 (white-label) y §8.10 / Forma B de `MODELO_FINANCIERO`. **Están marcadas en su lugar**, no aplicadas.
 
 > **v0.3 — 9 de septiembre de 2026.** v0.2 + Anexo A (credenciales y encendido de la emisión automática, a pedido del founder). v0.2 reescribió el documento tras la decisión del founder (S-fiscal): *"si es la mejor opción, que sea Satori quien facture todo — hay que aceptarlo"*. Esta versión recomienda y desarrolla ese modelo. **Pendiente de ratificación por el contador** — las preguntas abiertas quedaron en cuatro (§9), una de ellas bloqueante para veterinaria.
 > Contexto que fija esta versión: **cero compras reales hasta hoy**; la app sale a producción el **1 de octubre de 2026** con **servicios (paseo, grooming, vet) y despensa**; **todo el cobro entra por e-PetPlace**, que captura el importe total del cliente.
