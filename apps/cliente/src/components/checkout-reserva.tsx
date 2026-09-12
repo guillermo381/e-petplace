@@ -57,6 +57,7 @@ import {
 } from '@/components/seccion-medio-de-pago';
 import { SeccionFacturacion, useFacturacion } from '@/components/seccion-facturacion';
 import { AvisoNoCargo } from '@/components/aviso-no-cargo';
+import { LineaFacturaEnCamino } from '@/components/linea-factura-en-camino';
 import { cobrar } from '@/lib/pagos/cobro';
 import { useEsperaDeConfirmacion } from '@/lib/pagos/espera-confirmacion';
 import { EsperaDeUna } from '@/components/espera-deuna';
@@ -394,23 +395,28 @@ export function CheckoutReserva({
             />
           }
         />
+        {/* 🔴 EL MOMENTO EN QUE TODAVÍA MIRA. Va DESPUÉS del botón a propósito:
+            la acción principal es volver, y esto es una nota al pie — no compite
+            con ella. *Arriba del botón se leería como un paso más que hay que
+            hacer, y no hay nada que hacer: sólo esperar el correo.* */}
+        <LineaFacturaEnCamino />
         {exitoExtra}
       </>
     );
-    /* S106-C t3 · **DOS LAYOUTS, y la rama existe para no tocar los otros
-       tres oficios.** El éxito siempre fue un `EstadoVacio` centrado en un
-       `View` que no scrollea — con un bloque extra abajo (los consejos de
-       §3bis: título + cuatro líneas) eso deja de entrar en un teléfono
-       chico, y lo que se pierde es el final: el botón de volver.
-       Con `exitoExtra` presente pasa a `ScrollView` con `flexGrow` — sigue
-       centrado cuando cabe, scrollea cuando no. **Sin `exitoExtra` el
-       render es byte por byte el de antes**, así que paseo, grooming y
-       adiestramiento no cambian ni necesitan re-gate. */
+    /* S106-C t3 · **DOS LAYOUTS**, y su razón sigue viva: el éxito era un
+       `EstadoVacio` centrado en un `View` que no scrollea, y con un bloque extra
+       abajo deja de entrar en un teléfono chico — *lo que se pierde es el final,
+       que es el botón de volver*.
+       ⏪ **ENMIENDA S115-C:** la rama del `View` decía «sin `exitoExtra` el
+       render es byte por byte el de antes». **Dejó de ser cierto**: ahora el
+       cuerpo lleva SIEMPRE la línea de la factura, así que la condición vieja
+       habría mandado al layout sin scroll un contenido más alto — *justo el caso
+       que esta rama existe para evitar*. **Scrollea siempre**: sigue centrado
+       cuando cabe y el botón no se pierde nunca. Los cuatro oficios cambian de
+       contenedor (no de composición) y por eso se declara. */
     return (
       <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        {exitoExtra === undefined ? (
-          <View style={{ flex: 1, justifyContent: 'center', padding: spacing[4] }}>{cuerpo}</View>
-        ) : (
+        {(
           <ScrollView
             contentContainerStyle={{
               flexGrow: 1,

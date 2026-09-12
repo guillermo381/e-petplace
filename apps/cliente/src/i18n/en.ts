@@ -3421,4 +3421,8 @@ export const clienteEn = {
     editable: 'You can change these if this invoice goes to someone else.',
   },
 
+  facturaEnCamino: {
+    llega: 'Your electronic invoice arrives by email in a few minutes, separately from this receipt.',
+  },
+
 } as const satisfies Espejo<typeof clienteEs>;

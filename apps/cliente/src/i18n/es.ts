@@ -4713,4 +4713,13 @@ export const clienteEs = {
     editable: 'Puedes cambiarlos si esta factura va a otro nombre.',
   },
 
+  /* S115-C · LA FACTURA EN CAMINO. Se dice en el momento en que la persona
+     TODAVÍA ESTÁ MIRANDO — si no, quien necesita su factura escribe
+     preguntando, o cree que no se la vamos a mandar. */
+  facturaEnCamino: {
+    /* Dos correos y se dice que son dos: el de pago llega ya, el del SRI
+       tarda. Sin eso, el segundo parece que no existe. */
+    llega: 'Tu factura electrónica llega por correo en unos minutos, aparte de este comprobante.',
+  },
+
 } as const;
