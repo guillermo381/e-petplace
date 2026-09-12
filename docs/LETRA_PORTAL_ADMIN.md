@@ -25,10 +25,17 @@ frontera se escribe en este documento y se actualiza con cada retiro.
 
 ## §2 · LA PUERTA DEL ALCANCE — el criterio, y sólo él
 
-**Entra al MVP lo que cumple UNA de estas dos:**
+**Entra al MVP lo que cumple UNA de estas ~~dos~~ TRES:**
 
 1. **Sin eso no se puede operar el 1 de octubre.** No «sería incómodo»: se detiene.
 2. **Toca plata de un tercero** — del prestador, del vendedor o de la familia.
+3. ➕ **MIDE SI EL NEGOCIO AGUANTA.** *(Tercer criterio — elección del founder, opción (a) de §6.6, 12-sep-2026.)*
+
+> **Por qué entra un tercero, con la razón escrita para que la próxima pantalla se contraste contra él:** la contribución por transacción y la caja atrapada en retenciones **no son métricas de vanidad — son lo que dice si hay con qué operar en noviembre**. Un tablero que las muestra no es «lindo de tener»: es la diferencia entre enterarse en octubre o en diciembre.
+>
+> ⚠️ **Y su límite, porque un criterio sin límite se traga la puerta entera:** ③ admite **lo que decide si se sigue operando**, no lo que describe cómo va. *Un número que nadie va a mirar para tomar una decisión no pasa por acá* — y el contraste es concreto: si el número cambiara y **no cambiaría nada de lo que se hace**, es vanidad y espera.
+>
+> 🔴 **Lo que ③ NO releva: la honestidad del dato.** Un tablero de contribución que mezcle **caja con costo** da un margen falso — y la retención del 2 % de renta y el 30/70 % del IVA **son caja, no costo** (`MODELO_ECONOMICO` §6.2). *Un tablero que decide y miente es peor que no tenerlo.*
 
 **Todo lo demás espera**, y esperar no es un juicio sobre su valor.
 
@@ -394,6 +401,8 @@ Contra esa puerta, los cinco no entran igual:
 — pero decidirlos **ensancha §2**, y esta casa ya pagó tres veces el precio de dejar dos letras
 firmadas contradiciéndose (el magenta en S83, la plata en S88, la telemedicina en S113):
 *cualquiera cita la que le conviene y está «en regla»*.
+
+> ✅ **CERRADO EL 12-sep-2026: el founder eligió (a).** El tercer criterio está escrito en §2 con su razón y su límite. *Se deja el dictado de abajo entero, porque la decisión se lee mejor al lado de las dos opciones que había.*
 
 **Las dos formas de cerrarlo, y las dos son del founder:**
 

@@ -161,6 +161,25 @@ abre cuando hay una explicación plausible a mano.*
   necesitás no está, es una decisión de letra — no un valor más que se agrega
   para que la migración pase.
 
+## El despliegue de edges es parte del MISMO acto que la migración (S115-CIERRE, 12-sep-2026)
+
+🔴 **Una migración que cambia la firma o el contrato de una función que una edge llama, y el `deploy` de esa edge, son UN SOLO ACTO.** Hermana exacta de la regla de `D-662` para los bundles vivos — y la razón es idéntica: **la base y las edges son DOS versiones de la verdad, y una migración mueve sólo una.**
+
+**El modo de falla no tiene síntoma en el repo:** `db push` da verde, `gen:types` da verde, el typecheck da verde — *y la edge desplegada sigue llamando a la firma vieja.* El error aparece en producción, horas después, en una función que nadie tocó.
+
+⇒ **La secuencia se decide ANTES de aplicar**, y es la misma lógica que ya rige para los bundles:
+1. Si la edge vieja **rompe** con el cambio ⇒ **la migración y el deploy van juntos**, y el orden lo decide cuál deja una ventana más corta con algo roto.
+2. Si el cambio es **aditivo** (parámetro con `DEFAULT`, columna nueva) ⇒ **primero la migración, después el deploy**, y la ventana es segura.
+3. Si hay que **quitar** algo ⇒ **dos pasadas**: primero compatible-hacia-atrás con las dos formas vivas, se despliega, y recién después muere la vieja.
+
+**Toda migración que toque una función llamada por una edge DECLARA qué edges la consultan** — igual que declara su veda 76(g) y su reversa. **El censo:**
+```
+grep -rl "<nombre_de_la_funcion>" supabase/functions/
+```
+**La lista va en la migración AUNQUE ESTÉ VACÍA:** *«censé y no hay» es una medición; no decir nada es indistinguible de no haber mirado.*
+
+⚠️ **Y el cierre incluye verificar que la edge quedó desplegada, del OBJETO:** `supabase functions list` dice `status` y `version`. *Un `deploy` que se corrió no es un `deploy` que llegó.*
+
 ## Diagnóstico
 
 - 404 de PostgREST sobre RPC que existe = schema cache viejo (`NOTIFY pgrst, 'reload schema'`) o proyecto equivocado — verificar el ref ANTES de cada RUN, una sola pestaña/conexión (L-123/L-127). No confiar en el copy genérico del wrapper.

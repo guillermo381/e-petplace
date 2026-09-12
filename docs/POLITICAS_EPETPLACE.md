@@ -1011,3 +1011,23 @@ del período en curso** (firma del founder, S107 — rige `LETRA_COBRO_RECURRENT
 *Aplicarle estas tres ventanas a un cobro recurrente sería devolver por día algo
 que se cobró por mes.*
 
+---
+
+## P25 — LA FACTURA DE LA FAMILIA · ⚠️ **CANDIDATA, SIN FIRMA DEL FOUNDER**
+
+> **No rige.** Se deposita con el molde de `P15`: *el texto describe lo que el sistema YA HACE, medido el 12-sep-2026, para que el founder firme o corrija sobre un hecho y no sobre una idea.* **Mientras no tenga su firma, ninguna pantalla puede citarla como política.**
+
+**① Toda compra pagada produce una factura electrónica a nombre de quien la pagó.** Nace del pago —no del pedido, no del devengo— y su disparador único es `aplicar_evento_de_pago` sobre `pagos_intentos`.
+
+**② Hasta el tope, no se piden datos.** Por debajo de `app_config.fiscal_tope_consumidor_final` (hoy **$50**) la factura sale a **consumidor final**. Por encima, **el documento espera a la familia** (`esperando_receptor`) y la app le pide su identificación. *Medido: hay 2 documentos en ese estado ahora mismo.*
+
+**③ «Consumidor final» se dice con palabras.** *(Firma del founder, 11-sep-2026.)* Cuando la identificación es `consumidor_final`, la pantalla dice **«Consumidor final»** y **JAMÁS `9999999999999`**. *Ese número es el código que el SRI define para una venta sin comprador identificado: no significa nada para nadie fuera del SRI, y mostrarlo es enseñar el vocabulario del motor.*
+
+**④ La factura llega por correo con sus DOS papeles** —RIDE en PDF y XML— y **también se puede bajar desde Cuenta → Tus facturas**. *La familia puede quedarse con el papel de lo que compró sin pedírselo a nadie.*
+
+**⑤ Un documento trabado DICE por qué, y el accionable LLEVA a resolverlo.** Sólo uno de los estados trabados lo puede resolver la familia (le faltan sus datos) y ése tiene camino a la pantalla donde los carga. *Decir «faltan tus datos» y no dar el camino es la mitad de la ayuda.*
+
+**⑥ Un reembolso produce una nota de crédito**, nunca el borrado de la factura. El CHECK de la base hace **inexpresable** una nota de crédito sin su documento de referencia.
+
+**⑦ Lo que esta política NO decide, y se declara:** si el acto veterinario lo factura la clínica o e-PetPlace. *Depende de `F1` —¿puede Satori revender un servicio de salud animal?— que sigue sin respuesta del contador* (`MODELO_FISCAL` E10).
+

@@ -108,6 +108,25 @@
 
 **De S94, vigente:**
 
+> 🔴 **ENMIENDA S115-CIERRE (12-sep-2026) — LA FORMA B QUEDÓ SUPERADA, Y NO SE BORRA.**
+> Declaración del founder: **el cobro ya entra por e-PetPlace**, así que *«él factura al
+> cliente final»* dejó de ser cierto. **Factura e-PetPlace; el vendedor le factura a
+> e-PetPlace el neto** (`MODELO_FISCAL` §1.4, segundo ítem).
+>
+> **El objeto ya está del lado nuevo, medido el 12-sep:** `documentos_fiscales` separa
+> `sentido`/`rol`, con `venta_cliente` **emitido** por la casa y `comprobante_proveedor`
+> **recibido** del vendedor — que es exactamente el modelo de la enmienda. Y la compuerta
+> de liquidación **no gira un centavo** sin ese `comprobante_proveedor` autorizado
+> (`MODELO_FINANCIERO` §3.3).
+>
+> ⚠️ **La enmienda de fondo del texto de abajo es del founder y NO se aplicó acá** — se
+> marca donde alguien la va a leer. *Dos letras firmadas que se contradicen son peores que
+> una equivocada: cualquiera cita la que le conviene y está «en regla».*
+>
+> ⚠️ **Y lo que NO cambia: la comisión.** Sigue siendo **15 % sobre el total con IVA** para
+> despensa, con mínimo — cargada en `fee_configs` con vigencia **2026-10-01** (hoy rige el
+> 10 %). *Lo que se enmienda es quién emite el papel, no cuánto cobra la casa.*
+
 1. **Forma B.** El vendedor es el vendedor de registro: él factura al
    cliente final y absorbe los costos financieros. e-PetPlace cura la
    vitrina, pone la experiencia y cobra comisión. Ver §2.

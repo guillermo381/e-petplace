@@ -1310,3 +1310,41 @@ en quien lee el evento al final.*
 > un verde: mira el eslabón que uno construyó, no el que el otro va a leer.*
 
 *Los cuatro pasaron sus pruebas. Ninguna prueba tocaba el cable.*
+
+---
+
+## ENMIENDA S115-CIERRE (12-sep-2026) — el correo fiscal, y **el canal de WhatsApp está caído en un 93 %**
+
+### A · El correo de la factura lleva LOS DOS PAPELES
+
+Cuando el documento queda autorizado, el correo a la familia sale **con el RIDE (PDF) y el XML adjuntos**. `despachar-correo` arma el envío con `attachments` y su `filename`.
+
+🔴 **Y el RIDE que viaja hoy es EL DEL PROVEEDOR, no el nuestro.** Tenemos generador propio (`_shared/facturacion/ride.ts`, PDF real vía `pdf-lib`, y la edge `fiscal-ride` desplegada `ACTIVE` v9) — **lo que llega al cliente lleva la marca de Factuplan**. *No es un defecto de este motor: es una decisión pendiente sobre cuál de los dos se manda* (ver `PROVEEDOR_FISCAL` §1.4).
+
+**Y `sendEmail` del proveedor NO se usa porque su API lo rechaza**, literal: `property sendEmail should not exist` (400). ⇒ **el correo es nuestro por obligación, no por elección** — dato que importa el día que alguien quiera «simplificar» delegándoselo.
+
+### B · 🔴 WHATSAPP: 40 DE 43 ENTREGAS SALEN `fallida`
+
+> **Comando:** `select canal, estado, count(*) from notificacion_entrega group by 1,2;` · 12-sep-2026.
+
+| canal | `aceptada_transporte` | `fallida` |
+|---|---|---|
+| `email` | **44** | 0 |
+| `push` | **60** | 0 |
+| **`whatsapp`** | **3** | **40** |
+
+**Los motivos, medidos** (`select canal, motivo, count(*) … where estado='fallida'`):
+
+| motivo | n | última |
+|---|---|---|
+| `sin_plantilla_resuelta` | **28** | 12-09 **17:01** |
+| `ensamblado_incompleto:null` | **12** | 12-09 16:58 |
+
+⚠️ **Está fallando HOY, no es histórico.** Y **falla ANTES de llegar a Meta**: los dos motivos son nuestros —no hay plantilla que resolver, o el ensamblado quedó incompleto—, así que *esto no se destraba del lado de Meta ni esperando su aprobación*.
+
+🔴 **Lo que esto vuelve falso en este documento:** cualquier línea que describa WhatsApp como un canal vivo describe **3 entregas de 43**. **El multicanal funciona —la intención nace y el correo y el push salen—; el que no entrega es WhatsApp.**
+
+⚠️ **Y lo que el techo NO ve, por diseño:** el techo cuenta la **INTENCIÓN**, no las entregas (`L-530` y la firma que decidió la forma). ⇒ **una intención cuyo WhatsApp falla y cuyo correo sale consumió su techo igual.** Eso es correcto y hoy tiene una consecuencia nueva: *el contador de avisos se gasta aunque el canal preferido no entregue nada.*
+
+**NO SE CURA EN ESTA TANDA** (orden del founder: al medir, anotar). Ver «LO QUE SIGUE ABIERTO» del cierre de S115.
+
