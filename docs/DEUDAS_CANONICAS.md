@@ -33809,3 +33809,45 @@ Donde E1 dice **«las clínicas arrancan en agencia»**, léase **«los actos ve
 ### Lo que NO hace falta para probar
 
 **Nada.** Hay **tres vendedores de despensa en `reventa_pura` con ofertas publicadas y stock** — `VENDEDOR DE PRUEBAS` (375), `Vendedor Puro de Pruebas` (47), `DESPENSA DE PRUEBAS S97` (17). *El founder pidió activarle producto a una y no hace falta: ya lo tienen.* Su compra cayó en un vendedor de fachada por azar del catálogo.
+
+---
+
+## `D-1085` 🔴 — CUANDO UN BUNDLE ROMPE LA APP, EL OTA QUE LO CURA NO PUEDE ENTRAR POR OTA
+
+**Estado:** ABIERTA · **BLOQUEA PRODUCCIÓN.** **Dueño:** founder (decisión operativa) + A (el instrumento).
+**Origen:** founder, 12-sep-2026, después de tres ciclos de cerrar y abrir sin que el update entrara.
+
+### La clase, y por qué no estaba escrita en ningún lado
+
+> *«Cuando un bundle rompe la app lo suficiente, el OTA que lo cura no puede entrar por OTA. La única salida es reinstalar — y una familia no reinstala: desinstala.»*
+
+Y se suma a lo que ya sabíamos del `republish` (`D-1074`): **no revierte el código** — y ahora también **puede no llegar al teléfono**. ⇒ **para un bundle que mata la app, la salida es una BUILD, no un OTA.** *Conviene saberlo antes de necesitarlo un martes de octubre.*
+
+### El margen, MEDIDO — y es mucho más chico de lo que parece
+
+El ciclo completo de `expo-updates` en el arranque del 12-sep, del log del founder:
+
+```
+Check                  0,18 s
+CheckCompleteAvailable 0,99 s
+Download               0,99 s
+DownloadComplete       4,37 s   ← el update queda en disco
+EndStartup             4,38 s
+  … y recién el ARRANQUE SIGUIENTE lo corre
+```
+
+⇒ **el margen NO es «lo que la app tarde en morir»: son ~4,4 segundos, MÁS un arranque limpio después.** Con `launchWaitMs = 0` la app lanza con el bundle viejo y el nuevo se aplica recién en la próxima apertura: **hacen falta DOS aperturas sanas de ~5 s cada una.**
+
+**Una app que muere en tres segundos no recibe ninguna cura, nunca.** Y una que muere en diez recibe la descarga pero **puede no llegar al arranque que la aplica**.
+
+⚠️ **HONESTIDAD SOBRE EL CASO QUE LA PARIÓ:** en el incidente de esta noche la app vivía **2 min 25 s** y el ciclo necesitaba 4,4 s ⇒ **había tiempo de sobra, y la descarga NO fue el cuello.** *Por qué los tres ciclos del founder no aplicaron quedó SIN EXPLICAR* — pudo ser propagación del publish o una apertura que murió temprano. **La ficha nace de un razonamiento correcto sobre una clase real, no de este caso: el caso no la prueba.**
+
+### Lo que hay que decidir, y es del founder
+
+1. **El umbral:** ¿cuántos segundos de vida garantizan que un OTA entre? Con lo medido, **menos de ~10 s de vida es zona de no-retorno.**
+2. **El plan de salida para un bundle que mata la app.** Hoy no existe. Candidatos: una build de emergencia (tiempo de EAS + reinstalación manual, **que una familia no va a hacer**) · `expo-updates` con `checkAutomatically` y un arranque mínimo a prueba de fallos · o **aceptar que ese escenario se previene y no se cura**, lo que empuja todo el peso al gate de publicación.
+3. **Y la consecuencia de gobierno, que es la incómoda:** *si un bundle roto no se puede curar por OTA, entonces el OTA deja de ser reversible* — y todo lo que publiquemos tiene que pasar por el aparato antes, no después.
+
+### Lo que ya está construido y ayuda
+
+`verify:reversion-no-vuelve` (`D-1074`) impide que lo revertido vuelva solo — **que es la mitad del problema**. La otra mitad —que el OTA de la cura llegue— no tiene instrumento.
