@@ -65,7 +65,78 @@ async function leerMarca(): Promise<Marca> {
 /** El token viaja al motor. Se llama al conceder, y también en cada arranque
  *  con permiso ya concedido: el token del SO puede ROTAR y un token viejo es
  *  un aviso que no llega — sin ruido para nadie. */
+/* ═══════════════════════════════════════════════════════════════════════════
+   🔴 EL LAZO CERRADO QUE MATABA LA APP — `D-1074`, medido el 12-sep-2026.
+
+   **`getDevicePushTokenAsync()` DISPARA `addPushTokenListener`.** Pedir el
+   token ES un evento de token. Y el listener de `token-avisos.ts` respondía
+   volviendo a llamar a esta función ⇒ **pedir → evento → pedir**, a velocidad
+   de CPU.
+
+   **Medido en el aparato, no deducido:** `11.100` llamadas a
+   `registrar_push_token` en 10 segundos, con dos `getSession()` cada una
+   (`22.220` cruces a AsyncStorage). El heap de Java llegaba al techo de 256 MB
+   y la app moría por `OutOfMemoryError` a los **2 min 12 s**.
+
+   ⚠️ **Y explica el síntoma exacto que describió el founder —«la app está viva,
+   sólo falla lo que viene de la base»— sin ninguna hipótesis de memoria:** con
+   11 mil peticiones por segundo el pool de OkHttp queda saturado (28 hilos
+   `OkHttp Dispatcher` medidos), así que **las consultas legítimas nunca
+   llegan**. El OOM no era la causa: era la consecuencia.
+   *También explica el cero de DNS: HTTP/2 multiplexa sobre las 5 conexiones
+   que ya estaban abiertas, así que un bucle de consultas no resuelve un
+   nombre más.*
+
+   ── LA CURA, y son DOS guardas porque hacen cosas distintas ───────────────
+   ① **El listener ya no pide un token: registra el del evento**
+      (`registrarTokenConocido`). *Cortar el lazo en su origen es lo único que
+      lo cierra; cualquier freno que igual llame a `getDevicePushTokenAsync`
+      sigue disparando el evento.*
+   ② **No se re-registra un token que no cambió.** Mata el trabajo redundante
+      por cualquier otro camino, presente o futuro.
+   ③ Y un cerrojo de re-entrada, como cinturón: el arranque y la vuelta del
+      fondo pueden coincidir.
+
+   🔴 **LO QUE LA CURA CONSERVA, porque era el motivo del diseño original:** el
+   permiso **se re-verifica igual** antes de registrar. *Registrar el token de
+   un evento sin confirmar que el permiso sigue dado escribiría una dirección
+   que el SO ya no atiende* — esa razón sigue siendo cierta y por eso
+   `registrarTokenConocido` pregunta por el permiso; lo que NO hace es volver a
+   pedir el token.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/** El último token que ESTE proceso registró con éxito. Se reinicia en cada
+ *  arranque frío ⇒ **el arranque siempre sincroniza una vez**, que es lo que
+ *  `D-1056` vino a garantizar. */
+let ultimoTokenRegistrado: string | null = null;
+/** Cerrojo de re-entrada del camino que PIDE token. */
+let pidiendoToken = false;
+
+/**
+ * Registra un token **YA CONOCIDO** — jamás pide uno nuevo.
+ *
+ * 🔴 Es la puerta del listener de rotación: **no puede llamar a
+ * `getDevicePushTokenAsync`**, porque esa llamada es justo lo que dispara el
+ * evento que lo trajo hasta acá.
+ */
+export async function registrarTokenConocido(token: string): Promise<void> {
+  if (typeof token !== 'string' || token.length === 0) return;
+  if (token === ultimoTokenRegistrado) return;
+  try {
+    const modulo = moduloAvisosSiHayNativo();
+    if (modulo === null) return;
+    const { status } = await modulo.getPermissionsAsync();
+    if (status !== 'granted') return;
+    await registrarTokenDeAparato(token, Platform.OS === 'ios' ? 'ios' : 'android');
+    ultimoTokenRegistrado = token;
+  } catch {
+    /* sin módulo nativo (Expo Go / web) esto no existe — y no es un fallo */
+  }
+}
+
 export async function sincronizarTokenSiHayPermiso(): Promise<void> {
+  if (pidiendoToken) return;
+  pidiendoToken = true;
   try {
     const modulo = moduloAvisosSiHayNativo();
     if (modulo === null) return;
@@ -73,10 +144,14 @@ export async function sincronizarTokenSiHayPermiso(): Promise<void> {
     if (status !== 'granted') return;
     const t = await modulo.getDevicePushTokenAsync();
     if (typeof t?.data === 'string' && t.data.length > 0) {
+      if (t.data === ultimoTokenRegistrado) return;
       await registrarTokenDeAparato(t.data, Platform.OS === 'ios' ? 'ios' : 'android');
+      ultimoTokenRegistrado = t.data;
     }
   } catch {
     /* sin módulo nativo (Expo Go / web) esto no existe — y no es un fallo */
+  } finally {
+    pidiendoToken = false;
   }
 }
 

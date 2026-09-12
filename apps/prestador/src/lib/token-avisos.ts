@@ -48,13 +48,13 @@
 import { useEffect } from 'react';
 import { AppState } from 'react-native';
 
-import { sincronizarTokenSiHayPermiso } from '@/components/invitacion-avisos';
+import { registrarTokenConocido, sincronizarTokenSiHayPermiso } from '@/components/invitacion-avisos';
 
 /** El contrato MÍNIMO del listener de rotación. Se declara acá y no se
  *  importan los tipos del paquete: importarlos evaluaría su JS, que es lo que
  *  la sonda existe para no hacer (patrón `permiso-push.ts` / `toque-de-push.ts`). */
 interface ModuloRotacion {
-  addPushTokenListener: (cb: (t: unknown) => void) => { remove: () => void };
+  addPushTokenListener: (cb: (evento: unknown) => void) => { remove: () => void };
 }
 
 /** El nativo, o `null` si el binario no lo trae. Misma sonda que sus dos
@@ -101,12 +101,16 @@ export function useTokenDeAvisosAlDia(): void {
 
     /* ② la rotación en vivo */
     const modulo = moduloRotacionSiHayNativo();
-    const susc = modulo?.addPushTokenListener(() => {
-      /* No se usa el token del evento: **se vuelve a preguntar por el camino
-         normal**, que además re-verifica el permiso. *Registrar el token de un
-         evento sin confirmar que el permiso sigue dado escribiría una
-         dirección que el SO ya no atiende.* */
-      void sincronizarTokenSiHayPermiso();
+    const susc = modulo?.addPushTokenListener((evento) => {
+      /* 🔴 SE USA EL TOKEN DEL EVENTO, y es la mitad que cierra `D-1074`.
+         Antes esto volvía a llamar a `sincronizarTokenSiHayPermiso()`, que
+         pide el token — **y pedir el token dispara este mismo listener**:
+         pedir → evento → pedir, a velocidad de CPU. Medido: 11.100 consultas
+         en 10 s y la app muerta por OOM a los 2 min 12 s.
+         *El permiso se re-verifica igual, adentro de `registrarTokenConocido`:
+         lo que se retira es volver a PEDIR, no volver a VERIFICAR.* */
+      const token = (evento as { data?: unknown } | null)?.data;
+      if (typeof token === 'string' && token.length > 0) void registrarTokenConocido(token);
     });
 
     /* ③ la vuelta del fondo */
