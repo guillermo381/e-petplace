@@ -33231,7 +33231,9 @@ edges estén al día antes de dejar cerrar.
 
 ---
 
-## `D-1074` 🔴 — LA APP QUEDA SIN RESPONDER DESPUÉS DE UN OTA · DOS OCURRENCIAS EL MISMO DÍA
+## `D-1074` ☠️ **CERRADA (12-sep-2026)** — LA APP QUEDA SIN RESPONDER DESPUÉS DE UN OTA · DOS OCURRENCIAS EL MISMO DÍA
+
+> 🔴 **LA CAUSA ESTÁ AL FINAL DE LA FICHA, medida en el aparato: `getDevicePushTokenAsync()` disparaba el listener que volvía a pedir el token — 11.100 consultas cada 10 s.** Todo lo que sigue hasta ahí es el camino, con sus hipótesis muertas declaradas. *Se conserva entero porque la mitad del valor de esta ficha son los descartes.*
 
 **Estado:** ABIERTA · 🔴 **BLOQUEA PRODUCCIÓN** (subida de prioridad, founder 11-sep: *«tres de tres publishes con incidente. Va con lo que bloquea producción»*).
 **Dueño:** A (la red) + C (el botón) · **Fecha límite:** antes del soft launch (1-oct-2026).
@@ -33473,106 +33475,80 @@ adb logcat | grep -iE "lowmemorykiller|am_kill|ANR in|Reason:|FATAL EXCEPTION"
 
 ---
 
-## `D-1074` · EL GUION DE LA CORRIDA QUE CIERRA (12-sep-2026 · para retomar sin re-razonar)
+## `D-1074` ☠️ **CERRADA (12-sep-2026) — PEDIR EL TOKEN DISPARABA EL EVENTO QUE PEDÍA EL TOKEN**
 
-### 🔴 ANTES QUE NADA: LA CAUSALIDAD ESTABA INVERTIDA (reencuadre del founder, y es el que manda)
+### LA CAUSA, con su literal y su número
 
-> *«La app está VIVA. El contenido estático carga, los labels cargan, el menú navega. Sólo falla lo que viene de la BASE — nunca llega el resultado. Y el crash aparece DESPUÉS, por los reintentos.»*
+`getDevicePushTokenAsync()` **dispara `addPushTokenListener`**: pedir el token *es* un evento de token. Y el listener de `token-avisos.ts` respondía **volviendo a llamar a `sincronizarTokenSiHayPermiso()`**, que pide el token.
 
-⇒ **El OOM no es la causa: es la consecuencia de reintentar contra algo que nunca responde.** Y eso explica el cero de DNS **sin ninguna hipótesis de heap**: las peticiones no están saliendo, o salen y no vuelven.
+⇒ **pedir → evento → pedir**, a velocidad de CPU.
 
-⇒ **El eje correcto: en el arranque que aplica el OTA, el acceso a la base nace mal** —*«no le llega el número o el dato correcto»*— y se cura al reiniciar porque el arranque siguiente lo lee bien.
+**Medido en el aparato del founder** (`R5CY201ZDVL`, APK **1.0.7 de producción**, sin `debuggable`):
 
-⚠️ **Lo que esto retira de la ficha, por orden del founder:** el heap y el censo de AsyncStorage **son consecuencias y dejan de ser el frente**. *Perseguimos el humo una noche entera.*
+| Medición | Antes | Después |
+|---|---|---|
+| `registrar_push_token` por ventana de 10 s | **11.100** | **2 en todo el arranque** |
+| `getSession()` / cruces a AsyncStorage por ventana | 22.220 / 22.229 | 0 |
+| Peticiones: salieron / volvieron / pendientes | 11.110 / 299 / **10.811** | 55 / 55 / **0** |
+| Hilos `OkHttp Dispatcher` a los 70 s | **28** | — (hilos totales 91 → 72) |
+| Dalvik Heap a los 15 s → 135 s | 67 → **485 MB** | 15 → **19 MB, plano** |
+| A los 150 s | **muerta, `OutOfMemoryError`** | **viva** |
 
-⚠️ **Y lo que corrige de mis propias lecturas, que llegaron acá como causas y eran víctimas:** `okhttp3…Http2Reader.nextFrame` y `nativeGetString` son pilas **del instante del OOM** — dicen dónde estaba el hilo cuando faltó memoria, no quién la consumió. *Tercera vez que esta ficha cobra la misma confusión.*
+**El OOM, literal:** `java.lang.OutOfMemoryError: Failed to allocate a 56 byte allocation … target footprint 268435456` · `FATAL EXCEPTION: AsyncTask #4` · a los **2 min 12 s** del arranque, reproducido **dos veces**.
 
----
+🔴 **POR QUÉ ESTO EXPLICA EL SÍNTOMA QUE EL FOUNDER DESCRIBIÓ Y NINGUNA HIPÓTESIS DE MEMORIA EXPLICABA** — *«la app está VIVA; el contenido estático carga, el menú navega, sólo falla lo que viene de la BASE»*: con **once mil peticiones por segundo** el pool de OkHttp queda saturado, así que **las consultas legítimas nunca llegan**. *El OOM no era la causa: era la consecuencia de un bucle que también ahogaba la red.* **Su reencuadre —«el crash aparece DESPUÉS, por los reintentos»— fue el que hizo encontrar la causa; la ficha venía persiguiendo el humo.**
 
-### 🔴 PASO 0 · EL TERMÓMETRO QUE LEÍMOS TODA LA NOCHE PUEDE NO MEDIR LO QUE CREÍAMOS
+**Y explica el cero de DNS sin ninguna hipótesis extra:** HTTP/2 multiplexa sobre las conexiones ya abiertas, así que **un bucle de consultas no resuelve un nombre más**. *El dato duro que nos tuvo perdidos era el que mejor encajaba con la causa real.*
 
-**Los 158 MB de piso no son necesariamente memoria asignada.** El vigía (`scripts/s115/vigilar-heap.sh:34`) lee el renglón `Java Heap:` del **App Summary** de `dumpsys meminfo`, y ese renglón es la **suma de `Dalvik Heap` + `.art mmap`**. `.art mmap` es la imagen de ART y los datos de clases: **archivo mapeado, compartido, y NO cuenta contra el límite de asignación que lanza `OutOfMemoryError`**.
-
-🔴 **Su consecuencia, escrita porque es incómoda: parte del diagnóstico de anoche se apoyó en un número que no medía lo que creíamos.** *No se salta y va primero.*
-
-**Cómo se parte — sin build nueva, sin dump, sin `debuggable`:**
-
-```
-adb -s <serial> shell dumpsys meminfo com.epetplace.cliente
-```
-Se leen del **detalle**, no del resumen: `Dalvik Heap` · `Dalvik Other` · `.art mmap` · `.so mmap` · `.dex mmap` · `.oat mmap` · `Native Heap` · `Graphics` · `Unknown`.
-
-```
-adb -s <serial> logcat -d | grep -E "art *:.*GC freed" | tail -20
-```
-La cola de cada línea dice `…, X% free, YYY MB/ZZZ MB, paused …` ⇒ **`YYY/ZZZ` es el heap Dalvik real (usado/reservado), y ÉSE es el que lanza el OOM.** Es el número a vigilar de acá en adelante.
-
-⚠️ Gratis en la misma salida, el bloque `Objects`: **`AppContexts` · `Activities` · `Assets` · `AssetManagers` · `Views`.** *Si alguno aparece duplicado en el arranque que aplica y normal en el siguiente, «hay dos de todo» deja de ser hipótesis.*
+**Cuándo entró:** `77142c10` (**9-sep-2026, S114-C**, `D-1056` — *«el token del aparato, al día en las dos apps»*). **Estaba en LAS DOS APPS** y se curó en las dos.
 
 ---
 
-### PASO 1 · LOS TRES ARRANQUES (el discriminador que el founder corre solo)
+### LA CURA — tres guardas, y hacen cosas distintas
 
-**Forzar «update pendiente» de forma repetible.** El canal tiene historia: cualquier group viejo sirve de segundo estado, y **`republish` no toca el repo** (ya medido en esta ficha).
+① **El listener registra el token DEL EVENTO** (`registrarTokenConocido`) y **jamás pide uno nuevo**. *Cortar el lazo en su origen es lo único que lo cierra: cualquier freno que igual llame a `getDevicePushTokenAsync` sigue disparando el evento.*
+② **No se re-registra un token que no cambió** — mata el trabajo redundante por cualquier otro camino, presente o futuro.
+③ **Cerrojo de re-entrada** como cinturón: el arranque y la vuelta del fondo pueden coincidir.
 
-```
-cd apps/cliente                                  # eas-cli SIEMPRE desde apps/<app>/
-npx eas-cli update:list --branch preview         # elegir A (vigente) y B (cualquiera anterior)
-npx eas-cli update:republish --group <B>
-```
-
-En el teléfono:
-
-1. **Abrir** → corre A y descarga B en segundo plano (~4,4 s medidos). Esperar ~10 s y **cerrar de recientes**.
-2. 🔴 **MODO AVIÓN ON.** *El update ya está en disco y se aplica igual; saca la red de los dos arranques que se comparan, y de paso vuelve a descartar la red gratis.*
-3. **Abrir** → **arranque 2: el que APLICA.** Medir (paso 0). Cerrar de recientes.
-4. **Abrir** → **arranque 3: el control.** Medir. Cerrar.
-5. **Modo avión OFF.** Para repetir: `update:republish --group <A>` y volver al 1.
-
-🔴 **Arranques 2 y 3 corren EL MISMO BUNDLE. La única variable es «aplicar».**
-
-**Cómo confirmar que el 2 fue el que aplicó** (no se asume, se lee): el marcador de `L-160` en **Cuenta → el pie** dice `update <8 chars> · <canal>` — en el arranque 2 tiene que mostrar el id de **B**. *Un arranque que no aplicó es indistinguible de uno que aplicó y no falló.*
-
-**Qué decide:** si el 2 arranca alto y el 3 bajo ⇒ **mecanismo acotado al acto de aplicar**, y la cura se diseña contra eso. Si los dos arrancan igual ⇒ la hipótesis cae y **la build deja de ser opcional**.
-
-⚠️ **Lo que NO sirve para forzarlo:** borrar datos de la app (arrastra sesión y almacenamiento: mueve dos variables) ni reinstalar el APK (vuelve al bundle embebido, que es un tercer estado).
+🔴 **LO QUE LA CURA CONSERVA, porque era el motivo del diseño original:** el permiso **se re-verifica igual** antes de registrar. *Registrar el token de un evento sin confirmar que el permiso sigue dado escribiría una dirección que el SO ya no atiende* — esa razón seguía siendo cierta. **Lo que se retira es volver a PEDIR, no volver a VERIFICAR.** Y `D-1056` queda intacta: el arranque frío sigue sincronizando una vez (el cache es de proceso).
 
 ---
 
-### PASO 2 · LA BUILD — ✅ **FIRMADA POR EL FOUNDER (12-sep-2026), y sólo si el paso 1 no separa**
+### LO QUE CAYÓ EN EL CAMINO, todo medido y no argumentado
 
-**Son dos cosas distintas que se llaman igual, y sólo una sirve:**
+| Hipótesis | Cómo cayó |
+|---|---|
+| **`D-1080`** (los techos cableados a `onAuthStateChange`) | La sonda de arranque: `sesion=sí en 4ms` · `techos=sí aplicados=4 en 268ms`. **La inicialización estaba sana.** |
+| **«Falla una sola vez, en el arranque que aplica el OTA»** | **FALSO**: falla en **todos** los arranques. Medido dos veces con el mismo bundle y sin update pendiente. |
+| **AsyncStorage acumulado** | El censo: **3 claves, 0,00 MB**. La mayor es la sesión, 2,2 KB. **Era víctima, no causa.** |
+| **`.art mmap` inflando el `Java Heap`** (mi hipótesis del paso 0) | **FALSA**: `.art mmap` son **8 MB**. El `Dalvik Heap` real era el que crecía — el termómetro no mentía. |
+| **Bucle de render en el Home** (mía) | `cargarTimelineHogar` cierra en `810` con `[]`. Leí las deps de `cargarMas` como si fueran suyas. |
+| **Bucle en el camino de facturación** (del founder) | `useFacturacion` vive sólo en checkout, un efecto, deps primitivas. |
+| **El canal de Realtime reintentando el join** | Las dos tablas **están** en `supabase_realtime`. |
+| **Dos runtimes en el arranque que aplica** | **Cero `reloadAsync`** en las apps: nunca se relanzan solas. |
 
-☠️ **El perfil `development` que ya existe (`developmentClient: true`) NO SIRVE, y es la trampa porque es lo que uno pide por reflejo.** Corre el JS desde Metro, sin minificar, con herramientas de desarrollo: **es otra app**, con otro perfil de memoria. Y lo definitivo: **un dev client no aplica updates del canal** ⇒ *el arranque que queremos medir no existe ahí.*
-
-✅ **Lo firmado: un APK de RELEASE con `android:debuggable=true`.** Mismo bundle de producción, mismo Hermes, **mismo camino de expo-updates** — y habilita `adb run-as` y `am dumpheap`.
-· **Costo:** un perfil nuevo en `apps/cliente/eas.json` + una rama en `app.config.ts` que agregue el atributo bajo una variable de entorno · un build de EAS (~20 min de nube) · instalación por cable.
-· 🔴 **Su límite, declarado y firmado con ella:** `debuggable=true` **cambia el runtime de ART** — desactiva optimizaciones de JIT y mueve el comportamiento del GC y el tamaño del heap. ⇒ **sirve para nombrar QUÉ objetos ocupan; NO para confiar en el número absoluto.** *Una build que mide distinto no es inútil: es inútil si uno se olvida de que mide distinto.*
-· Parser ya escrito: `scripts/s115/leer-hprof.py` (top 25 clases por bytes; mide lo que **ocupa**, no lo que **retiene**).
-
----
-
-### EL INSTRUMENTO QUE YA ESTÁ CONSTRUIDO Y **NO SE PUBLICA**
-
-`fd334d03` (sobre `7ea871c1`) — **commiteado, sin publicar por orden del founder: *publicar cuesta uno de los arranques que fallan, y esos son escasos.*** Viaja sólo si los pasos 0 y 1 no alcanzan.
-
-Qué imprime, y **nunca un valor**:
-- `[pulso-init] host=… clave=N chars` — qué leyó el cliente al nacer. *Si el bundle salió sin env, se ve en una línea.*
-- `[pulso-init] sesion=sí|NO en Nms` — la lectura de la sesión desde AsyncStorage, **con perro guardián a los 10 s**. 🔴 *El perro es la mitad que importa: si la lectura se cuelga no hay log, y la ausencia de un log se lee igual que una sonda que no corre. A los 10 s el silencio habla.*
-- `[pulso-init] techos=…` — el sospechoso de `D-1080`, con su demora y su propio perro.
-- `[pulso] salieron=N volvieron=M fallaron=K pendientes=N−M−K` — 🔴 *contar sólo las que salen no distingue «no sale» de «sale y nunca vuelve». **Una `pendientes` que sube y no baja es el defecto con nombre.*** Los primeros 30 s se loguea cada petición; después sólo el agregado.
-
-**EL SOSPECHOSO CONCRETO QUE NOMBRÓ EL FOUNDER, medido contra el SDK instalado y no por doctrina** (`@supabase/auth-js 2.110.0`): `_notifyAllSubscribers` **espera a cada callback** (`await x.callback(event, session)`) y se emite **desde adentro de `_acquireLock`**. Nuestro callback de `D-1080` zafa **por poco** —es síncrono y devuelve enseguida—, pero el `from('app_config')` que dispara adentro **va a pedir el candado que el emisor todavía tiene**. *Es estructura real y está en el camino exacto de toda consulta; entró en la ventana de 16 horas que el founder señala.* **No alcanza para afirmarlo, y por eso el instrumento lo nombra en vez de curarlo a ciegas.**
+⚠️ **Y una corrección de lectura que esta ficha cobró TRES veces: `Http2Reader.nextFrame`, `nativeGetString` y `AsyncStorageModule$1` son pilas DEL INSTANTE DEL OOM.** Dicen dónde estaba el hilo cuando faltó memoria, **no quién la consumió**. *Las tres eran víctimas, y las tres se leyeron como causa.* El discriminador que lo prueba estaba a mano y era de una línea: **AsyncStorage tenía 3 claves y 0,00 MB — un `multiGet` de eso no puede asignar nada.**
 
 ---
 
-### LO QUE QUEDA DECLARADO
+### LA LECCIÓN, y no es sobre memoria
 
-- **`D-1074` ABIERTA**, ahora **acotada a la inicialización del acceso a la base en el arranque que aplica un update**. **Bloquea producción.**
-- **`D-1085`** abierta.
-- **Mañana se abren TRES frentes y ninguno más** (orden del founder): **paso 0** → **los tres arranques** → **la build sólo si eso no separa**.
-- El censo de AsyncStorage quedó **retirado del arranque** (`fd334d03`); su archivo sigue en el árbol por si el eje vuelve. El OTA publicado que lo lleva es `8a708b54` (ancla `3ae0b08f`).
-- **El encargo de documentación sigue FRENADO.**
+🔴 **Un bucle de consultas no se ve como un bucle de consultas: se ve como que la base no responde.** Saturar el pool de conexiones hace que las consultas *legítimas* nunca lleguen, así que el síntoma en pantalla es idéntico al de un servidor caído — y el crecimiento de memoria, que es lo ruidoso, llega después y se lleva toda la atención.
+
+⇒ **El instrumento que lo nombró no mide memoria: cuenta actos.** «Cuántas salieron, cuántas volvieron, cuántas quedan pendientes, y a qué ruta.» *Una `pendientes` que sube y no baja es un defecto con nombre; un heap que sube es un defecto sin nombre.* **Con el heap estuvimos una noche; con el contador, diez segundos.**
+
+⚠️ **Y el corolario de método, que es del founder:** *cuando una pila aparece en el momento del OOM, la pregunta no es «qué hace esa pila» sino «¿podría esa pila haber asignado tanto?»* — y esa segunda pregunta casi siempre se contesta con un dato que ya se tiene.
+
+---
+
+### OPERATIVO DEL CIERRE
+
+- **Cura:** `66aa77b6` (las dos apps) · **retiro del instrumento en el mismo acto:** `d181f9b8`.
+- **OTA final, mismo ancla `d181f9b8`, runtime 1.0.7:** cliente `75c64bb4` · prestador `4e55281b`.
+- **Gate en el aparato, sobre el bundle definitivo:** cliente **20 MB plano a los 120 s** · prestador **7 MB plano a los 120 s**. Las dos vivas.
+- La sonda (`pulso.ts`, `pulso-almacenamiento.ts`, `censo-almacenamiento.ts`) queda en el árbol **sin consumidores**, por si el eje vuelve.
+- ⚠️ **La build con `debuggable` que el founder firmó NO hizo falta** y no se construyó: el paso 1 separó antes. *La firma queda en pie para el día que un dump sea el único camino.*
+- **`D-1074` deja de bloquear producción.**
 
 ---
 
