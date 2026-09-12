@@ -145,7 +145,10 @@
     "verify:edge-desplegada": "node scripts/verify-edge-desplegada.mjs",
     "edge:desplegar": "node scripts/edge-desplegar.mjs",
     "verify:techo-de-red": "tsx scripts/verify-techo-de-red.ts",
-    "verify:techo-vive": "tsx scripts/s115/verify-techo-vive.mjs"
+    "verify:techo-vive": "tsx scripts/s115/verify-techo-vive.mjs",
+    "verify:error-no-pegado": "node scripts/s115/verify-error-no-pegado.mjs",
+    "verify:fee-por-fecha-servicio": "node scripts/s115/verify-fee-por-fecha-servicio.mjs",
+    "verify:rename-seguro": "node scripts/s115/verify-rename-seguro.mjs"
   },
   "devDependencies": {
     "eslint": "^10.9.1",
