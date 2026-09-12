@@ -2042,3 +2042,7 @@ export type {
 } from './wrappers/economico';
 export { tresNumerosDelPrestador, configuracionPago, fechaDeVigenciaPorDefecto } from './wrappers/economico';
 export type { TresNumeros, ConfiguracionPago } from './wrappers/economico';
+
+/* El techo de tiempo de la red (`D-1070`) y su lector. */
+export { SIN_RED, esSinRed, fijarTechosDeRed, techosVigentes, claseDeLlamada, cargarTechosDeRed } from './red';
+export type { ClaseDeLlamada } from './red';
