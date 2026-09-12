@@ -108,6 +108,24 @@ Deno.serve(async (req) => {
     identificacion: Object.fromEntries(identRows.map((i) => [i.codigo, i.codigo_sri])),
   };
 
+  /* 🔴 SE NIEGA A EMITIR CON CÓDIGO VIEJO (`D-1073`). Tercera vez de `L-536`,
+     y la que la convirtió en guard: emití con esta misma edge desatrasada, tomó
+     un secuencial de NUESTRO contador para un documento que numera el proveedor,
+     y **el `000000005` quedó quemado**. El gate lo sabía y la decisión de
+     consultarlo vivía en la memoria de alguien.
+
+     ⚠️ Lo que este guard ve y lo que NO: ve **migraciones aplicadas después de
+     mi despliegue** —que es el caso que costó el secuencial—; **no ve** un
+     cambio de código sin migración. Para eso sigue `verify:edge-desplegada`,
+     que compara firmas de verdad desde afuera. *Son dos instrumentos y ninguno
+     reemplaza al otro.* */
+  const { data: alDia } = await db.rpc('edge_esta_al_dia', { p_slug: 'fiscal-emitir' });
+  if (alDia && (alDia as { al_dia?: boolean }).al_dia === false) {
+    return json({ ok: false, codigo: 'edge_desactualizada',
+      detalle: 'Hay migraciones aplicadas despues de mi despliegue. No emito con codigo viejo.',
+      diagnostico: alDia }, 409);
+  }
+
   /* 🔴 LA CAPACIDAD SE PREGUNTA UNA VEZ Y SE DECLARA EN EL PARTE. Un proveedor
      que acepta nuestro secuencial y otro que numera él son dos motores, y la
      diferencia **no tiene síntoma**: los dos contestan «autorizada». */
