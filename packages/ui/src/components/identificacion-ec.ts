@@ -199,12 +199,21 @@ function cierraComoSociedadPrivada(valor: string): boolean {
  * el pipeline ya sabe manejar. Con 3 de 13 fallando, el verificador no
  * distingue lo bueno de lo malo.»*
  *
- * ⚠️ **Nota de precisión, medida y reportada:** la firma dice **3 de 13** e
- * incluye a `1713744546001` (TOGA FASHION). **Medido con la cuenta a la vista,
- * ése SÍ cierra** —suma 44 ⇒ dv 6, impreso 6— así que **son 2 de 13**. *La
- * decisión no cambia con el número —dos RUC reales rechazados, uno el nuestro,
- * y el costo sigue siendo asimétrico— pero el número se corrige acá para que
- * nadie lo herede mal.*
+ * ⚠️ **EL NÚMERO EXACTO, y su historia, porque enseña más que el número:** la
+ * firma dijo primero **3 de 13**, incluyendo a `1713744546001` (TOGA FASHION).
+ * Medido con la cuenta a la vista, **ése SÍ cierra** —suma 44 ⇒ dv 6, impreso
+ * 6—. **El founder encontró la causa de su propio dato: su script había
+ * aplicado los coeficientes de SOCIEDADES a un RUC de PERSONA NATURAL.**
+ *
+ * 🔴 *Es exactamente el defecto que esta firma vino a corregir —elegir mal la
+ * rama— cometido AL MEDIRLO.* Un instrumento que replica el defecto que mide
+ * produce un dato verosímil y falso, y el único motivo por el que se vio es que
+ * dos mediciones no coincidieron y se le preguntó al objeto cuál era cuál.
+ *
+ * ⇒ **El número final: 2 de 13 en total, y los dos de SOCIEDAD PRIVADA — o sea
+ * 2 de 11 en esa rama** (medido: de los 13 reales, 11 son sociedad privada, 1
+ * sector público y 1 persona natural). *El denominador de la rama es el que
+ * sostiene la decisión: ahí el verificador falla casi uno de cada cinco.*
  *
  * ── QUÉ BLOQUEA AHORA, Y QUÉ SÓLO SE REPORTA ──────────────────────────────
  * **BLOQUEA** (la FORMA): 13 dígitos · provincia 01–24 o 30 · establecimiento

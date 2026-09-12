@@ -127,8 +127,10 @@ const RUCS_DE_PRODUCCION = [
 
 /* 🔴🔴 LOS DOS QUE **NO CIERRAN**, Y NO SE ESCONDEN.
  *
- * Son de comprobantes autorizados igual que los once de arriba, **y uno es el
- * NUESTRO** —está en `docs/legal/POLITICA-PRIVACIDAD-APP.md`, en
+ * **Son 2 de los 11 de SOCIEDAD PRIVADA** —casi uno de cada cinco— y ése es el
+ * denominador que sostiene la firma, no el 2/13 del total: los dos fallan en la
+ * misma rama. Son de comprobantes autorizados igual que los once de arriba,
+ * **y uno es el NUESTRO** —está en `docs/legal/POLITICA-PRIVACIDAD-APP.md`, en
  * `MODELO_FISCAL` y en las facturas que A ya emitió—. Fallan el módulo 11 de
  * sociedades **con las CUATRO variantes probadas** (con y sin la convención
  * 10→1, resto directo, y `(11−resto)%11`), mientras las otras nueve pasan con
