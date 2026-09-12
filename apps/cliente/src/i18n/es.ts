@@ -4722,4 +4722,20 @@ export const clienteEs = {
     llega: 'Tu factura electrónica llega por correo en unos minutos, aparte de este comprobante.',
   },
 
+  /* S115-C · LA SESIÓN CORTADA. 🔴 «Cortada» NO es «te desconectamos»: es «el
+     refresco no está volviendo», y **puede revivir sola en la próxima vuelta**.
+     Por eso la voz dice que estamos reconectando y JAMÁS «vuelve a entrar»:
+     mandar a re-loguear a alguien cuya sesión va a volver sola le hace perder lo
+     que estaba haciendo por un problema que se iba a resolver. */
+  sesion: {
+    cortadaTitulo: 'Tu sesión se cortó',
+    /* El hecho, y la sospecha COMO sospecha — igual que en «no cargó». */
+    cortadaDetalle: 'Estamos reconectando. Puede volver sola en un momento.',
+    /* Sin sesión SÍ hay que entrar: no hay nada que reconectar. Son dos
+       situaciones distintas y por eso tienen dos voces. */
+    sinSesionTitulo: 'Necesitas volver a entrar',
+    sinSesionDetalle: 'Tu sesión ya no está activa.',
+    entrar: 'Entrar',
+  },
+
 } as const;

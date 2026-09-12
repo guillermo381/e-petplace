@@ -76,11 +76,13 @@ import {
   fiscalObtenerTaxProfile,
   fiscalGuardarTaxProfile,
   obtenerMiPerfil,
+  estadoDeSesion,
   type TaxProfile,
 } from '@epetplace/api';
 import { formatearPrecio } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
+import type { MotivoNoCargo } from '@/components/aviso-no-cargo';
 
 const VACIO: DatosIdentificacion = {
   tipo: 'cedula',
@@ -388,6 +390,8 @@ export interface FacturacionLista {
   /** 🔴 `true` = la consulta no volvió. **Es distinto de «todavía no»**, y la
    *  pantalla tiene que poder decirlo y ofrecer reintentar. */
   noCargo: boolean;
+  /** Por qué no cargó: decide la voz y si se ofrece entrar o reintentar. */
+  motivo: MotivoNoCargo;
   /** 🔴 `true` mientras un reintento está en vuelo: **el aviso se queda y el
    *  botón gira**. Un reintento sin señal es indistinguible de un botón roto. */
   reintentando: boolean;
@@ -413,6 +417,9 @@ export function useFacturacion(activo: boolean): FacturacionLista {
      tocar el botón y la pantalla queda vacía hasta el techo — desde afuera,
      idéntico a un botón muerto, y la persona lo toca cinco veces.* */
   const [reintentando, setReintentando] = useState(false);
+  /* 🔴 POR QUÉ no cargó. Se pregunta SÓLO cuando ya falló: *consultarlo siempre
+     agregaría un viaje al camino feliz para un dato que casi nunca se usa.* */
+  const [motivo, setMotivo] = useState<MotivoNoCargo>('red');
   const [perfil, setPerfil] = useState<TaxProfile | null>(null);
   const [nombrePersona, setNombrePersona] = useState<string | null>(null);
   const [correo, setCorreo] = useState('');
@@ -461,7 +468,16 @@ export function useFacturacion(activo: boolean): FacturacionLista {
          compra si a alguien se le piden sus datos. */
       /* Fail-closed en el VALOR (sin tope no se cae a 50) y hablado en la
          FORMA: el fallo se dice, no se queda en silencio. */
-      setTope(rTope.ok ? rTope.data : 'noCargo');
+      if (rTope.ok) {
+        setTope(rTope.data);
+      } else {
+        /* La sesión decide el mensaje: «no cargó» mandó al founder a mirar la
+           red cuatro veces cuando lo que pasaba era el refresco. */
+        const s = await estadoDeSesion();
+        if (!vigente) return;
+        setMotivo(s === 'cortada' ? 'sesionCortada' : s === 'sin_sesion' ? 'sinSesion' : 'red');
+        setTope('noCargo');
+      }
       setReintentando(false);
       if (rPerfil.ok) setPerfil(perfilUsable(rPerfil.data));
       if (rYo.ok) setNombrePersona(rYo.data.nombre);
@@ -566,6 +582,7 @@ export function useFacturacion(activo: boolean): FacturacionLista {
     /* `noCargo` viaja como props: la sección lo dibuja con su reintento. Antes
        `null` significaba las dos cosas y la pantalla no podía distinguirlas. */
     noCargo: tope === 'noCargo',
+    motivo,
     reintentar: () => {
       setReintentando(true);
       setTope('cargando');

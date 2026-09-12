@@ -27,33 +27,71 @@
  * («no cargó») y la sospecha como sospecha («puede ser la conexión»).
  */
 import { View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Boton, Texto, spacing } from '@epetplace/ui';
 
 import { useTraduccion } from '@/i18n';
 
+/** Por qué no cargó. 🔴 Son TRES y no uno, porque mandan a mirar lugares
+ *  distintos: la red, el refresco de la sesión, o la puerta de entrada.
+ *  *Cuatro veces el founder se colgó y el mensaje genérico lo mandó a buscar del
+ *  lado equivocado las cuatro.* */
+export type MotivoNoCargo = 'red' | 'sesionCortada' | 'sinSesion';
+
 export function AvisoNoCargo({
   onReintentar,
   reintentando = false,
+  motivo = 'red',
 }: {
   onReintentar: () => void;
+  /** 🔴 `sesionCortada` **NO es «te desconectamos»**: es «el refresco no está
+   *  volviendo», y **puede revivir sola**. Por eso ese caso ofrece reintentar y
+   *  **jamás manda a entrar de nuevo** — *mandar a re-loguear a alguien cuya
+   *  sesión va a volver sola le hace perder lo que estaba haciendo por un
+   *  problema que se iba a resolver.* `sinSesion` sí manda a entrar: ahí no hay
+   *  nada que reconectar. */
+  motivo?: MotivoNoCargo;
   /** 🔴 Mientras es true el botón GIRA y el aviso se queda. Sin esto, tocar
    *  reintentar hacía desaparecer todo y dejaba la pantalla vacía hasta el
    *  techo — 8 segundos que se leen como «el botón no hace nada». */
   reintentando?: boolean;
 }) {
   const { t } = useTraduccion();
+  const router = useRouter();
+
+  /* La voz sale de un mapa EXHAUSTIVO por motivo, no de concatenar: si mañana
+     nace un cuarto motivo, el tsc lo exige acá en vez de dejar una key rota en
+     pantalla. *(La lección del `identificacion.etiqueta.null`.)* */
+  const VOZ: Record<MotivoNoCargo, { titulo: string; detalle: string }> = {
+    red: { titulo: t('noCargo.titulo'), detalle: t('noCargo.detalle') },
+    sesionCortada: { titulo: t('sesion.cortadaTitulo'), detalle: t('sesion.cortadaDetalle') },
+    sinSesion: { titulo: t('sesion.sinSesionTitulo'), detalle: t('sesion.sinSesionDetalle') },
+  };
+  const voz = VOZ[motivo];
+
   return (
     <View style={{ gap: spacing[3] }}>
       <View style={{ gap: spacing[1] }}>
-        <Texto variante="seccion">{t('noCargo.titulo')}</Texto>
-        <Texto variante="apoyo">{t('noCargo.detalle')}</Texto>
+        <Texto variante="seccion">{voz.titulo}</Texto>
+        <Texto variante="apoyo">{voz.detalle}</Texto>
       </View>
-      <Boton
-        variante="secundario"
-        etiqueta={t('noCargo.reintentar')}
-        cargando={reintentando}
-        onPress={onReintentar}
-      />
+      {/* 🔴 Sólo `sinSesion` manda a entrar. Con la sesión CORTADA se ofrece
+          reintentar, porque puede volver sola — y el reintento sigue siendo del
+          dedo, jamás automático. */}
+      {motivo === 'sinSesion' ? (
+        <Boton
+          variante="secundario"
+          etiqueta={t('sesion.entrar')}
+          onPress={() => router.replace('/login')}
+        />
+      ) : (
+        <Boton
+          variante="secundario"
+          etiqueta={t('noCargo.reintentar')}
+          cargando={reintentando}
+          onPress={onReintentar}
+        />
+      )}
     </View>
   );
 }

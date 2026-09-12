@@ -335,7 +335,11 @@ export default function ConfirmarPrograma() {
         {/* Compra SUELTA ⇒ sin `recurrente`: DeUna se puede elegir. */}
         {facturacion.props === null ? (
             facturacion.noCargo || facturacion.reintentando ? (
-              <AvisoNoCargo onReintentar={facturacion.reintentar} reintentando={facturacion.reintentando} />
+              <AvisoNoCargo
+                onReintentar={facturacion.reintentar}
+                reintentando={facturacion.reintentando}
+                motivo={facturacion.motivo}
+              />
             ) : null
           ) : (
           <SeccionFacturacion {...facturacion.props} total={precio} />

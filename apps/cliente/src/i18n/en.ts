@@ -3425,4 +3425,12 @@ export const clienteEn = {
     llega: 'Your electronic invoice arrives by email in a few minutes, separately from this receipt.',
   },
 
+  sesion: {
+    cortadaTitulo: 'Your session dropped',
+    cortadaDetalle: 'We are reconnecting. It may come back on its own in a moment.',
+    sinSesionTitulo: 'You need to sign in again',
+    sinSesionDetalle: 'Your session is no longer active.',
+    entrar: 'Sign in',
+  },
+
 } as const satisfies Espejo<typeof clienteEs>;
