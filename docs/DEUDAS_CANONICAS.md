@@ -33043,3 +33043,58 @@ encontró **C**, que le pasó a B el control que lo reproducía (`S115-C-para-B-
 R90-no-caza-el-regex-en-constante.md`). *El instrumento lo arregló su dueño con
 el rojo que le trajo quien lo sufría* — que es la forma que esta casa ya firmó
 en `L-459` y acá se cumplió sola.
+
+---
+
+### `D-1071` ☠️ CERRADA EN EL MISMO DÍA · LA MITAD DEL CATÁLOGO DE SERVICIOS NO SE PODÍA COBRAR
+
+**Lo destapó el founder COMPRANDO, no un gate** — y eso es lo que la ficha
+conserva.
+
+**Medido el 12-sep-2026:** `pagos-cobro` exige que alguna línea declare su tasa
+nominal. `cita_desglose` guardaba `subtotal · impuesto · total · moneda` y
+**ningún código** ⇒ toda cita con IVA > 0 rebotaba `iva_sin_tasa_declarada`.
+
+```
+EC_IVA_0    15 tipos activos   ✓ cobraban   (consulta, cirugía, laboratorio…)
+EC_IVA_15   15 tipos activos   🔴 NO        (paseo, grooming, guardería, hotel,
+                                             adiestramiento…)
+```
+
+**La mitad exacta.** Y la despensa funcionaba porque sus líneas salen de
+`pedido_items`, que sí traen `impuesto_pct` — *por eso el defecto se veía como
+«reserva no cobra y despensa sí», que apunta al lugar equivocado.*
+
+🔴 **POR QUÉ NINGÚN INSTRUMENTO LO VIO, que es lo que hay que no repetir:** los
+15 que pasaban eran los **exentos**. Un cobro de consulta médica anda perfecto y
+un gate que prueba «el cobro funciona» sale verde. *El instrumento medía la
+mitad del catálogo y su verde se leía como salud del todo.*
+
+**La cura, y lo que la vuelve incómoda:** el trigger `_trg_cita_congela_desglose`
+**ya resolvía `codigo_iva` y `tarifa_pct`** —los usa para calcular el impuesto—
+**y los descartaba.** El dato estaba a una línea de distancia.
+
+**Firma del founder sobre la forma:** la tasa **se congela con el precio**, no
+se resuelve al cobrar. *Una tasa resuelta al cobrar cambia bajo los pies y
+produce un comprobante que no cuadra con lo que la familia aceptó.* Mismo molde
+que `pedido_items`.
+
+**Y el guard NO se aflojó:** sin tasa declarada sigue sin cobrar. *Aflojarlo
+habría hecho pasar el mismo comprobante sin tasa — el defecto con otra cara.*
+
+**Backfill declarado con su conteo:** `0 de 71 → 71 (+71)`, con la tarifa
+vigente **a la fecha del servicio** y no la de hoy — *backfillear con la tarifa
+actual reescribiría el pasado con un número que en su momento no regía.*
+
+**El control que nace con la ficha:** `pnpm verify:tasa-cobrable` mide que
+**TODOS** los tipos activos resuelvan su tasa, no sólo los exentos — con el
+brazo que discrimina (*si el catálogo fuera todo exento, el gate pasaría sin
+medir nada*).
+
+**Cierra** con la migración `20260912730000`, la edge `pagos-cobro` desplegada y
+el gate verde: `30 de 30 tipos · 15 gravados · 71 de 71 desgloses con tasa`.
+
+⚠️ **Lo que NO cierra con ella y va aparte:** la voz. Un rechazo determinista
+decía *«probá de nuevo en otro momento»* e hizo que el founder intentara **tres
+veces** sobre algo que no iba a funcionar nunca. Partición de los 31 códigos en
+el buzón a C.
