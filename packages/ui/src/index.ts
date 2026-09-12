@@ -1481,6 +1481,8 @@ export {
   esClaveAccesoValida,
   esIdentificacionValida,
   esRucValido,
+  verificarRuc,
+  type VerificacionRuc,
   soloAlfanumerico,
   soloDigitos,
   type TipoIdentificacion,

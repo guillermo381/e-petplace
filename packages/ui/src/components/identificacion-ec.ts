@@ -165,62 +165,127 @@ function modulo11(digitos: string, coeficientes: readonly number[]): number {
   return 11 - resto === 10 ? 1 : 11 - resto
 }
 
-/** Persona natural: los diez primeros son una cédula válida y el
- *  establecimiento no puede ser `000`. **El establecimiento son los TRES
- *  últimos** — `slice(10)` —, que es lo que da «001» y no «6001». */
-function esRucDePersonaNatural(valor: string): boolean {
-  return esCedulaValida(valor.slice(0, 10)) && valor.slice(10) !== '000'
+/* Las tres ramas, **sólo su ARITMÉTICA**: el establecimiento no se mira acá
+   porque es FORMA y vive en `establecimientoValido`. *Cada cosa en el veredicto
+   que le toca — si el establecimiento estuviera en las dos, un `000` bajaría el
+   dígito verificado además de bloquear, y la advertencia diría algo que no es.* */
+
+/** Persona natural: los diez primeros son una cédula válida. */
+function cierraComoPersonaNatural(valor: string): boolean {
+  return esCedulaValida(valor.slice(0, 10))
 }
 
-/** Sector público: módulo 11 sobre los OCHO primeros, verificador en el noveno
- *  y establecimiento de CUATRO dígitos. */
-function esRucDeSectorPublico(valor: string): boolean {
-  return modulo11(valor, COEF_PUBLICO) === Number(valor[8]) && valor.slice(9) !== '0000'
+/** Sector público: módulo 11 sobre los OCHO primeros, verificador en el noveno. */
+function cierraComoSectorPublico(valor: string): boolean {
+  return modulo11(valor, COEF_PUBLICO) === Number(valor[8])
 }
 
-/** Sociedad privada: módulo 11 sobre los NUEVE primeros, verificador en el
- *  décimo y establecimiento de tres. */
-function esRucDeSociedadPrivada(valor: string): boolean {
-  return modulo11(valor, COEF_PRIVADO) === Number(valor[9]) && valor.slice(10) !== '000'
+/** Sociedad privada: módulo 11 sobre los NUEVE primeros, verificador en el décimo. */
+function cierraComoSociedadPrivada(valor: string): boolean {
+  return modulo11(valor, COEF_PRIVADO) === Number(valor[9])
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
- * ⏪☠️ **LA RAMA YA NO SE ELIGE POR EL TERCER DÍGITO: SE PRUEBAN LAS TRES Y
- *    ALCANZA CON QUE UNA CIERRE** (firma del founder, 11-sep-2026).
+ * ⏪☠️ **EL DÍGITO VERIFICADOR DEL RUC DEJA DE BLOQUEAR: PASA A ADVERTENCIA**
+ *    (firma del founder, 12-sep-2026).
  *
- * Su razón: *«es exactamente lo que acabamos de retirar de la cédula. Una
- * convención que decide QUÉ algoritmo aplicar es más frágil que la aritmética
- * que valida — y ya demostró estar vencida.»*
+ * 🔴 **EL DATO QUE LO DECIDE:** de **13 RUC de comprobantes AUTORIZADOS por el
+ * SRI, DOS no cierran su dígito verificador** —y uno es **el nuestro**,
+ * `1793240435001`, con el que ya se emitieron facturas—. Probadas cuatro
+ * variantes del módulo 11: ninguna los valida.
  *
- * **El caso:** `1762613006001` es un RUC activo de persona natural, derivado de
- * una cédula impresa en siete facturas autorizadas. Su tercer dígito es 6, así
- * que la convención lo mandaba a **sector público** y lo rechazaba —por módulo
- * 11 (dv 7 contra el 0 impreso) y de paso por establecimiento («6001» en vez de
- * «001»)—. Con las tres ramas **cierra por persona natural**, y el
- * establecimiento sale **«001»** ✓.
+ * Su razón, verbatim: *«el costo de rechazar un RUC real es un cliente que no
+ * puede facturar; el costo de aceptar uno malformado es un rebote del SRI que
+ * el pipeline ya sabe manejar. Con 3 de 13 fallando, el verificador no
+ * distingue lo bueno de lo malo.»*
  *
- * ── EL COSTO DEL ENSANCHE, MEDIDO Y NO ESTIMADO ─────────────────────────
- * Sobre 585 mutaciones de un dígito de cinco RUC reales: **de 104 aceptadas a
- * 192 · factor 1,85×.** *Probar tres puertas en vez de una casi duplica lo que
- * pasa, y se dice en vez de descubrirse después.* Se acepta porque **el costo
- * de rechazar a un contribuyente real es mayor que el de aceptar un número
- * malformado que el SRI va a rebotar igual** — la misma razón con la que cayó
- * la regla del tercer dígito de la cédula.
- * ⚠️ Y buena parte de ese 1,85× **ya existía**: el establecimiento (los tres
- * últimos) **no lo protege ningún verificador**, así que sus mutaciones pasaban
- * antes y siguen pasando.
+ * ⚠️ **EL NÚMERO EXACTO, y su historia, porque enseña más que el número:** la
+ * firma dijo primero **3 de 13**, incluyendo a `1713744546001` (TOGA FASHION).
+ * Medido con la cuenta a la vista, **ése SÍ cierra** —suma 44 ⇒ dv 6, impreso
+ * 6—. **El founder encontró la causa de su propio dato: su script había
+ * aplicado los coeficientes de SOCIEDADES a un RUC de PERSONA NATURAL.**
+ *
+ * 🔴 *Es exactamente el defecto que esta firma vino a corregir —elegir mal la
+ * rama— cometido AL MEDIRLO.* Un instrumento que replica el defecto que mide
+ * produce un dato verosímil y falso, y el único motivo por el que se vio es que
+ * dos mediciones no coincidieron y se le preguntó al objeto cuál era cuál.
+ *
+ * ⇒ **El número final: 2 de 13 en total, y los dos de SOCIEDAD PRIVADA — o sea
+ * 2 de 11 en esa rama** (medido: de los 13 reales, 11 son sociedad privada, 1
+ * sector público y 1 persona natural). *El denominador de la rama es el que
+ * sostiene la decisión: ahí el verificador falla casi uno de cada cinco.*
+ *
+ * ── QUÉ BLOQUEA AHORA, Y QUÉ SÓLO SE REPORTA ──────────────────────────────
+ * **BLOQUEA** (la FORMA): 13 dígitos · provincia 01–24 o 30 · establecimiento
+ * ≠ `000` · **tercer dígito coherente con alguna de las tres familias**
+ * (0–6 o 9; el 7 y el 8 no pertenecen a ninguna).
+ *
+ * **NO BLOQUEA** (se calcula y se reporta): el dígito verificador. Si no
+ * cierra, `verificarRuc().digitoVerificado` viene en `false` y quien emite
+ * marca el documento como **«identificación no verificada» y sigue** — *el SRI
+ * lo va a rechazar si está mal, y ahí nos enteramos por el camino que ya
+ * existe.*
+ *
+ * ── 🔴 Y LA CÉDULA **NO** CAMBIA. LA ASIMETRÍA ES DEL DATO, NO DE COMODIDAD ─
+ * En la cédula el **módulo 10 SIGUE BLOQUEANDO**, y eso **no es una
+ * inconsistencia que alguien deba «emparejar» después**:
+ *   · **la única cédula real que tenemos la VALIDA**, y sus **90 mutaciones
+ *     fallaron** — ahí el verificador *sí* distingue lo bueno de lo malo;
+ *   · el del RUC **falla sobre 2 de 13 reales** — ahí no distingue nada.
+ * *Dos reglas distintas porque los datos son distintos. Emparejarlas sería
+ * cambiar una decisión medida por una simetría estética.*
  * ═══════════════════════════════════════════════════════════════════════════ */
-export function esRucValido(valor: string): boolean {
-  if (!/^\d{13}$/.test(valor)) return false
+
+/** Las tres familias del RUC por su tercer dígito. El 7 y el 8 no pertenecen a
+ *  ninguna — **y eso SÍ bloquea**, porque es barato y no rechaza reales: ningún
+ *  RUC de producción los tiene. */
+function familiaReconocida(valor: string): boolean {
+  const t = Number(valor[2])
+  return (t >= 0 && t <= 6) || t === 9
+}
+
+/** El establecimiento: los TRES últimos, y `000` no existe. */
+function establecimientoValido(valor: string): boolean {
+  return valor.slice(10) !== '000'
+}
+
+export interface VerificacionRuc {
+  /** La FORMA. **Esto bloquea** — ver el bloque de arriba. */
+  formaValida: boolean
+  /** El dígito verificador. 🔴 **NO bloquea**: quien emite marca el documento
+   *  como «identificación no verificada» y sigue. `false` con `formaValida` en
+   *  `true` es exactamente ese caso. */
+  digitoVerificado: boolean
+}
+
+/** El RUC, con sus DOS veredictos separados. Se exporta porque **quien emite
+ *  necesita los dos**: la forma para dejar pasar, el dígito para marcar. */
+export function verificarRuc(valor: string): VerificacionRuc {
+  if (!/^\d{13}$/.test(valor)) return { formaValida: false, digitoVerificado: false }
 
   const provincia = Number(valor.slice(0, 2))
-  if ((provincia < 1 || provincia > 24) && provincia !== 30) return false
+  const forma =
+    ((provincia >= 1 && provincia <= 24) || provincia === 30) &&
+    familiaReconocida(valor) &&
+    establecimientoValido(valor)
 
-  return (
-    esRucDePersonaNatural(valor) ||
-    esRucDeSectorPublico(valor) ||
-    esRucDeSociedadPrivada(valor)
-  )
+  /* El verificador se calcula IGUAL aunque no bloquee — si no se calculara, no
+     habría nada que reportar y la advertencia sería una promesa vacía.
+     Se prueban las tres ramas (firma del 11-sep): la rama no se elige por el
+     tercer dígito, se prueba cuál cierra. */
+  const digito =
+    cierraComoPersonaNatural(valor) ||
+    cierraComoSectorPublico(valor) ||
+    cierraComoSociedadPrivada(valor)
+
+  return { formaValida: forma, digitoVerificado: forma && digito }
+}
+
+/** `true` si el RUC **puede usarse**. Es la FORMA, no el dígito verificador
+ *  (ver el bloque de arriba). Quien necesite saber si el dígito cerró usa
+ *  `verificarRuc`. */
+export function esRucValido(valor: string): boolean {
+  return verificarRuc(valor).formaValida
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

@@ -75,7 +75,7 @@
     "verify:cotejo": "node scripts/ia/cotejar-verdad.mjs",
     "verify:d485-familia-lee": "node scripts/verify-s112a-d485-familia-lee.mjs",
     "verify:diseno": "node scripts/verify-diseno.mjs",
-    "verify:identificacion-ec": "node scripts/verify-identificacion-ec.mjs",
+    "verify:identificacion-ec": "tsx scripts/verify-identificacion-ec.ts",
     "verify:plata": "tsx scripts/verify-plata.ts",
     "verify:reintento-visible": "node scripts/s115/verify-reintento-visible.mjs",
     "verify:perfil-fantasma": "node scripts/s115/verify-perfil-fantasma.mjs",
