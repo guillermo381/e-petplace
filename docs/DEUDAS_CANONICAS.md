@@ -33546,3 +33546,33 @@ Buscando cerrar `D-1068` sin esperar a Nuvei, censé el `payload_crudo` entero. 
 **Lo que lo destraba es un solo pago con tarjeta de DÉBITO.** Si ahí `installments_type` dice otra cosa, el campo discrimina y `D-1068` se cierra sin Erick. Si dice `Revolving credit` igual, es una constante y no sirve.
 
 **Y mejora la pregunta a Erick**, que es lo barato de hoy: en vez de *«¿hay un campo de funding type?»* → **«¿`installments_type` dice `Revolving credit` para crédito y otra cosa para débito, o es constante?»** *Una pregunta que nombra el campo se contesta en una línea; una que pregunta si existe se contesta en una reunión.*
+
+---
+
+## `D-1083` 🔴 — EL PROVEEDOR EMITIÓ DOS FACTURAS QUE NUESTRA BASE NO REGISTRA
+
+**Estado:** ABIERTA · **BLOQUEA PRODUCCIÓN.** **Dueño:** A. **Encontrado por:** la primera corrida del reloj (12-sep-2026, 05:36).
+
+**Lo que pasó, medido de punta a punta.** El reloj procesó 4, emitió 2 y rebotó 2. Los dos rebotes fueron `numero_ajeno_rechazado: clave_con_otra_fecha` — **mi propio guard de numeración ajena (`S115-A`) cazando su primer caso real**: la fila decía `11092026` y la clave que devolvió Factuplan empieza en `12092026`.
+
+🔴 **El guard hizo bien su trabajo y llegó tarde.** Dos minutos después llegaron **dos webhooks `invoice.authorized`, con firma verificada**, y el buzón los resolvió como **`documento_no_encontrado`**. Sus claves:
+
+```
+1209202601179324043500110010020000000082332182717   ← secuencial 000000008
+1209202601179324043500110010020000000070632835412   ← secuencial 000000007
+```
+
+⇒ **Factuplan creó, firmó y autorizó dos comprobantes bajo el RUC de Satori, quemó los secuenciales 7 y 8, y nuestra base no tiene fila para ninguno.** El rechazo fue nuestro y fue **después** de que el documento existiera del otro lado.
+
+*El guard protege la coherencia de NUESTRA numeración; no puede deshacer lo que el proveedor ya hizo.* **Rechazar no es cancelar.**
+
+**Por qué hoy no duele y por qué en octubre sí.** Ambiente 1: sin efecto fiscal y los documentos se borran cada hora. **En producción serían dos facturas autorizadas fuera de los libros** — y el SRI las tiene aunque nosotros no.
+
+**Las tres curas candidatas, ninguna aplicada:**
+1. **No pedir la emisión con una fecha que no es la de hoy.** La causa raíz es que un documento nacido ayer se emitió hoy: el guard compara `left(clave,8)` contra `fecha_emision` de la fila. **Antes de emitir, si la fecha de la fila no es la de hoy, el documento se re-fecha o no se manda.** *Es la más barata y ataca la causa.*
+2. **Guardar la referencia del proveedor ANTES de validar la clave** — así un webhook posterior encuentra su fila aunque el documento haya quedado en `no_autorizada`, y el huérfano se ve.
+3. **Un barrido de huérfanos**: `documento_no_encontrado` en `fiscal_webhook_eventos` es hoy la única traza, y nadie la lee. El lector de salud tendría que contarla.
+
+⚠️ **Y una cuarta que NO es cura y hay que nombrarla para descartarla: aflojar el guard.** El guard es lo único que impide que escribamos una clave incoherente con su fila; apagarlo cambiaría dos facturas huérfanas por dos facturas mal numeradas en nuestros libros, que es peor.
+
+**Y el grito no lo vio:** la corrida cerró `procesados 4 · emitidos 2 · rebotados 2 · sin grito`, que es correcto por sus dos condiciones. **Falta una tercera: un rebote que deja un comprobante vivo del otro lado no es un rebote — es una divergencia**, y merece gritar aunque la corrida haya emitido.

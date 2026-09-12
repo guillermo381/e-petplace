@@ -267,6 +267,18 @@ Deno.serve(async (req) => {
         continue;
       }
 
+      /* 🔴 `D-1068` ④ · SI LA FORMA DE PAGO SE ASUMIÓ, EL DOCUMENTO LO DICE.
+         La marca se escribe ANTES de emitir, no después: si la emisión falla a
+         mitad, la fila igual tiene que saber que su `<formaPago>` no salió de
+         un dato. *Un documento asumido que no está marcado es indistinguible
+         de uno medido, y esa distinción es justo la que el founder pidió poder
+         listar.* */
+      if (fp.asumida === true) {
+        await exigeUnaFila(db.from('documentos_fiscales')
+          .update({ forma_pago_asumida: true }).eq('id', d.id).select('id'),
+          'marcar_forma_asumida');
+      }
+
       const emisorCanonico = {
         ...emisor,
         /* Cae a la matriz si nadie declaró la del local — y se ve en el dato,
