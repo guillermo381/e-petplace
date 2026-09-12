@@ -53,6 +53,7 @@ import { View } from 'react-native';
 import {
   Boton,
   Campo,
+  esCorreoValido,
   useAviso,
   CampoIdentificacion,
   SelectorFacturacion,
@@ -80,16 +81,18 @@ const VACIO: DatosIdentificacion = {
   email: '',
 };
 
-/* 🔴 EL CORREO SE VALIDA POR FORMA MÍNIMA, NO POR REGEX DE ESPECIFICACIÓN.
-   *Un validador que sólo busca «@» no valida un correo: confirma que alguien
-   escribió una arroba* (`S105`, un correo con un espacio adentro entró y su
-   mensaje murió 20 minutos después en una cola que nadie leía). Se exige algo
-   antes, algo después, un punto en el dominio y CERO espacios — el resto lo
-   dice el rebote real del envío, que es la única autoridad.
-   No se re-implementa acá la validación del servidor: esto sólo evita el caso
-   obvio antes de cobrar. */
-const CORREO_MINIMO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-export const correoSirve = (v: string) => CORREO_MINIMO.test(v.trim());
+/* ☠️ ACÁ VIVÍA UN CUARTO REGEX DE CORREO. Murió con `esCorreoValido` de B
+   (S115-B): **la validación de la casa es UNA**, y el suyo es más estricto que
+   el mío — rechaza `a@b.` y `a@.b`, que el mío aceptaba. *Entre dos que ya
+   viven, gana la que rechaza más: el costo de rebotar un correo raro es que la
+   persona lo corrija; el de aceptarlo es que no le llegue la factura.*
+
+   🔴 **`esCorreoValido` NO hace `trim()`, y es a propósito** (letra de B): un
+   correo con espacios al borde **es** un correo mal escrito, y limpiarlo en
+   silencio esconde el error donde la función existe para mostrarlo. ⇒ acá se
+   limpia **ANTES y A LA VISTA**, al tipear: la persona ve que el espacio no
+   quedó, en vez de que se lo perdonemos por dentro. */
+export const correoSirve = esCorreoValido;
 
 export interface SeccionFacturacionProps {
   /** El perfil guardado. `null` = todavía no declaró ninguno. */
@@ -168,7 +171,10 @@ export function SeccionFacturacion({
         label={t('correoFactura.etiqueta')}
         placeholder={t('correoFactura.formato')}
         value={correo}
-        onChangeText={onCorreo}
+        /* Saneo A LA VISTA: los espacios no entran, y la persona lo ve
+           mientras escribe. Es lo que la letra de B pide de quien tolere el
+           pegado — limpiar ANTES, nunca por dentro al validar. */
+        onChangeText={(v) => onCorreo(v.replace(/\s/g, ''))}
         onBlur={() => setCorreoTocado(true)}
         keyboardType="email-address"
         autoCapitalize="none"
@@ -237,6 +243,11 @@ export function SeccionFacturacion({
       acento="control"
     >
       <CampoIdentificacion
+        /* 🔴 `sinCorreo` (B, S115-B): apaga SU campo porque el correo ya vive
+           arriba y hace falta elija lo que elija. **Su modo de falla es
+           silencioso —también deja de validarlo—** y por eso la validación de
+           esta pantalla es `esCorreoValido`, la misma de la casa. */
+        sinCorreo
         valor={datos}
         onCambiar={(d) => {
           setDatos(d);
