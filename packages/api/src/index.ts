@@ -3,6 +3,12 @@
 
 export type { Database, Json } from './database.types';
 export { initApi, getClient, type EpetplaceClient, type OpcionesApi, type StorageSesion } from './client';
+/* `uidActual` sale a la puerta en S115-CIERRE: es el resolvedor canónico de «quién
+   soy» (S80-A14) y ya lo usaban 29 sitios ADENTRO del paquete. Lo necesita la sección
+   de facturación para distinguir «no hay sesión» de «no hay red» — sin él, ese
+   componente tendría que tocar `getClient().auth` y saltarse la puerta única.
+   Sólo LEE la sesión local: no amplía el acceso a la base ni una fila. */
+export { uidActual } from './client';
 export {
   registrarse,
   iniciarSesion,

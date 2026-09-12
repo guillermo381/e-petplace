@@ -76,7 +76,7 @@ import {
   fiscalObtenerTaxProfile,
   fiscalGuardarTaxProfile,
   obtenerMiPerfil,
-  estadoDeSesion,
+  uidActual,
   type TaxProfile,
 } from '@epetplace/api';
 import { formatearPrecio } from '@epetplace/i18n';
@@ -481,10 +481,26 @@ export function useFacturacion(activo: boolean): FacturacionLista {
         setTope(rTope.data);
       } else {
         /* La sesión decide el mensaje: «no cargó» mandó al founder a mirar la
-           red cuatro veces cuando lo que pasaba era el refresco. */
-        const s = await estadoDeSesion();
+           red cuatro veces cuando lo que pasaba era el refresco.
+
+           🔴 DEGRADADO A PROPÓSITO EN EL MERGE DE S115-CIERRE (12-sep-2026), y se
+           declara acá en vez de dejarse romper: esta rama llamaba a `estadoDeSesion()`,
+           que **A retiró el mismo día** junto con la cura del refresco que lo
+           alimentaba (`D-1074`). Sin `refrescoCaidoHace()` esa señal **no puede
+           distinguir `cortada` de `viva`**, y una señal que siempre dice `viva` es peor
+           que ninguna — ésa fue la razón escrita de su retiro.
+
+           ⇒ Se conservan las DOS voces que tienen con qué sostenerse: `sinSesion` sale
+           de `uidActual()`, que lee la sesión LOCAL y sigue existiendo; todo lo demás
+           cae en `red`, que es lo honesto cuando no se sabe.
+
+           ⚠️ `sesionCortada` queda SIN PRODUCTOR — su cadena vuelve el día que vuelva
+           la cura del refresco, y ese día es una firma, no un arreglo. **La voz y su
+           traducción se conservan a propósito:** borrarlas obligaría a reconstruirlas,
+           y lo único que falta es quién las dispare. */
+        const uid = await uidActual();
         if (!vigente) return;
-        setMotivo(s === 'cortada' ? 'sesionCortada' : s === 'sin_sesion' ? 'sinSesion' : 'red');
+        setMotivo(uid === null ? 'sinSesion' : 'red');
         setTope('noCargo');
       }
       setReintentando(false);
