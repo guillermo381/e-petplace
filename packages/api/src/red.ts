@@ -145,16 +145,55 @@ export function fetchConTecho(fetchBase: typeof fetch = fetch): typeof fetch {
        y pisarla convertiría su cancelación en un cuelgue. */
     const propia = new AbortController();
     const previa = init?.signal;
+    /* 🔴 EL OYENTE SE SACA, Y ANTES NO SE SACABA. `{ once: true }` lo quita
+       cuando DISPARA — y el caso normal es que no dispare nunca. Si el que
+       llama reusa su señal (el cliente la tiene viva mientras viva la app),
+       **cada consulta dejaba un oyente pegado a esa señal, con su
+       AbortController adentro**. No es la fuga de conexiones que vio el
+       founder en el logcat, pero es una fuga real, es mía, y crece con el uso.
+       *La encontré buscando la otra: una fuga tapa a la siguiente.* */
+    let quitarOyente: (() => void) | null = null;
     if (previa) {
       if (previa.aborted) propia.abort(previa.reason);
-      else previa.addEventListener('abort', () => propia.abort(previa.reason), { once: true });
+      else {
+        const alAbortar = () => propia.abort(previa.reason);
+        previa.addEventListener('abort', alAbortar, { once: true });
+        quitarOyente = () => previa.removeEventListener('abort', alAbortar);
+      }
     }
     const reloj = setTimeout(
       () => propia.abort(new Error(`${SIN_RED}: la consulta superó el techo de ${ms} ms`)),
       ms,
     );
     try {
-      const r = await fetchBase(entrada as RequestInfo, { ...init, signal: propia.signal });
+      /* 🔴 EL TECHO DEJA DE ESPERAR, PERO NO ABANDONA — `D-1074`.
+         Medido por el founder en el aparato, y es el literal que cerró la
+         ficha: `okhttp: A connection to …supabase.co was leaked. Did you
+         forget to close a response body?` **nueve veces en el mismo instante**,
+         con DNS resolviendo en 1 ms y cero `lowmemorykiller`, cero `ANR`.
+         *La app estaba viva: lo que se agotaba era el pool de conexiones.*
+
+         Abortar le dice a OkHttp que cancele, **pero si la respuesta ya se
+         materializó, su cuerpo queda abierto y nadie lo va a leer** — el que
+         llama recibió una excepción y se fue. Por eso no alcanza con abortar:
+         hay que quedarse a cerrar.
+
+         ⚠️ Y la conclusión fácil es la equivocada, dicha por el founder antes
+         que por mí: **no es «saquemos el techo»** —sin techo vuelve el cuelgue
+         mudo— **es «el techo tiene que cerrar lo que aborta»**. */
+      const enVuelo = fetchBase(entrada as RequestInfo, { ...init, signal: propia.signal });
+      enVuelo.then(
+        (resp) => {
+          /* Si la carrera la ganó el reloj, esta respuesta ya no la espera
+             nadie: se cierra acá o queda colgada del pool para siempre. */
+          if (propia.signal.aborted) {
+            try { void resp.body?.cancel?.(); } catch { /* ya cerrado */ }
+          }
+        },
+        () => { /* el rechazo lo maneja el catch de abajo; acá sólo se evita
+                   una promesa rechazada sin dueño. */ },
+      );
+      const r = await enVuelo;
       if (clase === 'refresco' && r.ok) _refrescoFallidoEn = null;
       return r;
     } catch (e) {
@@ -170,6 +209,7 @@ export function fetchConTecho(fetchBase: typeof fetch = fetch): typeof fetch {
       throw new Error(`${SIN_RED}: ${msg.slice(0, 160)}`);
     } finally {
       clearTimeout(reloj);
+      quitarOyente?.();
     }
   };
 }
