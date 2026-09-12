@@ -9,6 +9,10 @@ import { useColorScheme } from 'react-native';
 // S106 · parchea los globales de WebRTC ANTES de que monte cualquier
 // pantalla de video. Import por efecto: no exporta nada que se use acá.
 import '@/lib/livekit';
+/* ⏳ SONDA TEMPORAL — `D-1074`. Censa AsyncStorage y lo dice por el log,
+   porque el APK de producción no es `debuggable` y `adb run-as` no puede
+   leerlo. **Se retira en cuanto el censo esté medido.** */
+import { censarAlmacenamiento } from '@/lib/censo-almacenamiento';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { router, Stack } from 'expo-router';
 import { destinoDePushDeEstaApp } from '@/lib/destino-de-push';
@@ -91,6 +95,9 @@ export default function RootLayout() {
      cableado* — y el modo de falla no tiene síntoma: el token rota, el motor
      despacha «bien» a una dirección muerta, y el aparato se vuelve fantasma. */
   useTokenDeAvisosAlDia();
+
+  /* ⏳ SONDA TEMPORAL `D-1074` — corre una vez, no bloquea, y se retira. */
+  useEffect(() => { void censarAlmacenamiento(); }, []);
 
   /**
    * ① · EL TOQUE DE LA PUSH — a dónde lleva (S111-C).
