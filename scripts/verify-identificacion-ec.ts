@@ -24,38 +24,22 @@
  * forma, jamás existencia (ver la cabecera de `identificacion-ec.ts`).
  */
 
-import { readFileSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
-import { dirname, join } from 'node:path'
+import {
+  esCedulaValida,
+  esRucValido,
+  verificarRuc,
+  esClaveAccesoValida,
+  agrupar,
+} from '../packages/ui/src/components/identificacion-ec'
 
-const raiz = join(dirname(fileURLToPath(import.meta.url)), '..')
-const FUENTE = join(raiz, 'packages/ui/src/components/identificacion-ec.ts')
-
-/* Se transpila a la mano lo mínimo: quitar los tipos de TS para poder
-   importarlo como módulo. Es más barato que arrastrar un bundler acá, y
-   **mide el ARCHIVO REAL** — no una reimplementación, que sería el defecto
-   que este control existe para cazar (precedente: el gate de la barra que
-   extrae `pathBarra` del archivo vivo en vez de reimplementar la fórmula). */
-let fuente
-try {
-  fuente = readFileSync(FUENTE, 'utf8')
-} catch {
-  console.error('✗ ANCLA ROTA — no encontré `identificacion-ec.ts`. Un cero acá diría «no medí», no «está bien».')
-  process.exit(2)
-}
-
-const js = fuente
-  .replace(/^export type [\s\S]*?$/gm, '')
-  .replace(/: Record<TipoIdentificacion, number \| null>/g, '')
-  .replace(/: TipoIdentificacion/g, '')
-  .replace(/: readonly number\[\]/g, '')
-  .replace(/: string\b/g, '')
-  .replace(/: number\b/g, '')
-  .replace(/: boolean\b/g, '')
-  .replace(/ as const/g, '')
-
-const mod = await import(`data:text/javascript;base64,${Buffer.from(js).toString('base64')}`)
-const { esCedulaValida, esRucValido, esClaveAccesoValida, agrupar } = mod
+/* ⏪ Acá vivía un transpilador de TS **a mano** (quitar `: string`, `as const`,
+   etc.) para poder importar el archivo real desde un `.mjs`. **Se rompió dos
+   veces** —con un parámetro opcional (`_idioma?`) y con un `export
+   interface`— y las dos veces el síntoma fue un `SyntaxError` del propio gate.
+   *Un instrumento que se cae por la forma del archivo que mide no está
+   midiendo: está adivinando su sintaxis.*
+   ⇒ el archivo pasa a `.ts` y corre con `tsx`, igual que `verify-plata.ts`.
+   **Sigue midiendo el archivo REAL** —lo importa— que era todo el punto. */
 
 let fallos = 0
 let corridas = 0
@@ -137,6 +121,8 @@ const RUCS_DE_PRODUCCION = [
   '1792845424001', // proveedor de facturación
   '0992560754001', // proveedor de facturación
   '0993113557001', // proveedor de facturación
+  '1793240435001', // SATORI INOV LATAM S.A.S. — su dígito NO cierra (advertencia)
+  '0993411372001', // SigniaDigital (Factuplan) — su dígito NO cierra (advertencia)
 ]
 
 /* 🔴🔴 LOS DOS QUE **NO CIERRAN**, Y NO SE ESCONDEN.
@@ -158,7 +144,12 @@ const RUCS_DE_PRODUCCION = [
  * las bloquearía por una decisión que no es de código. **Se cuentan y se
  * nombran en cada corrida** hasta que el founder decida. *Esconderlos sería el
  * verde flojo que este archivo existe para no tener.* */
-const RUCS_RECHAZADOS_CONOCIDOS = [
+/* ⏪ Eran «rechazados conocidos» y **hoy son POSITIVOS OBLIGATORIOS como los
+   otros once**: la firma del 12-sep sacó el dígito verificador del bloqueo, así
+   que su FORMA alcanza para usarlos. Siguen nombrados acá porque **su dígito no
+   cierra y eso se REPORTA** — la advertencia es el punto de la firma, no un
+   resto. */
+const RUCS_CON_DIGITO_QUE_NO_CIERRA = [
   ['1793240435001', 'SATORI INOV LATAM S.A.S. — el nuestro'],
   ['0993411372001', 'SigniaDigital (Factuplan)'],
 ]
@@ -243,58 +234,40 @@ const restoDe = (cuerpo, coef) => {
 const COEF = { publico: [3, 2, 7, 6, 5, 4, 3, 2], privado: [4, 3, 2, 7, 6, 5, 4, 3, 2] }
 
 /* ═══════════════════════════════════════════════════════════════════════════
- * 🔴 LA MUTACIÓN DEL RUC — CAMBIA DE FORMA CON LA FIRMA DEL 11-sep, y el
- *    porqué es la mitad del valor de este bloque.
+ * 🔴 LA MUTACIÓN DEL RUC — **CAMBIA DE SENTIDO CON LA FIRMA DEL 12-sep, Y EL
+ *    GATE DECLARA SU PROPIA DEBILIDAD.**
  *
- * Hasta hoy exigía que **toda** mutación fuera rechazada. Con **las tres ramas
- * probándose**, eso dejó de ser alcanzable: hay tres puertas en vez de una, y
- * un número alterado tiene tres oportunidades de cerrar. *Un guard que exige lo
- * imposible no se cumple: se apaga.*
- *
- * ⇒ pasa a **CONTAR POR ZONA y declarar**, con techo. La firma lo pedía con
- * todas las letras: *«si probar tres ramas hace que más números malos pasen,
- * quiero saber cuánto»*.
- *
- * ── LO MEDIDO, sobre 1.872 mutaciones de 16 RUC ────────────────────────────
+ * Con el dígito verificador **fuera del bloqueo**, el validador de RUC ya casi
+ * no discrimina. Medido sobre 1.521 mutaciones de los 13 reales:
  * ```
- *   provincia        (díg. 0-1)    9,7 %  pasan
- *   cuerpo           (díg. 2-9)   20,9 %  pasan   ← EL número del ensanche
- *   establecimiento  (díg. 10-12) 96,8 %  pasan   ← esperado, ver abajo
+ *   provincia        (díg. 0-1)   53,8 % pasan   ← lo único que frena de verdad
+ *   cuerpo           (díg. 2-9)   97,2 % pasan   ← el dv ya no bloquea
+ *   establecimiento  (díg. 10-12) 96,3 % pasan   ← nunca estuvo protegido
  * ```
- * **El establecimiento NO lo protege ningún verificador** —cambiar «001» por
- * «002» da otro RUC legítimo del mismo contribuyente— así que su 96,8 % **no
- * es una pérdida del ensanche: ya era así**.
+ * **Ese 97,2 % es la consecuencia buscada, no un defecto** — la firma cambió
+ * un verificador que fallaba sobre 2 de 13 reales por una advertencia. *Pero se
+ * escribe acá, con su número, para que nadie lea el verde de este gate como
+ * «el RUC está validado».*
  *
- * **El número que el ensanche movió es el del CUERPO: de ~9 % a ~21 %.**
- * Se acepta porque *el costo de rechazar a un contribuyente real es mayor que
- * el de aceptar un número malformado que el SRI va a rebotar igual* — y porque
- * el validador **nunca prometió** decir que el número EXISTE.
+ * ⇒ el techo por zona **muere**: medía cuánto frenaba el verificador, y el
+ * verificador ya no frena. *Un techo sobre algo que dejó de existir es un
+ * número que alguien va a creer.* Lo que queda exigible son **los negativos de
+ * FORMA**, que son lo único que bloquea — y están abajo.
  * ═══════════════════════════════════════════════════════════════════════════ */
-const TECHO_CUERPO_PCT = 25 // hoy 20,9 · falla si sube, para que nadie lo mueva sin verlo
-let mutCuerpo = [0, 0]
-let mutEstablecimiento = [0, 0]
-
+let mutForma = [0, 0]
 for (const r of RUCS_OK) {
   for (let i = 0; i < 13; i += 1) {
     for (let d = 0; d <= 9; d += 1) {
       if (String(d) === r[i]) continue
-      const mutante = mutar(r, i, String(d))
-      const zona = i < 10 ? mutCuerpo : mutEstablecimiento
-      zona[1] += 1
-      if (esRucValido(mutante)) zona[0] += 1
+      mutForma[1] += 1
+      if (esRucValido(mutar(r, i, String(d)))) mutForma[0] += 1
     }
   }
 }
-const pctCuerpo = (mutCuerpo[0] / mutCuerpo[1]) * 100
-decir(
-  pctCuerpo <= TECHO_CUERPO_PCT,
-  `las mutaciones del CUERPO que pasan subieron a ${pctCuerpo.toFixed(1)} % (techo ${TECHO_CUERPO_PCT} %). ` +
-  `El ensanche a tres ramas lo llevó de ~9 % a ~21 %; por encima del techo, algo más se aflojó.`,
-)
 console.log(
-  `   cuerpo ${mutCuerpo[0]}/${mutCuerpo[1]} (${pctCuerpo.toFixed(1)} %, techo ${TECHO_CUERPO_PCT} %) · ` +
-  `establecimiento ${mutEstablecimiento[0]}/${mutEstablecimiento[1]} ` +
-  `(${((mutEstablecimiento[0] / mutEstablecimiento[1]) * 100).toFixed(1)} %, NO protegido por diseño)`,
+  `   mutaciones que la FORMA deja pasar: ${mutForma[0]}/${mutForma[1]} ` +
+  `(${((mutForma[0] / mutForma[1]) * 100).toFixed(1)} %) — alto A PROPÓSITO: el dígito ` +
+  `verificador ya no bloquea (firma del 12-sep). Lo exigible son los negativos de forma.`,
 )
 
 /* ── ③ NEGATIVOS ESTRUCTURALES ───────────────────────────────────────── */
@@ -315,6 +288,26 @@ decir(!esCedulaValida('17123456a5'), 'una letra adentro fue aceptada')
    como una regresión ni lo «arregle» de vuelta. */
 decir(!esRucValido('1712345675000'), 'RUC con establecimiento 000 fue aceptado')
 decir(!esRucValido('1712345675'), 'una cédula de 10 dígitos fue aceptada como RUC')
+/* 🔴 LOS NEGATIVOS DE FORMA — lo ÚNICO que bloquea desde el 12-sep. Si alguno
+   de éstos deja de frenar, el validador de RUC no frena NADA. */
+decir(!esRucValido('9912345675001'), 'provincia 99 (inexistente) fue aceptada')
+decir(!esRucValido('0012345675001'), 'provincia 00 (inexistente) fue aceptada')
+decir(!esRucValido('1772345675001'), 'tercer dígito 7 —ninguna familia— fue aceptado')
+decir(!esRucValido('1782345675001'), 'tercer dígito 8 —ninguna familia— fue aceptado')
+decir(esRucValido('3012345677001') || !esRucValido('3012345677001'), 'provincia 30 (exterior) no rompe')
+decir(!esRucValido('171234567500a'), 'una letra adentro fue aceptada')
+decir(!esRucValido('17123456750011'), '14 dígitos fueron aceptados')
+
+/* 🔴 LA ASIMETRÍA CÉDULA vs RUC, ESCRITA PARA QUE NADIE LA «EMPAREJE».
+   En la CÉDULA el módulo 10 **sigue bloqueando**; en el RUC el verificador
+   **sólo advierte**. No es una inconsistencia: es que los datos son distintos.
+     · cédula → la única real que tenemos VALIDA, y sus 90 mutaciones fallaron:
+       ahí el verificador SÍ distingue lo bueno de lo malo;
+     · RUC    → falla sobre 2 de 13 reales: ahí no distingue nada.
+   *Emparejarlas sería cambiar una decisión medida por una simetría estética.*
+   Estos dos renglones se ponen rojos si alguien lo intenta. */
+decir(!esCedulaValida('1762613007'), 'la CÉDULA dejó de bloquear su dígito verificador (mutación del dv aceptada)')
+decir(esRucValido('1793240435001'), 'el RUC volvió a bloquear por dígito verificador (Satori rechazado)')
 
 /* ── ③bis EL RUC SE TRATA POR SEPARADO, y este control lo prueba ─────────
    La firma del 11-sep quitó la regla del tercer dígito **de la cédula**, y
@@ -328,17 +321,17 @@ console.log('③bis EL RUC NO CAMBIÓ — sus tres ramas y su familia inexistent
 decir(esRucValido('1760001040001'), 'la rama SECTOR PÚBLICO (tercer dígito 6, módulo 11) dejó de validar')
 decir(esRucValido('1790011674001'), 'la rama SOCIEDAD PRIVADA (tercer dígito 9, módulo 11) dejó de validar')
 decir(esRucValido('1712345675001'), 'la rama PERSONA NATURAL (tercer dígito <6, módulo 10) dejó de validar')
-/* ⏪☠️ **Acá se exigía que las «familias» 7 y 8 fueran rechazadas. Ya no.**
-   Es CONSECUENCIA DIRECTA de la firma del 11-sep: al probar las tres ramas, la
-   rama ya no se elige por el tercer dígito, así que *«esa familia no existe»*
-   dejó de ser un criterio. Un `177…` que cierre el módulo 10 como persona
-   natural ahora pasa — **y eso es lo firmado**: la aritmética manda sobre la
-   convención. Se deja escrito para que nadie lo lea como una regresión. */
-decir(
-  esRucValido('1772345675001'),
-  'ATENCIÓN: `1772345675001` volvió a rechazarse. Si alguien reintrodujo la elección de ' +
-  'rama por tercer dígito, la firma del 11-sep quedó deshecha.',
-)
+/* ⏪☠️ **DOS FIRMAS SE CRUZARON ACÁ, Y LA SEGUNDA GANA — se deja escrito el
+   cruce en vez de borrarlo.**
+   · **11-sep:** al probarse las tres ramas, «esa familia no existe» dejó de ser
+     criterio ⇒ este renglón llegó a exigir que `1772345675001` **pasara**.
+   · **12-sep:** el dígito verificador salió del bloqueo, y la firma puso
+     explícitamente entre lo que SÍ bloquea el «tercer dígito coherente con
+     alguna de las tres familias» ⇒ el 7 y el 8 **vuelven a rechazarse**.
+   *Tiene sentido: cuando el verificador dejó de frenar, hizo falta que algo
+   frenara — y la coherencia de familia es barata y no rechaza reales.*
+   ⇒ el renglón vive ahora en ③, con el signo correcto. **Dos letras que se
+   contradicen son peores que una equivocada.** */
 /* 🔴 EL CASO QUE QUEDA ABIERTO Y SE DECLARA, no se esconde: el RUC de persona
    natural de la cédula real (`1762613006001`) **se rechaza**, porque su tercer
    dígito lo manda a sector público. Es el MISMO defecto un piso más arriba.
@@ -354,10 +347,16 @@ decir(esRucValido('1762613006001'), 'el RUC natural del founder volvió a rechaz
    («6001») que salían cuando la convención lo mandaba a sector público. */
 decir('1762613006001'.slice(10) === '001', 'el establecimiento dejó de ser «001»')
 
-console.log('③ter LOS DOS RECHAZADOS CONOCIDOS — declarados, no escondidos')
-for (const [r, quien] of RUCS_RECHAZADOS_CONOCIDOS) {
-  if (esRucValido(r)) console.log(`  ✅ ${r} (${quien}) YA VALIDA — sacalo de la lista y pasalo a obligatorio.`)
-  else console.log(`  🔴 ${r} (${quien}) sigue rechazado — comprobante autorizado por el SRI. Decisión del founder.`)
+console.log('③ter LA ADVERTENCIA — dígito que no cierra, con NOMBRE (firma del 12-sep)')
+for (const [r, quien] of RUCS_CON_DIGITO_QUE_NO_CIERRA) {
+  const v = verificarRuc(r)
+  /* Lo EXIGIBLE es que se puedan USAR: eso es la forma. */
+  decir(v.formaValida, `🔴 el RUC REAL ${r} (${quien}) no pasa ni la FORMA — eso sí bloquea`)
+  if (v.digitoVerificado) {
+    console.log(`  ✅ ${r} (${quien}) su dígito YA cierra — sacalo de esta lista.`)
+  } else {
+    console.log(`  ⚠️  ${r} (${quien}) · usable ✓ · dígito NO verificado → «identificación no verificada»`)
+  }
 }
 
 /* ── ④ CLAVE DE ACCESO ───────────────────────────────────────────────────
@@ -400,14 +399,16 @@ console.log(
   `${CEDULAS_OK.length} cédula(s) y ${RUCS_OK.length} RUC(s) verificados a mano · ` +
   `${CEDULAS_DE_PRODUCCION.length} de ${CEDULAS_ESPERADAS_DE_PRODUCCION} cédula(s) y ` +
   `${RUCS_DE_PRODUCCION.length} RUC DE PRODUCCIÓN (comprobantes autorizados) · ` +
-  `🔴 ${RUCS_RECHAZADOS_CONOCIDOS.length} RUC real(es) RECHAZADO(S), declarados y pendientes de decisión · ` +
+  `⚠️ ${RUCS_CON_DIGITO_QUE_NO_CIERRA.length} con dígito NO verificado (advertencia, no bloqueo) · ` +
   `${mutacionesClave} mutación(es) de la clave rechazadas · ` +
   `la colisión 1↔10 del estándar sigue documentada en su bloque (ya no se cuenta: ` +
   `el bucle de mutación del RUC pasó a contar por ZONA — ver su cabecera)`,
 )
 console.log(
-  'su verde dice: «la cédula y la clave discriminan CADA dígito cambiado» · «el RUC se ' +
-  'mantiene bajo su techo por zona» · «los 11 RUC y la cédula DE PRODUCCIÓN pasan». ' +
-  'JAMÁS dice «el número EXISTE» —eso ningún dígito verificador lo prueba— ni «los 2 ' +
-  'rechazados están bien»: están DECLARADOS y esperan decisión. El pasaporte NO se valida.',
+  `su verde dice: «la cédula y la clave discriminan CADA dígito cambiado» · ` +
+  `«la FORMA del RUC bloquea provincia, familia y establecimiento» · ` +
+  `«${CEDULAS_DE_PRODUCCION.length + RUCS_DE_PRODUCCION.length} números DE PRODUCCIÓN pasan». ` +
+  `JAMÁS dice «el número EXISTE» —eso ningún dígito verificador lo prueba— ni «el RUC está ` +
+  `verificado»: desde el 12-sep su dígito **sólo advierte**, y ${RUCS_CON_DIGITO_QUE_NO_CIERRA.length} ` +
+  `de los reales no cierran. El pasaporte NO se valida (decisión declarada).`,
 )
