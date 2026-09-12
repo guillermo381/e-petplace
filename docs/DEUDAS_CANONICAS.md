@@ -33193,8 +33193,43 @@ edges estén al día antes de dejar cerrar.
 
 ## `D-1074` 🔴 — LA APP QUEDA SIN RESPONDER DESPUÉS DE UN OTA · DOS OCURRENCIAS EL MISMO DÍA
 
-**Estado:** ABIERTA · **medida, NO curada** (orden del founder: *«no la cures hoy: medila. Es de octubre»*).
-**Dueño:** A · **Fecha límite:** antes del soft launch (1-oct-2026).
+**Estado:** ABIERTA · 🔴 **BLOQUEA PRODUCCIÓN** (subida de prioridad, founder 11-sep: *«tres de tres publishes con incidente. Va con lo que bloquea producción»*).
+**Dueño:** A (la red) + C (el botón) · **Fecha límite:** antes del soft launch (1-oct-2026).
+
+### 🔴 TERCERA OCURRENCIA, Y EL DISCRIMINADOR CORRIÓ — LA FICHA CAMBIA DE PREGUNTA
+
+| # | Tras el OTA | Publicado | Síntoma |
+|---|---|---|---|
+| ③ | `77782b95` *«el perfil fantasma curado…»* | **23:45** | **la app DICE «no cargó»** |
+
+**El discriminador que esta ficha dejó escrito se corrió y contestó:** *si con el techo puesto la pantalla igual se queda muda, lo que cuelga no es una consulta de Supabase.* **No se quedó muda: dijo «no cargó».** ⇒ **es una consulta de Supabase, y el techo hizo su trabajo.**
+
+🟢 **EL CUELGUE MUDO ESTÁ CURADO.** Lo que quedaba de las ocurrencias ① y ② —una pantalla en silencio, indistinguible de un esqueleto eterno— **no vuelve a pasar**: el techo de lectura (8.000 ms) corta y la superficie habla. *La cura de `D-1070` se ganó su primer caso real, y se lo ganó en el peor momento, que es cuando vale.*
+
+🔴 **LO QUE QUEDA ES OTRA COSA Y ES PEOR DE DIAGNOSTICAR: EL REINTENTO NO RESCATA.** El botón no devuelve nada. Dos posibilidades, y **no se elige entre ellas sin medición** (founder):
+
+- **(a) El botón no dispara** — handler sin cablear, o la pantalla no vuelve a consultar. **Dueño: C.**
+- **(b) Dispara y la consulta vuelve a colgar hasta el techo, sin señal visible de que está reintentando.** *Desde afuera es idéntico a un botón muerto* — y la persona lo toca cinco veces. **Es la peor de las dos, y se distingue fácil: si hay estado de «reintentando», se ve.**
+
+⚠️ **Y una ley que sale de acá: un reintento sin señal es indistinguible de un botón roto.** El usuario no puede saber que está esperando, así que concluye que no funciona — *el mismo defecto de clase que el cuelgue mudo, un piso más arriba.*
+
+### La hipótesis de la descarga, ahora con más sustento
+
+**Si el caso es (b)**, la pregunta vuelve a ser por qué la red sigue sin responder después del OTA — y la aritmética la sostiene: **6,4 MB de bundle**; sobre un enlace degradado a ~500 kbps son **~100 segundos** de descarga. *Una ventana de cien segundos se come doce reintentos de ocho.* **Es una estimación declarada, no una medición:** el ancho de banda real del incidente no se midió.
+
+### 🔴 Y EL COSTO DE LA CURA ③, MEDIDO — NO VIAJA POR OTA
+
+`checkAutomatically` **se hornea en el binario.** Medido en `@expo/config-plugins/build/android/Updates.js:119-120`: el plugin lo escribe en el **AndroidManifest** con `addMetaDataItemToMainApplication(Config.CHECK_ON_LAUNCH, …)`, y el nativo lo lee de ahí (`UpdatesConfiguration.kt:101`). **Lo mismo `launchWaitMs`** (línea 122).
+
+⇒ **Tomar el control en JS exige una BUILD NATIVA NUEVA.** No es una tarde de código: es un tren de EAS + reinstalar el APK. *Y el orden importa: publicar el OTA con el código de control mientras el binario sigue en `ALWAYS` no cambia nada — el nativo ya descargó antes de que corra una línea de JS.*
+
+**Lo que SÍ está disponible sin tocar el binario:** `checkForUpdateAsync()`, `fetchUpdateAsync()` y el hook `useUpdates()` (medidos presentes en `expo-updates@57.0.6`). Sirven para **ver** el estado de la descarga y para **decidir cuándo** traerla — pero sólo gobiernan de verdad cuando el binario ya no lo hace solo.
+
+**La cura mínima y honesta, en dos tiempos:**
+1. **Sin build:** que la app **sepa si hay una descarga en curso** (`useUpdates()`) y **lo diga** cuando una consulta se rinde por techo — *«estamos actualizando la app; probá en un minuto»* en lugar de «no cargó». **Convierte un misterio en una espera.**
+2. **Con build:** `checkAutomatically: ON_ERROR_RECOVERY` o `WIFI_ONLY` + control en JS que difiera la descarga hasta que no haya pantallas cargando.
+
+*El tiempo 1 no necesita nada y quita la mitad del daño; el tiempo 2 lo cura y cuesta un binario.*
 
 ### Las dos ocurrencias, con sus horas (todas -05)
 
@@ -33407,3 +33442,16 @@ cinturon OK · dueño=1 · ajeno=0 (rojo probado) · anon=0
 ⇒ **Ante un `NoSuchKey`, antes de re-archivar nada se pregunta si la fila del objeto EXISTE** (`storage.objects` por `bucket_id` + `name`) **y si hay una policy que la alcance.** Las dos preguntas son SQL y contestan en un segundo; sin ellas, el camino obvio —«faltan los archivos, hay que volver a subirlos»— cura lo que no está roto y deja el permiso cerrado.
 
 **Caso fundante:** `D-1076`. El objeto estaba, pesaba lo correcto, y la única policy del bucket exigía `is_admin()`.
+
+
+---
+
+## `D-1080` 🟠 — LOS CUATRO TECHOS DE RED VIVEN EN `app_config` Y NADIE LOS LEE
+
+**Estado:** ABIERTA. **Dueño:** A. **Disparo:** la primera vez que haya que mover un techo sin publicar.
+
+**Medido:** `cargarTechosDeRed()` **tiene CERO llamadores** — sólo aparece en su archivo y en el `export` de `index.ts`. Los techos que rigen son los `ARRANQUE` del código: `lectura 8000 · escritura 20000 · auth 20000 · subida 120000`.
+
+**Hoy el efecto es NULO, y por eso es fácil que nadie lo vea:** las cuatro filas de `app_config` dicen exactamente los mismos números. ⇒ **una perilla que el motor no honra** — y la próxima vez que alguien la mueva para apagar un incendio, **va a mirar un valor cambiado y un comportamiento igual**.
+
+*Es la clase «escritor sin lector» al revés: el dato existe, es correcto, y no llega a ninguna parte.* La cura es una línea en el arranque de cada app — con su cuidado propio ya escrito en `red.ts:30`: **la petición que trae los techos necesita su propio techo**, y por eso los `ARRANQUE` no se borran nunca.
