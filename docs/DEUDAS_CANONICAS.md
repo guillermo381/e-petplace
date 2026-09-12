@@ -32923,3 +32923,94 @@ resuelve → `medio_de_pago_no_declarado` → **el documento espera**. Nunca un
 
 **Disparo:** la respuesta de Nuvei. **Dueño:** founder (la pregunta) · B (el
 origen del dato) · A (la derivación y el catálogo).
+
+---
+
+### `D-1069` 🔴 · DIECISÉIS SUJETOS NO SE PUEDEN PAGAR DESDE HACE DOS SEMANAS — el guard correcto con la conciliación que no barre · **FECHA LÍMITE: 25-sep-2026**
+
+**Medido el 11-sep-2026:**
+
+```
+8 compras  ·  16,2 días de edad media
+8 citas    ·  15,1 días        el más viejo: 21-ago-2026
+todos en estado `pendiente`
+```
+
+`pagos-cobro` frena con `pago_en_proceso` (409) cuando el sujeto tiene un
+intento en `iniciado` o `pendiente` — **el guard es correcto y evita el doble
+débito**. Su contracara es que **un intento que nunca se resuelve bloquea a ese
+sujeto para siempre**: esas 8 compras y esas 8 citas **no se pueden volver a
+pagar**, y la familia recibe un rechazo que no explica nada.
+
+**Los dos relojes de conciliación corren todos los días** —`pagos-conciliar`
+17:00 y 21:15 UTC— **y no los están barriendo.** Por qué, no está medido: es el
+trabajo de la ficha.
+
+⚠️ **Y estaba anunciado.** El comentario de `pagos-cobro` (S108-B), sobre la
+otra mitad del mismo problema, dice: *«arreglar la clave sin el índice parcial
+cambia un cobro doble por un bloqueo permanente»*. **Acá no fue la clave: fue el
+guard con una conciliación que no cierra — y produjo exactamente eso.**
+
+**🔴 BLOQUEA EL TECHO DE TIEMPO DEL CAMINO DEL PAGO** (firma del founder,
+11-sep): un timeout del lado de la app deja el intento en `pendiente`, y con
+esta ficha viva eso convierte **un cuelgue de red de 30 segundos en una familia
+que no puede pagar dos semanas**. *El orden firmado es: la conciliación barre
+primero, el techo entra después.*
+
+**Lo que NO hay que hacer, y es el voto que el founder ratificó:** liberar los
+16 a mano. *Curar el síntoma sin entender por qué la conciliación no los barrió
+deja viva la causa* — y la causa va a producir los próximos 16.
+
+**Qué tiene que contestar la pasada, en orden:**
+1. ¿`pagos-conciliar` los MIRA y no los cierra, o ni siquiera los selecciona?
+   (su filtro es lo primero que hay que leer)
+2. ¿El proveedor sabe qué pasó con cada uno? La consulta activa lo puede decir.
+3. ¿Falta un vencimiento por tiempo —un intento sin resolver a las N horas se
+   cierra `expirado`— o falta que la conciliación los alcance?
+
+**FECHA LÍMITE: 25-sep-2026**, firmada por el founder: *son familias reales que
+hoy no pueden comprar, y no puede quedar esperando indefinidamente.* Si llega esa
+fecha sin cura, se libera a mano **y la causa queda como ficha propia** — pero
+ése es el peor final, no el plan.
+
+**Dueño:** la pista del motor de pagos. **Disparo: ya.**
+
+---
+
+### `D-1070` 🔴 · EL CLIENTE DE LA CASA NO TIENE TECHO DE TIEMPO — cualquier cuelgue de red es un esqueleto eterno
+
+**Medido el 11-sep-2026, con el síntoma delante.** `createClient` no pasa un
+`fetch` propio: **cero `AbortSignal` en toda `packages/api`**. Una consulta que
+sale y no vuelve **no vuelve nunca** — no hay error, no hay `catch`, el `await`
+queda colgado y la pantalla se queda en el esqueleto.
+
+*El contraste lo prueba: en las edges hay `AbortSignal.timeout` en cinco
+lugares. En la puerta que usan las dos apps, ninguno.*
+
+**Firmado por el founder el 11-sep**, con los valores como DATO en `app_config`:
+
+| clase | techo | de dónde sale |
+|---|---|---|
+| lectura de pantalla | **8 s** | 10 consultas en paralelo dieron 0,56 s la peor · peaje fijo ~150 ms (S94-PERF) ⇒ ~14× lo normal |
+| escritura de negocio | **20 s** | no es plata, pero se pierde trabajo escrito si se rinde antes |
+| auth | **20 s** | el login real midió < 1 s; el margen es por la red |
+| subida de archivos | **120 s** | `D-734` midió 5 MB = **44 s** ⇒ ~3× el peor caso conocido |
+| **camino del pago** | **🔴 NO ENTRA TODAVÍA** | bloqueado por `D-1069`; cuando entre, **90 s**, y **midiendo antes la llamada HTTP sola** |
+
+**Lo que el techo tiene que producir, y es la mitad que importa:** un **error de
+red honesto** que la pantalla pueda decir. *Nunca más un `await` colgado: o
+vuelve con datos, o vuelve con un error.* La voz y la forma son de C con B —
+pedido en el buzón como «la pantalla tiene que poder decir que no cargó y
+ofrecer reintentar».
+
+**El rojo del instrumento, exigido por el founder:** una consulta que nunca
+responde **termina en error antes del techo + margen**, no cuelga. Con su
+control positivo: **una consulta normal no se aborta de más.**
+
+⚠️ **Sobre el 27,8 s de mediana del ciclo de pago: mide de `creado_en` a
+`cerrado_en` —el ciclo entero, webhook incluido—, NO la llamada HTTP.** Se
+declara con ese límite y **no funda los 90 s**: eso se mide aparte cuando el
+techo del pago entre.
+
+**Disparo:** ya, para las cuatro clases firmadas. **Dueño:** A (el cliente y los
+wrappers) · C con B (la voz).
