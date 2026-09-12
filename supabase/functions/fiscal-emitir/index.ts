@@ -52,6 +52,37 @@ Deno.serve(async (req) => {
 
   const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
+  /* ── `D-1072` · LA LLAVE DEL RELOJ ────────────────────────────────────────
+     🔴 EL RELOJ NACE APAGADO Y ESTE ES SU INTERRUPTOR. La llave vive en
+        `app_config.fiscal_emision_automatica` y hoy dice `false`, porque su
+        precondición es `D-1068`: medido el 12-sep, **101 de 101 pagos Nuvei no
+        tienen medio de pago**, y sin forma de pago el SRI no recibe el
+        comprobante. Encendido hoy, este barrido correría cada cinco minutos y
+        rebotaría todo por el mismo motivo — *y el tablero se vería vivo.*
+
+     🔴 SÓLO FRENA AL RELOJ, JAMÁS A LA MANO. Un `disparo: 'manual'` pasa
+        siempre: la llave gobierna la automatización, no la capacidad de
+        emitir. *Si apagara las dos, el día que el reloj falle no habría con
+        qué sacar una factura.* */
+  let disparo: 'reloj' | 'manual' = 'manual';
+  try {
+    const cuerpo = await req.clone().json();
+    if (cuerpo?.disparo === 'reloj') disparo = 'reloj';
+  } catch { /* cuerpo vacío o no-JSON: se trata como manual */ }
+
+  if (disparo === 'reloj') {
+    const { data: llave } = await db.from('app_config').select('valor')
+      .eq('clave', 'fiscal_emision_automatica').maybeSingle();
+    if (llave?.valor !== 'true') {
+      /* No se anota la corrida: un reloj apagado que escribe una fila cada
+         cinco minutos convierte su bitácora en ruido y esconde las corridas
+         que sí significan algo. */
+      return json({ ok: true, codigo: 'emision_automatica_apagada',
+                    porque: 'app_config.fiscal_emision_automatica=false (D-1072; '
+                          + 'su precondición es D-1068)' }, 200);
+    }
+  }
+
   /* 🔴 `fiscal_ambiente` SALIÓ DE ESTA LECTURA: se traía y NO SE USABA.
      El ambiente vive en `fiscal_emisor.ambiente` —de ahí lo toma
      `fiscal_reservar_numero` y de ahí sale el dígito de la clave—, así que la
@@ -236,6 +267,18 @@ Deno.serve(async (req) => {
         continue;
       }
 
+      /* 🔴 `D-1068` ④ · SI LA FORMA DE PAGO SE ASUMIÓ, EL DOCUMENTO LO DICE.
+         La marca se escribe ANTES de emitir, no después: si la emisión falla a
+         mitad, la fila igual tiene que saber que su `<formaPago>` no salió de
+         un dato. *Un documento asumido que no está marcado es indistinguible
+         de uno medido, y esa distinción es justo la que el founder pidió poder
+         listar.* */
+      if (fp.asumida === true) {
+        await exigeUnaFila(db.from('documentos_fiscales')
+          .update({ forma_pago_asumida: true }).eq('id', d.id).select('id'),
+          'marcar_forma_asumida');
+      }
+
       const emisorCanonico = {
         ...emisor,
         /* Cae a la matriz si nadie declaró la del local — y se ve en el dato,
@@ -364,8 +407,44 @@ Deno.serve(async (req) => {
   /* El reporte DICE de dónde salió el proveedor. *Sin esto, «proveedor:
      simulador» no distingue «así está configurado» de «no había config y cayó
      al default» — dos situaciones con la misma cara y consecuencias opuestas.* */
+  /* ── `D-1072` · LA CORRIDA SE ANOTA, Y CON SU DESGLOSE POR MOTIVO ────────
+     🔴 Sin esto el reporte vive SÓLO en esta respuesta HTTP — y el cron la
+        descarta. *Un reloj cuyo resultado nadie guarda no se puede auditar:
+        la única forma de saber si emitió algo sería estar mirando en el
+        momento exacto en que corrió.*
+
+     Y el desglose no es adorno: `rebotados: 7` no distingue un problema de
+     siete. Hoy los siete dirían `sin_forma_de_pago`, que es UN problema. */
+  type Hecho = { estado?: unknown; resultado?: unknown; en_cola_por?: unknown; error?: unknown };
+  const emitido = (h: Hecho) => h.estado === 'autorizada' || h.estado === 'emitiendo';
+  const emitidos = (hechos as Hecho[]).filter(emitido).length;
+  const porMotivo: Record<string, number> = {};
+  for (const h of hechos as Hecho[]) {
+    if (emitido(h)) continue;
+    const m = String(h.resultado ?? h.en_cola_por ?? h.error ?? h.estado ?? 'sin_motivo');
+    porMotivo[m] = (porMotivo[m] ?? 0) + 1;
+  }
+  /* Lo que queda esperando DESPUÉS de la corrida: es el número que convierte
+     un «procesé cero» en un grito o en una tarde tranquila. */
+  const { count: quedanPendientes } = await db.from('documentos_fiscales')
+    .select('id', { count: 'exact', head: true })
+    .in('estado', ['borrador', 'emitiendo']).eq('sentido', 'emitido');
+
+  /* Que anotar falle NO puede voltear una emisión que ya ocurrió: se dice en
+     el log y la respuesta sigue. *La bitácora sirve al que audita; el
+     comprobante, a la familia.* */
+  const { error: eBit } = await db.rpc('fiscal_anotar_corrida_emision', {
+    p_disparo: disparo, p_procesados: hechos.length,
+    p_emitidos: emitidos, p_rebotados: hechos.length - emitidos,
+    p_por_motivo: porMotivo, p_pendientes: quedanPendientes ?? 0,
+  });
+  if (eBit) console.error(`fiscal_bitacora_no_anotada: ${eBit.message}`);
+
   return json({ ok: true, proveedor: puerto.nombre, proveedor_fuente: prov.fuente,
                 numera: numeraLaCasa ? 'la casa' : 'el proveedor',
+                disparo,
                 ...(prov.discrepancia ? { proveedor_discrepancia: prov.discrepancia } : {}),
-                procesados: hechos.length, hechos });
+                procesados: hechos.length, emitidos,
+                rebotados: hechos.length - emitidos, por_motivo: porMotivo,
+                pendientes_al_cerrar: quedanPendientes ?? 0, hechos });
 });

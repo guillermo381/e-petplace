@@ -137,6 +137,17 @@ export async function urlFirmada(
   if (error) return fallo(codigoDe(error.message), 'No pudimos abrir ese archivo.');
   if (!ruta) return fallo('archivo_no_existe', 'Ese comprobante todavía no tiene archivo.');
 
+  /* 🔴 LA AUTORIZACIÓN VIVE EN LA BASE, NO ACÁ — y una corrección de letra
+     muerta: la migración `20260912300000` comenta *«la firma la hace el wrapper
+     con service_role»* y **nunca fue cierto**: esto firma con el cliente del
+     usuario. Quien leyera ese comentario daba por hecha una arquitectura que no
+     existe. Lo que gobierna de verdad es la policy `fiscal_dueno_select`
+     (`20260912770000`, con su rojo probado: otra familia ve 0 filas).
+
+     ⚠️ Y por eso el error de acá se lee con cuidado: **Storage devuelve
+     `not_found`/`NoSuchKey` cuando el fallo es de PERMISO**, idéntico a un
+     objeto ausente (L-546). Ante ese código, antes de re-archivar nada se
+     pregunta si la fila del objeto existe y si hay policy que la alcance. */
   const { data, error: e2 } = await cli.storage.from('fiscal')
     .createSignedUrl(String(ruta), segundos);
   if (e2 || !data?.signedUrl) {
@@ -145,16 +156,50 @@ export async function urlFirmada(
   return { ok: true, data: data.signedUrl };
 }
 
+/**
+ * 🔴 UN `as` NO CONVIERTE UN DATO: PROMETE ALGO SOBRE ÉL — y la promesa era
+ * falsa (hallazgo de C, 11-sep-2026). `f.tipo_identificacion as
+ * TaxProfile['tipoIdentificacion']` afirmaba no-nulidad sobre un valor que
+ * llegaba NULL, y **ningún gate lo ve**: el compilador da verde porque un cast
+ * es justamente pedirle que no mire.
+ *
+ * Esto verifica en RUNTIME contra el mismo vocabulario cerrado que el CHECK de
+ * la tabla, y devuelve `null` cuando no lo reconoce — *un valor que no está en
+ * el vocabulario no es un tipo de identificación, es un dato que no sabemos
+ * leer, y decirlo es más barato que fingirlo.*
+ */
+const TIPOS_IDENTIFICACION = ['ruc', 'cedula', 'pasaporte', 'consumidor_final'] as const;
+
+function normalizarTipoIdentificacion(v: unknown): TaxProfile['tipoIdentificacion'] | null {
+  return typeof v === 'string' && (TIPOS_IDENTIFICACION as readonly string[]).includes(v)
+    ? (v as TaxProfile['tipoIdentificacion'])
+    : null;
+}
+
 export async function obtenerTaxProfile(): Promise<ResultadoWrapper<TaxProfile | null>> {
   const { data, error } = await getClient().rpc('fiscal_tax_profile_mio');
   if (error) return fallo(codigoDe(error.message), 'No pudimos traer tus datos de facturación.');
-  if (!data) return { ok: true, data: null };
-  const f = data as Record<string, unknown>;
+  /* 🔴 LA SEGUNDA MITAD DE LA CURA (L-537: si una capa aprende la regla y la
+     otra no, decide la que NO aprendió).
+
+     La RPC pasó a `RETURNS SETOF`, así que ahora devuelve un ARRAY — y `[]`
+     **también es truthy**: el `if (!data)` de antes seguiría dejando pasar el
+     vacío, sólo que con otra forma. *Una cura que arregla el motor y no toca
+     al lector mueve el defecto de lugar en vez de matarlo.*
+
+     Y el corte NO se hace por presencia de objeto sino por el campo que define
+     la EXISTENCIA del perfil: es el mismo predicado que la fila de nulls sabía
+     esquivar, y por eso es el que no se deja engañar por ninguna forma futura. */
+  const filas = Array.isArray(data) ? data : data == null ? [] : [data];
+  const cruda = filas[0] as Record<string, unknown> | undefined;
+  const tipo = normalizarTipoIdentificacion(cruda?.tipo_identificacion);
+  if (!cruda || tipo === null) return { ok: true, data: null };
+  const f = cruda;
   return {
     ok: true,
     data: {
       id: String(f.id),
-      tipoIdentificacion: f.tipo_identificacion as TaxProfile['tipoIdentificacion'],
+      tipoIdentificacion: tipo,
       identificacion: String(f.identificacion),
       razonSocial: (f.razon_social as string) ?? null,
       direccion: (f.direccion as string) ?? null,
@@ -185,11 +230,18 @@ export async function guardarTaxProfile(args: {
   });
   if (error) return fallo(codigoDe(error.message), 'No pudimos guardar tus datos de facturación.');
   const f = data as Record<string, unknown>;
+  /* Acá el perfil SÍ existe —la RPC lo acaba de escribir— pero el cast seguía
+     siendo una promesa sin verificar. Si el vocabulario del CHECK cambiara y
+     este lector no, el `as` lo dejaría pasar callado. */
+  const tipoGuardado = normalizarTipoIdentificacion(f.tipo_identificacion);
+  if (tipoGuardado === null) {
+    return fallo('no_se_pudo', 'No pudimos leer tus datos de facturación.');
+  }
   return {
     ok: true,
     data: {
       id: String(f.id),
-      tipoIdentificacion: f.tipo_identificacion as TaxProfile['tipoIdentificacion'],
+      tipoIdentificacion: tipoGuardado,
       identificacion: String(f.identificacion),
       razonSocial: (f.razon_social as string) ?? null,
       direccion: (f.direccion as string) ?? null,

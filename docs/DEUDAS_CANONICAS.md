@@ -32867,6 +32867,46 @@ su compra?* **Es otra tanda.**
 
 ### `D-1068` 🔴 · NUVEI NO MANDA EL TIPO DE FINANCIACIÓN — y el campo que parece decirlo no discrimina
 
+---
+
+#### 🔴 ENMIENDA S115-A (12-sep-2026) — LA MEDICIÓN QUE PEDÍA EL FOUNDER, Y DA VUELTA LA FICHA
+
+**La pregunta firmada:** *«medí qué porcentaje del histórico sería asumido bajo ④ — si es casi todo, la regla no sirve y hay que esperar a Nuvei.»* **Contestada, y en tres pasadas, porque las dos primeras daban números distintos sobre poblaciones distintas.**
+
+**① El número bruto — y está mal poblado.** 119 intentos aprobados, 83 sin medio ni BIN ⇒ 70 % asumido. *Pero incluye `seed_gate`, `simulado`, `siembra` (datos de prueba) y **`deuna`, que no es una tarjeta**: su `forma` es `codigo_push`.* ⚠️ **Aplicar la regla ④ a DeUna pondría «tarjeta de crédito» sobre un pago que no fue con tarjeta** — la regla tiene que estar acotada al riel de tarjeta o produce un dato falso distinto del que viene a evitar.
+
+**② La población que decide: Nuvei, 101 aprobados.** Con BIN en su columna: 34 (34 %). ⇒ **66 % asumido.** Y el rescate por tarjeta guardada da **CERO**: los 67 sin BIN **tampoco tienen `ultimos4`**, así que no hay con qué cruzar.
+
+**🔴 ③ Y LA TERCERA PASADA ENCONTRÓ QUE LA PREMISA ERA FALSA: EL BIN SIEMPRE ESTUVO.** `payload_crudo` está presente en los 101, y trae `card.{bin, type, origin, holder_name, number}`. Medido:
+
+| | |
+|---|---|
+| Nuvei aprobados | **101** |
+| BIN en la **columna** | 34 |
+| **BIN alcanzable** (columna **o** `payload_crudo->card->>'bin'`) | **101 — el 100 %** |
+| Sin BIN por ningún lado | **0** |
+| ⇒ **asumidos bajo la regla ④** | **0 de 101 — el 0 %** |
+
+**La causa de los 67 «sin tarjeta» no es Nuvei: es NUESTRO camino.** El corte es perfecto y no es casual:
+
+| grupo | n | qué son |
+|---|---|---|
+| CON datos de tarjeta | 34 | **los 34 son `compra_id`** (despensa) |
+| SIN datos de tarjeta | 67 | **ninguno es compra**: 40 citas · 15 bonos · 3 suscripciones |
+
+⇒ **el camino de COMPRAS copia `marca`/`bin`/`ultimos4` del payload a sus columnas y el camino de SERVICIOS no.** *El dato llegó en los 101 y en 67 lo tiramos.* **Es un defecto de captura por camino, no una carencia del proveedor** — y ningún gate lo vio porque las dos mitades funcionan por separado.
+
+**⚠️ EL LÍMITE QUE NO SE TAPA CON EL 100 %:** `bins_distintos = 2`. **En toda la historia vimos DOS BINs** —las dos tarjetas del founder—, así que *la cobertura del MECANISMO es 100 % y la diversidad de la MUESTRA es 2*. Una tabla BIN→crédito/débito no se puede validar contra esto. **El verde sigue siendo de campo, con una tarjeta real de cada tipo**, exactamente como quedó firmado.
+
+**Y `card.type` NO es el tipo de financiación:** sus valores son `vi` (60) y `di` (40) — **la MARCA**. *Un campo que se llama `type` y no dice el tipo es la clase de cosa que se lee una vez, se da por buena y funda un plan entero.* ⇒ **el camino ① (preguntarle a Erick) sigue en pie: nada de lo que Nuvei manda hoy discrimina crédito de débito.**
+
+#### Lo que esto reordena
+
+1. **Extraer el BIN del `payload_crudo` en el camino de servicios** — el dato ya está guardado; es copiarlo donde el resto del motor lo busca. **Sin esto, la regla ④ asume el 66 %; con esto, el 0 %.**
+2. **Acotar la regla ④ al riel de tarjeta** — DeUna tiene su propio código y no se asume.
+3. Recién entonces la regla ④ tiene sentido: cubre lo que quede, que hoy sería **nada**.
+
+
 **Medido sobre los 162 avisos de Nuvei guardados, 11-sep-2026.** El founder
 pidió mirar el payload completo antes de buscar un dataset de BINs: *puede que
 el dato ya esté y nadie lo lea*. Está mirado, y **no está**.
@@ -33188,3 +33228,380 @@ solo**: un gate que lea el encabezado de las migraciones nuevas y exija que esas
 edges estén al día antes de dejar cerrar.
 
 **Dueño:** A. **Disparo: ya — va antes de octubre.**
+
+---
+
+## `D-1074` 🔴 — LA APP QUEDA SIN RESPONDER DESPUÉS DE UN OTA · DOS OCURRENCIAS EL MISMO DÍA
+
+**Estado:** ABIERTA · 🔴 **BLOQUEA PRODUCCIÓN** (subida de prioridad, founder 11-sep: *«tres de tres publishes con incidente. Va con lo que bloquea producción»*).
+**Dueño:** A (la red) + C (el botón) · **Fecha límite:** antes del soft launch (1-oct-2026).
+
+### 🔴 TERCERA OCURRENCIA, Y EL DISCRIMINADOR CORRIÓ — LA FICHA CAMBIA DE PREGUNTA
+
+| # | Tras el OTA | Publicado | Síntoma |
+|---|---|---|---|
+| ③ | `77782b95` *«el perfil fantasma curado…»* | **23:45** | **la app DICE «no cargó»** |
+
+**El discriminador que esta ficha dejó escrito se corrió y contestó:** *si con el techo puesto la pantalla igual se queda muda, lo que cuelga no es una consulta de Supabase.* **No se quedó muda: dijo «no cargó».** ⇒ **es una consulta de Supabase, y el techo hizo su trabajo.**
+
+🟢 **EL CUELGUE MUDO ESTÁ CURADO.** Lo que quedaba de las ocurrencias ① y ② —una pantalla en silencio, indistinguible de un esqueleto eterno— **no vuelve a pasar**: el techo de lectura (8.000 ms) corta y la superficie habla. *La cura de `D-1070` se ganó su primer caso real, y se lo ganó en el peor momento, que es cuando vale.*
+
+🔴 **LO QUE QUEDA ES OTRA COSA Y ES PEOR DE DIAGNOSTICAR: EL REINTENTO NO RESCATA.** El botón no devuelve nada. Dos posibilidades, y **no se elige entre ellas sin medición** (founder):
+
+- **(a) El botón no dispara** — handler sin cablear, o la pantalla no vuelve a consultar. **Dueño: C.**
+- **(b) Dispara y la consulta vuelve a colgar hasta el techo, sin señal visible de que está reintentando.** *Desde afuera es idéntico a un botón muerto* — y la persona lo toca cinco veces. **Es la peor de las dos, y se distingue fácil: si hay estado de «reintentando», se ve.**
+
+⚠️ **Y una ley que sale de acá: un reintento sin señal es indistinguible de un botón roto.** El usuario no puede saber que está esperando, así que concluye que no funciona — *el mismo defecto de clase que el cuelgue mudo, un piso más arriba.*
+
+### La hipótesis de la descarga, ahora con más sustento
+
+**Si el caso es (b)**, la pregunta vuelve a ser por qué la red sigue sin responder después del OTA — y la aritmética la sostiene: **6,4 MB de bundle**; sobre un enlace degradado a ~500 kbps son **~100 segundos** de descarga. *Una ventana de cien segundos se come doce reintentos de ocho.* **Es una estimación declarada, no una medición:** el ancho de banda real del incidente no se midió.
+
+### 🔴 Y EL COSTO DE LA CURA ③, MEDIDO — NO VIAJA POR OTA
+
+`checkAutomatically` **se hornea en el binario.** Medido en `@expo/config-plugins/build/android/Updates.js:119-120`: el plugin lo escribe en el **AndroidManifest** con `addMetaDataItemToMainApplication(Config.CHECK_ON_LAUNCH, …)`, y el nativo lo lee de ahí (`UpdatesConfiguration.kt:101`). **Lo mismo `launchWaitMs`** (línea 122).
+
+⇒ **Tomar el control en JS exige una BUILD NATIVA NUEVA.** No es una tarde de código: es un tren de EAS + reinstalar el APK. *Y el orden importa: publicar el OTA con el código de control mientras el binario sigue en `ALWAYS` no cambia nada — el nativo ya descargó antes de que corra una línea de JS.*
+
+**Lo que SÍ está disponible sin tocar el binario:** `checkForUpdateAsync()`, `fetchUpdateAsync()` y el hook `useUpdates()` (medidos presentes en `expo-updates@57.0.6`). Sirven para **ver** el estado de la descarga y para **decidir cuándo** traerla — pero sólo gobiernan de verdad cuando el binario ya no lo hace solo.
+
+**La cura mínima y honesta, en dos tiempos:**
+1. **Sin build:** que la app **sepa si hay una descarga en curso** (`useUpdates()`) y **lo diga** cuando una consulta se rinde por techo — *«estamos actualizando la app; probá en un minuto»* en lugar de «no cargó». **Convierte un misterio en una espera.**
+2. **Con build:** `checkAutomatically: ON_ERROR_RECOVERY` o `WIFI_ONLY` + control en JS que difiera la descarga hasta que no haya pantallas cargando.
+
+*El tiempo 1 no necesita nada y quita la mitad del daño; el tiempo 2 lo cura y cuesta un binario.*
+
+### Las dos ocurrencias, con sus horas (todas -05)
+
+| # | Tras el OTA | Publicado | Ancla | Síntoma | Cómo se salió |
+|---|---|---|---|---|---|
+| ① | `36ad853a` *«checkout fiscal cableado…»* | **20:57** | `b65befcd` | la app deja de responder | **reinstalando** |
+| ② | `bd764ec6` *«el freno antes de cobrar…»* | **22:43** | `8a875d49` | idem | (reportado al cierre) |
+
+*Entre las dos hubo un tercer publish —`0405f710`, 21:57, ancla `74d81bf5`— sin incidente reportado.*
+
+### Lo medido (y lo que cada número descarta)
+
+**① `update:insights` de los tres grupos, plataforma android, último día:**
+
+| grupo | launches | **failed launches** | **crash rate** | usuarios | payload |
+|---|---|---|---|---|---|
+| `bd764ec6` | 2 | **0** | **0,00 %** | 2 | **6,41 MB** |
+| `0405f710` | 1 | **0** | **0,00 %** | 1 | 6,41 MB |
+| `36ad853a` | 2 | **0** | **0,00 %** | 2 | 6,40 MB |
+
+🔴 **Cero failed launches y cero crashes en los tres.** Eso **descarta** la hipótesis del bundle a medias y **sostiene** lo que dije ayer: expo-updates verifica el manifest y los assets ANTES de marcar un update como lanzable; si la verificación falla, no lanza y cae al anterior — y eso se contaría como *failed launch*, que acá es 0. **Lo que cuelga, cuelga DESPUÉS de un arranque exitoso.** No hay estado «a medias» del bundle: hay una app viva que deja de contestar.
+
+**② Los cuatro techos de red: `packages/api/src/red.ts`, commit `ee0b6cce`, 11-sep 21:44.** Ancestría medida contra las tres anclas:
+
+| OTA | ¿lleva los techos? |
+|---|---|
+| `36ad853a` (incidente ①) | **NO** |
+| `0405f710` | SÍ |
+| `bd764ec6` (incidente ②) | **SÍ** |
+
+⇒ **El incidente ① ocurrió SIN techos y el ② CON techos puestos.** *Los techos no evitaron el segundo cuelgue.* Y la explicación está medida, no supuesta: el único consumidor de `fetchConTecho()` es `client.ts:41`, el `global.fetch` del cliente de Supabase — **cubre las llamadas a Supabase y NADA MÁS**. La descarga del OTA la hace el **módulo nativo de expo-updates**, que no pasa por ese fetch. *Un techo sobre el fetch de JS no alcanza a una descarga nativa, igual que no alcanza a un websocket.*
+
+**③ La configuración de updates, leída del objeto (no de la doc):** `app.json` declara `updates: { url }` y **nada más** ⇒ rigen los defaults, verificados en el código nativo de `expo-updates@57.0.6` (`UpdatesConfiguration.kt`):
+
+- `checkOnLaunch` → **`ALWAYS`** (línea 101: `?: "ALWAYS"`) — **se consulta en cada arranque**.
+- `launchWaitMs` → **`0`** (línea 168) — **la app arranca YA con el bundle cacheado y la descarga sigue en segundo plano.**
+
+⇒ **Mecanismo candidato, y es exactamente el de tu punto ④:** en cada arranque frío que encuentra un update nuevo, **la app corre mientras se descargan ~6,4 MB por la misma conexión** que están usando las consultas de las pantallas. Sobre una red mala, la descarga puede acaparar el enlace. **Esto es una HIPÓTESIS con mecanismo medido, no una causa: falta reproducirla.**
+
+### Lo que falta para cerrar la causa (guion)
+
+1. **Reproducir con red degradada** (emulador: perfil GPRS/EDGE, o `adb shell` con *Network throttling*) — arrancar en frío con un update pendiente y ver si cuelga.
+2. **Distinguir «colgado» de «esperando»:** con el techo puesto, una consulta que no vuelve **tiene que** reventar en su tope y pintar «no cargó». Si la pantalla se queda muda igual, **lo que cuelga no es una consulta de Supabase** — y ahí el sospechoso es el hilo de JS o el nativo, no la red.
+3. **`adb logcat`** al momento del cuelgue: buscar `ANR`, `Skipped N frames`, `expo-updates`.
+
+### Curas candidatas, NO aplicadas
+
+- **`fallbackToCacheTimeout` explícito** — hoy es 0 por default, o sea el peor caso para la competencia; ponerlo en 0 *a propósito y escrito* no cambia nada, pero documenta la decisión.
+- **`checkAutomatically: ON_ERROR_RECOVERY` o `WIFI_ONLY`** — mata la competencia en datos móviles a cambio de que el update tarde más en llegar. **Es decisión de producto, no técnica.**
+- **Tomar el control en JS** (`checkForUpdateAsync`/`fetchUpdateAsync` a mano) para **diferir la descarga hasta que no haya pantallas cargando**. Medido: **hoy no hay una sola llamada a esas APIs en el repo** — el ciclo es 100 % automático.
+
+🔴 **Y la consecuencia que ordena la prioridad, con las palabras del founder:** *«si esto pasa en octubre, la familia no reinstala — desinstala.»*
+
+---
+
+## `D-1075` 🔴 — `obligadoContabilidad = NO` EN UN XML AUTORIZADO, Y SATORI SÍ LO ESTÁ
+
+**Estado:** ABIERTA · **lo más urgente de la tanda.** **Dueño:** founder (panel de Factuplan) + A (verificación).
+
+**Medido sobre el XML autorizado real** (`61668c3f…/comprobante.xml`, 9.498 bytes, bajado de Storage):
+
+```xml
+<razonSocial>SATORI INOV LATAM S A S</razonSocial>
+<ruc>1793240435001</ruc>
+<obligadoContabilidad>NO</obligadoContabilidad>   ← FALSO
+<ambiente>1</ambiente>                             ← PRUEBAS
+```
+
+**Nuestro dato está BIEN:** `fiscal_emisor.obligado_contabilidad = true`. **El `NO` no sale de nosotros:** el payload de `POST /developer/invoices` lleva del emisor **sólo** `establishment` y `emissionPoint` — en modo `create` el XML lo arma Factuplan con **la configuración del contribuyente en SU panel**.
+
+⚠️ **Atenuante medido, y cambia la urgencia sin borrarla: `<ambiente>1</ambiente>` es PRUEBAS.** Ningún documento con este defecto tiene efecto fiscal todavía. **Pero el mismo error en producción es un dato falso en un comprobante firmado**, y el campo es obligatorio en el esquema del SRI.
+
+### ✅ CAUSA ACLARADA POR FACTUPLAN (founder, 11-sep) — BAJA DE URGENCIA, **NO SE CIERRA**
+
+**No es un límite del plan sobre el DATO: la PANTALLA donde se configura el emisor está detrás del plan pago.** Al contratar se habilita y el campo se pone en `SÍ`.
+
+*Es una distinción que cambia la cura entera, y por eso vale anotarla: «el proveedor no deja poner el dato» habría mandado a armar el XML nosotros; «la pantalla está detrás del plan» se resuelve contratando.* **El síntoma era idéntico en los dos casos.**
+
+- **Disparo:** el momento de contratar el plan.
+- **Verificación:** la **primera emisión después de configurarlo** — no antes, porque hasta entonces el campo no puede estar bien.
+- 🔴 **NO se construye el modo `factuplan_xml` para esto** — firma del founder: *«no vamos a armar el XML nosotros para arreglar un campo de su formulario.»* El modo existe y queda donde estaba: como el camino del día que necesitemos numerar nosotros, **jamás como rodeo de una configuración ajena.**
+
+**Y queda en la lista de encendido de producción:** la primera factura real se mira **campo por campo contra el certificado de RUC, empezando por `obligadoContabilidad`. Si sale `NO`, se frena antes de la segunda.** Depositado en `MODELO_FISCAL` §Paso 7.4 — ⚠️ *la lista existía y ese chequeo NO estaba en ella: decía «verificar de punta a punta», que es una instrucción que cada uno cumple a su manera.*
+
+**Gate de no-repetición, PROPUESTO y sin firma:** un cinturón que compare los campos del emisor del XML autorizado contra `fiscal_emisor` en cada emisión. *Un dato del emisor que sale de la configuración de un tercero se verifica contra la nuestra en cada emisión, o no se verifica nunca* — y hoy el único que lo vio fue el founder leyendo el PDF. **No se construye hasta que se firme:** con el plan contratado el campo va a estar bien, y un gate para un defecto ya corregido es andamio.
+
+---
+
+## `D-1076` 🔴 — LA FAMILIA NO PUEDE FIRMAR SU PROPIA FACTURA: EL BUCKET `fiscal` SÓLO TIENE POLICY DE ADMIN
+
+**Estado:** ABIERTA · **es la causa real del «Descargar factura falla»** que midió C.
+
+**Lo medido.** Policies de `SELECT` sobre `storage.objects` para el bucket `fiscal`: **UNA sola.**
+
+```
+fiscal_admin_select · cmd=r · qual: (bucket_id = 'fiscal' AND is_admin())
+```
+
+⇒ **no existe ninguna policy que deje a la familia leer su propio archivo.** `createSignedUrl` desde el cliente autenticado rebota, y **Storage devuelve `not_found` / `NoSuchKey` cuando el fallo es de PERMISO** — por eso se lee como «el objeto no está».
+
+🔴 **Corrección a lo que reportó C, y es la parte que importa: el objeto SÍ está.** Cruce de `documentos_fiscales` contra `storage.objects`:
+
+| documento | `pdf_url` | objeto presente |
+|---|---|---|
+| `61668c3f` | `61668c3f…/ride.pdf` (28.797 B) | **sí** |
+| `61668c3f` | `61668c3f…/comprobante.xml` (9.498 B) | **sí** |
+
+**Cero rutas huérfanas en toda la tabla.** *El síntoma decía «falta el archivo» y lo que falta es el permiso — dos causas distintas con la misma cara, y curar la equivocada habría mandado a re-archivar documentos que ya estaban archivados.*
+
+**Y un hallazgo de paso: la migración se describe a sí misma mal.** `20260912300000` comenta *«la firma la hace el wrapper con service_role»* y `fiscal.ts:140` firma con `getClient()`, el cliente del usuario. **Letra muerta**: quien la lea da por hecha una arquitectura que no existe. *Se cura junto con la policy, en el mismo acto.*
+
+### ✅ CURADA — firma del founder, 11-sep: **POLICY POR DUEÑO**
+
+*«La familia lee su propio archivo porque es suyo, y eso se dice en la base. Firmar desde una edge pone un salto de red en cada descarga y esconde la autorización donde nadie la busca.»*
+
+Migración `20260912770000`. El predicado compara contra **la ruta que el documento declara** (`pdf_url`/`xml_url`) — **la misma fuente que usa `fiscal_ruta_archivo`**, así que las dos puertas no pueden divergir. Las alternativas se descartaron por medición: `(storage.foldername(name))[1]::uuid` **revienta** con los objetos de `ensayo/…` que ya viven en el bucket (la carpeta ahí es texto, y un cast que falla en un `USING` mata la consulta entera), y comparar por prefijo dejaría leer cualquier objeto subido bajo una carpeta con nombre de documento ajeno.
+
+**Cinturón con su ROJO probado** (L-459 — la primera prueba de un guard no es que dé verde):
+
+```
+cinturon OK · dueño=1 · ajeno=0 (rojo probado) · anon=0
+```
+
+*Y el cinturón aborta si no encuentra un documento con archivo REAL en Storage o un segundo usuario contra el cual discriminar (L-437): un censo que no puede producir su rojo no está midiendo.*
+
+---
+
+## `D-1077` 🟠 — «LISTA» SIN ARCHIVOS: EL ESTADO VISIBLE NO MIRA SI HAY ALGO PARA BAJAR
+
+**Estado:** ABIERTA. **Dueño:** A (motor) + C (voz).
+
+`fiscal_mis_documentos` deriva `estado_visible = 'lista'` de `estado = 'autorizada'` **y nada más** (`20260912300000:30`). Medido hoy: **2 documentos `autorizada`, sólo 1 con archivos.**
+
+| documento | estado | `pdf_url` | `xml_url` | lo que ve la familia |
+|---|---|---|---|---|
+| `61668c3f` | autorizada | sí | sí | «Lista» + dos botones ✓ |
+| `492bdafe` | autorizada | **NULL** | **NULL** | **«Lista» y ningún botón** |
+
+*Una factura que dice «lista» y no ofrece nada promete algo que no existe.* La pieza de C oculta el botón cuando falta el archivo —eso está bien, Ley 23— pero **el estado sigue diciendo que está lista**.
+
+**Causa de la ausencia, medida:** `492bdafe` tiene `estado='autorizada'` y **`autorizado_en = NULL`** ⇒ lo movió el camino de CONSULTA (`fiscal-emitir`), no el webhook. El archivado del camino de consulta **está construido y nunca se ejerció sobre un documento real** (declarado al cierre de la tanda anterior). **Éste es su primer caso vivo.**
+
+**Dos mitades, las dos hacen falta:** ① que el camino de consulta archive de verdad; ② que `estado_visible` no diga «lista» sin archivo — *o se archiva, o el estado dice la verdad.*
+
+---
+
+## `D-1078` 🟠 — SETENTA `as` SIN GUARDA EN `packages/api` AFIRMAN FORMA SOBRE DATOS DE LA BASE
+
+**Estado:** ABIERTA. **Dueño:** A. **Origen:** hallazgo de C sobre `TaxProfile.tipoIdentificacion`.
+
+**Censo medido** sobre `packages/api/src/wrappers` (excluyendo `Record`/`Obj`/`unknown`, que ensanchan y no prometen):
+
+| | |
+|---|---|
+| casts a un tipo **nombrado** sobre datos de la base | **115** |
+| con guarda en la misma línea (`includes` / `typeof` / `??` / ternario) | 45 |
+| **SIN guarda** | **70** |
+
+⚠️ **Lo que el número NO prueba:** que los 70 estén rotos. La mayoría cae sobre columnas `NOT NULL` con CHECK, donde el cast acierta. **El daño aparece cuando la fuente puede ser nula** — y eso hay que cruzarlo caso por caso contra la nulabilidad de cada columna. *Publicar «70 defectos» sería etiquetar un número con la población equivocada (L-544): son 70 CANDIDATOS de una clase, no 70 fallas.*
+
+**Lo que sí está probado es la clase**, con su caso vivo: `fiscal.ts:157` afirmaba `tipo_identificacion as TaxProfile['tipoIdentificacion']` sobre un valor que llegaba `NULL`, **con typecheck verde** — porque un cast es pedirle al compilador que no mire. Curado en esta tanda con verificación en runtime contra el vocabulario cerrado.
+
+**Cura de raíz propuesta (no aplicada): un gate.** `verify:casts-sin-guarda` con baseline solo-baja, que exija guarda o una lápida declarada. *Sin instrumento, esta clase vuelve en el próximo wrapper — nadie puede recordar 70 líneas.*
+
+---
+
+## `D-1079` 🟡 — EL RIDE QUE RECIBE LA FAMILIA LLEVA LA MARCA DE FACTUPLAN
+
+**Estado:** ABIERTA · **esperando la respuesta de Factuplan** sobre personalización.
+
+**Medido: el PDF es de ELLOS, no el nuestro.** `factuplan.ts:301` lo trae de `GET /developer/receipts/{id}/pdf` y archiva **los bytes tal cual**. El `ride.ts` propio (HTML) **nunca se usó para este documento** — y se comprueba sin abrir el archivo: la extensión sale del mime, y en Storage el objeto es `ride.pdf`; el nuestro habría quedado `ride.html`.
+
+**El XML, en cambio, está bien:** `razonSocial` y `ruc` son de Satori, y Factuplan aparece **sólo** en `<infoAdicional>` como `RUC Proveedor = 0993411372001`, que es exactamente donde corresponde. **Los tres campos adicionales del XML:** `Email`, `servicioPrestadoPor = [DEMO S44] Paseos Andres`, `RUC Proveedor`. ⇒ **El defecto es de RENDERIZADO de su RIDE, y el XML autorizado prueba qué debería decir el encabezado.** Va al reclamo.
+
+### 🔴 CORRECCIÓN DE UNA MEDICIÓN PROPIA (misma tanda, antes de que la firma se apoyara en ella)
+
+**Reporté que el RIDE nuestro es HTML y que no hay motor de PDF en el repo. Las dos son FALSAS.** Lo deduje del `ext = mime === 'application/pdf' ? 'pdf' : 'html'` del webhook y de que el RIDE del simulador sí es HTML — *razoné desde el vecino en vez de abrir el archivo.* Lo que hay, medido:
+
+- **HAY DOS `rideDesdeCanonico`, y ése fue el engaño.** `simulador.ts:86` devuelve `string` (HTML) y **`ride.ts:28` devuelve `Uint8Array` (PDF)**. `mod.ts:10` re-exporta **la del simulador**, así que el nombre que se ve desde afuera es el que NO es el bueno. *Dos funciones con el mismo nombre y distinto tipo de retorno: quien lea el export cree que ya sabe cuál es.*
+- **Hay motor de PDF:** `papel.ts:34` importa `npm:pdf-lib@1.17.1`. Es `Papel`, el molde de los cinco papeles de la casa (S90) — marca de agua del isotipo, filete magenta, tinta, mono para el dato exacto.
+- **Hay QR real:** `qr.ts:32` `matrizQr()`, 91 líneas, y `Papel.qr()` lo dibuja. El RIDE ya lleva el QR de la clave de acceso.
+- **Y ya tiene su edge:** `fiscal-ride/index.ts`, 83 líneas, gateada por `DESPACHO_SECRET`, **idempotente por diseño** (el canónico está congelado ⇒ el PDF sale idéntico y `pdf_url` no cambia).
+
+**El costo real, entonces:**
+
+| | RIDE de Factuplan | RIDE nuestro (`ride.ts`) |
+|---|---|---|
+| Marca del encabezado | **Factuplan** | e-PetPlace / Satori |
+| Formato | PDF | **PDF** (`pdf-lib`) |
+| Clave de acceso (49 díg.) | sí | **sí** |
+| QR de la clave | — | **sí, ya dibujado** |
+| Estado y fecha de autorización | sí | **sí** (`args.estado`, `args.autorizadoEn`) |
+| Detalle con IVA por línea | sí | **sí** |
+| Referencia de nota de crédito | sí | **sí** |
+| `obligadoContabilidad` | **`NO` (falso)** | **correcto — sale de `fiscal_emisor`** |
+| **Código de barras Code128 de la clave** | **sí** | **NO — es lo ÚNICO que falta** |
+
+⇒ **El costo no es «motor de PDF + código de barras». Es sólo el código de barras**, más cablear el webhook para que archive el nuestro en vez del suyo. La pieza está construida, tiene su edge y es idempotente.
+
+⚠️ **Y la única pregunta abierta de verdad: si el SRI EXIGE el Code128 o si el QR alcanza.** No lo afirmo de memoria — se verifica contra la ficha técnica del SRI y contra las siete facturas reales que ya medimos (¿cuántas traen barcode, cuántas QR, cuántas las dos?). *De esa respuesta depende si «lo único que falta» es una tarde o es nada.*
+
+**Mi voto, con el número corregido:** sigue siendo **preguntarles primero** —si personalizan, esto muere sin costo—, pero si dicen que no, **usar el nuestro ya no es una decisión cara**. Y el eje que decide no es la marca: **su RIDE lleva un dato fiscal falso (`D-1075`) y el nuestro no.**
+
+---
+
+## `L-546` — UN FALLO DE PERMISO EN STORAGE SE DISFRAZA DE ARCHIVO AUSENTE
+
+`createSignedUrl` sobre un objeto que existe pero que la policy no deja leer devuelve **`not_found` / `NoSuchKey`**, idéntico a un objeto que de verdad no está. *No es un mensaje pobre: es la respuesta correcta de un sistema que no te confirma la existencia de lo que no podés ver.*
+
+⇒ **Ante un `NoSuchKey`, antes de re-archivar nada se pregunta si la fila del objeto EXISTE** (`storage.objects` por `bucket_id` + `name`) **y si hay una policy que la alcance.** Las dos preguntas son SQL y contestan en un segundo; sin ellas, el camino obvio —«faltan los archivos, hay que volver a subirlos»— cura lo que no está roto y deja el permiso cerrado.
+
+**Caso fundante:** `D-1076`. El objeto estaba, pesaba lo correcto, y la única policy del bucket exigía `is_admin()`.
+
+
+---
+
+## `D-1080` 🟠 — LOS CUATRO TECHOS DE RED VIVEN EN `app_config` Y NADIE LOS LEE
+
+**Estado:** ABIERTA. **Dueño:** A. **Disparo:** la primera vez que haya que mover un techo sin publicar.
+
+**Medido:** `cargarTechosDeRed()` **tiene CERO llamadores** — sólo aparece en su archivo y en el `export` de `index.ts`. Los techos que rigen son los `ARRANQUE` del código: `lectura 8000 · escritura 20000 · auth 20000 · subida 120000`.
+
+**Hoy el efecto es NULO, y por eso es fácil que nadie lo vea:** las cuatro filas de `app_config` dicen exactamente los mismos números. ⇒ **una perilla que el motor no honra** — y la próxima vez que alguien la mueva para apagar un incendio, **va a mirar un valor cambiado y un comportamiento igual**.
+
+*Es la clase «escritor sin lector» al revés: el dato existe, es correcto, y no llega a ninguna parte.* La cura es una línea en el arranque de cada app — con su cuidado propio ya escrito en `red.ts:30`: **la petición que trae los techos necesita su propio techo**, y por eso los `ARRANQUE` no se borran nunca.
+
+---
+
+## `D-1081` 🔴 — DOS VALIDADORES DE IDENTIFICACIÓN QUE NO DICEN LO MISMO
+
+**Estado:** ABIERTA · **PRIORIDAD** (founder, 12-sep: *«no al final de la lista»*). **Dueño:** A + B.
+**Disparo:** antes de que cualquier superficie o motor cablee el de SQL.
+
+**Medido contra el objeto**, los tres RUC reales de comprobantes autorizados por el SRI:
+
+| RUC | `esRucValido` (TS, `packages/ui`) | `validar_identificacion_fiscal` (SQL) |
+|---|---|---|
+| `1793240435001` — **Satori, el nuestro** | **rechaza** | **acepta** |
+| `0993411372001` — SigniaDigital (Factuplan) | **rechaza** | **acepta** |
+| `1713744546001` — TOGA FASHION | **rechaza** | **rechaza** |
+
+Son **dos reglas distintas**: el de TS verifica el **módulo 11**; el de SQL verifica **la forma** (país + tipo) y no toca el dígito. *No es que uno esté roto: es que responden preguntas distintas con el mismo nombre.*
+
+🟢 **Hoy no hace daño, y por eso es fácil que se quede así:** `validar_identificacion_fiscal` **no tiene un solo invocador** — salió en el censo de `verify:sin-invocador`. La cadena fiscal no valida el RUC del emisor por ningún lado (medido: cero usos en edges y en SQL), así que **Satori nunca rebotó**.
+
+🔴 **El día que alguien lo cablee, la firma de B no lo alcanza.** B firmó que *el dígito verificador del RUC deja de bloquear y pasa a advertencia*; esa firma vive en el de TS. El de SQL nunca bloqueó por dígito **y sí bloquea por forma**, o sea que aplicaría un criterio que nadie firmó, en un lugar donde nadie lo va a ir a mirar.
+
+> *Es la misma clase que dos letras firmadas que se contradicen —cualquiera cita la que le conviene y está «en regla»— y esa clase ya costó una sesión entera al principio de S115 con el modelo fiscal.* **La diferencia acá es que no son dos textos: son dos funciones, y una de ellas se puede cablear sin leer la otra.**
+
+**Las dos salidas, y no son equivalentes:** (a) que el de SQL **delegue** en la misma regla que el de TS —una sola fuente, y la firma de B la alcanza—; (b) **jubilar** el de SQL si su pregunta ya la contesta la puerta de arriba. **Lo que NO vale es dejarlos conviviendo con una lápida**: una lápida no frena a quien escribe el `SELECT`.
+
+---
+
+## `D-1082` 🟠 — EL PAYLOAD TIENE CUATRO CAMPOS QUE PARECEN DECIR CRÉDITO/DÉBITO, Y NINGUNO SE PUEDE USAR TODAVÍA
+
+**Estado:** ABIERTA. **Dueño:** founder (la pregunta a Erick) + A. **Precondición de `D-1072`.**
+
+Buscando cerrar `D-1068` sin esperar a Nuvei, censé el `payload_crudo` entero. Aparecieron **cuatro candidatos**, y el más prometedor es semánticamente exacto:
+
+| campo | valor, en TODA la historia | n |
+|---|---|---|
+| `transaction.installments_type` | **`"Revolving credit"`** | **108 / 108** |
+| `transaction.payment_method_type` | `"0"` | 100 |
+| `transaction.installments` | `"0"` | 100 |
+| `transaction.carrier_code` | `"00"` | 100 |
+| `card.type` | `vi` (60) · `di` (40) | — **es la MARCA** |
+
+*«Revolving credit» es literalmente crédito rotativo: el nombre de la línea de una tarjeta de crédito.* Parece la respuesta.
+
+🔴 **Y no se puede usar, por una razón que vale para los cuatro: la muestra es de UNA persona y DOS tarjetas.** Medido: `installments_type` aparece 108 veces, con **2 BINs** y **1 pagador**. **Un campo constante sobre una población de una sola tarjeta no se distingue de un campo que siempre dice lo mismo.** Los cuatro son constantes a la vez, que es exactamente lo que se ve cuando nunca variaste la entrada.
+
+⚠️ **Y usarlo igual sería PEOR que la regla ④**, no mejor: la regla ④ marca `derivado:false` y se sabe cuáles se asumieron. Un campo que se lee como dato **entra al XML sin marca** — *la misma suposición, vestida de medición, y sin forma de encontrarla después.*
+
+**Lo que lo destraba es un solo pago con tarjeta de DÉBITO.** Si ahí `installments_type` dice otra cosa, el campo discrimina y `D-1068` se cierra sin Erick. Si dice `Revolving credit` igual, es una constante y no sirve.
+
+**Y mejora la pregunta a Erick**, que es lo barato de hoy: en vez de *«¿hay un campo de funding type?»* → **«¿`installments_type` dice `Revolving credit` para crédito y otra cosa para débito, o es constante?»** *Una pregunta que nombra el campo se contesta en una línea; una que pregunta si existe se contesta en una reunión.*
+
+---
+
+## `D-1083` 🔴 — EL PROVEEDOR EMITIÓ DOS FACTURAS QUE NUESTRA BASE NO REGISTRA
+
+**Estado:** ABIERTA · **BLOQUEA PRODUCCIÓN.** **Dueño:** A. **Encontrado por:** la primera corrida del reloj (12-sep-2026, 05:36).
+
+**Lo que pasó, medido de punta a punta.** El reloj procesó 4, emitió 2 y rebotó 2. Los dos rebotes fueron `numero_ajeno_rechazado: clave_con_otra_fecha` — **mi propio guard de numeración ajena (`S115-A`) cazando su primer caso real**: la fila decía `11092026` y la clave que devolvió Factuplan empieza en `12092026`.
+
+🔴 **El guard hizo bien su trabajo y llegó tarde.** Dos minutos después llegaron **dos webhooks `invoice.authorized`, con firma verificada**, y el buzón los resolvió como **`documento_no_encontrado`**. Sus claves:
+
+```
+1209202601179324043500110010020000000082332182717   ← secuencial 000000008
+1209202601179324043500110010020000000070632835412   ← secuencial 000000007
+```
+
+⇒ **Factuplan creó, firmó y autorizó dos comprobantes bajo el RUC de Satori, quemó los secuenciales 7 y 8, y nuestra base no tiene fila para ninguno.** El rechazo fue nuestro y fue **después** de que el documento existiera del otro lado.
+
+*El guard protege la coherencia de NUESTRA numeración; no puede deshacer lo que el proveedor ya hizo.* **Rechazar no es cancelar.**
+
+**Por qué hoy no duele y por qué en octubre sí.** Ambiente 1: sin efecto fiscal y los documentos se borran cada hora. **En producción serían dos facturas autorizadas fuera de los libros** — y el SRI las tiene aunque nosotros no.
+
+### ✅ FIRMA DEL FOUNDER, 12-sep-2026 — LAS HUÉRFANAS SE **ADOPTAN**, NO SE ANULAN
+
+*«Se crea la fila faltante, marcada como reconciliada y con su origen declarado, para que los libros digan lo que el SRI ya dice. **Anular sería emitir un documento más para tapar uno que nadie pidió, y dejar dos huellas donde había una.**»*
+
+**Con su límite, que es parte de la firma:** se adopta lo que es **NUESTRO** — RUC de Satori · punto de emisión nuestro · **y un pago que la respalde**. *Una huérfana que no corresponde a ningún pago no se adopta: es un incidente y se escala.* El reconciliador tiene que **distinguir los dos casos**, no tratarlos igual.
+
+#### 🔴 UN TERCER CASO QUE LA FIRMA NO CUBRE, Y ESTÁ VIVO EN LOS DATOS DE HOY
+
+**Las 4 huérfanas son 2 ventas, no 4.** Medido: el barrido tomó los MISMOS dos documentos dos veces —05:36 y 05:40, el tick del cron— y Factuplan autorizó un comprobante distinto en cada pasada:
+
+| hora | secuencial | |
+|---|---|---|
+| 05:36:42 · 05:40:08 | `…007` · `…009` | **el mismo documento de $11,50** |
+| 05:36:44 · 05:40:10 | `…008` · `…010` | **el mismo documento de $14,95** |
+
+⇒ **adoptar las cuatro crearía dos facturas duplicadas por la misma venta.** La regla dice *«un pago que la respalde»*, y acá **dos claves comparten un pago**: sólo una de cada par es adoptable.
+
+**Y el par sobrante obliga justo a lo que la firma descarta.** No se puede adoptar —no hay segunda venta— y no se puede dejar —existe en el SRI—. ⇒ **nota de crédito, y la razón NO contradice la firma: no se anula para tapar un documento que nadie pidió, se anula porque la alternativa es una venta facturada dos veces.** *La firma resuelve el caso general y este borde lo abre el reintento, no el proveedor.*
+
+⚠️ **Cuál de cada par se adopta no se puede decidir desde acá:** hay que preguntarle al proveedor cuál corresponde a qué, con `queryExternalByAccessKey` — la pieza del adaptador que nunca ejercimos. **Decisión pendiente del founder cuando el reconciliador la traiga.**
+
+#### El reconciliador, dimensionado
+
+1. **La pieza ya existe y nunca se ejerció:** `queryExternalByAccessKey` en `factuplan.ts`.
+2. **Un reloj que tome las claves huérfanas y pregunte** — la fuente es `fiscal_webhooks_huerfanos()`, que ya las entrega con su clave.
+3. **Tres salidas, no dos:** adoptar (nuestro + con pago) · **nota de crédito** (duplicado del mismo pago) · **escalar** (ni nuestro, ni con pago respaldándolo).
+
+---
+
+**Las tres curas candidatas, ninguna aplicada:**
+1. **No pedir la emisión con una fecha que no es la de hoy.** La causa raíz es que un documento nacido ayer se emitió hoy: el guard compara `left(clave,8)` contra `fecha_emision` de la fila. **Antes de emitir, si la fecha de la fila no es la de hoy, el documento se re-fecha o no se manda.** *Es la más barata y ataca la causa.*
+2. **Guardar la referencia del proveedor ANTES de validar la clave** — así un webhook posterior encuentra su fila aunque el documento haya quedado en `no_autorizada`, y el huérfano se ve.
+3. **Un barrido de huérfanos**: `documento_no_encontrado` en `fiscal_webhook_eventos` es hoy la única traza, y nadie la lee. El lector de salud tendría que contarla.
+
+⚠️ **Y una cuarta que NO es cura y hay que nombrarla para descartarla: aflojar el guard.** El guard es lo único que impide que escribamos una clave incoherente con su fila; apagarlo cambiaría dos facturas huérfanas por dos facturas mal numeradas en nuestros libros, que es peor.
+
+**Y el grito no lo vio:** la corrida cerró `procesados 4 · emitidos 2 · rebotados 2 · sin grito`, que es correcto por sus dos condiciones. **Falta una tercera: un rebote que deja un comprobante vivo del otro lado no es un rebote — es una divergencia**, y merece gritar aunque la corrida haya emitido.

@@ -1,0 +1,4 @@
+-- REVERSA de 20260912810000. Vuelve el grito a sus dos condiciones y el lector
+-- a no contar huérfanos.
+-- ⚠️ Revertir reintroduce el estado que D-1083 encontró: el sistema se ve sano
+--    con comprobantes vivos del otro lado que nadie reclama.

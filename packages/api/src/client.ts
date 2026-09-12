@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { fetchConTecho } from './red';
+import { fetchConTecho, cargarTechosDeRed, refrescoCaidoHace, marcarRefrescoSano } from './red';
 import type { Database } from './database.types';
 
 export type EpetplaceClient = SupabaseClient<Database>;
@@ -61,7 +61,78 @@ export function initApi(url: string, anonKey: string, opciones?: OpcionesApi): E
       ...(opciones?.storageSesion ? { storage: opciones.storageSesion } : null),
     },
   });
+
+  /* ── `D-1080` · LOS CUATRO TECHOS SE LEEN DE `app_config` ─────────────────
+     🔴 LO QUE HABÍA: `cargarTechosDeRed()` existía, estaba exportada, y **no
+        la llamaba NADIE** (medido: cero consumidores fuera de su propio
+        `export`). Los techos que regían eran los del código. Hoy el efecto era
+        NULO —las cuatro filas dicen los mismos números— *y por eso nadie lo
+        iba a ver*: la perilla se movía y la app no cambiaba, y el día del
+        incendio eso se lee como «el problema es otro».
+
+     🔴 POR QUÉ VA ATADO A LA SESIÓN Y NO AL ARRANQUE, y es la parte que casi
+        me sale mal: medí la lectura de `app_config` por rol antes de cablear
+        nada — **`authenticated` ve las 4 filas y `anon` ve 0**. Llamarlo acá
+        mismo, al crear el cliente, habría leído CERO filas, devuelto
+        `ok:false` **sin lanzar**, y dejado la perilla igual de muerta con una
+        línea de código encima. *La cura habría reproducido el defecto que
+        viene a curar, y con mejor cara.*
+
+     Y por eso no se le pide a nadie que se acuerde de llamarla: se engancha
+     sola al primer momento en que hay sesión. *Una regla que hay que recordar
+     es una que alguien va a olvidar.*
+
+     Su fallo NO es grave y por eso no lanza: los valores de arranque siguen
+     rigiendo. Lo único que se pierde es poder moverlos sin publicar — que es
+     exactamente para lo que son dato. */
+  let techosPedidos = false;
+  cliente.auth.onAuthStateChange((evento, sesion) => {
+    /* `TOKEN_REFRESHED` es la única prueba de que la sesión revivió: mientras
+       no llegue, un refresco caído sigue caído por más que la red vuelva. */
+    if (evento === 'TOKEN_REFRESHED') marcarRefrescoSano();
+    if (evento === 'SIGNED_OUT') marcarRefrescoSano();
+    if (!sesion || techosPedidos) return;
+    techosPedidos = true;
+    void cargarTechosDeRed(async () => {
+      const { data } = await cliente!.from('app_config')
+        .select('clave, valor').like('clave', 'red_techo%');
+      return data ?? null;
+    });
+  });
+
   return cliente;
+}
+
+/**
+ * EL ESTADO DE LA SESIÓN, PARA QUE LA PANTALLA DIGA LA VERDAD (`D-1074`).
+ *
+ * 🔴 POR QUÉ HACE FALTA: hoy un refresco caído y una consulta caída producen
+ *    **el mismo texto** —«no cargó»— y son cosas distintas: una se arregla
+ *    reintentando y la otra no se arregla nunca hasta que la sesión vuelva.
+ *    *Cuatro de cinco publishes tuvieron este síntoma y perdimos cuatro
+ *    vueltas buscando del lado de la red, porque la pantalla decía red.*
+ *
+ * ⚠️ `cortada` NO significa «te desconectamos»: significa **«el refresco no
+ *    está volviendo»**. La sesión puede revivir sola en la próxima vuelta del
+ *    reloj de `auth-js`, y por eso la voz de la superficie tiene que ser
+ *    *«tu sesión se cortó, estamos reconectando»* y no *«volvé a entrar»* —
+ *    mandar a re-loguear a alguien cuya sesión va a volver sola es peor que
+ *    no decir nada.
+ */
+export type EstadoDeSesion = 'viva' | 'cortada' | 'sin_sesion';
+
+/** Cuánto tiene que llevar caído un refresco para llamarlo `cortada`. Un
+ *  refresco tarda como mucho ~33 s en agotar sus 4 intentos (ver `red.ts`);
+ *  por debajo de eso todavía está peleando y decirlo sería alarmar de más. */
+const MS_PARA_DECIR_CORTADA = 35_000;
+
+export async function estadoDeSesion(): Promise<EstadoDeSesion> {
+  const c = cliente;
+  if (!c) return 'sin_sesion';
+  const { data } = await c.auth.getSession();
+  if (!data.session) return 'sin_sesion';
+  const caido = refrescoCaidoHace();
+  return caido !== null && caido > MS_PARA_DECIR_CORTADA ? 'cortada' : 'viva';
 }
 
 export function getClient(): EpetplaceClient {

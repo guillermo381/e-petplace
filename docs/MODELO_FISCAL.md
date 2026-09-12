@@ -403,6 +403,7 @@ Los reembolsos disparan el mismo circuito con nota de crédito (referenciando la
 2. Webhook verificado con firma; cron de reconciliación corriendo; alarma de certificado activa.
 3. Autorizar producción en SRI en línea (paso 3), cambiar secretos (paso 5), y arrancar con **tope diario** de documentos las dos primeras semanas.
 4. Verificar la primera factura real de punta a punta: consulta pública en el SRI con la clave de acceso, correo recibido, XML y RIDE descargables desde el perfil del cliente.
+5. 🔴 **La primera factura real se lee CAMPO POR CAMPO contra el certificado de RUC** (enmienda S115-A, firma del founder 11-sep-2026) — **empezando por `obligadoContabilidad`: si sale `NO`, se frena antes de la segunda.** *Lo que obligó a escribirlo: en Pruebas el XML autorizado salió con `obligadoContabilidad = NO` mientras Satori Inov SÍ lo está, porque ese dato lo arma el proveedor con la configuración de su panel y no viaja en nuestro payload.* El ítem 4 decía «verificar de punta a punta», que **es una instrucción que cada uno cumple a su manera** — de punta a punta se leyó, y el campo falso pasó igual. Los campos: razón social · RUC · dirección matriz · establecimiento · punto de emisión · **obligado a contabilidad** · leyenda de régimen · contribuyente especial · agente de retención.
 
 **Tiempos totales:** pasos 1–4 caben en una semana (el certificado suele salir en el día); el paso 6 es el trabajo de septiembre del camino crítico (§10, filas 6–8). Ninguna de las llaves cuesta más que el certificado.
 
