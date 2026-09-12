@@ -9,8 +9,32 @@
 > Reventa con margen (B2) es el modelo BASE: default de toda cuenta comercial nueva
 > (`modelo_comercial = reventa_pura`). Las cuentas en `marketplace_fachada` operan en
 > AGENCIA: el proveedor factura al cliente, la plataforma captura y valida su clave de
-> acceso, y Satori le factura la comisión mensual con IVA. Al lanzamiento, en fachada
-> quedan las clínicas veterinarias; el resto en reventa. El «flujo 3 — contingencia» deja
+> acceso, y Satori le factura la comisión mensual con IVA. ~~Al lanzamiento, en fachada
+> quedan las clínicas veterinarias; el resto en reventa.~~
+>
+> 🔴 **ENMIENDA S115-A · 12-sep-2026 · FIRMA DEL FOUNDER — LA AGENCIA ES POR ACTO, NO
+> POR CUENTA.** Donde decía *«en fachada quedan las clínicas veterinarias»*, léase
+> **«los ACTOS VETERINARIOS se facturan en agencia»**: si el ítem es acto veterinario o
+> telemedicina va en agencia; **todo lo demás va en reventa, aunque lo venda una
+> clínica**.
+>
+> *La razón es el alcance de la duda que creó la agencia: si Satori puede revender un
+> servicio de salud animal (F1). **Esa duda alcanza al acto veterinario y a nada más.**
+> Un baño es grooming lo venda un peluquero o una clínica, y una bolsa de alimento es
+> despensa — facturarlos distinto según quién los venda no tiene fundamento fiscal.*
+>
+> ⚠️ **Y el caso es la NORMA, no el borde:** casi toda clínica hace baños y vende
+> alimento. Medido el 12-sep sobre la base de prueba: **Clínica Aurora tiene 6 ofertas
+> médicas Y TAMBIÉN grooming y guardería**, y con el reparto por cuenta sus baños
+> facturaban por agencia. *La diferencia entre las dos redacciones no es de estilo: la
+> primera reparte por SUJETO y la segunda por HECHO, y el sujeto vende más cosas que su
+> oficio.*
+>
+> **Borde que la enmienda crea y que hay que resolver con ella:** una compra que mezcle
+> una consulta con un baño en la misma clínica produce **DOS facturas**, una del
+> proveedor y una nuestra — la pantalla tiene que poder decirlo. Ficha **`D-1084`**,
+> con el alcance medido (6 lectores de `modelo_comercial`, que pasa a ser DEFAULT y
+> deja de ser criterio). El «flujo 3 — contingencia» deja
 > de ser contingencia: es el modo de arranque de veterinaria. **D-419 (S66) queda
 > ACOTADA** a las cuentas en fachada, no derogada. Razón: la cohorte fuera de las clínicas
 > no va a facturarle a cada familia, y la plata ya entra a nombre de e-PetPlace.

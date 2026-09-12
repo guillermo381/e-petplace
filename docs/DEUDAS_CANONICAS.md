@@ -33668,3 +33668,59 @@ Buscando cerrar `D-1068` sin esperar a Nuvei, censé el `payload_crudo` entero. 
 ⚠️ **Y una cuarta que NO es cura y hay que nombrarla para descartarla: aflojar el guard.** El guard es lo único que impide que escribamos una clave incoherente con su fila; apagarlo cambiaría dos facturas huérfanas por dos facturas mal numeradas en nuestros libros, que es peor.
 
 **Y el grito no lo vio:** la corrida cerró `procesados 4 · emitidos 2 · rebotados 2 · sin grito`, que es correcto por sus dos condiciones. **Falta una tercera: un rebote que deja un comprobante vivo del otro lado no es un rebote — es una divergencia**, y merece gritar aunque la corrida haya emitido.
+
+---
+
+## `D-1084` 🔴 — LA AGENCIA ES POR **ACTO**, NO POR CUENTA
+
+**Estado:** ABIERTA con **FIRMA DE LETRA**. **Dueño:** A (motor) + C (la pantalla de las dos facturas). **NO se construye de noche** (orden del founder: *«lo hacés con luz»*).
+
+### ✅ LA FIRMA (founder, 12-sep-2026), con su razón
+
+> *«La agencia existe porque hay una duda abierta sobre si Satori puede revender un servicio de salud animal (F1). **Esa duda alcanza al acto veterinario y a nada más.** Un baño es grooming lo venda un peluquero o una clínica, y una bolsa de alimento es despensa — facturarlos distinto según quién los venda no tiene fundamento fiscal. Y el caso va a ser la NORMA en producción: casi toda clínica hace baños y vende alimento.»*
+
+⇒ **si el ítem es acto veterinario o telemedicina → agencia; todo lo demás → reventa, aunque lo venda una clínica.**
+
+### Cómo se encontró, y es un caso vivo
+
+El founder reportó que **tres de cinco compras no le facturaron** y sospechó que el reparto de la base de prueba estaba mal. **Medido: el reparto está bien** —las cinco cuentas en `marketplace_fachada` tienen consulta o vacunación activa, o sea que son clínicas de verdad—. **Lo que estaba mal era el eje.** Sus tres compras:
+
+| monto | cuenta | qué compró |
+|---|---|---|
+| $29,90 ×2 | **Clínica Aurora** | **Baño y corte** |
+| $24,90 | **TODO EN UNO** | **despensa** |
+
+*Clínica Aurora tiene 6 ofertas médicas **y también vende grooming y guardería**. Como el modelo vive en la CUENTA, todo lo que vende factura por agencia — incluido el baño.* **El modelo era por cuenta y la regla es por ítem.**
+
+⚠️ **Y por eso NO se reasentaron las cuentas, que era lo que el founder pidió primero:** mover Clínica Aurora a `reventa_pura` haría que **sus consultas facturen en reventa**, que es exactamente lo que la firma prohíbe. *Habría cambiado un caso mal por otro caso mal, y el segundo toca el acto médico.*
+
+### El alcance, MEDIDO — y la respuesta a «default o desaparece»
+
+**`modelo_comercial` tiene 6 lectores. No es un campo suelto:**
+
+| dónde | quién |
+|---|---|
+| motor | `_trg_pago_aprobado_outbox_fiscal` · `fiscal_quien_emite` · `registrar_factura_pedido` · `fiscal_adjuntar_comprobante_liquidacion` · `liquidacion_respaldo` |
+| superficie | `apps/cliente/src/components/seccion-facturacion.tsx` |
+
+⇒ **Menos invasivo: que QUEDE como DEFAULT, no que desaparezca.** Dos razones medidas:
+1. **Los cinco lectores del motor siguen necesitando un modelo cuando el ítem no lo dice** — una liquidación o un respaldo no tienen «ítem»; tienen cuenta. Quitarlo obliga a tocar los cinco.
+2. **El que decide pasa a ser el ítem**, y la cuenta contesta sólo cuando el ítem no alcanza. *Un campo que deja de ser criterio pero sigue existiendo como piso se cambia en UN lugar —el resolvedor— en vez de en seis.*
+
+**La forma concreta:** un resolvedor `fiscal_modelo_del_item(...)` que mire el tipo de servicio (`tipos_servicio.es_medico` ya existe y ya distingue) y caiga al `modelo_comercial` de la cuenta cuando no haya ítem. Los cinco lectores del motor pasan a llamarlo.
+
+### 🔴 EL BORDE QUE LA FIRMA CREA, y el founder lo nombró antes que yo
+
+**Una compra que mezcle una consulta con un baño en la misma clínica produce DOS facturas: una de ellos y una nuestra.**
+
+- El carrito mixto entre modelos **ya existe y nada lo impide** (medido en su momento).
+- **`fiscalQuienEmite` está construido y devuelve una LISTA justamente por esto** — nació con cero consumidores y este es su caso.
+- ⇒ **la pantalla tiene que poder decir «vas a recibir dos facturas»**. Es de C, y sin eso la familia recibe un correo que no espera y cree que le cobraron dos veces.
+
+### 📜 ENMIENDA A `MODELO_FISCAL` v0.4 · E1 — depositada con fecha
+
+Donde E1 dice **«las clínicas arrancan en agencia»**, léase **«los actos veterinarios se facturan en agencia»**. *La diferencia no es de redacción: la primera reparte por sujeto y la segunda por hecho, y el sujeto vende más cosas que su oficio.*
+
+### Lo que NO hace falta para probar
+
+**Nada.** Hay **tres vendedores de despensa en `reventa_pura` con ofertas publicadas y stock** — `VENDEDOR DE PRUEBAS` (375), `Vendedor Puro de Pruebas` (47), `DESPENSA DE PRUEBAS S97` (17). *El founder pidió activarle producto a una y no hace falta: ya lo tienen.* Su compra cayó en un vendedor de fachada por azar del catálogo.
