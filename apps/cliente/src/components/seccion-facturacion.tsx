@@ -102,6 +102,48 @@ const VACIO: DatosIdentificacion = {
    quedó, en vez de que se lo perdonemos por dentro. */
 export const correoSirve = esCorreoValido;
 
+/* ═══ 🔴 EL PERFIL FANTASMA — la causa ÚNICA de los tres defectos del OTA ═══
+   (11-sep-2026, medido con la sesión real del founder.)
+
+   `fiscal_tax_profile_mio` **no devuelve `NULL` cuando no hay perfil: devuelve
+   una FILA con todos los campos en null.**
+
+   ```json
+   {"id":null,"user_id":null,"tipo_identificacion":null,"identificacion":null,…}
+   ```
+
+   El wrapper corta con `if (!data) return null` — y **un objeto de nulls es
+   truthy**, así que pasa entero. Lo que llega a la pantalla es un `TaxProfile`
+   con `id: "null"` (el STRING, de `String(null)`) y `tipoIdentificacion: null`.
+
+   **Los tres síntomas son ése, visto desde tres lados:**
+   ① `if (perfil && …)` da true ⇒ se dibuja la línea compacta y **el selector no
+      se monta nunca** — por eso nadie preguntó y el motor resolvió consumidor
+      final sobre una decisión que la familia no tomó;
+   ② el `tipo` viaja `null` ⇒ `t(\`identificacion.etiqueta.${null}\`)` arma una
+      key inexistente y **la pinta cruda**;
+   ③ y por eso «no está llegando el dato»: llega, pero vacío y disfrazado de
+      lleno.
+
+   🔴 **El typecheck no podía verlo:** `TaxProfile.tipoIdentificacion` está
+   declarado sin `null` y el wrapper lo afirma con un `as`. *Un cast no convierte
+   un dato: promete algo sobre él, y acá la promesa era falsa.*
+
+   **La cura de RAÍZ es del wrapper y está pedida a A.** Ésta es la del lado
+   consumidor: mientras exista, un perfil sin identificación real **no es un
+   perfil**. Cuando A corte en origen, esta guarda queda redundante e inofensiva
+   — y su comentario se borra con ella (Ley 37). */
+function perfilUsable(p: TaxProfile | null): TaxProfile | null {
+  if (p === null) return null;
+  /* La identificación es lo que lo vuelve usable: sin ella no hay a nombre de
+     quién facturar, y el `id` puede venir como el string "null". */
+  const tieneIdentificacion = typeof p.identificacion === 'string'
+    && p.identificacion.trim().length > 0
+    && p.identificacion !== 'null';
+  const tieneTipo = p.tipoIdentificacion !== null && p.tipoIdentificacion !== undefined;
+  return tieneIdentificacion && tieneTipo ? p : null;
+}
+
 export interface SeccionFacturacionProps {
   /** El perfil guardado. `null` = todavía no declaró ninguno. */
   perfil: TaxProfile | null;
@@ -405,17 +447,18 @@ export function useFacturacion(activo: boolean): FacturacionLista {
       /* Fail-closed en el VALOR (sin tope no se cae a 50) y hablado en la
          FORMA: el fallo se dice, no se queda en silencio. */
       setTope(rTope.ok ? rTope.data : 'noCargo');
-      if (rPerfil.ok) setPerfil(rPerfil.data);
+      if (rPerfil.ok) setPerfil(perfilUsable(rPerfil.data));
       if (rYo.ok) setNombrePersona(rYo.data.nombre);
       /* La precarga NO pisa lo ya escrito si la lectura llega tarde, y el correo
          del perfil FISCAL manda sobre el de la cuenta: es el que la persona
          eligió para sus facturas. */
-      const sugerido = (rPerfil.ok && rPerfil.data?.email) || (rYo.ok && rYo.data.email) || '';
+      const pu = rPerfil.ok ? perfilUsable(rPerfil.data) : null;
+      const sugerido = pu?.email || (rYo.ok && rYo.data.email) || '';
       if (sugerido) setCorreo((v) => (v.trim().length > 0 ? v : sugerido));
       /* Igual que el correo: manda el del perfil FISCAL —es el nombre que la
          persona eligió para sus facturas— y cae al de la cuenta. Medido:
          172/182 lo tienen; los 10 que no, lo escriben. */
-      const nombreSugerido = (rPerfil.ok && rPerfil.data?.razonSocial) || (rYo.ok && rYo.data.nombre) || '';
+      const nombreSugerido = pu?.razonSocial || (rYo.ok && rYo.data.nombre) || '';
       if (nombreSugerido) setNombre((v) => (v.trim().length > 0 ? v : nombreSugerido));
     })();
     return () => { vigente = false; };

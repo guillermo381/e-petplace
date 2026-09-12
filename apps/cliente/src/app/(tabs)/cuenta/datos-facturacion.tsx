@@ -122,7 +122,16 @@ export default function DatosFacturacionScreen() {
          `SelectorFacturacion`. Acá significa «no declaró una identificación
          propia» ⇒ el formulario queda en blanco, que es la verdad. Pedido a B
          en el buzón por si prefiere expresarlo. */
-      if (r.data !== null && r.data.tipoIdentificacion !== 'consumidor_final') {
+      /* 🔴 Mismo perfil fantasma que en el checkout: la RPC devuelve una fila
+         de nulls, no NULL. Sin identificación real NO se precarga nada — si no,
+         el tipo viaja `null` y la etiqueta se arma con una key inexistente. */
+      const util =
+        r.data !== null &&
+        typeof r.data.identificacion === 'string' &&
+        r.data.identificacion.trim().length > 0 &&
+        r.data.identificacion !== 'null' &&
+        r.data.tipoIdentificacion !== null;
+      if (util && r.data !== null && r.data.tipoIdentificacion !== 'consumidor_final') {
         setDatos({
           tipo: r.data.tipoIdentificacion,
           identificacion: r.data.identificacion,
