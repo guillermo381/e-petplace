@@ -18,6 +18,8 @@
 //    `app_config` y los firmó el founder con su origen escrito.
 // ═══════════════════════════════════════════════════════════════════════════
 
+import { pulsoRed } from './pulso';
+
 /** El prefijo del mensaje cuando el techo se cumple. Estable a propósito. */
 export const SIN_RED = 'sin_red';
 
@@ -108,6 +110,9 @@ export function fetchConTecho(fetchBase: typeof fetch = fetch): typeof fetch {
       : (entrada as Request).url;
     const metodo = init?.method ?? (entrada as Request)?.method ?? 'GET';
     const clase = claseDeLlamada(url, metodo);
+    /* SONDA `D-1074` (temporal): cuenta el acto, jamás el contenido. Va ANTES
+       del corte por `sin_techo` para que las edge también se cuenten. */
+    pulsoRed(url);
 
     if (clase === 'sin_techo') return fetchBase(entrada as RequestInfo, init);
 

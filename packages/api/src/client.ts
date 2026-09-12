@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { fetchConTecho, cargarTechosDeRed } from './red';
+import { pulsoSesion } from './pulso';
 import type { Database } from './database.types';
 
 export type EpetplaceClient = SupabaseClient<Database>;
@@ -29,6 +30,7 @@ export function initApi(url: string, anonKey: string, opciones?: OpcionesApi): E
   if (!url || !anonKey) {
     throw new Error('initApi: faltan EXPO_PUBLIC_SUPABASE_URL o EXPO_PUBLIC_SUPABASE_ANON_KEY');
   }
+
   cliente = createClient<Database>(url, anonKey, {
     /* 🔴 EL TECHO DE TIEMPO (`D-1070`). Sin esto, una consulta que sale y no
        vuelve **no vuelve nunca**: no hay error, no hay `catch`, el `await`
@@ -85,6 +87,21 @@ export function initApi(url: string, anonKey: string, opciones?: OpcionesApi): E
      Su fallo NO es grave y por eso no lanza: los valores de arranque siguen
      rigiendo. Lo único que se pierde es poder moverlos sin publicar — que es
      exactamente para lo que son dato. */
+  /* ── SONDA `D-1074` (temporal): cuántas veces SE PIDE la sesión ──────────
+     Es el contador que contesta «¿hay un bucle que lee y no sale a la red?».
+     Se envuelve el método público: `auth-js` usa sus privados por dentro, así
+     que esto cuenta **nuestras** llamadas —`uidActual()` y sus 29 sitios—, que
+     es exactamente la pregunta. Si esto sube y `red` no, el bucle es nuestro y
+     nunca llega a salir. */
+  {
+    const original = cliente.auth.getSession.bind(cliente.auth);
+    type FirmaGetSession = typeof original;
+    (cliente.auth as unknown as { getSession: FirmaGetSession }).getSession = ((...args) => {
+      pulsoSesion();
+      return original(...args);
+    }) as FirmaGetSession;
+  }
+
   let techosPedidos = false;
   cliente.auth.onAuthStateChange((_evento, sesion) => {
     if (!sesion || techosPedidos) return;

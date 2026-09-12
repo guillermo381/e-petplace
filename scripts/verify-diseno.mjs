@@ -7501,6 +7501,12 @@ const TABLA_R77 = new Map([
      facturar. El orden NO es alfabético —cédula va primera porque es el caso
      de casi toda familia—, así que tampoco se puede derivar del tipo. */
   ['CampoIdentificacion.tsx::TIPOS', 'exhaustivo'],
+  /* S115-A · SONDA TEMPORAL de `D-1074`. **EXHAUSTIVO**: son los nueve métodos
+     que cruzan al nativo en AsyncStorage, y la consecuencia de que falte uno es
+     exactamente el defecto que la sonda busca — *un bucle que use el método no
+     contado sale del conteo y la sonda informa cero sobre lo que está pasando*.
+     Se retira con la sonda. */
+  ['pulso-almacenamiento.ts::METODOS', 'exhaustivo'],
   ['EscaleraSolicitud.tsx::ORDEN', 'exhaustivo'],
   ['HojaFiltros.tsx::ORDEN_CONVIVENCIA', 'exhaustivo'],
   ['ModalDosAlturas.tsx::candidatas', 'exhaustivo'],

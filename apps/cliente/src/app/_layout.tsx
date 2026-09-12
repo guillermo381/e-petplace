@@ -1,3 +1,7 @@
+/* ⏳ SONDA TEMPORAL — `D-1074`, y va PRIMERA a propósito: parchea el
+   singleton de AsyncStorage para contar cruces al nativo, y tiene que
+   estar puesta antes de que `@/lib/api` lo use al arrancar. */
+import '@/lib/pulso-almacenamiento';
 import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 // CURA S82-A r3 (espejo EXACTO de la cura S58 del prestador, misma clase):

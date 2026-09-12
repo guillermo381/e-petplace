@@ -2048,3 +2048,5 @@ export type { TresNumeros, ConfiguracionPago } from './wrappers/economico';
 /* El techo de tiempo de la red (`D-1070`) y su lector. */
 export { SIN_RED, esSinRed, fijarTechosDeRed, techosVigentes, claseDeLlamada, cargarTechosDeRed } from './red';
 export type { ClaseDeLlamada } from './red';
+/* SONDA `D-1074` (temporal): el pulso. Se retira con la ficha. */
+export { pulsoPuente, pulsoRed, pulsoSesion } from './pulso';
