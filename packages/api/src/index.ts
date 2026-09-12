@@ -2033,7 +2033,7 @@ export {
 } from './wrappers/fiscal';
 export type {
   DocumentoFiscalMio, TaxProfile, EstadoVisibleFiscal, CodigoFiscal,
-  QuienEmite, EmisorDeLaCompra,
+  QuienEmite, EmisorDeLaCompra, MotivoVisibleFiscal,
 } from './wrappers/fiscal';
 
 export {

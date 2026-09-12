@@ -4379,29 +4379,35 @@ export type Database = {
       cita_desglose: {
         Row: {
           cita_id: string
+          codigo_iva: string | null
           congelado_en: string
           fee_config_id: string | null
           impuesto: number
           moneda: string
           subtotal: number
+          tarifa_pct: number | null
           total: number
         }
         Insert: {
           cita_id: string
+          codigo_iva?: string | null
           congelado_en?: string
           fee_config_id?: string | null
           impuesto?: number
           moneda: string
           subtotal: number
+          tarifa_pct?: number | null
           total: number
         }
         Update: {
           cita_id?: string
+          codigo_iva?: string | null
           congelado_en?: string
           fee_config_id?: string | null
           impuesto?: number
           moneda?: string
           subtotal?: number
+          tarifa_pct?: number | null
           total?: number
         }
         Relationships: [
@@ -14766,6 +14772,24 @@ export type Database = {
           usuarios_activos_dia?: number | null
           usuarios_activos_mes?: number | null
           usuarios_nuevos?: number | null
+        }
+        Relationships: []
+      }
+      migracion_exige_edge: {
+        Row: {
+          declarado_en: string
+          migracion: string
+          slug: string
+        }
+        Insert: {
+          declarado_en?: string
+          migracion: string
+          slug: string
+        }
+        Update: {
+          declarado_en?: string
+          migracion?: string
+          slug?: string
         }
         Relationships: []
       }
@@ -26191,6 +26215,7 @@ export type Database = {
         Returns: Json
       }
       deuna_nueva_referencia: { Args: never; Returns: string }
+      edge_esta_al_dia: { Args: { p_slug: string }; Returns: Json }
       editar_memoria_coach: {
         Args: { p_hecho: string; p_id: string }
         Returns: Json
@@ -26503,15 +26528,19 @@ export type Database = {
         Args: never
         Returns: {
           clave_acceso: string
+          emitida_por_tercero: boolean
           estado: string
           estado_visible: string
           fecha_emision: string
           id: string
+          identificacion: string
           moneda: string
+          motivo_visible: string
           numero: string
           tiene_ride: boolean
           tiene_xml: boolean
           tipo: string
+          tipo_identificacion: string
           total: number
         }[]
       }

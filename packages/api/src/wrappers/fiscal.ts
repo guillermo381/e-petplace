@@ -17,12 +17,41 @@ import type { ResultadoWrapper } from '../resultado';
 
 /** Lo que la familia VE. Jamás el estado crudo del motor. */
 export type EstadoVisibleFiscal =
-  | 'preparando' | 'faltan_tus_datos' | 'lista' | 'con_problema' | 'anulada';
+  | 'preparando' | 'faltan_tus_datos' | 'lista' | 'con_problema' | 'anulada'
+  /**
+   * 🔴 EN AGENCIA LA FACTURA LA HACE EL VENDEDOR, y hasta hoy este caso se
+   *    mostraba como `preparando` — *una mentira con cara de paciencia: la
+   *    familia esperaba algo que de nuestro lado no iba a llegar nunca.*
+   */
+  | 'la_emite_el_vendedor';
+
+/** Por qué está trabado, en voz de producto. El motivo del motor NO se expone. */
+export type MotivoVisibleFiscal =
+  | 'la_factura_el_vendedor'
+  | 'necesitamos_tu_identificacion'
+  | 'necesitamos_tu_correo'
+  | 'faltan_tus_datos'
+  | 'no_pudimos_emitirla';
 
 export interface DocumentoFiscalMio {
   id: string;
   tipo: 'factura' | 'nota_credito';
   estadoVisible: EstadoVisibleFiscal;
+  /**
+   * 🔴 A NOMBRE DE QUIÉN SALIÓ. `consumidor_final` y una cédula son cosas
+   *    distintas que la familia eligió —o que se eligieron por ella—, y la
+   *    pantalla tiene que poder decir cuál.
+   */
+  tipoIdentificacion: string | null;
+  identificacion: string | null;
+  /** `true` ⇒ la emite el vendedor (agencia). La familia NO puede resolverlo. */
+  emitidaPorTercero: boolean;
+  /**
+   * 🔴 LA DISTINCIÓN QUE DECIDE SI HAY ALGO QUE HACER: `faltan_tus_datos` y
+   *    `necesitamos_tu_identificacion` los resuelve la familia;
+   *    `la_factura_el_vendedor` no lo resuelve nadie de este lado.
+   */
+  motivoVisible: MotivoVisibleFiscal | null;
   total: number;
   moneda: string;
   fechaEmision: string;
@@ -76,6 +105,10 @@ export async function misDocumentos(): Promise<ResultadoWrapper<DocumentoFiscalM
       id: String(f.id),
       tipo: f.tipo as 'factura' | 'nota_credito',
       estadoVisible: f.estado_visible as EstadoVisibleFiscal,
+      tipoIdentificacion: (f.tipo_identificacion as string) ?? null,
+      identificacion: (f.identificacion as string) ?? null,
+      emitidaPorTercero: Boolean(f.emitida_por_tercero),
+      motivoVisible: (f.motivo_visible as MotivoVisibleFiscal) ?? null,
       total: Number(f.total),
       moneda: String(f.moneda ?? 'USD'),
       fechaEmision: String(f.fecha_emision),
