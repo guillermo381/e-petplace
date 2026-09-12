@@ -33930,3 +33930,202 @@ EndStartup             4,38 s
 ### Lo que ya está construido y ayuda
 
 `verify:reversion-no-vuelve` (`D-1074`) impide que lo revertido vuelva solo — **que es la mitad del problema**. La otra mitad —que el OTA de la cura llegue— no tiene instrumento.
+
+---
+
+## `L-547` — UN DATO QUE CADUCA EN SILENCIO NO SE ESCRIBE NI EN UN DICCIONARIO NI EN EL CÓDIGO
+
+Una tarifa, un tope, un mes de promoción, un porcentaje de comisión. **Todos comparten un modo de falla: el día que dejan de ser ciertos, nada falla.** La pantalla sigue pintando, el typecheck sigue verde, y el número equivocado se cobra.
+
+⇒ **Va a `app_config` o a una tabla con vigencia, y la pieza lo LEE.** Y si la lectura falla, **fail-closed hablado** — jamás un default plausible: *cobrarle $0,99 a una familia porque un default lo dijo es cobrar sin que nadie lo haya decidido.*
+
+**Casos de S115:** `tarifa_servicio_monto` · `fiscal_tope_consumidor_final` · `minimo_por_transaccion` · las tasas de IVA con su `vigencia_desde/hasta`.
+
+---
+
+## `L-548` — UNA REGLA ATADA AL **VALOR** MUERE CON LA FIRMA; ATADA A LA **FORMA** SOBREVIVE
+
+Un guard que dice *«el tope es 50»* deja de servir el día que el tope cambia — y el que lo cambia no sabe que había un guard. Un guard que dice *«el tope se LEE y si no se puede leer se frena»* sigue sirviendo con cualquier número.
+
+⇒ **Lo mismo con los gates: un gate atado a un nombre mide la CONVENCIÓN, no el hecho.** Cuando el campo cambia de nombre el gate no falla: **cae a su fallback y sigue publicando un número, con otro significado.**
+
+*Hermana de `L-547`: aquélla es sobre dónde vive el dato; ésta es sobre qué mira la regla.*
+
+---
+
+## `L-549` — CUANDO UN ESTADO NO DEBE PODER EXISTIR, NO SE DOCUMENTA: SE HACE **INEXPRESABLE**
+
+Una nota al pie que dice *«no debería pasar»* protege a quien lee el archivo, no a quien usa la pantalla.
+
+**Los casos de S115, y son la prueba:** `chk_documento_fiscal_tercero_coherente` hace imposible un documento recibido que no venga de un tercero · `chk_documento_fiscal_nota_credito_referencia` hace imposible una nota de crédito huérfana · `chk_documento_fiscal_clave_reconstruible` hace imposible una clave de acceso que no cierre contra su propia fila.
+
+⇒ **Ninguno de los tres necesita que alguien se acuerde.** *Un CHECK no se olvida, no se saltea en un apuro y no depende de que el próximo lea el comentario.*
+
+---
+
+## `L-550` — UN GATE VERDE SOBRE UN CORPUS QUE NO CONTIENE EL CASO REAL NO DICE NADA
+
+El gate corrió, pasó, y **midió su propio fixture**. *Un corpus escrito por el mismo que escribió la regla comparte sus supuestos* — y el caso que falta es justo el que nadie imaginó.
+
+⇒ **La primera prueba de un guard nuevo no es que dé VERDE: es que dé ROJO sobre el primer caso real.** Y todo gate **declara su corpus y su tamaño**; si le falta una fuente, lo dice en vez de medir con la mitad.
+
+*Ampliación de `L-459`, y su forma S115: un gate puede seguir en verde después de que su sujeto perdió el productor —midió que la voz existe, no que alguien la dispare— y eso es honesto SÓLO si el gate declara ese límite en su cabecera.*
+
+---
+
+## `L-551` — EL CENSO PREGUNTA SI **EXISTE** Y SI **COMPILA**, NUNCA SI ALGUIEN LA LLAMA
+
+Una función puede existir, estar bien escrita, pasar typecheck, tener su gate en verde — **y no tener un solo consumidor**. Es `L-318` (motor sin puerta) vista desde el instrumento: *el censo que la buscó la encontró, y por eso nadie volvió a preguntar.*
+
+⇒ **Al cerrar un frente, por cada pieza nueva se corre la pregunta que el censo no hace:** `pg_get_functiondef … ILIKE '%<nombre>%'` en el motor **y** `grep` en `packages/api` + su `index.ts`. **Cero consumidores es un hallazgo, no un vacío.**
+
+**Caso fundante S115:** `resolver_comision_despensa()` — escrita, correcta, con su fecha de vigencia bien resuelta, y **cero llamadores** en el motor y en la puerta única. La regla del carrito mixto que debía cumplir **no la está cumpliendo nadie**.
+
+---
+
+## `L-552` — UNA EXPLICACIÓN ESCRITA EN EL MOMENTO DE CURAR ES UNA **HIPÓTESIS**, NO UN HALLAZGO
+
+El comentario que uno escribe mientras arregla algo suena a conclusión y es una corazonada con buena redacción. **Después nadie lo vuelve a mirar, porque ya tiene forma de explicación.**
+
+⇒ **Se marca como hipótesis en el momento, o se mide antes de escribirla.** *Lo caro no es equivocarse: es que la próxima persona la lea como un hecho verificado.*
+
+**Caso S115, y es el más caro de la sesión:** *«la cura del refresco asigna 20 MB/s»* se escribió al revertir, con un control de cinco procesos que era verdadero sobre lo que medía. **La causa real era otra** —un bucle de `registrar_push_token`— y esa frase gobernó ocho horas de trabajo. *Hermana de `L-541` y `L-544`.*
+
+---
+
+## `L-553` — UN PATRÓN EN UN LOG COMPARTIDO NO ES UN PATRÓN DE TU APP HASTA QUE SE FILTRA POR PROCESO
+
+`logcat` es de todo el teléfono. Un ritmo, una fuga, un error repetido: **cualquiera de los tres puede ser de otra app y se lee igual de convincente.**
+
+⇒ **Todo hallazgo de log declara su PID**, y si no se puede, se declara que no se filtró.
+
+**Dos casos de S115, uno en cada dirección:** un ritmo de 3 segundos que resultó ser **Instagram** (55 resoluciones contra nuestras 27) · y dos `SQLiteConnection … was leaked` que parecían nuestros y eran de **`com.samsung.mediasearch`**. *El segundo apareció en el mismo minuto en que se estaba evaluando si nuestra cura de fugas había funcionado — y habría dicho que no.*
+
+---
+
+## `L-554` — `eas update:republish` **NO REVIERTE EL CÓDIGO**
+
+Sirve el bundle viejo desde el canal y **deja el repositorio intacto**. El síntoma desaparece, el commit sigue ahí, y la próxima publicación lo trae de vuelta.
+
+⇒ **Toda reversión se hace en las DOS puntas o no es una reversión.** Con la del canal alcanza para respirar; sin la del repo, *«una reversión que vive en un solo lado no es una reversión: es una pausa que nadie apuntó»* (founder, S115).
+
+**Su correctivo mecanizado:** `verify:reversion-no-vuelve`, que mide **CONTENIDO y no ancestría** — `git revert` deja el commit original como ancestro para siempre, así que un gate por ancestría sería **permanentemente rojo** y alguien lo apagaría.
+
+---
+
+## `L-555` — CUANDO UN BUNDLE ROMPE LA APP LO SUFICIENTE, EL OTA QUE LA CURA **NO PUEDE ENTRAR POR OTA**
+
+*(Firma del founder, S115.)* Si el bundle malo impide que la app llegue a aplicar una actualización —se cierra antes, se queda sin memoria, no termina de arrancar—, **el canal deja de ser un camino de salida**.
+
+⇒ **Para esa clase, la salida es una BUILD.** Y el corolario operativo: *un modo de falla que se cura reinstalando no está curado — está esperando al próximo usuario que no sabe reinstalar.*
+
+---
+
+## `L-556` — EL DATO QUE MÁS DESPISTA SUELE SER EL QUE MEJOR ENCAJA CON LA CAUSA REAL
+
+*(Firma del founder, S115.)* **Las CERO resoluciones de DNS parecían descartar un bucle de consultas, y eran su consecuencia**: HTTP/2 multiplexa sobre las conexiones ya abiertas, así que once mil peticiones por segundo **no resuelven un nombre más que una**.
+
+⇒ **Un dato que descarta una hipótesis se contrasta contra el mecanismo, no contra la intuición.** *La pregunta no es «¿esto es compatible con lo que creo?», es «¿qué tendría que ser cierto para que este número saliera así?»* — y ahí el cero de DNS tenía dos respuestas, no una.
+
+---
+
+## `L-557` — UNA PILA DE `OutOfMemoryError` DICE DÓNDE ESTABA EL HILO, NO QUIÉN CONSUMIÓ LA MEMORIA
+
+*(Firma del founder, S115.)* El que falla es **el siguiente que pide**, no el que llenó. Una pila de OOM nombra a la víctima con toda la autoridad de un stack trace.
+
+⇒ **Ante una pila de OOM, la pregunta no es «qué hace esa pila» sino «¿PODRÍA esa pila haber asignado tanto?»** — y esa segunda pregunta casi siempre se contesta con un dato que ya se tiene.
+
+**S115 la cobró TRES veces en una sola ficha:** `Http2Reader.nextFrame` · `nativeGetString` · `AsyncStorageModule$1.doInBackgroundGuarded`. **La tercera murió con un dato de una línea que estaba a mano desde hacía horas: el censo decía que AsyncStorage tenía 3 claves y 0,00 MB, y un `multiGet` de eso no puede asignar nada.**
+
+⚠️ **Y la nota que la vuelve incómoda y por eso se escribe: una de las tres la dictó el founder como lección dos horas antes de volver a caer en ella.** *Saber la regla no protege de aplicarla tarde.*
+
+---
+
+## `L-558` — DESCRIBIR LO QUE SE VE EN PANTALLA PUEDE VALER MÁS QUE CINCO CAPAS DE INSTRUMENTACIÓN
+
+*(Firma del founder, S115.)* El reencuadre que encontró la causa de `D-1074` **no salió de medir**: salió de una frase — *«la app está VIVA, el contenido estático carga, el menú navega, sólo falla lo que viene de la BASE; y el crash aparece DESPUÉS, por los reintentos»*.
+
+Esa descripción **invirtió la causalidad** —el OOM pasó de causa a consecuencia— y con eso el frente se movió del heap al acceso a datos, donde estaba.
+
+⇒ **Antes de instrumentar, se escribe qué se ve y qué NO se ve.** *La instrumentación contesta preguntas; la descripción decide cuál preguntar, y una pregunta mal elegida se puede medir con mucha precisión durante toda una noche.*
+
+---
+
+# ESTADO AL CIERRE DE S115 — **medido el 12-sep-2026, no transcripto**
+
+> **Regla de esta sección:** cada estado se contrastó contra el objeto donde el objeto puede contestar. Donde no puede, dice **NO MEDIBLE DESDE EL OBJETO** y nombra a quién le toca. *Un documento que da por resuelto lo que no se resolvió es peor que uno viejo: el viejo se desconfía, el falso se obedece.*
+
+## 🔴 BLOQUEAN PRODUCCIÓN
+
+| ficha | qué es | estado medido |
+|---|---|---|
+| **`D-1068`** | el medio de pago no se puede derivar | **ABIERTA.** La regla ④ la destraba declarando **crédito (código 19)** con su marca; `forma_pago_asumida` existe en `documentos_fiscales` y `fiscal_forma_pago_asumida = true` **en pruebas**. |
+| **`D-1072`** en producción | la segunda llave del reloj | **ABIERTA por diseño.** `fiscal_emision_automatica = true` y `fiscal_forma_pago_asumida_en_produccion = **false**`. *Encender en pruebas y encender en producción no son el mismo acto, y por eso son dos llaves.* |
+| **`D-1074`** | el mecanismo del cuelgue | ☠️ **CERRADA el 12-sep-2026** — la causa tiene nombre y su cura está verde en las dos apps. *Su encabezado decía «el mecanismo ABIERTO aunque el síntoma esté revertido»; eso dejó de ser cierto el mismo día.* |
+| **`D-1083`** | huérfanas + reconciliador | **ABIERTA, y ahora con evidencia del lado del webhook:** `fiscal_webhook_eventos` registra **4 eventos `invoice.authorized` con resultado `documento_no_encontrado`** (05:36→05:40) — *el proveedor autorizó cuatro facturas que nuestra base no reconoce*. Firma: **se ADOPTAN, con el límite de que se adopta lo que es NUESTRO**; los duplicados salen por nota de crédito. |
+| **`D-1069`** | los intentos trabados · fecha 25-sep | **ABIERTA, número exacto: 16** — `pagos_intentos` en `pendiente`: **13 DeUna + 3 Nuvei**. *El número que la ficha citaba se re-midió y coincide.* |
+| **`D-1061`** | las edges atrasadas | **NO MEDIBLE DESDE EL OBJETO con lo corrido hoy.** Lo que sí se midió: **las 7 edges fiscales están `ACTIVE`** (`fiscal-emitir` v17 · `fiscal-webhook` v14 · `fiscal-reconciliar` v9 · `fiscal-ride` v9 · `fiscal-validar-clave` v9 · `fiscal-sonda` v10 · `fiscal-ensayo` v7). *Comparar cada edge desplegada contra su fuente exige un diff por contenido que esta tanda no corrió: se declara en vez de darlo por verde.* |
+| **`D-1059`** | — | **ABIERTA.** No se re-midió en esta tanda. |
+
+## ABIERTAS
+
+| ficha | estado medido |
+|---|---|
+| **`D-1084`** agencia por acto | **FIRMADA, SIN CONSTRUIR.** El objeto sigue decidiendo **por cuenta**: `cuentas_comerciales.modelo_comercial` = **5 `marketplace_fachada` · 10 `reventa_pura`**. ⇒ la consecuencia aceptada —un carrito que mezcla consulta y baño produce **dos facturas**— **todavía no puede ocurrir**. |
+| **`D-1081`** dos validadores que se contradicen | **ABIERTA**, no re-medida hoy. |
+| **`D-1082`** `installments_type` | **ABIERTA.** Su límite sigue siendo el mismo: 108/108 con el mismo valor sobre **2 BINs y 1 persona** ⇒ no se puede distinguir constante de señal. |
+| **`D-1075`** `obligadoContabilidad` | **ABIERTA, baja de urgencia**: no es límite del plan sobre el dato, es que la pantalla del emisor está detrás del plan pago (ver `PROVEEDOR_FISCAL` §1.4). |
+| **`D-1077`** · **`D-1078`** · **`D-1079`** | **ABIERTAS**, no re-medidas hoy. |
+| **`D-1080`** | ✅ **CERRADA**, y hoy se midió de nuevo porque era sospechosa del cuelgue: `[pulso-init]` dijo `sesion=sí en 4ms` · `techos=sí aplicados=4 en 268ms`. **La inicialización del acceso a la base está sana.** |
+| **`D-1076`** | ✅ **CERRADA** con su rojo en tres direcciones. |
+| **WebRTC fuera del arranque** | **FIRMADO, SIN CONSTRUIR.** `@/lib/livekit` sigue importado en el layout raíz del cliente (línea 11). *Medido hoy y NO curado: el eje del cuelgue resultó ser otro, y tocarlo en la misma tanda habría mezclado dos cambios en la única corrida que podía medir la cura.* |
+
+---
+
+## LOS SECUENCIALES QUEMADOS — **uno por uno, y el contador no se retrocede**
+
+> **Comando:** `select establecimiento, punto_emision, secuencial, estado, rol, motivo_rechazo from documentos_fiscales where sentido='emitido' order by secuencial;` · 12-sep-2026.
+
+**Los que EXISTEN, serie `001-002`, tipo factura — siete autorizadas:**
+
+`000000003` · `000000004` · `000000005` · `000000006` · `000000011` · `000000012` · `000000013`
+
+**⇒ LOS HUECOS SON SEIS: `000000001` · `000000002` · `000000007` · `000000008` · `000000009` · `000000010`.**
+
+**Su origen, hasta donde el objeto contesta** (`fiscal_webhook_eventos`):
+
+| evidencia | cuántos | ventana | qué significa |
+|---|---|---|---|
+| `invoice.authorized` → **`documento_no_encontrado`** | **4** | 05:36 → 05:40 | **el proveedor autorizó y numeró; nuestra base no tenía la fila.** Es `D-1083` visto desde el webhook. |
+| `invoice.authorized` → **`firma_no_coincide`** (rechazado) | **3** | 11-09 21:38 → 03:22 | el proveedor emitió y **nosotros rechazamos el aviso**: el número se consumió igual. |
+| `webhook.test` → `sin_receiptId` | 2 | 11-09 04:01 → 04:02 | pruebas del webhook; **no consumen secuencial**. |
+
+⚠️ **Siete candidatos para seis huecos ⇒ la atribución es POR CLASE, no uno a uno.** *Se declara así en vez de repartirlos: asignar un número a un evento concreto exigiría un identificador que ninguno de los dos lados guardó, y adivinarlo sería inventar trazabilidad fiscal.* **Lo que sí es un hecho: ningún hueco es un error de nuestra numeración — los seis los consumió el proveedor.**
+
+**Los CINCO documentos emitidos SIN número** (no queman secuencial, porque el número nace al emitir):
+- **2 × `esperando_receptor`** · motivo `supera_tope_sin_identificacion` — *esperan a la familia, y son las únicas accionables por ella.*
+- **2 × `pendiente_manual`** · motivo `D-1083 · fecha_emision (2026-09-11) no es la de hoy: el proveedor numera`.
+- **1 × `no_autorizada`** · motivo literal del proveedor: **`INVOICE_4015: No puedes emitir un comprobante a ti mismo`**.
+
+🔴 **Y UN HALLAZGO QUE NO ESTABA BUSCADO: `fiscal_sequences.ultimo_secuencial` dice `5` para `001-002/factura`** (actualizado 12-09 03:19) **mientras hay documentos autorizados con secuencial `13`.**
+
+*No es una corrupción: es la consecuencia directa de `numeracion_origen = 'proveedor'` — cuando numera Factuplan, nuestro contador no avanza.* ⚠️ **Pero significa que `fiscal_sequences` NO refleja la numeración real de la serie**, y **cualquiera que lo lea para saber «por dónde vamos» va a leer un número seis por debajo.** Sin consecuencia hoy (nadie lo usa para emitir en ese modo); con consecuencia el día que se emita en modo `casa` sobre la misma serie: **pediría el 6 y el SRI ya tiene el 13**. Ficha: ver «LO QUE SIGUE ABIERTO» del cierre.
+
+---
+
+## EL RELOJ DE EMISIÓN — su bitácora, medida
+
+`fiscal_emision_corridas`: **162 corridas** registradas el 12-sep, cadencia de **5 minutos**. **Siete hicieron trabajo**; el resto son `procesados = 0`, que es el estado sano.
+
+| hora | disparo | procesados | emitidos | rebotados |
+|---|---|---|---|---|
+| 05:36 | reloj | 4 | **2** | 2 |
+| 05:40 | reloj | 2 | 0 | 2 |
+| 05:45 | reloj | 1 | 0 | 1 |
+| 05:50 | reloj | 1 | 0 | 1 |
+| 05:54 | **manual** | 1 | 0 | 1 |
+| 06:10 | reloj | 1 | **1** | 0 |
+| 17:00 | reloj | 2 | **2** | 0 |
+
+**⇒ el reloj CORRE y EMITE.** *Las 155 corridas en cero no son ruido: son la prueba de que el reloj no se detuvo, que es exactamente lo que el founder pidió descartar explícitamente.*
+
