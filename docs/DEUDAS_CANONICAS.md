@@ -33568,6 +33568,35 @@ Buscando cerrar `D-1068` sin esperar a Nuvei, censé el `payload_crudo` entero. 
 
 **Por qué hoy no duele y por qué en octubre sí.** Ambiente 1: sin efecto fiscal y los documentos se borran cada hora. **En producción serían dos facturas autorizadas fuera de los libros** — y el SRI las tiene aunque nosotros no.
 
+### ✅ FIRMA DEL FOUNDER, 12-sep-2026 — LAS HUÉRFANAS SE **ADOPTAN**, NO SE ANULAN
+
+*«Se crea la fila faltante, marcada como reconciliada y con su origen declarado, para que los libros digan lo que el SRI ya dice. **Anular sería emitir un documento más para tapar uno que nadie pidió, y dejar dos huellas donde había una.**»*
+
+**Con su límite, que es parte de la firma:** se adopta lo que es **NUESTRO** — RUC de Satori · punto de emisión nuestro · **y un pago que la respalde**. *Una huérfana que no corresponde a ningún pago no se adopta: es un incidente y se escala.* El reconciliador tiene que **distinguir los dos casos**, no tratarlos igual.
+
+#### 🔴 UN TERCER CASO QUE LA FIRMA NO CUBRE, Y ESTÁ VIVO EN LOS DATOS DE HOY
+
+**Las 4 huérfanas son 2 ventas, no 4.** Medido: el barrido tomó los MISMOS dos documentos dos veces —05:36 y 05:40, el tick del cron— y Factuplan autorizó un comprobante distinto en cada pasada:
+
+| hora | secuencial | |
+|---|---|---|
+| 05:36:42 · 05:40:08 | `…007` · `…009` | **el mismo documento de $11,50** |
+| 05:36:44 · 05:40:10 | `…008` · `…010` | **el mismo documento de $14,95** |
+
+⇒ **adoptar las cuatro crearía dos facturas duplicadas por la misma venta.** La regla dice *«un pago que la respalde»*, y acá **dos claves comparten un pago**: sólo una de cada par es adoptable.
+
+**Y el par sobrante obliga justo a lo que la firma descarta.** No se puede adoptar —no hay segunda venta— y no se puede dejar —existe en el SRI—. ⇒ **nota de crédito, y la razón NO contradice la firma: no se anula para tapar un documento que nadie pidió, se anula porque la alternativa es una venta facturada dos veces.** *La firma resuelve el caso general y este borde lo abre el reintento, no el proveedor.*
+
+⚠️ **Cuál de cada par se adopta no se puede decidir desde acá:** hay que preguntarle al proveedor cuál corresponde a qué, con `queryExternalByAccessKey` — la pieza del adaptador que nunca ejercimos. **Decisión pendiente del founder cuando el reconciliador la traiga.**
+
+#### El reconciliador, dimensionado
+
+1. **La pieza ya existe y nunca se ejerció:** `queryExternalByAccessKey` en `factuplan.ts`.
+2. **Un reloj que tome las claves huérfanas y pregunte** — la fuente es `fiscal_webhooks_huerfanos()`, que ya las entrega con su clave.
+3. **Tres salidas, no dos:** adoptar (nuestro + con pago) · **nota de crédito** (duplicado del mismo pago) · **escalar** (ni nuestro, ni con pago respaldándolo).
+
+---
+
 **Las tres curas candidatas, ninguna aplicada:**
 1. **No pedir la emisión con una fecha que no es la de hoy.** La causa raíz es que un documento nacido ayer se emitió hoy: el guard compara `left(clave,8)` contra `fecha_emision` de la fila. **Antes de emitir, si la fecha de la fila no es la de hoy, el documento se re-fecha o no se manda.** *Es la más barata y ataca la causa.*
 2. **Guardar la referencia del proveedor ANTES de validar la clave** — así un webhook posterior encuentra su fila aunque el documento haya quedado en `no_autorizada`, y el huérfano se ve.
