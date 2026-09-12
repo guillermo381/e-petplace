@@ -106,6 +106,8 @@ import { cobrar } from '@/lib/pagos/cobro';
 import {
   BotonPagar, SeccionMedioDePago, useMedioDePago,
 } from '@/components/seccion-medio-de-pago';
+import { SeccionFacturacion, useFacturacion } from '@/components/seccion-facturacion';
+import { AvisoNoCargo } from '@/components/aviso-no-cargo';
 import { useEsperaDeConfirmacion } from '@/lib/pagos/espera-confirmacion';
 import { EsperaDeUna } from '@/components/espera-deuna';
 import { topeDeEspera, useEstadoDeUna } from '@/lib/pagos/deuna-estado';
@@ -193,6 +195,12 @@ export default function DespensaCheckout() {
      🔴 Se activa en el RESUMEN y no antes: *mientras no haya un total que
      pagar, «con qué pagás» no es una pregunta.* */
   const medio = useMedioDePago(fase === 'resumen');
+  /* 🔴 LA DESPENSA FACTURA IGUAL QUE UNA CITA, y hasta hoy no pedía ni correo
+     ni datos: mi tanda anterior cableó `checkout-reserva` —que son las CITAS de
+     los cuatro oficios— y esta pantalla es propia. *El founder lo encontró
+     pagando un pedido.* Misma pieza, mismo hook: no hay una versión de la
+     facturación para la despensa. */
+  const facturacion = useFacturacion(fase === 'resumen');
 
   /* ═══ 🔴 EL RIEL EN CURSO — congelado AL TOCAR (S105-C) ══════════════════
      La misma razón que en el checkout de reserva: **`confirmando` tiene que
@@ -611,6 +619,11 @@ export default function DespensaCheckout() {
    * acá por construcción y no por cuidado.*
    */
   async function pagar() {
+    /* 🔴 SIN CORREO Y SIN SUS DATOS NO SE COBRA — el mismo freno que las citas.
+       Va ANTES de todo lo demás: el perfil tiene que existir cuando el motor
+       resuelva el receptor del comprobante, y eso pasa al confirmar el pago. */
+    if (!(await facturacion.validarYGuardar())) return;
+
     if (trabajando || compraId === null) return;
     setTrabajando(true);
 
@@ -1505,6 +1518,12 @@ export default function DespensaCheckout() {
                 preselección. *Ya no es «igual a»: es LA MISMA, y por eso no hay
                 de dónde sacar una versión propia.* */}
             <View style={{ paddingHorizontal: spacing[5] }}>
+              {facturacion.props === null || compraTotal === null ? (
+                facturacion.noCargo ? <AvisoNoCargo onReintentar={facturacion.reintentar} /> : null
+              ) : (
+                <SeccionFacturacion {...facturacion.props} total={compraTotal} />
+              )}
+
               <SeccionMedioDePago medio={medio} />
             </View>
 

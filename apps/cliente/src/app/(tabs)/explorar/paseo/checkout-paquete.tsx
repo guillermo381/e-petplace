@@ -25,6 +25,8 @@ import {
 import { comprarPaqueteSalidas, PRESETS_PAQUETE, type PresetPaquete } from '@epetplace/api';
 
 import { SeccionMedioDePago, useMedioDePago } from '@/components/seccion-medio-de-pago';
+import { SeccionFacturacion, useFacturacion } from '@/components/seccion-facturacion';
+import { AvisoNoCargo } from '@/components/aviso-no-cargo';
 import { cobrar } from '@/lib/pagos/cobro';
 import { useEsperaDeConfirmacion } from '@/lib/pagos/espera-confirmacion';
 import { EsperaDeUna } from '@/components/espera-deuna';
@@ -50,6 +52,8 @@ export default function CheckoutPaquetePaseo() {
   const total = Number(texto('precioPaquete')) * (preset ?? 0);
 
   const medio = useMedioDePago(true);
+  /* S115-C · la facturación, la MISMA pieza que las citas y la despensa. */
+  const facturacion = useFacturacion(true);
   const [fase, setFase] = useState<'resumen' | 'confirmando'>('resumen');
   const [enviando, setEnviando] = useState(false);
   const [rebote, setRebote] = useState<string | null>(null);
@@ -98,6 +102,11 @@ export default function CheckoutPaquetePaseo() {
   }, [espera, preset, t]);
 
   const pagar = useCallback(async () => {
+    /* 🔴 SIN CORREO Y SIN SUS DATOS NO SE COBRA — el mismo freno de las citas y
+       la despensa. Va al PRINCIPIO y no junto a `cobrar`: más abajo ya se creó
+       el sujeto, y frenar ahí dejaría una compra a medias esperando su hold. */
+    if (!(await facturacion.validarYGuardar())) return;
+
     if (enviando) return;
     if (medio.idTarjeta === null && medio.elegido?.tipo !== 'deuna') {
       setRebote(t('pago.cobroElegiMedio'));
@@ -266,6 +275,12 @@ export default function CheckoutPaquetePaseo() {
         </Tarjeta>
 
         {/* Compra suelta ⇒ **sin `recurrente`**: DeUna se puede elegir. */}
+        {facturacion.props === null ? (
+            facturacion.noCargo ? <AvisoNoCargo onReintentar={facturacion.reintentar} /> : null
+          ) : (
+          <SeccionFacturacion {...facturacion.props} total={total} />
+        )}
+
         <SeccionMedioDePago medio={medio} />
 
         <Texto variante="apoyo">{t('paquete.vigenciaVoz')}</Texto>

@@ -33,6 +33,8 @@ import {
 } from '@epetplace/ui';
 import { contratarPrograma, type ProgramaContratado } from '@epetplace/api';
 import { SeccionMedioDePago, useMedioDePago } from '@/components/seccion-medio-de-pago';
+import { SeccionFacturacion, useFacturacion } from '@/components/seccion-facturacion';
+import { AvisoNoCargo } from '@/components/aviso-no-cargo';
 import { cobrar } from '@/lib/pagos/cobro';
 import { useEsperaDeConfirmacion } from '@/lib/pagos/espera-confirmacion';
 import { useTraduccion } from '@/i18n';
@@ -75,6 +77,8 @@ export default function ConfirmarPrograma() {
   const [fase, setFase] = useState<'resumen' | 'procesando' | 'confirmando' | 'exito'>('resumen');
   /** Compra SUELTA ⇒ DeUna se ofrece: la regla de lo recurrente no aplica. */
   const medio = useMedioDePago(true);
+  /* S115-C · la facturación, la MISMA pieza que las citas y la despensa. */
+  const facturacion = useFacturacion(true);
   /** 🔴 El programa ya registrado: **se contrata UNA vez aunque el cobro se
    *  reintente.** Sin esto, tres tarjetas probadas dejarían tres programas
    *  pendientes contra la agenda del mismo profesional. */
@@ -124,6 +128,11 @@ export default function ConfirmarPrograma() {
   }, [fecha, nSesiones, fmtHumana]);
 
   const comprar = async () => {
+    /* 🔴 SIN CORREO Y SIN SUS DATOS NO SE COBRA — el mismo freno de las citas y
+       la despensa. Va al PRINCIPIO y no junto a `cobrar`: más abajo ya se creó
+       el sujeto, y frenar ahí dejaría una compra a medias esperando su hold. */
+    if (!(await facturacion.validarYGuardar())) return;
+
     if (fase !== 'resumen') return;
     if (medio.elegido === null) { setRebote(t('pago.cobroElegiMedio')); return; }
     setFase('procesando');
@@ -324,6 +333,12 @@ export default function ConfirmarPrograma() {
             viva para plan y paquete de paseo, que todavía simulan; *cae entera
             el día que las tres puertas cobren.* */}
         {/* Compra SUELTA ⇒ sin `recurrente`: DeUna se puede elegir. */}
+        {facturacion.props === null ? (
+            facturacion.noCargo ? <AvisoNoCargo onReintentar={facturacion.reintentar} /> : null
+          ) : (
+          <SeccionFacturacion {...facturacion.props} total={precio} />
+        )}
+
         <SeccionMedioDePago medio={medio} />
         {rebote !== null ? <Texto variante="cuerpo">{rebote}</Texto> : null}
       </ScrollView>

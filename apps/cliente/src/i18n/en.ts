@@ -3382,7 +3382,6 @@ export const clienteEn = {
   facturacionCheckout: {
     facturaA: 'Invoice to',
     cambiar: 'Change',
-    quieresFactura: 'Want an invoice with your details?',
   },
 
   correoFactura: {
@@ -3392,6 +3391,13 @@ export const clienteEn = {
     formato: 'you@email.com',
     falta: 'We need an email to send you the invoice.',
     invalido: "That email doesn't look valid. Check it.",
+  },
+
+  noCargo: {
+    titulo: "We couldn't load this",
+    detalle: 'It might be your connection. Try again.',
+    reintentar: 'Try again',
+    noSePuedePagar: "We couldn't load your invoice details. Try again before paying.",
   },
 
 } as const satisfies Espejo<typeof clienteEs>;

@@ -4643,10 +4643,6 @@ export const clienteEs = {
   facturacionCheckout: {
     facturaA: 'Factura a',
     cambiar: 'Cambiar',
-    /* El enlace del caso bajo tope: se paga como consumidor final sin preguntar,
-       y esto queda a un lado por si alguien la quiere igual. Discreto a
-       propósito — preguntarlo sería volver a preguntar. */
-    quieresFactura: '¿Quieres factura con tus datos?',
   },
 
   /* S115-C · EL CORREO DE LA FACTURA. Su voz NO es la de un campo de formulario:
@@ -4662,6 +4658,21 @@ export const clienteEs = {
     formato: 'tu@correo.com',
     falta: 'Necesitamos un correo para enviarte la factura.',
     invalido: 'Ese correo no parece válido. Revísalo.',
+  },
+
+  /* S115-C · «NO CARGÓ» — la voz que faltaba cuando una consulta no vuelve.
+     🔴 El founder pasó media hora mirando esqueletos sin saber qué pasaba: el
+     `await` colgaba sin techo y la pantalla no tenía forma de decirlo. A puso
+     los techos (el error ahora VUELVE); esto es la otra mitad. */
+  noCargo: {
+    titulo: 'No pudimos cargar esto',
+    /* Sin conexión y «tardó demasiado» son el MISMO hecho desde el lado de la
+       familia —no cargó, se puede reintentar— y por eso una sola voz. */
+    detalle: 'Puede ser la conexión. Prueba de nuevo.',
+    reintentar: 'Probar de nuevo',
+    /* Cuando el freno del cobro no puede correr porque sus datos no cargaron:
+       pedir un correo sin campo dónde escribirlo sería mandar a un callejón. */
+    noSePuedePagar: 'No pudimos cargar los datos de tu factura. Prueba de nuevo antes de pagar.',
   },
 
 } as const;
