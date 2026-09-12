@@ -26,6 +26,7 @@ import { comprarPaqueteSalidas, PRESETS_PAQUETE, type PresetPaquete } from '@epe
 
 import { SeccionMedioDePago, useMedioDePago } from '@/components/seccion-medio-de-pago';
 import { SeccionFacturacion, useFacturacion } from '@/components/seccion-facturacion';
+import { AvisoNoCargo } from '@/components/aviso-no-cargo';
 import { cobrar } from '@/lib/pagos/cobro';
 import { useEsperaDeConfirmacion } from '@/lib/pagos/espera-confirmacion';
 import { EsperaDeUna } from '@/components/espera-deuna';
@@ -274,7 +275,9 @@ export default function CheckoutPaquetePaseo() {
         </Tarjeta>
 
         {/* Compra suelta ⇒ **sin `recurrente`**: DeUna se puede elegir. */}
-        {facturacion.props === null ? null : (
+        {facturacion.props === null ? (
+            facturacion.noCargo ? <AvisoNoCargo onReintentar={facturacion.reintentar} /> : null
+          ) : (
           <SeccionFacturacion {...facturacion.props} total={total} />
         )}
 

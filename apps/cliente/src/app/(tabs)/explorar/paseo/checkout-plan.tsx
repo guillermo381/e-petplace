@@ -58,6 +58,7 @@ import { cobrar } from '@/lib/pagos/cobro';
 import { useEsperaDeConfirmacion } from '@/lib/pagos/espera-confirmacion';
 import { useMedioDePago, SeccionMedioDePago } from '@/components/seccion-medio-de-pago';
 import { SeccionFacturacion, useFacturacion } from '@/components/seccion-facturacion';
+import { AvisoNoCargo } from '@/components/aviso-no-cargo';
 import { useTraduccion } from '@/i18n';
 
 export default function CheckoutPlanPaseo() {
@@ -295,7 +296,9 @@ export default function CheckoutPlanPaseo() {
             ⭐ El día que `plan` entre a `SujetoDeuna`, esto es borrar una prop
             — y `cobro_link_mensual` ya tiene `suscripcion_servicio_id` en su
             XOR, así que el destino del link existe. Reportado a B. */}
-        {facturacion.props === null ? null : (
+        {facturacion.props === null ? (
+            facturacion.noCargo ? <AvisoNoCargo onReintentar={facturacion.reintentar} /> : null
+          ) : (
           <SeccionFacturacion {...facturacion.props} total={precio} />
         )}
 

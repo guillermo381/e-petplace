@@ -59,6 +59,7 @@ import { cobrar } from '@/lib/pagos/cobro';
 import { useEsperaDeConfirmacion, type SujetoEnEspera } from '@/lib/pagos/espera-confirmacion';
 import { SeccionMedioDePago, useMedioDePago } from '@/components/seccion-medio-de-pago';
 import { SeccionFacturacion, useFacturacion } from '@/components/seccion-facturacion';
+import { AvisoNoCargo } from '@/components/aviso-no-cargo';
 import { parsearPrecio } from '@epetplace/i18n';
 import { EsperaDeUna } from '@/components/espera-deuna';
 import { urlWhatsApp } from '@/lib/contacto';
@@ -759,7 +760,9 @@ export default function CheckoutGuarderia() {
             apoyo={esMensual ? t('checkoutGuarderia.dondeRecogenMensual') : undefined}
           />
 
-          {facturacion.props === null || totalAFacturar === null ? null : (
+          {facturacion.props === null || totalAFacturar === null ? (
+                facturacion.noCargo ? <AvisoNoCargo onReintentar={facturacion.reintentar} /> : null
+              ) : (
             <SeccionFacturacion {...facturacion.props} total={totalAFacturar} />
           )}
 

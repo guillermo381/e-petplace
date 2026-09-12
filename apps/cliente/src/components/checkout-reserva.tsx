@@ -56,6 +56,7 @@ import {
   BotonPagar, SeccionMedioDePago, useMedioDePago,
 } from '@/components/seccion-medio-de-pago';
 import { SeccionFacturacion, useFacturacion } from '@/components/seccion-facturacion';
+import { AvisoNoCargo } from '@/components/aviso-no-cargo';
 import { cobrar } from '@/lib/pagos/cobro';
 import { useEsperaDeConfirmacion } from '@/lib/pagos/espera-confirmacion';
 import { EsperaDeUna } from '@/components/espera-deuna';
@@ -535,7 +536,9 @@ export function CheckoutReserva({
             final» sobre el tope, no preguntar nada bajo el tope— son el MISMO
             `if` contra ese número, y sin él la sección no puede decidir cuál
             de los dos mostrar. */}
-        {facturacion.props === null ? null : (
+        {facturacion.props === null ? (
+            facturacion.noCargo ? <AvisoNoCargo onReintentar={facturacion.reintentar} /> : null
+          ) : (
           <SeccionFacturacion {...facturacion.props} total={precio} />
         )}
 

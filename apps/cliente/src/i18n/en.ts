@@ -3393,4 +3393,11 @@ export const clienteEn = {
     invalido: "That email doesn't look valid. Check it.",
   },
 
+  noCargo: {
+    titulo: "We couldn't load this",
+    detalle: 'It might be your connection. Try again.',
+    reintentar: 'Try again',
+    noSePuedePagar: "We couldn't load your invoice details. Try again before paying.",
+  },
+
 } as const satisfies Espejo<typeof clienteEs>;

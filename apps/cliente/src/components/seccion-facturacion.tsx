@@ -289,6 +289,10 @@ export function SeccionFacturacion({
 export interface FacturacionLista {
   /** `null` mientras el tope no se sepa: la sección NO se monta (fail-closed). */
   props: Omit<SeccionFacturacionProps, 'total'> | null;
+  /** 🔴 `true` = la consulta no volvió. **Es distinto de «todavía no»**, y la
+   *  pantalla tiene que poder decirlo y ofrecer reintentar. */
+  noCargo: boolean;
+  reintentar: () => void;
   /** 🔴 Se llama ANTES de cobrar. `false` = no se cobra, y ya avisó por qué. */
   validarYGuardar: () => Promise<boolean>;
 }
@@ -296,7 +300,13 @@ export interface FacturacionLista {
 export function useFacturacion(activo: boolean): FacturacionLista {
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
-  const [tope, setTope] = useState<number | null>(null);
+  /* 🔴 TRES ESTADOS, no dos. `null` era «todavía no» Y «no pudo» a la vez, y
+     desde afuera se leen igual: la sección no se montaba y **nadie sabía por
+     qué**. *Es el defecto que dejó al founder media hora mirando esqueletos, en
+     miniatura.* Ahora «no cargó» es un estado propio, lo DICE y ofrece
+     reintentar. */
+  const [tope, setTope] = useState<number | 'cargando' | 'noCargo'>('cargando');
+  const [intento, setIntento] = useState(0);
   const [perfil, setPerfil] = useState<TaxProfile | null>(null);
   const [nombrePersona, setNombrePersona] = useState<string | null>(null);
   const [correo, setCorreo] = useState('');
@@ -320,8 +330,10 @@ export function useFacturacion(activo: boolean): FacturacionLista {
      recordar en cada consumidor es una regla que alguien va a olvidar — y su
      modo de falla es que no se puede cobrar.* */
   const correoVivo = useRef('');
+  const topeVivo = useRef<number | 'cargando' | 'noCargo'>('cargando');
   const eleccionVivo = useRef<Parameters<SeccionFacturacionProps['onCambiar']>[0] | null>(null);
   correoVivo.current = correo;
+  topeVivo.current = tope;
   eleccionVivo.current = eleccion;
 
   useEffect(() => {
@@ -336,7 +348,9 @@ export function useFacturacion(activo: boolean): FacturacionLista {
       if (!vigente) return;
       /* Fail-closed: sin tope NO se cae a 50. Un tope inventado decide en cada
          compra si a alguien se le piden sus datos. */
-      if (rTope.ok) setTope(rTope.data);
+      /* Fail-closed en el VALOR (sin tope no se cae a 50) y hablado en la
+         FORMA: el fallo se dice, no se queda en silencio. */
+      setTope(rTope.ok ? rTope.data : 'noCargo');
       if (rPerfil.ok) setPerfil(rPerfil.data);
       if (rYo.ok) setNombrePersona(rYo.data.nombre);
       /* La precarga NO pisa lo ya escrito si la lectura llega tarde, y el correo
@@ -346,11 +360,18 @@ export function useFacturacion(activo: boolean): FacturacionLista {
       if (sugerido) setCorreo((v) => (v.trim().length > 0 ? v : sugerido));
     })();
     return () => { vigente = false; };
-  }, [activo]);
+  }, [activo, intento]);
 
   const validarYGuardar = useCallback(async () => {
     /* ① El correo, siempre. Sin él la compra se paga y el comprobante no tiene
        a dónde ir. */
+    /* 🔴 Si sus datos no cargaron, el freno lo DICE. Pedir un correo cuando la
+       sección no se pudo montar sería mandar a escribirlo en un campo que no
+       está en pantalla — un callejón con voz de instrucción. */
+    if (topeVivo.current === 'noCargo' || topeVivo.current === 'cargando') {
+      mostrar({ variante: 'error', texto: t('noCargo.noSePuedePagar') });
+      return false;
+    }
     const correoAhora = correoVivo.current;
     if (!correoSirve(correoAhora)) {
       mostrar({ variante: 'error', texto: t('correoFactura.falta') });
@@ -383,8 +404,12 @@ export function useFacturacion(activo: boolean): FacturacionLista {
   }, [mostrar, t]);
 
   return {
+    /* `noCargo` viaja como props: la sección lo dibuja con su reintento. Antes
+       `null` significaba las dos cosas y la pantalla no podía distinguirlas. */
+    noCargo: tope === 'noCargo',
+    reintentar: () => { setTope('cargando'); setIntento((n) => n + 1); },
     props:
-      tope === null
+      typeof tope !== 'number'
         ? null
         : {
             perfil,

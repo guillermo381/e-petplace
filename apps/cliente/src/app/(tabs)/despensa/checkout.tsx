@@ -107,6 +107,7 @@ import {
   BotonPagar, SeccionMedioDePago, useMedioDePago,
 } from '@/components/seccion-medio-de-pago';
 import { SeccionFacturacion, useFacturacion } from '@/components/seccion-facturacion';
+import { AvisoNoCargo } from '@/components/aviso-no-cargo';
 import { useEsperaDeConfirmacion } from '@/lib/pagos/espera-confirmacion';
 import { EsperaDeUna } from '@/components/espera-deuna';
 import { topeDeEspera, useEstadoDeUna } from '@/lib/pagos/deuna-estado';
@@ -1517,7 +1518,9 @@ export default function DespensaCheckout() {
                 preselección. *Ya no es «igual a»: es LA MISMA, y por eso no hay
                 de dónde sacar una versión propia.* */}
             <View style={{ paddingHorizontal: spacing[5] }}>
-              {facturacion.props === null || compraTotal === null ? null : (
+              {facturacion.props === null || compraTotal === null ? (
+                facturacion.noCargo ? <AvisoNoCargo onReintentar={facturacion.reintentar} /> : null
+              ) : (
                 <SeccionFacturacion {...facturacion.props} total={compraTotal} />
               )}
 
