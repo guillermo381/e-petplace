@@ -165,3 +165,48 @@ abre cuando hay una explicación plausible a mano.*
 
 - 404 de PostgREST sobre RPC que existe = schema cache viejo (`NOTIFY pgrst, 'reload schema'`) o proyecto equivocado — verificar el ref ANTES de cada RUN, una sola pestaña/conexión (L-123/L-127). No confiar en el copy genérico del wrapper.
 - Contratos entre repos que comparten la DB: cambio de schema exige identificar dependientes, notificar y actualizar el doc maestro correspondiente en el mismo bloque (regla 69).
+
+## Medir contra la base: tres cosas que devuelven verde sin serlo (S115-E)
+
+**① El CLI de Supabase NO es seguro para uso concurrente.** Cada
+`supabase db query --linked` crea un **rol temporal de login** (lo dice: `Initialising
+login role...`). Medido con seis invocaciones simultáneas: **una sobrevive (4,8 s) y cinco
+mueren con `LegacyDbConfigConnectTempRoleError` tras ~165 s** de reintentos.
+
+- Consultas de lectura: **secuenciales**. Paralelizar con el CLI es más LENTO, no más
+  rápido, y sus fallos **no se parecen a un problema de canal** — el mensaje habla de
+  «temp role» y de postgres, así que se lee como un problema de permisos o de la base.
+- Muchas lecturas: **una sola consulta** que devuelva todo (`jsonb_build_object`,
+  `union all`). El CLI además devuelve **sólo el último resultset** de un lote
+  multi-statement: partir en cuatro `SELECT` pierde los tres primeros.
+- Para probar concurrencia real (un lock, un `FOR UPDATE`): **el CLI no sirve**. Con 2-3
+  escalonadas funciona *a veces*; con 6, casi nunca.
+- La degradación es **transitoria y se recupera sola**; insistir mientras dura alarga la
+  cola. Y un arnés matado con `SIGKILL` **no corre su `finally`**: barré el residuo viejo
+  al arrancar en vez de confiar en la limpieza propia.
+- Para diagnosticarlo hay que guardar **`stdout` y `stderr` de CADA hijo**: el error real
+  sólo aparece ahí. *Sin eso me costó tres diagnósticos equivocados —lock colgado, `npx`
+  lento, timeout— antes de llegar a la causa.*
+
+**② La respuesta de una función o una edge NO prueba que escribió: se lee la fila.**
+Medido contra `fiscal-emitir`: devolvió `{"secuencial":"000000001","estado":"emitiendo"}`
+y la fila quedó en `borrador` con `secuencial NULL` — porque ese `hechos[]` se arma con
+las **variables locales**, no leyendo lo que quedó. Dos pases consumieron dos secuenciales
+que ninguna fila tiene.
+
+- **`supabase-js` no lanza**: devuelve `{ error }`. Un `await` a secas se come el rebote.
+- **Y un UPDATE que afecta 0 filas no es `error`**: no hay rebote que leer. *Un fallo que
+  no se lee no se ve como fallo — se ve como huecos en la numeración que hay que explicar
+  meses después.*
+- ⇒ todo arnés que verifique una escritura **relee la fila**, y quien afirme «se guardó»
+  cita el `SELECT`, no la respuesta.
+
+**③ Dos vocabularios para el mismo concepto devuelven NULL en silencio.** El ambiente del
+SRI es el dígito `1|2` en la clave de acceso y `pruebas|produccion` en la columna
+`sri_ambiente`. Pasarle el dígito a `fiscal_clave_acceso` devuelve **NULL** —no error— y
+el CHECK de coherencia rebota **con razón**, pareciendo un defecto del motor.
+
+- *Un `RAISE` de la función NO es un rechazo del CHECK*, y confundirlos manda a curar lo
+  que funciona. Antes de acusar a una puerta ajena: **saber QUIÉN rebotó**.
+- Cuando una columna tiene vocabulario propio, se lee del `CHECK` o del `enum` **antes**
+  de escribir el arnés — no se deduce del nombre.
