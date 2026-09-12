@@ -237,7 +237,7 @@ export function CheckoutReserva({
     /* 🔴 SIN CORREO Y SIN SUS DATOS NO SE COBRA. El hook valida y guarda; si
        dice que no, ya avisó por qué. *Una compra pagada cuyo comprobante no
        tiene a dónde ir es una familia que no recibe su factura.* */
-    if (!(await facturacion.validarYGuardar())) return;
+    if (!(await facturacion.validarYGuardar(precio))) return;
 
     /* ── 🔴 EL RIEL DE DEUNA NO PASA POR `cobrar()`, y no es un atajo ───────
        `cobrar()` **debita una tarjeta**: es el riel de Nuvei entero. En DeUna

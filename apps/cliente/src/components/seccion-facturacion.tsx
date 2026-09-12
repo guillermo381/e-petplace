@@ -122,6 +122,11 @@ export interface SeccionFacturacionProps {
    *  el de la cuenta y la persona puede cambiarlo. */
   correo: string;
   onCorreo: (v: string) => void;
+  /** 🔴 El nombre del receptor, **precargado del perfil y EDITABLE**: a veces la
+   *  factura va a nombre de otra persona. Medido: 172/182 perfiles lo tienen —
+   *  los 10 que no, lo escriben acá. */
+  nombre: string;
+  onNombre: (v: string) => void;
 }
 
 export function SeccionFacturacion({
@@ -134,6 +139,8 @@ export function SeccionFacturacion({
   nombrePersona,
   correo,
   onCorreo,
+  nombre,
+  onNombre,
 }: SeccionFacturacionProps) {
   const { t } = useTraduccion();
 
@@ -172,6 +179,29 @@ export function SeccionFacturacion({
      correo y se ve dos veces. **No divergen** —los dos escriben el mismo
      estado— pero es redundancia visible: pedido a B una prop para apagar el
      suyo, y el día que llegue esta nota se borra con ella. */
+  /* ═══ LO QUE YA TENEMOS, VISIBLE Y EDITABLE ═══════════════════════════════
+     🔴 **No se vuelve a pedir lo que el perfil ya tiene** (firma del founder):
+     nombre y correo se precargan. *Pero se muestran y se pueden cambiar* —
+     alguien puede querer su factura a nombre de su empresa o de otra persona, y
+     una pantalla que sólo muestra lo nuestro lo obliga a pedirlo por WhatsApp.
+
+     **Medido antes de decidir qué entra acá** (182 perfiles): correo 100 % ·
+     nombre 94 % · **teléfono 13 %**. ⇒ **el teléfono queda AFUERA, firmado por
+     el founder sobre esta medición** (11-sep-2026): no hace falta para facturar
+     en EC y precargarlo habría mostrado un campo vacío al 87 %. *Un campo
+     precargado que casi nunca trae nada es un campo más, no una ayuda.* */
+  const nombreMal = correoTocado && nombre.trim().length === 0;
+  const campoNombre = (
+    <Campo
+      label={t('identidadFactura.nombre')}
+      placeholder={t('identidadFactura.nombreFormato')}
+      value={nombre}
+      onChangeText={onNombre}
+      autoCapitalize="words"
+      error={nombreMal ? t('identidadFactura.nombreFalta') : undefined}
+    />
+  );
+
   const campoCorreo = (
     <View style={{ gap: spacing[2] }}>
       <Texto variante="seccion">{t('correoFactura.pregunta')}</Texto>
@@ -208,7 +238,12 @@ export function SeccionFacturacion({
     const nombre = perfil.razonSocial ?? nombrePersona ?? null;
     return (
       <View style={{ gap: spacing[5] }}>
-      {campoCorreo}
+      <View style={{ gap: spacing[3] }}>
+        <Texto variante="seccion">{t('identidadFactura.aNombreDe')}</Texto>
+        {campoNombre}
+        {campoCorreo}
+        <Texto variante="apoyo">{t('identidadFactura.editable')}</Texto>
+      </View>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
         <View style={{ flex: 1 }}>
           <Texto variante="apoyo">{t('facturacionCheckout.facturaA')}</Texto>
@@ -232,7 +267,20 @@ export function SeccionFacturacion({
      pieza lo explica en vez de dejar un control muerto. */
   return (
     <View style={{ gap: spacing[5] }}>
-    {campoCorreo}
+    <View style={{ gap: spacing[3] }}>
+      <Texto variante="seccion">{t('identidadFactura.aNombreDe')}</Texto>
+      {campoNombre}
+      {campoCorreo}
+      <Texto variante="apoyo">{t('identidadFactura.editable')}</Texto>
+    </View>
+    {/* 🔴 ARRIBA DEL TOPE SE DICE POR QUÉ — **firmado por el founder**
+        (11-sep-2026): *«una razón se entiende sola; una orden no»*. «Completá
+        tus datos» manda; «el SRI lo pide arriba de $50» explica. */}
+    {total > topeConsumidorFinal ? (
+      <Texto variante="apoyo">
+        {t('identidadFactura.porqueSobreTope', { tope: topeFormateado })}
+      </Texto>
+    ) : null}
     <SelectorFacturacion
       elegido={modo}
       onElegir={(m) => {
@@ -294,7 +342,8 @@ export interface FacturacionLista {
   noCargo: boolean;
   reintentar: () => void;
   /** 🔴 Se llama ANTES de cobrar. `false` = no se cobra, y ya avisó por qué. */
-  validarYGuardar: () => Promise<boolean>;
+  /** 🔴 Recibe el TOTAL: sobre el tope, sin datos, **no deja cobrar**. */
+  validarYGuardar: (total: number) => Promise<boolean>;
 }
 
 export function useFacturacion(activo: boolean): FacturacionLista {
@@ -310,6 +359,7 @@ export function useFacturacion(activo: boolean): FacturacionLista {
   const [perfil, setPerfil] = useState<TaxProfile | null>(null);
   const [nombrePersona, setNombrePersona] = useState<string | null>(null);
   const [correo, setCorreo] = useState('');
+  const [nombre, setNombre] = useState('');
   const [eleccion, setEleccion] = useState<Parameters<SeccionFacturacionProps['onCambiar']>[0] | null>(null);
 
   /* ═══ 🔴 EL ESPEJO VIVO — la cura del defecto que el founder encontró pagando
@@ -330,10 +380,14 @@ export function useFacturacion(activo: boolean): FacturacionLista {
      recordar en cada consumidor es una regla que alguien va a olvidar — y su
      modo de falla es que no se puede cobrar.* */
   const correoVivo = useRef('');
+  const nombreVivo = useRef('');
   const topeVivo = useRef<number | 'cargando' | 'noCargo'>('cargando');
+  const perfilVivo = useRef<TaxProfile | null>(null);
   const eleccionVivo = useRef<Parameters<SeccionFacturacionProps['onCambiar']>[0] | null>(null);
   correoVivo.current = correo;
+  nombreVivo.current = nombre;
   topeVivo.current = tope;
+  perfilVivo.current = perfil;
   eleccionVivo.current = eleccion;
 
   useEffect(() => {
@@ -358,11 +412,21 @@ export function useFacturacion(activo: boolean): FacturacionLista {
          eligió para sus facturas. */
       const sugerido = (rPerfil.ok && rPerfil.data?.email) || (rYo.ok && rYo.data.email) || '';
       if (sugerido) setCorreo((v) => (v.trim().length > 0 ? v : sugerido));
+      /* Igual que el correo: manda el del perfil FISCAL —es el nombre que la
+         persona eligió para sus facturas— y cae al de la cuenta. Medido:
+         172/182 lo tienen; los 10 que no, lo escriben. */
+      const nombreSugerido = (rPerfil.ok && rPerfil.data?.razonSocial) || (rYo.ok && rYo.data.nombre) || '';
+      if (nombreSugerido) setNombre((v) => (v.trim().length > 0 ? v : nombreSugerido));
     })();
     return () => { vigente = false; };
   }, [activo, intento]);
 
-  const validarYGuardar = useCallback(async () => {
+  /* 🔴 RECIBE EL TOTAL, y es lo que le faltaba para poder frenar. Sin el monto
+     el guard sólo podía mirar el correo — y por eso **el cobro pasaba sobre el
+     tope aunque el documento quedara trabado**: la familia pagaba y su factura
+     no salía, sin enterarse. *Frenar el documento y no el cobro es peor que no
+     frenar nada: cobra igual y el problema aparece después, cuando ya pagó.* */
+  const validarYGuardar = useCallback(async (total: number) => {
     /* ① El correo, siempre. Sin él la compra se paga y el comprobante no tiene
        a dónde ir. */
     /* 🔴 Si sus datos no cargaron, el freno lo DICE. Pedir un correo cuando la
@@ -377,15 +441,32 @@ export function useFacturacion(activo: boolean): FacturacionLista {
       mostrar({ variante: 'error', texto: t('correoFactura.falta') });
       return false;
     }
-    /* ② El perfil, sólo si lo declaró en ESTA compra y pidió recordarlo. Se
+    /* ② 🔴 ARRIBA DEL TOPE NO SE COBRA SIN DATOS. El motor ya se niega a
+       facturar mal (deja el documento en `esperando_receptor`), pero eso pasa
+       DESPUÉS del cobro. Acá el freno llega antes, que es donde sirve.
+       Cuenta como «tiene datos»: un perfil guardado, o los que acaba de
+       declarar en esta compra. */
+    const eleccionAhora = eleccionVivo.current;
+    const tope = topeVivo.current;
+    const declaroAhora =
+      eleccionAhora?.modo === 'misDatos' &&
+      eleccionAhora.datos !== null &&
+      eleccionAhora.datos.identificacion.trim().length > 0;
+    if (typeof tope === 'number' && total > tope && !perfilVivo.current && !declaroAhora) {
+      mostrar({ variante: 'error', texto: t('frenoFiscal.faltanDatos') });
+      return false;
+    }
+
+    /* ③ El perfil, sólo si lo declaró en ESTA compra y pidió recordarlo. Se
        guarda ANTES de cobrar porque el motor resuelve el receptor al confirmar
        el pago: después sería emitir con lo viejo. */
-    const eleccionAhora = eleccionVivo.current;
     if (eleccionAhora?.modo === 'misDatos' && eleccionAhora.datos && eleccionAhora.guardar) {
       const g = await fiscalGuardarTaxProfile({
         tipoIdentificacion: eleccionAhora.datos.tipo,
         identificacion: eleccionAhora.datos.identificacion,
-        razonSocial: eleccionAhora.datos.razonSocial.trim() || null,
+        /* Con RUC manda la razón social de la empresa; sin RUC, el nombre de la
+           persona ES la razón social del receptor para el SRI. */
+        razonSocial: eleccionAhora.datos.razonSocial.trim() || nombreVivo.current.trim() || null,
         direccion: eleccionAhora.datos.direccion.trim() || null,
         email: correoAhora.trim(),
         predeterminado: true,
@@ -418,6 +499,8 @@ export function useFacturacion(activo: boolean): FacturacionLista {
             nombrePersona,
             correo,
             onCorreo: setCorreo,
+            nombre,
+            onNombre: setNombre,
             onCambiar: setEleccion,
           },
     validarYGuardar,

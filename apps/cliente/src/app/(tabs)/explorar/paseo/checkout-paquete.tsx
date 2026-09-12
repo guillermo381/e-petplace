@@ -105,7 +105,7 @@ export default function CheckoutPaquetePaseo() {
     /* 🔴 SIN CORREO Y SIN SUS DATOS NO SE COBRA — el mismo freno de las citas y
        la despensa. Va al PRINCIPIO y no junto a `cobrar`: más abajo ya se creó
        el sujeto, y frenar ahí dejaría una compra a medias esperando su hold. */
-    if (!(await facturacion.validarYGuardar())) return;
+    if (!(await facturacion.validarYGuardar(total))) return;
 
     if (enviando) return;
     if (medio.idTarjeta === null && medio.elegido?.tipo !== 'deuna') {

@@ -3400,4 +3400,24 @@ export const clienteEn = {
     noSePuedePagar: "We couldn't load your invoice details. Try again before paying.",
   },
 
+  facturaTrabada: {
+    faltanDatosTitulo: 'We need your details to issue it',
+    faltanDatosDetalle: 'This purchase is above the final-consumer limit. Add your ID or tax number and we\'ll issue it.',
+    faltanDatosAccion: 'Add my details',
+  },
+
+  frenoFiscal: {
+    faltanDatos: 'This purchase needs your ID or tax number so we can invoice it.',
+  },
+
+  identidadFactura: {
+    porqueSobreTope: 'For purchases over {{tope}}, the tax authority requires your ID.',
+    aNombreDe: 'Billed to',
+    nombre: 'Full name',
+    nombreFormato: 'As it should appear on your invoice',
+    nombreFalta: 'We need a name for the invoice.',
+    cambiar: 'Change',
+    editable: 'You can change these if this invoice goes to someone else.',
+  },
+
 } as const satisfies Espejo<typeof clienteEs>;

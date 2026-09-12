@@ -452,7 +452,12 @@ export default function CheckoutGuarderia() {
   const pagar = useCallback(async () => {
     /* 🔴 SIN CORREO Y SIN SUS DATOS NO SE COBRA — el mismo freno de las citas,
        la despensa y los prepagos. */
-    if (!(await facturacion.validarYGuardar())) return;
+    if (!(await facturacion.validarYGuardar(
+      /* 🔴 `?? Infinity` = FAIL-CLOSED, firmado por el founder (11-sep): sin total
+         conocido se PIDEN los datos. *Pedir de más molesta; cobrar algo que
+         después no se puede facturar es un problema que aparece cuando ya pagó.* */
+      totalAFacturar ?? Infinity,
+    ))) return;
 
     if (enviando) return;
     /* Ni el paquete ni la mensualidad se tocan sin medio: los dos cobran.
