@@ -1,6 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { fetchConTecho, cargarTechosDeRed } from './red';
-import { pulsoSesion, pulsoInicio, pulsoSesionInicial, pulsoTechos } from './pulso';
 import type { Database } from './database.types';
 
 export type EpetplaceClient = SupabaseClient<Database>;
@@ -30,8 +29,6 @@ export function initApi(url: string, anonKey: string, opciones?: OpcionesApi): E
   if (!url || !anonKey) {
     throw new Error('initApi: faltan EXPO_PUBLIC_SUPABASE_URL o EXPO_PUBLIC_SUPABASE_ANON_KEY');
   }
-  /* SONDA `D-1074` ③ — qué leyó el cliente al nacer. Host y largo, nunca el valor. */
-  pulsoInicio(url, anonKey.length);
 
   cliente = createClient<Database>(url, anonKey, {
     /* 🔴 EL TECHO DE TIEMPO (`D-1070`). Sin esto, una consulta que sale y no
@@ -89,64 +86,14 @@ export function initApi(url: string, anonKey: string, opciones?: OpcionesApi): E
      Su fallo NO es grave y por eso no lanza: los valores de arranque siguen
      rigiendo. Lo único que se pierde es poder moverlos sin publicar — que es
      exactamente para lo que son dato. */
-  /* ── SONDA `D-1074` (temporal): cuántas veces SE PIDE la sesión ──────────
-     Es el contador que contesta «¿hay un bucle que lee y no sale a la red?».
-     Se envuelve el método público: `auth-js` usa sus privados por dentro, así
-     que esto cuenta **nuestras** llamadas —`uidActual()` y sus 29 sitios—, que
-     es exactamente la pregunta. Si esto sube y `red` no, el bucle es nuestro y
-     nunca llega a salir. */
-  {
-    const original = cliente.auth.getSession.bind(cliente.auth);
-    type FirmaGetSession = typeof original;
-    (cliente.auth as unknown as { getSession: FirmaGetSession }).getSession = ((...args) => {
-      pulsoSesion();
-      return original(...args);
-    }) as FirmaGetSession;
-  }
-
-  /* ── SONDA `D-1074` ③ · LA LECTURA DE LA SESIÓN, CON PERRO GUARDIÁN ───────
-     🔴 El perro guardián es la mitad que importa. *Si esta lectura se cuelga,
-     no hay log — y la ausencia de un log se lee igual que una sonda que no
-     corre.* A los 10 s sin respuesta, el silencio HABLA. */
-  {
-    const t = Date.now();
-    let contestó = false;
-    const perro = setTimeout(() => {
-      if (!contestó) pulsoSesionInicial(false, Date.now() - t, 'SIGUE COLGADA a los 10s');
-    }, 10_000);
-    void cliente.auth
-      .getSession()
-      .then(
-        ({ data, error }) => {
-          contestó = true;
-          clearTimeout(perro);
-          pulsoSesionInicial(Boolean(data.session), Date.now() - t, error?.message ?? null);
-        },
-        (e: unknown) => {
-          contestó = true;
-          clearTimeout(perro);
-          pulsoSesionInicial(false, Date.now() - t, String((e as Error)?.message ?? e));
-        },
-      );
-  }
-
   let techosPedidos = false;
   cliente.auth.onAuthStateChange((_evento, sesion) => {
     if (!sesion || techosPedidos) return;
     techosPedidos = true;
-    const tTechos = Date.now();
-    let techosContestaron = false;
-    const perroTechos = setTimeout(() => {
-      if (!techosContestaron) pulsoTechos(false, -1, Date.now() - tTechos);
-    }, 10_000);
     void cargarTechosDeRed(async () => {
       const { data } = await cliente!.from('app_config')
         .select('clave, valor').like('clave', 'red_techo%');
       return data ?? null;
-    }).then((r) => {
-      techosContestaron = true;
-      clearTimeout(perroTechos);
-      pulsoTechos(r.ok, r.aplicados, Date.now() - tTechos);
     });
   });
 

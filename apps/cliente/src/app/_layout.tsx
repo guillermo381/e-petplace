@@ -1,7 +1,3 @@
-/* ⏳ SONDA TEMPORAL — `D-1074`, y va PRIMERA a propósito: parchea el
-   singleton de AsyncStorage para contar cruces al nativo, y tiene que
-   estar puesta antes de que `@/lib/api` lo use al arrancar. */
-import '@/lib/pulso-almacenamiento';
 import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 // CURA S82-A r3 (espejo EXACTO de la cura S58 del prestador, misma clase):
@@ -17,7 +13,9 @@ import '@/lib/livekit';
    founder con el eje corregido: *la app está viva y sólo falla lo que viene
    de la base; el heap y el almacenamiento son CONSECUENCIA de reintentar
    contra algo que nunca responde.* El archivo queda por si el eje vuelve.
-   Lo que sí viaja es `@/lib/pulso-almacenamiento`, arriba de todo. */
+   El pulso que nombró la causa (`@/lib/pulso-almacenamiento`) también se
+   retiró, en el mismo acto que la cura: los dos archivos siguen en el árbol
+   por si el eje vuelve, pero ninguno viaja en el bundle. */
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { router, Stack } from 'expo-router';
 import { destinoDePushDeEstaApp } from '@/lib/destino-de-push';
