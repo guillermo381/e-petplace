@@ -33236,6 +33236,69 @@ edges estén al día antes de dejar cerrar.
 **Estado:** ABIERTA · 🔴 **BLOQUEA PRODUCCIÓN** (subida de prioridad, founder 11-sep: *«tres de tres publishes con incidente. Va con lo que bloquea producción»*).
 **Dueño:** A (la red) + C (el botón) · **Fecha límite:** antes del soft launch (1-oct-2026).
 
+### 🔴 LA CURA SE CONSTRUYÓ, SE PUBLICÓ Y SE REVIRTIÓ — Y LAS DOS COSAS SON CIERTAS A LA VEZ
+
+**Esta sección existe para que el próximo no vuelva a aplicarla igual.** *El razonamiento es correcto y el resultado en el aparato fue peor: sin las dos mitades escritas juntas, alguien lee la cura, la encuentra impecable, y la repite.*
+
+#### Lo que la cura probó, y sigue siendo verdad
+
+Medido contra `auth-js` REAL, con un servidor que acepta y nunca contesta (`verify:presupuesto-refresco`, con su control):
+
+```
+techo 20 s → 2 intentos en 40,2 s
+techo  8 s → 4 intentos en 33,4 s
+```
+
+**Lo que sostiene la sesión no es un intento largo: es el PRESUPUESTO DE REINTENTOS.** `auth-js` corta a los 30 s en total, así que un techo largo se lo come en el primero. *Eso no se cae: es aritmética sobre el paquete instalado.*
+
+#### 🔴 Y lo que pasó al publicarla (OTA `7c19762f`, 12-sep)
+
+**Un síntoma NUEVO, que no es el de esta ficha:** la app **se cierra sola, en silencio, sin diálogo**, con patrón — *el primer intento aguanta ~1 minuto y muestra el aviso; al reintentar, se cierra*. Cuatro veces seguidas. **Revertido** al grupo anterior (`477a67a7`, ancla `1de103fa`).
+
+**La reversión no es una acusación**, y el criterio queda escrito porque va a hacer falta otra vez: *que el cambio sea mío, reciente, y que el síntoma sea nuevo desde él alcanza para revertir aunque no alcance para culpar.* Y la comparación honesta: **no había OTA sano al que volver** —el anterior tiene este mismo `D-1074`— **pero un cuelgue diagnosticado es mejor que un cierre silencioso que nadie entiende.**
+
+#### Lo medido antes de revertir, para que nadie lo repita
+
+| hipótesis | veredicto |
+|---|---|
+| `update:insights` de los dos grupos | **0 crashes · 0 failed launches** — ⚠️ **y eso NO exonera**: un kill silencioso del sistema **se lleva puesto al reportero**. Un 0 acá es *consistente* con el síntoma, no evidencia en contra |
+| Deadlock por llamar Supabase dentro de `onAuthStateChange` | **DESCARTADA** — el paquete dice *«callbacks can safely call other Supabase auth methods»* y en RN corre **sin lock** (`this.lock = null`) |
+| Acumulación de clientes/listeners por `initApi` | **DESCARTADA** — corre **una vez al cargar el módulo** (`apps/cliente/src/lib/api.ts`, nivel superior), no por pantalla ni por reintento |
+| **El minuto** (~60 s con techos de 8 s) | 🔴 **SIN EXPLICACIÓN MEDIDA.** Es lo que falta, y es lo que más pesa |
+
+#### 🔴 La sospecha que queda sobre la cura, y es de su autor
+
+**La cura hace que el refresco intente 4 veces en vez de 2: es el doble de trabajo concurrente en el peor momento.** El patrón del founder —*el primero aguanta, el segundo cierra*— es exactamente la forma que toma un recurso que se agota en la segunda vuelta. **No está probado. Y es la razón por la que se revirtió en vez de defenderla.**
+
+#### ⚠️ LA PREGUNTA ABIERTA PARA CUANDO HAYA APARATO (founder, 12-sep)
+
+*«Si 4 intentos son demasiado trabajo concurrente, ¿hay un punto medio —3 intentos, o un techo de 12 s— que mejore el presupuesto sin duplicar la carga?»* Medido sobre la misma aritmética:
+
+| techo | intentos | total |
+|---|---|---|
+| 20 s (hoy, revertido a esto) | 2 | 40,2 s |
+| **12 s** | **3** | ~37 s |
+| 8 s (lo revertido) | 4 | 33,4 s |
+
+⇒ **12 s da un intento más sin duplicar.** *No se construye hasta tener el aparato: esta ficha ya tiene una cura impecable que salió mal, y la segunda no se publica a ciegas.*
+
+#### 🔑 LO QUE LA CIERRA — la línea exacta, para el founder con el teléfono conectado
+
+```
+adb logcat | grep -iE "lowmemorykiller|am_kill|ANR in|Reason:|FATAL EXCEPTION"
+```
+
+| lo que aparezca | qué significa |
+|---|---|
+| `lowmemorykiller` · `am_kill` | **memoria** — el sistema lo mató. Confirma la hipótesis del founder y la sospecha sobre la cura |
+| `ANR in` | **hilo principal trabado** — y explicaría también el minuto |
+| `FATAL EXCEPTION` | excepción de JS/nativo — pero entonces habría diálogo, y no lo hubo |
+| **nada de eso** | está más abajo, y hace falta mirar el nativo |
+
+*Sin esa línea se razona sobre un proceso que muere sin dejar nota — y esta ficha ya tuvo una explicación perfecta que resultó falsa.*
+
+---
+
 ### 🔴 TERCERA OCURRENCIA, Y EL DISCRIMINADOR CORRIÓ — LA FICHA CAMBIA DE PREGUNTA
 
 | # | Tras el OTA | Publicado | Síntoma |
