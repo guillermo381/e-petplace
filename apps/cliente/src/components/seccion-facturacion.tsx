@@ -44,6 +44,14 @@
  * *Listar perfiles es otro producto —y otra puerta— y dibujar una lista de uno
  * promete una elección que no existe.*
  *
+ * 🔴 **EL CORREO SE PIDE IGUAL EN AGENCIA** (firma del founder, 11-sep-2026).
+ * *Lo que cambia es QUIÉN manda la factura, no si hace falta.* Cuando la cuenta
+ * es `marketplace_fachada` el comprobante lo emite el prestador, no e-PetPlace —
+ * y la familia igual necesita recibirlo. **Lo que falta es decírselo**: va a
+ * recibir una factura a otro nombre, y si no se lo avisamos escribe preguntando.
+ * *Pendiente de un lector de «quién emite» que hoy no existe en la puerta única
+ * (pedido a A) — `modelo_comercial` no lo expone ningún wrapper ni RPC.*
+ *
  * **CHANEL (Ley 16):** se quitó el título de sección cuando hay perfil guardado.
  * Con una sola línea que ya dice «Factura a», un encabezado arriba sería el
  * elemento que rotula lo que el contenido ya dijo (Ley 17.6).
