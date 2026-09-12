@@ -4675,4 +4675,13 @@ export const clienteEs = {
     noSePuedePagar: 'No pudimos cargar los datos de tu factura. Prueba de nuevo antes de pagar.',
   },
 
+  /* S115-C · LOS TRABADOS. «Preparando tu factura» sobre algo que no se está
+     preparando miente, y miente distinto según el motivo: uno lo destraba la
+     familia y el otro no lo destraba nadie desde la app. */
+  facturaTrabada: {
+    faltanDatosTitulo: 'Faltan tus datos para emitirla',
+    faltanDatosDetalle: 'Esta compra supera el monto que se factura a consumidor final. Completa tu cédula o RUC y la emitimos.',
+    faltanDatosAccion: 'Completar mis datos',
+  },
+
 } as const;

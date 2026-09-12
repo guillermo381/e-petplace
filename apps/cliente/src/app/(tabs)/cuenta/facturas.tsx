@@ -14,7 +14,29 @@
  * directa*, y acá la fila responde «¿puedo bajarla?», no «¿cuánto fue?».
  *
  * ───────────────────────────────────────────────────────────────────────
- * 🔴 **DOS ESTADOS DE `A` QUE LA PIEZA DE `B` NO EXPRESA — y por qué no se
+ * 🔴 **«PREPARANDO» SOBRE UN TRABADO MIENTE — y miente DISTINTO según el
+ * motivo** (defecto del founder, 11-sep, con tres casos reales en la base).
+ *
+ * *Dos documentos en el MISMO estado con motivos distintos tienen dueños
+ * distintos:* uno lo destraba la familia, el otro no lo destraba nadie desde la
+ * app. Medido hoy: **2 en `pendiente_manual`/`agencia_factura_el_tercero`** ·
+ * **2 en `esperando_receptor`/`supera_tope_sin_identificacion`** · 1 borrador.
+ *
+ * **① El accionable YA se puede distinguir y está resuelto acá:**
+ * `estadoVisible === 'faltan_tus_datos'` dice qué falta **y lleva a
+ * completarlo** — la pantalla de Cuenta que existe desde la tanda 1. *Es el
+ * único de los tres que la familia puede resolver sola, así que es el que más
+ * vale.*
+ *
+ * ⚠️ **② El de AGENCIA no se puede distinguir todavía, y NO se adivina.** Su
+ * discriminador es `emitida_por_tercero` / `motivo_rechazo`, que **están en la
+ * tabla y no en `DocumentoFiscalMio`** (medido). `fiscalQuienEmite` existe pero
+ * pide el ORIGEN de la compra, y el documento tampoco lo trae. **Pedido a A.**
+ * *Mientras tanto cae en «preparando», que es lo que hoy hace — no empeora, y
+ * ponerle un techo de días le diría «lleva 3 días preparándose» a algo que
+ * **nunca** se va a preparar: más alarma sobre la misma mentira.*
+ *
+ * 🔴 **LOS DOS ESTADOS QUE LA PIEZA DE `B` NO EXPRESA — y por qué no se
  * disfrazan.** `estadoVisible` tiene CINCO valores; `TarjetaFactura` acepta
  * cuatro y son otros. `preparando`, `lista` y `con_problema` mapean; y quedan:
  *
@@ -45,6 +67,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
   Celda,
+  Texto,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
@@ -154,14 +177,31 @@ export default function FacturasScreen() {
               const estado = d.tipo === 'nota_credito' ? 'notaCredito' : ESTADO_TARJETA[d.estadoVisible];
 
               if (estado === null) {
+                /* 🔴 EL ACCIONABLE LLEVA A RESOLVERLO. Decir «faltan tus datos»
+                   y no dar el camino es la mitad de la ayuda: la persona sabe
+                   qué falta y no dónde ponerlo (Ley 17.5 — el vacío invita a
+                   actuar, cero finales mudos). */
+                if (d.estadoVisible === 'faltan_tus_datos') {
+                  return (
+                    <Tarjeta key={d.id}>
+                      <View style={{ gap: spacing[3] }}>
+                        <View style={{ gap: spacing[1] }}>
+                          <Texto variante="seccion">{t('facturaTrabada.faltanDatosTitulo')}</Texto>
+                          <Texto variante="apoyo">{t('facturaTrabada.faltanDatosDetalle')}</Texto>
+                          {d.numero === null ? null : <Texto variante="dato">{d.numero}</Texto>}
+                        </View>
+                        <Boton
+                          variante="secundario"
+                          etiqueta={t('facturaTrabada.faltanDatosAccion')}
+                          onPress={() => router.push('/cuenta/datos-facturacion')}
+                        />
+                      </View>
+                    </Tarjeta>
+                  );
+                }
                 return (
                   <Tarjeta key={d.id} relleno="ninguno">
-                    <Celda
-                      titulo={t(
-                        d.estadoVisible === 'faltan_tus_datos' ? 'facturas.faltanTusDatos' : 'facturas.anulada',
-                      )}
-                      metadataMono={d.numero ?? undefined}
-                    />
+                    <Celda titulo={t('facturas.anulada')} metadataMono={d.numero ?? undefined} />
                   </Tarjeta>
                 );
               }
