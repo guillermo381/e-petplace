@@ -4688,6 +4688,7 @@ export const clienteEs = {
      DOCUMENTO y el cobro pasaba igual: la familia pagaba y su factura quedaba
      trabada sin que se enterara. */
   frenoFiscal: {
+    identificacionInvalida: 'Revisa tu cédula o RUC: ese número no parece válido.',
     faltanDatos: 'Esta compra necesita tu cédula o RUC para poder facturarla.',
   },
 

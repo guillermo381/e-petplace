@@ -3407,6 +3407,7 @@ export const clienteEn = {
   },
 
   frenoFiscal: {
+    identificacionInvalida: "Check your ID or tax number: it doesn't look valid.",
     faltanDatos: 'This purchase needs your ID or tax number so we can invoice it.',
   },
 

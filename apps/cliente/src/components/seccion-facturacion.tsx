@@ -62,6 +62,7 @@ import {
   Boton,
   Campo,
   esCorreoValido,
+  esIdentificacionValida,
   useAviso,
   CampoIdentificacion,
   SelectorFacturacion,
@@ -232,13 +233,18 @@ export function SeccionFacturacion({
      el founder sobre esta medición** (11-sep-2026): no hace falta para facturar
      en EC y precargarlo habría mostrado un campo vacío al 87 %. *Un campo
      precargado que casi nunca trae nada es un campo más, no una ayuda.* */
-  const nombreMal = correoTocado && nombre.trim().length === 0;
+  /* ☠️ Decía `correoTocado && …` — el error del NOMBRE colgaba del toque del
+     CORREO. Copié la variable de al lado. Ahora tiene la suya: cada campo se
+     juzga cuando lo tocan a ÉL. */
+  const [nombreTocado, setNombreTocado] = useState(false);
+  const nombreMal = nombreTocado && nombre.trim().length === 0;
   const campoNombre = (
     <Campo
       label={t('identidadFactura.nombre')}
       placeholder={t('identidadFactura.nombreFormato')}
       value={nombre}
       onChangeText={onNombre}
+      onBlur={() => setNombreTocado(true)}
       autoCapitalize="words"
       error={nombreMal ? t('identidadFactura.nombreFalta') : undefined}
     />
@@ -501,10 +507,29 @@ export function useFacturacion(activo: boolean): FacturacionLista {
        declarar en esta compra. */
     const eleccionAhora = eleccionVivo.current;
     const tope = topeVivo.current;
+    /* 🔴 VÁLIDA, no sólo NO VACÍA (defecto del founder, 11-sep). Antes bastaba
+       con que hubiera algo escrito: *se dejaba cobrar con una identificación que
+       el propio campo estaba marcando en rojo*. Salió bien porque el dato era
+       bueno y el error era viejo — pero **desde afuera es indistinguible de
+       cobrar ignorando un error real**, y la próxima vez el dato puede ser malo.
+
+       Es la familia del closure otra vez: **la pantalla mostraba un estado y el
+       guard evaluaba otro**. Esta vez a favor. Se cierra con la MISMA función
+       que pinta el error (`esIdentificacionValida`), no con una segunda cuenta:
+       *dos validaciones del mismo hecho se separan un día y nadie se entera.* */
+    const datosAhora = eleccionAhora?.modo === 'misDatos' ? eleccionAhora.datos : null;
     const declaroAhora =
-      eleccionAhora?.modo === 'misDatos' &&
-      eleccionAhora.datos !== null &&
-      eleccionAhora.datos.identificacion.trim().length > 0;
+      datosAhora !== null &&
+      datosAhora.identificacion.trim().length > 0 &&
+      esIdentificacionValida(datosAhora.tipo, datosAhora.identificacion);
+    /* Si eligió «con mis datos» y lo escrito NO es válido, no se cobra —
+       cualquiera sea el monto. *Un error pintado en pantalla y un cobro que
+       avanza no pueden convivir.* */
+    if (datosAhora !== null && datosAhora.identificacion.trim().length > 0 && !declaroAhora) {
+      mostrar({ variante: 'error', texto: t('frenoFiscal.identificacionInvalida') });
+      return false;
+    }
+
     if (typeof tope === 'number' && total > tope && !perfilVivo.current && !declaroAhora) {
       mostrar({ variante: 'error', texto: t('frenoFiscal.faltanDatos') });
       return false;
