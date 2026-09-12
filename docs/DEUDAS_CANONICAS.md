@@ -32867,6 +32867,46 @@ su compra?* **Es otra tanda.**
 
 ### `D-1068` 🔴 · NUVEI NO MANDA EL TIPO DE FINANCIACIÓN — y el campo que parece decirlo no discrimina
 
+---
+
+#### 🔴 ENMIENDA S115-A (12-sep-2026) — LA MEDICIÓN QUE PEDÍA EL FOUNDER, Y DA VUELTA LA FICHA
+
+**La pregunta firmada:** *«medí qué porcentaje del histórico sería asumido bajo ④ — si es casi todo, la regla no sirve y hay que esperar a Nuvei.»* **Contestada, y en tres pasadas, porque las dos primeras daban números distintos sobre poblaciones distintas.**
+
+**① El número bruto — y está mal poblado.** 119 intentos aprobados, 83 sin medio ni BIN ⇒ 70 % asumido. *Pero incluye `seed_gate`, `simulado`, `siembra` (datos de prueba) y **`deuna`, que no es una tarjeta**: su `forma` es `codigo_push`.* ⚠️ **Aplicar la regla ④ a DeUna pondría «tarjeta de crédito» sobre un pago que no fue con tarjeta** — la regla tiene que estar acotada al riel de tarjeta o produce un dato falso distinto del que viene a evitar.
+
+**② La población que decide: Nuvei, 101 aprobados.** Con BIN en su columna: 34 (34 %). ⇒ **66 % asumido.** Y el rescate por tarjeta guardada da **CERO**: los 67 sin BIN **tampoco tienen `ultimos4`**, así que no hay con qué cruzar.
+
+**🔴 ③ Y LA TERCERA PASADA ENCONTRÓ QUE LA PREMISA ERA FALSA: EL BIN SIEMPRE ESTUVO.** `payload_crudo` está presente en los 101, y trae `card.{bin, type, origin, holder_name, number}`. Medido:
+
+| | |
+|---|---|
+| Nuvei aprobados | **101** |
+| BIN en la **columna** | 34 |
+| **BIN alcanzable** (columna **o** `payload_crudo->card->>'bin'`) | **101 — el 100 %** |
+| Sin BIN por ningún lado | **0** |
+| ⇒ **asumidos bajo la regla ④** | **0 de 101 — el 0 %** |
+
+**La causa de los 67 «sin tarjeta» no es Nuvei: es NUESTRO camino.** El corte es perfecto y no es casual:
+
+| grupo | n | qué son |
+|---|---|---|
+| CON datos de tarjeta | 34 | **los 34 son `compra_id`** (despensa) |
+| SIN datos de tarjeta | 67 | **ninguno es compra**: 40 citas · 15 bonos · 3 suscripciones |
+
+⇒ **el camino de COMPRAS copia `marca`/`bin`/`ultimos4` del payload a sus columnas y el camino de SERVICIOS no.** *El dato llegó en los 101 y en 67 lo tiramos.* **Es un defecto de captura por camino, no una carencia del proveedor** — y ningún gate lo vio porque las dos mitades funcionan por separado.
+
+**⚠️ EL LÍMITE QUE NO SE TAPA CON EL 100 %:** `bins_distintos = 2`. **En toda la historia vimos DOS BINs** —las dos tarjetas del founder—, así que *la cobertura del MECANISMO es 100 % y la diversidad de la MUESTRA es 2*. Una tabla BIN→crédito/débito no se puede validar contra esto. **El verde sigue siendo de campo, con una tarjeta real de cada tipo**, exactamente como quedó firmado.
+
+**Y `card.type` NO es el tipo de financiación:** sus valores son `vi` (60) y `di` (40) — **la MARCA**. *Un campo que se llama `type` y no dice el tipo es la clase de cosa que se lee una vez, se da por buena y funda un plan entero.* ⇒ **el camino ① (preguntarle a Erick) sigue en pie: nada de lo que Nuvei manda hoy discrimina crédito de débito.**
+
+#### Lo que esto reordena
+
+1. **Extraer el BIN del `payload_crudo` en el camino de servicios** — el dato ya está guardado; es copiarlo donde el resto del motor lo busca. **Sin esto, la regla ④ asume el 66 %; con esto, el 0 %.**
+2. **Acotar la regla ④ al riel de tarjeta** — DeUna tiene su propio código y no se asume.
+3. Recién entonces la regla ④ tiene sentido: cubre lo que quede, que hoy sería **nada**.
+
+
 **Medido sobre los 162 avisos de Nuvei guardados, 11-sep-2026.** El founder
 pidió mirar el payload completo antes de buscar un dataset de BINs: *puede que
 el dato ya esté y nadie lo lea*. Está mirado, y **no está**.
