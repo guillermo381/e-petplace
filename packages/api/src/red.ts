@@ -21,7 +21,7 @@
 /** El prefijo del mensaje cuando el techo se cumple. Estable a propósito. */
 export const SIN_RED = 'sin_red';
 
-export type ClaseDeLlamada = 'lectura' | 'escritura' | 'auth' | 'refresco' | 'subida' | 'sin_techo';
+export type ClaseDeLlamada = 'lectura' | 'escritura' | 'auth' | 'subida' | 'sin_techo';
 
 /**
  * Los valores DE ARRANQUE.
@@ -33,7 +33,7 @@ export type ClaseDeLlamada = 'lectura' | 'escritura' | 'auth' | 'refresco' | 'su
  *    base, y se reemplazan en cuanto la config llega.
  */
 const ARRANQUE: Record<Exclude<ClaseDeLlamada, 'sin_techo'>, number> = {
-  lectura: 8000, escritura: 20000, auth: 20000, refresco: 8000, subida: 120000,
+  lectura: 8000, escritura: 20000, auth: 20000, subida: 120000,
 };
 
 let techos = { ...ARRANQUE };
@@ -67,30 +67,23 @@ export function techosVigentes(): Readonly<typeof ARRANQUE> {
 export function claseDeLlamada(url: string, metodo: string): ClaseDeLlamada {
   if (url.includes('/functions/v1/')) return 'sin_techo';
   if (url.includes('/storage/v1/')) return 'subida';
-  /* 🔴 EL REFRESCO TIENE SU PROPIA CLASE, Y SU TECHO ES MÁS CORTO QUE EL DEL
-     LOGIN. Es contraintuitivo y por eso va escrito acá y no en una ficha: **el
-     próximo que lea «20 s» lo va a leer como generoso.**
+  /* ⏪ ACÁ VIVIÓ UNA CLASE PROPIA PARA EL REFRESCO, con techo de 8 s, y esto
+     es una REVERSIÓN CON SU MEDICIÓN AL LADO (`D-1074`, 12-sep-2026).
 
-     Lo que sostiene la sesión NO es un intento largo: es el PRESUPUESTO DE
-     REINTENTOS. `auth-js` reintenta el refresh con espera creciente
-     (200·400·800 ms) pero corta cuando el total pasa de 30 s
-     (`AUTO_REFRESH_TICK_DURATION_MS`, medido en el paquete). Un techo largo se
-     come ese presupuesto en el primer intento:
+     Su razón sigue siendo verdadera: `auth-js` corta sus reintentos a los 30 s
+     en total, así que un techo de 20 s se come el presupuesto en el primer
+     intento — 2 intentos en 40 s contra 4 en 33 s, medido contra el SDK real.
 
-       techo 20 s → 2 intentos en 40 s   ← lo que había
-       techo  8 s → 4 intentos en 33 s
-       techo  5 s → 5 intentos en 28 s
+     🔴 **Y EN EL APARATO SALIÓ PEOR: el heap de Java crecía ~20 MB/s hasta
+     morir por OOM a los 2 min 25 s.** El control que lo cierra son cinco
+     procesos en un mismo logcat: **los cuatro que corrieron el bundle CON esta
+     cura crecieron; el que corrió el bundle SIN ella quedó plano.**
 
-     Y rendirse cuesta caro: tras fallar entra un enfriamiento de 60 s
-     (`REFRESH_FAILURE_COOLDOWN_MS`) ⇒ **~100 segundos con la sesión muerta**,
-     y en ese hueco las DOS apps quedan mudas mientras el teléfono navega
-     perfecto. *Ese fue el síntoma de cuatro de cinco publishes, y se leía como
-     un problema de red* (`D-1074`).
-
-     🔴 EL LOGIN SE QUEDA EN 20 s, a propósito: es del usuario, está mirando la
-     pantalla, y puede esperar. El refresco es de la máquina y nadie lo mira —
-     por eso el que tiene que fallar rápido y reintentar es él. */
-  if (url.includes('/auth/v1/token') && url.includes('grant_type=refresh_token')) return 'refresco';
+     ⚠️ **NO SE REINTENTA HASTA ENTENDER EL MECANISMO.** *Cuatro intentos de
+     refresco no deberían asignar nada parecido a 20 MB/s, y mientras no
+     sepamos por qué, no sabemos qué OTRA cosa puede hacerlo* (founder). Queda
+     como pregunta ABIERTA en `D-1074`, no como cerrada. Lo vigila
+     `verify:reversion-no-vuelve`. */
   if (url.includes('/auth/v1/')) return 'auth';
   const m = (metodo || 'GET').toUpperCase();
   /* Una RPC puede leer o escribir y desde afuera no se distingue. Se le da el
@@ -108,28 +101,6 @@ export function claseDeLlamada(url: string, metodo: string): ClaseDeLlamada {
  *    importa no es abortar: es que la pantalla pueda decir que no cargó y
  *    ofrecer reintentar, en vez de quedarse esperando para siempre.*
  */
-/**
- * 🔴 LA SEÑAL DE QUE LA SESIÓN NO ESTÁ VIVA — y nace ACÁ porque acá es donde
- *    el fallo se ve primero. `onAuthStateChange` avisa cuando la sesión
- *    CAMBIA; no avisa cuando el refresco **falla y sigue fallando**, que es el
- *    estado en el que la app pasa sus peores cien segundos.
- *
- * *Sin esto, un refresco caído y una consulta caída producen el mismo texto en
- * pantalla —«no cargó»— y eso costó cuatro vueltas buscando del lado
- * equivocado* (`D-1074`).
- */
-let _refrescoFallidoEn: number | null = null;
-
-/** Milisegundos desde el último refresco que no volvió, o `null` si el último anduvo. */
-export function refrescoCaidoHace(): number | null {
-  return _refrescoFallidoEn === null ? null : Date.now() - _refrescoFallidoEn;
-}
-
-/** Lo llama el cliente cuando `auth-js` avisa `TOKEN_REFRESHED`: la sesión revivió. */
-export function marcarRefrescoSano(): void {
-  _refrescoFallidoEn = null;
-}
-
 export function fetchConTecho(fetchBase: typeof fetch = fetch): typeof fetch {
   return async (entrada: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     const url = typeof entrada === 'string' ? entrada
@@ -194,16 +165,12 @@ export function fetchConTecho(fetchBase: typeof fetch = fetch): typeof fetch {
                    una promesa rechazada sin dueño. */ },
       );
       const r = await enVuelo;
-      if (clase === 'refresco' && r.ok) _refrescoFallidoEn = null;
       return r;
     } catch (e) {
       /* 🔴 El error del techo se distingue del de red real, y los dos se
          devuelven con el MISMO prefijo: desde la pantalla son la misma cosa
          —no cargó y se puede reintentar—, y darles códigos distintos obligaría
          a cada superficie a manejar dos casos con la misma respuesta. */
-      /* Un refresco que no vuelve NO es una consulta más: es lo que sostiene
-         todo lo demás, y se anota para que la superficie pueda decirlo. */
-      if (clase === 'refresco') _refrescoFallidoEn = Date.now();
       const msg = String((e as Error)?.message ?? e);
       if (msg.startsWith(SIN_RED)) throw e;
       throw new Error(`${SIN_RED}: ${msg.slice(0, 160)}`);
@@ -237,8 +204,7 @@ export async function cargarTechosDeRed(
 
   const mapa: Record<string, keyof ReturnType<typeof techosVigentes>> = {
     red_techo_lectura_ms: 'lectura', red_techo_escritura_ms: 'escritura',
-    red_techo_auth_ms: 'auth', red_techo_refresco_ms: 'refresco',
-    red_techo_subida_ms: 'subida',
+    red_techo_auth_ms: 'auth', red_techo_subida_ms: 'subida',
   };
   const parche: Record<string, number> = {};
   let n = 0;

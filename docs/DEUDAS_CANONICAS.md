@@ -33236,7 +33236,51 @@ edges estén al día antes de dejar cerrar.
 **Estado:** ABIERTA · 🔴 **BLOQUEA PRODUCCIÓN** (subida de prioridad, founder 11-sep: *«tres de tres publishes con incidente. Va con lo que bloquea producción»*).
 **Dueño:** A (la red) + C (el botón) · **Fecha límite:** antes del soft launch (1-oct-2026).
 
-### ✅ CAUSA CERRADA EN EL APARATO — Y NO ERA LA SESIÓN
+### 🔴 EL OOM ERA MI CURA DEL REFRESCO — Y EL ERROR FUE DE PROCESO, NO DE CÓDIGO
+
+**El control que lo cierra, y es más fuerte que todo lo medido en las horas anteriores:** cinco procesos en un mismo logcat.
+
+| pid | bundle | heap |
+|---|---|---|
+| 5070 | `01a09445` (el **republicado**) | 46 MB · **1 solo GC · plano** |
+| 5591 · 6472 | `01a0965e` | 54→151 MB · 34→154 MB |
+| 7151 · 8588 | `01a0965e` | **254 y 253 MB → OOM** |
+
+**Los cuatro arranques del bundle con la cura crecieron; el del bundle sin ella quedó plano.**
+
+#### 🔴 CÓMO VOLVIÓ LO REVERTIDO
+
+La reversión se hizo con **`eas update:republish`** — sirve un bundle viejo desde el **canal** y **deja el repo intacto**. Una hora después publiqué la cura de las fugas **desde `main`**, que todavía tenía la cura del refresco encima, **y la reintrodujo.** Medido: `a421a66a` es ancestro de `d2711c26`; no lo es de `1de103fa`.
+
+> **Una reversión que vive en un solo lado no es una reversión: es una pausa que nadie apuntó.**
+
+⚠️ **Es `D-662` exacta —dos versiones de la verdad, y sólo se movió una— y la escribió quien la cometió, el día anterior.** *Eso es lo que prueba que recordarlo no alcanza:* quien publicó tenía el comando de ancestría a mano y la ficha escrita. ⇒ **`verify:reversion-no-vuelve`**, con `.commits-revertidos` como su lista.
+
+#### ⚠️ LA PREGUNTA QUE QUEDA ABIERTA, Y NO SE CIERRA CON EL REVERT
+
+**No sabemos POR QUÉ la cura del refresco asignaba ~20 MB/s en el heap de Java.** El revert quita el síntoma; no explica el mecanismo. *Cuatro intentos de refresco no deberían asignar nada parecido a eso — y mientras no sepamos por qué, no sabemos qué OTRA cosa puede hacerlo* (founder).
+
+🔴 **Condición para reintentarla algún día: entender el mecanismo primero.** Su línea en `.commits-revertidos` sólo se retira con firma del founder.
+
+**Y lo que se pierde con el revert, declarado:** vuelve `D-1074` en su forma original (2 intentos en 40 s + enfriamiento de 60 s) y **se retira `estadoDeSesion()`** — sin `refrescoCaidoHace()` no tenía con qué distinguir `cortada` de `viva`, *y una señal que siempre dice `viva` es peor que ninguna.*
+
+#### Lo que se conserva, verificado en el aparato
+
+**La cura de las fugas queda**: tu logcat sobre `3205e708` dio **cero `was leaked`**. Es la única pieza del episodio verificada contra el aparato.
+
+#### Las tres hipótesis que la medición mató por el camino
+
+| hipótesis | quién la tenía | qué la mató |
+|---|---|---|
+| el techo rompe el reintento del SDK | A | `fetch.js:124` envuelve todo en `AuthRetryableFetchError` |
+| **doble inicialización de WebRTC** | A | **cinco PIDs distintos, un init cada uno** |
+| el ritmo de 3 s es nuestro | los dos | **era Instagram** — 55 resoluciones contra nuestras 27 |
+
+*La segunda y la tercera son de la misma familia: un patrón bonito en un log COMPARTIDO no es un patrón de tu app hasta que se filtra por proceso.*
+
+---
+
+### ✅ LA FUGA DE CONEXIONES — CERRADA EN EL APARATO
 
 **El founder corrió `adb logcat` y trajo el literal (12-sep, 09:51):**
 

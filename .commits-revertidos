@@ -1,0 +1,23 @@
+# LO REVERTIDO QUE NO PUEDE VOLVER AL ÁRBOL — `D-1074`
+#
+# 🔴 POR QUÉ EXISTE. Una reversión de OTA se hace con `eas update:republish`:
+#    sirve un bundle viejo desde el CANAL y **deja el repo intacto**. El
+#    siguiente publish sale de `main`, que nunca se enteró, y **deshace la
+#    reversión en silencio**. Pasó el 12-sep-2026 y costó cuatro procesos
+#    muertos por OOM antes de que un control de cinco PIDs lo dijera.
+#
+#    *Una reversión que vive en un solo lado no es una reversión: es una pausa
+#    que nadie apuntó.*
+#
+# 🔴 POR QUÉ SE MIDE POR CONTENIDO Y NO POR ANCESTRÍA — y lo cazó el propio
+#    gate en su primera corrida: **`git revert` deja el commit original como
+#    ancestro PARA SIEMPRE.** Un gate por ancestría daría rojo eternamente
+#    después de revertir, y *un gate permanentemente rojo se apaga* — con lo
+#    cual el defecto que vino a vigilar queda sin vigilancia. Se vigila la
+#    MARCA del cambio, que es lo que de verdad no puede volver.
+#
+# FORMATO:  <sha> :: <marca regex> :: <rutas> :: <por qué>
+#   (separador `::` y no `|`: la marca ES una regex y necesita el pipe)
+# Sacar una línea exige firma del founder: significa que el defecto se entendió.
+
+a421a66a :: refrescoCaidoHace|marcarRefrescoSano|estadoDeSesion|'refresco' :: packages/api/src :: D-1074 · el techo corto del refresco: su aritmética era correcta (2 intentos en 40s vs 4 en 33s, medido contra el SDK) y en el aparato asignaba ~20MB/s en el heap de Java hasta OOM a los 2min25s. Control: 5 PIDs, los 4 con la cura crecieron, el de sin ella quedó plano. NO vuelve hasta entender el mecanismo.
