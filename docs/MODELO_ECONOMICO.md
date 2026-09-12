@@ -1,4 +1,5 @@
 # MODELO_ECONOMICO.md — e-PetPlace (Ecuador)
+**v1.2 · 12 de septiembre de 2026 (S115-CIERRE) — §6: DeUna medido (cierra la primera pregunta abierta), la retención declarada CAJA y no costo, la regla de paso de fase firmada, y lo que el objeto todavía no hace.**
 **v1.1 · 10 de septiembre de 2026 · mesa + founder.** (v1.0 misma fecha: despensa al 12 % y base de costos incompleta — superada por firma del founder.) Reemplaza las hipótesis económicas del MODELO_FINANCIERO v2.9 (§2.2 mapa de revenue, §3.1 fórmula, 8.1) por lo medido: calculadora de Nuvei, RUC de Satori Inov, normativa verificada. El contrato técnico del ledger no cambia; cambian los NÚMEROS que `fee_configs` guarda y quién paga qué. Calculadora viva: `MODELO_ECONOMICO_EPETPLACE_v1.1.xlsx` (todo lo amarillo es supuesto a reemplazar).
 
 > **➕ ENMIENDA S115-A (10-sep-2026) — EL CARRITO MIXTO, LA BASE CERO Y LA FECHA QUE RIGE.**
@@ -129,7 +130,7 @@ Sin sueldo del founder — lo asume aparte. Todo esto vive en la calculadora y s
 
 **Break-even con el modelo propuesto** (contribución promedio ~$3,17/transacción con la mezcla de lanzamiento): F&F ~610 transacciones/mes (~200 familias a 3 compras/mes); Operación ~2.020/mes (~670 familias). Con 200 Prime y 100 planes de prestador, Operación baja a ~1.400. Caja consumida el primer año: ~$45.000 con este modelo, ~$57.000 con el 10 % de hoy. **Ningún porcentaje de comisión razonable alcanza el break-even de Operación en el primer año** — lo mueven la mezcla de pago (cada punto que sale de tarjeta de crédito vale ~4 % del ticket) y los ingresos no transaccionales.
 
-**Regla de paso de fase (pendiente de firma):** la fase Operación no se enciende por calendario sino por tracción — cuando ~100 familias hayan comprado tres meses seguidos. Pagar CAC antes de tener repetición medida es comprar familias que se van.
+**Regla de paso de fase** ~~(pendiente de firma)~~ **✅ FIRMADA 12-sep-2026 — ver §6.3:** la fase Operación no se enciende por calendario sino por tracción — cuando ~100 familias hayan comprado tres meses seguidos. Pagar CAC antes de tener repetición medida es comprar familias que se van.
 
 ## 4. Lo que hay que decirle a la cohorte esta semana
 
@@ -139,9 +140,56 @@ El precio que declaran es **sin IVA** y es su precio; la app le suma el IVA que 
 
 | Pregunta | Dueño | Cambia |
 |---|---|---|
-| Costo real de DeUna y si retiene renta/IVA | Carlos Ochoa (DeUna) | La mezcla y la caja |
+| ~~Costo real de DeUna y si retiene renta/IVA~~ ☠️ **CERRADA 12-sep-2026 → §6.1: 2 % + IVA, no retiene, transfiere el 100 %** | Carlos Ochoa (DeUna) | La mezcla y la caja |
 | Precio por mensaje utility de WhatsApp en Ecuador | Panel de Meta (founder) | $0,05/tx arriba o abajo |
 | Devolución de IVA retenido: plazo real, requisitos | Contador | Capital de trabajo |
 | Si Satori es «mercado en línea» solo por la parte agencia y cómo se declara | Contador | Retenciones a clínicas |
 | Tickets y precios reales de la cohorte | Relevamiento (founder + Karina) | Toda la hoja UE |
 | Costo mensual real de Supabase, Anthropic, Resend | Facturas del mes | Fijos |
+
+---
+
+## 6. ENMIENDA S115-CIERRE (12-sep-2026) — el riel barato deja de ser hipótesis, y la caja deja de confundirse con el costo
+
+### 6.1 DeUna, medido — **cierra la primera pregunta abierta de §5**
+
+| dato | valor |
+|---|---|
+| Costo | **2 % + IVA** sobre el cobro |
+| Retención de renta | **NO retiene** |
+| Retención de IVA | **NO retiene** |
+| Transfiere | **el 100 %** |
+
+**Lo que esto cambia, y no es chico:** contra el **6,35 % + $0,05** de la tarjeta de crédito corriente (hecho 1 de §1), DeUna cuesta **menos de un tercio** — y encima **no toca la caja**, porque no retiene nada.
+
+⇒ **`D-D` («riel barato por diseño») pasa de preferencia a aritmética.** Poner DeUna primero en el checkout no es una opinión de producto: es la diferencia entre un paseo de $10 que deja margen y uno que no.
+
+⚠️ **Y su condición, declarada:** este dato **no cierra el riel**, lo cierra la adopción. *Un riel más barato que nadie elige no baja ningún costo* — la mezcla real se mide con las primeras compras de la cohorte, no acá.
+
+### 6.2 🔴 LA ADVERTENCIA QUE CAMBIA EL MODELO: LA RETENCIÓN ES **CAJA**, NO **COSTO**
+
+Las emisoras retienen **2 % de renta** sobre la base y **30 % (bienes) / 70 % (servicios) del IVA** de cada cobro con tarjeta (hecho 2 de §1).
+
+**Esa plata NO SE PIERDE: se adelanta.** La retención de renta es crédito contra el impuesto anual; la de IVA es crédito contra la declaración mensual.
+
+🔴 **Meterla como costo en el margen es contarla dos veces y da un margen falsamente malo. Ignorarla en la caja es quedarse sin plata para pagar la nómina.** *Son dos errores opuestos, y el modelo se equivoca en uno u otro según dónde la ponga.*
+
+⇒ **Regla:** la retención **entra en la proyección de CAJA** (`Caja_retenciones`, `D-E`) y **NO entra en el margen de contribución**. **El take rate efectivo y el margen se calculan sobre lo devengado, no sobre lo cobrado.**
+
+⚠️ **Lo que sigue abierto y decide cuánto capital de trabajo hace falta:** el **plazo real de devolución del IVA retenido** — sigue en §5 con el contador como dueño. *Mientras no tenga número, la caja se presupuesta con el plazo pesimista: quedarse corto acá no es un error de planilla, es no poder pagar.*
+
+### 6.3 La regla de paso de fase — **firmada** (pasa de «pendiente de firma» a decisión)
+
+**La fase Operación no se enciende por calendario: se enciende por TRACCIÓN.** El disparo son **~100 familias que hayan comprado tres meses seguidos**.
+
+*La razón es que la base de costos salta de **$1.936** a **$6.402** mensuales —más de 3×— y un salto así atado a una fecha se paga aunque la tracción no haya llegado.* **Una fecha no genera ingresos; cien familias que repiten, sí.**
+
+### 6.4 ⚠️ Lo que este documento dice y el objeto TODAVÍA no hace
+
+*Medido el 12-sep-2026; se declara para que nadie lea este modelo como si ya estuviera corriendo.*
+
+- **Las comisiones de este documento (18 / 15 / 12) están cargadas en `fee_configs` con vigencia `2026-10-01`. Hoy rige el 10 %.** Ver `MODELO_FINANCIERO` §2.2bis, con su comando.
+- **`E-A` (el mínimo del carrito mixto por MAYOR BASE) no está construido.** `resolver_comision_despensa()` no mira categoría, no devuelve mínimo y **no tiene un solo consumidor**.
+- **`tarifa_servicio` existe y está en promoción a $0 hasta el `2026-12-31`** (`app_config.tarifa_servicio_promo_hasta`). El ingreso que este modelo le atribuye **empieza a entrar en 2027**, no en octubre.
+- **La contribución de ~$3,17/transacción del break-even supone la tarifa cobrada.** Con la promo vigente, la contribución real de F&F es menor y **el break-even de esa fase es más alto que el publicado**. *No se recalcula acá porque el número nuevo exige la mezcla real de rieles, que todavía no existe — se declara en vez de estimarse.*
+
