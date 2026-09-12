@@ -30,6 +30,7 @@
 
 | qué | dueño | qué lo destraba |
 |---|---|---|
+| 🔴 **EL GATE EN EL APARATO DEL ÚLTIMO OTA** — cliente `66683587` · prestador `3e1df302`, ancla `5d83a413` | **founder** | Enchufar el cable y abrir la app **dos veces** (la 1ª descarga, la 2ª aplica). **Lo verificado es el bundle ANTERIOR** (`d181f9b8`): la cura de `D-1074` verde, 19-20 MB planos a los 120 s. **Este bundle agrega el trabajo de C mergeado** —checkout, sección de facturación, diccionarios— **y ese código no lo caminó nadie**. *typecheck y gates verdes, pero ninguno mira una pantalla* (regla 77). |
 | 🔴 **WhatsApp caído (93 %)** · 28 `sin_plantilla_resuelta` + 12 `ensamblado_incompleto:null` | **quien tenga el canal** | **Falla ANTES de Meta** ⇒ no espera a nadie de afuera: falta resolver la plantilla y completar el ensamblado. *Es el hallazgo más accionable de esta tanda.* |
 | 🔴 **`F1`: ¿puede Satori revender un servicio de salud animal?** | **contador** | Su respuesta. **Es la única razón por la que el acto veterinario va en agencia** — sin ella, la agencia por acto es una cobertura, no una conclusión |
 | 🔴 **`D-1083`** las huérfanas + el reconciliador | **founder + A** | La firma ya está (se **adoptan**, sólo lo NUESTRO; los duplicados por nota de crédito). Falta construir el reconciliador. Evidencia nueva: **4 `invoice.authorized` → `documento_no_encontrado`** |
