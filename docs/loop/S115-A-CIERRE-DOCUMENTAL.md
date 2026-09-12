@@ -28,9 +28,14 @@
 
 *Sin optimismo. Lo que no tiene fecha, no tiene fecha.*
 
+> ✅ **CERRADO EL 12-sep-2026 · EL GATE EN EL APARATO DEL ÚLTIMO OTA.** Corrido sobre `R5CY201ZDVL`, APK **1.0.7 de producción**, con el ciclo de dos arranques.
+> **El bundle se confirmó contra el OBJETO, no se asumió:** el marcador de `L-160` dijo `01a09711-0d87-7967…` (cliente) y `01a09711-e3be-7a84…` (prestador), y los dos **coinciden con el id android de sus groups** `66683587` y `3e1df302` (`eas update:view --json`). *Un arranque que no aplicó es indistinguible de uno que aplicó y no falló.*
+> **Resultado:** cliente **21 MB planos a los 120 s** · prestador **7 MB planos a los 100 s** · **cero errores de JS** en el arranque. **La cura de `D-1074` se sostiene con el trabajo de C adentro.**
+>
+> ⚠️ **Lo que este gate NO cubre, y por eso no dice «pasado entero» (regla 77):** midió que **la app vive y no crece**. **No caminó las pantallas** que el merge cambió —checkout, Cuenta → Tus facturas— y eso **es del founder**: *ningún instrumento mira una pantalla.*
+
 | qué | dueño | qué lo destraba |
 |---|---|---|
-| 🔴 **EL GATE EN EL APARATO DEL ÚLTIMO OTA** — cliente `66683587` · prestador `3e1df302`, ancla `5d83a413` | **founder** | Enchufar el cable y abrir la app **dos veces** (la 1ª descarga, la 2ª aplica). **Lo verificado es el bundle ANTERIOR** (`d181f9b8`): la cura de `D-1074` verde, 19-20 MB planos a los 120 s. **Este bundle agrega el trabajo de C mergeado** —checkout, sección de facturación, diccionarios— **y ese código no lo caminó nadie**. *typecheck y gates verdes, pero ninguno mira una pantalla* (regla 77). |
 | 🔴 **WhatsApp caído (93 %)** · 28 `sin_plantilla_resuelta` + 12 `ensamblado_incompleto:null` | **quien tenga el canal** | **Falla ANTES de Meta** ⇒ no espera a nadie de afuera: falta resolver la plantilla y completar el ensamblado. *Es el hallazgo más accionable de esta tanda.* |
 | 🔴 **`F1`: ¿puede Satori revender un servicio de salud animal?** | **contador** | Su respuesta. **Es la única razón por la que el acto veterinario va en agencia** — sin ella, la agencia por acto es una cobertura, no una conclusión |
 | 🔴 **`D-1083`** las huérfanas + el reconciliador | **founder + A** | La firma ya está (se **adoptan**, sólo lo NUESTRO; los duplicados por nota de crédito). Falta construir el reconciliador. Evidencia nueva: **4 `invoice.authorized` → `documento_no_encontrado`** |
