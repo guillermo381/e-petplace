@@ -33473,6 +33473,135 @@ adb logcat | grep -iE "lowmemorykiller|am_kill|ANR in|Reason:|FATAL EXCEPTION"
 
 ---
 
+## `D-1074` · EL GUION DE LA CORRIDA QUE CIERRA (escrito 12-sep-2026, para retomar sin re-razonar)
+
+🔴 **EL EJE NUEVO, y es del founder — reencuadra la ficha entera y descarta tres hipótesis sin gastar una corrida:**
+
+> *«Falla EXACTAMENTE UNA VEZ: el arranque en que se APLICA el bundle nuevo. Reinicio, y a partir de ahí funciona siempre con ese mismo bundle.»*
+
+De ahí salen tres descartes que **no hace falta medir**, porque el patrón ya los contradice:
+
+| Hipótesis | Por qué cae con este patrón |
+|---|---|
+| Almacenamiento acumulado (AsyncStorage crecido) | Fallaría **siempre**, no una vez |
+| Un bucle de la app | **No se curaría reiniciando** — el bucle volvería |
+| El bundle nuevo en sí | El **mismo** bundle anda perfecto en el arranque siguiente |
+
+⇒ Es algo que ocurre **sólo en el arranque que aplica**, y una única vez. *Eso también explica por qué cinco publishes seguidos podían pasar sin incidente y el sexto no: lo que decide no es el contenido del bundle, es si ese arranque aplicó uno.*
+
+⚠️ **Y de paso corrige dos lecturas mías que llegaron a esta ficha como causas y eran víctimas:** `okhttp3…Http2Reader.nextFrame` y `nativeGetString` son las pilas **del instante del OOM** — dicen dónde estaba el hilo cuando faltó memoria, no quién la consumió. *Es la tercera vez que esta ficha cobra la misma confusión.*
+
+---
+
+### ② LA PREGUNTA QUE VA PRIMERA (orden del founder, y tiene razón en que nadie la hizo)
+
+**El heap arranca YA en 158 MB en una app recién abierta. ¿Qué ocupa 158 MB antes de cualquier bucle?**
+
+🔴 **Y hay una respuesta candidata que invalidaría media ficha, así que va antes que todo lo demás: ese 158 NO es necesariamente memoria asignada.** El vigía (`scripts/s115/vigilar-heap.sh:34`) lee la línea `Java Heap:` del **App Summary** de `dumpsys meminfo` — y ese renglón es la **suma de `Dalvik Heap` + `.art mmap`**. `.art mmap` es la imagen de ART y los datos de clases: **archivo mapeado, compartido, y NO cuenta contra el límite de asignación que lanza `OutOfMemoryError`**.
+
+⇒ *Puede que el piso de 158 MB sea casi todo `.art mmap` y que el número que de verdad se llena sea mucho más chico.* Si es así, veníamos mirando el termómetro equivocado toda la noche.
+
+**Cómo se parte, sin build nueva y sin dump** — las dos líneas van en el paso 0 del guion:
+
+```
+adb -s <serial> shell dumpsys meminfo com.epetplace.cliente
+```
+y se leen, del detalle (no del resumen): `Dalvik Heap` · `Dalvik Other` · `.art mmap` · `.so mmap` · `.dex mmap` · `.oat mmap` · `Native Heap` · `Graphics` · `Unknown`.
+
+```
+adb -s <serial> logcat -d | grep -E "^.*art *:.*GC freed" | tail -20
+```
+La cola de cada línea dice `…, X% free, YYYMB/ZZZMB, paused …` ⇒ **`YYY/ZZZ` es el heap Dalvik real (usado/reservado), y ÉSE es el que lanza el OOM.** Es el número que hay que vigilar, no el del resumen.
+
+⚠️ Del mismo `dumpsys meminfo`, el bloque `Objects` decide otra cosa y es gratis: **`AppContexts`, `Activities`, `Assets`, `AssetManagers`, `Views`.** *Si alguno aparece DUPLICADO en el arranque que aplica y normal en el siguiente, «hay dos de todo» deja de ser hipótesis.*
+
+---
+
+### ① EL GUION, EN ORDEN, CON LO QUE DECIDE CADA PASO
+
+**Precondición: cable puesto, un solo emulador/teléfono, `adb -s <serial>` en todos los comandos** (regla de la casa: sin `-s` el comando se va al dispositivo de otra pista).
+
+**Paso 0 — Partir el piso.** Las dos lecturas de arriba, con la app recién abierta y **sin** update pendiente.
+· **Decide:** si el 158 MB es asignación o es `.art mmap`. Si es lo segundo, el «piso enorme» deja de ser un defecto y el objetivo pasa a ser el delta.
+
+**Paso 1 — Forzar «update pendiente» de forma repetible.** Receta abajo, en su propia sección.
+· **Decide:** nada todavía; monta el experimento.
+
+**Paso 2 — EL DISCRIMINADOR (el que el founder puede correr solo, y el que puede cerrar la ficha sin dump).**
+Tres arranques seguidos, midiendo en los tres:
+| Arranque | Qué hace | Qué se espera si la hipótesis es cierta |
+|---|---|---|
+| **1** | corre el bundle viejo, **descarga** el nuevo en segundo plano (~4,4 s medidos) | normal |
+| **2** | **aplica** el bundle nuevo por primera vez | **el arranque enfermo** |
+| **3** | corre el MISMO bundle, ya aplicado | normal |
+
+🔴 **Arranques 2 y 3 corren EL MISMO BUNDLE. La única variable es «aplicar».** Por eso este par prueba o mata la hipótesis sin ningún dump.
+· **Decide:** si 2 arranca alto y 3 arranca bajo ⇒ **mecanismo localizado en el acto de aplicar**, y la ficha pasa de «abierta» a «acotada al arranque de aplicación». Si los dos arrancan igual ⇒ la hipótesis del founder cae y **recién ahí la build se vuelve obligatoria**.
+
+**Paso 3 — Sólo si el paso 2 discrimina: nombrar QUÉ se duplica.**
+Con el bloque `Objects` de los arranques 2 y 3 lado a lado, más el log de expo-updates de ese arranque:
+```
+adb -s <serial> logcat -d | grep -iE "expo-updates|EXUpdates|Reaper|Launcher|embedded" | tail -40
+```
+· **Decide:** si hay un `AppContexts`/`AssetManagers` de más, o si el log muestra trabajo de disco que sólo ocurre ahí (verificación de hashes, copia de assets, **barrido del update viejo**), el mecanismo tiene nombre y la cura se diseña contra él.
+· ⚠️ **Candidato nombrado y NO medido:** expo-updates borra el update anterior y sus assets **en el arranque posterior a cargar uno nuevo**. Es trabajo de disco + SQLite, ocurre exactamente una vez, no hace red, no loguea en JS y se cura al reiniciar. **Encaja con todo el patrón — y por eso mismo hay que medirlo antes de creerle.**
+
+**Paso 4 — El pulso, si hace falta descartar la app.** `7ea871c1`, **commiteado y SIN publicar**: cuenta peticiones por ruta y cruces al puente de AsyncStorage cada 10 s, sin imprimir un solo valor. *Su brazo de puente es el único instrumento que puede ver un bucle que lee del almacenamiento y no sale a la red — el único compatible con las CERO resoluciones de DNS.*
+· **Decide:** si los dos brazos salen en cero durante el crecimiento, **el consumo no es de nuestro JS** y queda del lado nativo/expo-updates.
+
+**Paso 5 — El dump, sólo si los anteriores no cerraron.** Requiere la decisión ③. Parser ya escrito: `scripts/s115/leer-hprof.py` (top 25 clases por bytes; mide lo que **ocupa**, no lo que **retiene**).
+
+---
+
+### CÓMO FORZAR «CON UPDATE PENDIENTE» DE FORMA REPETIBLE (lo que el founder pidió para correr solo)
+
+El canal tiene historia: cualquier group viejo sirve de segundo estado. Con dos groups **A** y **B** se alterna infinitas veces, y **`republish` no toca el repo** (ya medido en esta ficha).
+
+```
+cd apps/cliente                      # eas-cli SIEMPRE desde apps/<app>/
+npx eas-cli update:list --branch preview       # elegir A (el vigente) y B (cualquier anterior)
+npx eas-cli update:republish --group <B>       # el canal pasa a servir B
+```
+
+Luego, en el teléfono:
+
+1. **Abrir la app** → corre A, descarga B en segundo plano. Esperá ~10 s y **cerrala del todo** (deslizar de recientes, no sólo al fondo).
+2. 🔴 **MODO AVIÓN ON.** *Saca la red de los dos arranques que se van a comparar: el update ya está en disco y se aplica igual. Y de paso vuelve a probar, gratis, que el defecto no necesita red.*
+3. **Abrir** → **arranque 2, el que aplica.** Medir. Cerrar del todo.
+4. **Abrir** → **arranque 3, el control.** Medir. Cerrar.
+5. **Modo avión OFF.** Para repetir: `update:republish --group <A>` y volver al punto 1.
+
+**Cómo confirmar que el arranque 2 fue de verdad el que aplicó** (no se asume, se lee): el marcador de `L-160` en **Cuenta → el pie** dice `update <8 chars> · <canal>` — en el arranque 2 tiene que mostrar el id de **B** y en el 1 el de **A**. *Sin esa confirmación el experimento no vale: un arranque que no aplicó es indistinguible de uno que aplicó y no falló.*
+
+⚠️ **Lo que NO sirve para forzarlo:** borrar datos de la app (arrastra la sesión y el almacenamiento, cambia dos variables a la vez) ni reinstalar el APK (vuelve al bundle embebido, que es un tercer estado).
+
+---
+
+### ③ LA DECISIÓN SERVIDA PARA FIRMAR: ¿VALE UNA BUILD?
+
+**No son una sino DOS cosas distintas, y sólo una sirve — la trampa está en que se llaman igual:**
+
+**(a) El perfil `development` que ya existe** (`developmentClient: true`). **NO sirve para este defecto, y es importante decirlo porque es lo que uno pide por reflejo.** Corre el JS desde Metro, sin minificar, con herramientas de desarrollo: **es otra app**, con otro perfil de memoria. Y lo definitivo: **un dev client no aplica updates del canal** ⇒ *el arranque que queremos medir no existe ahí.* Mediría cualquier cosa menos esto.
+
+**(b) Un APK de RELEASE con `android:debuggable=true`.** Mismo bundle de producción, mismo Hermes, **mismo camino de expo-updates** — y habilita `adb run-as` y `am dumpheap`. **Ésta es la que sirve.**
+· **Costo:** un perfil nuevo en `apps/cliente/eas.json` + una rama en `app.config.ts` que agregue el atributo bajo una variable de entorno, un build de EAS (~20 min de nube) y una instalación por cable.
+· 🔴 **Riesgo declarado, y no es menor:** `debuggable=true` **cambia el runtime de ART** — desactiva optimizaciones de JIT y mueve el comportamiento del GC y del tamaño del heap. ⇒ **sirve para nombrar QUÉ objetos ocupan, que es justo lo que falta; NO para confiar en el número absoluto.** *Una build que mide distinto no es inútil: es inútil si uno se olvida de que mide distinto.*
+
+**Mi voto, con su razón:** **(b) SÍ, pero DESPUÉS del paso 2.** Si el discriminador de los tres arranques separa 158 de 40, el mecanismo queda acotado sin dump y la build se ahorra entera. Si no separa, la build deja de ser opcional y se pide sin discutir. *Gastar veinte minutos de nube para responder algo que dos arranques pueden responder es el orden al revés — y el precedente de esta misma noche es que cada vez que medimos antes de construir, el trabajo se achicó.*
+
+---
+
+### LO QUE QUEDA DECLARADO AL CERRAR LA NOCHE
+
+- **`D-1074` sigue ABIERTA con el mecanismo sin nombre**, ahora **acotada** al arranque que aplica un update. **Bloquea producción.**
+- **`D-1085`** abierta.
+- **La sonda del censo de AsyncStorage está PUBLICADA** — group `8a708b54`, ancla `3ae0b08f`, runtime 1.0.7, árbol limpio verificado con `git status --porcelain` antes de bundlear. ⚠️ **Con el eje nuevo puesto, su valor bajó**: el patrón «falla una vez» ya descarta el almacenamiento acumulado. *Se lee igual porque ya está en el teléfono y es gratis, pero no es el camino.*
+- **El pulso está COMMITEADO Y SIN PUBLICAR** (`7ea871c1`). *Se publica sólo si el paso 2 no cierra — y publicarlo cuesta exactamente un arranque de los que fallan, así que no se hace por las dudas.*
+- **El encargo de documentación sigue FRENADO** por orden del founder.
+
+
+---
+
 ## `D-1075` 🔴 — `obligadoContabilidad = NO` EN UN XML AUTORIZADO, Y SATORI SÍ LO ESTÁ
 
 **Estado:** ABIERTA · **lo más urgente de la tanda.** **Dueño:** founder (panel de Factuplan) + A (verificación).
