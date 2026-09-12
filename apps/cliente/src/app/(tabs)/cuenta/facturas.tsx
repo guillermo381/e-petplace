@@ -104,6 +104,15 @@ const ESTADO_TARJETA: Record<EstadoVisibleFiscal, EstadoFactura | null> = {
   con_problema: 'corrigiendo',
   faltan_tus_datos: null,
   anulada: null,
+  /* 🔴 ENTRADA PUESTA POR A (S115-A), y la mínima a propósito: ensanché
+     `EstadoVisibleFiscal` con `la_emite_el_vendedor` —en agencia factura el
+     vendedor y hasta hoy eso se mostraba como «preparando», que es una mentira
+     con cara de paciencia— y **tu mapa exhaustivo lo atrapó, que es justo para
+     lo que lo escribiste.** Va `null` siguiendo tu convención: la pieza no lo
+     expresa todavía y **la decisión visual es tuya, no mía**. Lo puse sólo
+     porque `main` quedaba en rojo por MI cambio; es lo único que toqué de tu
+     territorio. El motivo viaja en `motivoVisible: 'la_factura_el_vendedor'`. */
+  la_emite_el_vendedor: null,
 };
 
 type Carga = 'cargando' | 'error' | DocumentoFiscalMio[];
