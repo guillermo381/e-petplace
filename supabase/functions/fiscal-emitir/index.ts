@@ -132,10 +132,37 @@ Deno.serve(async (req) => {
          real.* Medido en el e2e: cuatro corridas, cuatro POST. */
       if (d.referencia_proveedor && d.estado === 'emitiendo') {
         const c = await puerto.consultarEstado(d.referencia_proveedor);
+
+        /* 🔴 LA CONSULTA TRAÍA LOS ARCHIVOS Y LOS TIRABA. `consultarEstado`
+           devuelve `xml` y `ride` cuando el comprobante está autorizado —los
+           baja en el mismo viaje— y este camino sólo miraba el estado. *El
+           archivado vivía SÓLO en el webhook, así que con la firma sin validar
+           el comprobante quedaba autorizado y sin respaldo, y nada lo decía.*
+           Y no se puede posponer: el enlace del proveedor es una pre-firmada de
+           S3 que vive CINCO MINUTOS. */
+        const extra: Record<string, unknown> = {};
+        if (c.xml) {
+          const ruta = `${d.id}/comprobante.xml`;
+          await db.storage.from('fiscal').upload(
+            ruta, new Blob([c.xml], { type: 'application/xml' }), { upsert: true });
+          extra.xml_url = ruta;
+        }
+        if (c.ride) {
+          const ext = c.ride.mime === 'application/pdf' ? 'pdf' : 'html';
+          const cuerpo = c.ride.base64
+            ? Uint8Array.from(atob(c.ride.contenido), (ch) => ch.charCodeAt(0))
+            : c.ride.contenido;
+          const ruta = `${d.id}/ride.${ext}`;
+          await db.storage.from('fiscal').upload(
+            ruta, new Blob([cuerpo], { type: c.ride.mime }), { upsert: true });
+          extra.pdf_url = ruta;
+        }
+
         await exigeUnaFila(db.from('documentos_fiscales').update({
           estado: c.estado,
           motivo_rechazo: c.motivo ?? null,
           ...(c.autorizado_en ? { autorizado_en: c.autorizado_en } : {}),
+          ...extra,
         }).eq('id', d.id).select('id'), 'consulta_estado');
         const { data: f } = await db.from('documentos_fiscales')
           .select('estado,secuencial').eq('id', d.id).maybeSingle();
