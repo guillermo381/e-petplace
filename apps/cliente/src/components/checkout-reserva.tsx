@@ -537,7 +537,9 @@ export function CheckoutReserva({
             `if` contra ese número, y sin él la sección no puede decidir cuál
             de los dos mostrar. */}
         {facturacion.props === null ? (
-            facturacion.noCargo ? <AvisoNoCargo onReintentar={facturacion.reintentar} /> : null
+            facturacion.noCargo || facturacion.reintentando ? (
+              <AvisoNoCargo onReintentar={facturacion.reintentar} reintentando={facturacion.reintentando} />
+            ) : null
           ) : (
           <SeccionFacturacion {...facturacion.props} total={precio} />
         )}
