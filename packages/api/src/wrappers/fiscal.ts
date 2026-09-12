@@ -277,3 +277,72 @@ export async function fiscalDeclararMedioDePago(args: {
   }
   return { ok: true, data: { medio: String(r.medio), codigoSri: String(r.codigo_sri) } };
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// QUIÉN EMITE — el EMISOR, que no es el receptor
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface EmisorDeLaCompra {
+  modelo: 'reventa_pura' | 'marketplace_fachada';
+  /** `la_casa` = facturamos nosotros · `el_tercero` = factura el vendedor. */
+  emite: 'la_casa' | 'el_tercero';
+  razonSocial: string;
+  /** El monto de ESA parte del carrito. `null` en sujetos de una sola línea. */
+  monto: number | null;
+}
+
+export interface QuienEmite {
+  emisores: EmisorDeLaCompra[];
+  /** 🔴 Puede ser MÁS DE UNA: ya existe una compra real con dos emisores. */
+  cuantasFacturas: number;
+  /** Firma del founder: el correo se pide SIEMPRE, también en agencia. */
+  pedirCorreo: boolean;
+}
+
+/**
+ * Quién le va a facturar a la familia por esta compra o reserva.
+ *
+ * 🔴 ES EL EMISOR, NO EL RECEPTOR. El receptor —a quién se factura— lo resuelve
+ *    el motor solo. Esto contesta la otra mitad: **de quién va a venir el
+ *    comprobante.** Sin eso, la familia paga sin saber que su factura va a
+ *    llegar con otro nombre.
+ *
+ * 🔴 DEVUELVE UNA LISTA, y no es precaución: medido el 11-sep-2026, **ya existe
+ *    una compra con pedidos de dos cuentas y dos modelos**, y nada en el
+ *    esquema lo impide. Una compra mixta produce DOS facturas de DOS emisores,
+ *    y la pantalla tiene que poder decir «vas a recibir dos facturas» antes de
+ *    cobrar.
+ *
+ * 🔴 Y `pedirCorreo` viene del servidor en `true` SIEMPRE — firma del founder:
+ *    *la familia necesita su comprobante venga de quien venga; lo que cambia es
+ *    quién lo manda, no si hace falta.* Viaja como dato para que ninguna
+ *    pantalla lo deduzca del modelo.
+ */
+export async function fiscalQuienEmite(args: {
+  origenTipo: 'compra' | 'cita' | 'bono' | 'suscripcion' | 'programa' | 'guarderia';
+  origenId: string;
+}): Promise<ResultadoWrapper<QuienEmite>> {
+  const { data, error } = await getClient().rpc('fiscal_quien_emite', {
+    p_origen_tipo: args.origenTipo, p_origen_id: args.origenId,
+  });
+  if (error) return fallo(codigoDe(error.message), 'No pudimos ver quién emite la factura.');
+  const r = data as Record<string, unknown>;
+  if (!r?.ok) {
+    return { ok: false, codigo: String(r?.codigo ?? 'no_se_pudo'),
+             mensaje: 'No pudimos ver quién emite la factura.' };
+  }
+  const lista = (r.emisores as Array<Record<string, unknown>>) ?? [];
+  return {
+    ok: true,
+    data: {
+      emisores: lista.map((e) => ({
+        modelo: e.modelo as EmisorDeLaCompra['modelo'],
+        emite: e.emite as EmisorDeLaCompra['emite'],
+        razonSocial: String(e.razon_social ?? ''),
+        monto: e.monto == null ? null : Number(e.monto),
+      })),
+      cuantasFacturas: Number(r.cuantas_facturas ?? lista.length),
+      pedirCorreo: Boolean(r.pedir_correo),
+    },
+  };
+}

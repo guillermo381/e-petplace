@@ -102,3 +102,46 @@ un pago real. *Del lado del motor no falta nada: falta que la pantalla pregunte.
 paquete y plan adentro es el 46 % de los pagos. *Lo que hoy produce es un
 documento `pendiente_manual` por cada compra — no se pierde plata, pero alguien
 tiene que cerrarlos a mano, uno por uno.*
+
+---
+
+## ✅ AGREGADO 11-sep · el lector que pediste ya existe: `fiscalQuienEmite`
+
+**Es el EMISOR, no el receptor.** El receptor lo resuelve el motor solo; esto
+contesta la otra mitad: **de quién le va a llegar el comprobante a la familia.**
+
+```ts
+import { fiscalQuienEmite } from '@epetplace/api';
+
+const r = await fiscalQuienEmite({ origenTipo: 'compra', origenId });
+// r.data.emisores        → [{ modelo, emite: 'la_casa'|'el_tercero', razonSocial, monto }]
+// r.data.cuantasFacturas → 1 … N
+// r.data.pedirCorreo     → true SIEMPRE
+```
+
+### 🔴 Devuelve una LISTA, y no es precaución: ya pasó
+
+Medido: **existe una compra real con pedidos de DOS cuentas y DOS modelos
+distintos**, y **nada en el esquema lo impide** — cero constraints sobre
+`pedidos.cuenta_comercial_id` por compra. El cinturón de la migración corre
+contra **esa compra** y exige que devuelva **2**.
+
+⇒ **La pantalla tiene que poder decir «vas a recibir dos facturas»**, con el
+monto de cada una. *Si esto devolviera un valor único, el día de la primera
+compra mixta grande la mitad de la plata quedaría atribuida al emisor
+equivocado — y el error se vería perfectamente normal.*
+
+### La firma que cierra la duda del correo
+
+**El correo se pide IGUAL en agencia** (founder, 11-sep): *la familia necesita
+su comprobante venga de quien venga; lo que cambia es quién lo manda, no si
+hace falta.* Por eso `pedirCorreo` **viaja como dato desde el servidor y siempre
+en `true`** — para que ninguna pantalla lo deduzca del modelo y se equivoque.
+
+### Lo que queda ABIERTO y no decidí yo
+
+**Si la identificación (cédula/RUC) se pide también en agencia.** Nuestro tope
+gobierna lo que emitimos **nosotros**; en agencia emite el tercero y **su** tope
+es suyo. *Es interpretación fiscal, no lectura de catálogo* — el lector te da el
+modelo y el monto, y la letra decide. Hoy, sin decidir, **pedirla igual es lo
+conservador y no rompe nada.**

@@ -26515,6 +26515,10 @@ export type Database = {
           total: number
         }[]
       }
+      fiscal_quien_emite: {
+        Args: { p_origen_id: string; p_origen_tipo: string }
+        Returns: Json
+      }
       fiscal_reservar_numero: {
         Args: {
           p_canonico: Json
