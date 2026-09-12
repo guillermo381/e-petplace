@@ -148,7 +148,8 @@
     "verify:techo-vive": "tsx scripts/s115/verify-techo-vive.mjs",
     "verify:error-no-pegado": "node scripts/s115/verify-error-no-pegado.mjs",
     "verify:fee-por-fecha-servicio": "node scripts/s115/verify-fee-por-fecha-servicio.mjs",
-    "verify:rename-seguro": "node scripts/s115/verify-rename-seguro.mjs"
+    "verify:rename-seguro": "node scripts/s115/verify-rename-seguro.mjs",
+    "verify:sin-invocador": "node scripts/verify-sin-invocador.mjs"
   },
   "devDependencies": {
     "eslint": "^10.9.1",

@@ -1,0 +1,3 @@
+-- REVERSA de 20260912790000. Vuelve el lector a contar SOLO la cola del reloj.
+-- ⚠️ Revertir reintroduce el defecto: el veredicto vuelve a decir «sin cola»
+--    mientras hay facturas trabadas que nadie está mirando.
