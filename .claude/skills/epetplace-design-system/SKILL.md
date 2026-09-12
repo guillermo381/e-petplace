@@ -878,6 +878,32 @@ comprar es lo último, y lo que compra combina con TODO.*
 
 ## 3. ÍNDICE — los componentes (import de `@epetplace/ui`)
 
+> **➕ LAS PIEZAS DE LA FACTURA (S115-B) — al índice con su regla.**
+> Letra: `docs/MODELO_FISCAL.md`. **La tarifa, el tope y la fecha de promoción
+> NUNCA viven adentro de una pieza** — son datos que la ley mueve, y en Ecuador
+> el IVA ya pasó de 12 a 15 (la base conserva `subtotal_12` al lado de
+> `subtotal_15` como cicatriz). Lo vigila **`R84`**, con su brazo de fechas.
+>
+> | Export | Cuándo |
+> |---|---|
+> | `CampoIdentificacion` | **El tipo se ELIGE, jamás se adivina por el largo**: mientras alguien tipea, toda cédula pasa por ser un RUC incompleto, y un pasaporte no tiene largo. Valida **al llegar al largo y al salir**, nunca tecla por tecla. 🔴 `sinCorreo` apaga el campo **y su validación** — quien la use valida con `esCorreoValido` |
+> | `SelectorFacturacion` | **La opción apagada por el tope se ve CON SU RAZÓN, jamás escondida**: un límite invisible no se aprende, y esconderla haría que la misma persona vea dos pantallas distintas sin saber por qué. El formulario entra como `children` — la pieza no lo construye |
+> | `DesgloseCompra` | 🔴 **El IVA en CERO se dibuja; el IVA en `null` NO.** No deroga la ley del nulo (19.9): esa habla de la AUSENCIA, y acá el cero es un **hecho medido** (el alimento tributa 0 %). · La **tarifa de servicio** va ANTES del IVA —el impuesto es el penúltimo renglón— y su promoción es **unión discriminada**: una promo sin su precio tachado **no se puede escribir** |
+> | `TarjetaFactura` | 🔴 **El error del SRI es INEXPRESABLE: ni prop ni slot `ReactNode`** —el slot es por donde entraría sin llamarse motivo (`R86`)—. Los cuatro estados **miden lo mismo**: la lista no salta al cambiar. `FacturasVacio` es su vacío, **sin botón**: una factura no se crea, aparece |
+> | `CampoClaveAcceso` | **49 dígitos para PEGAR, agrupados de a cuatro como en el papel — NO son 49 cajitas.** *La forma se elige por el número, no se hereda del hermano* (`CampoCodigo` dibuja una caja por dígito y es lo correcto para 8) |
+> | `esCorreoValido` | **LA validación de correo de la casa.** Había **tres regex sueltos** en el prestador y ninguno acá; dos coincidían **por copia**. Ganó el más estricto. 🔴 **No hace `trim()` a propósito**: un correo con espacios al borde ES un correo mal escrito. `R90` impide el cuarto |
+> | `formatearPrecio` · `parsearPrecio` | **La fuente única de plata** (viven en `packages/i18n`: `ui` ya depende del riel y al revés sería ciclo). **Coma decimal y punto de miles**, igual en los dos idiomas —es el formato de los RIDE del SRI—. 🔴 `parsearPrecio` devuelve **`NaN` ante formato ajeno**, para que `Number.isFinite` vuelva a servir de guard. `R87`/`R88`/`R89` lo sostienen |
+> | `esCedulaValida` · `verificarRuc` | Los validadores del SRI. ⚠️ **ASIMÉTRICOS A PROPÓSITO, y no se «emparejan»**: en la cédula el módulo 10 **bloquea** (valida la única real y sus 90 mutaciones caen); en el RUC el dígito **sólo ADVIERTE** (falla sobre 2 de los 11 reales de sociedad privada, y uno es el nuestro). *Dos reglas distintas porque los datos son distintos* |
+> | `Tilde` | Geometría compartida, **no un glifo del registry**: un tilde no tiene objeto ni oficio ni capa. **Sin default de color** — en `Casilla` va en papel sobre fill; en un campo, en `status.successText`. ⚠️ NO se exporta desde `index.ts`, mismo criterio que `chevron` |
+>
+> 🔴 **Y una lección de contraste que vale para toda pieza nueva:** el gate tumbó
+> `status.success` (el verde PURO) sobre el interior del campo — **1,63 en
+> claro**, contra un piso de 3:1 para un glifo. **El par no estaba declarado y
+> `verify:contrast` daba VERDE con 431 pares**: *un gate de pares declarados no
+> crece con el código.* El hex puro es GRÁFICA (Ley 2) y un tilde que es la
+> única señal de que el número cerró **es funcional** ⇒ `successText`.
+
+
 > **➕ LAS PIEZAS DE LA POSTVENTA (S114-B) — al índice con su regla.**
 > Letra: `docs/DIRECCION_POSTVENTA.md`. **Cinco de las ocho no son piezas
 > nuevas: son la de despensa o la de adopción con otro vocabulario** — y eso

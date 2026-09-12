@@ -32,6 +32,35 @@
  * está atada al valor y hay que subir un nivel hasta el invariante — que casi
  * siempre es *una sola fuente*, *una sola forma*, *nadie lo escribe a mano*.
  *
+ * 🔴 **UN CENSO POR PATRÓN ACOTA, NO CIERRA — y en S115-B se cobró TRES veces
+ * en una sola sesión, siempre SUBCONTANDO y siempre con un número creíble:**
+ *   · un `grep` de `import {…} from '…'` **en una línea** perdió los imports
+ *     MULTILÍNEA ⇒ dije **5** consumidores y eran **8**. *`grep` trabaja línea
+ *     por línea; el `[^}]*` de JS cruza saltos.* **Lo cazó el gate**, corriendo
+ *     sobre el corpus real, no yo releyendo.
+ *   · un `| head -8` cortó la lista ⇒ dije **8** sitios de parseo y eran **18**.
+ *   · un detector que exigía `.test(` **pegado al literal** era ciego a la forma
+ *     «constante arriba, uso abajo» —la más común— y daba **0** sobre un caso
+ *     real. *Lo midió otra pista con un control: copió el caso a mi corpus y vio
+ *     que seguía en 0. Eso descartó «es el corpus» y dejó sólo «es la forma».*
+ *
+ * ⇒ **antes de publicar un número salido de un patrón: ¿qué FORMA de lo que
+ * busco no matchea esto?** Y si el patrón vive en un gate, su fixture **tiene
+ * que usar una forma DISTINTA de la que el autor tenía en la cabeza** — si no,
+ * pasa su propia prueba compartiendo sus supuestos (`L-459`).
+ *
+ * 🔴 **UN GATE NO TRANSPILA A MANO EL ARCHIVO QUE MIDE.** En S115-B dos
+ * controles importaban su fuente desde un `.mjs` quitando tipos con `replace`
+ * (`: string`, `as const`, …). **Se rompieron los dos** —uno con un parámetro
+ * opcional (`_idioma?`), otro con un `export interface`— y el síntoma fue un
+ * `SyntaxError` **del propio gate**, que es la forma más cara de fallar: no
+ * mide y encima parece roto él. *Un instrumento que se cae por la forma del
+ * archivo que mide está adivinando su sintaxis.*
+ * ⇒ el control se escribe en **`.ts` y corre con `tsx`**, importando el archivo
+ * REAL (`verify-plata.ts` · `verify-identificacion-ec.ts` son los moldes).
+ * **Importar el archivo vivo sigue siendo el punto** — medir la pieza y no su
+ * eco; lo que se retira es el transpilador casero del medio.
+ *
  * El exit se lee del COMANDO, jamás del pipe (L-191).
  */
 
