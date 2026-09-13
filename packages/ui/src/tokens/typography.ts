@@ -44,6 +44,36 @@ export const typography = {
       regular: 'JetBrainsMono_400Regular',
       medium:  'JetBrainsMono_500Medium',
     },
+
+    /* ═══════════════════════════════════════════════════════════════
+     * 🔴 **v5 · LAS DOS FAMILIAS DEL CLIENTE (S116, letra §1.4).**
+     * *«Baloo 2 800 para display, títulos y cifras; Plus Jakarta Sans
+     * 400/600/700 para todo lo demás»* — **deroga N1 y «la casa no
+     * titula en bold»** para la app cliente.
+     *
+     * ⚠️ **`sans` y `mono` de arriba NO se tocan, y la razón está
+     * MEDIDA, no supuesta: el PRESTADOR las consume — 64 ocurrencias en
+     * 26 archivos** (`grep -rn 'family\.sans\|family\.mono'
+     * apps/prestador/src`), más **130 en 58 piezas compartidas de
+     * `packages/ui`** que montan las dos apps. La letra §5 dice que el
+     * prestador no cambia; re-apuntar `sans` lo habría cambiado entero
+     * y en silencio.
+     * ⇒ **DM Sans NO sale del mapa en este lote.** Su disparo real:
+     * cuando el prestador tenga su propia letra, o cuando el último
+     * lector del CLIENTE migre a `display`/`texto` (censo por import).
+     * ═══════════════════════════════════════════════════════════════ */
+
+    /** Baloo 2 ExtraBold — display, títulos y cifras del cliente.
+     *  UN solo peso a propósito: la letra nombra 800 y nada más. */
+    display: {
+      extraBold: 'Baloo2_800ExtraBold',
+    },
+    /** Plus Jakarta Sans — TODO lo demás del cliente. */
+    texto: {
+      regular:  'PlusJakartaSans_400Regular',
+      semiBold: 'PlusJakartaSans_600SemiBold',
+      bold:     'PlusJakartaSans_700Bold',
+    },
   },
 
   /* ── LA ESCALA — N1 EJECUTADA POR VÍA A (firma de mesa, 14-ago-2026) ──
@@ -129,6 +159,46 @@ export const typography = {
     mono:    0.6,   // metadata mono 11-13px (≈ .04-.06em) — REGLA DE VOZ
     wide:    0.8,   // (≈ .05em @ 15px)
     widest:  1.4,   // tags — recordar: mono JAMÁS en mayúsculas
+  },
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+   * 🔴 **v5 · LA ESCALA POR ROL (S116, letra §2 — «tokens fijos; los
+   * rangos del mock se cierran acá»).**
+   *
+   * **Es una escala de ROLES, no de tamaños**, y por eso vive aparte de
+   * `size`: cada entrada trae familia + tamaño + interlínea juntos, que
+   * es exactamente lo que evita que una pantalla vuelva a decidir la
+   * jerarquía a mano — el defecto que `Texto` nació para cerrar (S71).
+   *
+   * Los DOS rangos de la letra se cierran acá con nombre, jamás con un
+   * intermedio inventado:
+   *   · «cifra Baloo 44/44 y 22/22» ⇒ `cifra` y `cifraChica`
+   *   · «apoyo PJS 400–600 12/17»   ⇒ `apoyo` (400) y `apoyoFuerte` (600)
+   *
+   * ⚠️ **El tope de la pantalla pasa de TRES a CUATRO tamaños** (§1.4).
+   * Lo mide `R39`, que se RECALIBRA — no se apaga.
+   * ═══════════════════════════════════════════════════════════════════ */
+  escala: {
+    display:    { familia: 'Baloo2_800ExtraBold',        size: 34, lineHeight: 38 },
+    titulo1:    { familia: 'Baloo2_800ExtraBold',        size: 28, lineHeight: 31 },
+    titulo2:    { familia: 'Baloo2_800ExtraBold',        size: 22, lineHeight: 26 },
+    cifra:      { familia: 'Baloo2_800ExtraBold',        size: 44, lineHeight: 44 },
+    cifraChica: { familia: 'Baloo2_800ExtraBold',        size: 22, lineHeight: 22 },
+    cta:        { familia: 'PlusJakartaSans_700Bold',    size: 16, lineHeight: 20 },
+    fila:       { familia: 'PlusJakartaSans_700Bold',    size: 14, lineHeight: 18 },
+    cuerpo:     { familia: 'PlusJakartaSans_400Regular', size: 14, lineHeight: 22 },
+    apoyo:      { familia: 'PlusJakartaSans_400Regular', size: 12, lineHeight: 17 },
+    apoyoFuerte:{ familia: 'PlusJakartaSans_600SemiBold',size: 12, lineHeight: 17 },
+    /** El antetítulo es el ÚNICO que lleva mayúsculas y tracking.
+     *  ⚠️ **No resucita el eyebrow que S52 mató**: aquel era mono +
+     *  uppercase + tracking como ESTRUCTURA DECORATIVA (Ley 18); éste lo
+     *  firma la letra §2 con su color semántico (magenta en cuerpo,
+     *  `rosaSobreCiruela` sobre ciruela), o sea que codifica una verdad
+     *  del contenido. La distinción es de FUNCIÓN, no de forma, y se
+     *  declara acá para que nadie la «corrija» citando S52. */
+    antetitulo: { familia: 'PlusJakartaSans_700Bold',    size: 11, lineHeight: 14,
+                  letterSpacing: 2, textTransform: 'uppercase' as const },
   },
 
 } as const
