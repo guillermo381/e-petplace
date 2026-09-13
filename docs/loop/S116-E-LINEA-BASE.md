@@ -388,7 +388,7 @@ Declarado para que nadie lo lea como medido.
 ## ⑤ EL ÍNDICE DE LAS CAPTURAS
 
 Viven en **`docs/loop/capturas-s116-antes/`**, una por ruta, nombradas por ruta (las barras pasan a guiones).
-**El índice con ruta · datos · SHA de cada una está en `capturas-s116-antes/INDICE.md`** — no lo repito acá para que este parte se pueda leer.
+**El índice fila por fila —archivo · ruta · con qué datos · peso— está en `capturas-s116-antes/INDICE.md`**, y el **SHA, el aparato y el bundle van en su cabecera porque son los mismos para las 118**. No lo repito acá para que este parte se pueda leer.
 
 **Convención de nombres:**
 
