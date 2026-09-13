@@ -583,7 +583,14 @@ const esAlias = (n: NombreDeIcono): n is IconoAlias => n in ALIAS
 export const canonico = (n: NombreDeIcono): IconoNombre =>
   esAlias(n) ? ALIAS[n] : n
 
-const TRAZO = 1.9
+/* 🔴 **1.8 DESDE S116-B lote 2b — firma de la mesa: «un solo trazo de 1,8
+ * para todo el set».** Venía en 1.9 desde S53 (`DIRECCION_ARTE` §1).
+ * **Se aplica a TODO el registry, las dos casas**, y eso es deliberado: un
+ * trazo por casa haría que el mismo glifo tenga dos pesos según dónde se
+ * monte, que es lo contrario de lo que la orden pide. *0,1 px no cambia
+ * ninguna lectura a 21 px; lo que cambia es que deja de haber dos números
+ * para el grosor de la casa.* */
+const TRAZO = 1.8
 
 type Pincel = { tinta: string; huella: string }
 
@@ -1416,11 +1423,25 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
       <Rect x={4.6} y={10.4} width={14.8} height={9.4} rx={2.2} {...trazo(tinta)} />
     </>
   ),
-  ayuda: ({ tinta, huella }) => (
+  /* ⏪ **REDIBUJADO S116-B lote 2b — firma de la mesa: «signo de pregunta
+   * en círculo».** Era un SALVAVIDAS (círculo + cuatro rayos rectos +
+   * huella), y el dibujo dependía de la huella para no leerse como un
+   * control náutico. **Con la letra §1.1 sacando la huella del set, el
+   * salvavidas se quedaba sin lo que lo explicaba** — cuatro rayos
+   * alrededor de un círculo vacío no dicen «ayuda»: dicen «apuntar».
+   * *No es que el dibujo viejo fuera malo: es que su sentido colgaba de
+   * una pieza que la letra retiró.*
+   * ⚠️ **EL RIESGO SE MUEVE, no desaparece:** el «?» a 21 px es un arco de
+   * 2,6 de radio más un punto, y lo que puede fallar es que el arco se
+   * cierre en un círculo. Por eso la cola baja RECTA y el punto va suelto
+   * — dos trazos que el ojo separa aunque el arco se empaste.
+   * ☠️ Muere el descarte histórico de `contactoOndas` por vecindad con
+   * este glifo: ya no comparten familia visual. */
+  ayuda: ({ tinta }) => (
     <>
       <Circle cx={12} cy={12} r={8.4} {...trazo(tinta)} />
-      <Path d="M12 3.6v3M12 17.4v3M3.6 12h3M17.4 12h3" {...trazo(tinta)} />
-      <Huella color={huella} x={9.3} y={9.5} escala={0.3} />
+      <Path d="M9.5 9.4a2.6 2.6 0 1 1 3.4 2.5c-.6.2-.9.7-.9 1.3v.5" {...trazo(tinta)} />
+      <Path d="M12 16.6v.3" {...trazo(tinta)} />
     </>
   ),
   /* LA GOTA — el pin de la casa. ⏪ Decía *«la huella vive en la gota»*.
@@ -1606,10 +1627,20 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
   // segundo dibujo: el escudo se queda con el que llegó primero y el otro
   // pasa por §6b (hoja de contacto, 2-3 variantes, gate POR ÍCONO a 21px).
   // Ese día esta nota es la que dice cuál es cuál.
-  seguros: ({ tinta, huella }) => (
+  /* ⏪ **REDIBUJADO S116-B lote 2b — firma de la mesa: «escudo con check».**
+   * Era un escudo con la huella adentro, y sin ella quedaba **un escudo
+   * vacío** — que no dice «asegurado»: dice «escudo». *Mismo caso que
+   * `ayuda`: el dibujo colgaba de la pieza que la letra retira.*
+   * ⚠️ **CHOQUE DECLARADO Y MEDIDO CONTRA DOS VECINOS que ya llevan un
+   * check:** `checkEnCirculo` (check dentro de un CÍRCULO) y
+   * `nodoEntregado` (check SUELTO). Los tres se separan por el contenedor,
+   * que es el rasgo que sobrevive a 21 px — escudo · círculo · nada. Van
+   * los tres juntos en la hoja, y si no se separan, el que se mueve es
+   * éste: los otros dos son etapas de escaleras vivas. */
+  seguros: ({ tinta }) => (
     <>
-      <Path d="M12 3.4 19 6v5.4c0 4.5-2.9 8-7 9.6-4.1-1.6-7-5.1-7-9.6V6Z" {...trazo(tinta)} />
-      <Huella color={huella} x={8.8} y={7.2} escala={0.4} />
+      <Path d="M12 3.4 19.2 6v5.6c0 4.6-3 8.2-7.2 9.8-4.2-1.6-7.2-5.2-7.2-9.8V6Z" {...trazo(tinta)} />
+      <Path d="M8.8 11.8 11.2 14.2 15.4 10" {...trazo(tinta)} />
     </>
   ),
   // La pantalla que atiende — salud a distancia, la huella presente.
@@ -1759,11 +1790,30 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
    * círculo y las costuras de la pelota viven ADENTRO**, y que éstas son
    * CURVAS. A 21 px es lo primero que hay que mirar; si no se separan, el
    * que se mueve es éste (`ayuda` tiene consumidores desde S53). */
+  /* ⏪ **REDIBUJADO DOS VECES EN DOS LOTES, y la segunda la ordenó el ojo
+   * del founder sobre la hoja: «hoy se lee como globo».** Tenía razón y la
+   * causa es geométrica: llevaba **dos** costuras, una vertical y una
+   * horizontal, **las dos pasando por el centro** — que es exactamente el
+   * dibujo de un meridiano y un paralelo. *Un globo terráqueo es una
+   * esfera con DOS ejes simétricos; una pelota tiene UNA banda.*
+   * ⏪ **Y LA PRIMERA CURA TAMBIÉN FALLÓ EN SU HOJA, que es el dato:** una
+   * sola costura curva y descentrada **se leía como un círculo TACHADO** —
+   * o sea «no disponible», que es peor que un globo porque significa algo.
+   * *Quitarle un eje al globo no lo convirtió en pelota: lo convirtió en
+   * una prohibición.*
+   * ⇒ quedan **dos arcos opuestos que nacen y mueren en el borde**, sin
+   * pasar por el centro: la costura de una pelota. **Ningún trazo cruza el
+   * medio**, que es exactamente lo que distingue una costura de un
+   * meridiano y de un tachado.
+   * ⚠️ Su vecino sigue siendo `ayuda`, que también es un círculo — y en
+   * este mismo lote `ayuda` pasó a llevar un «?» adentro, así que la
+   * distancia entre los dos **creció sin que ninguno se moviera por el
+   * otro**. Se declara igual: los dos van juntos en la hoja. */
   personalidad: ({ tinta }) => (
     <>
       <Circle cx={12} cy={12} r={8.4} {...trazo(tinta)} />
-      <Path d="M12 3.6c-3.1 4.7-3.1 12.1 0 16.8" {...trazo(tinta)} />
-      <Path d="M3.6 12c4.7 3.1 12.1 3.1 16.8 0" {...trazo(tinta)} />
+      <Path d="M6.1 5.9a9.4 9.4 0 0 1 0 12.2" {...trazo(tinta)} />
+      <Path d="M17.9 5.9a9.4 9.4 0 0 0 0 12.2" {...trazo(tinta)} />
     </>
   ),
 
@@ -2105,17 +2155,36 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
 
   papel: ({ tinta, huella }) => (
     <>
-      <Path d="M8.5 3.2h9v12.5h-9Z" {...trazo(tinta)} />
-      <Path d="M10.5 7.4h5M10.5 10.4h5" {...trazo(tinta)} />
+      <Path d="M7.2 2.6h11.2v15.4H7.2Z" {...trazo(tinta)} />
+      <Path d="M9.7 7.6h6.2M9.7 11.3h6.2" {...trazo(tinta)} />
       <Huella color={huella} x={2.2} y={13.6} escala={0.32} />
     </>
   ),
 
-  documentos: ({ tinta, huella }) => (
+  /* ⏪ **REDIBUJADO S116-B lote 2b — firma de la mesa: «documentos y copiar
+   * se diferencian por esquina doblada vs. dos hojas».**
+   * 🔴 **LA ORDEN CORRIGE UN DEFECTO QUE SU PROPIA ENTRADA HABÍA PREDICHO
+   * Y ACEPTADO.** `copiar` nació en S103-B **mirroreando la geometría de
+   * este glifo a propósito** —«un hermano se construye con la métrica del
+   * hermano»— y declaró el riesgo con su condición de muerte escrita:
+   * *«los separan DOS cosas: la huella (uno la lleva, el otro no) y que
+   * jamás comparten unidad de barrido … si el founder los ve juntos a
+   * 21 px y no los separa, el que se mueve es éste»*.
+   * **La letra §1.1 le sacó la primera de las dos cosas**, y la hoja de
+   * contacto de este lote los puso juntos por primera vez: exactamente las
+   * dos condiciones que aquella entrada nombró. *El riesgo no apareció: se
+   * cobró como estaba escrito, tres sesiones después.*
+   * ⇒ este glifo se queda con **el DOBLEZ**, que es lo que dice «papeles
+   * archivados», y `copiar` con el apilado plano.
+   * ⚠️ **VECINO NUEVO QUE ESTO DESPIERTA, declarado: `presupuesto`**, que
+   * ya es *«documento con esquina doblada»*. **Los separa el conteo**
+   * —aquél es UNA hoja con líneas de texto adentro; éste son DOS y va
+   * vacío— y eso es más frágil que un doblez. Van juntos en la hoja. */
+  documentos: ({ tinta }) => (
     <>
-      <Path d="M11 3.5H21.5V14" {...trazo(tinta)} />
-      <Path d="M7.5 7H18V17.5H7.5Z" {...trazo(tinta)} />
-      <Huella color={huella} x={1.8} y={14.8} escala={0.3} />
+      <Path d="M9.4 3.6h6.2l3.4 3.4v8.4H9.4Z" {...trazo(tinta)} />
+      <Path d="M15.6 3.6v3.4h3.4" {...trazo(tinta)} />
+      <Path d="M14.6 15.4v4.8H4.8V8.4h2.6" {...trazo(tinta)} />
     </>
   ),
   // ── S91-B · EL SOBRE — hoy `correo`, EN RESERVA DECLARADA (sin
@@ -2169,14 +2238,32 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
    * papeles.ts` monta `receta` para el papel de receta — que es
    * exactamente lo que ahora dibuja. *El redibujo no rompe a nadie: le da
    * la razón al consumidor que ya estaba bien.* */
-  receta: ({ tinta, huella }) => (
+  /* ⏪ **REDIBUJADO S116-B lote 2b — firma de la mesa: «Rx como el mock».**
+   * Este glifo ya venía de un redibujo: en el lote 2 dejó de ser una
+   * CÁPSULA (que se mudó a `medicamento`) y pasó a ser una hoja con la
+   * cápsula asomando. **La hoja con cápsula resolvía el choque contra
+   * `papel` por SILUETA, y el Rx lo resuelve mejor**: no hay ningún otro
+   * papel del set con letras adentro.
+   * EL DIBUJO: hoja con esquinas + la **R** con la pata cruzada en
+   * diagonal — el símbolo de prescripción, que es lo que el mock monta.
+   * ⚠️ **EL RIESGO QUE ESTE PÁRRAFO DECLARÓ SE COBRÓ EN LA MISMA HOJA, y
+   * no fue la panza: fue la PATA.** El símbolo se dibujó con la diagonal
+   * saliendo de la pata derecha de la R, y a 21 px **la diagonal y la pata
+   * se leían como un solo trazo ⇒ quedaba una «R» a secas**, sin el rasgo
+   * que la vuelve prescripción. ⇒ **la R se angosta y la diagonal se cruza
+   * con una segunda barra corta**, que es lo que el ℞ real tiene: una
+   * tachadura, no un apéndice. *Dos trazos que se cruzan sobreviven a la
+   * escala; uno que continúa a otro, no.*
+   * ⚠️ **LO QUE SIGUE EN RIESGO, declarado: la panza.** Mide ~2,1 px de
+   * aire a 21 px. Si se cierra queda una mancha con una tachadura — y la
+   * salida sigue siendo la hoja con la cápsula asomando del lote 2, que
+   * está escrita arriba para no re-descubrirla. */
+  receta: ({ tinta }) => (
     <>
-      <Path d="M6.4 2.6h9.6v14.8H6.4Z" {...trazo(tinta)} />
-      <Path
-        d="M11.4 10.6A2.9 2.9 0 0 0 15.5 14.7L20.2 10A2.9 2.9 0 0 0 16.1 5.9Z"
-        {...trazo(tinta)}
-      />
-      <Huella color={huella} x={1.2} y={15.2} escala={0.28} />
+      <Path d="M7 3.4h10.4a1.6 1.6 0 0 1 1.6 1.6v14a1.6 1.6 0 0 1-1.6 1.6H7a1.6 1.6 0 0 1-1.6-1.6V5a1.6 1.6 0 0 1 1.6-1.6Z" {...trazo(tinta)} />
+      <Path d="M8.6 16.8V8.2h2.2a2.1 2.1 0 0 1 0 4.2H8.6" {...trazo(tinta)} />
+      <Path d="M10.6 12.4 15.4 17.2" {...trazo(tinta)} />
+      <Path d="M11.4 15.4 14.6 12.2" {...trazo(tinta)} />
     </>
   ),
 
@@ -2382,10 +2469,17 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
   // Las esquinas redondeadas salen del `strokeLinejoin: 'round'` de
   // `trazo()`, como en TODO el set — no de un `rx`. Es lo que lo vuelve
   // hermano y no injerto: mismo peso (1.9), mismos remates, misma grilla.
+  /* ⏪ **RE-ENCUADRADO S116-B lote 2b (mismo par que `documentos`).** El
+   * apilado se conserva —es el dibujo correcto para «copiar»— y lo que
+   * cambia es que **ahora es el único del par que lo tiene**: su hermano
+   * se llevó el doblez. *No se le agregó nada para distinguirlo; se le
+   * quitó al otro lo que compartían.* Las dos hojas crecieron para ocupar
+   * la grilla completa, que es lo que la orden de tamaño óptico único
+   * pide y lo que el aire de la huella retirada permitió. */
   copiar: ({ tinta }) => (
     <>
-      <Path d="M15.5 5H5V15.5" {...trazo(tinta)} />
-      <Path d="M19 8.5H8.5V19H19Z" {...trazo(tinta)} />
+      <Path d="M8.6 3.8h10.6v10.6H8.6Z" {...trazo(tinta)} />
+      <Path d="M15.4 14.4v5.8H4.8V9.6h3.8" {...trazo(tinta)} />
     </>
   ),
   descargar: ({ tinta }) => (
@@ -2427,7 +2521,7 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
    *  dibujar el objeto DEL OFICIO; acá no hay oficio. */
   agregar: ({ tinta }) => (
     <>
-      <Path d="M12 5.2v13.6M5.2 12h13.6" {...trazo(tinta)} />
+      <Path d="M12 3.7v16.6M3.7 12h16.6" {...trazo(tinta)} />
     </>
   ),
   /** #13 del mock. El `−`. **Nace porque `papelera` lo estaba haciendo y
@@ -2438,7 +2532,7 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
    *  largo, mismo centro): son un par y tienen que leerse como par. */
   quitar: ({ tinta }) => (
     <>
-      <Path d="M5.2 12h13.6" {...trazo(tinta)} />
+      <Path d="M3.7 12h16.6" {...trazo(tinta)} />
     </>
   ),
   /** #15 del mock. El corazón. **Censo: cero vecinos** — `seguros` es un
@@ -2474,7 +2568,7 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
   calificacion: ({ tinta }) => (
     <>
       <Path
-        d="M12.00 5.00L14.06 9.17L18.66 9.84L15.33 13.08L16.11 17.66L12.00 15.50L7.89 17.66L8.67 13.08L5.34 9.84L9.94 9.17Z"
+        d="M12.00 3.70L14.61 8.98L20.44 9.83L16.22 13.94L17.21 19.74L12.00 17.00L6.79 19.74L7.78 13.94L3.56 9.83L9.39 8.98Z"
         {...trazo(tinta)}
       />
     </>
@@ -2522,7 +2616,7 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
   colgar: ({ tinta }) => (
     <G rotation={135} origin="12, 12">
       <Path
-        d="M16.4 14.1l-2 2a13.2 13.2 0 0 1-6.5-6.5l2-2-2.6-4.1-3 1.2C3.6 11 12.9 20.3 19.6 19.5l1.2-3Z"
+        d="M15.6 13.7l-1.7 1.7a11.2 11.2 0 0 1-5.5-5.5l1.7-1.7-2.2-3.5-2.5 1C4.7 11 12.6 18.9 18.3 18.2l1-2.5Z"
         {...trazo(tinta)}
       />
     </G>
@@ -2568,12 +2662,12 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
   /** #52 del mock. Los tres puntos. **Horizontal y no vertical, con su
    *  razón:** el mock lo monta al final de una FILA (la acción de más de un
    *  ítem de lista), y un punto suspensivo vertical pide una columna. Los
-   *  tres puntos se dibujan con el propio trazo redondeado —`M x y v.01`—,
+   *  tres puntos se dibujan con el propio trazo redondeado —`M x y v.3`—,
    *  que es el molde que `info` y `foto` ya usan para su punto: **el punto
    *  del set mide el trazo del set**, jamás un radio inventado. */
   mas: ({ tinta }) => (
     <>
-      <Path d="M6.2 12v.01M12 12v.01M17.8 12v.01" {...trazo(tinta)} />
+      <Path d="M4.9 12v.3M12 12v.3M19.1 12v.3" {...trazo(tinta)} />
     </>
   ),
   /** #43 del mock. LA LLAVE. 🔴 **No es un candado, y el censo es la razón
@@ -2651,11 +2745,17 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
    *  **La huella va ARRIBA, cayendo al bol**: el comedero solo es un
    *  recipiente; lo que lo vuelve alimento DE ELLA es de quién es el bol.
    *  Sin vecinos: es la única forma cóncava del set. */
-  alimento: ({ tinta, huella }) => (
+  /* ⏪ **REDIBUJADO S116-B lote 2b — firma de la mesa: «el cuenco solo».**
+   * Nació con la huella cayendo desde arriba —*el comedero solo es un
+   * recipiente; lo que lo vuelve alimento DE ELLA es de quién es el bol*—
+   * y con la letra §1.1 la huella se va. **El cuenco creció para ocupar
+   * el aire que dejó**, que es lo que lo mantiene en el mismo peso óptico
+   * que sus vecinos en vez de quedar chico y flotando arriba.
+   * Sigue sin vecinos: es la única forma cóncava del set. */
+  alimento: ({ tinta }) => (
     <>
-      <Path d="M3.6 11.6h16.8a8.4 8.4 0 0 1-16.8 0Z" {...trazo(tinta)} />
-      <Path d="M7.6 19.9h8.8" {...trazo(tinta)} />
-      <Huella color={huella} x={9.6} y={3.2} escala={0.42} />
+      <Path d="M3.4 10.6h17.2a8.6 8.6 0 0 1-17.2 0Z" {...trazo(tinta)} />
+      <Path d="M7.4 19.2h9.2" {...trazo(tinta)} />
     </>
   ),
   /** #29 del mock. EL TRIÁNGULO CON LA HUELLA ADENTRO. 🔴 **El dibujo sale
@@ -2671,10 +2771,22 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
    *  porque llegó primero.** *La estrella de `personalidad` dejó escrito
    *  ese criterio tres sesiones antes de que hiciera falta; acá se aplica
    *  al nacer en vez de esperar el choque.* */
-  alergia: ({ tinta, huella }) => (
+  /* ⏪ **REDIBUJADO S116-B lote 2b — firma de la mesa: «triángulo con
+   * signo».** Nació con la huella adentro y el argumento era bueno —*un
+   * triángulo vacío advierte de algo; con la huella advierte de ella*—
+   * pero **la letra §1.1 no admite esa excepción**. Sin huella, el
+   * triángulo solo no advierte: es una forma. ⇒ entra el signo de
+   * exclamación, que es lo que la vuelve una señal.
+   * **La colisión declarada al nacer SIGUE VIVA y ahora es más fuerte:**
+   * este dibujo es el universal de «advertencia», y la casa no tiene
+   * ninguna. El nombre sigue tomado por alergia — *el día que exista una
+   * advertencia general, esto se revisa antes que aquélla, porque llegó
+   * primero.* */
+  alergia: ({ tinta }) => (
     <>
-      <Path d="M12 4 21 19.8H3Z" {...trazo(tinta)} />
-      <Huella color={huella} x={9.6} y={10.8} escala={0.38} />
+      <Path d="M12 3.8 21.2 19.8H2.8Z" {...trazo(tinta)} />
+      <Path d="M12 10.2v4.2" {...trazo(tinta)} />
+      <Path d="M12 17v.3" {...trazo(tinta)} />
     </>
   ),
   /** #30 del mock. EL CIRCUITO CON PATAS. **La cápsula estaba ocupada**
@@ -2697,11 +2809,25 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
    *    ella esto es un componente electrónico; con ella es la identidad de
    *    ella grabada, que es el objeto (mismo criterio que `wearables`).
    * ⇒ **la cura fue quitarle patas al chip, no quitarle la mascota.** */
-  microchip: ({ tinta, huella }) => (
+  /* ⏪ **REDIBUJADO S116-B lote 2b — firma de la mesa: «cuadrado con cuatro
+   * patas por lado, vacío».** Nació en el lote 2 con ocho patas y la
+   * huella adentro; su propia hoja lo cazó como mancha y le quitó las
+   * patas verticales **conservando la huella**, con el argumento de que
+   * sin ella era un componente electrónico y no la identidad de ella.
+   * **La letra §1.1 le da la razón al argumento contrario:** si el set no
+   * lleva huella, un chip de identificación es un chip, y lo que dice de
+   * quién es lo dice la pantalla que lo monta.
+   * ⇒ vuelven las cuatro patas por lado (dos arriba, dos abajo, dos por
+   * costado) y el cuerpo queda **vacío**, que es lo que la orden pide.
+   * **El aire que dejó la huella es lo que hace que ahora entren**: doce
+   * trazos sin relleno adentro respiran donde trece con relleno no lo
+   * hacían. *No es que la medición del lote 2 estuviera mal — es que su
+   * premisa (la huella se queda) dejó de valer.* */
+  microchip: ({ tinta }) => (
     <>
-      <Path d="M8 8h8v8H8Z" {...trazo(tinta)} />
-      <Path d="M8 10.6H5.2M8 13.4H5.2M18.8 10.6H16M18.8 13.4H16" {...trazo(tinta)} />
-      <Huella color={huella} x={9.4} y={9.4} escala={0.36} />
+      <Path d="M7.6 7.6h8.8v8.8H7.6Z" {...trazo(tinta)} />
+      <Path d="M9.8 7.6V4.4M14.2 7.6V4.4M9.8 19.6v-3.2M14.2 19.6v-3.2" {...trazo(tinta)} />
+      <Path d="M7.6 9.8H4.4M7.6 14.2H4.4M19.6 9.8h-3.2M19.6 14.2h-3.2" {...trazo(tinta)} />
     </>
   ),
   /* #20 del mock. 🔴 **ES LA CÁPSULA DE `receta`, MUDADA BYTE A BYTE** —
@@ -2714,10 +2840,10 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
   medicamento: ({ tinta, huella }) => (
     <>
       <Path
-        d="M8.15 10.85A2.9 2.9 0 0 0 12.25 14.95L18.85 8.35A2.9 2.9 0 0 0 14.75 4.25Z"
+        d="M6.94 10.13A3.83 3.83 0 0 0 12.33 15.52L21.06 6.79A3.83 3.83 0 0 0 15.67 1.40Z"
         {...trazo(tinta)}
       />
-      <Path d="M11.45 7.55 15.55 11.65" {...trazo(tinta)} />
+      <Path d="M10.51 6.19 15.93 11.61" {...trazo(tinta)} />
       <Huella color={huella} x={1.8} y={14.8} escala={0.3} />
     </>
   ),
@@ -3022,6 +3148,7 @@ export function Icono({
     montaje,
     activa,
     esEstructura: HUELLA_ES_ESTRUCTURA.has(nombre),
+    casaV5: theme.accent.formaV5,
     colorHuella,
     colorTinta,
   })

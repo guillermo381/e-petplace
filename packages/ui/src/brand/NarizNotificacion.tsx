@@ -15,45 +15,32 @@
  * declarada acá y no en la ley: la ley gobierna glifos de interfaz, y esto
  * no se dibuja para una interfaz nuestra sino para la bandeja del sistema.
  *
- * 🔴 **LA PRIMERA VERSIÓN ERA OTRA FORMA, Y LA CORRIGIÓ UNA MEDICIÓN, NO
- * UNA REVISIÓN.** Se dibujó de memoria como *«dos lóbulos con hueco»* — o
- * sea un corazón con dos agujeros — y al rasterizarla al lado del isotipo
- * real quedó a la vista que **el isotipo no es eso**: es **un ANILLO
- * ABIERTO ABAJO con dos volutas colgando de su borde superior interno**.
- * *La forma que yo recordaba era plausible y estaba equivocada, y ningún
- * gate de código la habría frenado: compilaba, se veía limpia, y decía la
- * marca de otro.* El rasterizador apareció el mismo día (ver
- * `scripts/hoja-de-contacto-glifos.mjs`).
+ * 🔴 **TERCER DIBUJO, Y LOS TRES TIENEN SU PORQUÉ ESCRITO — se conservan
+ * porque cada uno murió por una razón distinta y ninguna era tonta.**
  *
- * LA SIMPLIFICACIÓN, y qué conserva de la marca:
- *  · **El anillo abierto** — la silueta madre. Pared de ~3,1 en la grilla
- *    24, que a 24 px son ~3 px reales: el mínimo que no se cierra.
- *  · **Las dos volutas, VUELTAS SÓLIDAS y SOBRESALIENDO del borde
- *    superior del anillo** — que es como el isotipo las tiene. La primera
- *    versión las puso adentro y chicas, y al montarlas contra el isotipo
- *    real quedó claro que el rasgo es justamente que ASOMAN. Se probaron
- *    **tres radios en hoja de contacto a 24/48/96** (3,0 · 3,3 · 2,7) y
- *    ganó **3,3**, por el único criterio que decide acá: **a 24 px es el
- *    que más aguanta**. *§6b pide 2-3 variantes con su riesgo; ésta es la
- *    primera pieza de esta tanda que las tuvo de verdad.*
- *  · **(la nota vieja, que sigue valiendo)** — en el isotipo son anillos con
- *    su propio hueco, y ese hueco mide ~4,5 % del alto: **a 24 px se
- *    cierra y deja una mancha** (medido rasterizando el isotipo real a
- *    24 px, que es de dónde salió el encargo). Rellenarlas es lo único
- *    que las conserva.
- *  · **La abertura inferior** — abierta a 6,1 de ancho. La primera
- *    versión la cortaba en el punto más bajo de la elipse y salía una
- *    ranura de 1,6: *cortar en el fondo de una elipse chata no deja
- *    abertura, deja una hendidura.* El corte subió a y = 20,9.
+ *  · **① dos lóbulos con hueco** (un corazón agujereado). Dibujado de
+ *    memoria. **Murió al montarlo contra el isotipo real**: el isotipo no
+ *    es eso — es un anillo abierto abajo con dos volutas.
+ *  · **② el anillo con volutas.** Fiel al isotipo, con tres radios de
+ *    voluta probados a 24/48/96. **Murió por FIRMA DE LA MESA**, no por
+ *    medición: *«solo el corazón-nariz relleno con las dos fosas como
+ *    hueco, sin bigotes ni comisuras»*. ⇒ lo que la marca usa como
+ *    ISOTIPO y lo que la bandeja usa como SILUETA **dejan de ser el mismo
+ *    objeto, y es deliberado**: el isotipo es una composición de dos
+ *    volutas; la silueta es la NARIZ, que es de lo que la composición
+ *    habla. *Ser fiel al isotipo era una premisa mía, no una orden.*
+ *  · **③ el corazón-nariz con las dos fosas** — éste. Tres tamaños de
+ *    fosa probados sobre **los dos fondos reales** (ciruela noche y el
+ *    gris de la barra de Android); ganó **2,3 × 3,0**, por el único
+ *    criterio que decide acá: **a 24 px es el que más aguanta**.
  *
- * ⚠️ **RIESGO DECLARADO, y la medición lo cambió de lo que yo creía: a
- * 24 px se lee como una CARA (dos ojos dentro de un óvalo).** No es culpa
- * de la simplificación — **el isotipo real rasterizado a 96 px se lee
- * igual**, porque sus dos volutas ocupan el lugar donde el ojo espera
- * ojos. *El riesgo es de la marca, no del recorte, y por eso no se cura
- * acá: se declara.* Si en la bandeja real molesta, la salida es achicar
- * las volutas y bajarlas, no sacarlas — sin ellas queda un anillo, que no
- * es nada.
+ * ⚠️ **RIESGO DECLARADO, y lo hereda de la ①: a 24 px las dos fosas se
+ * leen como OJOS.** No se cura y no es un descuido — es la consecuencia
+ * directa de la firma: *una nariz frontal con dos fosas simétricas ocupa
+ * el lugar donde el ojo espera ojos, y cualquier dibujo fiel a esa
+ * descripción lo va a hacer.* Si en la bandeja real molesta, la salida es
+ * inclinar las fosas (candidato `c` de la hoja, ya dibujado y medido), no
+ * achicarlas: achicadas se cierran antes de dejar de parecer ojos.
  *
  * ⚠️ **ESTA PIEZA NO ES LO QUE ANDROID MONTA.** Existe para poder VER y
  * gatear la silueta dentro del producto. Lo que Android usa es
@@ -68,7 +55,7 @@ import Svg, { Path } from 'react-native-svg'
 /** El path canónico. **Se exporta para que nadie lo copie**: es el mismo
  *  `d` que vive en `assets/marca/nariz-notificacion.svg`. */
 export const NARIZ_NOTIFICACION_PATH =
-  'M8.96 20.9A10.2 8.8 0 1 1 15.04 20.9L15.04 17.65A7.1 5.7 0 1 0 8.96 17.65Z M8.1 4.9a3.3 3.3 0 1 0 0 6.6a3.3 3.3 0 1 0 0-6.6Z M15.9 4.9a3.3 3.3 0 1 0 0 6.6a3.3 3.3 0 1 0 0-6.6Z'
+  'M12 21.8C8.3 19.7 2.8 15.7 2.8 10.8 2.8 6.8 5.8 4.1 9.2 4.1 10.6 4.1 11.5 4.8 12 5.7 12.5 4.8 13.4 4.1 14.8 4.1 18.2 4.1 21.2 6.8 21.2 10.8 21.2 15.7 15.7 19.7 12 21.8Z M8.2 6.6a2.3 3 0 1 0 0 6 2.3 3 0 1 0 0-6Z M15.8 6.6a2.3 3 0 1 0 0 6 2.3 3 0 1 0 0-6Z'
 
 export function NarizNotificacion({
   tamano = 24,

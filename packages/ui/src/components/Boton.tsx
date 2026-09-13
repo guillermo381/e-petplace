@@ -719,8 +719,34 @@ export function Boton({
           // EL PESO ES LO QUE SEPARA A LAS DOS SIN CAJA: `acento` manda
           // (bold + color de CTA), `ghost` recede (medium + tinta). Sin
           // superficie que las distinga, el peso ES la jerarquía.
-          fontFamily: variante === 'acento' ? typography.family.sans.bold : typography.family.sans.medium,
-          fontSize: t.fontSize,
+          /* 🔴 **S116-B lote 2b — LA ETIQUETA SE VEÍA FINA Y ERA UN TOKEN
+           * SIN ENCHUFAR.** Medido del founder sobre la captura de «Pagar»:
+           * la casa v5 pide **PJS 700 16** (`escala.cta`) y acá se pintaba
+           * `sans.medium`, o sea **DM Sans 500** — dos pesos abajo y la
+           * familia del PRESTADOR, que la enmienda de la letra §1.4 ya
+           * había separado. *El token existía con el valor correcto desde
+           * el lote 1 y nadie lo consumió: el mismo defecto que `Texto`,
+           * un piso más abajo.*
+           *
+           * Resuelve por casa con `formaV5` —el slot que ya significa
+           * «¿esta casa recibió el rediseño?»— y **el tamaño también sale
+           * de la escala**: la letra fija los dos juntos, y tomar sólo la
+           * familia dejaría un CTA en PJS 700 al tamaño viejo, que es una
+           * tercera cosa que ninguna letra describe.
+           *
+           * ⚠️ **`ghost` NO migra, y es la única asimetría de este bloque.**
+           * El comentario de abajo dice por qué: sin superficie que las
+           * distinga, **el peso ES la jerarquía**. Si los dos suben a 700,
+           * el secundario deja de recede*r* y se pierde una distinción
+           * firmada — la letra §2 le da al secundario su propia forma
+           * (alto 52, borde 1,5 magenta), no su propio peso. */
+          fontFamily: theme.accent.formaV5
+            ? (variante === 'acento'
+                ? typography.escala.cta.familia
+                : typography.family.sans.medium)
+            : (variante === 'acento' ? typography.family.sans.bold : typography.family.sans.medium),
+          fontSize:
+            theme.accent.formaV5 && variante === 'acento' ? typography.escala.cta.size : t.fontSize,
           color: c.texto,
           opacity: mostrarSpinner ? 0 : 1,
         }}
