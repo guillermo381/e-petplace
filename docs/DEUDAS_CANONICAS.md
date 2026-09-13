@@ -34353,6 +34353,8 @@ El barrido original cayó con **~67 navegaciones**. El ritmo de pico pone el tec
 
 **Sigue 🔴 y sigue ABIERTA**, pero por otra razón que al abrirse: no porque la app se caiga seguido —**no se cayó en 331 navegaciones**— sino porque **cayó dos veces en producción de instrumentación y el factor que lo explica no aparece en ninguna de las ocho corridas.**
 
+> 🟢 **EL INSTRUMENTO LLEGÓ (S116-C lote 3, en main desde el 13-sep-2026): `apps/cliente/src/components/conteo-de-montajes.tsx`** + `lib/medicion/montajes`. Se monta sólo bajo `__DEV__`, desde el pie de Cuenta. **Lo detectó `verify:piezas-locales` al subir 61 → 62** —el trinquete haciendo su trabajo sobre una pieza legítima—, y el baseline se subió a mano con esa razón escrita. ⇒ **lo que falta ya no es construirlo: es CORRERLO** contra el barrido que produjo el OOM, y eso es una corrida en el aparato.
+
 **☠️ MUERTE (enmendada):** el contador de montajes de C confirma o descarta la hipótesis **y** aparece el factor de la brecha — o una corrida larga muestra que el piso post-poda **no** crece entre pasadas, en cuyo caso no hay fuga acumulativa y el OOM original tuvo una causa distinta que habrá que buscar en otro lado.
 
 ## `D-1091` 🟡 — EL CENSO DE «MASCOTAS REALES» SOBRE-CUENTA 4,5× EN LA FAMILIA DEL FOUNDER
