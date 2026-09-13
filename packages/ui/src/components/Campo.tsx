@@ -340,7 +340,18 @@ export function Campo({
           secureTextEntry={secure && oculto}
           multiline={!!multilinea}
           numberOfLines={multilinea}
-          placeholderTextColor={theme.text.tertiary}
+          /* 🔴 **S116-B lote 2 · era `text.tertiary` y da 3.28:1** — bajo el
+             4.5 que WCAG pide para texto. **Un placeholder no es decoración:
+             es lo que la persona lee para saber qué escribir.** `secondary`
+             da 5.24 sobre la superficie del campo.
+             *Lo señaló la crítica de Impeccable («placeholder needs the same
+             4.5:1, not the muted-gray default») y la casa ya había resuelto
+             este mismo caso igual en S114: «tres piezas de esta tanda lo
+             usaban y las tres pasaron a `secondary`». El token `tertiary` NO
+             se toca —sigue siendo placeholder-y-decorativo por doctrina, con
+             28 lectores—; lo que cambia es que un placeholder deja de contar
+             como decorativo.* */
+          placeholderTextColor={theme.text.secondary}
           accessibilityLabel={label}
           accessibilityHint={ayuda}
           onFocus={(e) => {

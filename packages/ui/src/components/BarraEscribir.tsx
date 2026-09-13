@@ -149,7 +149,7 @@ export function BarraEscribir(props: BarraEscribirProps) {
           value={valor}
           onChangeText={(t) => onCambio(t.slice(0, TOPE))}
           placeholder={placeholder}
-          placeholderTextColor={theme.text.tertiary}
+          placeholderTextColor={theme.text.secondary}
           accessibilityLabel={placeholder}
           multiline
           /* 🔴 «salto de línea», JAMÁS «enviar» (§2.5): con `enviar` en el
