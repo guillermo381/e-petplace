@@ -64,7 +64,7 @@ export const lightTheme = {
        //    el radio de v4. Sin este slot, rediseñar `Boton` en su archivo
        //    —que es lo que el lote pide— le habría cambiado la forma a las dos
        //    apps en silencio.
-    ctaPildora:    true,
+    formaV5:    true,
 
     /* 🔴 **LA REGLA DE DOS REGISTROS (Ley 2) APLICADA AL MAGENTA.**
        `accent.primary` es el registro FUNCIONAL —lo que los componentes

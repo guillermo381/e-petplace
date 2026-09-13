@@ -559,7 +559,7 @@ export function Boton({
    * Letra §2: *«CTA alto 58 radio 999 con sombra magenta 28 % · secundario
    * alto 52 borde 1,5 magenta»*.
    *
-   * **Entra por `accent.ctaPildora` y no como constante**, y la razón es la
+   * **Entra por `accent.formaV5` y no como constante**, y la razón es la
    * letra §5: el PRESTADOR no cambia con este rediseño. Rediseñar `Boton`
    * en su archivo —que es lo que el lote pide, para no tocar a sus 236
    * consumidores— le habría cambiado la forma a las dos apps **en
@@ -570,7 +570,7 @@ export function Boton({
    * ⚠️ `compacto` conserva su 44 y su radio suave: es la acción secundaria
    * de la Ley 22c, no el CTA, y la letra no la nombra.
    * ═══════════════════════════════════════════════════════════════════ */
-  const pildoraV5 = 'ctaPildora' in theme.accent && theme.accent.ctaPildora === true
+  const pildoraV5 = 'formaV5' in theme.accent && theme.accent.formaV5 === true
   const esSecundarioV5 = varianteEfectiva === 'secundario' || varianteEfectiva === 'apoyada'
   const altoV5 = esSecundarioV5 ? medidas.secundarioAlto : medidas.ctaAlto
 
