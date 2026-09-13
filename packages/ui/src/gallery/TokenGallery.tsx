@@ -117,6 +117,9 @@ import { LogoNegocio } from '../components/LogoNegocio'
 import { FilaCita } from '../components/FilaCita'
 import { PieRevelar } from '../components/PieRevelar'
 import { Personaje, TrioPersonajes, type EspeciePersonaje } from '../components/Personaje'
+import { BotonAsistente } from '../components/BotonAsistente'
+import { BadgeFecha } from '../components/BadgeFecha'
+import { BarraPasos } from '../components/BarraPasos'
 import { PantallaConPie } from '../components/PantallaConPie'
 import { GlifoConContador } from '../components/GlifoConContador'
 import { BurbujaPendientes } from '../components/BurbujaPendientes'
@@ -5226,6 +5229,28 @@ function GaleriaInterna() {
             server-side), jamás del oficio. Y el `paddingBottom` de la safe area lo pone la pieza:
             si cada pantalla lo recalcula, vuelve a divergir.
           </Texto>
+        </Seccion>
+
+        <Seccion titulo="BadgeFecha · BarraPasos · BotonAsistente (S116-B) — shell v5">
+          <View style={{ gap: spacing[4] }}>
+            <View style={{ flexDirection: 'row', gap: spacing[3], alignItems: 'center' }}>
+              <BadgeFecha mes="sep" dia="13" />
+              <BadgeFecha mes="oct" dia="1" />
+            </View>
+            {/* La barra vive SOBRE ciruela: se muestra sobre su fondo real,
+                porque sus dos colores se eligieron para ese fondo. */}
+            <View style={{ backgroundColor: palette.ciruela, padding: spacing[4], borderRadius: radius.tarjetaV5, gap: spacing[3] }}>
+              <BarraPasos total={3} actual={2} etiqueta="Paso 2 de 3" />
+              <BarraPasos total={4} actual={1} etiqueta="Paso 1 de 4" />
+              {/* total=1 no se dibuja: regla de existencia. */}
+              <BarraPasos total={1} actual={1} etiqueta="Paso 1 de 1" />
+            </View>
+            {/* El asistente es `position:absolute`: se muestra dentro de una
+                caja con alto propio para que no se vaya al borde de la galería. */}
+            <View style={{ height: 180, borderRadius: radius.tarjetaV5, backgroundColor: palette.lienzo, overflow: 'hidden' }}>
+              <BotonAsistente onPress={() => {}} etiqueta="Abrir el asistente" />
+            </View>
+          </View>
         </Seccion>
 
         <Seccion titulo="Personaje (S116-B) — las SEIS caras · ninguna es vector (ver cabecera)">

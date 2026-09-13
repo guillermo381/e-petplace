@@ -119,7 +119,15 @@ export type TextoVariante = 'titulo' | 'seccion' | 'cuerpo' | 'apoyo' | 'enfasis
  * son un PAR, y usar medio par es cómo se fabrica un texto invisible que
  * ningún typecheck ve.* Medido en el emulador antes de curar: **1.25:1**.
  */
-export type TextoColor = 'primary' | 'secondary' | 'tertiary' | 'danger' | 'success' | 'warning' | 'sobreVideo' | 'warm'
+/* 🔴 **S116-B lote 2 · entra `inverso`** — el texto sobre superficie OSCURA
+   (la cabecera ciruela, el `BadgeFecha`, la tarjeta `destacada`). Resuelve a
+   `theme.text.inverse`, que los tres temas ya portan.
+   ⚠️ **No lo prohíbe N23 ni R58**, y conviene decir por qué: R58 veta los
+   miembros que empiezan con `accent` —el color que marca IMPORTANCIA—, y
+   esto no marca importancia: es el par legible de `primary` cuando el fondo
+   se da vuelta. *Sin él, cada pieza sobre ciruela tendría que escribir su
+   color a mano, que es exactamente lo que `Texto` nació para cerrar.* */
+export type TextoColor = 'primary' | 'secondary' | 'tertiary' | 'danger' | 'success' | 'warning' | 'sobreVideo' | 'warm' | 'inverso'
 
 export type TextoProps = {
   children: ReactNode
@@ -295,7 +303,12 @@ export function Texto({ children, variante = 'cuerpo', color, numberOfLines, cen
         ? theme.status.successText
         : c === 'warning'
           ? theme.status.warningText
-          : theme.text[c as Exclude<TextoColor, 'danger' | 'success' | 'warning' | 'sobreVideo'>]
+          : c === 'inverso'
+            /* El slot del tema se llama `inverse` (inglés, como todo el
+               shape del tema) y la prop `inverso` (español, como toda la
+               API pública de la casa). Se traduce acá, en un solo lugar. */
+            ? theme.text.inverse
+            : theme.text[c as Exclude<TextoColor, 'danger' | 'success' | 'warning' | 'sobreVideo' | 'inverso'>]
 
   return (
     <Text
