@@ -168,7 +168,17 @@ export interface BotonProps {
    *  temas de tres y legible en el otro es justo el defecto que un gate
    *  en un solo tema no encuentra. §15b.2 ya lo decía —"sobre el muro el
    *  acento funcional es PAPEL"— y hasta hoy la pieza no sabía cumplirlo. */
-  superficie?: 'clara' | 'muro'
+  /* 🔴 **`'oscura'` entra en S116-B por pedido de C (buzón, pedido 5).** El
+   * caso vivo es 01 · Propuesta, sobre el degradado de entrada: la letra §2
+   * pide *«secundario blanco "Ya tengo cuenta"»* y **el secundario de la
+   * casa es borde magenta**, que sobre ciruela la misma §2 prohíbe textual
+   * (*«nunca magenta sobre magenta ni ciruela sobre ciruela»*).
+   *
+   * **VA COMO SUPERFICIE Y NO COMO VARIANTE, y lo decidió esta misma
+   * entrada**: *«la superficie es ORTOGONAL a la variante»*. Una
+   * `secundarioSobreOscuro` habría obligado a una hermana por cada variante
+   * el día que otra necesite el mismo fondo. */
+  superficie?: 'clara' | 'muro' | 'oscura'
   variante?: BotonVariante
   tamaño?: BotonTamaño
   /** Full-width. */
@@ -415,6 +425,7 @@ export function Boton({
   // sólido invierte (papel de fondo, muro de tinta) para que el primario
   // siga leyéndose como primario sin usar el teal prohibido.
   const sobreMuro = superficie === 'muro'
+  const sobreOscura = superficie === 'oscura'
   /** 🔴 `Exclude<…,'sinCaja'>` NO ES PROLIJIDAD: es lo que hace que el
    *  alias tenga que estar resuelto ANTES de llegar acá. Con el alias
    *  adentro del `Record`, el compilador pediría una entrada para él y
@@ -534,6 +545,32 @@ export function Boton({
       colores[k] = traeSuperficie
         ? { fondo: papel, texto: muro }
         : { fondo: 'transparent', texto: papel }
+    }
+  }
+
+  /* 🔴 **SOBRE SUPERFICIE OSCURA (el degradado de entrada, la cabecera
+   * ciruela).** Mismo molde que `sobreMuro` —una TABLA, no un parche por
+   * variante— y por la misma razón: si mañana nace otra variante, cae acá
+   * sola en vez de quedar con el color del tema claro.
+   *
+   * Lo que hace: **el primario conserva su magenta** (es la acción y el
+   * magenta sobre ciruela es justamente el par de la letra), y **todo lo
+   * demás pasa a blanco**: relleno transparente con borde blanco las que
+   * traen superficie, texto blanco las que no.
+   * *Es el mismo hueco que `Texto` ya había resuelto con `inverso` — «el
+   * par legible de `primary` cuando el fondo se da vuelta».*
+   *
+   * ⚠️ **Memorial queda afuera a propósito:** su acción es TINTA (Ley 21,
+   * que la letra §4 ratifica) y su cabecera es ciruela noche PLANA. Un
+   * botón magenta ahí rompería las dos. */
+  if (sobreOscura && theme.mode !== 'memorial') {
+    const blanco = palette.light0
+    for (const k of Object.keys(colores) as Exclude<BotonVariante, 'sinCaja'>[]) {
+      if (k === 'primario' || k === 'marca' || k === 'acento') continue
+      const traeSuperficie = colores[k].fondo !== 'transparent'
+      colores[k] = traeSuperficie
+        ? { fondo: 'transparent', texto: blanco, borde: blanco }
+        : { fondo: 'transparent', texto: blanco }
     }
   }
 
