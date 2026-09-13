@@ -34508,7 +34508,27 @@ grep -rnE 'toFixed\(2\)|\$\$\{' apps/cliente/src --include="*.tsx" --include="*.
 
 **Su auto-prueba distingue tres casos** y una de las tres **cazó un error mío** antes de sembrar: el discriminador que escribí primero contaba *cualquier* interpolación, y habría inflado el baseline.
 
-**☠️ MUERTE:** las 41 ocurrencias pasan por la fuente única — *el gate no la cura: impide que crezca mientras C la cura en el lote 3b.*
+### ⊳ ENMIENDA S116-A (2) — **EL NÚMERO NO ERA 41: ES 58.** Dos discriminadores reconciliados
+
+C midió **56 en el cliente y 51 en el prestador**; este gate decía **41 y 20**. Eran **dos discriminadores**, y el suyo era mejor.
+
+🔴 **El mío exigía un `$` en la MISMA LÍNEA, y con eso perdía 17 sitios — los 17 plata de verdad.** Todos del mismo patrón:
+
+```js
+t('recurrentes.alMes', { precio: m.monto.toFixed(2) })
+```
+
+**El `$` vive en el diccionario de i18n, no en la línea.** En pantalla sale `$6.00` igual. *Un discriminador que exige ver el símbolo no puede ver la plata que se arma en dos pedazos.*
+
+**Al revés, el de C traía un falso positivo** — pero **uno solo**, encontrado clasificando los 59 a mano: `lib/censo-almacenamiento.ts:56`, que formatea **megabytes**.
+
+⇒ **el gate queda con `toFixed(2)` (o `$${`) sobre `src` entero, excluyendo líneas de bytes.** **Baseline: cliente 58 · prestador 51** — y **el prestador coincide EXACTO con el censo de C**, que es lo que da confianza en que el discriminador es el mismo.
+
+📌 **Una corrección a mi propia clasificación, porque es la clase de error que se repite:** al separar plata de no-plata puse `despensa/index.tsx:451` del lado equivocado por tener `peso_kg` en la línea — **y es precio por kilo, o sea plata**. *El nombre de una variable vecina no dice la unidad del número.*
+
+⚠️ **Ruido aceptado a propósito:** un `peso.toFixed(2)` cuenta. No se puede distinguir por el nombre de la variable —lo acaba de probar el caso de arriba—, así que **el gate prefiere contar de más y que se declare, antes que perder plata real**. Medido: de los 59, sólo 1 no era plata.
+
+**☠️ MUERTE:** las 58 del cliente y las 51 del prestador pasan por la fuente única — *el gate no las cura: impide que crezcan mientras C las cura en el lote 3b.*
 
 ---
 

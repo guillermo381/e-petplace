@@ -1,10 +1,11 @@
 {
-  "baseline": { "cliente": 41, "prestador": 20 },
-  "sembrado": "2026-09-13 · S116-A",
+  "baseline": { "cliente": 58, "prestador": 51 },
+  "sembrado": "2026-09-13 · S116-A (re-sembrado con el discriminador ensanchado)",
   "firmado": "mesa 13-sep-2026 — trinquete del riel de moneda (D-1095)",
-  "por_app": "Heredado del guard de S82-A r16, que este archivo reemplaza: el baseline es POR APP para que el prestador —que se barre en su propia sesión— no tape una regresión del cliente ni al revés. Se conserva porque tenía razón.",
-  "nota_cliente_41": "La medición que abrió D-1095 publicó 42. El objeto dice 41: el 42 traía UN falso positivo, lib/censo-almacenamiento.ts:56, que formatea MEGABYTES y entraba porque el $ de su interpolación contaba como símbolo. El grep original lo esquivaba por casualidad (usaba toFixed(2) literal y las otras dos líneas de ese archivo son toFixed(1)). Corpus: app/ + components/ — las PANTALLAS. lib/ afuera.",
-  "nota_prestador_20": "Medido por A el 13-sep-2026 con el mismo discriminador, para recuperar la pata que el guard de S82 ya tenía. El prestador NO se barre en S116: su cura es de su propia sesión.",
+  "por_que_58_y_no_41": "El primer discriminador exigía un `$` en la misma línea y PERDÍA 17 sitios, los 17 plata de verdad: el patrón `t('clave', { precio: x.toFixed(2) })`, donde el $ vive en el diccionario de i18n y no en la línea. En pantalla sale $6.00 igual. Se reconcilió contra el censo de C (que reportó 56 cliente · 51 prestador): el prestador coincide EXACTO con este discriminador, y el cliente da 58 porque cuenta también los que C descontó.",
+  "que_cuenta": "toFixed(2) o el literal $${, sobre src entero de cada app, salvo líneas de bytes (1024 / 1048576) — la única clase de falso positivo que apareció al clasificar los 59 uno por uno: lib/censo-almacenamiento.ts:56, megabytes.",
+  "ruido_aceptado": "Un peso.toFixed(2) cuenta. No se distingue por el nombre de la variable: despensa/index.tsx:451 tiene peso_kg en la línea y ES plata (precio por kilo). El gate prefiere contar de más y que se declare, antes que perder plata real.",
+  "por_app": "Heredado del guard de S82-A r16: el baseline es POR APP para que el prestador —que se barre en su propia sesión— no tape una regresión del cliente ni al revés.",
   "solo_baja": "Sube A MANO y con su razón, jamás en el mismo commit que introdujo el caso.",
   "muerte": "Se retira el día que las dos apps lleguen a 0 y el riel sea el único camino (condición escrita en S82)."
 }

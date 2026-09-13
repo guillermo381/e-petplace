@@ -41,16 +41,32 @@
  * la fuente**. Un gate duro estaría rojo desde el minuto cero y se apagaría por
  * costumbre. *La cura es de C (lote 3b) y no de este gate.*
  *
- * ⚠️ EL DISCRIMINADOR, y es lo que hace que el número signifique algo: se cuenta
- *    una línea sólo si tiene **`toFixed(` CON un `$` en la línea**, o bien el
- *    literal **`$${`** (símbolo pegado a la interpolación). Sin esa exigencia,
- *    `toFixed` también cuenta kilos y megabytes — medido: el 42 que publicó
- *    `D-1095` traía justamente un falso positivo de MB.
+ * ── EL DISCRIMINADOR SE ENSANCHÓ (S116-A, 13-sep) Y ESTÁ MEDIDO POR QUÉ ────
+ * 🔴 El primero exigía un **`$` en la misma línea**. Medido contra el censo de
+ *    C: **perdía 17 sitios, y los 17 eran plata de verdad.** Todos del mismo
+ *    patrón — `t('clave', { precio: x.toFixed(2) })` — donde **el `$` vive en
+ *    el diccionario de i18n, no en la línea**. En pantalla sale `$6.00` igual.
+ *    *Un discriminador que exige ver el símbolo no puede ver la plata que se
+ *    arma en dos pedazos.*
  *
- * ALCANCE DECLARADO: las PANTALLAS (`app/` + `components/`) de las dos apps.
- * `lib/` queda afuera con su razón medida: `lib/censo-almacenamiento.ts`
- * formatea megabytes. Su verde dice «ninguna app empeoró», jamás «la casa
- * formatea bien».
+ * **Hoy cuenta:** `toFixed(2)` o el literal `$${`, **salvo líneas de bytes**
+ * (`1024` / `1048576`), que es **la única clase de falso positivo que apareció
+ * al clasificar los 59 uno por uno**: `lib/censo-almacenamiento.ts:56`, que
+ * formatea megabytes.
+ *
+ * ⚠️ **`$${` hoy aporta CERO** —medido: no hay ninguna línea que lo tenga sin
+ *    `toFixed(2)`— y se conserva igual, porque cubre el caso de un monto ya
+ *    formateado como string. *Se declara para que nadie lea su presencia como
+ *    evidencia de que atrapa algo.*
+ *
+ * 📌 **Y una corrección a la clasificación, para que no se repita:** al separar
+ *    plata de no-plata, `despensa/index.tsx:451` cayó del lado equivocado por
+ *    tener `peso_kg` en la línea — y es **precio por kilo**, o sea plata. *El
+ *    nombre de una variable vecina no dice la unidad del número.*
+ *
+ * ALCANCE: `src` entero de las dos apps (no sólo `app/` + `components/`): la
+ * plata también se formatea en `lib/` y en `hooks/`. Su verde dice «ninguna app
+ * empeoró», jamás «la casa formatea bien».
  *
  * SALIDAS: 0 verde · 1 rojo (subió) · 2 NO CONCLUYENTE (no pudo medir).
  */
@@ -62,11 +78,13 @@ const RAIZ = process.cwd()
 const BASE_FILE = join(RAIZ, 'scripts/.baseline-moneda.json')
 
 const APPS = {
-  cliente: [join(RAIZ, 'apps/cliente/src/app'), join(RAIZ, 'apps/cliente/src/components')],
-  prestador: [join(RAIZ, 'apps/prestador/src/app'), join(RAIZ, 'apps/prestador/src/components')],
+  cliente: [join(RAIZ, 'apps/cliente/src')],
+  prestador: [join(RAIZ, 'apps/prestador/src')],
 }
 
-const TIENE_PLATA = (l) => (/toFixed\s*\(/.test(l) && l.includes('$')) || /\$\$\{/.test(l)
+/* La ÚNICA clase de falso positivo medida: bytes. Nada más se excluye. */
+const ES_BYTES = (l) => /1024|1048576/.test(l)
+const TIENE_PLATA = (l) => !ES_BYTES(l) && (/toFixed\(2\)/.test(l) || /\$\$\{/.test(l))
 const ES_COMENTARIO = (l) => /^\s*(\*|\/\/|\/\*)/.test(l)
 
 function archivos(dir, out = []) {
@@ -82,8 +100,15 @@ function archivos(dir, out = []) {
 
 /* ══ AUTO-PRUEBA: si no distingue su rojo, su verde no vale (L-459) ══ */
 if (!TIENE_PLATA('metadataMono={`$${precio.toFixed(2)}`}')) { di('ROJO · auto-prueba: no ve el caso de D-1095.'); process.exit(2) }
-if (TIENE_PLATA('const kg = peso.toFixed(2)')) { di('ROJO · auto-prueba: cuenta un toFixed que NO es plata.'); process.exit(2) }
+if (!TIENE_PLATA("t('x.alMes', { precio: m.monto.toFixed(2) })")) { di('ROJO · auto-prueba: no ve la plata que se arma con i18n (los 17 que perdía el discriminador viejo).'); process.exit(2) }
+if (TIENE_PLATA('`[censo] TOTAL=${(total / 1048576).toFixed(2)}MB`')) { di('ROJO · auto-prueba: cuenta bytes como plata.'); process.exit(2) }
 if (TIENE_PLATA('const s = `${nombre} vino`')) { di('ROJO · auto-prueba: cuenta una interpolación que no es plata.'); process.exit(2) }
+
+/* ⚠️ LO QUE ESTE DISCRIMINADOR ACEPTA COMO RUIDO, declarado: un
+   `peso.toFixed(2)` SÍ cuenta. No se puede distinguir por el nombre de la
+   variable —`despensa/index.tsx:451` tiene `peso_kg` en la línea y ES plata—,
+   así que el gate prefiere contar de más y que se declare, antes que perder
+   plata de verdad. Medido: al clasificar los 59, sólo 1 no era plata. */
 
 const listas = Object.fromEntries(Object.entries(APPS).map(([a, ds]) => [a, ds.flatMap((d) => archivos(d))]))
 for (const [a, l] of Object.entries(listas)) {
