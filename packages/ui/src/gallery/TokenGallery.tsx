@@ -123,6 +123,7 @@ import { BarraPasos } from '../components/BarraPasos'
 import { Cabecera } from '../components/Cabecera'
 import { Opcion } from '../components/Opcion'
 import { IsotipoV5, LogoV5 } from '../brand/Marca'
+import { Confirmacion } from '../components/Confirmacion'
 import { PantallaConPie } from '../components/PantallaConPie'
 import { GlifoConContador } from '../components/GlifoConContador'
 import { BurbujaPendientes } from '../components/BurbujaPendientes'
@@ -5248,6 +5249,21 @@ function GaleriaInterna() {
             server-side), jamás del oficio. Y el `paddingBottom` de la safe area lo pone la pieza:
             si cada pantalla lo recalcula, vuelve a divergir.
           </Texto>
+        </Seccion>
+
+        <Seccion titulo="Confirmacion (S116-B) — la pantalla de «¡Listo!» con su slot fiscal">
+          <View style={{ height: 620, borderRadius: radius.tarjetaV5, overflow: 'hidden' }}>
+            <Confirmacion
+              exclamacion="¡Listo!"
+              titulo="Tu pedido está en camino"
+              apoyo="Te avisamos cuando salga del local"
+              dato={{ etiqueta: 'Pedido #1042', valor: '$45,00' }}
+              lineaExtra="La factura te llega aparte por correo."
+              especies={['perro', 'gato', 'conejo']}
+              primario={{ texto: 'Ver el pedido', onPress: () => {} }}
+              secundario={{ texto: 'Volver al hogar', onPress: () => {} }}
+            />
+          </View>
         </Seccion>
 
         <Seccion titulo="IsotipoV5 · LogoV5 (S116-B) — NO reemplazan a Isotipo todavía">

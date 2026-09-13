@@ -352,6 +352,7 @@ function BotonPaso({
           ? HOLGURA_ANCHA
           : 0
   const { theme } = useTheme()
+  const formaV5 = 'formaV5' in theme.accent && theme.accent.formaV5 === true
   const [presionado, setPresionado] = useState(false)
   return (
     <Pressable
@@ -373,13 +374,26 @@ function BotonPaso({
         style={{
           width: lado,
           height: lado,
-          borderRadius: radius.suave,
+          /* 🔴 **S116-B lote 2 · LOS DOS BOTONES SE SEPARAN** (punto 17:
+             *«un «−» en círculo blanco con borde fino, y un «+» en círculo
+             magenta lleno»*). Con `formaV5` dejan de ser dos cajas iguales:
+             el «+» es la acción y se ve como tal; el «−» acompaña.
+             *Hasta hoy compartían superficie, y eso decía que pesan lo
+             mismo — no es cierto: en una lista de compra agregar es lo que
+             la persona hace diez veces y quitar una.*
+             El prestador conserva las dos iguales. */
+          borderRadius: formaV5 ? radius.chipV5 : radius.suave,
+          ...(formaV5 && signo !== 'mas' ? { borderWidth: 1, borderColor: theme.border.subtle } : null),
           // Dentro del bloque de `ancho` la superficie ya la pone el
           // contenedor: una caja adentro de otra rompería el bloque en tres.
           // S103-B · UNO SOLO. El `ancho` los dejaba transparentes porque
           // el bloque ponía el material; sin bloque, el hundido de siempre —
           // el mismo que ve la ficha.
-          backgroundColor: theme.bg.hundido,
+          backgroundColor: formaV5
+            ? signo === 'mas'
+              ? theme.accent.cta        // el «+» lleno: es la acción
+              : theme.bg.card           // el «−» en blanco: acompaña
+            : theme.bg.hundido,
           alignItems: 'center',
           justifyContent: 'center',
           opacity: atenuado ? 0.4 : 1,
@@ -393,8 +407,10 @@ function BotonPaso({
           <Icono nombre="papelera" tamano={tamano === 'menudo' ? 16 : 20} registro="tinta" tinta={color} />
         ) : (
           <Svg width={20} height={20} viewBox="0 0 20 20" fill="none">
-            {signo === 'mas' ? <Path d="M10 4v12" stroke={color} strokeWidth={2} strokeLinecap="round" /> : null}
-            <Path d="M4 10h12" stroke={color} strokeWidth={2} strokeLinecap="round" />
+            {/* Sobre el «+» lleno el trazo invierte al par del CTA; el «−»
+                conserva su color de siempre. */}
+            {signo === 'mas' ? <Path d="M10 4v12" stroke={formaV5 ? theme.accent.ctaTexto : color} strokeWidth={2} strokeLinecap="round" /> : null}
+            <Path d="M4 10h12" stroke={formaV5 && signo === 'mas' ? theme.accent.ctaTexto : color} strokeWidth={2} strokeLinecap="round" />
           </Svg>
         )}
       </Animated.View>
