@@ -100,11 +100,23 @@ export default function AutorizacionScreen() {
   );
 
   const disponible = estado !== 'cargando' && estado !== 'no_disponible';
-  const titulo = disponible
-    ? estado.tipo === 'alta_mascota'
-      ? t('autorizacion.tituloAlta', { negocio: estado.negocioNombre ?? '', mascota: estado.mascotaNombre ?? '' })
-      : t('autorizacion.tituloAtencion', { negocio: estado.negocioNombre ?? '', mascota: estado.mascotaNombre ?? '' })
-    : t('autorizacion.cargando');
+  /* ⭐ S116-C lote 3 · `D-1087` — **EL TÍTULO DEJA DE PODER SALIR ROTO.**
+     El nombre del negocio puede faltar de verdad (la cuenta comercial es
+     solo-owner por RLS), y el `?? ''` producía «  quiere atender a Thor».
+     Ahora hay una voz para cada caso: *se dice lo que no se sabe en vez de
+     dejar el hueco* (ley del founder, 5-sep). El nombre de la mascota cae a
+     un genérico honesto y no a un nombre inventado. */
+  const negocioNombre = disponible ? estado.negocioNombre : null;
+  const mascotaNombre = disponible ? (estado.mascotaNombre ?? t('autorizacion.mascotaSinNombre')) : '';
+  const titulo = !disponible
+    ? t('autorizacion.cargando')
+    : estado.tipo === 'alta_mascota'
+      ? negocioNombre !== null
+        ? t('autorizacion.tituloAlta', { negocio: negocioNombre, mascota: mascotaNombre })
+        : t('autorizacion.tituloAltaSinNegocio', { mascota: mascotaNombre })
+      : negocioNombre !== null
+        ? t('autorizacion.tituloAtencion', { negocio: negocioNombre, mascota: mascotaNombre })
+        : t('autorizacion.tituloAtencionSinNegocio', { mascota: mascotaNombre });
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={[]}>

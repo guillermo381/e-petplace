@@ -430,9 +430,22 @@ export default function CitasDeMascota() {
             <Texto variante="apoyo">
               {/* D-455 cerrada (S71-A motor): el nombre del negocio llega por
                   la RPC angosta — la forma pobre queda de fallback real. */}
-              {(c.prestador_nombre ?? c.negocio_nombre) !== null
-                ? t('citasMascota.coordinaraNegocio', { negocio: c.prestador_nombre ?? c.negocio_nombre ?? '' })
-                : t('citasMascota.coordinaranSinNombre')}
+              {/* ⭐ S116-C lote 3 · `D-1087` — **EL HUECO SE HIZO INEXPRESABLE, NO
+                  SE SILENCIÓ.** El ternario YA garantizaba que el nombre no es
+                  nulo, pero TypeScript no puede estrechar una expresión
+                  (`a ?? b`) entre la condición y el uso, así que el `?? ''`
+                  estaba ahí sólo para compilar — y era un hueco real para el
+                  gate: *una frase con relleno vacío sale «… algo de ,» y
+                  compila perfecto*. Con la const, el estrechamiento ocurre y
+                  el fallback deja de poder escribirse.
+                  ⚠️ **Se cura acá y no con `HUECO_ACEPTADO`** porque el escape
+                  declara que se miró y deja el `?? ''` vivo; esto lo borra. */}
+              {(() => {
+                const quien = c.prestador_nombre ?? c.negocio_nombre
+                return quien !== null
+                  ? t('citasMascota.coordinaraNegocio', { negocio: quien })
+                  : t('citasMascota.coordinaranSinNombre')
+              })()}
             </Texto>
           ) : null}
           {c.prestador_nombre !== null ? (

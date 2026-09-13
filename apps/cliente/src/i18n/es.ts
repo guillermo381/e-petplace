@@ -971,6 +971,14 @@ export const clienteEs = {
     filaConfirmar: 'Es correcta',
     estaNoEs: 'Esta no es',
     faltanTocar: 'Faltan {{n}} por revisar',
+    /* ⭐ S116-C lote 3 · `D-1086` — LAS RAZONES DEL BOTÓN APAGADO.
+       Son TRES claves y no una genérica porque el botón se apaga por tres
+       causas distintas: *«revisá los datos» obliga a la persona a buscar
+       cuál de las tres es*, que es exactamente lo que el freno mudo hacía. */
+    razonSinNinguna: 'Todavía no hay ninguna vacuna para sumar',
+    razonDudosas: 'Hay vacunas a las que les falta un dato: revísalas primero',
+    razonSinTocar: 'Confirma cada vacuna antes de sumarlas',
+    razonEdicion: 'Completa el nombre y una fecha que no sea futura',
     faltaTocarUna: 'Falta 1 por revisar',
     campoAplicada: 'Aplicada',
     campoProxima: 'Próxima',
@@ -3611,6 +3619,15 @@ export const clienteEs = {
   autorizacion: {
     tituloAtencion: '{{negocio}} quiere atender a {{mascota}}',
     tituloAlta: '{{negocio}} quiere registrar a {{mascota}} en tu familia y atenderlo hoy',
+    /* ⭐ S116-C lote 3 · `D-1087` — **LAS VOCES DE LO QUE NO SE SABE.**
+       El nombre del negocio puede no llegar (RLS solo-owner sobre la cuenta
+       comercial). Antes se rellenaba con vacío y la frase salía «  quiere
+       atender a Thor». Acá se dice la verdad sin inventar quién — mismo
+       criterio que `citasMascota.coordinaranSinNombre`, que ya lo resolvió
+       así, y la ley del founder del 5-sep: *se dice dónde no pudimos*. */
+    tituloAltaSinNegocio: 'Quieren registrar a {{mascota}} en tu familia y atenderlo hoy',
+    tituloAtencionSinNegocio: 'Quieren atender a {{mascota}}',
+    mascotaSinNombre: 'tu mascota',
     // S82-C L3: voseo→tuteo al tocarse la pantalla (regla 27; C3 de la
     // directiva de craft, re-verificado contra fuente).
     cuerpo: 'Si autorizas, el negocio va a poder ver y cuidar su expediente.',
