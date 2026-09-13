@@ -34494,7 +34494,11 @@ grep -rnE 'toFixed\(2\)|\$\$\{' apps/cliente/src --include="*.tsx" --include="*.
 
 ### ⊳ ENMIENDA S116-A (13-sep-2026) — NACE SU GATE, Y EL NÚMERO SE CORRIGE A **41**
 
-**`verify:moneda`** (`scripts/verify-moneda.mjs`), **trinquete solo-baja, baseline 41, en el pre-commit** (100 ms, acotado a `apps/cliente`).
+**`verify:moneda`** (`scripts/verify-moneda.mjs`), **trinquete solo-baja, en el pre-commit** (100 ms). **Baseline POR APP: cliente 41 · prestador 20.**
+
+🔴 **Y al escribirlo apareció algo que cambia la lectura de esta ficha: el gate YA EXISTÍA desde S82-A r16, con el mismo propósito — y NUNCA estuvo cableado en `package.json`.** *Nadie lo corrió nunca.* ⇒ **el riel tenía su guard desde el día uno y el guard estaba tan huérfano como el riel.** Eso explica lo que esta ficha llamaba «casi nadie migró»: no es que la casa ignorara una advertencia, es que **la advertencia nunca sonó**.
+
+*De él se conserva lo que tenía mejor —el **baseline por app**, «para que el prestador, que se barre en su propia sesión, no tape una regresión del cliente ni al revés», y su condición de muerte— y se le agrega el discriminador corregido, la auto-prueba y el reporte con archivo y línea.* **El prestador entra al gate con 20, medido hoy: no se barre en S116, pero desde ahora tampoco crece.**
 
 🔴 **El 42 de esta ficha traía UN FALSO POSITIVO y se corrige acá:** `lib/censo-almacenamiento.ts:56` formatea **megabytes** —`` `${(total/1048576).toFixed(2)}MB` ``— y entraba porque el `$` de su interpolación contaba como símbolo de moneda. *El grep original lo esquivaba por casualidad —usaba `toFixed(2)` literal y las otras dos líneas de ese archivo son `toFixed(1)`—, así que el error entró justo por la única que coincidía.* **El corpus del gate son las PANTALLAS** (`app/` + `components/`, sin `lib/`): **41 en 31 archivos.**
 
