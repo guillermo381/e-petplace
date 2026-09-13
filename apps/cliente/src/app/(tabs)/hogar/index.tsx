@@ -48,6 +48,8 @@ import {
   CitaEnVivo,
   Esqueleto,
   EsqueletoGrupo,
+  Cabecera,
+  Personaje,
   EstadoVacio,
   Hoja,
   Icono,
@@ -1087,8 +1089,26 @@ export default function Hogar() {
      dictado, y tiene su razón: quien llegó por adopción entró a ver animales,
      no a llenar un formulario. */
   if (mascotas.length === 0) {
+    /* ⚠️ **`hoy` se declara ACÁ y no se reusa el de abajo** — el de la
+       pantalla poblada vive después de este `return` y leerlo sería un TDZ:
+       compila, y revienta en runtime. Es la clase exacta que `D-1009` y
+       `verify:ref-antes-de-uso` existen para cazar, y que ya costó un crash
+       en S112. *Una constante barata local vale más que un orden frágil.* */
+    const hoyVacio = new Date();
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+        {/* ⭐ **06 · EL HOGAR SIN MASCOTA — S116-C lote 3.**
+            La cabecera raíz de la casa, con su saludo. *Una pantalla vacía
+            sin techo se lee como una pantalla que no cargó.* */}
+        <Cabecera
+          variante="raiz"
+          /* **El MISMO saludo que el Hogar poblado**, no una voz paralela:
+             `saludoPorFranja` + el primer nombre del perfil. *Dos formas de
+             saludar en la misma app son dos que envejecen distinto.* */
+          antetitulo={fechaLargaHumana(hoyVacio.toISOString().slice(0, 10), idioma)}
+          titulo={`${saludoPorFranja(hoyVacio.getHours(), t)}${nombrePerfil ? `, ${nombrePerfil.trim().split(' ')[0]}` : ''}`}
+          apoyo={t('hogar.vacioApoyo')}
+        />
         <ScrollView
           contentContainerStyle={{
             flexGrow: 1,
@@ -1125,6 +1145,54 @@ export default function Hogar() {
 
               `chevron={false}`: la celda ABRE el alta, no entra a una sección
               (S58, patrón Hogar v2). */}
+          {/* ── ②bis **LA INVITACIÓN, RECOMPUESTA (06)** ─────────────────
+              El personaje, el título, la línea y el CTA. **El borde punteado
+              lo da `Tarjeta tinte="plana"` con el hairline de la casa** — no
+              se pinta un borde a mano: eso sería un valor en la pantalla y lo
+              caza `R4`. *Si la mesa quiere el punteado rosa exacto del mock,
+              es una prop de `Tarjeta` y se pide.* */}
+          <Tarjeta tinte="plana">
+            <View style={{ alignItems: 'center', gap: spacing[3], paddingVertical: spacing[4] }}>
+              <Personaje especie="perro" tamano="grande" fondo="rosa" />
+              <Texto variante="seccion">{t('hogar.vacioTitulo')}</Texto>
+              <Texto variante="cuerpo" color="secondary" centrado>
+                {t('hogar.vacioDetalle')}
+              </Texto>
+              <Boton
+                variante="primario"
+                bloque
+                etiqueta={t('hogar.vacioCta')}
+                onPress={() => router.push('/hogar/agregar')}
+              />
+            </View>
+          </Tarjeta>
+
+          {/* ── ③ **MIENTRAS TANTO** — dos caminos que SÍ llevan a algo.
+              *No es relleno: sin mascota el Hogar no tiene estado que contar,
+              y dejar la pantalla con una sola tarjeta sería correcto pero
+              mudo. Estas dos filas existen porque las dos secciones ya
+              funcionan sin mascota.* */}
+          <View style={{ gap: spacing[2] }}>
+            <Texto variante="antetitulo">{t('hogar.mientrasTanto')}</Texto>
+            <Tarjeta>
+              <CeldaNavegacion
+                icono="explorar"
+                titulo={t('hogar.vacioExplorar')}
+                detalle={t('hogar.vacioExplorarDetalle')}
+                onPress={() => router.push('/explorar')}
+              />
+              <Separador />
+              <CeldaNavegacion
+                icono="despensa"
+                titulo={t('hogar.vacioTienda')}
+                detalle={t('hogar.vacioTiendaDetalle')}
+                onPress={() => router.push('/despensa')}
+              />
+            </Tarjeta>
+          </View>
+
+          {/* La «i» del porqué se conserva — N22: lo que se necesita para
+              ENTENDER se pliega, y su Hoja sigue viva más abajo. */}
           <Tarjeta>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
               <View style={{ flex: 1 }}>

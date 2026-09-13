@@ -641,6 +641,16 @@ export const clienteEs = {
     historiaEmpieza: 'La historia empieza acá.',
     historiaEmpiezaDetalle: 'Cada paseo, cada visita al vet, va a quedar guardada.',
     sinMascotas: 'Todavía no hay nadie por acá',
+    /* ⭐ S116-C lote 3 · 06 — el hogar sin mascota. */
+    vacioApoyo: 'Empecemos por presentar a tu mascota.',
+    vacioTitulo: 'Agrega tu primera mascota',
+    vacioDetalle: 'Con su nombre y especie creamos su expediente digital. Toma menos de un minuto.',
+    vacioCta: '+ Agregar mascota',
+    mientrasTanto: 'MIENTRAS TANTO',
+    vacioExplorar: 'Explorar servicios',
+    vacioExplorarDetalle: 'Mira qué hay cerca de ti',
+    vacioTienda: 'Ver la tienda',
+    vacioTiendaDetalle: 'Alimento, juguetes e higiene',
     sinMascotasDetalle: 'Agrega a tu mascota para empezar su historia.',
     sinMascotasAgregar: 'Agregar a mi mascota',
     sinMascotasAdopcion: 'Conoce a los que están esperando',
@@ -2954,7 +2964,17 @@ export const clienteEs = {
   /** S103-C · RECUPERAR — heredadas VERBATIM del prestador: ya estaban en
    *  tuteo neutro y es el mismo acto para el mismo humano. */
   recuperar: {
-    titulo: 'Recuperar tu contraseña',
+    titulo: '¿Olvidaste tu contraseña?',
+    apoyo: 'Te ayudamos a entrar de nuevo.',
+    volver: 'Volver',
+    queSigue: 'QUÉ SIGUE',
+    paso1: 'Revisa tu bandeja de entrada',
+    paso2: 'Escribe el código que te enviamos',
+    paso3: 'Crea una contraseña nueva y entra',
+    /* Sin número a propósito — ver el comentario en la pantalla: la config
+       del vencimiento no existe de este lado y no se inventa. */
+    vence: 'El código vence al rato de enviarlo. Si se vence, pedimos otro.',
+    yaLaRecorde: '¿Ya la recordaste? Volver a ingresar',
     ayudaPedir: 'Escribe el correo con el que entras y te enviamos un código de {{n}} dígitos.',
     email: 'Tu correo',
     pedir: 'Enviar el código',

@@ -65,12 +65,12 @@ import {
   Boton,
   Campo,
   CampoCodigo,
-  Encabezado,
+  Cabecera,
+  Celda,
+  Icono,
+  Tarjeta,
   EvitaTeclado,
   HuellaDeLlegada,
-  Isotipo,
-  MarcaDeAgua,
-  PaseoDeHuellas,
   Texto,
   spacing,
   useAviso,
@@ -210,14 +210,16 @@ export default function Recuperar() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      {/* EL TAPIZ heredado del ritual (§4) — las dos capas de fondo. */}
-      <MarcaDeAgua />
-      <PaseoDeHuellas />
-
-      <Encabezado variante="navegacion" titulo={t('recuperar.titulo')} atras onAtras={() => router.back()} />
-      <View pointerEvents="none" style={{ position: 'absolute', top: insets.top + spacing[2], right: spacing[5] }}>
-        <Isotipo size={ISOTIPO_ESQUINA} variant="gradiente" />
-      </View>
+      {/* ☠️ **MUEREN EL TAPIZ, LA SENDA Y EL ISOTIPO DE ESQUINA** — misma
+          razón que en 01/03/05: la mesa los llamó ruido y del isotipo fino
+          dijo que no se reconoce. La identidad la pone la cabecera. */}
+      <Cabecera
+        variante="empujada"
+        titulo={t('recuperar.titulo')}
+        apoyo={t('recuperar.apoyo')}
+        onVolver={() => router.back()}
+        etiquetaVolver={t('recuperar.volver')}
+      />
       <EvitaTeclado>
         <ScrollView
           style={{ backgroundColor: 'transparent' }}
@@ -226,6 +228,11 @@ export default function Recuperar() {
         >
           {paso === 'pedir' ? (
             <>
+              {/* El glifo en su círculo — el patrón de la casa para la fila de
+                  lista, acá en grande. */}
+              <View style={{ alignItems: 'center', paddingBottom: spacing[4] }}>
+                <Icono nombre="candado" tamano={40} registro="capa" />
+              </View>
               <Texto variante="apoyo">{t('recuperar.ayudaPedir', { n: LARGO_CODIGO })}</Texto>
               <Campo
                 label={t('recuperar.email')}
@@ -237,6 +244,38 @@ export default function Recuperar() {
                 textContentType="username"
               />
               {rebote !== null && <Texto variante="apoyo" color="danger">{rebote}</Texto>}
+
+              {/* ⭐ **«QUÉ SIGUE» — los tres pasos.**
+                  🔴 **DICEN CÓDIGO, NO ENLACE, y es una corrección al encargo
+                  con su razón medida:** el mock describe un enlace por correo,
+                  y **esta app manda un CÓDIGO de dígitos** — el camino entero
+                  (`recuperarClave` → `verifyOtp` → nueva clave) está construido
+                  y **probado con una cuenta real que recuperó su clave y
+                  entró** (S104-C, `D-628` cerrada por medición).
+                  *Cambiar a enlace no es cambiar una pantalla: es cambiar el
+                  motor de recuperación y volver a probar el único camino de
+                  entrada que hoy funciona.* Se conserva el motor y la voz dice
+                  la verdad de lo que va a pasar. */}
+              <View style={{ paddingTop: spacing[6], gap: spacing[3] }}>
+                <Texto variante="antetitulo">{t('recuperar.queSigue')}</Texto>
+                <Celda inicio={<Texto variante="enfasis">1</Texto>} titulo={t('recuperar.paso1')} />
+                <Celda inicio={<Texto variante="enfasis">2</Texto>} titulo={t('recuperar.paso2')} />
+                <Celda inicio={<Texto variante="enfasis">3</Texto>} titulo={t('recuperar.paso3')} />
+                <Tarjeta tinte="plana">
+                  {/* 🔴 **EL AVISO DE VENCIMIENTO NO LLEVA NÚMERO, y es una
+                      medición:** el encargo dice *«el tiempo viene de config,
+                      no se escribe»*, y **esa config no existe** — cero
+                      constante de minutos en `packages/api` (buscado por
+                      `MINUTOS`/`expira`/`vence` junto a
+                      `LARGO_CODIGO_RECUPERACION`). El vencimiento real lo pone
+                      Supabase del lado del servidor.
+                      ⇒ **la frase dice que vence, sin inventar cuánto.** Un
+                      número tecleado acá sería falso el día que alguien mueva
+                      la config, y nadie se enteraría. El día que la constante
+                      exista, la voz la recibe. */}
+                  <Texto variante="apoyo">{t('recuperar.vence')}</Texto>
+                </Tarjeta>
+              </View>
               <View style={{ paddingTop: spacing[4] }}>
                 <Boton etiqueta={t('recuperar.pedir')} bloque cargando={trabajando} onPress={() => void pedir()} />
               </View>
@@ -300,6 +339,38 @@ export default function Recuperar() {
                 ayuda={t('recuperar.largoMinimo', { n: MIN_LARGO_CONTRASENA })}
               />
               {rebote !== null && <Texto variante="apoyo" color="danger">{rebote}</Texto>}
+
+              {/* ⭐ **«QUÉ SIGUE» — los tres pasos.**
+                  🔴 **DICEN CÓDIGO, NO ENLACE, y es una corrección al encargo
+                  con su razón medida:** el mock describe un enlace por correo,
+                  y **esta app manda un CÓDIGO de dígitos** — el camino entero
+                  (`recuperarClave` → `verifyOtp` → nueva clave) está construido
+                  y **probado con una cuenta real que recuperó su clave y
+                  entró** (S104-C, `D-628` cerrada por medición).
+                  *Cambiar a enlace no es cambiar una pantalla: es cambiar el
+                  motor de recuperación y volver a probar el único camino de
+                  entrada que hoy funciona.* Se conserva el motor y la voz dice
+                  la verdad de lo que va a pasar. */}
+              <View style={{ paddingTop: spacing[6], gap: spacing[3] }}>
+                <Texto variante="antetitulo">{t('recuperar.queSigue')}</Texto>
+                <Celda inicio={<Texto variante="enfasis">1</Texto>} titulo={t('recuperar.paso1')} />
+                <Celda inicio={<Texto variante="enfasis">2</Texto>} titulo={t('recuperar.paso2')} />
+                <Celda inicio={<Texto variante="enfasis">3</Texto>} titulo={t('recuperar.paso3')} />
+                <Tarjeta tinte="plana">
+                  {/* 🔴 **EL AVISO DE VENCIMIENTO NO LLEVA NÚMERO, y es una
+                      medición:** el encargo dice *«el tiempo viene de config,
+                      no se escribe»*, y **esa config no existe** — cero
+                      constante de minutos en `packages/api` (buscado por
+                      `MINUTOS`/`expira`/`vence` junto a
+                      `LARGO_CODIGO_RECUPERACION`). El vencimiento real lo pone
+                      Supabase del lado del servidor.
+                      ⇒ **la frase dice que vence, sin inventar cuánto.** Un
+                      número tecleado acá sería falso el día que alguien mueva
+                      la config, y nadie se enteraría. El día que la constante
+                      exista, la voz la recibe. */}
+                  <Texto variante="apoyo">{t('recuperar.vence')}</Texto>
+                </Tarjeta>
+              </View>
               <View style={{ paddingTop: spacing[4] }}>
                 <Boton etiqueta={t('recuperar.cambiar')} bloque cargando={trabajando} onPress={() => void cambiar()} />
               </View>
