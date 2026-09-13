@@ -30,6 +30,21 @@ export interface EntornoHuella {
   activa?: boolean
   /** Su huella ES el dibujo (`negocio`, `datos`, `ia`). */
   esEstructura: boolean
+  /** 🔴 **S116-B lote 2b — ¿esta casa recibió el rediseño?** Es el mismo
+   *  `theme.accent.formaV5` que gobierna la geometría y la tipografía v5:
+   *  una sola bandera para una sola decisión de una sola letra.
+   *
+   *  **Lo que hace acá:** la letra §1.1 dice *«los glifos no llevan
+   *  huella»* y deroga las leyes 1-3 de `DIRECCION_ARTE` **para el
+   *  cliente**. ⇒ en la casa v5 la huella se apaga en TODO glifo.
+   *
+   *  ⚠️ **Y ES POR CASA PORQUE LA MEDICIÓN LO OBLIGÓ, no por prudencia.**
+   *  La orden de la mesa nombró **doce** glifos con huella; el censo del
+   *  registry dio **49**, y **24 de ellos los monta el prestador**, que la
+   *  letra §5 deja sin cambios. *Apagarla a secas le habría sacado la
+   *  huella a la barra del prestador entera — el mismo defecto que el
+   *  décimo slot nació para evitar en el lote 2.* */
+  casaV5: boolean
   colorHuella: string
   colorTinta: string
 }
@@ -61,9 +76,19 @@ export function resolverHuella({
   montaje,
   activa,
   esEstructura,
+  casaV5,
   colorHuella,
   colorTinta,
 }: EntornoHuella): string {
+  /* 🔴 **LA CASA v5 MANDA PRIMERO, salvo donde la huella es el objeto.**
+   * El orden importa y no es arbitrario: `esEstructura` gana sobre todo lo
+   * demás —lo dice el bloque de arriba y sigue rigiendo— porque un `'none'`
+   * sobre `ia` no deja un glifo sin adorno: **deja un glifo vacío, y no da
+   * error: da un hueco**. *Los tres estructurales son de la barra del
+   * prestador, así que en la práctica esta rama no se cruza con la de
+   * arriba — pero se escribe en este orden para que siga siendo cierta el
+   * día que un estructural aparezca en el cliente.* */
+  if (casaV5 && !esEstructura) return 'none'
   /* El montaje manda… salvo donde la huella es el objeto (ver arriba). */
   if (montaje === 'control' && !esEstructura) return 'none'
   /* Desde acá, la Ley 6 tal como estaba escrita en `Icono` — sin un cambio. */

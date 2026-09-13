@@ -155,6 +155,7 @@
     "verify:reversion-no-vuelve": "node scripts/verify-reversion-no-vuelve.mjs",
     "verify:numero-nombra-comando": "node scripts/verify-numero-nombra-comando.mjs",
     "verify:reduced-motion": "node scripts/verify-reduced-motion.mjs",
+    "verify:huella-por-casa": "npx tsx scripts/verify-huella-por-casa.mjs",
     "verify:assets-resuelven": "node scripts/verify-assets-resuelven.mjs",
     "verify:moneda": "node scripts/verify-moneda.mjs"
   },
