@@ -30,6 +30,19 @@ import { useTheme } from '../ThemeProvider'
 
 export type TarjetaTinte =
   | 'ninguno'
+  /* 🔴 **S116-B lote 2 · LOS DOS MATERIALES DE v5** (letra §2, punto 8 del
+     encargo). Entran como TINTE y no como variante nueva porque el
+     contrato se conserva: quien monta `Tarjeta` hoy no cambia una línea.
+     · `plana`     — rosa tinte, sin borde ni sombra: los avisos y el dato
+                     de apoyo («Con estos datos creamos su expediente…»).
+     · `destacada` — ciruela con degradado y texto blanco: la promo de la
+                     casa dentro de una categoría.
+     ⚠️ `destacada` **NO pinta el texto**: una `Tarjeta` es un contenedor y
+     el color del texto es de quien lo escribe. Lo que hace es exponer su
+     superficie oscura para que el consumidor pida `text.onGradient` — el
+     mismo trato que `HeroMarca` le da al gradiente. */
+  | 'plana'
+  | 'destacada'
   | 'warning'
   | 'danger'
   | 'success'
@@ -100,8 +113,14 @@ export function Tarjeta(props: TarjetaProps) {
     vida:      { fondo: theme.status.successBg, borde: theme.status.successBorder },
     cuidado:   { fondo: theme.status.infoBg,    borde: theme.status.infoBorder },
     comunidad: { fondo: theme.accent.brandBg,   borde: theme.accent.brandBorder },
+    // S116-B lote 2 · los dos de v5. `plana` usa el tinte de la casa
+    // (`bg.overlay` = rosa tinte en el cliente, gris cálido en memorial):
+    // así el material viaja por tema y no por hex.
+    plana:     { fondo: theme.bg.overlay,       borde: 'transparent' },
+    destacada: { fondo: theme.accent.control,   borde: 'transparent' },
   }
   const tt = tintes[tinte]
+  const formaV5 = 'formaV5' in theme.accent && theme.accent.formaV5 === true
 
   // Alias deprecados de shadows v4 → niveles de la Ley 20
   const nivel =
@@ -113,7 +132,10 @@ export function Tarjeta(props: TarjetaProps) {
   const superficieSombra = nivel !== null ? theme.elevacion[nivel] : ''
   const superficie: ViewStyle = {
     backgroundColor: tt.fondo,
-    borderRadius: radius.lg,  // 16 fijo — decisión B1: cards 16
+    /* S116-B lote 2 · el radio pasa a 24 (letra §2: «tarjeta radio 24»)
+       **sólo donde la casa recibió la geometría v5** — ver `accent.formaV5`.
+       El prestador y memorial conservan el 16 de la decisión B1. */
+    borderRadius: formaV5 ? radius.tarjetaV5 : radius.lg,
     padding: RELLENO[relleno],
     overflow: relleno === 'ninguno' ? 'hidden' : undefined,  // la imagen respeta el radius
     // REGLA CHANEL DEL MARCO (D-358): la superficie que gana elevación

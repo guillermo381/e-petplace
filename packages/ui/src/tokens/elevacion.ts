@@ -79,6 +79,26 @@ export type ElevacionTokens = Readonly<Record<ElevacionNivel, string>> & {
  *  DIBUJA, y un modo de falla silencioso es exactamente lo que esta
  *  casa dejó de aceptar (L-192). Queda como candidata con su prueba
  *  pendiente, no como mejora obvia. */
+/* ═══════════════════════════════════════════════════════════════════════
+ * 🔴 **S116-B lote 2 · EL HALO DEL FOCO — token, no string por pieza.**
+ * Letra §2: *«campo … foco borde 1,5 + **halo 4 al 10 %**»*.
+ *
+ * **Nace porque `R4` lo exigió**, y la regla tenía razón: el halo ya se
+ * repetía en dos piezas —el campo enfocado y la opción elegida— y un
+ * `boxShadow` escrito en cada una son dos halos que divergen. *Es la Ley 20
+ * en su forma literal: la sombra sale del token, jamás de un string por
+ * pantalla.*
+ *
+ * ⚠️ **No entra en `elevacion` (reposo/elevada)**: eso es APOYO —una
+ * superficie que se despega del fondo— y esto es PRESENCIA —«acá estás»—.
+ * Confundirlos fue justamente el defecto que el foco del campo tenía antes
+ * de este lote: tomaba prestada `elevacion.reposo`.
+ * ═══════════════════════════════════════════════════════════════════════ */
+export const halo = {
+  /** 4 px al 10 % del magenta de acción (letra §2). */
+  foco: '0 0 0 4px rgba(209,7,136,.10)',
+} as const
+
 export const elevacion = {
   light: {
     reposo:  '0 1px 2px rgba(31,27,22,0.05), 0 2px 8px rgba(31,27,22,0.06)',

@@ -111,6 +111,7 @@
 import type { Theme } from '../themes'
 import { motion } from '../tokens/motion'
 import { radius } from '../tokens/radius'
+import { halo } from '../tokens/elevacion'
 import { spacing } from '../tokens/spacing'
 import { typography } from '../tokens/typography'
 
@@ -157,7 +158,17 @@ export interface EstadoCaja {
 /** El color del contorno según estado. El reposo YA NO ES TRANSPARENTE
  *  (ver la derogación en la cabecera). */
 export function colorDeContorno(theme: Theme, { error, enfocado }: EstadoCaja): string {
-  if (error) return theme.status.danger
+  /* 🔴 **S116-B lote 2 · EL ERROR DEJA DE PINTAR LA CAJA DE ROJO.**
+     Punto 5 del encargo, textual: *«si hay un error, la caja no se pone
+     roja: aparece una línea de texto debajo que dice qué falta, en tinta,
+     y el borde toma el ámbar»*.
+     **Sólo donde la casa recibió la geometría v5** — el prestador conserva
+     su rojo, que es lo que su gate midió. *El rojo no se saca porque
+     moleste: se saca porque un campo a medio llenar no es una falla, y
+     pintarlo de rojo mientras la persona todavía está escribiendo la
+     acusa de algo que no hizo.* La voz sigue en su línea de texto: ahí
+     está el «qué falta» (Ley 17.4, intacta). */
+  if (error) return formaV5(theme) ? theme.status.warning : theme.status.danger
   if (enfocado) return theme.accent.active  /* S116-B · memorial ya porta este slot (los 3 temas son isomorfos): el fallback era rama muerta. */
   return theme.border.campo
 }
@@ -219,16 +230,34 @@ export function interiorDeCaja(theme: Theme): string {
  * quedó** — pero ahora es el único cambio, no el acompañante de un
  * cambio de color.
  * ═══════════════════════════════════════════════════════════════════ */
+/** ¿Esta casa recibió la geometría del rediseño? (`accent.formaV5`, el
+ *  décimo slot — nace en el lote 2 de S116-B). Cliente sí; prestador y
+ *  memorial no. */
+function formaV5(theme: Theme): boolean {
+  return 'formaV5' in theme.accent && theme.accent.formaV5 === true
+}
+
 export function estiloDeCaja(theme: Theme, estado: EstadoCaja) {
+  const v5 = formaV5(theme)
   return {
-    borderRadius: radius.md,
+    /* S116-B · «campo radio 18» (letra §2). Sólo con la geometría v5; el
+       prestador conserva su `radius.md`. */
+    borderRadius: v5 ? radius.campoV5 : radius.md,
     borderWidth: grosorDeContorno(estado),
     borderColor: colorDeContorno(theme, estado),
     backgroundColor: interiorDeCaja(theme),
     /** La presencia del foco (N11). En reposo NO hay sombra: el contorno
      *  ya contiene, y sombrear todo campo llenaría de material una
      *  pantalla de formulario. */
-    boxShadow: estado.enfocado && !estado.error ? theme.elevacion.reposo : undefined,
+    /* S116-B · «foco borde 1,5 + **halo 4 al 10 %**» (letra §2). Con v5 el
+       foco deja de tomar prestada la elevación de reposo —que es una sombra
+       de apoyo, no un halo— y usa un halo del acento: *un halo dice «acá
+       estás», una sombra dice «esto está apoyado», y no son lo mismo.* */
+    boxShadow: estado.enfocado && !estado.error
+      ? v5
+        ? halo.foco
+        : theme.elevacion.reposo
+      : undefined,
     /* S104-B — `fast` YA vale **150**, exactamente la duración que la orden
      * pide: no se tecleó un número nuevo ni se fundó una excepción.
      *

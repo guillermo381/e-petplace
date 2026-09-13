@@ -88,7 +88,14 @@ import { typography } from '../tokens/typography'
 import { useTheme } from '../ThemeProvider'
 import { sobreVideo } from '../tokens/sobreVideo'
 
-export type TextoVariante = 'titulo' | 'seccion' | 'cuerpo' | 'apoyo' | 'enfasis' | 'dato' | 'datoMd' | 'voz'
+/* S116-B lote 2 · entra `antetitulo` — el rótulo chiquito en mayúsculas que
+   la letra §2 firma para la cabecera («la fecha, el barrio, ACTIVIDAD»).
+   ⚠️ **No resucita el eyebrow que S52 mató**: aquel era mono + uppercase +
+   tracking como ESTRUCTURA DECORATIVA (Ley 18); éste lo firma la letra con
+   su color semántico, o sea que codifica una verdad del contenido. La
+   distinción es de FUNCIÓN, no de forma — y la escala v5 ya lo trae con su
+   `textTransform`, así que la pieza no lo pone en mayúsculas a mano. */
+export type TextoVariante = 'titulo' | 'seccion' | 'cuerpo' | 'apoyo' | 'enfasis' | 'dato' | 'datoMd' | 'voz' | 'antetitulo'
 /** S81 (pedido de C, los spreads dangerText de los cierres): entran los
  *  colores de STATUS — 'danger' y 'success' resuelven contra
  *  theme.status.*Text (los registros AA). El resto sigue en theme.text. */
@@ -119,7 +126,15 @@ export type TextoVariante = 'titulo' | 'seccion' | 'cuerpo' | 'apoyo' | 'enfasis
  * son un PAR, y usar medio par es cómo se fabrica un texto invisible que
  * ningún typecheck ve.* Medido en el emulador antes de curar: **1.25:1**.
  */
-export type TextoColor = 'primary' | 'secondary' | 'tertiary' | 'danger' | 'success' | 'warning' | 'sobreVideo' | 'warm'
+/* 🔴 **S116-B lote 2 · entra `inverso`** — el texto sobre superficie OSCURA
+   (la cabecera ciruela, el `BadgeFecha`, la tarjeta `destacada`). Resuelve a
+   `theme.text.inverse`, que los tres temas ya portan.
+   ⚠️ **No lo prohíbe N23 ni R58**, y conviene decir por qué: R58 veta los
+   miembros que empiezan con `accent` —el color que marca IMPORTANCIA—, y
+   esto no marca importancia: es el par legible de `primary` cuando el fondo
+   se da vuelta. *Sin él, cada pieza sobre ciruela tendría que escribir su
+   color a mano, que es exactamente lo que `Texto` nació para cerrar.* */
+export type TextoColor = 'primary' | 'secondary' | 'tertiary' | 'danger' | 'success' | 'warning' | 'sobreVideo' | 'warm' | 'inverso'
 
 export type TextoProps = {
   children: ReactNode
@@ -181,6 +196,10 @@ const RECETA: Record<
   {
     fontFamily: string
     fontSize: number
+    /* S116-B · los dos que pide el antetítulo de la letra §2. Opcionales:
+       ninguna receta viva los usa, así que el resto no cambia. */
+    letterSpacing?: number
+    textTransform?: 'uppercase'
     color: TextoColor
     tabular?: boolean
     /** Interlineado explícito — solo donde la prosa lo necesita (enmienda 2). */
@@ -219,6 +238,16 @@ const RECETA: Record<
   cuerpo:  { fontFamily: typography.family.sans.regular, fontSize: typography.size.base, color: 'primary', leading: 24 }, // D-482: la prosa de la casa · N1: 16/24
 
   apoyo:   { fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: 'secondary', leading: 20 },
+  /* Sale ENTERO de `typography.escala.antetitulo` (letra §2): familia,
+     tamaño, interlínea, tracking 2 y mayúsculas. No se teclea ninguno. */
+  antetitulo: {
+    fontFamily: typography.escala.antetitulo.familia,
+    fontSize: typography.escala.antetitulo.size,
+    color: 'secondary',
+    leading: typography.escala.antetitulo.lineHeight,
+    letterSpacing: typography.escala.antetitulo.letterSpacing,
+    textTransform: typography.escala.antetitulo.textTransform,
+  },
   /* 🔴 `enfasis` — EL ELEMENTO DESTACADO DE UNA LISTA, QUE NO ES UN RÓTULO
      (S100d·bis).
 
@@ -295,7 +324,12 @@ export function Texto({ children, variante = 'cuerpo', color, numberOfLines, cen
         ? theme.status.successText
         : c === 'warning'
           ? theme.status.warningText
-          : theme.text[c as Exclude<TextoColor, 'danger' | 'success' | 'warning' | 'sobreVideo'>]
+          : c === 'inverso'
+            /* El slot del tema se llama `inverse` (inglés, como todo el
+               shape del tema) y la prop `inverso` (español, como toda la
+               API pública de la casa). Se traduce acá, en un solo lugar. */
+            ? theme.text.inverse
+            : theme.text[c as Exclude<TextoColor, 'danger' | 'success' | 'warning' | 'sobreVideo' | 'inverso'>]
 
   return (
     <Text
@@ -311,6 +345,8 @@ export function Texto({ children, variante = 'cuerpo', color, numberOfLines, cen
         color: colorResuelto,
         ...(centrado ? { textAlign: 'center' as const } : null),
         ...(receta.leading !== undefined ? { lineHeight: receta.leading } : null),
+        ...(receta.letterSpacing !== undefined ? { letterSpacing: receta.letterSpacing } : null),
+        ...(receta.textTransform !== undefined ? { textTransform: receta.textTransform } : null),
         ...(receta.tabular || tabular ? { fontVariant: ['tabular-nums' as const] } : null),
       }}
     >

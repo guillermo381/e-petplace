@@ -58,6 +58,13 @@ export const lightTheme = {
     cta:           palette.magentaAccion,
     ctaTexto:      palette.white,
     ctaElevado:    true,
+    // 🔴 S116-B lote 2 · LA GEOMETRÍA DEL CTA v5 (letra §2: «CTA alto 58
+       //    radio 999 con sombra magenta»). Es SLOT y no constante porque la
+       //    letra §5 deja al PRESTADOR sin cambios: su CTA conserva el alto y
+       //    el radio de v4. Sin este slot, rediseñar `Boton` en su archivo
+       //    —que es lo que el lote pide— le habría cambiado la forma a las dos
+       //    apps en silencio.
+    formaV5:    true,
 
     /* 🔴 **LA REGLA DE DOS REGISTROS (Ley 2) APLICADA AL MAGENTA.**
        `accent.primary` es el registro FUNCIONAL —lo que los componentes

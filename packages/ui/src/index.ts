@@ -10,6 +10,15 @@ export { radius, type RadiusKey } from './tokens/radius'
    aparte de `spacing` a propósito: `spacing` es ritmo (base 4 estricta),
    `medidas` es cuánto mide una cosa (26, 58, 74… no son múltiplos de 4). */
 export { medidas, type MedidaKey } from './tokens/medidas'
+/* v5 (S116-B lote 2) — las seis caras de la casa y su composición Trío. */
+export { Personaje, TrioPersonajes, type PersonajeProps, type EspeciePersonaje, type TamanoPersonaje } from './components/Personaje'
+export { BotonAsistente, type BotonAsistenteProps } from './components/BotonAsistente'
+export { BadgeFecha, type BadgeFechaProps } from './components/BadgeFecha'
+export { BarraPasos, type BarraPasosProps } from './components/BarraPasos'
+export { Cabecera, type CabeceraProps } from './components/Cabecera'
+export { Opcion, type OpcionProps, type OpcionItem } from './components/Opcion'
+export { IsotipoV5, LogoV5, type SobreFondo, type TamanoMarca } from './brand/Marca'
+export { Confirmacion, type ConfirmacionProps } from './components/Confirmacion'
 export { shadows, type ShadowToken } from './tokens/shadows'
 export { elevacion, type ElevacionNivel, type ElevacionTokens } from './tokens/elevacion'
 export { motion } from './tokens/motion'
@@ -366,7 +375,22 @@ export {
 
 // Lenguaje b′ — DIRECCION_ARTE v1.0 (S53): la mascota presente en cada ícono
 export { Huella, HUELLA_BOX } from './brand/Huella'
-export { Icono, type IconoNombre, type IconoRegistro } from './components/Icono'
+/* S116-B · `NombreDeIcono` es lo que una pantalla puede montar: el
+ * canónico de la casa **o** el nombre del mock. `canonico()` traduce y es
+ * idempotente sobre los canónicos. Ver la tabla `ALIAS` y su choque
+ * declarado con la lápida de `coach`→`ia` en el propio Icono.tsx. */
+/* S116-B · la silueta de la marca para la bandeja de Android. NO es lo
+ * que Android monta —eso es `assets/marca/nariz-notificacion.svg`—: esta
+ * pieza existe para poder VER y gatear la silueta dentro del producto. */
+export { NarizNotificacion, NARIZ_NOTIFICACION_PATH } from './brand/NarizNotificacion'
+export {
+  Icono,
+  canonico,
+  type IconoNombre,
+  type IconoAlias,
+  type NombreDeIcono,
+  type IconoRegistro,
+} from './components/Icono'
 export { Guijarro, type GuijarroCapa } from './brand/Guijarro'
 export { BarrasSemana, type BarrasSemanaCapa } from './components/BarrasSemana'
 // ClipSesion — S63 (Ley 11, espec aprobada por el arquitecto): el clip

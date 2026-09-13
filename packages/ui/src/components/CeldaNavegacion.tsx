@@ -29,6 +29,7 @@
 
 import { useState } from 'react'
 import { Pressable, Text, View } from 'react-native'
+import { radius } from '../tokens/radius'
 import Animated, { cubicBezier } from 'react-native-reanimated'
 import Svg, { Path } from 'react-native-svg'
 
@@ -76,6 +77,7 @@ export interface CeldaNavegacionProps {
 
 export function CeldaNavegacion({ icono, titulo, detalle, onPress, registro = 'capa', chevron = true, direccion = 'derecha' }: CeldaNavegacionProps) {
   const { theme } = useTheme()
+  const formaV5 = 'formaV5' in theme.accent && theme.accent.formaV5 === true
   const [presionada, setPresionada] = useState(false)
 
   return (
@@ -101,7 +103,31 @@ export function CeldaNavegacion({ icono, titulo, detalle, onPress, registro = 'c
           transitionTimingFunction: cubicBezier(...motion.easing.spring.bezier),
         }}
       >
-        {icono ? <Icono nombre={icono} registro={registro} /> : null}
+        {/* 🔴 **S116-B lote 2 · EL GLIFO VA EN UN CÍRCULO ROSA TINTE**
+            (punto 9 del encargo: *«a la izquierda un glifo magenta dentro de
+            un círculo rosa tinte»*). Sólo con la geometría v5; el prestador
+            conserva el glifo suelto, que es lo que su gate midió.
+            *El círculo no es decoración: es lo que hace que una lista de
+            ocho filas tenga una columna, en vez de ocho glifos flotando a
+            distintas alturas ópticas según su dibujo.* */}
+        {icono ? (
+          formaV5 ? (
+            <View
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: radius.chipV5,
+                backgroundColor: theme.bg.overlay,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Icono nombre={icono} registro={registro} />
+            </View>
+          ) : (
+            <Icono nombre={icono} registro={registro} />
+          )
+        ) : null}
 
         <View style={{ flex: 1, gap: spacing[0.5] }}>
           <Text

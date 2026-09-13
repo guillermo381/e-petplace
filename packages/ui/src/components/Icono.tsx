@@ -33,7 +33,26 @@ export type IconoNombre =
    *  SECCIÓN y ésta es lo que llevás adentro. Conviven en pantalla. */
   | 'carrito'
   /** G-08 (S100b-B) — el `−` del stepper con cantidad 1, **solo en el
-   *  carrito**. Familia de CONTROL: sin huella, como `lapiz`. */
+   *  carrito**. Familia de CONTROL: sin huella, como `lapiz`.
+   *
+   *  🔴 **ENMENDADO S116-B — Y LA ENMIENDA CORRIGE UNA MEDICIÓN MÍA, no el
+   *  glifo.** El §② del lote 0 declaró este caso como uno de los tres
+   *  donde *«el dibujo dice otra cosa»*: leyó este comentario (*«el `−` del
+   *  stepper»*), lo cruzó contra el dibujo (un TACHO) y concluyó que no
+   *  coincidían. El encargo del lote 2 vino de esa conclusión.
+   *  **Al abrir el consumidor, coinciden.** `StepperCantidad:592` monta
+   *  este glifo con `signo={onBorrar !== undefined && v <= min ?
+   *  'papelera' : 'menos'}` — o sea **sólo cuando bajar de 1 SACA EL ÍTEM
+   *  DE LA LISTA**, y el propio Stepper lo dice dos veces: *«en la GRILLA
+   *  no: ahí bajar de 1 devuelve la tarjeta a su `+`, el tile no
+   *  desaparece, y una papelera prometería un borrado que no ocurre»*.
+   *  ⇒ el tacho dice ELIMINAR y ahí se elimina de verdad. **El que decía
+   *  de menos era esta línea**, que omitía el `onBorrar`. Se corrige acá y
+   *  el dibujo NO se toca.
+   *  *Leer el nombre y el comentario y no el consumidor produjo una
+   *  conclusión verosímil y falsa — la clase exacta que esta casa persigue,
+   *  cobrada por quien la estaba aplicando a los otros dos casos.*
+   *  ⚠️ El `−` propiamente dicho vive desde S116-B en `quitar`. */
   | 'papelera'
   /** S100c-B, pedido de D — LA TAB DE PEDIDOS. Distinto de `despensa` (la
    *  sección) y de `carrito` (lo que llevás sin comprar): esto es lo que YA
@@ -405,7 +424,164 @@ export type IconoNombre =
   // rellena en la esquina). NO es «glifo de control»: §6bis sigue
   // pendiente y esta entrada no la funda ni la toca.
   | 'campana'
+  /* ══ S116-B · LOTE 2 · LA TANDA DE GLIFOS DEL MOCK — LOS DOCE DE CONTROL
+   *  El §② del lote 0 cruzó los 52 del mock contra los 72 del registry y
+   *  midió **15 que no existen** (el parte decía 17; el conteo del objeto
+   *  dice 15 ❌ + 19 con otro nombre + 1 ambiguo — ver la corrección en el
+   *  parte del lote 2). Éstos son los que caen del lado de CONTROL.
+   *
+   *  🔴 **LOS DOCE VAN SIN HUELLA Y NO ES UNA OMISIÓN: es `N27` + la Ley 9
+   *  en su alcance S98** — *«en un glifo de control no hay mascota, hay
+   *  interfaz»*. Ninguno nombra un mundo: los doce ejecutan un acto.
+   *  ⚠️ **GATE POR ÍCONO A 21 px PENDIENTE (§2.9)** — en este entorno no
+   *  hay rasterizador de SVG; la hoja de contacto va adjunta al parte y la
+   *  mira el founder en una sola pasada.
+   *
+   *  ── EL CENSO DE METÁFORAS (§6b paso 2), corrido ANTES de dibujar ────
+   *  Se abrieron los 72 dibujantes, no los 72 nombres. Lo que encontró y
+   *  cambió una decisión cada vez:
+   *   · **`veterinaria` es un ESTETOSCOPIO, no una cruz** ⇒ la cruz queda
+   *     libre para `urgencias` (tanda 2), y `agregar` puede ser el `+` sin
+   *     chocar contra ella.
+   *   · **`ayuda` es círculo + 4 rayos RECTOS y `info` es círculo + ⓘ** ⇒
+   *     `hora` entra como TERCER círculo del set. Riesgo declarado abajo.
+   *   · **`foto` ya es la cámara** ⇒ `voltear` NO la vuelve a dibujar.
+   *   · **`copiar` y `documentos` ya son dos hojas apiladas** ⇒ `galeria`
+   *     NO puede ser dos rectángulos apilados. Es UNO, con contenido.
+   *   · **`papelera` es un TACHO** y su uso declarado era el `−` del
+   *     stepper: eso es lo que nace acá como `quitar`. El tacho se queda
+   *     donde siempre debió estar — Eliminar (ver su entrada, redibujo 2).
+   *   · **`candado` NO lleva ojo de cerradura a propósito** (se llena a
+   *     21 px) y su significado declarado es *«esta conversación quedó en
+   *     lectura»* ⇒ `contrasena` no puede ser otro candado: es la LLAVE. */
+  | 'agregar' | 'quitar' | 'favorito' | 'calificacion' | 'hora'
+  | 'microfono' | 'colgar' | 'galeria' | 'voltear' | 'salir' | 'mas'
+  | 'contrasena'
+  /* ══ S116-B · LOTE 2 · LOS SEIS DE CAPA DEL MOCK ═══════════════════
+   *  La otra mitad de los 15 que el §② midió como inexistentes. Éstos SÍ
+   *  nombran un mundo ⇒ **llevan huella**, y dónde la llevan es parte del
+   *  dibujo: adentro cuando el objeto la puede contener (el matraz, el
+   *  chip, el bol, el triángulo) y **externa en la esquina** cuando el
+   *  objeto ya trae tres elementos y la huella adentro lo llenaría — el
+   *  molde que `vacuna`, `carnet`, `papel` y `receta` ya usan.
+   *  ⚠️ **GATE POR ÍCONO A 21 px PENDIENTE (§2.9)** en los seis. */
+  | 'urgencias' | 'laboratorio' | 'alimento' | 'alergia' | 'microchip'
+  /* 🔴 **`medicamento` NO ES UN DIBUJO NUEVO: es el dibujo que hoy se
+   *  llama `receta`.** El §② lo midió: *«el dibujo es una CÁPSULA partida
+   *  en diagonal — el ícono universal de medicamento. Se llama receta»*.
+   *  El mock pide los DOS (#20 Medicamento y #22 Receta) y son dos cosas:
+   *  una se toma, la otra se firma. ⇒ la cápsula se muda acá con su
+   *  geometría intacta y `receta` se redibuja como lo que es. *No se
+   *  inventó un segundo dibujo: se le puso su nombre al que había.* */
+  | 'medicamento'
 export type IconoRegistro = 'capa' | 'aa' | 'tinta'
+
+/* ══════════════════════════════════════════════════════════════════════
+ *  S116-B · LOS NOMBRES DEL MOCK QUE LA CASA YA DIBUJA
+ *
+ *  El §② del lote 0 cruzó los 52 nombres del mock contra los 72 del
+ *  registry y midió **21 que existen con OTRO nombre**. De esos 21:
+ *   · **3 son `Chevron`** (Volver · Avanzar · Flecha) — NO entran acá: es
+ *     otra pieza (`components/chevron.tsx`), geometría compartida con su
+ *     propia tabla de direcciones, no una entrada del registry.
+ *   · **1 es `Huella`** (Mascota) — tampoco: es la primitiva de `brand/`
+ *     que todos los demás montan ADENTRO. Un alias que devuelva la huella
+ *     sola sería un dibujo nuevo disfrazado de alias.
+ *   · **3 ganaron glifo propio en esta misma tanda** (`quitar`,
+ *     `contrasena`, `medicamento`) porque su dibujo decía otra cosa.
+ *   · **14 quedan acá.**
+ *
+ *  🔴 **ESTO CHOCA CONTRA LETRA ESCRITA EN ESTE ARCHIVO Y SE DECLARA EN
+ *  VEZ DE SALTEARLO.** La lápida del rename `coach` → `ia` (S84-B11) dice:
+ *  *«NO SE HIZO ALIAS Y ES LA DECISIÓN: dos nombres para un dibujo es no
+ *  decidir cuál es el correcto, y deja al siguiente eligiendo»*.
+ *
+ *  **Por qué esto no es ese caso, y la diferencia es medible, no de
+ *  gusto:** en `coach`/`ia` los dos nombres nombraban CONCEPTOS DISTINTOS
+ *  — uno una pantalla, otro la marca de la IA — y quedarse con los dos era
+ *  efectivamente no decidir. Acá los pares nombran **la misma cosa por su
+ *  forma y por su función**: `lupa` es el objeto, «Buscar» es el acto que
+ *  ese objeto hace; `campana` y «Notificación»; `foto` y «Cámara».
+ *  *Ningún par de éstos puede llevar a alguien a montar el glifo
+ *  equivocado, que es el daño que aquella lápida evitaba.*
+ *
+ *  Y la forma es la que sostiene la diferencia: **`ALIAS` NO es un
+ *  dibujante.** El registry sigue teniendo UNA entrada por dibujo — el
+ *  canónico —, y esto es una tabla de traducción que se resuelve antes de
+ *  dibujar. No hay dos funciones que puedan divergir; hay un nombre que
+ *  apunta a otro. *Lo que la lápida prohíbe es duplicar el dibujo; esto no
+ *  lo duplica.*
+ *
+ *  ⚠️ **El canónico sigue siendo el canónico**: piezas nuevas montan el
+ *  nombre de la casa. Los alias existen para que C pueda consumir los 52
+ *  nombres del mock sin traducir a mano en cada pantalla — y para que
+ *  cuando traduzca mal, el compilador lo frene.
+ * ══════════════════════════════════════════════════════════════════════ */
+const ALIAS = {
+  /** #4 — el objeto es la lupa; «buscar» es lo que hace. */
+  buscar: 'lupa',
+  /** #8 — el mock pluraliza; la casa ya distinguió `pedido` de `despensa`
+   *  y de `carrito` en su propia entrada (S100c-B). */
+  pedidos: 'pedido',
+  /** #11 — la campana. Su huella vive en el Badge, no adentro (S88). */
+  notificacion: 'campana',
+  /** #14 — de los dos que el §② encontró (`checkEnCirculo` · `nodoEntregado`)
+   *  el alias apunta al primero: el segundo es una ETAPA de la escalera de
+   *  seguimiento y prestarlo mezclaría «se confirmó» con «se entregó» —
+   *  exactamente la vecindad que la entrada de `candado` midió y evitó. */
+  confirmar: 'checkEnCirculo',
+  /** #23 — el papel con la huella como SELLO. NO apunta a `checkEnCirculo`:
+   *  un check dice «hecho» y verificado dice «alguien lo acreditó», que es
+   *  literalmente el criterio con el que `certificaciones` ganó su gate. */
+  verificado: 'certificaciones',
+  /** #10 — ☠️ y acá el alias es el NOMBRE QUE MURIÓ AL REVÉS: `ia` se llamó
+   *  `coach` y el rename fue para sacarle el nombre de una pantalla. El
+   *  mock lo llama «Asistente», que es el acto y no la pantalla ⇒ no
+   *  reintroduce el equívoco que aquel rename cerró. */
+  asistente: 'ia',
+  /** #28 */
+  estetica: 'grooming',
+  /** #32 — de los dos que el §② encontró (`bitacora` · `pluma`) apunta a la
+   *  libreta: `pluma` es una ETAPA de la escalera de adopción (firmar), no
+   *  el objeto donde se anota. */
+  nota: 'bitacora',
+  /** #33 — `hoy` ES el calendario (marco + anillas + travesaño + huella).
+   *  El nombre de la casa dice el recorte temporal; el del mock dice el
+   *  objeto. Conviven `semana` y `mes`, que se separan contando barras. */
+  agenda: 'hoy',
+  /** #37 — el tacho. Y éste es el uso PARA EL QUE el dibujo siempre fue
+   *  correcto: ver la enmienda de `papelera` arriba. */
+  eliminar: 'papelera',
+  /** #38 — de los dos que el §② encontró (`pagos` · `bancario`) apunta al
+   *  billete: `bancario` es el frontón del banco, o sea la institución, no
+   *  el medio. */
+  medioDePago: 'pagos',
+  /** #41 — de los dos que el §② encontró (`burbujas` · `contacto`) apunta a
+   *  las DOS burbujas encaradas: `contacto` es UNA burbuja con huella y su
+   *  objeto declarado es el ACTO de contactar por cualquiera de los cuatro
+   *  canales, no la conversación. */
+  chat: 'burbujas',
+  /** #44 — el mismo dibujo que #9 Cuenta; el mock los nombra distinto
+   *  según dónde los monta. */
+  perfil: 'cuenta',
+  /** #46 — la cámara. Control, sin huella. */
+  camara: 'foto',
+} as const satisfies Record<string, IconoNombre>
+
+/** Los nombres del mock que resuelven a un dibujo de la casa. */
+export type IconoAlias = keyof typeof ALIAS
+
+/** Lo que una pantalla puede montar: el nombre de la casa **o** el del
+ *  mock. Piezas nuevas usan el canónico; el alias existe para que el
+ *  consumo del mock no se traduzca a mano en cada pantalla. */
+export type NombreDeIcono = IconoNombre | IconoAlias
+
+const esAlias = (n: NombreDeIcono): n is IconoAlias => n in ALIAS
+
+/** Resuelve un nombre del mock a su canónico. Idempotente sobre los
+ *  canónicos, que es lo que permite llamarlo sin preguntar. */
+export const canonico = (n: NombreDeIcono): IconoNombre =>
+  esAlias(n) ? ALIAS[n] : n
 
 const TRAZO = 1.9
 
@@ -1553,12 +1729,41 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
    *  no tiene todavía ninguna de las dos, así que el nombre queda libre —
    *  *pero el día que exista un favorito, esto se revisa antes que aquello,
    *  porque llegó primero y va a parecer que califica.* */
+  /* 🔴 **REDIBUJADO (S116-B) — LA ESTRELLA SE FUE A `calificacion`, POR LA
+   * ORDEN QUE ESTA MISMA ENTRADA DEJÓ ESCRITA.** Su versión vieja decía:
+   * *«el día que exista un favorito, esto se revisa antes que aquello,
+   * porque llegó primero y va a parecer que califica»*. El mock pide
+   * Favorito (#15) y Calificación (#16), y el founder firmó (letra §1.9):
+   * **la estrella es Calificación; Personalidad recibe glifo nuevo.**
+   * *La colisión no se descubrió: estaba declarada hace tres sesiones con
+   * su regla de desempate adentro, y lo único que hizo esta tanda fue
+   * cobrarla.* La geometría medida (`r/R = 0.5`, resuelta por los 21 px y
+   * no por el gusto) viajó INTACTA a `calificacion`; acá no se perdió.
+   *
+   * EL OBJETO NUEVO: LA PELOTA. Lo que el producto pregunta con este glifo
+   * es *«cómo es»* (`InvitacionBio`), y §1 manda dibujar un OBJETO, no una
+   * idea — *«el carácter» no tiene forma*. Los candidatos y por qué
+   * cayeron, que es el trabajo:
+   *  · **el corazón** — lo toma `favorito` en esta misma tanda.
+   *  · **el hueso** — dice PERRO, y la personalidad es de todas las
+   *    especies. Es exactamente el error que el veto de `wearables`
+   *    esquivó («jamás un corazón médico»): un objeto que nombra a un
+   *    subconjunto de los sujetos.
+   *  · **una carita** — la casa no dibuja caras humanas ni animales fuera
+   *    de la marca, y una carita es un ESTADO DE ÁNIMO, no un carácter.
+   *  ⇒ la pelota es el objeto del JUEGO, que es donde el carácter de un
+   *  animal se ve, y sirve para las once especies del catálogo por igual.
+   *
+   * ⚠️ **RIESGO DECLARADO Y ES EL MÁS ALTO DE LA TANDA: `ayuda`** — círculo
+   * + 4 rayos. Los separa que **los rayos de `ayuda` salen FUERA del
+   * círculo y las costuras de la pelota viven ADENTRO**, y que éstas son
+   * CURVAS. A 21 px es lo primero que hay que mirar; si no se separan, el
+   * que se mueve es éste (`ayuda` tiene consumidores desde S53). */
   personalidad: ({ tinta }) => (
     <>
-      <Path
-        d="M12.00 5.00L14.06 9.17L18.66 9.84L15.33 13.08L16.11 17.66L12.00 15.50L7.89 17.66L8.67 13.08L5.34 9.84L9.94 9.17Z"
-        {...trazo(tinta)}
-      />
+      <Circle cx={12} cy={12} r={8.4} {...trazo(tinta)} />
+      <Path d="M12 3.6c-3.1 4.7-3.1 12.1 0 16.8" {...trazo(tinta)} />
+      <Path d="M3.6 12c4.7 3.1 12.1 3.1 16.8 0" {...trazo(tinta)} />
     </>
   ),
 
@@ -1928,14 +2133,50 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
       <Huella color={huella} x={1.8} y={14.8} escala={0.3} />
     </>
   ),
+  /* 🔴 **REDIBUJADO (S116-B) — y no es un cambio de gusto: el nombre y el
+   * dibujo decían cosas distintas.** Hasta hoy `receta` dibujaba una
+   * CÁPSULA, o sea un medicamento. El §② del lote 0 lo midió abriendo el
+   * dibujante y no el nombre — *«el dibujo es una cápsula partida en
+   * diagonal … se llama receta»* — y el mock pide los dos ítems por
+   * separado (#20 Medicamento · #22 Receta). **Una receta no es lo que se
+   * toma: es el papel que lo indica**, y la propia entrada vieja de esta
+   * capa ya lo había escrito para explicar su color (*«la receta no vende,
+   * indica»*). La cápsula se mudó entera a `medicamento`.
+   *
+   * EL DIBUJO: hoja + una línea de encabezado + LA CÁPSULA ADENTRO. La
+   * cápsula chica es lo que lo separa de todo lo demás — es el único papel
+   * del set con un objeto adentro.
+   * ⚠️ **VECINO DECLARADO, el más cercano que tiene: `papel`** (hoja
+   * vertical + dos líneas + huella externa en la misma esquina). Los
+   * separa la cápsula y nada más.
+   * ⏪ **SU HOJA DE CONTACTO LO COBRÓ DOS VECES (S116-B), y la segunda
+   * cambió el dibujo de raíz.**
+   *  · **Primera:** llevaba además una línea de encabezado y a 21 px la
+   *    cápsula se cerraba y se leía como una segunda línea. Murió la línea
+   *    y creció la cápsula.
+   *  · **Segunda, montado AL LADO DE `papel` como §6b manda:** seguían
+   *    siendo **el mismo rectángulo vertical con la misma huella magenta
+   *    en la misma esquina**. 🔴 *El riesgo que este párrafo declaraba no
+   *    era hipotético: se materializó, y sólo se vio montándolos juntos —
+   *    por separado los dos se leían bien.*
+   * ⇒ **LA CURA NO FUE AGRANDAR LA CÁPSULA OTRA VEZ: fue SACARLA DE LA
+   * HOJA.** La cápsula ahora cruza el borde derecho y asoma. Así la
+   * SILUETA deja de ser un rectángulo — y una silueta es lo único que
+   * sobrevive a 21 px. *Dos glifos que se distinguen por su interior se
+   * confunden al achicarse; dos que se distinguen por su contorno, no.*
+   *
+   * ⚠️ **CONSUMIDORES: NO se tocan y es correcto.** `apps/cliente/src/lib/
+   * papeles.ts` monta `receta` para el papel de receta — que es
+   * exactamente lo que ahora dibuja. *El redibujo no rompe a nadie: le da
+   * la razón al consumidor que ya estaba bien.* */
   receta: ({ tinta, huella }) => (
     <>
+      <Path d="M6.4 2.6h9.6v14.8H6.4Z" {...trazo(tinta)} />
       <Path
-        d="M8.15 10.85A2.9 2.9 0 0 0 12.25 14.95L18.85 8.35A2.9 2.9 0 0 0 14.75 4.25Z"
+        d="M11.4 10.6A2.9 2.9 0 0 0 15.5 14.7L20.2 10A2.9 2.9 0 0 0 16.1 5.9Z"
         {...trazo(tinta)}
       />
-      <Path d="M11.45 7.55 15.55 11.65" {...trazo(tinta)} />
-      <Huella color={huella} x={1.8} y={14.8} escala={0.3} />
+      <Huella color={huella} x={1.2} y={15.2} escala={0.28} />
     </>
   ),
 
@@ -2173,10 +2414,317 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
       <Path d="M4.5 4.5 19.5 19.5" {...trazo(tinta)} />
     </>
   ),
+
+  /* ══════════════════════════════════════════════════════════════════
+   *  S116-B · LOS DOCE GLIFOS DE CONTROL DEL MOCK
+   *  Familia de CONTROL ⇒ **sin huella** (`N27`). Trazo 1.9, remates
+   *  redondeados, `fill: none`, grilla 24. Gate a 21 px PENDIENTE.
+   * ══════════════════════════════════════════════════════════════════ */
+
+  /** #12 del mock. El `+` desnudo. **Es el único glifo del set que no
+   *  dibuja un objeto y está bien**: los controles de la casa ya viven así
+   *  (`compartir` y `descargar` son flechas, no objetos). La Ley §1 manda
+   *  dibujar el objeto DEL OFICIO; acá no hay oficio. */
+  agregar: ({ tinta }) => (
+    <>
+      <Path d="M12 5.2v13.6M5.2 12h13.6" {...trazo(tinta)} />
+    </>
+  ),
+  /** #13 del mock. El `−`. **Nace porque `papelera` lo estaba haciendo y
+   *  su dibujo dice otra cosa** — su propia entrada declaraba el uso (*«el
+   *  `−` del stepper con cantidad 1»*) sobre un TACHO. Uso y dibujo no
+   *  coincidían, y ésa es exactamente la clase que la Ley 12 persigue.
+   *  ⚠️ **Mide exactamente lo mismo que la barra de `agregar`** (13.6 de
+   *  largo, mismo centro): son un par y tienen que leerse como par. */
+  quitar: ({ tinta }) => (
+    <>
+      <Path d="M5.2 12h13.6" {...trazo(tinta)} />
+    </>
+  ),
+  /** #15 del mock. El corazón. **Censo: cero vecinos** — `seguros` es un
+   *  escudo (hombros rectos, punta abajo) y el corazón tiene dos lóbulos
+   *  arriba; a 21 px se separan por el tope, que es el rasgo que ninguno
+   *  de los dos puede copiar.
+   *  ⚠️ SIN HUELLA aunque lo que se marque sea una mascota: **lo que el
+   *  glifo dice es el ACTO de marcar**, no de quién es lo marcado. Mismo
+   *  criterio con el que `lapiz` no lleva huella editando un expediente. */
+  favorito: ({ tinta }) => (
+    <>
+      <Path
+        d="M12 20.1 4.9 13a4.45 4.45 0 0 1 6.3-6.3l.8.8.8-.8A4.45 4.45 0 0 1 19.1 13Z"
+        {...trazo(tinta)}
+      />
+    </>
+  ),
+  /* #16 del mock. 🔴 **ES LA ESTRELLA DE `personalidad`, MUDADA BYTE A
+   * BYTE** — no se re-dibujó, y es deliberado: su geometría fue MEDIDA y
+   * la medición sigue siendo válida. `r/R = 0.5` lo decidieron los 21 px,
+   * no el gusto (la estrella clásica abre 36° y a 2 px de la punta mide
+   * 1,30 px, **menos que el trazo de 1,66 que la dibuja** ⇒ cinco bultos;
+   * con 0.5 abre 52,5° y mide 1,97). Re-dibujarla habría tirado eso.
+   *
+   * **LA COLISIÓN SE CIERRA ACÁ, Y SU PROPIA ENTRADA VIEJA ESCRIBIÓ CÓMO:**
+   * *«una estrella es la metáfora universal de "favorito" y de
+   * "calificación" … el día que exista un favorito, esto se revisa antes
+   * que aquello, porque llegó primero y va a parecer que califica»*.
+   * Ese día llegó: el mock pide los dos. Firma del founder (letra §1.9):
+   * **la estrella es Calificación; Personalidad recibe glifo nuevo.**
+   * *La estrella no se repartió por votación: la entrada la reservó por
+   * escrito hace tres sesiones y hoy se cobra.* */
+  calificacion: ({ tinta }) => (
+    <>
+      <Path
+        d="M12.00 5.00L14.06 9.17L18.66 9.84L15.33 13.08L16.11 17.66L12.00 15.50L7.89 17.66L8.67 13.08L5.34 9.84L9.94 9.17Z"
+        {...trazo(tinta)}
+      />
+    </>
+  ),
+  /** #34 del mock. El reloj. 🔴 **NACE CONTRA UNA EVITACIÓN ESCRITA, y por
+   *  eso se declara:** la entrada de `wearables` dice *«la silueta se
+   *  parece a un reloj, y un reloj puede leerse como "hora". Lo desambigua
+   *  la huella adentro»*. Ese criterio **sigue vivo y ahora corre en las
+   *  dos direcciones**: `wearables` lleva huella y correas; `hora` no lleva
+   *  ninguna de las dos. *La desambiguación que se inventó para uno es la
+   *  que hoy deja nacer al otro.*
+   *  ⚠️ **RIESGO MEDIDO Y DECLARADO — es el TERCER círculo del set.**
+   *  `ayuda` (círculo + 4 rayos rectos FUERA), `info` (círculo + ⓘ) y éste
+   *  (círculo + dos agujas en L ADENTRO). Los tres a 21 px es lo primero
+   *  que hay que mirar en el gate. Lo que los separa es dónde está el
+   *  detalle: afuera · vertical · en ángulo. */
+  hora: ({ tinta }) => (
+    <>
+      <Circle cx={12} cy={12} r={8.4} {...trazo(tinta)} />
+      <Path d="M12 7.2V12l3.3 2" {...trazo(tinta)} />
+    </>
+  ),
+  /** #45 del mock. **Su disparo tiene tres sesiones de historia:** el
+   *  dictado clínico existe desde S70 y el botón se llama *«Dictar la
+   *  consulta»* desde S78 — el glifo nunca existió y el registry no tenía
+   *  ninguna mención. Cápsula + arco + pie.
+   *  ⚠️ Vecino declarado: `receta` (hoy `medicamento`) también es una
+   *  cápsula. **Los separa el eje** — la del medicamento va en DIAGONAL y
+   *  partida por su línea; ésta va VERTICAL, entera, y apoyada en un pie. */
+  microfono: ({ tinta }) => (
+    <>
+      <Path d="M12 3.4a2.8 2.8 0 0 1 2.8 2.8v5.4a2.8 2.8 0 0 1-5.6 0V6.2A2.8 2.8 0 0 1 12 3.4Z" {...trazo(tinta)} />
+      <Path d="M6.8 11.2a5.2 5.2 0 0 0 10.4 0" {...trazo(tinta)} />
+      <Path d="M12 16.4v4.2M9.4 20.6h5.2" {...trazo(tinta)} />
+    </>
+  ),
+  /* #47 del mock. **El auricular ROTADO 135°** — el universal de colgar.
+   * 🔴 **Y la rotación es el dibujo, no un efecto:** el registry no tiene
+   * ningún teléfono, así que el glifo tuvo que traer los dos (el auricular
+   * y su giro). *Un auricular derecho diría «llamar»; lo que dice «colgar»
+   * es exactamente el ángulo.*
+   * Se monta con `<G rotation>` y no con un path pre-rotado a propósito:
+   * el path es el auricular canónico y queda legible para quien lo lea —
+   * un path rotado a mano es geometría que nadie puede volver a tocar. */
+  colgar: ({ tinta }) => (
+    <G rotation={135} origin="12, 12">
+      <Path
+        d="M16.4 14.1l-2 2a13.2 13.2 0 0 1-6.5-6.5l2-2-2.6-4.1-3 1.2C3.6 11 12.9 20.3 19.6 19.5l1.2-3Z"
+        {...trazo(tinta)}
+      />
+    </G>
+  ),
+  /** #48 del mock. La imagen. 🔴 **EL CENSO LE CAMBIÓ LA FORMA:** el dibujo
+   *  obvio son dos rectángulos apilados, y **`copiar` y `documentos` YA son
+   *  dos hojas apiladas** — a 21 px habrían sido el mismo glifo con otro
+   *  nombre. ⇒ es UNO, y lo que lo distingue de una hoja es que **tiene
+   *  contenido**: horizonte quebrado + sol. *Una hoja está vacía; una foto
+   *  no puede estarlo.* */
+  galeria: ({ tinta }) => (
+    <>
+      <Path d="M4.6 5.4h14.8a1.4 1.4 0 0 1 1.4 1.4v10.4a1.4 1.4 0 0 1-1.4 1.4H4.6a1.4 1.4 0 0 1-1.4-1.4V6.8a1.4 1.4 0 0 1 1.4-1.4Z" {...trazo(tinta)} />
+      <Path d="M3.2 15.6l4.6-4.4 3.4 3.2 2.8-2.6 6.8 6.4" {...trazo(tinta)} />
+      <Circle cx={8.4} cy={9} r={1.4} {...trazo(tinta)} />
+    </>
+  ),
+  /** #49 del mock. Los dos arcos en ciclo. 🔴 **NO DIBUJA LA CÁMARA, y es
+   *  decisión:** `foto` ya es la cámara, y el control vive DENTRO de la
+   *  cámara abierta — el contexto ya dijo de qué se voltea. *Repetir el
+   *  cuerpo de la cámara adentro de la cámara es la clase que la Ley 12
+   *  enmendada S71 nombra: el glifo marca lo que VARÍA dentro de su unidad
+   *  de barrido, y acá lo que varía es el giro.* */
+  voltear: ({ tinta }) => (
+    <>
+      <Path d="M4.6 12a7.4 7.4 0 0 1 12.5-5.3" {...trazo(tinta)} />
+      <Path d="M19.4 12a7.4 7.4 0 0 1-12.5 5.3" {...trazo(tinta)} />
+      <Path d="M17.3 3.6v3.4h-3.4M6.7 20.4v-3.4h3.4" {...trazo(tinta)} />
+    </>
+  ),
+  /** #51 del mock. La puerta con la flecha saliendo. **Censo: cero
+   *  vecinos** — la casa tiene `hogar` (casa con techo a dos aguas) y
+   *  `guarderia` (casa con arco), las dos con huella; esto es un marco
+   *  abierto por un lado, sin techo. Lo que dice «salir» no es la puerta:
+   *  es la flecha CRUZÁNDOLA hacia afuera. */
+  salir: ({ tinta }) => (
+    <>
+      <Path d="M13.8 4.4H6.4a1.8 1.8 0 0 0-1.8 1.8v11.6a1.8 1.8 0 0 0 1.8 1.8h7.4" {...trazo(tinta)} />
+      <Path d="M11.2 12h9.2" {...trazo(tinta)} />
+      <Path d="M17.2 8.8 20.4 12l-3.2 3.2" {...trazo(tinta)} />
+    </>
+  ),
+  /** #52 del mock. Los tres puntos. **Horizontal y no vertical, con su
+   *  razón:** el mock lo monta al final de una FILA (la acción de más de un
+   *  ítem de lista), y un punto suspensivo vertical pide una columna. Los
+   *  tres puntos se dibujan con el propio trazo redondeado —`M x y v.01`—,
+   *  que es el molde que `info` y `foto` ya usan para su punto: **el punto
+   *  del set mide el trazo del set**, jamás un radio inventado. */
+  mas: ({ tinta }) => (
+    <>
+      <Path d="M6.2 12v.01M12 12v.01M17.8 12v.01" {...trazo(tinta)} />
+    </>
+  ),
+  /** #43 del mock. LA LLAVE. 🔴 **No es un candado, y el censo es la razón
+   *  entera:** `candado` existe, su significado declarado es *«esta
+   *  conversación quedó en lectura»* (postventa), y su entrada dice que
+   *  **no lleva ojo de cerradura a propósito porque a 21 px se llena**.
+   *  ⇒ un segundo candado con ojo sería el mismo dibujo peleando consigo
+   *  mismo, y quitarle el significado al primero rompería una escalera
+   *  viva. *La llave abre; el candado cierra. Son dos objetos, no dos
+   *  versiones de uno.*
+   *  Anillo a la izquierda, vástago horizontal, dos dientes hacia abajo —
+   *  la silueta que no comparte con nadie del set. */
+  contrasena: ({ tinta }) => (
+    <>
+      <Circle cx={7.4} cy={12} r={3.8} {...trazo(tinta)} />
+      <Path d="M11.2 12h9.2" {...trazo(tinta)} />
+      <Path d="M17.6 12v3.2M14.6 12v2.4" {...trazo(tinta)} />
+    </>
+  ),
+
+  /* ══════════════════════════════════════════════════════════════════
+   *  S116-B · LOS SEIS DE CAPA DEL MOCK
+   * ══════════════════════════════════════════════════════════════════ */
+
+  /** #18 del mock. EL MALETÍN CON CRUZ. 🔴 **La cruz está libre y eso lo
+   *  encontró el censo, no el recuerdo:** `veterinaria` es un
+   *  ESTETOSCOPIO (arco + campana + huella), no una cruz. Ningún glifo del
+   *  set dibuja una.
+   *  ⚠️ **DOS RIESGOS DECLARADOS, los dos a mirar en el gate:**
+   *   · contra `agregar` — una cruz y un `+` son el mismo trazo. Los separa
+   *     que ésta vive ADENTRO de un objeto; la del `+` está sola. Si a
+   *     21 px el maletín se cierra y solo se lee la cruz, el que se mueve
+   *     es éste.
+   *   · contra `despensa` — la bolsa también es cuerpo + asa. Los separa la
+   *     proporción (el maletín es ANCHO, la bolsa ALTA) y el asa (recta
+   *     contra curva).
+   *  La huella va EXTERNA abajo-izquierda (molde `receta`/`papel`): con
+   *  cuerpo + asa + cruz adentro no queda aire, y la Ley 9 manda que a
+   *  21 px la huella sobreviva o sea ruido. */
+  /* ⏪ **ENMENDADO EN SU PROPIA HOJA DE CONTACTO (S116-B).** Nació con la
+   * huella externa abajo-izquierda (molde `receta`/`papel`) y a 21 px **se
+   * pegaba al maletín y se leía como suciedad**. La Ley 9 en su forma
+   * afilada S71 dice exactamente esto: *«a 21 px la huella SOBREVIVE O ES
+   * RUIDO»*. ⇒ **este glifo va SIN HUELLA, y es una medición y no una
+   * excepción de conveniencia** — con cuerpo + asa + cruz ya hay tres
+   * elementos y el cuarto no cabe. El maletín pasa a ocupar la grilla
+   * entera, que es lo que el aire liberado permitió.
+   * *Se probó la versión con huella antes de descartarla; la hoja de
+   * contacto de esta tanda es su evidencia.* */
+  urgencias: ({ tinta }) => (
+    <>
+      <Path d="M4.4 8.6h15.2a1.6 1.6 0 0 1 1.6 1.6v7.6a1.6 1.6 0 0 1-1.6 1.6H4.4a1.6 1.6 0 0 1-1.6-1.6v-7.6a1.6 1.6 0 0 1 1.6-1.6Z" {...trazo(tinta)} />
+      <Path d="M8.8 8.6V6.8a1.4 1.4 0 0 1 1.4-1.4h3.6a1.4 1.4 0 0 1 1.4 1.4v1.8" {...trazo(tinta)} />
+      <Path d="M12 11.4v5M9.5 13.9h5" {...trazo(tinta)} />
+    </>
+  ),
+  /** #21 del mock. EL MATRAZ. 🔴 **El tubo de ensayo estaba vetado por el
+   *  censo:** `vacuna` es un rectángulo vertical con aguja, y un tubo es
+   *  un rectángulo vertical redondeado abajo — a 21 px, el mismo glifo. El
+   *  Erlenmeyer tiene una silueta que nadie del set comparte: hombros que
+   *  se abren.
+   *  **La huella va ADENTRO, flotando en el líquido**, y eso es lo que
+   *  dice de quién es la muestra. Sin ella el matraz es química genérica. */
+  laboratorio: ({ tinta, huella }) => (
+    <>
+      <Path d="M10.2 3.4h3.6" {...trazo(tinta)} />
+      <Path d="M11 3.4v5.4L6.3 17.4a1.6 1.6 0 0 0 1.4 2.4h8.6a1.6 1.6 0 0 0 1.4-2.4L13 8.8V3.4" {...trazo(tinta)} />
+      <Path d="M8.4 13.6h7.2" {...trazo(tinta)} />
+      <Huella color={huella} x={10.4} y={15} escala={0.3} />
+    </>
+  ),
+  /** #27 del mock. EL BOL. **`despensa` es la SECCIÓN (una bolsa) y esto
+   *  es lo que se come** — la misma distinción que la casa ya hizo entre
+   *  `despensa` y `carrito`, escrita en su entrada.
+   *  **La huella va ARRIBA, cayendo al bol**: el comedero solo es un
+   *  recipiente; lo que lo vuelve alimento DE ELLA es de quién es el bol.
+   *  Sin vecinos: es la única forma cóncava del set. */
+  alimento: ({ tinta, huella }) => (
+    <>
+      <Path d="M3.6 11.6h16.8a8.4 8.4 0 0 1-16.8 0Z" {...trazo(tinta)} />
+      <Path d="M7.6 19.9h8.8" {...trazo(tinta)} />
+      <Huella color={huella} x={9.6} y={3.2} escala={0.42} />
+    </>
+  ),
+  /** #29 del mock. EL TRIÁNGULO CON LA HUELLA ADENTRO. 🔴 **El dibujo sale
+   *  de la letra, no del diccionario:** `LETRA_RECORRIDO_DESPENSA_S96`
+   *  firmó que *«la alergia ADVIERTE, no esconde»* — exclusión dura en la
+   *  recomendación, **advertencia dura en la búsqueda**. El objeto de una
+   *  advertencia es el triángulo, y la huella adentro dice de QUIÉN es.
+   *  *Un triángulo vacío advierte de algo; con la huella advierte de ella.*
+   *  ⚠️ **COLISIÓN DECLARADA, molde de la estrella:** el triángulo es
+   *  también la metáfora universal de «advertencia» genérica, y la casa no
+   *  tiene ninguna. El nombre queda tomado por alergia — **pero el día que
+   *  exista una advertencia general, esto se revisa antes que aquélla,
+   *  porque llegó primero.** *La estrella de `personalidad` dejó escrito
+   *  ese criterio tres sesiones antes de que hiciera falta; acá se aplica
+   *  al nacer en vez de esperar el choque.* */
+  alergia: ({ tinta, huella }) => (
+    <>
+      <Path d="M12 4 21 19.8H3Z" {...trazo(tinta)} />
+      <Huella color={huella} x={9.6} y={10.8} escala={0.38} />
+    </>
+  ),
+  /** #30 del mock. EL CIRCUITO CON PATAS. **La cápsula estaba ocupada**
+   *  (es el medicamento) y un chip de identificación dibujado como cápsula
+   *  habría sido el mismo dibujo que lo que se toma — la peor vecindad
+   *  posible en un expediente clínico.
+   *  **La huella va ADENTRO del cuerpo**: el chip no es un componente
+   *  electrónico, es la identidad de ella grabada. Mismo criterio con el
+   *  que `wearables` la lleva adentro del dispositivo.
+   *  ⚠️ A 21 px las ocho patas son lo que puede empastarse: van a 2.6 de
+   *  largo y separadas 3.2, que es el máximo que la grilla admite sin
+   *  achicar el cuerpo por debajo de la huella. */
+  /* ⏪ **ENMENDADO EN SU PROPIA HOJA DE CONTACTO (S116-B).** Nació con
+   * OCHO patas (dos por lado) + la huella adentro, y a 21 px **era una
+   * mancha**: doce trazos en 21 px de lado. Lo que se sacó y por qué:
+   *  · **las patas de arriba y abajo** — un circuito integrado se reconoce
+   *    por las patas LATERALES; las verticales no agregan lectura y son
+   *    las que chocan contra el cuerpo. Quedan cuatro, de a dos por lado.
+   *  · **nada más**: la huella SE QUEDA y es lo que no se negocia. Sin
+   *    ella esto es un componente electrónico; con ella es la identidad de
+   *    ella grabada, que es el objeto (mismo criterio que `wearables`).
+   * ⇒ **la cura fue quitarle patas al chip, no quitarle la mascota.** */
+  microchip: ({ tinta, huella }) => (
+    <>
+      <Path d="M8 8h8v8H8Z" {...trazo(tinta)} />
+      <Path d="M8 10.6H5.2M8 13.4H5.2M18.8 10.6H16M18.8 13.4H16" {...trazo(tinta)} />
+      <Huella color={huella} x={9.4} y={9.4} escala={0.36} />
+    </>
+  ),
+  /* #20 del mock. 🔴 **ES LA CÁPSULA DE `receta`, MUDADA BYTE A BYTE** —
+   * mismo path, misma línea de partición, misma huella en la misma
+   * esquina. No se re-dibujó a propósito: **su geometría ya pasó por el
+   * criterio de la casa** y re-trazarla sería fabricar una diferencia que
+   * nadie pidió. Lo único que cambia es el nombre, que es lo que estaba
+   * mal (§② del lote 0: *«nombre y dibujo apuntan a dos ítems distintos
+   * del mock»*). */
+  medicamento: ({ tinta, huella }) => (
+    <>
+      <Path
+        d="M8.15 10.85A2.9 2.9 0 0 0 12.25 14.95L18.85 8.35A2.9 2.9 0 0 0 14.75 4.25Z"
+        {...trazo(tinta)}
+      />
+      <Path d="M11.45 7.55 15.55 11.65" {...trazo(tinta)} />
+      <Huella color={huella} x={1.8} y={14.8} escala={0.3} />
+    </>
+  ),
 }
 
 export function Icono({
-  nombre,
+  nombre: nombreEntrante,
   tamano = 24,
   registro = 'capa',
   tinta,
@@ -2184,7 +2732,11 @@ export function Icono({
   activa,
   montaje,
 }: {
-  nombre: IconoNombre
+  /** Canónico de la casa **o** nombre del mock (ver `ALIAS`). Se resuelve
+   *  al canónico antes de tocar el registry, así que todo lo de abajo —
+   *  capa, huella, estructura — decide una sola vez y sobre un solo
+   *  nombre: **un alias no puede tener una capa distinta de su dibujo.** */
+  nombre: NombreDeIcono
   /** Tamaño de render; el diseño vive en la grilla 24 (gate también a 21 — §2.9). */
   tamano?: number
   /** 'capa' hex puro (dueño) · 'aa' funcional (prestador) · 'tinta' (vista con su acento ya puesto). */
@@ -2212,6 +2764,7 @@ export function Icono({
    *  marca de mascota, que es lo que `N27` nombra.* */
   montaje?: MontajeIcono
 }) {
+  const nombre = canonico(nombreEntrante)
   const { theme } = useTheme()
   const esMemorial = theme.mode === 'memorial'
   const colorTinta = tinta ?? theme.text.primary
@@ -2419,6 +2972,33 @@ export function Icono({
     // oficio) ⇒ tinta en los dos registros, como los controles — sin
     // fundar §6bis: el criterio acá es «sin capa de la que tomar color».
     campana: { pura: colorTinta, aa: colorTinta },
+    /* S116-B · LOS DOCE DE CONTROL DEL MOCK: tinta en los dos registros,
+     * como sus nueve hermanos de arriba. Su `registro="capa"` resuelve a
+     * tinta A PROPÓSITO — pedirle capa a un control no lo tiñe, porque no
+     * hay oficio del que tomar color. */
+    agregar: { pura: colorTinta, aa: colorTinta },
+    quitar: { pura: colorTinta, aa: colorTinta },
+    favorito: { pura: colorTinta, aa: colorTinta },
+    calificacion: { pura: colorTinta, aa: colorTinta },
+    hora: { pura: colorTinta, aa: colorTinta },
+    microfono: { pura: colorTinta, aa: colorTinta },
+    colgar: { pura: colorTinta, aa: colorTinta },
+    galeria: { pura: colorTinta, aa: colorTinta },
+    voltear: { pura: colorTinta, aa: colorTinta },
+    salir: { pura: colorTinta, aa: colorTinta },
+    mas: { pura: colorTinta, aa: colorTinta },
+    contrasena: { pura: colorTinta, aa: colorTinta },
+    /* S116-B · LOS SEIS DE CAPA DEL MOCK. Cinco son SALUD (identidad, la
+     * capa de `veterinaria`/`vacuna`/`receta`) y uno es CONSUMO (el ocre
+     * de la despensa) — `alimento` hereda de su sección por el mismo
+     * motivo que `carrito`: es la misma familia en otro momento, y darle
+     * color propio los separaría justo donde tienen que leerse juntos. */
+    urgencias: identidad,
+    laboratorio: identidad,
+    alergia: identidad,
+    microchip: identidad,
+    medicamento: identidad,
+    alimento: { pura: theme.status.warning, aa: theme.status.warningText },
   }
 
   // §2.8 memorial: la huella a tinta secundaria, el trazo se conserva.

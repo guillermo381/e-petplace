@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <!-- S116-B · LA SILUETA DE NOTIFICACIÓN.
+       Android usa este archivo como MÁSCARA ALFA: todo lo opaco sale
+       blanco y el color lo pone el sistema. Por eso es fill sólido y no
+       trazo — un ícono de notificación no puede tener color propio.
+       NO es un recorte del isotipo: está DIBUJADO. El lote 1 midió que la
+       silueta del isotipo no se lee a 24 px (sus dos huecos interiores se
+       cierran), y recortarla habría entregado una mancha. -->
+  <path fill="#FFFFFF" fill-rule="evenodd" d="M8.96 20.9A10.2 8.8 0 1 1 15.04 20.9L15.04 17.65A7.1 5.7 0 1 0 8.96 17.65Z M8.1 4.9a3.3 3.3 0 1 0 0 6.6a3.3 3.3 0 1 0 0-6.6Z M15.9 4.9a3.3 3.3 0 1 0 0 6.6a3.3 3.3 0 1 0 0-6.6Z"/>
+</svg>

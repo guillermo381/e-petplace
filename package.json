@@ -153,7 +153,8 @@
     "verify:sin-invocador": "node scripts/verify-sin-invocador.mjs",
     "verify:techo-no-fuga": "tsx scripts/s115/verify-techo-no-fuga.mjs",
     "verify:reversion-no-vuelve": "node scripts/verify-reversion-no-vuelve.mjs",
-    "verify:numero-nombra-comando": "node scripts/verify-numero-nombra-comando.mjs"
+    "verify:numero-nombra-comando": "node scripts/verify-numero-nombra-comando.mjs",
+    "verify:reduced-motion": "node scripts/verify-reduced-motion.mjs"
   },
   "devDependencies": {
     "eslint": "^10.9.1",

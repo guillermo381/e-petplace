@@ -175,6 +175,32 @@ const DISCO_RADIO = 33
  *  que se ve por ahí es el fondo de la pantalla —sea cual sea—.
  *  *Mismo principio que la advertencia ③: el hueco existe por
  *  AUSENCIA de material, jamás pintándolo de un color supuesto.* */
+/* ⚖️ **S116-B lote 2 · CHOQUE DECLARADO CON LA LETRA §2, NO RESUELTO ACÁ.**
+ *
+ * La letra del rediseño dice *«activo círculo 74 con borde 5 del lienzo,
+ * −14»* y hoy la barra mide **disco 66 · anillo 9 · alto 85**. Son tres
+ * números distintos, y **no se tocaron**. Las razones, medidas:
+ *
+ * ① **El anillo ya cumple lo que la letra pide, y mejor.** La letra dice
+ *    «borde del color del lienzo»; acá **no hay borde pintado**: el hueco
+ *    es AUSENCIA de material (`fillRule="evenodd"`), así que lo que se ve
+ *    es el fondo real de la pantalla, *sea cual sea*. Pintarlo del lienzo
+ *    sería peor: mentiría sobre cualquier otro fondo.
+ * ② **El 9 es firma del founder** —con su pedido literal arriba— y esta
+ *    misma cabecera lo declara *«la única palanca real»* de una geometría
+ *    donde el valle, el hombro y el clamp se DERIVAN de él. Cambiarlo no
+ *    mueve un borde: recalcula el dibujo que pasó su gate en S99/S100.
+ * ③ El alto y el radio son de la misma familia derivada.
+ *
+ * ⇒ *Cambiar un dibujo calibrado con gate por un número de una letra que
+ * no sabía que ese gate existió es exactamente el error que esta casa ya
+ * documentó tres veces (el magenta de S83, la plata de S88, la telemedicina
+ * de S113): **dos letras firmadas que se contradicen son peores que una
+ * equivocada**, y la que pierde se decide en la mesa, no acá.*
+ *
+ * **Lo que sí entró de v5 en esta pieza:** el disco ya es magenta —
+ * `accent.activoLleno` lo resuelve desde el lote 1— y el enganche
+ * `onMontaje`. La geometría espera firma. */
 const ANILLO = 9
 /** El centro del disco, DERIVADO. Positivo = hacia abajo desde el borde
  *  superior de la barra. */
@@ -503,6 +529,8 @@ export function BarraTabs({
   items,
   activo,
   onCambiar,
+  onRepetir,
+  onMontaje,
   estadoPorHuella = false,
   acento,
 }: {
@@ -517,6 +545,34 @@ export function BarraTabs({
   items: BarraTabsItem[]
   activo: string
   onCambiar: (key: string) => void
+  /** ⭐ **S116-B lote 2 · `onRepetir` — el re-toque del tab en el que ya
+   *  estás.** Hoy lo resuelve el consumidor dentro de `onCambiar` (la poda
+   *  de pila del layout del cliente), y **eso sigue siendo lo que corre**:
+   *  esta prop es el punto donde ese gesto va a vivir cuando se mude a la
+   *  pieza. **Opcional a propósito** — sin ella el comportamiento es
+   *  idéntico al de hoy, así que ningún consumidor cambia.
+   *  *Se declara en el contrato porque el encargo la nombra; no se cablea
+   *  acá para no mover una poda que ya pasó su gate.* */
+  onRepetir?: (key: string) => void
+  /** ⭐ **S116-B lote 2 · EL ENGANCHE DE MEDICIÓN — `onMontaje`.**
+   *
+   *  Se dispara cuando la barra entrega un cambio de destino, con la tab a
+   *  la que se va. **No hace nada por sí solo**: existe para que C pueda
+   *  contar montajes de pantalla por tab en el lote 3, sobre la hipótesis
+   *  de memoria que E dejó abierta (`S116-E-OOM.md`).
+   *
+   *  🔴 **NO ESTÁ CABLEADO Y ES DELIBERADO** (el encargo lo pide así: *«no
+   *  lo cablees: dejá el punto»*). *Un contador que se enciende sin que
+   *  nadie vaya a leer su número es ruido con forma de dato; el punto de
+   *  enganche, en cambio, cuesta una línea y evita que quien mida tenga
+   *  que abrir la pieza.*
+   *
+   *  ⚠️ **Se llama en el mismo acto que `onCambiar`, no en un efecto.** Un
+   *  `useEffect` sobre `activo` contaría también los cambios que vienen de
+   *  afuera (un deep link, un `router.replace`), y lo que se quiere contar
+   *  es **la navegación por la barra**. *Medir de más es el modo de falla
+   *  caro acá: inflaría justo la métrica que E va a usar para decidir.* */
+  onMontaje?: (key: string) => void
   /** S53 (DIRECCION_ARTE §2.6): con el set b′ la HUELLA es el sistema
    *  de estado — aparece en la tab activa y el pill NO se renderiza
    *  (sin recuadros, sin pills). La huella activa hereda el rol de
@@ -792,7 +848,16 @@ export function BarraTabs({
         return (
           <Pressable
             key={item.key}
-            onPress={() => onCambiar(item.key)}
+            onPress={() => {
+              /* El enganche se dispara EN EL ACTO del toque, junto a
+                 `onCambiar` — no en un efecto sobre `activo`. Ver el porqué
+                 en el contrato de `onMontaje`: un efecto contaría también
+                 los cambios que vienen de un deep link, y lo que se quiere
+                 contar es la navegación POR LA BARRA. */
+              if (item.key === activo) onRepetir?.(item.key)
+              onMontaje?.(item.key)
+              onCambiar(item.key)
+            }}
             accessibilityRole="tab"
             accessibilityState={{ selected: esActivo }}
             aria-selected={esActivo}

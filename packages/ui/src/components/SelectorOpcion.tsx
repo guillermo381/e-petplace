@@ -207,6 +207,7 @@ function Chip({
     return () => clearTimeout(timer)
   }, [cargando])
   const fondoReposo = superficieDelChip(theme)
+  const formaV5 = 'formaV5' in theme.accent && theme.accent.formaV5 === true
   // Patrón `'capaBg' in theme` de AvatarMascota/SelectorEspecie (memorial no tinta).
   const conCapa = seleccionada && 'capaBg' in theme
   // LEY 22 (S58): la selección entre pares es TONAL — borde en el
@@ -215,7 +216,15 @@ function Chip({
   /* S116-B · el guard externo `'capaText' in theme` era rama muerta desde
      que memorial porta los 12 slots que le faltaban. Se quita; el resto
      del ternario no se toca. */
-  const textoTonal =
+  const textoTonal = chipLlenoTexto()
+  function chipLlenoTexto() {
+    /* Sobre el lleno el texto va en `sobreControlLleno` — el par ya medido
+       del slot, no un blanco tecleado. */
+    if (formaV5 && seleccionada && !entidad && !esSolitario)
+      return (theme.accent as { sobreControlLleno: string }).sobreControlLleno
+    return textoTonalBase
+  }
+  const textoTonalBase =
     acento === 'control' && 'control' in theme.accent
       ? theme.accent.control
       : acento === 'oficio'
@@ -255,7 +264,28 @@ function Chip({
       : acento === 'oficio'
         ? theme.accent.primaryBg
         : theme.capaBg.identidad
-  const fondo = esSolitario
+  /* ═══════════════════════════════════════════════════════════════════
+   * 🔴 **S116-B lote 2 · EL CHIP ELEGIDO ES CIRUELA, Y LA PATA LO PISA.**
+   * Letra §1.3 (*«el chip activo es ciruela»*) · punto 6 del encargo.
+   *
+   * **Por slot de casa.** Con `formaV5` el elegido pasa de TONAL —borde +
+   * tinte + texto en el acento, la Ley 22— a **LLENO**: fondo
+   * `accent.controlLleno` (ciruela) y texto `sobreControlLleno` (blanco).
+   * *El prestador y memorial conservan el tonal, que es lo que su gate
+   * midió: la Ley 22 no se deroga, se modula por casa como todo lo demás.*
+   *
+   * ⚠️ **LA PATA YA ESTABA MONTADA ACÁ DESDE S91** (`MarcaEleccion`, línea
+   * ~419) — el punto 6 del encargo estaba cumplido a medias y conviene
+   * decirlo en vez de anunciarlo como nuevo. **Lo que faltaba era el
+   * LLENO**, y al ponerlo apareció un defecto propio: la pata venía en
+   * `accent.control`, que con v5 **es la misma ciruela del fondo**, así que
+   * quedaba invisible justo donde señala. Curado abajo.
+   * ═══════════════════════════════════════════════════════════════════ */
+  const chipLleno = formaV5 && seleccionada && !entidad && !esSolitario
+
+  const fondo = chipLleno
+    ? (theme.accent as { controlLleno: string }).controlLleno
+    : esSolitario
     ? seleccionada
       ? fondoReposo // la superficie APOYADA (card/elevated) se despega del overlay
       : theme.bg.overlay
@@ -385,7 +415,19 @@ function Chip({
       >
         {/* S91 — la pata pisa al elegido. Solo en el elegido: la huella en
             TODOS no puede señalar a UNO (S80 lo midió). */}
-        {marcaPata && seleccionada ? <MarcaEleccion color={theme.accent.control} /> : null}
+        {/* 🔴 **S116-B lote 2 · LA PATA CAMBIA DE COLOR CON EL LLENO, Y ES UN
+            DEFECTO QUE INTRODUJO ESTE MISMO COMMIT.** Con `formaV5` el chip
+            elegido pasa a ciruela (`controlLleno`) — y la pata venía en
+            `accent.control`, que **es la misma ciruela**: quedaba invisible
+            justo donde tiene que señalar. Sobre el lleno va en el papel del
+            par (`sobreControlLleno`); sin lleno, el acento de siempre.
+            *La pieza no elige dosis: elige el par legible del fondo que
+            ella misma puso* (Ley 4 intacta). */}
+        {marcaPata && seleccionada ? (
+          <MarcaEleccion
+            color={chipLleno ? (theme.accent as { sobreControlLleno: string }).sobreControlLleno : theme.accent.control}
+          />
+        ) : null}
 
         {/* S62 (receta Boton): en carga, adorno y label quedan MONTADOS
             invisibles — preservan el ancho exacto, cero layout shift. */}

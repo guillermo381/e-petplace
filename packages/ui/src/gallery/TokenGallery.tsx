@@ -116,6 +116,14 @@ import { FilaDato } from '../components/FilaDato'
 import { LogoNegocio } from '../components/LogoNegocio'
 import { FilaCita } from '../components/FilaCita'
 import { PieRevelar } from '../components/PieRevelar'
+import { Personaje, TrioPersonajes, type EspeciePersonaje } from '../components/Personaje'
+import { BotonAsistente } from '../components/BotonAsistente'
+import { BadgeFecha } from '../components/BadgeFecha'
+import { BarraPasos } from '../components/BarraPasos'
+import { Cabecera } from '../components/Cabecera'
+import { Opcion } from '../components/Opcion'
+import { IsotipoV5, LogoV5 } from '../brand/Marca'
+import { Confirmacion } from '../components/Confirmacion'
 import { PantallaConPie } from '../components/PantallaConPie'
 import { GlifoConContador } from '../components/GlifoConContador'
 import { BurbujaPendientes } from '../components/BurbujaPendientes'
@@ -218,6 +226,7 @@ import { FichaVacuna } from '../components/FichaVacuna'
 import { FichaMascotaHogar } from '../components/FichaMascotaHogar'
 import { ClipSesion } from '../components/ClipSesion'
 import { Icono, type IconoNombre } from '../components/Icono'
+import { NarizNotificacion } from '../brand/NarizNotificacion'
 import { EsperaDeMarca } from '../brand/EsperaDeMarca'
 import { EsperaDeTrabajo } from '../brand/EsperaDeTrabajo'
 import { Guijarro } from '../brand/Guijarro'
@@ -681,6 +690,22 @@ function MuestraPantallaConPie() {
 
 // S71-A3: muestra viva de PieRevelar — 3 ítems visibles, 2 plegados; el
 // toggle revela y vuelve a plegar (el mismo control, el mismo lugar).
+function MuestraOpcion() {
+  const [elegida, setElegida] = useState('balanza')
+  return (
+    <Opcion
+      opciones={[
+        { clave: 'balanza', texto: 'En una balanza', apoyo: 'La más precisa', derecha: 'Predeterminada' },
+        { clave: 'brazos', texto: 'En brazos, restando tu peso' },
+        { clave: 'veterinaria', texto: 'En la veterinaria' },
+      ]}
+      elegida={elegida}
+      onElegir={setElegida}
+      agregar={{ texto: 'Agregar otro método', onPress: () => {} }}
+    />
+  )
+}
+
 function MuestraPieRevelar() {
   const [revelado, setRevelado] = useState(false)
   const items = ['Thor · gastroenteritis', 'Zeus · profilaxis', 'Kary · control', 'Luna · vacuna', 'Rocco · herida']
@@ -2346,6 +2371,40 @@ function EjemploSetBPrima() {
     // S85-B18: la VENTANA TEMPORAL. Van pegados a `hoy` a propósito — es
     // su hermana mayor y la que define el idioma de la familia.
     'semana', 'mes',
+    /* ══ S116-B · LA TANDA DEL MOCK (lote 2, punto 18) ═══════════════
+     * Veinte entradas: 15 que el §② midió como inexistentes, 3 que
+     * nacieron porque el dibujo decía otra cosa, y 2 redibujos.
+     * 🔴 **SU HOJA DE CONTACTO YA CORRIÓ y está adjunta al parte**
+     * (`docs/loop/capturas-s116-b/`): se rasterizaron a 21 · 48 · 96 px
+     * con `scripts/hoja-de-contacto-glifos.mjs`, y **tres se curaron por
+     * lo que esa medición mostró** — `urgencias` perdió su huella (era
+     * ruido a 21), `microchip` perdió cuatro patas, y `receta` se rehízo
+     * dos veces, la segunda al montarla AL LADO DE `papel`.
+     * *Lo que esta fila agrega a la hoja es lo que la hoja no puede dar:
+     * los tres temas y el pulgar del founder.*
+     *
+     * EL ORDEN NO ES ALFABÉTICO — cada uno va pegado al vecino contra el
+     * que se midió, que es lo que §6b pide juzgar: */
+    // los tres círculos del set, juntos (ver la entrada de `hora`)
+    'hora', 'ayuda', 'info',
+    // la pelota contra el salvavidas — el choque más alto de la tanda
+    'personalidad', 'calificacion', 'favorito',
+    // el par del stepper: tienen que leerse COMO PAR
+    'agregar', 'quitar',
+    // la receta contra el papel: el único choque que se materializó
+    'receta', 'papel', 'medicamento',
+    // la llave contra el candado (abrir contra cerrar)
+    'contrasena', 'candado',
+    // la imagen contra las dos hojas apiladas
+    'galeria', 'copiar',
+    // los de salud, contra sus vecinos clínicos
+    'urgencias', 'laboratorio', 'vacuna', 'alergia', 'microchip',
+    // el bol contra la bolsa
+    'alimento', 'despensa',
+    // los controles de la cámara y la llamada
+    'voltear', 'foto', 'microfono', 'colgar',
+    // los dos que no tienen vecino
+    'salir', 'mas',
   ]
   return (
     <View style={{ gap: spacing[4] }}>
@@ -3924,6 +3983,39 @@ function GaleriaInterna() {
           </View>
         </Seccion>
 
+        <Seccion titulo="⭐ GATE S116-B — LA SILUETA DE NOTIFICACIÓN (punto 18) · qué decide, y es UNA sola cosa: que a 24 px se lea la marca y no una cara. Va sobre ciruela noche porque la bandeja de Android es oscura, y a los DOS tamaños que Android usa de verdad — 24 dp en la barra, 48 dp en la notificación abierta. El isotipo REAL va al lado a los mismos tamaños: si el original tampoco se lee a 24, el problema no es el recorte">
+          <View style={{ backgroundColor: palette.ciruelaNoche /* la bandeja de Android es oscura SIEMPRE, no por tema — pero el valor igual sale del token, que es de donde tiene que salir */, padding: spacing[5], borderRadius: radius.lg, gap: spacing[4] }}>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: spacing[6] }}>
+              <View style={{ alignItems: 'center', gap: spacing[2] }}>
+                <NarizNotificacion tamano={24} />
+                <Texto variante="apoyo" color="inverso">24 dp · la barra</Texto>
+              </View>
+              <View style={{ alignItems: 'center', gap: spacing[2] }}>
+                <NarizNotificacion tamano={48} />
+                <Texto variante="apoyo" color="inverso">48 dp · abierta</Texto>
+              </View>
+              <View style={{ alignItems: 'center', gap: spacing[2] }}>
+                <NarizNotificacion tamano={96} />
+                <Texto variante="apoyo" color="inverso">96 · para juzgar</Texto>
+              </View>
+              <View style={{ alignItems: 'center', gap: spacing[2] }}>
+                <Isotipo size={24} variant="blanco" />
+                <Isotipo size={96} variant="blanco" />
+                <Texto variante="apoyo" color="inverso">el isotipo real</Texto>
+              </View>
+            </View>
+            {/* 🔴 LA PIEZA NO ES LO QUE ANDROID MONTA, y decirlo acá importa
+                porque esta galería es donde se firma: lo que viaja al aparato
+                es `assets/marca/nariz-notificacion.svg`, que A/C convierten a
+                vector drawable. **Los dos comparten el mismo `d`** — si
+                alguien toca uno y no el otro, el founder firma una silueta y
+                la bandeja muestra otra. */}
+            <Texto variante="apoyo" color="inverso">
+              lo que viaja al aparato es assets/marca/nariz-notificacion.svg — mismo path que esta pieza
+            </Texto>
+          </View>
+        </Seccion>
+
         <Seccion titulo="⭐ GATE S113 — LOS TRES GLIFOS DEL COACH (§6b.5, POR ÍCONO) · qué decide, de a uno: (a) que `peso` se lea BALANZA y no termómetro ni lámpara; (b) que `antiparasitario` se distinga de `seguros`, que YA es un escudo — o que gane la pipeta; (c) que `foto` se lea CÁMARA y no pantalla-con-botón. Van a 21 y a 44 contra sus cinco vecinos, en claro y en oscuro">
           <HojaDeContactoCoach />
         </Seccion>
@@ -5225,6 +5317,109 @@ function GaleriaInterna() {
             server-side), jamás del oficio. Y el `paddingBottom` de la safe area lo pone la pieza:
             si cada pantalla lo recalcula, vuelve a divergir.
           </Texto>
+        </Seccion>
+
+        <Seccion titulo="Confirmacion (S116-B) — la pantalla de «¡Listo!» con su slot fiscal">
+          <View style={{ height: 620, borderRadius: radius.tarjetaV5, overflow: 'hidden' }}>
+            <Confirmacion
+              exclamacion="¡Listo!"
+              titulo="Tu pedido está en camino"
+              apoyo="Te avisamos cuando salga del local"
+              dato={{ etiqueta: 'Pedido #1042', valor: '$45,00' }}
+              lineaExtra="La factura te llega aparte por correo."
+              especies={['perro', 'gato', 'conejo']}
+              primario={{ texto: 'Ver el pedido', onPress: () => {} }}
+              secundario={{ texto: 'Volver al hogar', onPress: () => {} }}
+            />
+          </View>
+        </Seccion>
+
+        <Seccion titulo="IsotipoV5 · LogoV5 (S116-B) — NO reemplazan a Isotipo todavía">
+          <View style={{ gap: spacing[4] }}>
+            <View style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center' }}>
+              <IsotipoV5 sobre="claro" tamano="cabecera" />
+              <IsotipoV5 sobre="claro" tamano="splash" />
+              <LogoV5 sobre="claro" tamano="cabecera" />
+            </View>
+            {/* Sobre ciruela: acá se ve la placa negra que el archivo trae
+                y que NO se le quitó (ver la cabecera de la pieza). */}
+            <View style={{ backgroundColor: palette.ciruela, padding: spacing[4], borderRadius: radius.tarjetaV5, flexDirection: 'row', gap: spacing[5], alignItems: 'center' }}>
+              <IsotipoV5 sobre="oscuro" tamano="cabecera" />
+              <LogoV5 sobre="oscuro" tamano="cabecera" />
+            </View>
+          </View>
+        </Seccion>
+
+        <Seccion titulo="Opcion (S116-B) — una entre varias, en FILAS (no es SelectorOpcion)">
+          <MuestraOpcion />
+        </Seccion>
+
+        <Seccion titulo="Cabecera (S116-B) — raíz y empujada · NO reemplaza a Encabezado todavía">
+          <View style={{ gap: spacing[4], marginHorizontal: -spacing[4] }}>
+            <Cabecera
+              variante="raiz"
+              antetitulo="domingo, 13 de septiembre"
+              titulo="Buenas tardes"
+              apoyo="Tu hogar está al día"
+            />
+            <Cabecera
+              variante="empujada"
+              titulo="Agendar paseo"
+              apoyo="Zeus · 30 min"
+              onVolver={() => {}}
+              etiquetaVolver="Volver"
+              pasos={{ total: 3, actual: 2, etiqueta: 'Paso 2 de 3' }}
+            />
+          </View>
+        </Seccion>
+
+        <Seccion titulo="BadgeFecha · BarraPasos · BotonAsistente (S116-B) — shell v5">
+          <View style={{ gap: spacing[4] }}>
+            <View style={{ flexDirection: 'row', gap: spacing[3], alignItems: 'center' }}>
+              <BadgeFecha mes="sep" dia="13" />
+              <BadgeFecha mes="oct" dia="1" />
+            </View>
+            {/* La barra vive SOBRE ciruela: se muestra sobre su fondo real,
+                porque sus dos colores se eligieron para ese fondo. */}
+            <View style={{ backgroundColor: palette.ciruela, padding: spacing[4], borderRadius: radius.tarjetaV5, gap: spacing[3] }}>
+              <BarraPasos total={3} actual={2} etiqueta="Paso 2 de 3" />
+              <BarraPasos total={4} actual={1} etiqueta="Paso 1 de 4" />
+              {/* total=1 no se dibuja: regla de existencia. */}
+              <BarraPasos total={1} actual={1} etiqueta="Paso 1 de 1" />
+            </View>
+            {/* El asistente es `position:absolute`: se muestra dentro de una
+                caja con alto propio para que no se vaya al borde de la galería. */}
+            <View style={{ height: 180, borderRadius: radius.tarjetaV5, backgroundColor: palette.lienzo, overflow: 'hidden' }}>
+              <BotonAsistente onPress={() => {}} etiqueta="Abrir el asistente" />
+            </View>
+          </View>
+        </Seccion>
+
+        <Seccion titulo="Personaje (S116-B) — las SEIS caras · ninguna es vector (ver cabecera)">
+          <View style={{ gap: spacing[4] }}>
+            <View style={{ flexDirection: 'row', gap: spacing[3], alignItems: 'center', flexWrap: 'wrap' }}>
+              {(['perro', 'gato', 'conejo', 'ave', 'roedor', 'otro'] as EspeciePersonaje[]).map((e) => (
+                <Personaje key={e} especie={e} tamano="hogar" />
+              ))}
+            </View>
+            {/* Los cuatro tamaños de la letra §2, con el ave — que es la que
+                peor se lee a `fila` porque viene de cuerpo entero. */}
+            <View style={{ flexDirection: 'row', gap: spacing[3], alignItems: 'flex-end' }}>
+              <Personaje especie="ave" tamano="grande" />
+              <Personaje especie="ave" tamano="hogar" />
+              <Personaje especie="ave" tamano="selector" />
+              <Personaje especie="ave" tamano="fila" />
+            </View>
+            {/* elegido y fondo rosa */}
+            <View style={{ flexDirection: 'row', gap: spacing[3], alignItems: 'center' }}>
+              <Personaje especie="gato" tamano="selector" elegido />
+              <Personaje especie="gato" tamano="selector" fondo="rosa" />
+              {/* `roedor` con su fondo blanco opaco declarado: sobre rosa se
+                  ve el recuadro, y por eso está acá y no escondido. */}
+              <Personaje especie="roedor" tamano="selector" fondo="rosa" />
+            </View>
+            <TrioPersonajes especies={['perro', 'gato', 'conejo']} tamano="hogar" />
+          </View>
         </Seccion>
 
         <Seccion titulo="PieRevelar (60) — revelar el resto de una sección (19.6)">

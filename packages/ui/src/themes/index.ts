@@ -96,11 +96,22 @@ void _formaLight; void _formaDark; void _formaMemorial
  *       grep tomó el de texto. `accent.primary` sí es el teal, así que
  *       lo que C montó en el prestador está BIEN; lo que falla es
  *       reusarlo del otro lado.)*
- *  Si aparece un DÉCIMO, se agrega ACÁ: la lista es el contrato.
- *  **El noveno apareció en S116-B y está arriba** — `accent.primary`. */
+ *  Si aparece un UNDÉCIMO, se agrega ACÁ: la lista es el contrato.
+ *  **El noveno y el décimo aparecieron en S116-B** — `accent.primary` y
+ *  `accent.formaV5`. */
 export type SlotDeTema =
   | 'bg.base'
   | 'accent.primary'   // ⭐ S116-B · el NOVENO (ver `lightOficio`)
+  /* ⭐ **S116-B lote 2 · EL DÉCIMO — `accent.formaV5`.** Un booleano por
+   *  casa: **¿esta casa recibió la geometría del rediseño?** Cliente sí,
+   *  prestador no (letra §5), memorial no (§4 apaga la fiesta).
+   *  **Nació llamándose `ctaPildora` y se renombró en el mismo lote**, al
+   *  aparecer el segundo consumidor: el radio de `Tarjeta`. *Un slot con
+   *  nombre de su primer caso obliga a abrir uno nuevo por cada pieza que
+   *  se rediseñe — y cinco booleanos de casa que siempre valen lo mismo
+   *  son un tema paralelo escrito de a poco.* Lo que el slot dice es la
+   *  CASA, no el botón. */
+  | 'accent.formaV5'
   | 'accent.cta'
   | 'accent.ctaTexto'
   | 'accent.ctaElevado'
@@ -199,7 +210,7 @@ const lightOficio: Theme = {
   // El comentario de arriba ya lo anticipaba sin saberlo: *«`accent.primary`
   // es el MISMO teal en las dos casas y por lo tanto NO las distingue»* —
   // dejó de serlo, y por eso ahora tiene que estar acá.
-  accent: { ...lightTheme.accent, cta: palette.tealDark, ctaTexto: palette.light0, ctaElevado: false, primary: palette.tealDark, primaryBg: palette.tealAlpha16, primaryBorder: palette.tealBorderL, control: palette.tealDark, hito: palette.tealDark, controlBg: palette.tealAlpha16, active: palette.tealDark, marcaEleccion: palette.tealDark, atmosfera: palette.tealDark, activoLleno: palette.tealDark, sobreActivoLleno: palette.light0 },
+  accent: { ...lightTheme.accent, cta: palette.tealDark, ctaTexto: palette.light0, ctaElevado: false, formaV5: false, primary: palette.tealDark, primaryBg: palette.tealAlpha16, primaryBorder: palette.tealBorderL, control: palette.tealDark, hito: palette.tealDark, controlBg: palette.tealAlpha16, active: palette.tealDark, marcaEleccion: palette.tealDark, atmosfera: palette.tealDark, activoLleno: palette.tealDark, sobreActivoLleno: palette.light0 },
 }
 const darkOficio: Theme = {
   ...darkTheme,
@@ -250,7 +261,7 @@ const darkOficio: Theme = {
   // ⇒ sobre superficie oscura manda el hex PURO, con su contenido en
   // tinta. **Medido S83-B31: fill 10.50 · label 11.01.**
   // 🔴 S116-B · EL NOVENO SLOT, su registro oscuro (ver `lightOficio`).
-  accent: { ...darkTheme.accent, cta: palette.teal, ctaTexto: palette.textLight0, ctaElevado: false, primary: palette.teal, primaryBg: palette.tealAlpha15, primaryBorder: palette.tealBorder, control: palette.teal, hito: palette.teal, controlBg: palette.tealAlpha15, active: palette.teal, marcaEleccion: palette.teal, atmosfera: palette.teal, activoLleno: palette.teal, sobreActivoLleno: palette.textLight0 },
+  accent: { ...darkTheme.accent, cta: palette.teal, ctaTexto: palette.textLight0, ctaElevado: false, formaV5: false, primary: palette.teal, primaryBg: palette.tealAlpha15, primaryBorder: palette.tealBorder, control: palette.teal, hito: palette.teal, controlBg: palette.tealAlpha15, active: palette.teal, marcaEleccion: palette.teal, atmosfera: palette.teal, activoLleno: palette.teal, sobreActivoLleno: palette.textLight0 },
 }
 
 /** El default del producto es CLARO (B1 §7.3). Dark es opt-in. Memorial es automático (M6). */
