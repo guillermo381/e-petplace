@@ -34431,3 +34431,88 @@ Un arnés que espera algo —una respuesta, un proceso, un aparato— **tiene qu
 **La forma exigible:** todo arnés que espere declara su techo **adentro** (`perl -e 'alarm N; exec @ARGV'` donde no hay `timeout`, un `AbortController` en JS, `--timeout` del runner), y **al vencerse dice que venció** — porque *un arnés que se corta en silencio vuelve a ser indistinguible de uno que midió*.
 
 *Y se cobró sola mientras se escribía este mismo lote: un `node -c ""` sin argumento se quedó leyendo stdin y colgó su comando entero.*
+
+---
+
+## `D-1095` 🔴 — EL TOTAL DE «CONFIRMAR Y PAGAR» DICE `$6.00` CON PUNTO: BYPASS DE LA FUENTE ÚNICA, EN 32 PANTALLAS DEL CLIENTE
+
+**Estado:** ABIERTA · **Dueño: C** — *es bypass en la pantalla; **la fuente está bien**, medida abajo.*
+**Origen:** el founder, sobre las capturas del lote 2 de B (13-sep-2026). **No salió del rediseño: el rediseño lo destapó.**
+
+### El sitio exacto
+
+`apps/cliente/src/components/checkout-reserva.tsx:522`
+
+```js
+<Celda titulo={t('checkout.total')} metadataMono={`$${precio.toFixed(2)}`} />
+```
+
+**`toFixed` es JavaScript puro: produce punto SIEMPRE y no mira el locale.** Por eso sale `$6.00` donde la ley de S115 manda `$6,00`.
+
+### 🟢 LA FUENTE ÚNICA ESTÁ BIEN, Y POR ESO EL DUEÑO ES C Y NO A
+
+`packages/i18n/src/moneda.ts` usa `Intl.NumberFormat('es-EC')` con el locale **fijo a propósito** —*el número tiene que coincidir con el de la factura en los dos idiomas*—. Medido en este árbol:
+
+```
+new Intl.NumberFormat('es-EC',{minimumFractionDigits:2}).format(6)  →  6,00
+```
+
+⇒ `formatearPrecio(6)` da **`$6,00`**. **La fuente no tiene nada que curar.**
+
+### 🔴 Y EL HALLAZGO QUE LO VUELVE PEOR QUE UN BYPASS: LA MISMA PANTALLA MUESTRA EL MISMO MONTO DE DOS FORMAS
+
+En **el mismo archivo y la misma variable `precio`**:
+
+| línea | qué hace | qué sale |
+|---|---|---|
+| **522** | `` `$${precio.toFixed(2)}` `` | **`$6.00`** |
+| **554** | `<SeccionFacturacion total={precio} />` → y ese componente **sí** llama a `formatearPrecio` | **`$6,00`** |
+
+*No es que la casa formatee mal: es que formatea de las dos maneras a la vez, a quince líneas de distancia, sobre el mismo número.*
+
+### El censo del cliente, con su comando
+
+```bash
+grep -rnE 'toFixed\(2\)|\$\$\{' apps/cliente/src --include="*.tsx" --include="*.ts" | grep '\$'
+```
+
+| | |
+|---|--:|
+| formateos de plata **a mano** | **42 ocurrencias · 32 archivos** |
+| llamadas a la **fuente única** | **5 · 2 archivos** (`seccion-facturacion.tsx`, `lib/use-moneda.ts`) |
+
+*El discriminador es el `$` en la línea: sin él, `toFixed(2)` también cuenta kilos y megabytes, y el número saldría inflado.*
+
+### Lo que esto dice del riel, y es lo de fondo
+
+**`moneda.ts` nació en S82 declarando en su propia cabecera que había «115 formateos a mano en el producto».** Treinta y pico de sesiones después, **el cliente tiene 42 y usa la fuente 5 veces.** *El riel se construyó, se documentó, y casi nadie migró: es `L-318` en su variante más cara —no un motor sin puerta, sino un motor CON puerta que nadie cruza—, y por eso ningún gate lo vio: todo compila.*
+
+### ⚠️ LO QUE NO MEDÍ, declarado
+
+1. **Si `Intl` se comporta igual en Hermes que en Node.** Lo de arriba se midió en Node. **No hay polyfill de `Intl` declarado** en `apps/cliente/package.json` ni en `packages/i18n`. *Si en el aparato `Intl.NumberFormat('es-EC')` cayera a un fallback, la fuente también daría punto y esta ficha tendría un segundo dueño.* **Se cierra con una captura del aparato, no leyendo código.**
+2. **El prestador.** El censo es del cliente, que es lo que se pidió.
+
+**☠️ MUERTE:** las 42 ocurrencias pasan por la fuente única y un gate lo vigila — *sin gate, 34 sesiones de evidencia dicen que vuelve.*
+
+---
+
+## `D-1096` 🟡 — LA FECHA DE UNA CITA SE MUESTRA EN FORMATO DE MÁQUINA: `2026-09-13 · 15:00 · 30 min`
+
+**Estado:** ABIERTA · **Dueño: C · LOTE 5** (el que toca esa pantalla).
+**Origen:** el founder, sobre las capturas del lote 2 (13-sep-2026).
+
+`apps/cliente/src/components/checkout-reserva.tsx:516` — **la línea de arriba de `D-1095`**, en la misma tarjeta:
+
+```js
+metadataMono={`${fecha} · ${hora.slice(0, 5)} · ${duracion} min`}
+```
+
+`fecha` llega en ISO y se pinta cruda ⇒ **`2026-09-13 · 15:00 · 30 min`**. *Es el formato en que la base guarda, no en el que una familia lee.* **Y está en el último paso antes de pagar**, que es donde la persona confirma que entendió qué compró.
+
+**La casa ya tiene con qué:** `fechas.ts` es el riel hermano de `moneda.ts` —mismo origen, S82, misma razón— y `fechaLargaHumana` existe desde S55 (`D-323`).
+
+📌 **Es la misma tarjeta y la misma clase que `D-1095`: dos datos crudos a quince líneas, uno de plata y otro de tiempo.** *Los dos rieles existen; los dos están sin usar en el mismo componente.* ⇒ **se curan juntos o se vuelve a mirar dos veces.**
+
+**LA VOZ, con el literal de la mesa** (`docs/loop/S116-REVISION-MESA-1.md` §4, 13-sep-2026): *«la familia lee **«sáb 13 sep · 3:00 p. m. · 30 min»**»*. ⇒ **día de semana, mes en palabra, hora en reloj de 12 con a. m./p. m.** — no es «humanizar por gusto»: es el formato que la mesa escribió.
+
+**☠️ MUERTE:** la fecha sale en voz de familia por el riel, y el gate de voz la cubre.
