@@ -34374,3 +34374,60 @@ from mascotas where familia_id in (…familia de guillo381+8…);
 **La cura es marcarlas** (`creado_por_sistema = 'fixture_founder_s113'` o su equivalente), **no borrarlas**: varias son sujeto vivo de pruebas de otras pistas, y *una mascota de prueba borrada a destiempo no rompe un test: lo vuelve irreproducible, que es peor porque no se nota.*
 
 **☠️ MUERTE:** el censo de reales sobre esa familia devuelve **2**.
+
+---
+
+## `D-1092` 🟡 — LOS 20 GLIFOS NUEVOS ESPERAN EL GATE POR ÍCONO, Y LA PLANCHA YA ESTÁ
+
+**Estado:** ABIERTA · **Dueño: B**, en un lote propio · **firma: el founder** — *lo que falta no es trabajo, es un ojo.*
+**Origen:** `S116-B-LOTE2.md`, tabla de pendientes (13-sep-2026).
+
+`DIRECCION_ARTE` §2.9 manda que **un ojo los juzgue a 21 px**. **La plancha está rasterizada de verdad y adjunta** — lo que B no puede hacer es firmarla.
+
+**Y el lote arrastra más de lo que produjo:** `prime`/`primeCorona` y **los 12 gates por ícono pendientes desde S82** ahora son **corribles** —una línea del comando por glifo, porque el rasterizador existe desde este lote— y no se corrieron sólo porque no estaban en el encargo. ⇒ **el lote propio de B los junta a todos en una plancha, no de a uno.**
+
+**☠️ MUERTE:** la plancha firmada por el founder, con los 20 nuevos y los 12 viejos adentro.
+
+---
+
+## `D-1093` 🟠 — LA NARIZ DEL ÍCONO DE NOTIFICACIÓN NECESITA UN VECTOR DRAWABLE, Y ESO ES BUILD
+
+**Estado:** ABIERTA · **Dueño: A o C** (B lo declaró fuera de su territorio) · **entra en el LOTE 8, la build de octubre.**
+**Origen:** `S116-B-LOTE2.md` (13-sep-2026). El SVG **ya está entregado**: `packages/ui/assets/marca/nariz-notificacion.svg`, con su captura a 24 y 48 px contra el isotipo real.
+
+**Por qué no es del lote de piezas:** convertirlo a vector drawable y apuntarlo en el plugin de `expo-notifications` toca **`app.config.ts` y `android/`** — o sea **configuración nativa, no JS**. ⇒ **no viaja por OTA: necesita build.**
+
+*Por eso su lugar es el lote 8 y no antes: el tren de una build se toma cuando otra cosa lo obliga (precedente `D-456`), y en octubre hay build.*
+
+**☠️ MUERTE:** el ícono de notificación de Android muestra la nariz y no el cuadrado gris por defecto, verificado en el aparato con una push real.
+
+---
+
+## `D-1094` 🟡 — EL GLIFO DE HISTORIA CLÍNICA: SU DISPARO SONÓ Y NADIE LO ATENDIÓ
+
+**Estado:** ABIERTA · **Dueño: B**, en el próximo arco que toque glifos.
+**Origen:** `S116-B-LOTE2.md` (13-sep-2026) — **lo declaró B contra sí mismo**, que es lo que hace que exista esta ficha.
+
+Su disparo escrito era *«el próximo arco que toque los papeles o el registry de glifos»*. **El lote 2 tocó el registry entero.** El disparo **sonó** — y el glifo no entró, porque **el encargo listaba los 52 del mock y éste no está entre ellos**.
+
+> *Un disparo que suena y nadie anota vuelve a sonar dentro de diez sesiones.*
+
+**Lo que esto enseña sobre cómo se escriben los disparos:** uno atado a *«el próximo arco que toque X»* **no despierta solo** — despierta si alguien que está tocando X se acuerda de mirar la lista de disparos, y el encargo de ese lote suele venir de otro lado. **La ficha es lo que lo vuelve encontrable.**
+
+**☠️ MUERTE:** el glifo dibujado, en la plancha, firmado.
+
+---
+
+## `L-559` — UN ARNÉS DE ESPERA NECESITA TECHO DE TIEMPO **PROPIO**, Y EN MÁQUINA COMPARTIDA NO ES SÓLO SU MEDICIÓN LA QUE SE PIERDE
+
+*(Lección de E, S116. Al contrato.)*
+
+Un arnés que espera algo —una respuesta, un proceso, un aparato— **tiene que traer su propio techo de tiempo**, y no heredarlo de quien lo invoca.
+
+**Lo que ya sabíamos:** un arnés colgado **no falla**: su Promise nunca resuelve, el proceso queda vivo, y **su silencio se lee igual que un verde**. Esa mitad estaba escrita.
+
+🔴 **Lo que E agrega, y es lo que la vuelve regla del contrato y no consejo de estilo: en una máquina compartida por varias pistas, un arnés colgado NO SÓLO SILENCIA SU PROPIA MEDICIÓN — SE COME LA RAM DE LAS OTRAS.** *El costo deja de ser «una medición que no llegó» y pasa a ser «tres pistas midiendo raro al mismo tiempo, cada una buscando la causa en su propio territorio».* Y esa búsqueda es cara justamente porque **el síntoma aparece lejos de la causa**: quien colgó el arnés no es quien ve el número raro.
+
+**La forma exigible:** todo arnés que espere declara su techo **adentro** (`perl -e 'alarm N; exec @ARGV'` donde no hay `timeout`, un `AbortController` en JS, `--timeout` del runner), y **al vencerse dice que venció** — porque *un arnés que se corta en silencio vuelve a ser indistinguible de uno que midió*.
+
+*Y se cobró sola mientras se escribía este mismo lote: un `node -c ""` sin argumento se quedó leyendo stdin y colgó su comando entero.*

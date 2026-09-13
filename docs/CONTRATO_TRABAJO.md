@@ -865,6 +865,14 @@ comodidad se interpuso entre la medición y la conclusión, y no avisó.*
    > **⚠️ DIVERGENCIA DECLARADA, NO RESUELTA — a la mesa.** Este eslabón manda `eas update:list`; **`METODO_TRES_PISTAS` §2 deber ③ manda `update:view` y prohíbe `update:list`**, con su razón medida (*`update:list` no muestra el `gitCommitHash`*). **Son dos letras firmadas que se contradicen, y eso es peor que una equivocada: cualquiera cita la que le conviene y está «en regla».** *No se toca acá porque resolverlo es decidir sobre letra firmada ajena a esta enmienda* — **se deja nombrado para que la próxima sesión no lo descubra chocando.**
 4. **CUARTO ESLABÓN: verificar que lo que CONSUMÍS sigue vigente.** Con varias pistas, el contrato de una pieza puede cambiar **entre tu commit y tu publish** — en S82 un segmentado viajó en modo `'vista'` porque su dueña lo cerró después de que la consumidora lo leyera. Antes de bundlear, se re-lee la pieza ajena que tu código consume.
 
+**ENMIENDA S116 (13-sep-2026) — TODO ARNÉS QUE ESPERA TRAE SU TECHO DE TIEMPO ADENTRO.** *(Lección de E, depositada como `L-559`. Se escribe como enmienda y **sin número de regla nuevo**: la numeración es de gobierno y la asigna la mesa.)*
+
+Un arnés que espera algo —una respuesta, un proceso, un aparato— **declara su propio techo y no lo hereda de quien lo invoca**: `perl -e 'alarm N; exec @ARGV'` donde no hay `timeout`, un `AbortController` en JS, el `--timeout` del runner. **Y al vencerse, LO DICE** — *un arnés que se corta en silencio vuelve a ser indistinguible de uno que midió.*
+
+**La mitad conocida:** un arnés colgado **no falla** —su Promise nunca resuelve, el proceso queda vivo— y **su silencio se lee igual que un verde**.
+
+🔴 **La mitad que agrega E, y es la que lo vuelve regla del contrato: en una máquina compartida por varias pistas, el arnés colgado NO SÓLO SILENCIA SU MEDICIÓN — SE COME LA RAM DE LAS OTRAS.** El costo deja de ser *«una medición que no llegó»* y pasa a ser *«tres pistas midiendo raro al mismo tiempo, cada una buscando la causa en su propio territorio»* — y esa búsqueda es cara porque **el síntoma aparece lejos de la causa**: quien colgó el arnés no es quien ve el número raro.
+
 **Regla 86 — EL ANCLA DE UN OTA ES UN COMMIT DE FUSIÓN: `--no-ff` SIEMPRE, Y NADA DE REBASE/SQUASH/CHERRY-PICK ENTRE PISTAS (S86, firmada por la mesa).**
 
 **La letra:** el trabajo de una pista entra a `main` con **`git merge --no-ff`**. **Prohibidos entre pistas: `rebase`, `squash` y `cherry-pick`.**
