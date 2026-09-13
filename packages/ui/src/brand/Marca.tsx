@@ -18,11 +18,33 @@ import { medidas } from '../tokens/medidas'
  * *Se pide por el FONDO y no por el color a propósito: quien monta sabe
  * dónde lo pone, no qué archivo hace falta.*
  *
- * 🔴 **La versión `oscuro` trae su placa negra en el archivo** (medido en
- * `S116-B-ASSETS.md`: `14.png` y `15.png` vienen con fondo opaco). **No se
- * le quitó** —editar el asset es del founder— así que sobre ciruela va a
- * verse su rectángulo. *Se declara acá y no se disimula: quien lo monte
- * sobre la cabecera lo va a ver, y es mejor que lo sepa antes.*
+ * ✅ **LA PLACA NEGRA SE FUE (S116-B, autorizado por la mesa).** Esta nota
+ * decía que la versión `oscuro` traía su rectángulo horneado y que **no se
+ * le quitaba porque editar el asset es del founder** — se declaró en el
+ * lote 2 en vez de disimularse, y el founder lo vio en el splash y en la
+ * propuesta. Hoy está curado, **medido antes y después**:
+ * `logo-sobre-oscuro.png` pasó de **99,3 % a 27,3 % de píxeles opacos**;
+ * el isotipo, de **91,4 % a 50,4 %**.
+ *
+ * 🔴 **Y NO ERA UN RECTÁNGULO APARTE, que era la pregunta.** La placa es
+ * **el primer subpath del MISMO `<path>` que dibuja la marca** —un
+ * rectángulo del tamaño del lienzo, con el dibujo recortado por dentro
+ * como máscara—. ⇒ *quitar sólo el rectángulo INVIERTE el relleno y pinta
+ * la marca de negro sólido.* Se probaron las dos salidas rasterizadas
+ * sobre el degradado y **gana quitar el path entero**: lo que queda debajo
+ * es la marca en sus colores, sin marco.
+ *
+ * ⚠️ **CÓMO SE REGENERARON LOS PNG, porque el camino obvio no funciona y
+ * el próximo que los toque va a chocar con lo mismo:** `qlmanage` —el
+ * único rasterizador de este entorno— **NO preserva transparencia**:
+ * entrega el dibujo aplastado sobre blanco opaco. Un PNG «transparente»
+ * hecho así sale **100 % opaco** y el defecto queda igual, con un archivo
+ * nuevo que dice lo contrario. El alfa se DERIVA de dos rasterizados (uno
+ * sobre negro, otro sobre blanco): `α = 1 − (Cb − Cn)`, exacto, no una
+ * estimación por croma. Y **`@2x` y `@1x` se submuestrean del `@3x`**, no
+ * se rasterizan aparte — *tres rasterizados independientes no son la misma
+ * imagen: el antialiasing cae distinto y las densidades divergen sin que
+ * nada avise.*
  * ═══════════════════════════════════════════════════════════════════════
  */
 export type SobreFondo = 'claro' | 'oscuro'
