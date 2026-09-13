@@ -34492,7 +34492,19 @@ grep -rnE 'toFixed\(2\)|\$\$\{' apps/cliente/src --include="*.tsx" --include="*.
 1. **Si `Intl` se comporta igual en Hermes que en Node.** Lo de arriba se midió en Node. **No hay polyfill de `Intl` declarado** en `apps/cliente/package.json` ni en `packages/i18n`. *Si en el aparato `Intl.NumberFormat('es-EC')` cayera a un fallback, la fuente también daría punto y esta ficha tendría un segundo dueño.* **Se cierra con una captura del aparato, no leyendo código.**
 2. **El prestador.** El censo es del cliente, que es lo que se pidió.
 
-**☠️ MUERTE:** las 42 ocurrencias pasan por la fuente única y un gate lo vigila — *sin gate, 34 sesiones de evidencia dicen que vuelve.*
+### ⊳ ENMIENDA S116-A (13-sep-2026) — NACE SU GATE, Y EL NÚMERO SE CORRIGE A **41**
+
+**`verify:moneda`** (`scripts/verify-moneda.mjs`), **trinquete solo-baja, baseline 41, en el pre-commit** (100 ms, acotado a `apps/cliente`).
+
+🔴 **El 42 de esta ficha traía UN FALSO POSITIVO y se corrige acá:** `lib/censo-almacenamiento.ts:56` formatea **megabytes** —`` `${(total/1048576).toFixed(2)}MB` ``— y entraba porque el `$` de su interpolación contaba como símbolo de moneda. *El grep original lo esquivaba por casualidad —usaba `toFixed(2)` literal y las otras dos líneas de ese archivo son `toFixed(1)`—, así que el error entró justo por la única que coincidía.* **El corpus del gate son las PANTALLAS** (`app/` + `components/`, sin `lib/`): **41 en 31 archivos.**
+
+*Por qué se corrige en vez de heredarse: un baseline con un falso positivo adentro deja lugar para que alguien agregue un caso de verdad sin que el trinquete suene.*
+
+**Su rojo, probado sobre el sitio de esta ficha:** una ocurrencia nueva al lado de `checkout-reserva.tsx:522` → **41 → 42, exit 1**, listando archivo y línea. Limpieza verificada: el archivo quedó idéntico.
+
+**Su auto-prueba distingue tres casos** y una de las tres **cazó un error mío** antes de sembrar: el discriminador que escribí primero contaba *cualquier* interpolación, y habría inflado el baseline.
+
+**☠️ MUERTE:** las 41 ocurrencias pasan por la fuente única — *el gate no la cura: impide que crezca mientras C la cura en el lote 3b.*
 
 ---
 
@@ -34514,5 +34526,19 @@ metadataMono={`${fecha} · ${hora.slice(0, 5)} · ${duracion} min`}
 📌 **Es la misma tarjeta y la misma clase que `D-1095`: dos datos crudos a quince líneas, uno de plata y otro de tiempo.** *Los dos rieles existen; los dos están sin usar en el mismo componente.* ⇒ **se curan juntos o se vuelve a mirar dos veces.**
 
 **LA VOZ, con el literal de la mesa** (`docs/loop/S116-REVISION-MESA-1.md` §4, 13-sep-2026): *«la familia lee **«sáb 13 sep · 3:00 p. m. · 30 min»**»*. ⇒ **día de semana, mes en palabra, hora en reloj de 12 con a. m./p. m.** — no es «humanizar por gusto»: es el formato que la mesa escribió.
+
+### ⊳ ENMIENDA S116-A — **LA FECHA NO TIENE FORMA MEDIBLE. NO NACE SU GATE, Y ACÁ ESTÁ POR QUÉ**
+
+Se buscó el trinquete gemelo de `verify:moneda` y **no hay discriminador honesto**. Los tres datos que lo deciden:
+
+1. 🔴 **El caso de esta ficha NO es detectable desde la línea.** `fecha` es una **prop** (`fecha: string`), y lo que se pinta es `` `${fecha} · …` `` — **indistinguible de `${nombre}`**. El defecto no está en la línea que lo muestra: está en que el valor llega crudo. *Un gate que mire líneas no puede verlo.*
+2. **`.slice(0, 5)` casi siempre es correcto: 11 de 12 llevan «hora» en la línea** — recortar los segundos de `15:00:00` es lo que hay que hacer.
+3. **`toISOString()` (15) y `.slice(0, 10)` (13) tienen usos legítimos**: armar una clave, comparar, mandar al servidor. *Marcarlos a todos sería un gate que grita sobre código sano, y un gate ruidoso se apaga.*
+
+**El contraste con la plata es lo que cierra el caso: `toFixed` para plata SIEMPRE está mal, sin excepción — por eso ahí el trinquete es sólido. Para la fecha no existe un token equivalente.**
+
+📌 **Y su magnitud es otra: el riel de fechas SÍ se usa — 30 archivos del cliente**, contra los 2 de `moneda.ts`. *El problema de la fecha es puntual; el de la plata era estructural.*
+
+⇒ **queda sólo esta ficha, y la cura de C se verifica con el ojo, no con un gate.**
 
 **☠️ MUERTE:** la fecha sale en voz de familia por el riel, y el gate de voz la cubre.

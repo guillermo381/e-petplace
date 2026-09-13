@@ -748,6 +748,9 @@ if [ "$TOCA_CLIENTE" != "0" ]; then
   arnes_cliente "verify:pide-en-memorial" "apps/cliente/scripts/censo-pide-en-memorial.mts" \
     "npx tsx apps/cliente/scripts/censo-pide-en-memorial.mts" "D-1089" \
     "le pide algo a quien perdio a su mascota"
+  arnes_cliente "verify:moneda" "scripts/verify-moneda.mjs" \
+    "node scripts/verify-moneda.mjs" "D-1095" \
+    "la plata se formatea en UN lugar; toFixed da PUNTO y la ley es COMA"
 fi
 
 echo "✓ gate verde"
