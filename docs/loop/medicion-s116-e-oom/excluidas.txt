@@ -1,0 +1,12 @@
+cuenta/cerrar|cierra la cuenta: destructivo
+baja|baja de mascota: destructivo
+login|sin sesion: saca del estado que quiero medir
+registro|idem
+bienvenida|idem
+recuperar|idem
+verificar-correo|idem
+auth/callback|idem
+invitacion|idem
+onboarding|idem
+gallery|galeria del design system, no es pantalla de producto
+lamina-fusion|lamina de diseno, no es pantalla de producto
