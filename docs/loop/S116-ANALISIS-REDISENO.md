@@ -118,7 +118,7 @@ Hecho relevante: producción sale en octubre con APK/tienda nueva de todas forma
 - **Cuatro sistemas visuales.** El admin no importa `@epetplace/ui`. Hoy no entra (arrancamos por cliente), pero se declara: el rediseño del admin es sesión propia.
 - **Memorial no es isomorfo** (faltan `capaBg`, `capaText`, `accent.active`; 21 lecturas sin verificar). El nuevo tema nace con los tres temas iguales o no nace. Y memorial en el nuevo lenguaje pide letra: sin trío de personajes, sin magenta, sin cabecera ciruela festiva. Se escribe en el lote de tokens.
 - **`HeroMarca` muerta y copiada local en el Hogar.** El Hogar nuevo la jubila con lápida.
-- **81 reglas de `verify:diseno`, 23 atadas al VALOR.** Esas 23 se declaran una por una en el lote de tokens: cuál se recalibra, cuál se deroga con firma, cuál pasa a medir la forma. Ninguna se apaga.
+- **81 reglas de `verify:diseno`, 25 (23 filas) atadas al VALOR.** Esas 25 se declaran una por una en el lote de tokens: cuál se recalibra, cuál se deroga con firma, cuál pasa a medir la forma. Ninguna se apaga.
 - **Cero hex y cero `fontSize` a mano en las dos apps móviles.** El gate funciona: el rediseño se hace corriendo tokens, y 330 sitios ya demostraron en S97 que ese es el camino.
 - Lo que B no midió y hace falta antes del primer lote de piezas: regla × pieza (qué gates se encienden al tocar cada componente) y el cruce 72 glifos ↔ 52 del mock.
 
@@ -129,7 +129,7 @@ Hecho relevante: producción sale en octubre con APK/tienda nueva de todas forma
 | Etapa | Pista | Qué | Sale a |
 |---|---|---|---|
 | 0 | mesa | las siete firmas de la sección 6; la letra del memorial nuevo; el nombre de la 4.ª tab | — |
-| 1 | B | tokens v5: paleta, tipografía (fuentes nuevas), radios, sombras, motion; tres temas isomorfos; las 23 reglas declaradas; R12 re-medido en cero; assets de marca (logo, personajes) | nada visible aún |
+| 1 | B | tokens v5: paleta, tipografía (fuentes nuevas), radios, sombras, motion; tres temas isomorfos; las 25 reglas (23 filas) declaradas; R12 re-medido en cero; assets de marca (logo, personajes) | nada visible aún |
 | 2 | B | piezas del shell: `Cabecera` (raíz/empujada), `BarraTabs` con activo elevado, botón flotante del asistente, `Boton` ×3 niveles, `Campo`, `Chip`, `Opcion`, `Tarjeta`, `FilaLista`, `Estado`, `Confirmacion`, `Personaje`, `EsperaDeMarca` | nada visible aún |
 | 3 | C | bienvenida + alta (00–10) sobre las piezas; Hogar sin mascota | **primer OTA a preview → recorrido 1** |
 | 4 | C | Hogar y expediente (11–15) + perfil por pestañas; jubila `HeroMarca` | OTA → recorrido 2 |
