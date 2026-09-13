@@ -23,16 +23,13 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
+  Cabecera,
   Campo,
-  Encabezado,
   Entrada,
   EvitaTeclado,
   HuellaDeLlegada,
-  Isotipo,
-  MarcaDeAgua,
-  PaseoDeHuellas,
+  Texto,
   spacing,
-  typography,
   useAviso,
   useTheme,
 } from '@epetplace/ui';
@@ -42,7 +39,6 @@ import { useTraduccion } from '@/i18n';
 import { causaNoEnvia } from '@/lib/registro-guard';
 import { destinoDeVuelta } from '@/lib/volver-a';
 
-const ISOTIPO_ESQUINA = 28;
 
 export default function Registro() {
   const router = useRouter();
@@ -127,13 +123,19 @@ export default function Registro() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <MarcaDeAgua />
-      <PaseoDeHuellas />
-
-      <Encabezado variante="navegacion" titulo={t('registro.titulo')} atras onAtras={() => router.back()} />
-      <View pointerEvents="none" style={{ position: 'absolute', top: insets.top + spacing[2], right: spacing[5] }}>
-        <Isotipo size={ISOTIPO_ESQUINA} variant="gradiente" />
-      </View>
+      {/* ☠️ **MUEREN `MarcaDeAgua`, `PaseoDeHuellas` Y EL ISOTIPO DE ESQUINA**
+          (S116-C lote 3). La revisión de mesa los nombró como ruido en el
+          Hogar —*«los círculos decorativos translúcidos y la marca de agua del
+          isotipo… el sketch no los tiene»*— y del isotipo fino dijo que *«no
+          se reconoce»*. La razón alcanza igual acá: son las mismas piezas
+          haciendo lo mismo. La identidad la pone la cabecera. */}
+      <Cabecera
+        variante="empujada"
+        titulo={t('registro.saludo')}
+        apoyo={t('registro.apoyo')}
+        onVolver={() => router.back()}
+        etiquetaVolver={t('registro.volver')}
+      />
 
       <EvitaTeclado>
         <ScrollView
@@ -201,18 +203,17 @@ export default function Registro() {
                 }}
                 onPress={() => void crearCuenta()}
               />
-              {/* la línea de términos — la misma de bienvenida (§4). */}
-              <Text
-                style={{
-                  fontFamily: typography.family.sans.regular,
-                  fontSize: typography.size.xs,
-                  lineHeight: Math.round(typography.size.xs * typography.leading.normal),
-                  color: theme.text.tertiary,
-                  textAlign: 'center',
-                }}
-              >
+              {/* La línea de términos — la misma de 01. **Pasa de `Text` con
+                  estilo a mano a la pieza `Texto`**: la casa tiene una sola
+                  forma de escribir y esta línea se había quedado afuera.
+                  ⚠️ **Sigue SIN enlaces tocables (`D-336`)**: el encargo los
+                  pide y las páginas legales existen (`/legales/[codigo]`), pero
+                  **partir esta frase en tres nodos tocables es estructura, no
+                  copy** — y la fila social de esta misma pantalla ya está
+                  esperando pieza. Va al buzón con las otras dos. */}
+              <Texto variante="apoyo" color="tertiary">
                 {t('bienvenida.legales')}
-              </Text>
+              </Texto>
               <Boton
                 variante="ghost"
                 etiqueta={t('bienvenida.yaTengoCuenta')}

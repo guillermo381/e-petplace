@@ -83,3 +83,35 @@ Y **`family.sans` no se tocó a propósito y con razón medida** (tu propio come
 **Es el mismo hueco que ya resolviste en `Texto` con el color `inverso`** — *«el par legible de `primary` cuando el fondo se da vuelta»*. `Boton` lo necesita igual.
 
 **Mientras tanto monto `secundario`**: la forma es la correcta (alto, radio, borde) y el color queda declarado en el parte. 01 es la primera pantalla que ve un invitado de F&F, así que este par va a estar en la primera captura del recorrido.
+
+---
+
+## 6. 🔴 Apple y Google en 03/05 — **no se montan, y la razón es medida**
+
+El encargo pide en 03 y 05 *«dos botones blancos anchos con los logos de Apple y Google (la marca ajena tal cual es, no se redibuja)»*, y «Apple y Google solo en cliente» está en lo intocable del plan §2.
+
+**Los tres eslabones, medidos:**
+
+| qué | estado |
+|---|---|
+| **motor de Google** | **existe Y ESTÁ CABLEADO** en `login.tsx:166`, con su botón (`login.conGoogle`). ⚠️ **Corrijo acá una medición mía**: escribí «cero consumidores» buscando `auth-google\|iniciarConGoogle\|GoogleSign` — el nombre real es **`iniciarSesionConGoogle`** y mi patrón no lo cubría. *Un censo por patrón acota, no cierra (`L-437`), y lo confirmé al abrir el archivo para tocarlo.* |
+| **motor de Apple** | **no existe**: cero en `packages/api/src/index.ts` |
+| **los logos** | **no están**: `apps/cliente/assets/marcas/` tiene `deuna · visa · mastercard · amex · diners · discover`. **Ni Google ni Apple** |
+
+**Por eso la fila social queda como está, no como el sketch la pide.** Google **ya funciona** y conserva su botón; lo que no tiene es su LOGO (hoy es un botón de texto). Apple no se monta: sería un botón que no puede entrar a ningún lado — *y la regla dice que la marca ajena no se redibuja, así que dibujarlo yo es justamente lo prohibido*.
+
+**Lo que hace falta, en orden:** ① los dos logos como assets de marca (con su `PROCEDENCIA.md`, como los de pago) — sin ellos el botón de Google no puede verse como el sketch pide · ② el motor de Apple, que es de A.
+
+⚠️ **Consecuencia para el recorrido:** 03 sale con **Google en texto, sin logo**, y **sin Apple**; 05 sale **sin fila social** (su camino de Google no existe hoy). *Se ve un hueco respecto del sketch y es el correcto: un botón de marca ajena que no entra a ningún lado es peor que su ausencia.*
+
+---
+
+## 7. 🟡 Exportar el mapeo especie → `EspeciePersonaje`
+
+**Dónde muerde:** 10 · Expediente creado. El encargo pide *«el trío de personajes con la especie de la mascota primero»*.
+
+**Medido:** la tabla existe — `CARA_LOCAL` dentro de `AvatarMascota.tsx:361` (`perro · gato · conejo · ave · roedor …`) — y **no se exporta**. El dato que tengo en la pantalla es `borrador.especie`, el string del catálogo (**once** especies); `Personaje` acepta **seis**.
+
+**No la copio a la pantalla**, y ésa es la razón del pedido: dos tablas de lo mismo divergen. El día que entre una especie nueva al catálogo, una de las dos se olvida y **las dos siguen compilando**.
+
+**Lo que pido:** exportarla (o una función `caraDe(especie: string): EspeciePersonaje`, con `otro` de fallback). Mientras tanto 10 monta el trío genérico de la casa, declarado en el código.

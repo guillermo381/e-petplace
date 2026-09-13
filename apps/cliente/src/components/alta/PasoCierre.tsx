@@ -22,6 +22,7 @@ import { View } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
   Boton,
+  Confirmacion,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -344,49 +345,65 @@ export function PasoCierre({ modo, borrador }: { modo: ModoAlta; borrador: Borra
         </View>
       </EsqueletoGrupo>
 
-      {/* EL MODAL — texto de la lámina firmada. `onCerrar` hace lo mismo que
-          «Más tarde»: cerrar sin elegir NO puede dejar a la persona en una
-          pantalla de esqueleto para siempre.
+      {/* ⭐ **10 · EXPEDIENTE CREADO — LA CONFIRMACIÓN DE LA CASA** (S116-C
+          lote 3). ⏪ Acá vivía una **Hoja modal** que preguntaba *«¿querés
+          completar el perfil?»*.
 
-          ⚠️ LA PREGUNTA NO VA EN EL SLOT DE `titulo`, y el gate del founder lo
-          encontró: el título de `Hoja` es `numberOfLines={1}` (Hoja.tsx:323) —
-          es un ENCABEZADO, y está bien que lo sea. Meterle una pregunta con un
-          nombre variable adentro garantiza que el nombre se corte justo en las
-          mascotas de nombre largo, que son las que más ganas dan de leerlo.
-          Va como primera línea del cuerpo, donde envuelve. */}
-      <Hoja
-        visible={creada !== null}
-        onCerrar={() => salir(MODO[modo].salida)}
-        apertura="marca"
-      >
-        <View style={{ gap: spacing[4] }}>
-          <Texto variante="titulo">{t('alta.modalTitulo', { nombre })}</Texto>
-          <Texto variante="cuerpo">{t('alta.modalCuerpo')}</Texto>
-          <Texto variante="apoyo">{t('alta.modalCuando')}</Texto>
-          <Boton
-            etiqueta={t('alta.modalCompletar')}
-            bloque
-            /* A4 — este CTA LLEVA: abre el perfil de la mascota recién
-               creada. E14 firmada: acción que navega, chevron `›`. */
-            chevron
-            onPress={() => {
-              if (creada === null) return;
-              // Detrás de esto va EL PERFIL. Jamás una checklist ni una barra
-              // de progreso (MODELO_LOYALTY §2, literal en la lámina).
-              salir({
-                pathname: '/hogar/mascota/[mascotaId]',
-                params: { mascotaId: creada },
-              });
-            }}
-          />
-          <Boton
-            variante="ghost"
-            bloque
-            etiqueta={t('alta.modalMasTarde')}
-            onPress={() => salir(MODO[modo].salida)}
-          />
-        </View>
-      </Hoja>
+          **Por qué cambia, y no es sólo estética:** el plan §5 pide para 10
+          *«confirmación con el patrón único de la casa (check + personajes +
+          dato + dos acciones)»*, y la pieza `Confirmacion` de B es ese patrón.
+          *Una hoja modal sobre un esqueleto deja el logro flotando encima de
+          una pantalla que finge cargar; la confirmación ES la pantalla.*
+
+          **Lo que se CONSERVA de la versión vieja, y es lo que importaba:**
+           · **las dos acciones y sus destinos exactos** — «Ver expediente»
+             abre el perfil recién creado (*detrás de esto va EL PERFIL, jamás
+             una checklist ni una barra de progreso*, `MODELO_LOYALTY` §2) y la
+             segunda sale por `MODO[modo].salida`.
+           · **cerrar sin elegir sigue siendo salir**: el camino secundario
+             hace lo mismo que hacía `onCerrar`. *Nadie queda atrapado en una
+             pantalla de esqueleto.*
+           · las claves `alta.modal*` **NO se borran**: siguen vivas en el otro
+             camino del alta.
+
+          ⚠️ **EL APOYO SE ELIGE, no se afirma de más.** Decir *«guardamos su
+          foto y su carné»* cuando no se guardó ninguno de los dos es
+          exactamente lo que la ley del founder del 5-sep prohíbe. **El carné
+          todavía no existe en este flujo** (ver el parte), así que hoy la
+          condición mira la foto — y el día que el paso del carné entre, la
+          misma línea lo suma sin cambiar de forma. */}
+      {creada !== null ? (
+        <Confirmacion
+          exclamacion={t('alta.listoExclamacion')}
+          titulo={t('alta.listoTitulo', { nombre })}
+          apoyo={
+            borrador.fotoUri && !sinFoto
+              ? t('alta.listoApoyoConExtras')
+              : t('alta.listoApoyoSolo')
+          }
+          /* 🔴 **EL TRÍO SALE DE LA CASA Y NO EMPIEZA POR ESTA MASCOTA — es un
+             hueco declarado, no un olvido.** El encargo pide *«el trío de
+             personajes con la especie de la mascota primero»*, y para eso hay
+             que traducir `borrador.especie` (el string del catálogo, **once**
+             especies) a `EspeciePersonaje` (**seis**).
+
+             **Esa tabla YA EXISTE**: `CARA_LOCAL` dentro de `AvatarMascota`
+             (`packages/ui`), y **no está exportada**. Escribirla acá sería una
+             SEGUNDA tabla de lo mismo, y dos tablas de lo mismo divergen — el
+             día que entre una especie nueva, una de las dos se olvida y nadie
+             lo nota porque las dos compilan. *Preferir el trío genérico antes
+             que duplicar el mapeo.* Pedido a B en el buzón. */
+          primario={{
+            texto: t('alta.listoVerExpediente'),
+            onPress: () =>
+              salir({ pathname: '/hogar/mascota/[mascotaId]', params: { mascotaId: creada } }),
+          }}
+          secundario={{
+            texto: t('alta.listoExplorar'),
+            onPress: () => salir(MODO[modo].salida),
+          }}
+        />
+      ) : null}
     </View>
   );
 }

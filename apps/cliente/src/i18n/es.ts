@@ -274,6 +274,12 @@ export const clienteEs = {
     verAdopcion: 'Ver mascotas en adopción',
     olvide: '¿Olvidaste tu contraseña?',
     titulo: 'Iniciar sesión',
+    /* ⭐ S116-C lote 3 · encabezado de 03. **«Te damos la bienvenida» y
+       NUNCA «Bienvenido»** — tuteo neutro sin género, corrección 01 del
+       plan §5 («todo texto con género → neutro»). */
+    saludo: 'Te damos la bienvenida',
+    volver: 'Volver',
+    apoyo: 'Entra para ver el expediente de tu mascota.',
     emailLabel: 'Email',
     emailPlaceholder: 'ej: ana@correo.com',
     passwordLabel: 'Contraseña',
@@ -282,6 +288,11 @@ export const clienteEs = {
   },
   registro: {
     titulo: 'Crear cuenta',
+    saludo: 'Crea tu cuenta',
+    volver: 'Volver',
+    /* La línea que baja la ansiedad de un formulario: dice cuánto cuesta
+       y que el expediente NO se arma acá. */
+    apoyo: 'Tres datos y listo. El expediente de tu mascota lo armamos contigo después.',
     nombreLabel: 'Tu nombre',
     nombrePlaceholder: 'ej: Ana',
     emailLabel: 'Email',
@@ -412,6 +423,18 @@ export const clienteEs = {
     modalCuando: 'Puedes hacerlo ahora o cuando quieras desde su perfil.',
     modalCompletar: 'Completar ahora',
     modalMasTarde: 'Más tarde',
+    /* ⭐ S116-C lote 3 · 10 · EXPEDIENTE CREADO. La confirmación pasa de Hoja
+       modal a PANTALLA con el patrón único de la casa (plan §5). Las claves
+       `modal*` SE CONSERVAN: siguen vivas en el otro camino del alta. */
+    listoExclamacion: '¡Listo!',
+    listoTitulo: 'El expediente de {{nombre}} ya está creado.',
+    /* Dos apoyos, y la pantalla elige: decir «guardamos su foto y su carné»
+       cuando no se guardó ninguno de los dos sería exactamente la clase de
+       frase que la ley del founder prohíbe. */
+    listoApoyoConExtras: 'Guardamos su foto y su carné. Puedes completar el resto cuando quieras.',
+    listoApoyoSolo: 'Guardamos su expediente.',
+    listoVerExpediente: 'Ver expediente',
+    listoExplorar: 'Explorar servicios',
     // ── la celda de entrada en el Hogar (vivía en `agregarMascota`)
     entradaDetalle: 'Cada quien con su propia historia.',
   },

@@ -36,14 +36,11 @@ import * as WebBrowser from 'expo-web-browser';
 import {
   Boton,
   Separador,
+  Cabecera,
   Campo,
-  Encabezado,
   Entrada,
   EvitaTeclado,
   HuellaDeLlegada,
-  Isotipo,
-  MarcaDeAgua,
-  PaseoDeHuellas,
   spacing,
   typography,
   useAviso,
@@ -97,7 +94,6 @@ WebBrowser.maybeCompleteAuthSession();
 
 /** El isotipo recogido: ~0.4 del tamaño de la bienvenida (72 → 28), en la
  *  esquina superior. La continuidad del Acto III, montada per-pantalla. */
-const ISOTIPO_ESQUINA = 28;
 
 /** Deep link de vuelta del OAuth. `cliente://**` ya está en el uri_allow_list
  *  del proyecto (medido por A). No necesita ruta: `openAuthSessionAsync` lo
@@ -192,15 +188,17 @@ export default function Login() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      {/* EL TAPIZ — las dos capas de fondo (pointerEvents none). */}
-      <MarcaDeAgua />
-      <PaseoDeHuellas />
-
-      <Encabezado variante="navegacion" titulo={t('login.titulo')} atras onAtras={() => router.back()} />
-      {/* EL ISOTIPO RECOGIDO — la continuidad, en la esquina. */}
-      <View pointerEvents="none" style={{ position: 'absolute', top: insets.top + spacing[2], right: spacing[5] }}>
-        <Isotipo size={ISOTIPO_ESQUINA} variant="gradiente" />
-      </View>
+      {/* ☠️ **MUEREN EL TAPIZ, LA SENDA Y EL ISOTIPO DE ESQUINA** (S116-C
+          lote 3) — misma razón que en 05: la mesa los llamó ruido y del
+          isotipo fino dijo que no se reconoce. La identidad la pone la
+          cabecera, que además trae el título y el apoyo en su lugar. */}
+      <Cabecera
+        variante="empujada"
+        titulo={t('login.saludo')}
+        apoyo={t('login.apoyo')}
+        onVolver={() => router.back()}
+        etiquetaVolver={t('login.volver')}
+      />
 
       <EvitaTeclado>
         <ScrollView
