@@ -2,7 +2,7 @@ import { Pressable, View, type ViewStyle } from 'react-native'
 import Animated from 'react-native-reanimated'
 import { Icono } from './Icono'
 import { usePresionado } from './usePresionado'
-import { medidas } from '../tokens/medidas'
+import { medidas, SEPARACION_ASISTENTE } from '../tokens/medidas'
 import { palette } from '../tokens/palette'
 import { radius } from '../tokens/radius'
 import { shadows } from '../tokens/shadows'
@@ -52,7 +52,12 @@ export function BotonAsistente({ onPress, visible = true, etiqueta }: BotonAsist
     /* Por encima de la barra de tabs: su alto + un respiro. El número sale
        del token de la barra, no de una constante — si la barra cambia de
        alto, el asistente la sigue sola. */
-    bottom: medidas.barraAlto + spacing[2],
+    /* 🔴 **La separación sale del token, no de `spacing[2]`** (S116-B):
+     * `AIRE_RAIZ` la usa para calcular cuánto aire deja toda pantalla raíz
+     * abajo, y si acá se escribiera el número suelto **los dos podrían
+     * divergir sin que nada falle** — el botón se movería y el aire
+     * quedaría corto, que es el defecto que este token vino a curar. */
+    bottom: medidas.barraAlto + SEPARACION_ASISTENTE,
     width: lado,
     height: lado,
     borderRadius: radius.chipV5,

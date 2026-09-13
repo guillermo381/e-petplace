@@ -65,6 +65,39 @@ export const medidas = {
   /** El asistente (NEXO) que flota en toda raíz (§1.5). */
   asistenteDiametro: 60,
 
+  /* ══════════════════════════════════════════════════════════════════
+   *  EL AIRE QUE TODA PANTALLA RAÍZ TIENE QUE DEJAR ABAJO
+   *
+   * 🔴 **NACE DE UN DEFECTO VISTO: `BotonAsistente` tapaba contenido.**
+   * La barra tenía su medida (`barraAlto`) y el asistente la suya
+   * (`asistenteDiametro`), **y nadie tenía la suma** — así que cada
+   * pantalla resolvía su `paddingBottom` por su cuenta, o no lo resolvía.
+   * *Dos medidas correctas que nadie compone dejan un hueco que no es de
+   * ninguna de las dos.*
+   *
+   * LA CUENTA, para que se pueda auditar y no haya que creerla:
+   *   `barraAlto` 92  +  separación 8  +  `asistenteDiametro` 60  +
+   *   respiro 8  =  **168**
+   * El respiro final es lo que evita que la última fila quede BESANDO el
+   * botón: tocarla sería tocar el borde del asistente.
+   *
+   * ⚠️ **ES LA PARTE FIJA, Y LA PANTALLA LE SUMA `insets.bottom`** — misma
+   * fórmula que `ALTO_FILA_TABS + insets.bottom`, que el shell ya dejó
+   * escrita. *Un token que incluyera el inset sería falso en cuanto
+   * cambiara el aparato.*
+   *
+   * ⚠️ **UN SOLO TOKEN, NO UN NÚMERO POR PANTALLA.** Si mañana el
+   * asistente crece o la barra cambia, **el valor se recalcula solo y
+   * todas las raíces lo heredan**; un 168 escrito en once pantallas es
+   * once lugares donde olvidarse de uno. Y `R4` caza el número suelto.
+   *
+   * 🔴 **SE DERIVA, NO SE ESCRIBE — y vive ABAJO del objeto por eso.**
+   * Un `168` acá adentro sería un número que hay que acordarse de
+   * recalcular el día que cambie `barraAlto`, y esta casa ya tiene su
+   * lección escrita (`L-284`: *se deriva en vez de emparejar*, y el valor
+   * equivocado se vuelve **inexpresable**). Ver `AIRE_RAIZ`, al pie.
+   * ══════════════════════════════════════════════════════════════════ */
+
   /** Los tres tamaños de avatar que la letra nombra:
    *  «avatar hogar 78 / selector 66 / fila 52». */
   avatarHogar: 78,
@@ -79,5 +112,24 @@ export const medidas = {
   separacionTactil: 8,
 
 } as const
+
+/** Lo que el `BotonAsistente` deja entre la barra y su borde inferior.
+ *  🔴 **SE EXPORTA para que la pieza la consuma**, y no es prolijidad: si
+ *  la pieza escribiera su propio `spacing[2]` acá, serían **dos números
+ *  que significan lo mismo y pueden divergir sin que nada falle** — el
+ *  botón se movería y el aire de las raíces quedaría corto. *Un valor
+ *  compartido por dos piezas no se copia: se importa.* */
+export const SEPARACION_ASISTENTE = 8
+/** El respiro entre la última fila y el borde del asistente. Sin él, tocar
+ *  la última fila es tocar el botón. */
+const RESPIRO_ULTIMA_FILA = 8
+
+/** El aire que toda pantalla raíz deja abajo — **derivado, no escrito**
+ *  (ver el bloque de `asistenteDiametro`). Es la parte FIJA: la pantalla
+ *  le suma `insets.bottom`, igual que hace con `ALTO_FILA_TABS`.
+ *
+ *  `barra 92 + separación 8 + asistente 60 + respiro 8 = 168` */
+export const AIRE_RAIZ =
+  medidas.barraAlto + SEPARACION_ASISTENTE + medidas.asistenteDiametro + RESPIRO_ULTIMA_FILA
 
 export type MedidaKey = keyof typeof medidas

@@ -9,13 +9,17 @@ export { radius, type RadiusKey } from './tokens/radius'
 /* v5 (S116) — las medidas por objeto de la letra del rediseño. Vive
    aparte de `spacing` a propósito: `spacing` es ritmo (base 4 estricta),
    `medidas` es cuánto mide una cosa (26, 58, 74… no son múltiplos de 4). */
-export { medidas, type MedidaKey } from './tokens/medidas'
+/* `AIRE_RAIZ` (S116-B) — el aire que toda pantalla RAÍZ deja abajo para
+   que la última fila no quede debajo del asistente ni de la barra. Es la
+   parte FIJA: la pantalla le suma `insets.bottom`. **Un solo token, no un
+   número por pantalla** — si el asistente crece, todas lo heredan. */
+export { medidas, AIRE_RAIZ, SEPARACION_ASISTENTE, type MedidaKey } from './tokens/medidas'
 /* v5 (S116-B lote 2) — las seis caras de la casa y su composición Trío. */
 export { Personaje, TrioPersonajes, type PersonajeProps, type EspeciePersonaje, type TamanoPersonaje } from './components/Personaje'
 export { BotonAsistente, type BotonAsistenteProps } from './components/BotonAsistente'
 export { BadgeFecha, type BadgeFechaProps } from './components/BadgeFecha'
 export { BarraPasos, type BarraPasosProps } from './components/BarraPasos'
-export { Cabecera, type CabeceraProps } from './components/Cabecera'
+export { Cabecera, type CabeceraProps , ALTO_CABECERA_RAIZ_FIJO, ALTO_CABECERA_EMPUJADA_FIJO } from './components/Cabecera'
 export { Opcion, type OpcionProps, type OpcionItem } from './components/Opcion'
 export { IsotipoV5, LogoV5, type SobreFondo, type TamanoMarca } from './brand/Marca'
 export { Confirmacion, type ConfirmacionProps } from './components/Confirmacion'
@@ -211,6 +215,10 @@ export { CitaEnVivo, type CitaEnVivoProps, type CitaEnVivoCapa } from './compone
 export { Esqueleto, EsqueletoGrupo, type EsqueletoProps, type EsqueletoForma } from './components/Esqueleto'
 export {
   AvatarMascota,
+  /* S116-B · pedido 7 de C: la tabla especie→cara deja de estar en dos
+     lugares. Devuelve `undefined` cuando no hay cara propia — ver su nota:
+     ésas van al monograma, y un fallback adentro borraría ese criterio. */
+  caraDePersonaje,
   type AvatarMascotaProps,
   type AvatarMascotaTamano,
   type AvatarMascotaCapa,

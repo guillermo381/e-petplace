@@ -98,6 +98,37 @@ function DiscoVidrio({ children, onPress, etiqueta }: { children: ReactNode; onP
   )
 }
 
+/* ══════════════════════════════════════════════════════════════════════
+ *  EL ALTO DE LA CABECERA — pedido de C (buzón S116, pedido 2)
+ *
+ * C lo pidió como `ALTO_CABECERA_*`, al molde de `ALTO_FILA_TABS`, para
+ * que **el valor de arranque de su medición asincrónica sea el correcto**
+ * en vez de un cero que salta en el primer cuadro. La razón es buena y el
+ * molde es el de la casa.
+ *
+ * 🔴 **PERO NO HAY UN ALTO, y decirlo es más útil que inventar uno.** La
+ * cabecera mide `insets.top + padding + CONTENIDO + padding`, y el
+ * contenido es variable por diseño: antetítulo opcional, título de una o
+ * dos líneas, apoyo opcional, barra de pasos opcional. *Un `ALTO_CABECERA`
+ * único sería correcto para una combinación y falso para las otras siete —
+ * y al ser un valor de arranque, su error se ve como un salto.*
+ *
+ * ⇒ se exporta **LA PARTE FIJA**, que es exactamente lo que
+ * `ALTO_FILA_TABS` hace y lo que su nota ya declaró: *«se exporta la parte
+ * que es de la pieza, no la que es del teléfono»*. Acá son **dos** las que
+ * no son de la pieza: el inset **y el contenido**.
+ * ══════════════════════════════════════════════════════════════════════ */
+
+/** El padding vertical de la cabecera RAÍZ (70 arriba + 22 abajo).
+ *  **No incluye `insets.top` ni el contenido**: el alto real es
+ *  `inset + ALTO_CABECERA_RAIZ_FIJO + lo que midan sus líneas`. Sirve como
+ *  piso de arranque para una medición con `onLayout`, no como el alto. */
+export const ALTO_CABECERA_RAIZ_FIJO = medidas.cabeceraRaiz.top + medidas.cabeceraRaiz.bottom
+
+/** Íd. para la cabecera EMPUJADA (68 + 20). */
+export const ALTO_CABECERA_EMPUJADA_FIJO =
+  medidas.cabeceraEmpujada.top + medidas.cabeceraEmpujada.bottom
+
 export function Cabecera({
   variante,
   antetitulo,

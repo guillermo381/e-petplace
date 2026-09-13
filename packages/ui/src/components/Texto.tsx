@@ -87,6 +87,8 @@ import type { ReactNode } from 'react'
 import { typography } from '../tokens/typography'
 import { useTheme } from '../ThemeProvider'
 import { sobreVideo } from '../tokens/sobreVideo'
+/* `acentoSobreOscuro` resuelve a la paleta y no al tema — ver su nota. */
+import { palette } from '../tokens/palette'
 
 /* S116-B lote 2 · entra `antetitulo` — el rótulo chiquito en mayúsculas que
    la letra §2 firma para la cabecera («la fecha, el barrio, ACTIVIDAD»).
@@ -134,7 +136,22 @@ export type TextoVariante = 'titulo' | 'seccion' | 'cuerpo' | 'apoyo' | 'enfasis
    esto no marca importancia: es el par legible de `primary` cuando el fondo
    se da vuelta. *Sin él, cada pieza sobre ciruela tendría que escribir su
    color a mano, que es exactamente lo que `Texto` nació para cerrar.* */
-export type TextoColor = 'primary' | 'secondary' | 'tertiary' | 'danger' | 'success' | 'warning' | 'sobreVideo' | 'warm' | 'inverso'
+/* 🔴 **S116-B · entra `acentoSobreOscuro`** — por pedido de C (buzón,
+ * pedido 4). El caso vivo es 01 · Propuesta: la letra §2 pide el claim
+ * *«blanco, con "una vida." en rosa sobre ciruela»*, y **ese acento es la
+ * firma de la pantalla** — es lo único que la separa de un párrafo blanco.
+ * El token existía (`rosaSobreCiruela`, `#FFB8DE`) y ningún miembro de
+ * `TextoColor` lo alcanzaba.
+ *
+ * **Resuelve a la PALETA y no al tema, igual que `sobreVideo`**, y por la
+ * misma razón: la superficie ciruela **es oscura aunque el tema sea claro**
+ * —el degradado de entrada vive en los tres—, así que `theme.text.*` no
+ * puede contestarlo. *Un color de contexto no se pide al tema: el tema
+ * describe la app, no la superficie sobre la que se está parado.*
+ *
+ * ⚠️ **En memorial cae a `inverse`**: la letra §4 dice *«la misma
+ * estructura sin la fiesta»*, y un acento rosa es fiesta. */
+export type TextoColor = 'primary' | 'secondary' | 'tertiary' | 'danger' | 'success' | 'warning' | 'sobreVideo' | 'warm' | 'inverso' | 'acentoSobreOscuro'
 
 export type TextoProps = {
   children: ReactNode
@@ -409,12 +426,14 @@ export function Texto({ children, variante = 'cuerpo', color, numberOfLines, cen
         ? theme.status.successText
         : c === 'warning'
           ? theme.status.warningText
+          : c === 'acentoSobreOscuro'
+            ? (theme.mode === 'memorial' ? theme.text.inverse : palette.rosaSobreCiruela)
           : c === 'inverso'
             /* El slot del tema se llama `inverse` (inglés, como todo el
                shape del tema) y la prop `inverso` (español, como toda la
                API pública de la casa). Se traduce acá, en un solo lugar. */
             ? theme.text.inverse
-            : theme.text[c as Exclude<TextoColor, 'danger' | 'success' | 'warning' | 'sobreVideo' | 'inverso'>]
+            : theme.text[c as Exclude<TextoColor, 'danger' | 'success' | 'warning' | 'sobreVideo' | 'inverso' | 'acentoSobreOscuro'>]
 
   return (
     <Text
