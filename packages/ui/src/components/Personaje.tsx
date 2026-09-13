@@ -62,18 +62,27 @@ const LADO: Record<TamanoPersonaje, number> = {
    unión que no tenga archivo no compila**, que es la única forma de que no
    aparezca un hueco silencioso el día que entre el cerdo (el catálogo del
    ilustrador ya trae uno — ver `S116-B-ASSETS.md`). */
-/* ⚠️ **El tipo es `ImageSourcePropType`, NO `ReturnType<typeof require>`.**
+/* 🔴 **LOS ARCHIVOS NO LLEVAN `@3x`, Y NO ES COSMÉTICO.** Se ingirieron así
+   en el lote 1 y **Metro no los resolvió**: *«Unable to resolve
+   "../../assets/personajes/perro@3x.png"»*. El sufijo `@nx` **es semántico
+   para Metro** —es la densidad de pantalla—, así que busca el archivo BASE
+   y toma `@3x` como una de sus variantes. Con sólo la variante y sin base,
+   no encuentra nada. *El nombre parecía documentación («esto está a 3×») y
+   era una instrucción al bundler.* ⇒ nombre plano; la resolución por
+   densidad la maneja Metro si algún día entran las otras dos.
+
+   ⚠️ **El tipo es `ImageSourcePropType`, NO `ReturnType<typeof require>`.**
    El segundo compila en `packages/ui` y **resuelve a `unknown` bajo la
    config de `apps/prestador`**, donde `<Image source>` lo rechaza (TS2769).
    *Lo cazó el gate del hook, que compila las apps; `tsc` sobre el paquete
    solo daba 0 — el consumidor vive en otro tsconfig.* */
 const FUENTE: Record<EspeciePersonaje, ImageSourcePropType> = {
-  perro:  require('../../assets/personajes/perro@3x.png'),
-  gato:   require('../../assets/personajes/gato@3x.png'),
-  conejo: require('../../assets/personajes/conejo@3x.png'),
-  ave:    require('../../assets/personajes/ave@3x.png'),
-  roedor: require('../../assets/personajes/roedor@3x.png'),
-  otro:   require('../../assets/personajes/otro@3x.png'),
+  perro:  require('../../assets/personajes/perro.png'),
+  gato:   require('../../assets/personajes/gato.png'),
+  conejo: require('../../assets/personajes/conejo.png'),
+  ave:    require('../../assets/personajes/ave.png'),
+  roedor: require('../../assets/personajes/roedor.png'),
+  otro:   require('../../assets/personajes/otro.png'),
 }
 
 export type PersonajeProps = {
