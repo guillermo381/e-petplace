@@ -64,6 +64,9 @@ export const memorialTheme = {
     cta:           palette.tintaV5,
     ctaTexto:      palette.white,
     ctaElevado:    false,                   // sin relieve: no hay nada que celebrar
+    // S116-B · memorial NO lleva la píldora con sombra magenta: §4 apaga la
+    //    fiesta y la acción va en tinta. Conserva la geometría serena de v4.
+    ctaPildora:    false,
 
     primary:       palette.tintaV5,
     primaryBg:     palette.grisCalidoMemorial,

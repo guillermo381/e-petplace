@@ -37,6 +37,8 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { typography } from '../tokens/typography'
 import { palette } from '../tokens/palette'
 import { radius } from '../tokens/radius'
+import { medidas } from '../tokens/medidas'
+import { shadows } from '../tokens/shadows'
 import { spacing } from '../tokens/spacing'
 import { motion } from '../tokens/motion'
 import { opacity } from '../tokens/opacity'
@@ -551,10 +553,31 @@ export function Boton({
   }
 
   const esCompacto = varianteEfectiva === 'compacto'
+
+  /* ═══════════════════════════════════════════════════════════════════
+   * 🔴 **S116-B lote 2 · LA GEOMETRÍA v5 DEL CTA, POR SLOT.**
+   * Letra §2: *«CTA alto 58 radio 999 con sombra magenta 28 % · secundario
+   * alto 52 borde 1,5 magenta»*.
+   *
+   * **Entra por `accent.ctaPildora` y no como constante**, y la razón es la
+   * letra §5: el PRESTADOR no cambia con este rediseño. Rediseñar `Boton`
+   * en su archivo —que es lo que el lote pide, para no tocar a sus 236
+   * consumidores— le habría cambiado la forma a las dos apps **en
+   * silencio**. El slot lo resuelve por casa igual que `cta`, `ctaTexto` y
+   * `ctaElevado`, que ya viven así.
+   * **Memorial también lo apaga** (§4: sin fiesta, la acción va en tinta).
+   *
+   * ⚠️ `compacto` conserva su 44 y su radio suave: es la acción secundaria
+   * de la Ley 22c, no el CTA, y la letra no la nombra.
+   * ═══════════════════════════════════════════════════════════════════ */
+  const pildoraV5 = 'ctaPildora' in theme.accent && theme.accent.ctaPildora === true
+  const esSecundarioV5 = varianteEfectiva === 'secundario' || varianteEfectiva === 'apoyada'
+  const altoV5 = esSecundarioV5 ? medidas.secundarioAlto : medidas.ctaAlto
+
   const cuerpo: ViewStyle = {
-    height: esCompacto ? 44 : t.alto,
+    height: esCompacto ? 44 : pildoraV5 ? altoV5 : t.alto,
     paddingHorizontal: padX,
-    borderRadius: esCompacto ? radius.suave : radius.md,
+    borderRadius: esCompacto ? radius.suave : pildoraV5 ? radius.chipV5 : radius.md,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
@@ -572,8 +595,14 @@ export function Boton({
     // que su canal es la superficie apoyada (la cura de `sinCaja`). El
     // prestador NO la recibe: su teal no tiene ese problema y el tema de
     // oficio pisa el slot en false — meterla a las dos apps sería arrastre.
+    /* S116-B lote 2 · con la píldora v5 el CTA lleva **su propia sombra
+       magenta** (§2), que es de COLOR y no de tinta: el CTA no se apoya en
+       el papel, brilla. Sin píldora (prestador, memorial) sigue rigiendo la
+       elevación genérica de S82, que es la que su gate midió. */
     ...(varianteEfectiva === 'primario' && 'ctaElevado' in theme.accent && theme.accent.ctaElevado
-      ? { boxShadow: theme.elevacion.reposo }
+      ? pildoraV5
+        ? shadows.v5.ctaMagenta
+        : { boxShadow: theme.elevacion.reposo }
       : null),
     ...(c.borde ? { borderWidth: theme.border.width, borderColor: c.borde } : null),
     /* ⚠️ ESTA LÍNEA YA NO DECIDE DÓNDE SE PARA EL BOTÓN, y decirlo acá no

@@ -58,6 +58,9 @@ export const darkTheme = {
     cta:           palette.magentaLuz,
     ctaTexto:      palette.ciruelaNoche,
     ctaElevado:    true,
+    // S116-B · el oscuro comparte la geometría del cliente (no está calibrado
+    //    en color, pero su FORMA sí es la de v5).
+    ctaPildora:    true,
 
     primary:       palette.magentaLuz,
     primaryBg:     'rgba(255,127,196,.14)',
