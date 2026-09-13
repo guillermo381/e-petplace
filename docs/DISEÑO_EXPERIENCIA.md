@@ -1,5 +1,7 @@
 # DISEÑO_EXPERIENCIA — La arquitectura de la experiencia del dueño
 
+> ⚠️ **ENMENDADO PARA LA APP CLIENTE POR `docs/LETRA_REDISENO_S116.md`** (firma del founder, 13-sep-2026): la letra enmienda **§3** — cinco tabs (Hogar · Explorar · Despensa · Actividad · Cuenta), donde **Actividad es el estado en curso del hogar, no una sección administrativa, y la agenda sigue sin ser tab** — **sólo para el cliente y sólo en los puntos que ella nombra**; el resto de este documento sigue vigente, y la Parte II (prestador) no la toca.
+
 > **Versión: v2.4 — S72-A (21 Jul 2026).** Nace **§10ter LA VOZ DE UNA CITA
 > SIN NOMBRE PROPIO** — la regla de la descripción del procedimiento, que
 > gobierna las dos apps (datos no prosa · 1 ítem→descripción · N→primera+«+N»
