@@ -155,7 +155,9 @@ La letra §2 dice *«activo círculo 74 con borde 5 del lienzo, −14»*. La bar
 
 ## ⑩ LA CRÍTICA DE IMPECCABLE
 
-Instalado como skill de proyecto. 🔴 **No se le dejó generar `PRODUCT.md` ni `DESIGN.md`**: su flujo de `init` los escribe en el repo, y es **segunda opinión, no dueña del repo**. Se aplicó su criterio a mano.
+⚠️ **Ya estaba instalada desde S43-B0** — `.claude/skills/impeccable` es un **symlink** a `.agents/skills/impeccable`, trackeado desde el scaffold del monorepo. `skills add` lo **reemplazó por una copia real y rompió el symlink**; se restauró (`git checkout --`) y queda sólo la actualización de `skills-lock.json`, que registra la versión que el instalador trajo. *Un «instalá X» sobre un repo que ya tiene X no falla: lo duplica en silencio, y el `D` de git fue lo único que lo dijo.*
+
+🔴 **No se le dejó generar `PRODUCT.md` ni `DESIGN.md`**: su flujo de `init` los escribe en el repo, y es **segunda opinión, no dueña del repo**. Se aplicó su criterio a mano.
 
 **Lo que señaló sin chocar — CURADO:** *«placeholder needs the same 4.5:1, not the muted-gray default»*. Medido: el placeholder usaba `text.tertiary` = **3.28:1**. **Un placeholder no es decoración: es lo que la persona lee para saber qué escribir.** Pasa a `secondary` (**5.24**), en `Campo` y `BarraEscribir`. El token `tertiary` **no se toca** —sigue siendo placeholder-y-decorativo por doctrina, con 28 lectores—; lo que cambia es que un placeholder deja de contar como decorativo. *La casa ya había resuelto este mismo caso igual en S114.*
 

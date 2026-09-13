@@ -121,6 +121,12 @@
       "skillPath": "skills/fishjam/SKILL.md",
       "computedHash": "d761102db0af746a1f12d2d2c1a99c4200e30251cce05243162238880cd16af1"
     },
+    "impeccable": {
+      "source": "pbakaus/impeccable",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/impeccable/SKILL.md",
+      "computedHash": "a80e96114cca1a7324c3b5b72586b93687a12a2a05302563fa81e1e30987a049"
+    },
     "migrate-to-detour": {
       "source": "software-mansion-labs/skills",
       "sourceType": "github",
