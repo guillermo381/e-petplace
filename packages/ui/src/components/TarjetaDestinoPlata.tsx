@@ -142,9 +142,8 @@ export function TarjetaDestinoPlata({
   const tinte =
     acento === 'oficio'
       ? theme.accent.primaryBg
-      : 'controlBg' in theme.accent
-        ? (theme.accent as { controlBg: string }).controlBg
-        : theme.accent.brandBg
+      : theme.accent.controlBg
+  /* S116-B · memorial ya porta el slot: el fallback era rama muerta. */
 
   /* El orden es el de la tabla de §4 y son LADO A LADO: apiladas, la de
      arriba preside; al lado, ninguna. */

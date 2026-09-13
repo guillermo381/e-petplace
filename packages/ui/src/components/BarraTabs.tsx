@@ -556,7 +556,7 @@ export function BarraTabs({
   const { theme } = useTheme()
   const insets = useSafeAreaInsets()
 
-  const accentActive = acento ?? ('active' in theme.accent ? theme.accent.active : theme.accent.primary)
+  const accentActive = acento ?? theme.accent.active  /* S116-B · memorial ya porta este slot (los 3 temas son isomorfos): el fallback era rama muerta. */
 
   /** El ancho se MIDE (onLayout): el valle viaja al centro del tab
    *  activo, y con la barra compuesta por CAPACIDAD (L-251) la cantidad

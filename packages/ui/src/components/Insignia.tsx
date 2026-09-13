@@ -349,7 +349,7 @@ export function Insignia(props: InsigniaProps) {
         ? traducir(`modalidad.${props.modalidad}` as 'modalidad.teleconsulta')
         : (props as { etiqueta: string }).etiqueta
   const t = TAMAÑOS[tamaño]
-  const capaTexto = 'capaText' in theme ? theme.capaText : theme.capa
+  const capaTexto = theme.capaText  /* S116-B · memorial ya porta este slot (los 3 temas son isomorfos): el fallback era rama muerta. */
 
   // ── DISTINCIÓN: pastilla PLENA de su capa, sin punto y sin borde de
   //    estado. Es la anatomía de `estado` (fondo propio + texto AA) con
@@ -390,9 +390,8 @@ export function Insignia(props: InsigniaProps) {
           // de `capaText` que esta pieza ya usaba.
           backgroundColor: sobreMuro
             ? palette.light0
-            : 'capaBg' in theme
-              ? theme.capaBg.comunidad
-              : theme.bg.elevated,
+            : theme.capaBg.comunidad,
+  /* S116-B · memorial ya porta el slot: el fallback era rama muerta. */
           borderWidth: sobreMuro ? 0 : theme.border.width,
           borderColor: theme.capa.comunidad,
           alignSelf: 'flex-start',

@@ -158,7 +158,7 @@ export interface EstadoCaja {
  *  (ver la derogación en la cabecera). */
 export function colorDeContorno(theme: Theme, { error, enfocado }: EstadoCaja): string {
   if (error) return theme.status.danger
-  if (enfocado) return 'active' in theme.accent ? theme.accent.active : theme.accent.primary
+  if (enfocado) return theme.accent.active  /* S116-B · memorial ya porta este slot (los 3 temas son isomorfos): el fallback era rama muerta. */
   return theme.border.campo
 }
 

@@ -47,4 +47,34 @@ export const epetplaceFonts = {
   DMSans_700Bold,
   JetBrainsMono_400Regular,
   JetBrainsMono_500Medium,
+
+  /* ═══════════════════════════════════════════════════════════════════
+   * 🔴 **v5 · LAS CUATRO DEL REDISEÑO DEL CLIENTE (S116, letra §1.4).**
+   *
+   * **Vienen por `require` de `assets/fonts/`, no de npm**, y las dos
+   * razones son de este repo:
+   *   · la licencia **OFL vive AL LADO de los archivos** (`OFL-Baloo2.txt`
+   *     y `OFL-PlusJakartaSans.txt`) — de npm la licencia viaja en el
+   *     paquete y se pierde de vista;
+   *   · **el peso se controla acá**. El comentario de arriba cuenta cómo
+   *     el índice de una familia npm arrastró 35 `.ttf` al bundle: con
+   *     los archivos en el repo, lo que pesa es exactamente lo que hay.
+   *     Los cuatro juntos son **607648 bytes** (`cat assets/fonts/*.ttf | wc -c`;
+ *     `du` dice 600K, que son bloques de disco y no el peso real).
+   *
+   * **Llegan por OTA, no piden build** — medido por B en el lote 0 con
+   * tres `expo export`: una fuente cargada por `useFonts` entra al
+   * manifest del update (7 → 8 `.ttf`); un `.ttf` suelto que nadie
+   * requiere NO viaja (vuelve a 7). *El `require` es lo que la hace
+   * existir.*
+   *
+   * ⚠️ **Las seis de arriba NO salen todavía**, y no es olvido: el
+   * PRESTADOR consume DM Sans (64 ocurrencias en 26 archivos) y la letra
+   * §5 dice que el prestador no cambia. Sale cuando ningún token la
+   * nombre.
+   * ═══════════════════════════════════════════════════════════════════ */
+  Baloo2_800ExtraBold:        require('../assets/fonts/Baloo2_800ExtraBold.ttf'),
+  PlusJakartaSans_400Regular: require('../assets/fonts/PlusJakartaSans_400Regular.ttf'),
+  PlusJakartaSans_600SemiBold:require('../assets/fonts/PlusJakartaSans_600SemiBold.ttf'),
+  PlusJakartaSans_700Bold:    require('../assets/fonts/PlusJakartaSans_700Bold.ttf'),
 } as const

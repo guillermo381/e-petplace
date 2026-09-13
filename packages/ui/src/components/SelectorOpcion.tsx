@@ -212,14 +212,15 @@ function Chip({
   // LEY 22 (S58): la selección entre pares es TONAL — borde en el
   // acento + tinte claro + TEXTO en el acento (capturado acá: el
   // narrowing de `in` no sobrevive closures). Memorial degrada igual.
+  /* S116-B · el guard externo `'capaText' in theme` era rama muerta desde
+     que memorial porta los 12 slots que le faltaban. Se quita; el resto
+     del ternario no se toca. */
   const textoTonal =
-    'capaText' in theme
-      ? acento === 'control' && 'control' in theme.accent
-        ? theme.accent.control
-        : acento === 'oficio'
-          ? theme.accent.primary
-          : theme.capaText.identidad
-      : theme.text.primary
+    acento === 'control' && 'control' in theme.accent
+      ? theme.accent.control
+      : acento === 'oficio'
+        ? theme.accent.primary
+        : theme.capaText.identidad
   // S58 (firma founder): el ACENTO de la selección — 'control' (cliente:
   // accent.control, tint de la capa marca/afecto) · 'oficio' (prestador:
   // accent.primary/tealDark, §15b) · 'capa' (verdeVital — MUERE como
@@ -243,7 +244,9 @@ function Chip({
   // LÍNEA MÁS ABAJO — el brazo `oficio` lee `accent.primaryBg`, un slot
   // que sí resuelve por casa. *El defecto no era falta de patrón: era una
   // rama que no lo siguió, con la referencia a la vista.*
-  const tinteAcento = !('capaBg' in theme)
+  /* S116-B · mismo proxy que el `borde` de más abajo: preguntaba por el
+     slot para decir «memorial». Ahora pregunta por el tema. */
+  const tinteAcento = theme.mode === 'memorial'
     ? fondoReposo
     : acento === 'control'
       ? 'controlBg' in theme.accent
@@ -260,7 +263,15 @@ function Chip({
       ? tinteAcento
       : fondoReposo
   const borde = esSolitario
-    ? seleccionada && !('capaBg' in theme)
+    ? /* 🔴 S116-B · **ESTE GUARD NO ERA SOBRE EL SLOT: ERA UN PROXY DE
+           «¿ES MEMORIAL?»** — «memorial no tiene capaBg» se usaba para
+           preguntar «¿es memorial?», y funcionaba mientras memorial fuera
+           el único tema sin ese slot. Con los tres temas isomorfos el
+           proxy queda siempre FALSO, y el chip solitario seleccionado
+           habría perdido su borde sereno en memorial **sin que nada
+           fallara** — el tipo de defecto que no tiene síntoma.
+           ⇒ se pregunta por el TEMA, que es lo que siempre quiso decir. */
+      seleccionada && theme.mode === 'memorial'
       ? theme.text.secondary // memorial: la señal es el borde sereno (sin sombra)
       : 'transparent'
     : conCapa

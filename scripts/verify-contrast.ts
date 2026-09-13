@@ -723,7 +723,7 @@ todos.push(
   { nombre: 'PERFIL · chip de filtro elegido, en oscuro', fg: darkTheme.text.inverse, bg: darkTheme.accent.control, surface: darkTheme.bg.base },
   // El nombre de la cabecera, en sus dos casas.
   { nombre: 'COACH · nombre en la cabecera (violeta profundo / papel claro)', fg: '#7C2DD4', bg: lightTheme.bg.card, surface: lightTheme.bg.base },
-  { nombre: 'COACH · nombre en la cabecera (violeta claro / papel oscuro)', fg: '#AE59FF', bg: darkTheme.bg.card, surface: darkTheme.bg.base },
+  { nombre: 'COACH · nombre en la cabecera (violeta claro / papel oscuro)', fg: '#BE79FF', bg: darkTheme.bg.card, surface: darkTheme.bg.base },
 )
 /* ═══ S113-B · EL PUNTO DE ESTADO DEL CARNET (1.0 · adenda) ════════════════
    🔴 **OTRO PAR QUE NACE PORQUE FALLÓ, y por la misma razón que los de arriba:

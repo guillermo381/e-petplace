@@ -99,7 +99,7 @@ export interface BadgeProps {
 
 export function Badge({ n, forma = 'contador', superficie = 'clara', children }: BadgeProps) {
   const { theme } = useTheme()
-  const accentActive = 'active' in theme.accent ? theme.accent.active : theme.accent.primary
+  const accentActive = theme.accent.active  /* S116-B · memorial ya porta este slot (los 3 temas son isomorfos): el fallback era rama muerta. */
   // Sobre el muro, ORO (firma S89 orden 4; el hex sale de palette —
   // fuente única, jamás inline) — SALVO memorial, que no se celebra:
   // ahí conserva papel, lo de siempre. Sobre lo claro, el acento por

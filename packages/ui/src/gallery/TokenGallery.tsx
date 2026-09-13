@@ -2718,7 +2718,7 @@ function EjemploHojaCaptura() {
 function EjemploBadge() {
   const { theme } = useTheme()
   const etiquetaBadge = useEtiquetaBadge()
-  const accentActive = 'active' in theme.accent ? theme.accent.active : theme.accent.primary
+  const accentActive = theme.accent.active  /* S116-B · memorial ya porta este slot (los 3 temas son isomorfos): el fallback era rama muerta. */
   // n=0 NO dibuja nada (regla de existencia) · la pill se esconde de a11y:
   // el número viaja en el label del tocable (mostrado abajo, literal)
   const glifo = (n: number) => (
@@ -3462,8 +3462,8 @@ function GaleriaInterna() {
   const shadowLg = 'lg' in theme.shadow ? theme.shadow.lg : null
   const shadowGlow = 'glow' in theme.shadow ? theme.shadow.glow : null
   // B2.1 — dos registros: capaText para etiquetas; memorial (intacto) no lo tiene
-  const capaTexto = 'capaText' in theme ? theme.capaText : theme.capa
-  const accentActive = 'active' in theme.accent ? theme.accent.active : theme.accent.primary
+  const capaTexto = theme.capaText  /* S116-B · memorial ya porta este slot (los 3 temas son isomorfos): el fallback era rama muerta. */
+  const accentActive = theme.accent.active  /* S116-B · memorial ya porta este slot (los 3 temas son isomorfos): el fallback era rama muerta. */
 
   const modos: { key: ThemeMode; label: string }[] = [
     { key: 'light', label: 'Claro' },

@@ -1,311 +1,195 @@
-/**
- * e-PetPlace v4 · TEMA CLARO — DEFAULT del producto (B1 §7.3).
- * Shape v3.1 (bg/text/accent/capa/status/services/shadow/border),
- * components-ready para StyleSheet: colores string, sombras objeto RN,
- * bordes color+width (RN no tiene shorthand CSS).
- */
-
 import { palette, gradients } from '../tokens/palette'
 import { shadows } from '../tokens/shadows'
 import { elevacion } from '../tokens/elevacion'
 
+/**
+ * ═══════════════════════════════════════════════════════════════════════
+ * 🔴 **TEMA CLARO — v5, LA PIEL DEL REDISEÑO DEL CLIENTE (S116-B lote 1).**
+ * Letra: `docs/LETRA_REDISENO_S116.md` §2, firmada 13-sep-2026.
+ *
+ * **ESTE TEMA ES EL DEL CLIENTE.** El prestador lo recibe por herencia y
+ * le pisa sus slots en `lightOficio` (ver `themes/index.ts`) — **y en este
+ * lote esa lista crece a NUEVE**, porque `accent.primary` (su teal) no
+ * estaba ahí y la paleta nueva se lo habría llevado puesto.
+ *
+ * **LO QUE HEREDA EL PRESTADOR Y CAMBIA, medido y declarado** (`grep`
+ * sobre `apps/prestador/src`, comentarios excluidos): `text.primary` 27 ·
+ * `text.secondary` 23 · `bg.overlay` 8 · `text.tertiary` 6 ·
+ * `bg.hundido` 4 · `status.success` 4 · `status.warning` 4 ·
+ * `border.default` 3 · `bg.card` 1 · `border.subtle` 1.
+ * **Ninguno es cromático de marca** —son texto, superficie, borde y
+ * estado— y por eso no se pisan: pisar diez slots más sería fabricar un
+ * tema paralelo del prestador sin que nadie lo haya firmado. *Se declara
+ * para que el cambio se vea venir, no para que sorprenda en un gate.*
+ * ═══════════════════════════════════════════════════════════════════════
+ */
 export const lightTheme = {
   mode: 'light' as const,
 
   bg: {
-    // S82-B r9 (orden founder punto 1): el fondo del claro resuelve a
-    // PAPEL TAPIZ — hermano de papel algodón. `light0` QUEDA INTACTO a
-    // propósito: tiene DOS consumidores (este fondo y `accent.ctaTexto`,
-    // el texto sobre el CTA de tinta) y no se toca un token de dos
-    // consumidores para cambiar uno. Hoy `papelTapiz === light0`: el
-    // cableado vive, el color espera su firma en el gate.
-    // (Acá vivía la explicación del `as string`. S82-B r30: D-582 PAGADA
-    // — `Theme` dejó de derivarse y los 11 casts murieron juntos. El
-    // comentario se retira con ellos: describía un problema que ya no
-    // existe, y un comentario que sobrevive a su causa desinforma.)
-    base:     palette.papelTapiz,   // S82-B r10: pink 3% sobre papel
-    card:     palette.light1,   // #FFFFFF
-    elevated: palette.light2,   // #F8F7FC
-    overlay:  palette.light3,
-    /** S82-B — SUPERFICIE HUNDIDA (rieles, botones -/+): el hueco.
-     *  Nace porque `overlay` NO hunde en oscuro (es 2.6× más luminoso que
-     *  la tarjeta: el riel se leía ELEVADO). En claro coincide con overlay
-     *  —ahí sí hundía—, en oscuro baja al fondo. El slot ABSORBE la rama
-     *  por tema que SelectorSegmentado tenía que hacer a mano. */
-    hundido:  palette.light3,
-    // S82-B r22 — RE-DECLARADO (no migrado): su rol es **SUPERFICIE
-    // NEUTRA de la casa**, y el hover es UN CASO de ese rol, no un rol
-    // aparte. El comentario decía "hover states" y quedó viejo: de 43
-    // consumidores, **28 lo usan como superficie de fill** (rieles
-    // hundidos, chips en reposo, cajas neutras). Cero migraciones, cero
-    // cambio de valor — lo que cambia es lo que el token DICE que es.
-    // ⚠️ LO QUE NO ES, con el precedente de r12 escrito: **superficie
-    // neutra NO es fill de CONTROL**. Un control necesita su propio
-    // canal — es la letra de `sinCaja`, que nació justo porque este
-    // token no tenía presencia de control (par 1.07 en claro).
-    border:   palette.light4,   // #E3E0EF
-    /** ⏳ S82-B r22 — CERO CONSUMIDORES (medido: bg.warm 0 · text.warm 0
-     *  · accent.warm 0). NO SE MATA, y el porqué es que hay historia:
-     *  `cream` y `terracotta` vienen del MANUAL DE MARCA con la paleta v4
-     *  (S43-B2), no son invención de un tema — matar el slot no mata el
-     *  color, pero borra la única pista de que la casa tiene un registro
-     *  CÁLIDO reservado. Su rol declarado: **la voz de hogar/familia** —
-     *  la narrativa que el producto todavía no construyó (ninguna
-     *  superficie narrativa existe hoy).
-     *  ⚠️ PERO ES LA TRAMPA QUE EL FOUNDER NOMBRÓ: un token que nadie usó
-     *  jamás pasó por un gate, y el próximo que lo encuentre lo va a
-     *  estrenar sin que nadie lo haya mirado. Por eso queda DECLARADO CON
-     *  FECHA (D-583): si al soft launch (1-oct-2026) sigue en cero,
-     *  MUERE — y su primer consumidor, cuando llegue, entra por gate. */
-    warm:     palette.cream,    // narrativa cálida (hogar/familia) — SIN consumidores
-    tinta:    palette.tinta,    // ⏪ S99-B: **ya NO es «el techo del prestador»** — el techo
-                            // ganó el muro tealDark en S61-B12 y este rótulo quedó cuatro
-                            // sesiones vencido. Costó caro: la barra de tabs se pintó de
-                            // NEGRO en el gate 3 por elegir el token LEYENDO su comentario.
-                            // Hoy es tinta y nada más. Su techo vive en `useMuroOficio`.
+    /* ☠️ **EL PAPEL ALGODÓN MUERE COMO FONDO DEL CLIENTE** (letra §2: el
+       lienzo es `#F8F2F6`). ⚠️ **El HEX `palette.light0` NO muere** —
+       medido: **37 lectores vivos**, casi todos del prestador, donde no
+       es «el fondo» sino el PAPEL que va sobre su muro teal. Matarlo
+       habría roto `techo-oficio`, `cuenta`, `perfil-piezas` y
+       `grabador-clip`. *Muere el ROL, no el valor.* */
+    base:     palette.lienzo,        // era papelTapiz #F6F6F6
+    card:     palette.superficie,    // #FFFFFF — sin cambio de valor
+    elevated: palette.superficie,
+    overlay:  palette.rosaTinte,     // el tinte que reemplaza a las capas
+    hundido:  palette.rosaTinte,
+    border:   palette.tintaBorde12,
+    warm:     palette.cream,         // narrativa cálida — SIN consumidores
+    tinta:    palette.tinta,
   },
 
   text: {
-    primary:    palette.textLight0,  // #1D1A2E — también "tinta" CTA prestador
-    secondary:  palette.textLight1,  // #6B6584
-    tertiary:   palette.textLight2,  // #A9A4C0 — placeholder/decorativo
+    primary:    palette.tintaV5,        // #1C1D20
+    secondary:  palette.tintaTexto65,   // el extremo legible del rango §2
+    tertiary:   palette.tintaTexto50,   // apoyo — jamás un dato
     inverse:    palette.white,
-    onGradient: palette.white,       // sobre firmaUILight (#C4008A→#0A7268)
-    warm:       '#2A1A10',           // sobre cream
+    onGradient: palette.white,
+    warm:       '#2A1A10',
   },
 
   accent: {
-    // S63 — enmienda Ley 21 FIRMADA: el CTA primario resuelve por SLOT.
-    // Default 'tinta' (este valor); ThemeProvider cta='oficio' lo ancla a
-    // tealDark en light Y dark. Memorial SIEMPRE tinta (no se celebra).
-    // S82-B r15 — EL CTA DEL CLIENTE PASA A OCRE (FIRMADO por el founder
-    // en galería). ENMIENDA A LA LEY 21 en su mitad del cliente: "el CTA
-    // primario del CLIENTE sigue en tinta" deja de regir — era la ley por
-    // la que cada CTA nuevo nacía negro. La mitad del PRESTADOR queda
-    // INTACTA (su oficio ancla a tealDark por `lightOficio`), y memorial
-    // SIGUE EN TINTA por `getTheme` (memorial no se celebra) — las dos
-    // garantías viven en la fuente, no en la disciplina de cada pantalla.
-    // El par que manda: label TINTA sobre el ocre = 8.40 (blanco daba 2.02).
-    // S82-B — EL ORO FIRMADO. Un solo color para los DOS temas (label
-    // tinta 9.96 en ambos). El PRESTADOR no lo recibe: su oficio ancla a
-    // tealDark por `lightOficio`/`darkOficio`; memorial sigue en tinta
-    // por `getTheme` — las dos garantías viven en la fuente.
-    cta:           palette.ctaOro,
-    ctaTexto:      palette.textLight0,
-    /** S82-B — ¿el CTA lleva ELEVACIÓN? el oro NO se recorta contra papel (1.55): su canal es la superficie apoyada
-     *  Es SLOT y no prop: la pantalla no elige, y el prestador lo pisa en
-     *  `lightOficio`/`darkOficio` (su teal no tiene el problema del oro
-     *  contra papel — meterle relieve sería ARRASTRE). */
+    /* 🔴 **MAGENTA ACCIONA, CIRUELA SELECCIONA** (letra §1.3 — deroga N26:
+       el ocre muere como CTA). */
+    cta:           palette.magentaAccion,
+    ctaTexto:      palette.white,
     ctaElevado:    true,
-    primary:       palette.tealDark,
-    primaryBg:     palette.tealAlpha16,     // B2.1: tint sobre el hex puro
-    primaryBorder: palette.tealBorderL,
 
-    brand:         palette.pinkDark,
-    brandBg:       palette.pinkAlpha08,     // B2.1: tint sobre el hex puro
-    brandBorder:   palette.pinkBorderL,
+    /* 🔴 **LA REGLA DE DOS REGISTROS (Ley 2) APLICADA AL MAGENTA.**
+       `accent.primary` es el registro FUNCIONAL —lo que los componentes
+       pintan como TEXTO en el tonal de la Ley 22—, así que va en
+       `magentaTinta`, que es literalmente lo que la letra §2 define:
+       *«magenta tinta #8E0A5D — magenta sobre claro donde hay TEXTO»*.
+       **Medido:** `magentaAccion` sobre `rosaTinte` da **4.27** y
+       `verify:contrast` lo tumbó; `magentaTinta` da **7.44**. El puro se
+       queda donde es fill con blanco encima (`cta`, `active`). */
+    primary:       palette.magentaTinta,
+    primaryBg:     palette.rosaTinte,
+    primaryBorder: palette.tintaBorde12,
 
-    // B2.1 — indicador de estado ACTIVO (subrayado de tab, selección, paso
-    // actual). Registro gráfico: pink puro. Un solo elemento activo por vista lo usa.
-    active:        palette.pink,
+    brand:         palette.magentaAccion,
+    brandBg:       palette.rosaTinte,
+    brandBorder:   palette.tintaBorde12,
 
-    // S58 (firma founder) — acento de CONTROLES del cliente (selección,
-    // toggles, slider, píldoras de día). Marca ELECCIÓN y estado; la
-    // ACCIÓN sigue en tinta (CTA primario intacto). El prestador no lo
-    // usa: su oficio es tealDark (§15b).
-    control:       palette.magentaDark,
-    /** 🔴 EL COLOR DEL HITO EN UNA SERIE — slot propio, S100d·bis (firma founder).
-     *  **Existe para que la DOSIS de un color repetido se pueda bajar sin tocar
-     *  el token compartido.** `accent.control` vive en 64 sitios de 28 archivos;
-     *  la escalera es UNO. *Suavizar el magenta ahí habría movido selectores,
-     *  interruptores, el slider, el pin y los chips.*
-     *  ⚠️ **Cambia la dosis, JAMÁS el rol** (N26 v2: el magenta sigue siendo
-     *  marca y selección). Ver `palette.magentaSerie` para los dos pares. */
-    hito:          palette.magentaSerie,
-    /** 🔴 EL TINTE DE LA ELECCIÓN — SLOT NUEVO (S98-B, cura de D-813).
-     *  MISMO VALOR que hoy: `capaBg.comunidad` es `pinkAlpha08`, así que
-     *  el cliente NO cambia un píxel. Lo que cambia es de dónde sale.
-     *
-     *  EL DEFECTO QUE CIERRA, medido: la elección se pintaba con DOS
-     *  familias — el BORDE leía `accent.control` (que resuelve por casa)
-     *  y el RELLENO tecleaba `capaBg.comunidad` (que NO resuelve por
-     *  casa, porque los temas de oficio se arman por spread y pisan
-     *  `accent`, jamás `capaBg`). En el prestador eso daba **borde teal
-     *  con relleno magenta**, en la app donde §15b.1 firmó que el
-     *  magenta vive SOLO en la marca.
-     *
-     *  🔴 Y POR QUÉ NO SE VEÍA: la pieza nació en el CLIENTE, donde las
-     *  dos familias COINCIDEN. *Un acoplamiento entre dos valores que
-     *  casualmente son iguales no tiene síntoma hasta que alguien los
-     *  monta donde difieren* — la misma familia que D-806.
-     *
-     *  Memorial NO porta el slot y degrada como sus hermanos (Ley 8): el
-     *  guard de las piezas es `'controlBg' in theme.accent`, que pregunta
-     *  lo que de verdad importa —¿este tema tiñe la elección?— en vez del
-     *  proxy `'capaBg' in theme`. Lo vigila **R27**, junto a `control`,
-     *  `active` y `marcaEleccion`: son la misma física y por eso los
-     *  cubre UNA regla. */
-    controlBg:     palette.pinkAlpha08,
-    /** LA PATA — SLOT PROPIO (S83-B19/B20, FIRMA DEL FOUNDER: "lo que
-     *  quiero comunicar con la pata es: este es el seleccionado").
-     *  Es marca de SELECCIÓN, no de marca: por eso en el prestador toma
-     *  su verde y no el magenta (§15b.1), en los DOS registros como sus
-     *  hermanos `control` y `active`.
-     *  ⚠️ REDUNDANCIA MEDIDA Y DECLARADA: hoy resuelve IDÉNTICO a
-     *  `accent.control` en las CINCO resoluciones (los tres temas base y
-     *  las dos casas de oficio). Se conserva como slot propio porque son
-     *  conceptos distintos —`control` viste la LETRA del segmento, esto
-     *  viste la PATA— y el día que diverjan ya está el lugar; pero
-     *  mientras coincidan, un cambio en uno que no viaje al otro es una
-     *  divergencia por accidente. Si el founder decide que la pata SIEMPRE
-     *  sigue al control, este campo se borra y la pata lee `control`. */
-    marcaEleccion: palette.magentaDark,
-    /** El color de la LUZ DE AMBIENTE (S83-B34). En el cliente es su
-     *  MAGENTA de marca; los temas de oficio lo pisan a su verde. En
-     *  memorial da igual — la pieza no se monta (Ley 8). */
-    atmosfera: palette.pink,
-    // S82-B r12 — el fondo del Boton `sinCaja` (el paso sobre el papel tapiz):
-    // el secundario sin borde necesita un canal, y el borde ya no está.
-    apoyada:      palette.sinCajaLight,
-    // S73 (entity chip, token PROPUESTO — mini-gate founder pendiente):
-    // el elegido LLENO. En dark NO usa el violeta (acento de TEXTO):
-    // magentaDark porta blanco 8.25:1 — el MISMO par físico en ambos
-    // temas (ya medido en el gate). Memorial NO porta el slot: degrada.
-    controlLleno: palette.magentaDark,
-    sobreControlLleno: '#FFFFFF',
+    /** El estado ACTIVO — magenta, que es el empleo «acción y marca». */
+    active:        palette.magentaAccion,
 
-    /** ⭐ S99-B · EL ACTIVO EN SU REGISTRO **RELLENO** — el disco de la
-     *  barra de tabs (firma del founder sobre el gate 3).
-     *
-     *  🔴 **POR QUÉ UN SLOT NUEVO Y NO `accent.active`, medido:** `active`
-     *  es acento **GRÁFICO** (borde de foco, huella — mínimo 3:1 no
-     *  textual) y en el prestador resuelve a **teal PURO en oscuro**;
-     *  como RELLENO que carga un ícono, el papel encima de ese teal
-     *  reprueba. **Son dos registros de la misma idea** —Ley 2 y §15b.2
-     *  aplicadas al estado activo—, y por eso son dos slots y no un
-     *  color con excepciones.
-     *
-     *  ⚠️ **Y por qué tampoco `accent.cta`, aunque hoy COINCIDA en hexa
-     *  con el verde del techo en el prestador:** un CTA y un marcador de
-     *  navegación pueden divergir, y nadie debería descubrir esa
-     *  divergencia porque *la barra de tabs cambió de color el día que
-     *  alguien retocó un botón*. Valores iguales hoy, jobs distintos
-     *  siempre.
-     *
-     *  EN EL CLIENTE (este tema) el activo es su MAGENTA de identidad, no
-     *  el oro del CTA: **el oro decide, el magenta dice dónde estás.**
-     *  `magentaDark` porta papel 8.25 (medido S58) y sobre la barra
-     *  blanca (`bg.card` #FFFFFF) separa 9.2. */
-    activoLleno:      palette.magentaDark,
-    sobreActivoLleno: palette.light0,
+    /** El acento de ELECCIÓN — **ciruela**: «el chip activo es ciruela». */
+    control:       palette.ciruela,
+    controlBg:     palette.rosaTinte,
+    /* ⚠️ **`controlLleno`/`sobreControlLleno` NO MUEREN, y el lote 0 los
+       midió en CERO por un ciego de patrón.** Tienen **3 lectores**:
+       `SelectorOpcion.tsx:283` y `:408` (el entity chip que el founder
+       firmó en S73) y `EncuadreFoto.tsx:297`. Los tres los leen como
+       `'controlLleno' in theme.accent` + cast — una forma que el censo
+       `theme\.\w+\.\w+` no puede ver. *Es la advertencia literal de la
+       cabecera de `verify-diseno`: un censo por patrón acota, no cierra.*
+       ⇒ Se RE-APUNTAN a v5 y llevan su disparo: mueren cuando esas dos
+       piezas migren. */
+    controlLleno:      palette.ciruela,
+    sobreControlLleno: palette.white,
+
+    hito:          palette.magentaAccion,
+    marcaEleccion: palette.magentaAccion,
+    atmosfera:     palette.magentaAccion,
+
+    apoyada:       palette.rosaTinte,
+    activoLleno:      palette.magentaAccion,
+    sobreActivoLleno: palette.white,
 
     warm:          palette.terracottaDark,
     warmBg:        palette.terracottaAlphaL,
     warmBorder:    palette.terracottaBorderL,
 
-    gradient:       gradients.firmaUILight,  // contextos cerrados (ver palette.ts)
+    /** El degradado de cabecera de la letra §2 (168°, ciruela→profunda).
+     *  Reemplaza a `firmaUILight` en el rol de superficie cerrada. */
+    gradient:       gradients.cabeceraV5,
     gradientSubtle: {
-      colors: [palette.pinkAlphaL, palette.tealAlphaL],
+      colors: [palette.rosaTinte, palette.lienzo],
       locations: [0, 1],
       angle: 165,
     },
   },
 
-  // El color codifica CAPA, no servicio (v3 — intacto).
-  // B2.1 — REGISTRO GRÁFICO: hex PUROS para puntos/indicadores/decoración
-  // (el punto vida ya no necesita anillo). Para TEXTO usar capaText.
-  // S82-B r5 (orden founder, censo R12): en CLARO los hex vivos de vida y
-  // cuidado no llegaban a 3:1 sobre papel (1.46–1.63) — el valor de TEMA
-  // CLARO baja al PRIMER escalón oscuro de su propia rampa que pasa
-  // (tealDark 5.51 · verdeVitalDark 5.13); la CATEGORÍA no cambia, y en
-  // claro capa colapsa al mismo registro que capaText. Dark/memorial
-  // intactos (allá los vivos pasan). Multiplica a toda superficie que
-  // lea theme.capa en claro (huella de Icono, puntos, cantos) — asumido
-  // en la orden. REVERSA r5 (una línea): identidad=palette.verdeVital ·
-  // cuidado=palette.teal · dangerText=palette.coralDark.
+  /* ☠️ **LAS CAPAS DE COLOR POR CATEGORÍA MUEREN EN EL CLIENTE** (letra
+     §1.2: deroga la ley 10, los dos cantos de §9.1 y la huella en hex de
+     capa). **La categoría se dice con glifo + palabra + lugar.**
+
+     ⚠️ **Los slots NO se borran, por orden de la letra §3**: apuntan a
+     los valores nuevos y mueren cuando su último lector migre (censo por
+     import). Los cuatro de cada grupo **colapsan al mismo valor** — que
+     es exactamente lo que significa «el color deja de decir la
+     categoría». Medido: **28 lecturas en 17 archivos** (lote 0 §④). */
   capa: {
-    identidad:       palette.verdeVitalDark,  // Capa 1 · vida (era verdeVital)
-    cuidado:         palette.tealDark,        // Capa 2 · cuidado activo (era teal)
-    comunidad:       palette.pink,            // Capa 3 · vínculo propio
-    comunidadAmplia: palette.violet,          // Capa 3 · comunidad amplia
+    identidad:       palette.tintaV5,
+    cuidado:         palette.tintaV5,
+    comunidad:       palette.tintaV5,
+    comunidadAmplia: palette.tintaV5,
   },
-
-  // B2.1 — REGISTRO DE TEXTO: variantes AA. AA gobierna texto, no gráfica.
   capaText: {
-    identidad:       palette.verdeVitalDark,
-    cuidado:         palette.tealDark,
-    comunidad:       palette.pinkDark,
-    comunidadAmplia: palette.violetDark,
+    identidad:       palette.magentaTinta,
+    cuidado:         palette.magentaTinta,
+    comunidad:       palette.magentaTinta,
+    comunidadAmplia: palette.magentaTinta,
   },
-
-  // S44-B2.3 — REGISTRO DE TINTS: fondo suave por capa (AvatarMascota
-  // fallback; mismos tokens que los tintes de Tarjeta, ahora nombrados).
   capaBg: {
-    // identidad a .15 (no .20 como el tint de Tarjeta): con .20 el par
-    // verdeVitalDark/tint⊕base daba 4.46 — bajo AA (gate S44-B2.3).
-    identidad:       palette.verdeVitalAlpha15,
-    cuidado:         palette.tealAlpha16,
-    comunidad:       palette.pinkAlpha08,
-    comunidadAmplia: palette.violetAlphaL,
+    identidad:       palette.rosaTinte,
+    cuidado:         palette.rosaTinte,
+    comunidad:       palette.rosaTinte,
+    comunidadAmplia: palette.rosaTinte,
   },
 
+  /* «Estado con palabra» (§1.2): verde al día · ámbar pendiente · rosa
+     informativo. **Sigue rigiendo «ningún estado solo con color»** — la
+     letra lo ratifica textualmente. `danger` NO lo nombra la letra y por
+     eso conserva su coral: derogar por silencio sería inventar. */
   status: {
-    // campo base = registro gráfico (íconos, barras); *Text = registro AA
-    success:       palette.verdeVital,
-    successBg:     palette.verdeVitalAlpha20,
-    successBorder: palette.verdeVitalBorder,
-    successText:   palette.verdeVitalDark,
-
-    warning:       palette.ochre,
-    warningBg:     palette.ochreAlpha24,
-    warningBorder: palette.ochreBorderL,
-    warningText:   palette.ochreDark,
-
+    success:       palette.verdeAlDia,
+    successBg:     palette.verdeAlDiaBg,
+    successBorder: palette.verdeAlDia,
+    successText:   palette.verdeAlDia,
+    warning:       palette.ambarPendiente,
+    warningBg:     palette.ambarPendienteBg,
+    warningBorder: palette.ambarPendiente,
+    warningText:   palette.ochreDark,     // el ámbar puro no llega a 4.5 sobre claro
     danger:        palette.coral,
     dangerBg:      palette.coralAlpha16,
     dangerBorder:  palette.coralBorderL,
-    dangerText:    palette.coralDarkTexto,  // S82-B r5: 4.48→4.69 sobre dangerBg∘papel (R12)
-
-    info:          palette.teal,
-    infoBg:        palette.tealAlpha16,
-    infoBorder:    palette.tealBorderL,
-    infoText:      palette.tealDark,
+    dangerText:    palette.coralDarkTexto,
+    info:          palette.magentaAccion,  // «rosa informativo»
+    infoBg:        palette.rosaTinte,
+    infoBorder:    palette.tintaBorde12,
+    infoText:      palette.magentaTinta,
   },
 
-  // Servicio identificado por ícono; el color es el de su capa (registro AA:
-  // los íconos de servicio acompañan texto funcional en listas)
+  /* Los servicios pierden su color propio por la misma razón que las
+     capas: la categoría ya no se dice con color. Quedan en tinta. */
   services: {
-    vet:       palette.tealDark,
-    grooming:  palette.tealDark,
-    walking:   palette.tealDark,
-    boarding:  palette.tealDark,
-    store:     palette.tealDark,
-    insurance: palette.verdeVitalDark,  // Capa 1 · protección de vida
-    wearable:  palette.verdeVitalDark,  // Capa 1 · monitoreo de vida
-    adoption:  palette.pinkDark,        // Capa 3 · comunidad
+    vet:       palette.tintaV5,
+    grooming:  palette.tintaV5,
+    walking:   palette.tintaV5,
+    boarding:  palette.tintaV5,
+    store:     palette.tintaV5,
+    insurance: palette.tintaV5,
+    wearable:  palette.tintaV5,
+    adoption:  palette.tintaV5,
   },
 
   shadow: shadows.light,
-
-  // Ley 20 (D-358 S58): dos niveles, tinta cálida, regla Chanel del marco.
   elevacion: elevacion.light,
 
   border: {
     width:   1,
-    default: palette.light4,
-    /** S86-B (firma de mesa) · EL BORDE DE LO PRESENTE — nombrado por ROL
-     *  y no por color, porque lo que define no es "más oscuro": es *el
-     *  límite de la superficie que ESTÁ*, frente a `default`, que es el
-     *  de la que ESPERA. En oscuro el mismo rol se cumpliría con un valor
-     *  MÁS CLARO. */
-    presente: palette.light5,
-    /** S99-B · N11 — el contorno del CAMPO. Rol propio: `default` y
-     *  `presente` separan (1.18 y 1.62 contra el fondo); éste CONTIENE,
-     *  y su piso lo fija la ley: ≥3:1. Acá **3.34:1**. */
-    campo:    palette.campoBordeL,
-    subtle:  'rgba(0,0,0,.05)',
-    accent:  palette.tealBorderL,
-    brand:   palette.pinkBorderL,
-    warm:    '#E8E0C8',
+    default:  palette.tintaBorde12,
+    presente: palette.tintaBorde12,
+    campo:    palette.campoBordeL,   // conserva su piso medido de 3:1 (R43)
+    subtle:   palette.tintaBorde09,  // el hairline de tarjeta (§2: «borde 1 tinta 9 %»)
+    accent:   palette.magentaAccion,
+    brand:    palette.magentaAccion,
+    warm:     '#E8E0C8',
   },
 } as const

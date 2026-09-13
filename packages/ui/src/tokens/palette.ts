@@ -36,6 +36,98 @@
 
 export const palette = {
 
+  /* ═══════════════════════════════════════════════════════════════════
+   * 🔴 **v5 · LA PALETA DEL REDISEÑO DEL CLIENTE (S116-B lote 1).**
+   * Firma: `docs/LETRA_REDISENO_S116.md` §2, founder 13-sep-2026.
+   *
+   * **ESTOS 16 SON LA FUENTE ÚNICA** de la app cliente. Todo lo que está
+   * más abajo en este archivo sigue vivo porque **lo consume el
+   * PRESTADOR**, que esta letra NO cambia (§5) — no porque siga siendo
+   * la paleta del cliente.
+   *
+   * LOS TRES EMPLEOS DEL COLOR (§1.2, deroga la ley 10 de capas para el
+   * cliente): **ciruela = estructura · magenta = acción y marca · estado
+   * con palabra**. Sigue N5 (un acento por pantalla), sigue N23, y sigue
+   * «ningún estado solo con color».
+   *
+   * ⚠️ **NUNCA magenta sobre magenta ni ciruela sobre ciruela** (§2).
+   * ═══════════════════════════════════════════════════════════════════ */
+
+  // ── v5 · Magenta: ACCIONA ──
+  magentaAccion:    '#D10788',  // rgb(209,7,136) — el CTA, la marca
+  magentaPresionado:'#A00568',  // rgb(160,5,104) — el pressed del CTA
+  magentaTinta:     '#8E0A5D',  // rgb(142,10,93) — magenta sobre claro donde hay TEXTO
+  magentaLuz:       '#FF7FC4',  // rgb(255,127,196) — magenta sobre ciruela (gráfica y texto)
+
+  // ── v5 · Ciruela: ESTRUCTURA ──
+  ciruela:          '#4E1160',  // rgb(78,17,96) — cabeceras, chip activo
+  ciruelaProfunda:  '#3B0B47',  // rgb(59,11,71)
+  ciruelaNoche:     '#26062E',  // rgb(38,6,46) — el fondo de la cabecera memorial, plano
+  rosaSobreCiruela: '#FFB8DE',  // rgb(255,184,222) — antetítulo y apoyo SOBRE ciruela
+
+  // ── v5 · Superficies ──
+  rosaTinte:        '#FCE4F1',  // rgb(252,228,241) — el tinte que reemplaza a las capas
+  lienzo:           '#F8F2F6',  // rgb(248,242,246) — el fondo de la app cliente
+  superficie:       '#FFFFFF',  // la tarjeta
+  tintaV5:          '#1C1D20',  // rgb(28,29,32) — el texto y el trazo
+
+  // ── v5 · Estado (SIEMPRE con palabra, jamás solo color) ──
+  verdeAlDia:       '#14584A',  // rgb(20,88,74)
+  ambarPendiente:   '#E0A21F',  // rgb(224,162,31)
+
+  /* Las alphas de estado que la letra fija (fondo 10 % y 16 %),
+     PRECOMPUTADAS como manda la lección Kaxo — nada se interpola en
+     runtime. Compuestas sobre `lienzo` #F8F2F6, que es el fondo real
+     donde viven. */
+  verdeAlDiaBg:     'rgba(20,88,74,.10)',
+  ambarPendienteBg: 'rgba(224,162,31,.16)',
+
+  /* Texto secundario y bordes — los dos RANGOS que la letra da (§2:
+     «texto secundario tinta 50–58 %; bordes tinta 9–12 %»). Se fijan acá
+     los dos extremos con nombre, para que ninguna pantalla invente un
+     porcentaje intermedio (Ley 1). */
+  /* 🔴 **EL RANGO DE LA LETRA NO ALCANZA AA, Y ESTÁ MEDIDO.** §2 dice
+     *«texto secundario tinta 50–58 %»*. Medido contra los tres fondos
+     reales del tema (lienzo · blanco · rosa tinte):
+
+         alpha   lienzo  blanco  rosaTinte
+         .50      3.20    3.28    3.13
+         .58      4.05    4.18    3.94     ← el TOPE del rango de la letra
+         .63      4.73    4.91    4.58     ← el primero que pasa los tres
+         .65      5.04    5.24    4.87     ← el firmado acá
+
+     **Ninguno del rango llega al 4.5 de AA.** `verify:diseno` R12 lo
+     tumbó con siete pares —tres del cliente y tres que el prestador
+     hereda—, y el plan §2 es explícito: *«contraste WCAG AA de todo
+     texto … se re-mide, NO se afloja»*.
+     ⇒ **Se sube a .65 y no a .63**: a .63 el rosa tinte queda en 4.58,
+     margen 0.08, y esta casa ya pagó la lección de que *un par que se
+     decide por el redondeo no es un par decidido* (S100d, el magenta de
+     la serie). **Es un choque con la letra y se declara; no se maquilla
+     el gate.** */
+  tintaTexto65:     'rgba(28,29,32,.65)',   // secundario — MEDIDO para AA
+  tintaTexto50:     'rgba(28,29,32,.50)',   // terciario — apoyo decorativo, jamás un dato
+  tintaBorde12:     'rgba(28,29,32,.12)',   // el borde que se ve
+  tintaBorde09:     'rgba(28,29,32,.09)',   // el hairline de tarjeta
+
+  /* 🔴 **EL GRIS CÁLIDO DEL MEMORIAL — «B lo deriva de tinta al 6 %»
+     (letra §4, textual).** Es el reemplazo del `rosaTinte` en memorial:
+     misma FUNCIÓN (el tinte de una superficie secundaria), sin el rosa.
+     Precomputado sobre `lienzo`, no como alpha, porque memorial lo monta
+     sobre superficies que ya tienen su propio fondo. */
+  grisCalidoMemorial: '#EBE5E9',  // = tinta 6 % sobre lienzo, COMPUTADO
+  /* ⚠️ El primer valor que escribí acá fue `#EFEAEC`, estimado a ojo. La
+     cuenta da `#EBE5E9` — cuatro puntos de diferencia en cada canal. Se
+     deja escrito porque es la clase de error que nadie verifica después:
+     un hex plausible al lado de una nota que dice «tinta al 6 %» se lee
+     como calculado. */
+
+  /* La sombra del CTA — «CTA alto 58 radio 999 con sombra magenta 28 %»
+     (§2). Vive acá como color porque la sombra es un token de
+     `shadows.ts`, y su COLOR es de la paleta (Ley 1). */
+  sombraMagenta28:  'rgba(209,7,136,.28)',
+
+
   // ── Marca (canonizada desde SVG del logo) ──
   pink:      '#FF00AF',  // Capa 3 · comunidad — rgb(255,0,175)
   pinkDark:  '#C4008A',  // variante AA para light — rgb(196,0,138)
@@ -106,13 +198,28 @@ export const palette = {
   // ── Extensiones v3.1 (mismos hex) ──
   violet:         '#9E3AFF',  // Capa 3 · comunidad amplia — rgb(158,58,255)
   violetDark:     '#7C2DD4',  // rgb(124,45,212)
-  violetText:     '#AE59FF',  // violet aclarado MÍNIMO para AA como texto en dark
+  /* 🔴 S116-B · era #AE59FF. **No es un color nuevo: es el mismo token
+     cumpliendo el mismo contrato con el fondo cambiado** — su propia nota
+     decía «aclarado MÍNIMO para AA», o sea calibrado al límite contra el
+     `bg.card` viejo del tema oscuro. Con la ciruela profunda de v5 ese
+     mínimo dejó de alcanzar: **4.28 contra un piso de 4.5**, y
+     `verify:contrast` lo tumbó por el nombre de la cabecera del Coach.
+     #BE79FF da **5.56**. *Un token que promete AA y deja de darlo no es
+     «el tema sin calibrar»: es un token que dejó de cumplir lo que su
+     nombre dice.* */
+  violetText:     '#BE79FF',  // violet aclarado para AA como texto en dark
                               // (S44-B2.3: subió de #A64BFF para pasar también
                               // sobre el tint capaBg — 4.63:1 en el peor par)
                               // (#9E3AFF da 4.16:1 sobre card — gate S43-B2). rgb(166,75,255)
   coral:          '#FF5C5C',  // danger · separado del pink de marca — rgb(255,92,92)
   coralDark:      '#BE3535',  // rgb(190,53,53) — oscurecido MÍNIMO en B2.1: #C73A3A
-  coralDarkTexto: '#B93333',  // S82-B r5 (orden founder): UN paso más oscuro — dangerText
+  coralDarkTexto: '#A8332B',  /* 🔴 S116-B: era #B93333. **No es un color nuevo: es el mismo
+     *  token cumpliendo el mismo contrato con el fondo cambiado.** Su
+     *  cabecera ya cuenta un ajuste igual (S82-B r5, 4.48→4.69 «sobre
+     *  dangerBg∘papel»); ahora el fondo del cliente es `lienzo` y sobre él
+     *  #B93333 daba **4.49** — a una centésima del piso. #A8332B da **5.08**
+     *  sobre lienzo y **5.55** sobre blanco. El prestador lo hereda y MEJORA
+     *  (su fondo es más claro). */  // S82-B r5 (orden founder): UN paso más oscuro — dangerText
                               // sobre dangerBg∘papel daba 4.48 (R12); este paso da 4.69.
                               // Consumidor: light.dangerText (coralDark quedó sin consumidores
                               // de texto — se conserva como escalón de la rampa)
@@ -627,7 +734,7 @@ export const palette = {
    * del Coach de un slot que cambia por otra razón deja una bomba con
    * mecha: *el día que alguien decida dibujar algo del Coach en memorial,
    * el Coach se volvería rosa sin que nadie tocara su color.* */
-  coachClaro:    '#AE59FF',  // = violetText · el barrido y el halo sobre oscuro
+  coachClaro:    '#BE79FF',  // = violetText (S116-B: los dos suben juntos, es el MISMO color por definición)
   coachMedio:    '#9E3AFF',  // = violet · el cuerpo despierto y los arcos de aviso
   coachProfundo: '#7C2DD4',  // = violetDark · la letra del nombre sobre papel (AA)
 
@@ -692,6 +799,34 @@ export const palette = {
  *   jamás). En memorial: transparent — la marca habla bajito ahí.
  */
 export const gradients = {
+
+  /* 🔴 **v5 · LOS DOS DEGRADADOS DE LA LETRA (S116 §2).** Ángulos
+     textuales: cabecera 168°, entrada 178°. **No son decoración: son
+     ESTRUCTURA** (§1.2, «ciruela = estructura») — por eso viven acá y no
+     como prop de una pantalla. */
+  cabeceraV5: {
+    colors:    ['#4E1160', '#3B0B47'],   // ciruela → ciruela profunda
+    locations: [0, 1],
+    angle:     168,
+  },
+  entradaV5: {
+    colors:    ['#3B0B47', '#26062E'],   // ciruela profunda → ciruela noche
+    locations: [0, 1],
+    angle:     178,
+  },
+
+  /** 🔴 **La cabecera del MEMORIAL: ciruela noche PLANA, sin degradado**
+   *  (letra §4, textual). Entra como «gradiente» de un solo color a
+   *  propósito: así el consumidor monta LA MISMA pieza en los tres temas
+   *  y no ramifica por tema para pintar un color sólido — que es
+   *  exactamente la clase de rama que hace que memorial se rompa sin que
+   *  nadie lo note. */
+  memorialPlano: {
+    colors:    ['#26062E', '#26062E'],
+    locations: [0, 1],
+    angle:     168,
+  },
+
   logo: {
     colors: ['#FF00AF', '#D32EB7', '#68A2CD', '#28E8DA', '#90FF8B', '#FFF645'],
     locations: [0, 0.06, 0.2, 0.28, 0.48, 0.65],

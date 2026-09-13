@@ -876,99 +876,29 @@ const EXENTAS_R12 = new Set([
   // igual; sube a deuda si un usuario real lo reporta".
   'dark·canto·accent.controlLleno/bg.card',
 ]);
+/* 🔴 **S116-B · BASELINE RE-MEDIDO CONTRA LA PALETA v5 — de 6 a 1.**
+ *
+ * **CINCO BAJARON** y salen por solo-baja: las dos del oro sobre el tapiz
+ * (`accent.cta/bg.base` y `/bg.card`) murieron con el oro como CTA (§1.3),
+ * y las tres de `capaText`/`controlLleno`/`bg.elevated` con el colapso de
+ * las capas y la paleta nueva. *No se curaron de a una: dejaron de existir.*
+ *
+ * **QUEDA UNA, y es del tema que la letra deja SIN CALIBRAR a propósito**
+ * (§1.8 y §5: *«el tema existe isomorfo, no se calibra»*). Su cura es el
+ * lote de oscuro, después de F&F — no este.
+ *
+ * ⚠️ **Y por eso este par se rotula como lo que es.** Un baseline que no
+ * distingue lo heredado de lo que uno acaba de romper es donde se esconde
+ * el daño propio — la nota vieja de este mismo bloque lo decía y se
+ * conserva el criterio. */
 const BASELINE_R12 = new Set([
-  // ═══ S83-B30 · REGRESIÓN VIVA, NO HERENCIA — y se rotula así a
-  // propósito, porque un baseline que no distingue lo heredado de lo que
-  // uno acaba de romper es donde se esconde el daño propio.
-  //
-  // LAS CUATRO LAS CAUSÓ EL TAPIZ AL 8% (S83-B25, `42ffaef`, FIRMADO por
-  // el founder), y el barrido las cazó en su PRIMERA corrida — media hora
-  // después del commit. Antes/después, mismo medidor:
-  //     fill accent.cta/bg.base ... 3.37 → 2.79 → ✅ CURADO en B31 (10.50)
-  //     capaText.comunidad/capaBg ... 5.22 → 4.35 → ✅ 4.90 al 5% (B32)
-  //     capaText.comunidadAmplia .... 4.71 → 3.87 → ⚠️ 4.40 al 5%, falta 0.10
-  //     status.dangerText/dangerBg .. 5.48 → 4.43 → ✅ 5.06 al 5% (B32)
-  //
-  // LA CAUSA, medida: `capaBg` y `statusBg` son rgba con ALPHA y se
-  // componen sobre `bg.base`. Aclarar el fondo aclara el tinte, y el
-  // texto de capa —que es claro— pierde contraste contra él. **TRES de
-  // las cuatro son de TEXTO**, o sea AA de verdad y no elemento gráfico.
-  //
-  // POR QUÉ EN BASELINE Y NO EN ROJO: el rojo bloquearía el hook a las
-  // tres pistas en pleno ciclo de campo. Entran acotadas y VISIBLES en
-  // cada corrida, no exentas — `EXENTAS_R12` es para lo que la casa
-  // decidió; esto es lo que hay que decidir.
-  //
-  // ⏪ S85-B6 — VUELVE, Y VUELVE CON MÁS INFORMACIÓN QUE ANTES.
-  // S85-B4 la curó bajando `violetAlpha15` a .12 (par 4.40 → 4.54). El
-  // founder la REVIRTIÓ en dispositivo, literal: «el tinte verde no se ve
-  // o no se percibe, ni en claro ni en oscuro». Un ajuste imperceptible
-  // no paga su costo, así que el par vuelve a 4.40 y vuelve acá.
-  //
-  // LO QUE LA VUELTA DEJA MEDIDO, y por eso el menú de este par ya no es
-  // el que era: (a) el comentario original ofrecía "volver el tapiz al
-  // 3%" — esa salida apuntaba a `tapizDark`, el tapiz del CLIENTE, y este
-  // par cuelga de `tapizDarkOficio`: MOVÍA UNA PERILLA QUE NO LO
-  // GOBIERNA. (b) La perilla del tinte (`violetAlpha`) SÍ lo gobierna y
-  // alcanza, pero su efecto es INVISIBLE — probado en dispositivo, no
-  // deducido. (c) Quedan las dos caras: `tapizDarkOficio` un paso más
-  // oscuro (#0B1213 → par 4.54; 19 pares mejoran, ninguno pasa a
-  // reprobar) que toca un valor atado a "un tinte por casa", y la tanda
-  // de los textos de capa del oscuro, que es cara y con gate propio.
-  //
-  // ⚠️ SE QUEDA VISIBLE EN CADA CORRIDA A PROPÓSITO: un número bajo
-  // mínimo que nadie percibe SIGUE SIENDO un número bajo mínimo. Que el
-  // founder no vea el tinte es dato sobre la CURA, no sobre el defecto —
-  // el texto de capa sobre su tinte mide 4.40 contra un piso AA de 4.5, y
-  // quien lo lea con menos vista que él lo va a sufrir igual. Qué hacer
-  // con eso es decisión suya; esconderlo no es una de las opciones.
-  'darkOficio·texto·capaText.comunidadAmplia/capaBg.comunidadAmplia',
-  // ═══ S83-B30 · HEREDADAS DEL CLIENTE, que el barrido nuevo hizo
-  // visibles pero NO nacieron hoy:
-  // · el ORO contra papel (1.55) es EXENCIÓN FIRMADA — E1 lo midió y el
-  //   founder firmó igual, compensando con `ctaElevado`. Su lugar sería
-  //   EXENTAS, pero se deja acá con su nota hasta que la mesa lo mueva:
-  //   moverlo yo sería firmar una exención que no firmé.
-  'light·fill·accent.cta/bg.base',
-  'light·fill·accent.cta/bg.card',
-  // · los tres del oscuro del cliente, ya conocidos por r19/r20 (abajo).
-  'darkOficio·canto·accent.controlLleno/bg.card',
-  // S82-B r19 — LOS DOS PARES DE SUPERFICIE DEL OSCURO, con el hallazgo
-  // que los pone acá y no en una cura: subir bg.card ROMPE los textos que
-  // van encima. Medido: a 1.26 caen SEIS pares AA firmados (capaText
-  // comunidadAmplia y comunidad, dangerText sobre su tinte, dos avatares
-  // de iniciales, el tonal de Ley 22) y a 1.11 todavía caen DOS. El techo
-  // no lo pone el gusto: lo pone el texto de capa del oscuro. Subir la
-  // superficie exige subir ANTES violetText/pinkDark y re-medir los 178
-  // — es una tanda propia con su gate, no un token. Revertido a 1.05.
-  //
-  // S82-B r20 — EL OTRO LADO DEL PAR TAMBIÉN CERRADO, por una razón
-  // DISTINTA: bajar `bg.base` con card quieto NO rompe nada (los seis
-  // pares eran texto sobre SUPERFICIE; los que tocan el FONDO ganan —
-  // text.primary 17.73→18.29 · secondary 8.49→8.76 · capaText
-  // 13.23→13.65) pero **NO ALCANZA**: con card en #0D0D12 y el fondo en
-  // NEGRO ABSOLUTO el par llega a **1.083**, y de #050508 a #000000 sube
-  // apenas 0.033. EL PORQUÉ: el +0.05 de la fórmula WCAG DOMINA cuando
-  // las dos luminancias son ~0 (card L=0.00417, base L=0.00158) — el
-  // contraste SE APLANA en el extremo oscuro. No falta margen: NO HAY
-  // margen por debajo, y el tema perdería su "bosque nocturno" a cambio
-  // de 0.03. ⇒ LOS DOS LADOS MEDIDOS Y CERRADOS; la decisión es del
-  // founder: (a) abrir la tanda de los textos de capa del oscuro, o
-  // (b) que el oscuro separe por otro canal — borde NO (A6/Ley 20).
-  // S82-B r29 — RE-DECLARADOS, NO RETIRADOS (tu punto 5). Con (c) SIN
-  // TARJETA firmado, `card` deja de ser "la tarjeta del contenido" —
-  // pero NO deja de existir: sigue siendo la superficie de LO QUE
-  // FLOTA (Hojas, modales, la barra fija del CTA), y eso es el PISO que
-  // no puede desaparecer. Así que el par sigue midiendo algo real; lo
-  // que cambió es QUÉ mide. Quedan en baseline con el mismo número y
-  // otro significado, y su cura sigue siendo la misma tanda cara.
+  // dark · las dos superficies de ciruela separan 1.15 contra un piso de
+  // 1.25. Es el tema SIN CALIBRAR: sus valores son derivados por regla
+  // mecánica, no elegidos por ojo. La separación de superficie en oscuro
+  // ya tiene su respuesta escrita en la casa y NO es subir el fill —la
+  // enmienda S82 del halo direccional midió que la luminancia se agota por
+  // los dos lados— así que se resuelve por contorno, en su lote.
   'dark·superficie·bg.card/bg.base',
-  'dark·superficie·bg.elevated/bg.base',
-  // VACÍO desde S82-B r5 (solo-baja EJECUTADO): los 5 del censo del
-  // estreno CURARON por orden founder — capa.identidad/cuidado del tema
-  // CLARO bajaron al primer escalón oscuro de su rampa (verdeVitalDark ·
-  // tealDark) y dangerText ganó su paso (coralDarkTexto). La reversa
-  // vive en themes/light.ts (una línea). De vacío no se sube jamás.
 ]);
 /** Las que están en baseline por REGRESIÓN de S83-B25 (el tapiz al 8%),
  *  no por herencia: se cuentan aparte para que el info no las disfrace de
@@ -1118,20 +1048,41 @@ function volcadorReal() {
  *  rojo. R12 pasó verde mientras esto se rompía porque mide RATIOS, no
  *  identidades — por eso esta regla existe aparte. */
 const H_FAMILIA = 174.2, TOL_H = 12, MIN_S = 0.30, MAX_L = 0.35;
+/* 🔴 **S116-B · R15 RECALIBRADA (no derogada, no apagada).**
+ *
+ * **① LOS 10 PENDIENTES BAJARON SOLOS — medido, no supuesto.** La corrida
+ * anterior al rediseño imprimía `pendientes-arbitraje=0/10 · 10 BAJARON`:
+ * los diez tokens que esperaban arbitraje del founder desde S82-B r6
+ * (`capa.cuidado`, `capaText.cuidado`, `accent.primary`, `status.infoText`,
+ * los cinco `services.*` y la cola del gradiente firma) **dejaron de ser
+ * de esa familia** porque la letra los movió a magenta/tinta. La propia
+ * regla manda «solo-baja: el que sale no vuelve», así que la lista se
+ * VACÍA y esa deuda queda cerrada.
+ *
+ * **② NACE UNA EXENCIÓN FIRMADA, con su cita.** `LETRA_REDISENO_S116` §2
+ * firma **`#14584A` como «verde al día» del cliente**, y ese hex ESTÁ en
+ * la familia que A5 §9bis.3 excluye — medido: H 167.6 contra H 174.2 de
+ * `#0F5E56`, o sea **6.6° de distancia**, dentro de la tolerancia de 12°.
+ *
+ * ⚠️ **Y la razón de A5 sigue siendo VERDADERA, no se finge lo contrario:**
+ * *«colisiona con el acento firmado del prestador»* — `tealDark` está a
+ * **5.6°** del verde nuevo. Lo que cambió no es el hecho: es que **la
+ * letra nueva decide pagar esa colisión** para el rol de ESTADO, donde el
+ * verde nunca va solo (§1.2: *«estado con palabra»*, y «ningún estado
+ * solo con color» sigue rigiendo). *Dos letras firmadas que se
+ * contradicen son peores que una equivocada: gana la más nueva, y se dice
+ * cuál pierde y por qué.*
+ *
+ * ⇒ **La regla sigue viva y sigue siendo dura**: cualquier token del tema
+ * cliente que caiga en la familia **fuera de estos tres** sale rojo. */
+const EXENTOS_R15_V5 = new Set([
+  'light·status.success',        // LETRA_REDISENO_S116 §2 — «verde al día #14584A»
+  'light·status.successBorder',  // idem — el borde del mismo estado
+  'light·status.successText',    // idem — su registro de texto
+]);
 const PENDIENTES_R15 = new Set([
-  'light·capa.cuidado',              // r5 — opciones (a)/(b) en el reporte r6
-  'light·capaText.cuidado',          // pre-r5 (registro AA vivo desde S53)
-  'light·accent.primary',            // pre-r5
-  'light·status.infoText',           // pre-r5
-  'light·services.vet',              // pre-r5
-  'light·services.grooming',         // pre-r5
-  'light·services.walking',          // pre-r5
-  'light·services.boarding',         // pre-r5
-  'light·services.store',            // pre-r5
-  // pre-r5 Y EL MÁS GRANDE del censo: la COLA del gradiente firma UI
-  // claro (firmaUILight stop 3) ES tealDark — la familia adentro del
-  // gradiente de MARCA del cliente (el Boton marca de bienvenida).
-  'light·accent.gradient.colors[2]',
+  /* VACÍA desde S116-B: los 10 de S82-B r6 bajaron con el rediseño
+     (medido en la corrida previa: «10 BAJARON»). Solo-baja rige. */
 ]);
 function hslDe(valor) {
   let r, g, b;
@@ -1153,7 +1104,7 @@ function hslDe(valor) {
 const esFamilia = (c) => c && !c.alpha && Math.abs(c.h - H_FAMILIA) <= TOL_H && c.s >= MIN_S && c.l <= MAX_L;
 function r15(tokens) {
   const fallos = [];
-  let pendientes = 0, tintsAlpha = 0, bajaron = PENDIENTES_R15.size;
+  let pendientes = 0, tintsAlpha = 0, exentos = 0, bajaron = PENDIENTES_R15.size;
   for (const t of tokens) {
     const c = hslDe(t.valor);
     if (c?.alpha) {
@@ -1165,12 +1116,13 @@ function r15(tokens) {
     if (!esFamilia(c)) continue;
     const clave = `${t.tema}·${t.ruta}`;
     if (PENDIENTES_R15.has(clave)) { pendientes++; continue; }
+    if (EXENTOS_R15_V5.has(clave)) { exentos++; continue; }
     fallos.push(`R15: ${clave} = ${t.valor} — familia de #0F5E56 en el tema del cliente (A5 §9bis.3 FIRMADA)`);
   }
   bajaron -= pendientes;
   return {
     fallos,
-    info: `pendientes-arbitraje=${pendientes}/${PENDIENTES_R15.size} · tints-alpha-familia(info)=${tintsAlpha}${bajaron > 0 ? ` · ${bajaron} BAJARON: actualizar pendientes` : ''}`,
+    info: `pendientes-arbitraje=${pendientes}/${PENDIENTES_R15.size} · exentos-por-letra-S116=${exentos}/${EXENTOS_R15_V5.size} · tints-alpha-familia(info)=${tintsAlpha}${bajaron > 0 ? ` · ${bajaron} BAJARON: actualizar pendientes` : ''}`,
   };
 }
 
@@ -2054,7 +2006,9 @@ const BASELINE_R37 = 3;
 // lint diga nada, y en un solo-baja eso es peor que no tener la regla: el
 // número más chico se lee como progreso mientras la puerta sigue abierta.
 const BASELINE_R38 = 5;
-const BASELINE_R39 = 6;
+/* S116-B · BAJA de 6 a 5: medido en la corrida del lote 1 («5/6 — BAJÓ»).
+   Solo-baja rige: el que sale no vuelve. */
+const BASELINE_R39 = 0;
 const PRESUPUESTO_SEPARADORES = 3;
 /** R42 · la puerta de la foto — su doctrina vive con la regla, abajo.
  *
@@ -2795,7 +2749,13 @@ const FIXTURES = {
     ...RELLENO_APPS,
     ...Array.from({ length: BASELINE_R39 + 1 }, (_, i) => ({
       path: `(fixture-size-${i})`,
-      src: 'size.xs\nsize.sm\nsize.base\nsize.md',
+      /* S116-B · el fixture SUBE con el tope. Con PRESUPUESTO_TAMANOS = 4
+         (letra §1.4) cuatro tamaños ya NO exceden, y la auto-prueba de
+         L-192 lo cazó en la misma corrida: «R39 no salió roja contra su
+         fixture — REGLA DECORATIVA». Se agrega el quinto. *El fixture de
+         una regla con presupuesto es función del presupuesto; si no sube
+         con él, la regla queda viva y ciega.* */
+      src: 'size.xs\nsize.sm\nsize.base\nsize.md\nsize.lg',
     })),
   ],
   R3: [{ path: '(fixture)', src: '<Tarjeta elevacion="flotante">' }],
@@ -3395,7 +3355,11 @@ function r38(archivos) {
  *
  *  ⇒ Un archivo que sube en esta regla tiene una cura ya construida:
  *  montar `Texto`. Por eso el rojo es accionable y no una queja. */
-const PRESUPUESTO_TAMANOS = 3;
+/* 🔴 **S116-B · EL TOPE PASA DE 3 A 4** — `LETRA_REDISENO_S116` §1.4,
+   textual: *«Tope: cuatro tamaños por pantalla (era tres)»*. La regla
+   **se recalibra, no se apaga**: sigue midiendo lo mismo —que la jerarquía
+   la porte `Texto` y no la pantalla—, con el número que la letra firma. */
+const PRESUPUESTO_TAMANOS = 4;
 const RE_SIZE = /\btypography\.size\.(\w+)\b|\btypography\.size\['([^']+)'\]|\bsize\.(xs|sm|base|md|lg|xl|hero|display)\b|\bsize\['(2xl|3xl|4xl)'\]/g;
 function r39(archivos) {
   const fallos = [];
@@ -3667,10 +3631,21 @@ function r42(archivos) {
 const PISO_R43 = 3
 /** Los pares (borde, fondo) de las tres casas. Los hex se LEEN de
  *  `palette.ts`; acá vive solo qué token va contra qué token. */
+/* 🔴 **S116-B · R43 RECALIBRADA — medía contra un fondo que ya no existe.**
+ * Seguía preguntando por `papelTapiz` en claro y por `memorialDark0` en
+ * memorial. Con la letra v5 el fondo del cliente es `lienzo` y **memorial
+ * dejó de ser oscuro** (§4). *La regla daba VERDE con 3.41 / 3.34 midiendo
+ * un par que el producto ya no monta* — el número era correcto y la
+ * pregunta había caducado, que es la forma en que un rediseño rompe un gate
+ * sin que nadie lo note.
+ * Medido con los fondos reales: **light 3.33 · memorial 3.33 · dark 6.08**,
+ * los tres sobre el piso de 3.00 de N11. El umbral NO se toca: es de N11 y
+ * sobrevive a cualquier paleta. */
 const PARES_R43 = [
-  { casa: 'light', borde: 'campoBordeL', fondo: 'papelTapiz' },
+  { casa: 'light', borde: 'campoBordeL', fondo: 'lienzo' },
   { casa: 'dark', borde: 'campoBordeD', fondo: 'tapizDark' },
-  { casa: 'memorial', borde: 'campoBordeM', fondo: 'memorialDark0' },
+  // memorial ya es CLARO y usa el mismo borde del claro (ver memorial.ts)
+  { casa: 'memorial', borde: 'campoBordeL', fondo: 'lienzo' },
 ]
 function r43(fuentes) {
   const fallos = []
@@ -9039,7 +9014,7 @@ corridas.push(['R34 (una lista de tres estados no se decide por el largo)', r34(
 corridas.push(['R36 (N2 el ritmo: el espaciado sale del token)', r36(apps)]);
 corridas.push(['R37 (N4 el radio único: una sola escala)', r37(apps)]);
 corridas.push(['R38 (N3 la muerte del separador: 3 por pantalla)', r38(apps)]);
-corridas.push(['R39 (N1 la escala: 3 tamaños a mano por pantalla)', r39(apps)]);
+corridas.push(['R39 (N1 la escala: 4 tamaños a mano por pantalla — tope S116 §1.4)', r39(apps)]);
 corridas.push(['R40 (el placeholder sin firma no se embarca en silencio)', r40(DICS_R40)]);
 corridas.push(['R41 (lo que se mueve de verdad mira useReducedMotion)', r41(ui)]);
 corridas.push(['R42 (la puerta de la foto no se re-dibuja)', r42([...apps, ...ui])]);

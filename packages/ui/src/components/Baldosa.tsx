@@ -400,9 +400,8 @@ export function Baldosa({
             borderLeftColor: cantoApagado
               ? capa === 'consumo'
                 ? theme.accent.warmBg
-                : 'capaBg' in theme
-                  ? theme.capaBg[capa]
-                  : theme.capa[capa]
+                : theme.capaBg[capa]
+  /* S116-B · memorial ya porta el slot: el fallback era rama muerta. */
               : capa === 'consumo'
                 ? theme.accent.warm
                 : theme.capa[capa],

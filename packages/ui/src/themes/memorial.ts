@@ -1,198 +1,175 @@
-/**
- * e-PetPlace v4 · TEMA MEMORIAL — portado INTACTO de v3.1.
- *
- * Sub-tema que se activa AUTOMÁTICAMENTE cuando:
- *   · La mascota está en M6 (fin de vida)
- *   · La mascota tiene status = 'memorial' (fallecida)
- *   · El usuario navega a una pantalla de memorial
- *   · El usuario abre un hito etiquetado como 'fin-de-vida'
- *
- * No es elegible por el usuario. Es la respuesta del producto a un
- * momento concreto. Ver MODELO_PRODUCTO §3.3 (Memorial).
- * Memorial NO tiene gradiente firma: la marca habla bajito acá.
- */
-
 import { palette, gradients } from '../tokens/palette'
 import { shadows } from '../tokens/shadows'
 import { elevacion } from '../tokens/elevacion'
 
+/**
+ * ═══════════════════════════════════════════════════════════════════════
+ * 🔴 **TEMA MEMORIAL — v5 (S116-B lote 1). LETRA NUEVA: `LETRA_REDISENO_S116`
+ * §4, que ENMIENDA la Ley 21 para el cliente.**
+ *
+ * *«El memorial es la misma estructura sin la fiesta.»*
+ *
+ * **EL CAMBIO MÁS GRANDE DE ESTE ARCHIVO: memorial deja de ser OSCURO.**
+ * Hasta v4 era bosque nocturno (`memorialDark0`); la letra §4 dice
+ * textual *«lienzo y superficie del claro (#F8F2F6 / #FFFFFF)»*. **No es
+ * una calibración: es un cambio de familia**, y por eso la propia letra
+ * declara que *«lo que E midió el 13-sep (fondo 244 vs 237) deja de
+ * valer: el memorial se mide de nuevo sobre estos valores»*.
+ *
+ * **Las seis cláusulas de §4, cada una con su línea acá:**
+ *   1. **Sin magenta** — la acción es tinta (Ley 21 sigue).
+ *   2. **Sin verde ni ámbar** — «no hay estados que cumplir».
+ *   3. **Cabecera en ciruela noche PLANA**, sin degradado.
+ *   4. **Rosa tinte → gris cálido**, derivado de tinta al 6 % (COMPUTADO).
+ *   5. Sin personajes, trío, check festivo ni entrada escalonada: sólo
+ *      fundido. *(Vive en `motion`/las piezas, no en un color.)*
+ *   6. Sin pastillas de progreso ni contadores (LOYALTY §7.1: el motor
+ *      calla). *(Vive en las piezas.)*
+ *
+ * ⚠️ **GANA LOS 12 SLOTS QUE LE FALTABAN** (`accent.active`,
+ * `accent.controlBg`, `accent.controlLleno`, `accent.sobreControlLleno`,
+ * `capaBg.*` ×4, `capaText.*` ×4). Medido en el lote 0: eran 74 de 86, y
+ * **28 lecturas en 17 archivos caían a un fallback**. Ahora los tres
+ * temas tienen la MISMA forma, y lo prueba el compilador — ver
+ * `FormaDeTema` en `themes/index.ts`.
+ * ═══════════════════════════════════════════════════════════════════════
+ */
 export const memorialTheme = {
   mode: 'memorial' as const,
 
   bg: {
-    base:     palette.memorialDark0,   // bosque nocturno
-    card:     palette.memorialDark1,
-    elevated: palette.memorialDark1,
-    overlay:  palette.memorialDark1,
-    /** S82-B — SUPERFICIE HUNDIDA (rieles, botones -/+): el hueco.
-     *  Nace porque `overlay` NO hunde en oscuro (es 2.6× más luminoso que
-     *  la tarjeta: el riel se leía ELEVADO). En claro coincide con overlay
-     *  —ahí sí hundía—, en oscuro baja al fondo. El slot ABSORBE la rama
-     *  por tema que SelectorSegmentado tenía que hacer a mano. */
-    hundido:  palette.memorialDark1,
-    // S82-B r22 — RE-DECLARADO (no migrado): su rol es **SUPERFICIE
-    // NEUTRA de la casa**, y el hover es UN CASO de ese rol, no un rol
-    // aparte. El comentario decía "hover states" y quedó viejo: de 43
-    // consumidores, **28 lo usan como superficie de fill** (rieles
-    // hundidos, chips en reposo, cajas neutras). Cero migraciones, cero
-    // cambio de valor — lo que cambia es lo que el token DICE que es.
-    // ⚠️ LO QUE NO ES, con el precedente de r12 escrito: **superficie
-    // neutra NO es fill de CONTROL**. Un control necesita su propio
-    // canal — es la letra de `sinCaja`, que nació justo porque este
-    // token no tenía presencia de control (par 1.07 en claro).
-    border:   'rgba(143,166,142,.18)',
+    base:     palette.lienzo,               // §4: el lienzo del claro
+    card:     palette.superficie,           // §4: la superficie del claro
+    elevated: palette.superficie,
+    overlay:  palette.grisCalidoMemorial,   // §4: reemplaza al rosa tinte
+    hundido:  palette.grisCalidoMemorial,
+    border:   palette.tintaBorde12,
     warm:     palette.cream,
-    tinta:    palette.tinta,    // ⏪ S99-B: **ya NO es «el techo del prestador»** — el techo
-                            // ganó el muro tealDark en S61-B12 y este rótulo quedó cuatro
-                            // sesiones vencido. Costó caro: la barra de tabs se pintó de
-                            // NEGRO en el gate 3 por elegir el token LEYENDO su comentario.
-                            // Hoy es tinta y nada más. Su techo vive en `useMuroOficio`.
+    tinta:    palette.tinta,
   },
 
   text: {
-    primary:    palette.textMemorialDark,
-    secondary:  'rgba(232,220,200,.65)',
-    tertiary:   'rgba(232,220,200,.38)',
-    inverse:    palette.memorialDark0,
-    onGradient: palette.cream,
-    // v3.1 traía cream sobre bg.warm cream (1.00:1 — nunca validado).
-    // Corregido en S43-B2: texto oscuro de pergamino sobre superficie cálida.
-    warm:       palette.textMemorialLight,
+    primary:    palette.tintaV5,
+    secondary:  palette.tintaTexto65,
+    tertiary:   palette.tintaTexto50,
+    inverse:    palette.white,
+    onGradient: palette.white,              // sobre la cabecera ciruela noche
+    warm:       '#2A1A10',   // texto sobre `bg.warm` (cream) — 15.48
   },
 
   accent: {
-    // S63 — enmienda Ley 21 FIRMADA: el CTA primario resuelve por SLOT.
-    // Default 'tinta' (este valor); ThemeProvider cta='oficio' lo ancla a
-    // tealDark en light Y dark. Memorial SIEMPRE tinta (no se celebra).
-    cta:           palette.textMemorialDark,
-    ctaTexto:      palette.memorialDark0,
-    /** S82-B — ¿el CTA lleva ELEVACIÓN? memorial no se celebra — el CTA es tinta plana, sin relieve
-     *  Es SLOT y no prop: la pantalla no elige, y el prestador lo pisa en
-     *  `lightOficio`/`darkOficio` (su teal no tiene el problema del oro
-     *  contra papel — meterle relieve sería ARRASTRE). */
-    ctaElevado:    false,
-    primary:       palette.sage,
-    primaryBg:     palette.sageAlpha14,
-    primaryBorder: 'rgba(143,166,142,.28)',
+    /* §4 cláusula 1 — **SIN MAGENTA. La acción es tinta.** Ley 21 sigue
+       rigiendo ("memorial SIEMPRE tinta"), y por eso `getTheme` ignora el
+       ancla de casa para este tema: memorial no se celebra. */
+    cta:           palette.tintaV5,
+    ctaTexto:      palette.white,
+    ctaElevado:    false,                   // sin relieve: no hay nada que celebrar
 
-    brand:         palette.rose,
-    brandBg:       palette.roseAlpha14,
-    brandBorder:   'rgba(201,160,160,.30)',
+    primary:       palette.tintaV5,
+    primaryBg:     palette.grisCalidoMemorial,
+    primaryBorder: palette.tintaBorde12,
 
-    warm:          palette.cream,
-    warmBg:        palette.creamAlpha06,
-    warmBorder:    'rgba(250,246,232,.18)',
+    brand:         palette.tintaV5,
+    brandBg:       palette.grisCalidoMemorial,
+    brandBorder:   palette.tintaBorde12,
 
-    // S58 — en memorial el control es TINTA (la marca no celebra ahí)
-    /** El hito de la serie. ⚠️ **Igual a `control` A PROPÓSITO: el founder
-     *  firmó `#AE3785` medido contra carta blanca y `#F6F6F6` —superficies
-     *  CLARAS—. El par sobre fondo oscuro NO se midió, y elegirlo acá sería
-     *  firmar por él. Este tema conserva exactamente lo de hoy hasta que
-     *  exista su medición.** */
-    hito:          palette.textMemorialDark,
-    control:       palette.textMemorialDark,
-    /** LA PATA — SLOT PROPIO (S83-B19/B20, FIRMA DEL FOUNDER: "lo que
-     *  quiero comunicar con la pata es: este es el seleccionado").
-     *  Es marca de SELECCIÓN, no de marca: por eso en el prestador toma
-     *  su verde y no el magenta (§15b.1), en los DOS registros como sus
-     *  hermanos `control` y `active`.
-     *  ⚠️ REDUNDANCIA MEDIDA Y DECLARADA: hoy resuelve IDÉNTICO a
-     *  `accent.control` en las CINCO resoluciones (los tres temas base y
-     *  las dos casas de oficio). Se conserva como slot propio porque son
-     *  conceptos distintos —`control` viste la LETRA del segmento, esto
-     *  viste la PATA— y el día que diverjan ya está el lugar; pero
-     *  mientras coincidan, un cambio en uno que no viaje al otro es una
-     *  divergencia por accidente. Si el founder decide que la pata SIEMPRE
-     *  sigue al control, este campo se borra y la pata lee `control`. */
-    marcaEleccion: palette.textMemorialDark,
-    /** El color de la LUZ DE AMBIENTE (S83-B34). En el cliente es su
-     *  MAGENTA de marca; los temas de oficio lo pisan a su verde. En
-     *  memorial da igual — la pieza no se monta (Ley 8). */
-    atmosfera: palette.textMemorialDark,
-    // S82-B r12 — el fondo del Boton `sinCaja` (memorial: la superficie serena que ya existe):
-    // el secundario sin borde necesita un canal, y el borde ya no está.
-    apoyada:      palette.memorialDark1,
+    /* 🔴 LOS CUATRO QUE MEMORIAL NO TENÍA. Ya no degradan por fallback:
+       existen, en tinta y gris, que es lo que §4 pide. */
+    active:            palette.tintaV5,
+    controlBg:         palette.grisCalidoMemorial,
+    controlLleno:      palette.tintaV5,
+    sobreControlLleno: palette.white,
 
-    /** ⭐ S99-B · EL ACTIVO RELLENO (ver la nota larga en `light.ts`).
-     *
-     *  **REQUERIDO también acá, a diferencia de `controlLleno`** —que
-     *  memorial no porta y sus consumidores esquivan con
-     *  `'controlLleno' in theme.accent`—. La razón es de contrato: la
-     *  barra de tabs **siempre** dibuja su disco, así que un slot
-     *  opcional obligaría a la pieza a inventar un fallback, *y un
-     *  fallback es justo el lugar donde se esconde el color equivocado*
-     *  (D-813 vive de eso). Memorial no se saltea el marcador: lo dice
-     *  en su propia voz, con el par sereno que ya usa su CTA. */
-    activoLleno:      palette.textMemorialDark,
-    sobreActivoLleno: palette.memorialDark0,
+    control:       palette.tintaV5,
+    hito:          palette.tintaV5,
+    marcaEleccion: palette.tintaV5,
+    atmosfera:     palette.tintaV5,
 
-    gradient:       gradients.transparent,   // B1: en memorial, transparent
-    gradientSubtle: gradients.transparent,
+    apoyada:          palette.grisCalidoMemorial,
+    activoLleno:      palette.tintaV5,
+    sobreActivoLleno: palette.white,
+
+    /* S116-B · memorial paso a CLARO (§4), asi que su familia `warm` va en
+       registro CLARO: `cream` sobre el lienzo daba 1.02 y verify:contrast
+       lo tumbo. `terracottaDark` da 5.27 sobre lienzo y 5.82 sobre blanco
+       — es el mismo registro que usa el tema claro. */
+    warm:          palette.terracottaDark,
+    warmBg:        palette.terracottaAlphaL,
+    warmBorder:    palette.terracottaBorderL,
+
+    /** §4 cláusula 3 — **ciruela noche PLANA, sin degradado.** */
+    gradient:       gradients.memorialPlano,
+    gradientSubtle: gradients.memorialPlano,
   },
 
+  /* Las capas mueren igual que en claro, y acá ni siquiera tienen tinte:
+     **Ley 8 — memorial no tinta.** Los 8 slots existen para que la forma
+     sea la misma; su valor es neutro. */
   capa: {
-    identidad:       palette.sage,
-    cuidado:         palette.sage,
-    comunidad:       palette.rose,
-    comunidadAmplia: palette.rose,
+    identidad:       palette.tintaV5,
+    cuidado:         palette.tintaV5,
+    comunidad:       palette.tintaV5,
+    comunidadAmplia: palette.tintaV5,
+  },
+  capaText: {
+    identidad:       palette.tintaTexto65,
+    cuidado:         palette.tintaTexto65,
+    comunidad:       palette.tintaTexto65,
+    comunidadAmplia: palette.tintaTexto65,
+  },
+  capaBg: {
+    identidad:       palette.grisCalidoMemorial,
+    cuidado:         palette.grisCalidoMemorial,
+    comunidad:       palette.grisCalidoMemorial,
+    comunidadAmplia: palette.grisCalidoMemorial,
   },
 
+  /* §4 cláusula 2 — **SIN VERDE NI ÁMBAR: «no hay estados que cumplir».**
+     Los 16 slots existen (la forma es la misma) y todos resuelven a
+     tinta/gris. ⚠️ **`danger` conserva su lectura**: un error sigue
+     siendo un error incluso en memorial — lo que §4 apaga es el
+     CUMPLIMIENTO (al día / pendiente), no la falla. */
   status: {
-    success:       palette.sage,
-    successBg:     palette.sageAlpha14,
-    successBorder: 'rgba(143,166,142,.28)',
-    successText:   palette.sage,
-
-    warning:       palette.rose,
-    warningBg:     palette.roseAlpha14,
-    warningBorder: 'rgba(201,160,160,.30)',
-    warningText:   palette.rose,
-
-    danger:        palette.rose,
-    dangerBg:      palette.roseAlpha14,
-    dangerBorder:  'rgba(201,160,160,.30)',
-    dangerText:    palette.rose,
-
-    info:          palette.sage,
-    infoBg:        palette.sageAlpha14,
-    infoBorder:    'rgba(143,166,142,.28)',
-    infoText:      palette.sage,
+    success:       palette.tintaTexto65,
+    successBg:     palette.grisCalidoMemorial,
+    successBorder: palette.tintaBorde12,
+    successText:   palette.tintaTexto65,
+    warning:       palette.tintaTexto65,
+    warningBg:     palette.grisCalidoMemorial,
+    warningBorder: palette.tintaBorde12,
+    warningText:   palette.tintaTexto65,
+    danger:        palette.coralDarkTexto,
+    dangerBg:      palette.grisCalidoMemorial,
+    dangerBorder:  palette.tintaBorde12,
+    dangerText:    palette.coralDarkTexto,
+    info:          palette.tintaTexto65,
+    infoBg:        palette.grisCalidoMemorial,
+    infoBorder:    palette.tintaBorde12,
+    infoText:      palette.tintaTexto65,
   },
 
   services: {
-    vet:       palette.sage,
-    grooming:  palette.sage,
-    walking:   palette.sage,
-    boarding:  palette.sage,
-    store:     palette.sage,
-    insurance: palette.sage,
-    wearable:  palette.sage,
-    adoption:  palette.rose,
+    vet:       palette.tintaV5,
+    grooming:  palette.tintaV5,
+    walking:   palette.tintaV5,
+    boarding:  palette.tintaV5,
+    store:     palette.tintaV5,
+    insurance: palette.tintaV5,
+    wearable:  palette.tintaV5,
+    adoption:  palette.tintaV5,
   },
 
   shadow: shadows.memorial,
-
-  // Ley 20 (D-358 S58): memorial CONSERVA la elevación — la calidez es
-  // dignidad, no celebración. Superficies oscuras → resuelve como dark.
   elevacion: elevacion.memorial,
 
   border: {
-    width:   1,
-    default: 'rgba(143,166,142,.18)',
-    /** S86-B · mismo rol, misma familia serena, un paso de alfa. SIN
-     *  consumidor hoy (en memorial separa el halo, como en dark) — y acá
-     *  además rige la Ley 8: memorial no gana señales, las degrada. */
-    presente: 'rgba(143,166,142,.30)',
-    /** S99-B · N11 — el contorno del CAMPO. **SÓLIDO y no alfa**, y la
-     *  razón es medible: un alfa se compone sobre el INTERIOR del campo,
-     *  así que su contraste contra el FONDO —que es lo que la ley mide—
-     *  dependería de dónde se monte. `.30` sobre el interior da 1.49
-     *  contra el fondo; este sólido da **3.34:1**. *Memorial degrada
-     *  señales, no las pierde: un campo que no se ve no es sobriedad.* */
-    campo:    palette.campoBordeM,
-    subtle:  'rgba(232,220,200,.06)',
-    accent:  'rgba(143,166,142,.28)',
-    brand:   'rgba(201,160,160,.30)',
-    warm:    'rgba(250,246,232,.18)',
+    width:    1,
+    default:  palette.tintaBorde12,
+    presente: palette.tintaBorde12,
+    campo:    palette.campoBordeL,
+    subtle:   palette.tintaBorde09,
+    accent:   palette.tintaBorde12,
+    brand:    palette.tintaBorde12,
+    warm:     'rgba(250,246,232,.18)',
   },
 } as const

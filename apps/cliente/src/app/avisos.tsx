@@ -170,7 +170,7 @@ export default function Avisos() {
               const meta = [momento(a.creadoEn), a.mascotaNombre].filter(Boolean).join(' · ');
               // memorial no porta `active` (degrada a primary) — el guard
               // es el del precedente de C, no un cast a ciegas.
-              const acento = 'active' in theme.accent ? (theme.accent as { active: string }).active : theme.accent.primary;
+              const acento = theme.accent.active;  /* S116-B · memorial ya porta el slot: el fallback era rama muerta. */
               return (
                 <View key={a.id}>
                   {i > 0 ? <Separador /> : null}

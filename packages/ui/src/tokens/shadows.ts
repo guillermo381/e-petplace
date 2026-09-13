@@ -61,4 +61,43 @@ export const shadows = {
     sm: { shadowColor: palette.sage, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.10, shadowRadius: 2, elevation: 2 },
     md: { shadowColor: palette.sage, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.14, shadowRadius: 8, elevation: 4 },
   },
+  /* ═══════════════════════════════════════════════════════════════════
+   * 🔴 **v5 · LAS DOS SOMBRAS DEL REDISEÑO (S116, letra §2).**
+   *
+   * **La letra elige el mecanismo, y es este archivo:** *«Sombras: por
+   * `elevation` + `shadow*` (tokens `shadows.ts`/`elevacion.ts`), **nunca
+   * CSS**»*. Por eso entran acá como `ShadowToken` y no en
+   * `elevacion.ts`, que es `boxShadow` string.
+   *
+   * ⚠️ **`elevacion.ts` NO se deroga ni se toca**: lo consumen `Tarjeta`,
+   * `Hoja` y la enmienda S82 del halo direccional, en las DOS apps. Lo
+   * que la letra hace es elegir el mecanismo **para lo que nace en v5**,
+   * no jubilar el que ya existe.
+   * ═══════════════════════════════════════════════════════════════════ */
+  v5: {
+    /** «CTA alto 58 radio 999 **con sombra magenta 28 %**». Es una sombra
+     *  de COLOR, no de tinta: el CTA no se apoya en el papel, **brilla**.
+     *  El color sale de la paleta (`sombraMagenta28`) — acá va su
+     *  geometría. */
+    ctaMagenta: {
+      shadowColor: palette.magentaAccion,
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.28,
+      shadowRadius: 16,
+      elevation: 8,
+    },
+    /** «tarjeta radio 24, borde 1 tinta 9 %, **sombra suave**». Suave es
+     *  literal: la tarjeta conserva su hairline (enmienda S86, que la
+     *  letra ratifica — *«en claro, la superficie en reposo conserva el
+     *  hairline»*), así que la sombra sólo tiene que despegarla, no
+     *  dibujarle el borde. */
+    tarjetaSuave: {
+      shadowColor: palette.tintaV5,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.06,
+      shadowRadius: 10,
+      elevation: 2,
+    },
+  },
+
 } as const

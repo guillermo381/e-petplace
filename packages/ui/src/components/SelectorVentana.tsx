@@ -215,10 +215,9 @@ export function SelectorVentana({
           // de memorial — memorial no tiene `capaBg` y degrada a superficie
           // sin tinte (Ley 8).
           backgroundColor: activa
-            ? 'capaBg' in theme
-              ? theme.capaBg.comunidad
-              : theme.bg.overlay
+            ? theme.capaBg.comunidad
             : lleno
+  /* S116-B · memorial ya porta el slot: el fallback era rama muerta. */
               ? theme.bg.overlay
               : 'transparent',
         }}

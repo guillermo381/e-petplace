@@ -803,7 +803,7 @@ export function Boton({
             Platform.OS === 'web' && enfocado
               ? ({
                   outlineWidth: 2,
-                  outlineColor: 'active' in theme.accent ? theme.accent.active : theme.accent.primary,
+                  outlineColor: theme.accent.active,  /* S116-B · memorial ya porta este slot (los 3 temas son isomorfos): el fallback era rama muerta. */
                   outlineStyle: 'solid',
                   outlineOffset: 2,
                 } as unknown as ViewStyle)

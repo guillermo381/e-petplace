@@ -91,7 +91,7 @@ export function MapaRecorrido({
   const [encuadreSuspendido, setEncuadreSuspendido] = useState(false)
 
   const k = CAPA_A_KEY[capa]
-  const colorTrazo = 'capaText' in theme ? theme.capaText[k] : theme.capa[k]
+  const colorTrazo = theme.capaText[k]  /* S116-B · memorial ya porta este slot (los 3 temas son isomorfos): el fallback era rama muerta. */
   const colorPunto = theme.capa[k]
 
   // S81 (D-578 ①②): el DIBUJO se filtra; el crudo de las props no se
