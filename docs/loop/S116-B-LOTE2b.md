@@ -1,6 +1,6 @@
 # S116-B · LOTE 2b — la corrección de mesa sobre las láminas del lote 2
 
-> **Rama `pista/s116-b-02b` · worktree `/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace-s116-b-02` · partí de `main` @ `7dd13513`, que ya trae mi lote 2 mergeado.**
+> **Ramas `pista/s116-b-02b` (mergeada a main en `5fa3599b`) y `pista/s116-b-02c` (la corrección del ícono) · worktree `/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace-s116-b-02` · partí de `main` @ `7dd13513`, que ya trae mi lote 2 mergeado.**
 > Medido el **13-sep-2026**. No es lote nuevo: es corrección del 2.
 
 ---
@@ -148,19 +148,19 @@ La orden decía *«papel se retira si no tiene consumidor»*. **Tiene cuatro:** 
 🔴 **El isotipo NO está centrado en su propio viewBox.** Medido rasterizando y midiendo la caja de tinta: el dibujo ocupa **820 × 522 dentro de 1254 × 1254** —o sea **65 % del ancho y 42 % del alto**— y su centro cae en (650, 611) contra (627, 627).
 ⇒ **escalar por el viewBox daba un ícono al 43 % real**, chico y corrido hacia abajo. Se escala y centra **sobre la caja del dibujo**. *La zona segura se cumple sobre lo que se VE, no sobre lo que el archivo declara.*
 
-### ✅ ZONA SEGURA = LECTURA (B) — FIRMADA POR LA MESA
+### ✅ ZONA SEGURA = LECTURA (B) — FIRMADA POR LA MESA (lote 2c)
 
 Se midieron las dos y **ganó la que Android significa**:
 
 | | lectura | ancho | diagonal | ¿entra en el círculo del 66 %? |
 |:-:|---|--:|--:|:-:|
-| A | el LADO del dibujo mide 66 % | 676 (66 %) | 801 | **NO** |
-| **B** ✅ | el dibujo **CABE** en el círculo del 66 % | **570 (56 %)** | **676** | **sí, exacto** |
+| A | el LADO del dibujo mide 66 % | 676 (66 %) | **801** | **NO** |
+| **B** ✅ | la nariz **CABE ENTERA** en el círculo del 66 % | **570 (56 %)** | **676** | **sí, exacto** |
 
-**El criterio no es el lado: es la DIAGONAL contra el diámetro.** El dibujo es **ancho** (820 × 522 en su viewBox), así que con (A) su diagonal se sale de cualquier recorte redondo — y todo lanzador de Android recorta redondo. *(A) cumplía la letra de la orden y rompía su propósito: una zona segura que no protege no es una zona segura.*
+🔴 **EL CRITERIO NO ES EL LADO: ES LA DIAGONAL CONTRA EL DIÁMETRO** — y es lo único que hay que recordar acá, porque **la lectura equivocada es la que parece obvia**. El dibujo del ilustrador es **ancho** (820 × 522), así que con (A) su diagonal daba 801 contra un diámetro seguro de 676: **se salía de cualquier recorte redondo, y todo lanzador de Android recorta redondo.** *(A) cumplía la letra de la orden y rompía su propósito — una zona segura que no protege no es una zona segura.*
 
-**Compuesto con (B): dibujo 570 × 363, diagonal 676 = exactamente el diámetro seguro.** Verificado con el recorte circular **simulado sobre la lámina**, no supuesto: `icono-app.png` muestra el ícono recortado en círculo a 48 · 96 · 192 dp y **la nariz entra entera en los tres**.
-*La lámina de las dos lecturas se conserva (`icono-app-dos-lecturas.png`) — es la evidencia de por qué se eligió, y sin ella la decisión se lee como una preferencia.*
+**Compuesto con (B): dibujo 570 × 363, diagonal 676 = exactamente el diámetro seguro.** Verificado con el **recorte circular simulado**, no supuesto (`capturas-s116-b-2b/icono-app.png`): la nariz entra entera a 48 dp real, a 96 y a 192.
+*La lámina de las dos lecturas se conserva — es la evidencia de por qué se eligió, y sin ella la decisión se lee como una preferencia.*
 
 ---
 
@@ -182,7 +182,7 @@ node scripts/verify-reduced-motion.mjs → EXIT 0
 | archivo | qué muestra |
 |---|---|
 | `capturas-s116-b-2b/hoja-de-contacto-2b.png` | **los 20 a 21 y 48 px, SIN huella** — como los va a renderizar la casa v5 |
-| `capturas-s116-b-2b/icono-app.png` | el ícono a 48 · 96 · 192 dp **recortado en círculo**, que es como Android lo muestra |
+| `capturas-s116-b-2b/icono-app.png` | el ícono **recortado en círculo**, a 48 dp real y ampliado — como Android lo muestra |
 | `capturas-s116-b-2b/icono-app-dos-lecturas.png` | A y B lado a lado — **la evidencia de por qué ganó (B)** |
 
 🔴 **La hoja ahora dibuja el set SIN huella, y eso es una corrección del instrumento, no una opción.** *Una hoja de contacto que pinta huellas que el cliente no va a ver no es una hoja de contacto: es un dibujo del registry.* Sin el flag las sigue pintando, que es lo correcto para juzgar los glifos del **prestador**.
@@ -193,7 +193,7 @@ node scripts/verify-reduced-motion.mjs → EXIT 0
 
 | | por qué |
 |---|---|
-| **Capturas de las cuatro pantallas con el token nuevo** | 🔴 **NO SON MÍAS — las produce C en su lote** (firma de la mesa). El cambio de Baloo toca toda pantalla del cliente, y **quien monta las pantallas es otra mano**: una captura de pantalla la toma quien la compone, no quien cambió el token que la pinta. *Lo que yo entrego es la medición de qué token consumían y a qué familia resolvían — que es lo que la orden pedía.* **Las del lote 2 NO sirven de reemplazo: muestran el estado viejo.** |
+| **Capturas de las cuatro pantallas con el token nuevo** | 🔴 **NO SON MÍAS — las produce C en su lote** (firma de la mesa). El cambio de Baloo toca toda pantalla del cliente, y **quien monta las pantallas es otra mano**: una captura la toma quien compone la pantalla, no quien cambió el token que la pinta. *Lo que entrego yo es la medición de qué token consumían y a qué familia resolvían — que es lo que la orden pedía.* **Las del lote 2 NO sirven de reemplazo: muestran el estado viejo.** |
 | **El gate por ícono del founder** | la hoja está lista; firmarla no es mío |
 | **El vector drawable de la silueta y el cableado del ícono** | tocan `app.config.ts` y `android/` — no es mi territorio |
 | **Los ~29 glifos con huella que el prestador NO monta** | siguen dibujándola en su dibujante. **No molesta** —la casa v5 la apaga y el prestador no los monta— pero **es código que no se ejecuta en ninguna casa**, y merece una pasada de limpieza con su censo. No la hice porque no estaba en la orden. |
