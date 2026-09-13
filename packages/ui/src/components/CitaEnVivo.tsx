@@ -90,7 +90,7 @@ export function CitaEnVivo({ capa, children }: CitaEnVivoProps) {
   }
 
   const esMemorial = theme.mode === 'memorial'
-  const capaTexto = 'capaText' in theme ? theme.capaText : theme.capa
+  const capaTexto = theme.capaText  /* S116-B · memorial ya porta este slot (los 3 temas son isomorfos): el fallback era rama muerta. */
   // §7.1 la voz única — memorial conserva su degradación serena
   const vozEstado = esMemorial ? t('citaEnVivo.estadoMemorial') : t('citaEnVivo.estado')
 

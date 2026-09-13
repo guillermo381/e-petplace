@@ -27,6 +27,46 @@ type TemaAncho<T extends { shadow: unknown; elevacion: unknown; mode: unknown }>
   Omit<Ancho<T>, 'shadow' | 'elevacion' | 'mode'> & Pick<T, 'shadow' | 'elevacion' | 'mode'>
 export type Theme = TemaAncho<typeof lightTheme> | TemaAncho<typeof darkTheme> | TemaAncho<typeof memorialTheme>
 
+/* ═══════════════════════════════════════════════════════════════════════
+ * 🔴 **S116-B · LA ISOMORFÍA LA PRUEBA EL COMPILADOR, NO UNA NOTA.**
+ * Orden del lote, textual: *«Lo que prueba que quedaron isomorfos es un
+ * error del compilador si a un tema le falta un slot, no una nota.»*
+ *
+ * Hasta v4 **no lo probaba nadie**, y el costo está medido: `memorial`
+ * tenía **74 de 86 slots** y **28 lecturas en 17 archivos** caían a un
+ * fallback. Ninguna fallaba —los guards `'capaBg' in theme` estaban
+ * puestos—, así que *una pieza andaba en dos temas de tres y el tercero
+ * se veía distinto sin que nada avisara*.
+ *
+ * `FormaDeTema` sólo mira la FORMA: cada hoja es `unknown`, así que el
+ * tipo no dice nada sobre el color — dice que **la clave existe**. Se
+ * excluyen `mode` (su literal discrimina la unión), `shadow` y
+ * `elevacion` (se narrowean por tema, y ensancharlos rompería
+ * `shadow.glow`, que es sólo de `dark`).
+ *
+ * **CÓMO SE VE EL ROJO — producido, no supuesto.** Borrá
+ * `accent.active` de `memorial.ts` y `tsc` corta en **`themes/index.ts:59`**
+ * (`_formaMemorial`) con *«is not assignable to type
+ * `Estructura<Omit<…>>`»*; borrá el grupo `capaBg` de `dark.ts` y corta con
+ * *«Property 'capaBg' does not exist on type 'Theme'»* en cada consumidor.
+ * **Los dos sabotajes se corrieron y los dos dieron exit 2** (7 errores el
+ * primero), y el verde volvió al restaurar.
+ * ⚠️ La primera vez que los corrí leí sólo los tres primeros errores y
+ * concluí que el guard no disparaba — **disparaba, y estaba cuatro líneas
+ * más abajo**. *Un `head -3` sobre una salida ordenada por archivo prueba
+ * presencia, jamás ausencia.*
+ * ═══════════════════════════════════════════════════════════════════════ */
+type Estructura<T> = { [K in keyof T]: T[K] extends object ? Estructura<T[K]> : unknown }
+export type FormaDeTema = Estructura<Omit<typeof lightTheme, 'mode' | 'shadow' | 'elevacion'>>
+
+/* Los tres tienen que satisfacer la MISMA forma. `light` es la fuente
+   —es el tema del cliente, el que la letra firma— y los otros dos se
+   miden contra él. */
+const _formaLight:    FormaDeTema = lightTheme
+const _formaDark:     FormaDeTema = darkTheme
+const _formaMemorial: FormaDeTema = memorialTheme
+void _formaLight; void _formaDark; void _formaMemorial
+
 /** ⭐ LOS SLOTS — el número que antes NO EXISTÍA (S82-B r30).
  *  Un SLOT no es "un campo que cambia entre temas" (eso son casi todos:
  *  es lo que un tema ES). Un slot es un campo que un tema DERIVADO PISA
@@ -56,9 +96,11 @@ export type Theme = TemaAncho<typeof lightTheme> | TemaAncho<typeof darkTheme> |
  *       grep tomó el de texto. `accent.primary` sí es el teal, así que
  *       lo que C montó en el prestador está BIEN; lo que falla es
  *       reusarlo del otro lado.)*
- *  Si aparece un noveno, se agrega ACÁ: la lista es el contrato. */
+ *  Si aparece un DÉCIMO, se agrega ACÁ: la lista es el contrato.
+ *  **El noveno apareció en S116-B y está arriba** — `accent.primary`. */
 export type SlotDeTema =
   | 'bg.base'
+  | 'accent.primary'   // ⭐ S116-B · el NOVENO (ver `lightOficio`)
   | 'accent.cta'
   | 'accent.ctaTexto'
   | 'accent.ctaElevado'
@@ -146,7 +188,18 @@ const lightOficio: Theme = {
   // que `useMuroOficio` pinta el techo en claro, así que el disco de la
   // barra y el techo son **el mismo verde por construcción**, no por
   // coincidencia tecleada. Papel encima: 5.51 (medido S83-B13).
-  accent: { ...lightTheme.accent, cta: palette.tealDark, ctaTexto: palette.light0, ctaElevado: false, control: palette.tealDark, hito: palette.tealDark, controlBg: palette.tealAlpha16, active: palette.tealDark, marcaEleccion: palette.tealDark, atmosfera: palette.tealDark, activoLleno: palette.tealDark, sobreActivoLleno: palette.light0 },
+  // 🔴 **S116-B · EL NOVENO SLOT: `accent.primary`.** Lo obliga el
+  // rediseño del cliente: hasta v4 `primary` era `tealDark` en el tema
+  // BASE, así que el prestador lo heredaba gratis y nadie lo había
+  // declarado slot. Con la paleta v5 el base pasa a `magentaAccion` y
+  // **el prestador se habría vuelto magenta en silencio** — que es
+  // exactamente la clase de cambio que esta lista existe para impedir.
+  // MEDIDO antes de agregarlo: `theme.accent.primary` tiene **5 lecturas
+  // en `apps/prestador/src`** (y 3 en el cliente, 15 en `packages/ui`).
+  // El comentario de arriba ya lo anticipaba sin saberlo: *«`accent.primary`
+  // es el MISMO teal en las dos casas y por lo tanto NO las distingue»* —
+  // dejó de serlo, y por eso ahora tiene que estar acá.
+  accent: { ...lightTheme.accent, cta: palette.tealDark, ctaTexto: palette.light0, ctaElevado: false, primary: palette.tealDark, primaryBg: palette.tealAlpha16, primaryBorder: palette.tealBorderL, control: palette.tealDark, hito: palette.tealDark, controlBg: palette.tealAlpha16, active: palette.tealDark, marcaEleccion: palette.tealDark, atmosfera: palette.tealDark, activoLleno: palette.tealDark, sobreActivoLleno: palette.light0 },
 }
 const darkOficio: Theme = {
   ...darkTheme,
@@ -196,7 +249,8 @@ const darkOficio: Theme = {
   // (`bg.card` = `dark1`) separaría **1.4** — el marcador desaparecería.
   // ⇒ sobre superficie oscura manda el hex PURO, con su contenido en
   // tinta. **Medido S83-B31: fill 10.50 · label 11.01.**
-  accent: { ...darkTheme.accent, cta: palette.teal, ctaTexto: palette.textLight0, ctaElevado: false, control: palette.teal, hito: palette.teal, controlBg: palette.tealAlpha15, active: palette.teal, marcaEleccion: palette.teal, atmosfera: palette.teal, activoLleno: palette.teal, sobreActivoLleno: palette.textLight0 },
+  // 🔴 S116-B · EL NOVENO SLOT, su registro oscuro (ver `lightOficio`).
+  accent: { ...darkTheme.accent, cta: palette.teal, ctaTexto: palette.textLight0, ctaElevado: false, primary: palette.teal, primaryBg: palette.tealAlpha15, primaryBorder: palette.tealBorder, control: palette.teal, hito: palette.teal, controlBg: palette.tealAlpha15, active: palette.teal, marcaEleccion: palette.teal, atmosfera: palette.teal, activoLleno: palette.teal, sobreActivoLleno: palette.textLight0 },
 }
 
 /** El default del producto es CLARO (B1 §7.3). Dark es opt-in. Memorial es automático (M6). */

@@ -36,7 +36,7 @@ export function Guijarro({
   children?: ReactNode
 }) {
   const { theme } = useTheme()
-  const tinte = 'capaBg' in theme ? theme.capaBg[capa] : theme.bg.overlay
+  const tinte = theme.capaBg[capa]  /* S116-B · memorial ya porta este slot (los 3 temas son isomorfos): el fallback era rama muerta. */
 
   return (
     <View style={{ width: tamano, height: tamano, alignItems: 'center', justifyContent: 'center' }}>

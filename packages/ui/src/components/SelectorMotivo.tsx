@@ -130,9 +130,8 @@ export function SelectorMotivo({
   const tinte =
     acento === 'oficio'
       ? theme.accent.primaryBg
-      : 'controlBg' in theme.accent
-        ? (theme.accent as { controlBg: string }).controlBg
-        : theme.accent.brandBg
+      : theme.accent.controlBg
+  /* S116-B · memorial ya porta el slot: el fallback era rama muerta. */
 
   /* La última fila es un motivo más EN LA FORMA y otra cosa EN EL SIGNIFICADO:
      se dibuja igual —misma altura, mismo glifo, misma señal de elección— para

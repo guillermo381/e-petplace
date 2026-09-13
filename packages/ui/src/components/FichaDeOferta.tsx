@@ -275,7 +275,7 @@ export function FichaDeOferta({
   /* 🔴 EL FONDO ENCENDIDO — verde suave en LAS DOS CASAS (firma de mesa).
      Memorial no tiene `capaBg` y degrada a superficie sin tinte (Ley 8),
      mismo guard que `SelectorVentana` y `CalendarioCupo`. */
-  const fondoEncendido = 'capaBg' in theme ? theme.capaBg.cuidado : theme.bg.overlay
+  const fondoEncendido = theme.capaBg.cuidado  /* S116-B · memorial ya porta este slot (los 3 temas son isomorfos): el fallback era rama muerta. */
 
   const cabecera = (
     <View

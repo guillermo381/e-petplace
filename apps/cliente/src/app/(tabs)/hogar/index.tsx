@@ -261,7 +261,7 @@ function FilaReco({
             borderRadius: radius.md,
             // memorial no tiene registro capaBg: la placa degrada a
             // overlay neutro (memorial no se celebra, Ley 8).
-            backgroundColor: 'capaBg' in theme ? theme.capaBg[capa] : theme.bg.overlay,
+            backgroundColor: theme.capaBg[capa],  /* S116-B · memorial ya porta el slot: el fallback era rama muerta. */
             alignItems: 'center',
             justifyContent: 'center',
           }}

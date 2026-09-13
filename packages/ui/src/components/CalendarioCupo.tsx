@@ -268,10 +268,9 @@ export function CalendarioCupo({
                         ? 'transparent'
                         : theme.border.default,
                   backgroundColor: activo
-                    ? 'capaBg' in theme
-                      ? theme.capaBg.comunidad
-                      : theme.bg.overlay
+                    ? theme.capaBg.comunidad
                     : revelado
+  /* S116-B · memorial ya porta el slot: el fallback era rama muerta. */
                       ? theme.status.warningBg
                       : lleno
                         ? theme.bg.overlay

@@ -113,7 +113,7 @@ export function SliderPrecio({
 
   // Acento por registro — memorial degrada adentro (patrón Icono §2.8).
   // Capturado ANTES del branch: el narrowing de `in` no sobrevive closures.
-  const capaAA = 'capaText' in theme ? theme.capaText.cuidado : theme.capa.cuidado
+  const capaAA = theme.capaText.cuidado  /* S116-B · memorial ya porta este slot (los 3 temas son isomorfos): el fallback era rama muerta. */
   const acento = esMemorial
     ? theme.text.secondary
     : registro === 'control'
