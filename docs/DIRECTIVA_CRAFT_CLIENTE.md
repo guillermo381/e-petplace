@@ -1,5 +1,7 @@
 # DIRECTIVA DE CRAFT — LADO CLIENTE
 
+> ⚠️ **ENMENDADA POR `docs/LETRA_REDISENO_S116.md`** (firma del founder, 13-sep-2026): la letra manda sobre esta directiva en todo lo que nombra — color, tipografía, medidas, movimiento, las cinco tabs y el memorial del §4 —, y por ser esta directiva del lado cliente, **la enmienda la alcanza entera en esos puntos**; lo que la letra no nombra sigue rigiendo tal cual.
+
 > **DEPÓSITO S80 (28 Jul 2026, orden de mesa A6).** Origen: sesión de
 > diseño founder + arquitecto sobre láminas interactivas (26 Jul 2026).
 > El header original decía "Sesión: S<n> — asignar número al abrir":

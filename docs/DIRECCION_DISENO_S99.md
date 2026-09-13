@@ -1,5 +1,7 @@
 # DIRECCIÓN_DISEÑO_S99 — LA VARA DEL ARTESANO (N11–N20)
 
+> ⚠️ **ENMENDADO PARA LA APP CLIENTE POR `docs/LETRA_REDISENO_S116.md`** (firma del founder, 13-sep-2026): la letra deroga **N26** (el ocre muere como CTA: magenta acciona, ciruela selecciona) y **N1** junto con «la casa no titula en bold» (Baloo 2 800 para display, títulos y cifras) — **sólo para el cliente y sólo en los puntos que ella nombra**; **N5** (un acento por pantalla) y **N23** (el color marca clase) siguen rigiendo, igual que el resto de la vara.
+
 > **Estatuto: FIRMADA POR EL FOUNDER (14-ago-2026, mesa S99).** Nace de dos
 > dictados: *«quiero una pista encargada de hacer que todo se haga con el
 > diseño correcto, trayendo los mejores estándares — no solo de lo que hemos

@@ -14826,6 +14826,15 @@ megabyte.
 > tenga que hornear una APK. **☠️ MUERTE:** el export no lista MaterialSymbols y
 > las dos apps siguen dibujando sus glifos. Origen: S94-PERF, B3.
 
+> 🔴 **ENMENDADA S116-E (13-sep-2026, medido por checksum sobre el bundle exportado) — y la corrige en DOS puntos, no en uno:**
+>
+> ① **NO son «las dos apps»: `MaterialSymbols_400Regular.ttf` (936 kB) viaja SÓLO EN ANDROID.** iOS exporta 6 fuentes, Android 7 — la séptima es ésta. *La ficha decía «en las dos apps» y eso hacía el problema el doble de grande de lo que es, que es la clase de error que nadie va a ir a verificar porque no duele.*
+> ② **SU DISPARO SONÓ Y NO MURIÓ.** La muerte escrita era *«la próxima build nativa»*; hubo builds (hoy corre 1.0.7) y **sigue en el bundle exportado, que es lo que publica un OTA** — o sea que viaja en cada update, no sólo en una APK. Es el **67 %** del peso de fuentes de Android y el **57 %** de sus assets.
+>
+> ⇒ **DUEÑO NUEVO: B, en el LOTE 2 del rediseño S116.** *No es un tren que haya que salir a buscar: el lote 2 es el de los glifos —dibuja 17 nuevos y toca el registry entero—, así que va a estar con las manos exactamente ahí.* **La condición de muerte no cambia** (el export no lista `MaterialSymbols` y las dos apps siguen dibujando sus glifos); lo que cambia es que ahora tiene fecha y dueño en vez de esperar a que otra cosa obligue.
+>
+> ⚠️ **Y lo que sigue sin medirse, declarado:** que el registry no tenga consumidores **no prueba que ningún `node_modules` la pida en runtime** — el censo de S94 midió `SymbolView` y `expo-symbols` en el monorepo, no en el árbol de dependencias. Sacarla se verifica corriendo la app, no leyendo el `package.json`.
+
 #### D-736 — ⚪ 284 ÍNDICES SIN UN SOLO ESCANEO (3,4 MB) — censados, NO borrados
 
 `pg_stat_user_indexes` da **284 índices con `idx_scan = 0`** sobre 105 días de
@@ -34129,3 +34138,161 @@ Esa descripción **invirtió la causalidad** —el OOM pasó de causa a consecue
 
 **⇒ el reloj CORRE y EMITE.** *Las 155 corridas en cero no son ruido: son la prueba de que el reloj no se detuvo, que es exactamente lo que el founder pidió descartar explícitamente.*
 
+
+---
+
+## `D-1086` 🟠 — `verify:razon-muda` 139 → 140: DOS FRENOS MUDOS NUEVOS **DEL CLIENTE**, Y UNO QUE SE CURÓ SIN ASENTARSE
+
+**Estado:** ABIERTA · **Dueño:** **C**, en el lote que toque `carnet.tsx` y `nexo.tsx`.
+**Origen:** `S116-E-LINEA-BASE.md` §①.5b (13-sep-2026). Re-corrido por A el mismo día antes de fichar.
+
+### El delta, medido — y **corrige la lectura obvia del gate**
+
+El gate imprime su **top 5 por archivo**, y ese top está dominado por `apps/prestador/…/ventas/*`. **Leerlo de ahí lleva a concluir que la deuda es del prestador, y es falso.** El delta contra el commit que fijó el baseline (`d0199081`, S113-C) se midió corriendo **el mismo cuerpo del instrumento** sobre los dos árboles —copia con el tope de impresión levantado, sin reimplementar la medición— y da:
+
+| archivo | baseline `d0199081` | hoy | |
+|---|--:|--:|---|
+| `apps/cliente/src/app/carnet.tsx` | 1 | **2** | +1 |
+| `apps/cliente/src/app/nexo.tsx` | 0 | **1** | +1 |
+| `apps/cliente/src/components/coach.tsx` | 1 | **0** | −1 |
+
+**Neto +1 ⇒ 139 → 140.** Cuadra exacto. **Los tres son de `apps/cliente`: es territorio de S116, no deuda ajena del prestador.**
+
+### Los frenos vivos, con su línea
+
+- `apps/cliente/src/app/nexo.tsx:538` — `deshabilitado={pensando}`
+- `apps/cliente/src/app/carnet.tsx:580` — `deshabilitado={n === 0 || dudosas > 0 || sinTocar > 0}`
+- `apps/cliente/src/app/carnet.tsx:611` — `deshabilitado={!edicionValida}`
+
+⚠️ **Cuál de los dos de `carnet.tsx` es el nuevo, NO lo dice el gate y no se midió** — cuenta ocurrencias, no las identifica. **Los dos están mudos hoy**, así que para curar da igual; se declara para que nadie lea de esta ficha una precisión que no tiene.
+
+### Lo que esto significa, que es más que un contador
+
+Un botón apagado que no dice por qué **manda a la persona a adivinar** — y los tres viven en pantallas del recorrido: el carnet y el asistente. *`nexo.tsx:538` apaga el envío mientras el asistente piensa; eso es legítimo y probablemente sólo le falta su razón, que es la cura más barata del lote.*
+
+**Comando:** `pnpm verify:razon-muda` → hoy EXIT 1. **☠️ MUERTE:** el gate vuelve a EXIT 0 **y el baseline baja a su valor real en el mismo commit que lo cura** — *un baseline que baja y no se asienta convierte la próxima subida en invisible*, que es lo que su propio archivo ya advierte.
+
+---
+
+## `D-1087` 🔴 — `verify:voz-sin-hueco` 10 → 13: TRECE FRASES QUE PUEDEN SALIR ROTAS EN PANTALLA
+
+**Estado:** ABIERTA · **Dueño:** **C**. **La de `citas/[mascotaId].tsx:434` va al LOTE 4 por firma del founder** (13-sep-2026), que es el lote que toca esa pantalla.
+**Origen:** `S116-E-LINEA-BASE.md` §①.5b. Re-corrido por A.
+
+### Los trece, con archivo y línea
+
+| archivo | líneas | hueco |
+|---|---|---|
+| `apps/cliente/src/app/(tabs)/hogar/index.tsx` | 1290 ×2 · 1291 ×2 · 1305 | `negocio`, `mascota` |
+| `apps/cliente/src/app/(tabs)/despensa/checkout.tsx` | 952 · 954 · 959 | `saldo` |
+| `apps/cliente/src/app/autorizacion/[solicitudId].tsx` | 105 ×2 · 106 ×2 | `negocio`, `mascota` |
+| `apps/cliente/src/app/citas/[mascotaId].tsx` | 434 | `negocio` — **lote 4** |
+
+**Por qué es 🔴 y no 🟠:** *una frase con un hueco vacío sale rota en pantalla y compila perfecto.* El gate nombra la salida exacta: **«… algo de ,»**. No hay typecheck ni lint que lo vea, y el que lo ve es la familia.
+
+⚠️ **Cuáles 3 de los 13 son los nuevos, NO lo dice el gate** (cuenta contra un baseline, no identifica). **Los 13 están vivos hoy**; el baseline 10 sólo significa que 10 ya estaban cuando se fijó.
+
+### El escape que el propio gate ofrece, y cuándo usarlo
+
+`HUECO_ACEPTADO` en la misma línea, **para el caso donde el dato realmente no puede faltar** y el gate lo está marcando de más. *No es un silenciador: es la declaración de que se miró. Usarlo sin mirar convierte el gate en decoración.*
+
+**Comando:** `pnpm verify:voz-sin-hueco` → hoy EXIT 1. **☠️ MUERTE:** EXIT 0 con el `BASELINE` del script bajado en el mismo commit que cura.
+
+---
+
+## `D-1088` 🟠 — `verify:habla-en-presente`: OCHO SITIOS DICEN LA EDAD Y EL PESO **DE QUIEN YA NO ESTÁ**
+
+**Estado:** ABIERTA · **Dueño:** **C**, en el lote que toque el perfil de mascota.
+**Origen:** `S116-E-LINEA-BASE.md` §①.5b. Re-corrido por A.
+
+Los ocho viven en **un solo archivo**, `apps/cliente/src/app/(tabs)/hogar/mascota/[mascotaId].tsx`: `:995` (`edadMeses`), `:1080`, `:1094`, `:1095`, `:1096`, `:1098`, `:1445` (`pesoVigente`) y `:1417` (`vozEdad`).
+
+### 🔴 EL MATIZ QUE E MIDIÓ Y QUE HAY QUE LEER ANTES DE CURAR
+
+**El gate es un censo ESTÁTICO: marca el dato que fluye sin guard, no el texto que sale.** Su línea más citable dice que la edad sale *«~11 años»* en presente — **y la captura del 13-sep de esa misma pantalla dice «tenía ~11 años», en pasado.** ⇒ *el rojo es real y el gate hace su trabajo, pero de él **no** se puede leer «la app habla en presente de quien no está».* **Cuáles de los 8 llegan de verdad a pantalla hay que caminarlos uno por uno, y eso no se hizo.**
+
+*Por qué sobrevivieron, en palabras del propio gate: ninguno **pide** nada —su hermano `pide-en-memorial` está verde sobre ellos— y **un dato en presente sobre alguien que no está no dispara ninguna regla de acción y se lee perfectamente normal.***
+
+**Comando:** `pnpm verify:habla-en-presente` → hoy EXIT 1. **Sin baseline: es absoluto**, rojo mientras quede un solo caso. **☠️ MUERTE:** EXIT 0.
+
+---
+
+## `D-1089` 🟠 — `verify:pide-en-memorial`: DOS FRASES LE SIGUEN PIDIENDO ALGO A QUIEN PERDIÓ A SU MASCOTA
+
+**Estado:** ABIERTA · **Dueño:** **C**, mismo lote que `D-1088` — **es el mismo archivo**.
+**Origen:** `S116-E-LINEA-BASE.md` §①.5b. Re-corrido por A.
+
+En `apps/cliente/src/app/(tabs)/hogar/mascota/[mascotaId].tsx`:
+
+- `:2804` — `contanos.titulo` → **«Cuéntanos de {{nombre}}»**
+- `:2828` — `contanos.libreEtiqueta` → **«O cuéntanos lo que quieras de {{nombre}}»**
+
+**19 frases de acción halladas, 17 correctamente bajo el guard de memorial, 2 fuera.** El gate trae **su control positivo corrido**: 10 frases plantadas, las ve las 10 ✓ — *o sea que su rojo no es un artefacto de un matcher flojo.*
+
+**Y la letra del rediseño lo agrava en vez de aliviarlo:** su §4 dice que el memorial es *«la misma estructura sin la fiesta»* y que **no hay estados que cumplir**. Una pantalla que pide *«contanos de Sombra»* a quien acaba de perderla es exactamente lo que esa sección existe para que no pase. ⇒ **el lote del memorial lo cura o lo hereda declarado.**
+
+**Comando:** `pnpm verify:pide-en-memorial` → hoy EXIT 1. **Sin baseline: absoluto** (`exit(sinGuard === 0 ? 0 : 1)`). **☠️ MUERTE:** EXIT 0.
+
+---
+
+## `D-1090` 🔴 — LA APP CLIENTE MUERE CON `OutOfMemoryError` BAJO NAVEGACIÓN SOSTENIDA
+
+**Estado:** ABIERTA · **Dueño:** **E**, que lo investiga aparte (encargo del founder, 13-sep-2026).
+**Origen:** `S116-E-LINEA-BASE.md` §②.3. **No se fue a buscar: apareció recorriendo**, y se **reprodujo**.
+
+### Lo establecido, y nada más que eso
+
+```
+09-13 10:13:51.951 E/AndroidRuntime( 6152): FATAL EXCEPTION: OkHttp Dispatcher
+java.lang.OutOfMemoryError: Failed to allocate a 24 byte allocation with 356816 free bytes
+and 348KB until OOM, target footprint 201326592, growth limit 201326592
+	at okhttp3.internal.connection.RealCall$AsyncCall.run(RealCall.kt:513)
+```
+
+- Murió contra un techo de heap de **192 MB**, después de **~60 navegaciones** seguidas.
+- Android levantó `DevLauncherErrorActivity` ⇒ **51 capturas salieron del dev launcher** y hubo que rehacerlas.
+- **Se reprodujo** durante la re-captura.
+
+### 🔴 LA CAUSA NO ESTÁ ESTABLECIDA, Y NO SE DEDUCE DE LA PILA
+
+*Una pila de `OutOfMemoryError` dice **dónde estaba el hilo** cuando no pudo reservar, **no quién consumió la memoria*** (`L-557`, que el canon ya se cobró tres veces). **Que el frame sea `OkHttp Dispatcher` NO señala a la red:** señala que a un hilo de red le tocó la asignación que ya no entraba.
+
+### Por qué NO es una regresión de `D-1074`, y son dos hechos que no se contradicen
+
+La medición del mismo día dejó la **memoria PLANA a 120 s en el Hogar en reposo** (19,3 → 22,0 MB, hilos bajando 105 → 76). **Esto aparece bajo navegación sostenida, que es otro régimen.** *El defecto de `D-1074` hacía 67 → 485 MB con OOM a los 2 min 12 s; nada de eso aparece acá.*
+
+### Los tres límites, para que nadie lo agrande
+
+1. **Es un dev build** — carga el dev-launcher y trae el bundle por red: más pesado que un APK de producción.
+2. **~60 rutas en pocos minutos no es uso normal**; es un barrido de instrumentación.
+3. **No se midió el crecimiento durante el barrido** — sólo el techo y el momento. *Reconstruirlo pide muestrear memoria mientras se navega, y eso es otra corrida.*
+
+### Lo que ya deja como método, aunque la causa no se sepa
+
+**Cualquier barrido automatizado sobre esta app necesita detectar el dev launcher y relanzar**, o entrega **capturas falsas que se ven perfectamente creíbles** — que es exactamente lo que pasó con 51 de las 118.
+
+**☠️ MUERTE:** la causa medida (no deducida) y la app sobreviviendo un barrido equivalente.
+
+---
+
+## `D-1091` 🟡 — EL CENSO DE «MASCOTAS REALES» SOBRE-CUENTA 4,5× EN LA FAMILIA DEL FOUNDER
+
+**Estado:** ABIERTA · **Dueño:** **founder** — *tocar datos de su familia no es de una pista.*
+**Origen:** `S116-E-LINEA-BASE.md` §③.4.
+
+```sql
+select count(*) filter (where creado_por_sistema is null)                       -- 9
+     , count(*) filter (where creado_por_sistema is not null)                   -- 14
+     , count(*) filter (where creado_por_sistema is null
+                        and (nombre ilike 'prueba%' or nombre in ('Pp','Tt')))  -- 7
+     , count(*)                                                                 -- 23
+from mascotas where familia_id in (…familia de guillo381+8…);
+```
+
+**La regla de la casa manda excluir `creado_por_sistema IS NOT NULL`. Aplicada acá da 9 «reales» — y 7 de esas 9 son de prueba por su propio nombre** (`PruebaC12896`, `PruebaC24772`, `PruebaC37493`, `PruebaC76663`, `PruebaC82896`, `Pp`, `Tt`). **Las reales son 2: Thor y Zeus**, como dice el canon.
+
+⇒ **La marca de S113 quedó incompleta, y el censo que ella misma habilita cuenta 9 donde hay 2.** *Es la misma clase que S92 midió cuando descubrió que el 80 % de las familias eran sonda y toda métrica anterior estaba inflada tres veces.*
+
+**La cura es marcarlas** (`creado_por_sistema = 'fixture_founder_s113'` o su equivalente), **no borrarlas**: varias son sujeto vivo de pruebas de otras pistas, y *una mascota de prueba borrada a destiempo no rompe un test: lo vuelve irreproducible, que es peor porque no se nota.*
+
+**☠️ MUERTE:** el censo de reales sobre esa familia devuelve **2**.

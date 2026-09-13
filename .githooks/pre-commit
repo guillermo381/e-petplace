@@ -606,4 +606,87 @@ else
   fi
 fi
 
+# ── LOS CUATRO ARNESES DEL CLIENTE (S116-A lote 0, orden del founder) ────────
+# POR QUÉ ENTRAN, y la evidencia es de ayer: S116-E los corrió en la línea base
+# y encontró LOS CUATRO EN ROJO sobre `main` — dos de ellos trinquetes que ya se
+# habían disparado (`razon-muda` 139→140, `voz-sin-hueco` 10→13). Alguien metió
+# casos nuevos DESPUÉS de que se fijara el baseline y **el trinquete hizo
+# exactamente su trabajo: nadie estaba mirando**, porque estos cuatro vivían
+# fuera del hook y se corrían cuando alguien se acordaba. Eso es D-481 otra vez,
+# y D-481 ya midió que lo que se confía a la memoria de alguien se incumple.
+#
+# 🔴 ENTRAN CON SUS ROJOS VIVOS, Y ESO ES DELIBERADO — es la diferencia con
+#    `verify:gates-existen`, que entró después de curar sus 7 hallazgos con el
+#    argumento de que "un gate que frena por deuda ajena no protege: estorba".
+#    Acá la deuda NO es ajena: los cuatro rojos son de `apps/cliente`, que es
+#    justo lo que S116 rediseña, y los cuatro ya tienen ficha y dueño
+#    (D-1086 · D-1087 · D-1088 · D-1089, depositadas en el mismo lote 0).
+#    ⇒ el que los encuentre no está frenado por un desconocido: está frenado
+#    por su propio lote, con el archivo y la línea a la vista.
+#
+# ⚠️ NO SE TOCÓ NINGÚN BASELINE. Subirlo al valor de hoy los pondría en verde
+#    en un minuto — y sería DAR PERMISO (L-425) sobre defectos reales. El propio
+#    `razon-muda` lo dice: el baseline sube sólo "si el caso nuevo es legítimo",
+#    y una frase que sale «… algo de ,» en pantalla no lo es.
+#
+# ACOTADOS POR TERRITORIO, como el resto del hook — medido, no supuesto:
+#   `razon-muda` tiene RAIZ='apps'          ⇒ corre si el commit toca apps/
+#   los otros tres miden apps/cliente       ⇒ corren si toca apps/cliente/
+#   Un commit de docs, packages/ o supabase/ NO los dispara. **El lote 1 del
+#   rediseño (packages/ui) pasa limpio**, que es el próximo que viene.
+#
+# COSTO MEDIDO (los cuatro, en este árbol): 164 + 569 + 650 + 638 ≈ 2,0 s.
+#   Dentro del peor caso de ~8 s que este hook ya declara arriba.
+#
+# La forma `if ... then ... else X=$?; fi` es la exenta de `set -e` (L-490):
+# un gate en exit 2 no puede matar el shell antes de decir «no concluyente».
+TOCA_APPS=$(echo "$CAMBIOS" | grep -c '^apps/' || true)
+TOCA_CLIENTE=$(echo "$CAMBIOS" | grep -c '^apps/cliente/' || true)
+
+arnes_cliente() {
+  # $1 nombre · $2 archivo del script · $3 comando · $4 ficha · $5 qué mide
+  if [ ! -f "$2" ]; then
+    echo ""
+    echo "⚠️  $1 NO CONCLUYENTE — el script no existe en este árbol."
+    echo "   (worktree anterior al gate; NO es un gate ausente. El commit SIGUE.)"
+    return 0
+  fi
+  if eval "$3" >/dev/null 2>&1; then ESTADO_ARNES=0; else ESTADO_ARNES=$?; fi
+  if [ "$ESTADO_ARNES" = "2" ]; then
+    echo ""
+    echo "✗ $1 NO PUEDE MEDIR — el commit NO ocurre."
+    eval "$3" 2>&1 | grep -E "ROJO|🔴" | head -3
+    echo "  No es que esté limpio: es que su verde no significaría nada."
+    echo "  curalo, o declaralo:  SALTAR_GATE=\"por qué\" git commit ..."
+    exit 1
+  elif [ "$ESTADO_ARNES" != "0" ]; then
+    echo ""
+    echo "✗ $1 EN ROJO — el commit NO ocurre.  ($5)"
+    eval "$3" 2>&1 | grep -E "🔴|✗|EL NUMERO SUBIO" | head -6
+    echo ""
+    echo "  Deuda conocida, con dueño y línea: ver $4 en docs/DEUDAS_CANONICAS.md"
+    echo "  Si tu commit NO la agrega y sólo la arrastra, declaralo:"
+    echo "     SALTAR_GATE=\"$4, no es de este commit\" git commit ..."
+    exit 1
+  fi
+}
+
+if [ "$TOCA_APPS" != "0" ]; then
+  arnes_cliente "verify:razon-muda" "scripts/verify-razon-muda.mjs" \
+    "node scripts/verify-razon-muda.mjs" "D-1086" \
+    "un boton que se apaga sin decir por que"
+fi
+
+if [ "$TOCA_CLIENTE" != "0" ]; then
+  arnes_cliente "verify:voz-sin-hueco" "apps/cliente/scripts/verify-voz-sin-hueco.mts" \
+    "npx tsx apps/cliente/scripts/verify-voz-sin-hueco.mts" "D-1087" \
+    "una frase con un hueco vacio sale rota y compila perfecto"
+  arnes_cliente "verify:habla-en-presente" "apps/cliente/scripts/censo-habla-en-presente.mts" \
+    "npx tsx apps/cliente/scripts/censo-habla-en-presente.mts" "D-1088" \
+    "un dato vivo de quien ya no esta"
+  arnes_cliente "verify:pide-en-memorial" "apps/cliente/scripts/censo-pide-en-memorial.mts" \
+    "npx tsx apps/cliente/scripts/censo-pide-en-memorial.mts" "D-1089" \
+    "le pide algo a quien perdio a su mascota"
+fi
+
 echo "✓ gate verde"
