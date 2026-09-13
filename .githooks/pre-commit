@@ -751,6 +751,9 @@ if [ "$TOCA_CLIENTE" != "0" ]; then
   arnes_cliente "verify:moneda" "scripts/verify-moneda.mjs" \
     "node scripts/verify-moneda.mjs" "D-1095" \
     "la plata se formatea en UN lugar; toFixed da PUNTO y la ley es COMA"
+  arnes_cliente "verify:piezas-locales" "scripts/verify-piezas-locales.mjs" \
+    "node scripts/verify-piezas-locales.mjs" "LETRA_REDISENO_S116 §3" \
+    "el rediseno se hace en la PIEZA, no en la pantalla"
 fi
 
 echo "✓ gate verde"

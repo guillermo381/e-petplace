@@ -157,7 +157,8 @@
     "verify:reduced-motion": "node scripts/verify-reduced-motion.mjs",
     "verify:huella-por-casa": "npx tsx scripts/verify-huella-por-casa.mjs",
     "verify:assets-resuelven": "node scripts/verify-assets-resuelven.mjs",
-    "verify:moneda": "node scripts/verify-moneda.mjs"
+    "verify:moneda": "node scripts/verify-moneda.mjs",
+    "verify:piezas-locales": "node scripts/verify-piezas-locales.mjs"
   },
   "devDependencies": {
     "eslint": "^10.9.1",
