@@ -276,6 +276,43 @@ function avisarSiNoPuedeSerUrl(fotoUrl: unknown, nombre: string) {
   )
 }
 
+/* ══════════════════════════════════════════════════════════════════════
+ *  QUÉ CARA LE TOCA A CADA ESPECIE — exportado por pedido de C (buzón
+ *  S116, pedido 7), y **conservando su semántica, que es la mitad del
+ *  pedido que no se puede dar**.
+ *
+ * 🔴 **C pidió `caraDe(especie): EspeciePersonaje` con `'otro'` de
+ * fallback, y eso NO se entrega — se declara por qué.** Esta tabla es
+ * `Partial` a propósito: las especies **sin cara propia siguen al
+ * MONOGRAMA, no a la nariz**, y la razón está escrita en el bloque del
+ * residuo de esta pieza — *«el monograma dice algo verdadero —esto es
+ * Luna— sin afirmar una identidad animal que no tiene con qué sostener; un
+ * pez con cara de nariz genérica afirmaría menos que su propia inicial»*.
+ * Un `?? 'otro'` adentro de la función **borra ese criterio en silencio**
+ * para todo el que la llame.
+ *
+ * ⇒ devuelve `undefined` cuando no hay cara propia, y **la pantalla que de
+ * verdad necesite una escribe su fallback a la vista**. El caso de C es
+ * legítimo —el trío de `Confirmacion` exige tres caras sí o sí, y ahí no
+ * hay monograma posible— y así queda visible en su pantalla en vez de
+ * escondido acá.
+ *
+ * ⚠️ **La razón del pedido SÍ se cumple, que era lo importante:** el dato
+ * deja de estar en dos lugares. *Dos tablas de lo mismo divergen, y el día
+ * que entre una especie nueva una de las dos se olvida — y las dos siguen
+ * compilando.*
+ * ══════════════════════════════════════════════════════════════════════ */
+const CARA_LOCAL: Partial<Record<AvatarMascotaEspecie, EspeciePersonaje>> = {
+  perro: 'perro', gato: 'gato', conejo: 'conejo', ave: 'ave', roedor: 'roedor',
+}
+
+/** La cara de una especie, o `undefined` si no tiene una propia (ver
+ *  arriba: ésas van al monograma). Acepta el string del catálogo, que hoy
+ *  tiene **once** especies contra las **seis** que `Personaje` dibuja. */
+export function caraDePersonaje(especie: string | undefined): EspeciePersonaje | undefined {
+  return especie === undefined ? undefined : CARA_LOCAL[especie as AvatarMascotaEspecie]
+}
+
 export function AvatarMascota({ nombre, fotoUrl, fotoDeEspecie, especie, tamano = 'md', capa, sobreLleno = false, anidadoEn }: AvatarMascotaProps) {
   const { theme } = useTheme()
   const [falloCarga, setFalloCarga] = useState(false)
@@ -358,11 +395,8 @@ export function AvatarMascota({ nombre, fotoUrl, fotoDeEspecie, especie, tamano 
    * una identidad animal que no tiene con qué sostener»*. Un pez con cara
    * de nariz genérica afirmaría menos que su propia inicial.
    * ═══════════════════════════════════════════════════════════════════ */
-  const CARA_LOCAL: Partial<Record<AvatarMascotaEspecie, EspeciePersonaje>> = {
-    perro: 'perro', gato: 'gato', conejo: 'conejo', ave: 'ave', roedor: 'roedor',
-  }
   const formaV5Avatar = 'formaV5' in theme.accent && theme.accent.formaV5 === true
-  const caraLocal = especie !== undefined ? CARA_LOCAL[especie] : undefined
+  const caraLocal = caraDePersonaje(especie)
   if (!conEspecie && formaV5Avatar && caraLocal !== undefined) {
     return <Personaje especie={caraLocal} tamano={tamano === 'md' ? 'hogar' : 'fila'} />
   }

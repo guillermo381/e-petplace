@@ -19,7 +19,7 @@ export { Personaje, TrioPersonajes, type PersonajeProps, type EspeciePersonaje, 
 export { BotonAsistente, type BotonAsistenteProps } from './components/BotonAsistente'
 export { BadgeFecha, type BadgeFechaProps } from './components/BadgeFecha'
 export { BarraPasos, type BarraPasosProps } from './components/BarraPasos'
-export { Cabecera, type CabeceraProps } from './components/Cabecera'
+export { Cabecera, type CabeceraProps , ALTO_CABECERA_RAIZ_FIJO, ALTO_CABECERA_EMPUJADA_FIJO } from './components/Cabecera'
 export { Opcion, type OpcionProps, type OpcionItem } from './components/Opcion'
 export { IsotipoV5, LogoV5, type SobreFondo, type TamanoMarca } from './brand/Marca'
 export { Confirmacion, type ConfirmacionProps } from './components/Confirmacion'
@@ -215,6 +215,10 @@ export { CitaEnVivo, type CitaEnVivoProps, type CitaEnVivoCapa } from './compone
 export { Esqueleto, EsqueletoGrupo, type EsqueletoProps, type EsqueletoForma } from './components/Esqueleto'
 export {
   AvatarMascota,
+  /* S116-B · pedido 7 de C: la tabla especie→cara deja de estar en dos
+     lugares. Devuelve `undefined` cuando no hay cara propia — ver su nota:
+     ésas van al monograma, y un fallback adentro borraría ese criterio. */
+  caraDePersonaje,
   type AvatarMascotaProps,
   type AvatarMascotaTamano,
   type AvatarMascotaCapa,

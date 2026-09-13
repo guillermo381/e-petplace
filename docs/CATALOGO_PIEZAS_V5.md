@@ -19,6 +19,7 @@
 ### `Cabecera`
 La banda ciruela de arriba. **Va en TODAS las pantallas del cliente**, no solo en las del lote 3: es lo primero que se ve y lo que hace que la app parezca una sola.
 - **props:** `variante` (`raiz` | `empujada`) · `antetitulo` · `titulo` · `apoyo` · `accionDerecha` · `pasos` · `onVolver` · `etiquetaVolver`
+- ⚠️ **No tiene un alto fijo y no se puede exportar uno:** mide `inset + padding + CONTENIDO + padding`, y el contenido es variable por diseño. Se exportan `ALTO_CABECERA_RAIZ_FIJO` / `ALTO_CABECERA_EMPUJADA_FIJO` (**sólo el padding**) como piso de arranque para medir con `onLayout`. *Un alto único sería correcto para una combinación y falso para las otras siete.*
 - **tokens:** `gradients` · `medidas` · `palette` · `radius` · `spacing` · `elevacion` · `theme.accent`
 - **consumidores:** 0
 - **captura:** `docs/loop/capturas-s116-b-lote2/piezas-v5-montadas.png`
@@ -82,18 +83,20 @@ La marca v5 por imagen. **`LogoV5` lleva el wordmark y se dimensiona por ANCHO; 
 
 ### `Boton`
 La acción de la pantalla. **Una primaria por pantalla** (Ley 5).
-- **props:** `etiqueta` (**no children**) · `onPress` · `variante` · `superficie` · `tamano` (`sm`|`md`|`lg`) · `bloque` · `cargando` · `deshabilitado` · `iconoIzq` · `chevron` · `razonDeshabilitado`
+- **props:** `etiqueta` (**no children**) · `onPress` · `variante` · `superficie` (`clara`|`muro`|**`oscura`**) · `tamano` (`sm`|`md`|`lg`) · `bloque` · `cargando` · `deshabilitado` · `iconoIzq` · `chevron` · `razonDeshabilitado`
 - **tokens:** `medidas` · `radius` · `shadows` · `elevacion` · `motion` · `typography` · `theme.accent`
 - **consumidores:** 233
 - 🔴 **`razonDeshabilitado` no es opcional en la práctica:** `verify:razon-muda` cuenta los botones apagados sin razón. *Un botón que se apaga sin decir por qué manda a la persona a adivinar.*
 - ⚠️ En la casa v5 la etiqueta es **PJS 700 16** (`escala.cta`); el `ghost` conserva su peso — sin superficie que las distinga, **el peso ES la jerarquía**.
+- 🔴 **`superficie="oscura"` (S116-B)** para el degradado de entrada y la cabecera ciruela: el primario conserva su magenta y **todo lo demás pasa a blanco**. *Va como superficie y no como variante porque la superficie es ORTOGONAL a la variante — lo dice la propia pieza.* Memorial queda afuera: su acción es tinta (Ley 21).
 
 ### `Campo`
 Entrada de texto con su pie.
-- **props:** `label` · `ayuda` · `error` · `tono` (`alarma`|`estado`) · `etiquetaVisible` · `deshabilitado` · `sinPie` · `secure` · `multilinea` · `iconoIzq` · `iconoDer`
+- **props:** `label` · `ayuda` · `error` · `tono` (`alarma`|`estado`) · `etiquetaVisible` · `deshabilitado` · **`razonDeshabilitado`** · `sinPie` · `secure` · `multilinea` · `iconoIzq` · `iconoDer`
 - **tokens:** `medidas` · `motion` · `spacing` · `typography` · `theme.status` · `theme.text`
 - **consumidores:** 79 (+ `CampoFecha`, `CampoCodigo`, `CampoClaveAcceso`, `CampoIdentificacion`)
 - ⚠️ **El error NO pinta la caja de rojo:** lo dice el pie. Y el placeholder va en `secondary` (**5,24:1**), no en `tertiary` — *un placeholder no es decoración: es lo que la persona lee para saber qué escribir.*
+- 🔴 **`razonDeshabilitado` (S116-B):** un campo apagado dice POR QUÉ, igual que `Boton`. Se dibuja en el pie con precedencia **`error` › `razonDeshabilitado` › `ayuda`** — *mientras está apagado, la ayuda de cómo llenarlo no sirve; lo que la persona necesita saber es por qué no puede.*
 
 ### `Tarjeta`
 La superficie que agrupa.
@@ -143,16 +146,18 @@ El set b′. **Nombre tipado: cero strings mágicos.**
 
 ### `Texto`
 Toda la tipografía.
-- **props:** `variante` (`titulo`|`seccion`|`cuerpo`|`apoyo`|`enfasis`|`antetitulo`|`dato`|`datoMd`|`voz`) · `color` · `numberOfLines` · `centrado` · `tabular`
+- **props:** `variante` (`titulo`|`seccion`|`cuerpo`|`apoyo`|`enfasis`|`antetitulo`|`dato`|`datoMd`|`voz`) · `color` (+ **`acentoSobreOscuro`**) · `numberOfLines` · `centrado` · `tabular`
 - **tokens:** `typography` · `theme.text` · `theme.status`
 - **consumidores:** 227
 - 🔴 **En la casa v5, `titulo` y `seccion` son Baloo 2 800** (28/31 y 22/26); `cuerpo`/`apoyo`/`enfasis` son Plus Jakarta Sans. **No hay que pasar nada: la pieza resuelve por casa.**
 - ⚠️ **`dato` y `datoMd` siguen en JetBrains Mono** (Ley 3: metadata de máquina) y **`voz` sigue en DM Sans 300** — la letra no nombra una variante de voz, y cambiarla sería decidir algo que nadie firmó.
+- 🔴 **`acentoSobreOscuro` (S116-B)** = el rosa sobre ciruela, para el acento de un claim sobre el degradado. **Resuelve a la paleta, no al tema**, igual que `sobreVideo`: la superficie ciruela es oscura aunque el tema sea claro. En memorial cae a `inverso` — *un acento rosa es fiesta, y §4 dice «la misma estructura sin la fiesta»*.
 - ⚠️ **`Texto` no acepta `style`.** El color sale de `color`; si hace falta uno que no está, se pide.
 
 ### `AvatarMascota`
 La cara de la mascota — **el último peldaño de la escalera de la cara**.
 - **props:** `nombre` · `fotoUrl` · `fotoDeEspecie` · `especie` · `tamano` (`xs`|`sm`|`entidad`|`md`|`lg`) · `capa`
+- 🔴 **`caraDePersonaje(especie)` (S116-B)** exporta la tabla especie→cara para que no viva en dos lugares. **Devuelve `undefined` cuando no hay cara propia** —ésas van al monograma— así que la pantalla que necesite una cara sí o sí **escribe su fallback a la vista**. *Un `?? 'otro'` adentro borraría ese criterio para todos.*
 - **tokens:** `palette` · `typography` · `theme.capaBg` · `theme.text`
 - **consumidores:** 31
 
