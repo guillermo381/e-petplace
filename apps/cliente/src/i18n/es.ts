@@ -15,6 +15,12 @@ export const clienteEs = {
     // founder). La etiqueta de `explorar` QUEDA: la pantalla sigue viva y
     // se alcanza desde el perfil de la mascota — lo que salió es su botón.
     pedidos: 'Pedidos',
+    /* ⭐ S116-C lote 3 · letra §1.5 — la cuarta tab pasa a ACTIVIDAD
+       (citas + pedidos + postventa, en curso / historial). `pedidos` se
+       CONSERVA y no se renombra: la RUTA sigue llamándose así y su
+       pantalla propia llega en el lote 6. *Renombrar la clave habría
+       obligado a tocar la ruta, que es otra cosa que la etiqueta.* */
+    actividad: 'Actividad',
     // S95-I · el cuarto slot (§3, el ciclo del trono). Le guarda el lugar
     // a Comunidad: cuando ésta nazca, la Despensa le entrega el trono.
     despensa: 'Despensa',

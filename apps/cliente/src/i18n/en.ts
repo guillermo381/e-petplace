@@ -16,6 +16,7 @@ export const clienteEn = {
     pedidos: 'Orders',
     despensa: 'Pantry',
     cuenta: 'Account',
+    actividad: 'Activity',
   },
   // S61-A8 — the welcome, rewritten (founder letter; LOTE S61, GATE
   // PENDIENTE). heroTitulo/heroSubtitulo died with the hero (Ley 37).

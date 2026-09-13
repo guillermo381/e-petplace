@@ -55,38 +55,18 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Tabs, useGlobalSearchParams, useRouter, useSegments } from 'expo-router';
+import { Tabs, useRouter, useSegments } from 'expo-router';
 import { StackActions } from 'expo-router/react-navigation';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   ALTO_FILA_TABS,
   BarraTabs,
+  BotonAsistente,
   Icono,
-  PresenciaCoach,
-  useAviso,
-  type AtajosCoach,
   type BarraTabsItem,
-  type IconoNombre,
-  type PendientesCoach,
 } from '@epetplace/ui';
-import { useCarrito } from '@/lib/despensa/carrito';
-import { clasesVisibles, escucharPendientes, usePendientesAdopcion } from '@/lib/pendientes-adopcion';
-import { listarMisPedidos } from '@epetplace/api';
-
-import { ElegirMascotaHoja } from '@/components/nexo/elegir-mascota-hoja';
-import { RegistrarPesoHoja } from '@/components/registrar-peso-hoja';
-import {
-  focoNexo,
-  mascotasParaAtajo,
-  razonDelDedo,
-  vaConCoach,
-  ORDEN_DE_PATA,
-  type AtajoNexo,
-  type RazonApagado,
-} from '@/lib/nexo/atajos';
-import { estadoNexo, nexoVisibleEn } from '@/lib/nexo/estado';
-import { recargarHogar, useHogarVivo } from '@/lib/nexo/hogar-vivo';
-import type { MascotaResumen } from '@epetplace/api';
+import { nexoVisibleEn } from '@/lib/nexo/estado';
+import { registrarProfundidad, registrarToqueDeTab } from '@/lib/medicion/montajes';
+import { recargarHogar } from '@/lib/nexo/hogar-vivo';
 
 import { useTraduccion } from '@/i18n';
 
@@ -101,387 +81,76 @@ import { useTraduccion } from '@/i18n';
  * y nada falló: una copia no se entera de que la fuente cambió.
  * Ahora hay UNA fuente, y `Icono` resuelve la ley 6 adentro. */
 
-/**
- * 🔴 LA MARCA DE «ESTA CASA YA COMPRÓ» — y no es caché, es ANTI-SALTO.
- *
- * La firma dice que Pedidos **aparece con el primer pedido**, y eso exige
- * saber si hay pedidos **antes de dibujar la barra**. La lectura tarda.
- *
- * **Sin la marca, cada arranque en frío dibujaría CUATRO tabs y saltaría a
- * CINCO cuando llegara la respuesta** — y como el ancho de cada pestaña es
- * `ancho / cantidad`, ese salto **re-acomoda la barra entera**, disco y valle
- * incluidos, en la superficie que el dueño toca todos los días. *No es un
- * parpadeo de contenido: es la barra cambiando de forma bajo el pulgar.*
- *
- * La marca es **monótona a propósito**: un pedido no se borra, así que «esta
- * casa ya compró» **no vuelve a ser falso**. Por eso se persiste y jamás se
- * limpia — *una marca que puede volver atrás reintroduce el salto que vino a
- * evitar.*
- *
- * ⚠️ **El salto ocurre UNA vez y es el bueno:** el día de la primera compra,
- * la barra gana su casa de postventa. Eso no se esconde.
- */
-const CLAVE_YA_COMPRO = 'epp.cliente.tienePedidos.v1';
+/* ☠️ **`CLAVE_YA_COMPRO` MURIÓ (S116-C lote 3).** Era la marca que evitaba
+ * que la barra saltara de cuatro a cinco tabs en el primer arranque. **Con la
+ * quinta fija, el salto no puede ocurrir** ⇒ la marca dejó de tener objeto y
+ * se retira en el mismo acto (`L-395`). *Lo que se retira no es la cura: es su
+ * causa, y ésa es la forma buena de matar un puente.*
+ * ⚠️ La clave `epp.cliente.tienePedidos.v1` queda escrita en los teléfonos que
+ * ya la tengan. No se limpia: es un booleano inerte de 1 byte y un barrido
+ * costaría más que dejarlo. */
 
 
 /**
- * ⭐ **LA PRESENCIA SIN COACH — el memorial y el hogar que todavía no contestó**
- * (S113-C · lote 0.3).
+ * ⭐ **EL BOTÓN DEL ASISTENTE — S116-C lote 3, firma de la mesa.**
  *
- * ☠️ **ACÁ VIVÍA `BurbujaDelShell`, Y MURIÓ EN ESTE MISMO COMMIT**, con su
- * gemela del prestador. B dejó `BurbujaPendientes` derogada y exportada a
- * propósito, con su razón: *«si se retira antes de que las apps monten la
- * nueva, no queda ninguna puerta; si se monta la nueva sin retirar ésta, hay
- * dos discos peleando el mismo píxel»* (`L-395`). **El retiro y el montaje van
- * en el mismo commit** — y éste es ese commit.
+ * ☠️ **ACÁ VIVÍAN `PresenciaSinCoach` Y `NexoDelShell`, Y MUEREN EN ESTE
+ * COMMIT.** La revisión de mesa 1 (13-sep-2026) lo firmó así:
+ * *«El orbe morado del coach que flota sobre el contenido (tapa "Ver cómo
+ * va"). Lo reemplaza el botón del asistente en el lote 3»* — y el encargo del
+ * lote lo repite: **no conviven**. El retiro y el montaje van en el mismo
+ * commit (`L-395`: un puente que sobrevive a su río manda al próximo a
+ * construir otro).
  *
- * 🔴 **EN MEMORIAL NO SE APAGA LA PUERTA: SE APAGA EL COACH.** La razón vieja
- * sigue entera —*una presencia que propone cosas no tiene lugar en un duelo*—
- * y por eso no hay dedos ni «Pregúntale». Lo que cambió es que la pieza
- * aprendió a existir sin él, así que **el carrito y los mensajes conservan su
- * única puerta también acá**. *Antes había que elegir entre proponer y tener
- * puerta; ahora no.*
+ * ── 🔴 LO QUE SE VA CON EL ORBE, Y NO ES SÓLO UN DIBUJO ────────────────────
+ *
+ * El orbe **no era sólo el asistente**: era la única puerta flotante de tres
+ * cosas más. Se declara entero porque **una pérdida que no se nombra se
+ * descubre en producción**:
+ *
+ *   ① **el carrito flotante** (`ClasePastilla` = `pedidos`). 🔴 **Choca contra
+ *      firma del founder S100d-bis**, literal: *«si salgo de Despensa, se
+ *      pierde el carro; mientras tenga productos debe estar visible en TODA la
+ *      app»*. **Hoy su puerta flotante deja de existir**; el carrito sigue
+ *      alcanzable por la tab Despensa. *Son dos firmas que se contradicen y no
+ *      se resuelve en silencio: la mesa decide dónde vuelve.*
+ *   ② **los mensajes de adopción** (`chat`) y ③ **las solicitudes**: su badge
+ *      flotante se retira. Siguen en `/adoptar/solicitudes`.
+ *   ④ **los cuatro atajos del coach** (registrar peso, elegir mascota…) y con
+ *      ellos `ElegirMascotaHoja` y `RegistrarPesoHoja` **en este shell** — las
+ *      dos piezas siguen vivas y montadas donde ya estaban.
+ *
+ * ⚠️ **En memorial el orbe tenía una razón propia** —*«el carrito y los
+ * mensajes conservan su única puerta también acá»*— que este retiro **no
+ * reemplaza**. Queda declarado para la mesa.
+ *
+ * ── DÓNDE SE VE, Y POR QUÉ SON DOS CONDICIONES ────────────────────────────
+ *
+ * *«El botón del asistente flota en toda raíz»* ⇒ **raíz Y superficie
+ * permitida**, que son dos preguntas distintas:
+ *   · **raíz** — la profundidad del stack de la tab activa es 0. En una
+ *     pantalla empujada lo único fijo abajo es el CTA (firma de la mesa).
+ *   · **superficie** — `nexoVisibleEn()` ya lista las que lo excluyen con su
+ *     razón (la cámara del carnet, las llamadas, los checkouts, el carrito).
+ *     *Esa lista no se reescribe: sigue siendo cierta y sigue teniendo dueño.*
  */
-function PresenciaSinCoach({ altoBarra }: { altoBarra: number }) {
+function AsistenteDelShell({ raiz }: { raiz: boolean }) {
   const { t } = useTraduccion();
   const router = useRouter();
-  const items = useCarrito();
-  const pendientesAdopcion = usePendientesAdopcion();
   const segmentos = useSegments() as string[];
-  const [abierta, setAbierta] = useState(false);
 
-  const visibles = clasesVisibles(segmentos);
-  const enCarrito = visibles.carrito ? items.reduce((n, i) => n + i.cantidad, 0) : 0;
-  const conversaciones = visibles.mensajes ? pendientesAdopcion.conversaciones : 0;
-
-  const pendientes: PendientesCoach = { chat: conversaciones, pedidos: enCarrito, avisos: null };
+  if (!raiz || !nexoVisibleEn(segmentos)) return null;
 
   return (
-    <PresenciaCoach
-      coach={false}
-      estado={estadoNexo({ pendientes, huellaAbierta: abierta, hojaAbierta: false })}
-      pendientes={pendientes}
-      nombre={t('burbuja.abanico')}
-      abierta={abierta}
-      onAbrir={() => setAbierta(true)}
-      onCerrar={() => setAbierta(false)}
-      onPendiente={(clase) => {
-        if (clase === 'chat') {
-          pendientesAdopcion.unica !== null
-            ? router.push({ pathname: '/adoptar/solicitud/[solicitudId]', params: { solicitudId: pendientesAdopcion.unica } })
-            : router.push('/adoptar/solicitudes');
-          return;
-        }
-        router.push('/despensa/carrito');
-      }}
-      voz={{
-        /* 🔴 **NO se nombra al Coach acá.** Esta presencia no lo lleva, y en
-           memorial anunciarlo sería ofrecerle algo a quien está de duelo
-           (`A3.9`). Se reusa la voz que este mismo disco ya tenía cuando era
-           `BurbujaPendientes` —«Lo que te espera»— porque es el MISMO acto:
-           no se inventa una frase para algo que ya tenía la suya. */
-        abrir: t('burbuja.abanico'),
-        cerrar: t('nexo.cerrar'),
-        chat: conversaciones === 1 ? t('nexo.vozChatUna') : t('nexo.vozChat', { n: conversaciones }),
-        pedidos: enCarrito === 1 ? t('nexo.vozCarritoUno') : t('nexo.vozCarrito', { n: enCarrito }),
-      }}
-      aireInferior={altoBarra}
+    <BotonAsistente
+      onPress={() => router.push('/nexo')}
+      etiqueta={t('nexo.etiqueta', { nombre: t('coach.nombre') })}
     />
-  );
-}
-
-/**
- * ⭐ **NEXO EN EL SHELL — la presencia del Coach, montada** (S113-C · lote 0).
- *
- * ── QUÉ REEMPLAZA Y QUÉ CONSERVA ────────────────────────────────────────────
- * Reemplaza al disco de `BurbujaPendientes` **cuando hay hogar activo**, y
- * conserva sus dos destinos como pastillas: *«las pastillas de pendientes abren
- * lo mismo que abría la burbuja»* (§2.4).
- *
- * 🔴 **SE MONTA UNA DE LAS DOS, NUNCA LAS DOS** — es la regla que B dejó escrita
- * en su pieza y la razón es física: **ocupan exactamente el mismo píxel**
- * (`right: spacing[5] · bottom: spacing[5] + aireInferior`, medido en las dos
- * fuentes). *Dos discos peleando el mismo píxel es el defecto que `L-395` dejó
- * escrito.* En memorial manda la burbuja; en el resto, la presencia.
- *
- * 🔴 **Y MIENTRAS EL HOGAR NO CONTESTÓ TAMBIÉN QUEDA LA BURBUJA.** No es
- * timidez: la puerta del carrito es **firma del founder** (N28 — visible en TODA
- * la app) y **no puede parpadear**. Empezar por la burbuja y pasar a la
- * presencia cuando el dato llega nunca la pierde; al revés habría un instante de
- * pata sobre un hogar que resulta ser memorial. *Vacío por carga y vacío por
- * estado son dos hechos y no comparten guard.*
- *
- * ── DE DÓNDE SALEN LOS NÚMEROS ──────────────────────────────────────────────
- * **Del servidor, y del mismo lugar que ya los traía**: `contarPendientes` vía
- * `usePendientesAdopcion` (conversaciones sin leer) y `useCarrito` (unidades).
- * **No nació `obtenerPendientesHogar`** porque el conteo que hacía falta ya lo
- * contaba el servidor — *pedir un wrapper nuevo para leer dos veces el mismo
- * hecho es fabricar la divergencia.*
- *
- * ⚠️ **`avisos` VIAJA EN `null` Y ESO ES LETRA, NO HUECO:** el servidor expone
- * `hayAvisosSinLeer` —un BOOLEANO— porque `MODELO_LOYALTY` §3 manda que los no
- * leídos sean PRESENCIA y jamás número. El tipo de B ya distingue `null` de `0`,
- * así que el dato **no se tira en la puerta**.
- *
- * ── LA VOZ ES DE ACÁ (Ley 3) ────────────────────────────────────────────────
- * `voz.chat` y `voz.pedidos` **se pasan siempre, aunque la cuenta sea 0**: así
- * un número no puede existir sin su palabra, y la pieza nunca tiene que inventar
- * un plural. El singular y el plural salen de mis keys.
- *
- * ── EL AIRE LO MIDE LA BARRA ────────────────────────────────────────────────
- * `aireInferior` es el alto REAL de la barra de pestañas, medido con `onLayout`
- * en este mismo archivo. *Un número tecleado acá miente en el primer teléfono
- * distinto* — y la geometría de la pieza no se importa a propósito: B la dejó
- * sin exportar y lo único que la pantalla necesita es `COLA_PRESENCIA_COACH`.
- *
- * ── SOBRE QUÉ MASCOTA ACTÚA UN DEDO ─────────────────────────────────────────
- * `useGlobalSearchParams` — **el dato ya viaja**: las cuatro rutas de mascota
- * llevan `mascotaId` en la URL. *No hace falta inventar un estado de «mascota en
- * foco» cuando la ruta ya lo dice.* Con una sola candidata no se pregunta; con
- * varias, la hoja corta — y **la hoja ofrece sólo las que ese dedo puede tocar**,
- * porque un camino que después habría que rebotar no es un camino.
- */
-function NexoDelShell({ altoBarra }: { altoBarra: number }) {
-  const { t } = useTraduccion();
-  const router = useRouter();
-  const { mostrar } = useAviso();
-  const items = useCarrito();
-  const pendientesAdopcion = usePendientesAdopcion();
-  const mascotas = useHogarVivo();
-  const segmentos = useSegments() as string[];
-  const { mascotaId: mascotaIdEnRuta } = useGlobalSearchParams<{ mascotaId?: string }>();
-
-  const [abierta, setAbierta] = useState(false);
-  const [hojaPeso, setHojaPeso] = useState<MascotaResumen | null>(null);
-  /** El dedo que espera saber de quién habla. `'coach'` es la almohadilla. */
-  const [esperandoElegir, setEsperandoElegir] = useState<AtajoNexo | 'coach' | null>(null);
-
-  const foco = focoNexo({ mascotaIdEnRuta, mascotas });
-
-  /* Nexo no existe en la cámara del carnet, en las llamadas, en los checkouts
-     ni en la caja: la lista y su razón viven en `lib/nexo/estado.ts`. */
-  if (!nexoVisibleEn(segmentos)) return null;
-
-  /* 🔴 **SIN COACH: memorial, hogar sin contestar, u hogar sin activas**
-     (D-1021). La puerta a lo que te espera **no se le quita a nadie**; lo que
-     se apaga es el Coach — *en la pantalla de quien ya no está se lee, no se
-     pide nada* (`A3.9`).
-     ⚠️ Lo decide **la mascota EN FOCO, jamás el conteo de activas**: un hogar
-     con dos vivas y una en memoria tiene `activas.length === 2`, así que
-     contar habría dejado el Coach encendido justo donde no va.
-     Y sigue siendo UNA de las dos, nunca las dos: ocupan el mismo píxel. */
-  if (!vaConCoach(foco)) {
-    return <PresenciaSinCoach altoBarra={altoBarra} />;
-  }
-
-  /* Sobre quiénes puede actuar la pata acá: la del foco, o todas las activas. */
-  /* El compilador ya no deja leer `foco.entre` sin discriminar: con el modo
-     `memorial` la unión creció, y ese rojo es la prueba de que el caso nuevo
-     no se puede olvidar. Acá sólo llegan los dos modos con Coach. */
-  const candidatas: MascotaResumen[] =
-    foco.modo === 'directa' ? [foco.mascota] : foco.modo === 'elegir' ? foco.entre : [];
-
-  const enCarrito = items.reduce((n, i) => n + i.cantidad, 0);
-  const pendientes: PendientesCoach = {
-    chat: pendientesAdopcion.conversaciones,
-    /* La clase se llama `pedidos` en la pieza; **lo que abre es el carrito**,
-       que es lo que abría la burbuja. Ver la cabecera de `lib/nexo/estado.ts`. */
-    pedidos: enCarrito,
-    avisos: null,
-  };
-
-  const ejecutar = (atajo: AtajoNexo | 'coach', m: MascotaResumen) => {
-    /* ⭐ **EL COACH ABRE SU PANTALLA** (S113-C · 2.0). Antes abría `CoachHoja`,
-       tres preguntas con plantillas y cero generación. **Se retira en este
-       mismo acto** (L-395: no se deja una puerta vieja al lado de la nueva) y
-       lo suyo lo cubre la edge de D, cuya rama `dato` responde con plantilla y
-       cero modelo — la misma promesa, con una caja de texto delante.
-       🔴 **Es pantalla y no Hoja, por medición vieja de la casa**: un hilo con
-       teclado y scroll dentro de una Hoja pelea con su gesto de cierre
-       (`HojaScroll`, S45). *Una conversación necesita el alto entero.* */
-    if (atajo === 'coach') {
-      router.push({ pathname: '/nexo', params: { mascotaId: m.id, nombre: m.nombre } });
-      return;
-    }
-    if (atajo === 'peso') return setHojaPeso(m);
-    if (atajo === 'vacuna') {
-      router.push({ pathname: '/carnet', params: { mascotaId: m.id, nombre: m.nombre } });
-      return;
-    }
-    if (atajo === 'antiparasitario') {
-      router.push({ pathname: '/antiparasitario', params: { mascotaId: m.id, nombre: m.nombre } });
-      return;
-    }
-    /* ✅ **EL CUARTO DEDO SE ENCENDIÓ** (lote 0.1). ⏪ Acá decía que 'foto' no
-       llegaba hasta este punto porque nacía apagado: no había un solo escritor
-       de `evento_hito_narrativo` en `packages/api`. **A construyó la puerta**
-       y el comentario se corrige en el mismo acto en que deja de ser cierto. */
-    router.push({ pathname: '/recuerdo', params: { mascotaId: m.id, nombre: m.nombre } });
-  };
-
-  /* Las mascotas entre las que este dedo puede elegir. La almohadilla las
-     admite a todas: el Coach habla de cualquiera. */
-  const candidatasDe = (atajo: AtajoNexo | 'coach') =>
-    atajo === 'coach' ? candidatas : mascotasParaAtajo(atajo, candidatas);
-
-  /* 🔴 **CERRAR LA FILA ES DE LA PIEZA, NO DE ACÁ** (lote 0.2). ⏪ Este método
-     abría con un `setAbierta(false)` propio, y **hoy sería el segundo lugar
-     que cierra la misma pata**: medido, `PresenciaCoach` ya llama a `onCerrar`
-     antes de disparar el atajo (`:786`), la pastilla (`:677`) y la fila
-     «Pregúntale» (`:663`). *Dos lugares que cierran lo mismo son dos que algún
-     día no van a estar de acuerdo* — y ya hay un caso donde difieren a
-     propósito: **con un dedo apagado la pieza NO cierra**, para que la razón
-     se lea con la fila a la vista. */
-  const tocar = (atajo: AtajoNexo | 'coach') => {
-    const posibles = candidatasDe(atajo);
-    /* 🔴 **UNA SOLA POSIBLE NO SE PREGUNTA**, aunque el hogar tenga varias: con
-       un perro y un acuario, «Vacuna» ya sabe de quién habla. *Preguntar con una
-       sola opción es un paso que no decide nada.* */
-    if (posibles.length === 1) return ejecutar(atajo, posibles[0]);
-    if (foco.modo === 'directa') return ejecutar(atajo, foco.mascota);
-    if (posibles.length > 1) return setEsperandoElegir(atajo);
-  };
-
-  const vozAtajo: Record<AtajoNexo, string> = {
-    peso: t('nexo.dedoPeso'),
-    vacuna: t('nexo.dedoVacuna'),
-    antiparasitario: t('nexo.dedoAntiparasitario'),
-    foto: t('nexo.dedoFoto'),
-  };
-
-  /* ✅ **LOS CUATRO GLIFOS SON PROPIOS** (S113-B, `5dbcc5e2`). ⏪ Acá vivieron
-     tres préstamos declarados —`datos`, `receta`, `ojo`— porque el registry no
-     tenía peso, antiparasitario ni foto; **murieron el día que existieron los
-     suyos**, que era el trato. *Un préstamo que sobrevive a su reemplazo deja
-     de ser un puente y pasa a ser el camino.*
-
-     ⚠️ **El id no cambia aunque el dibujo sí**: el gate por ícono todavía no
-     está firmado (B lo declara), así que el founder puede mover el trazo sin
-     que esta línea se toque. Y el `registro` no se pasa: el registry lo
-     resuelve solo —peso y antiparasitario visten IDENTIDAD como `vacuna`, foto
-     viste TINTA porque es un verbo—. */
-  const glifoAtajo: Record<AtajoNexo, IconoNombre> = {
-    peso: 'peso',
-    vacuna: 'vacuna',
-    antiparasitario: 'antiparasitario',
-    foto: 'foto',
-  };
-
-  /* 🔴 LA RAZÓN NOMBRA A LA MASCOTA, y cuando no puede lo dice con la palabra
-     que la casa ya usa. **Con UNA candidata hay a quién nombrar; con varias no**
-     —la razón vale para todas— y ahí entra `alta.tuMascota`, el mismo fallback
-     de `/carnet`. *Inventar una segunda frase para el caso sin nombre serían dos
-     voces que algún día divergen.* */
-  const nombreEnRazon = candidatas.length === 1 ? candidatas[0].nombre : t('alta.tuMascota');
-
-  /* Una sola razón viva: el acuario. ⏪ La otra —«sin puerta», del dedo Foto—
-     murió con la puerta que A construyó. */
-  const vozRazon = (r: RazonApagado): string => t('nexo.razonAcuario', { mascota: nombreEnRazon });
-
-  /* 🔴 **LA TUPLA ES DE CUATRO Y EL COMPILADOR LO EXIGE.** `ORDEN_DE_PATA` tiene
-     cuatro y el `as` lo afirma; si alguien le agrega un quinto, **rompe acá**,
-     que es donde tiene que romper. */
-  const atajos = ORDEN_DE_PATA.map((a) => {
-    const razon = razonDelDedo(a, candidatas);
-    const base = { id: a, icono: glifoAtajo[a], etiqueta: vozAtajo[a] };
-    /* Vivo o apagado-con-razón: los dos a la vez no compilan (contrato de B), y
-       un atajo apagado y mudo tampoco se puede escribir. */
-    return razon === null
-      ? { ...base, onPress: () => tocar(a) }
-      : { ...base, razonApagado: vozRazon(razon) };
-  }) as unknown as AtajosCoach;
-
-  const nombre = t('coach.nombre');
-
-  return (
-    <>
-      <PresenciaCoach
-        estado={estadoNexo({ pendientes, huellaAbierta: abierta, hojaAbierta: false })}
-        pendientes={pendientes}
-        atajos={atajos}
-        nombre={nombre}
-        abierta={abierta}
-        onAbrir={() => setAbierta(true)}
-        onCerrar={() => setAbierta(false)}
-        onPreguntar={() => tocar('coach')}
-        onPendiente={(clase) => {
-          /* Cerrar es de la pieza (ver `tocar`). Acá sólo se navega.
-             LA REGLA DEL TOQUE LA DECIDE EL DOMINIO: con UNA conversación va al
-             hilo; con varias, a la lista. `unica` ya trae el id si y sólo si
-             corresponde — copiado del montaje que reemplaza, no reinventado. */
-          if (clase === 'chat') {
-            pendientesAdopcion.unica !== null
-              ? router.push({ pathname: '/adoptar/solicitud/[solicitudId]', params: { solicitudId: pendientesAdopcion.unica } })
-              : router.push('/adoptar/solicitudes');
-            return;
-          }
-          router.push('/despensa/carrito');
-        }}
-        voz={{
-          preguntar: t('nexo.almohadilla', { nombre }),
-          /* ☠️ **MI CONDICIONAL MURIÓ, Y GANA EL CONTRATO DE B (D-1019).**
-             ⏪ En el lote 0.3 yo hacía `orbe: abierta ? cerrarOrbe : etiqueta`,
-             porque la pieza usaba UNA sola `voz.orbe` para los dos estados y
-             `abierta` es estado de este shell. **B partió la prop en dos** —
-             `abrir` y `cerrar`— y eso es mejor por una razón que yo no podía
-             ver desde acá: *en web `accessibilityState` no llega, así que la
-             ETIQUETA es el mecanismo*, y con la prop partida **la pieza no
-             depende de que el consumidor se acuerde de alternarla**.
-             ⇒ *cuando la pieza puede garantizar sola lo que el montaje
-             garantizaba por disciplina, gana la pieza.*
-             Las keys son las mías y no se tocaron: ya decían lo correcto. */
-          abrir: t('nexo.etiqueta', { nombre }),
-          /* ⚠️ **SIEMPRE, aunque la cuenta sea 0** — así un número no existe sin
-             su palabra y la pieza nunca inventa un plural. */
-          chat:
-            pendientesAdopcion.conversaciones === 1
-              ? t('nexo.vozChatUna')
-              : t('nexo.vozChat', { n: pendientesAdopcion.conversaciones }),
-          pedidos: enCarrito === 1 ? t('nexo.vozCarritoUno') : t('nexo.vozCarrito', { n: enCarrito }),
-          cerrar: t('nexo.cerrar'),
-        }}
-        aireInferior={altoBarra}
-        /* La razón se muestra acá, en UNA línea. La pieza no elige el vehículo;
-           la casa ya tiene uno y es el aviso. */
-        onRazonApagado={(razon) => mostrar({ texto: razon })}
-      />
-
-      <ElegirMascotaHoja
-        visible={esperandoElegir !== null}
-        titulo={t('nexo.elegirMascota')}
-        /* Sólo las que este dedo puede tocar: **la hoja no ofrece un camino que
-           después habría que rebotar.** */
-        mascotas={esperandoElegir !== null ? candidatasDe(esperandoElegir) : []}
-        onElegir={(m) => {
-          const pendiente = esperandoElegir;
-          setEsperandoElegir(null);
-          if (pendiente !== null) ejecutar(pendiente, m);
-        }}
-        onCerrar={() => setEsperandoElegir(null)}
-      />
-
-      {hojaPeso !== null ? (
-        <RegistrarPesoHoja
-          visible
-          nombre={hojaPeso.nombre}
-          mascotaId={hojaPeso.id}
-          onCerrar={() => setHojaPeso(null)}
-          /* Desde el shell no hay perfil abierto que releer: la pantalla de la
-             mascota lee su serie al recuperar el foco. */
-          onRegistrado={() => setHojaPeso(null)}
-        />
-      ) : null}
-
-    </>
   );
 }
 
 export default function TabsLayout() {
   const { t } = useTraduccion();
-  /** `null` = todavía no sabemos (primer arranque, sin marca): la tab NO se
-   *  dibuja. *Ante la duda no se ofrece una casa vacía* — el acceso vive en
-   *  Cuenta, que es exactamente lo que la firma dice. */
-  const [tienePedidos, setTienePedidos] = useState<boolean | null>(null);
 
   /* 🔴 EL ALTO DE LA BARRA — **SE MIDE, Y ARRANCA EN EL VALOR DERIVADO.**
    *
@@ -508,59 +177,19 @@ export default function TabsLayout() {
   const insets = useSafeAreaInsets();
   const [altoBarra, setAltoBarra] = useState(ALTO_FILA_TABS + insets.bottom);
 
-  /* ⭐ **EL VIVO DE LA BURBUJA — UNA suscripción por SESIÓN, y vive acá.**
-     Va en el shell y no en una pantalla porque *su condición de existencia es
-     un dato, no una ruta* (N28): el número tiene que ser cierto en cualquier
-     pantalla, incluidas las que no saben que la burbuja existe.
+  /* ⭐ EL HOGAR — **una lectura por SESIÓN**, acá y no por pantalla. Su
+     condición de existencia es un dato (¿hay mascotas activas?), no una ruta.
+     ⚠️ **SE CONSERVA aunque el orbe se haya ido**, y no por inercia: medido,
+     `buscar.tsx` consume `useHogarVivo` y sin esta carga se quedaría vacío.
+     *El orbe era un lector de este dato, no su dueño.*
 
-     ⭐ **Y NO hay un recuento de arranque aparte, a propósito.**
-     `suscribirseAMisHilos` emite `'reconectado'` **también en la primera
-     conexión** (contrato de A, escrito así para esto) ⇒ *la carga inicial y el
-     refresco son el MISMO camino*: «llegó algo, pedí el contador». Dos caminos
-     serían dos formas de estar de acuerdo, y una de las dos envejece.
-
-     ⚠️ Sin deps: se monta con el shell y se desmonta con él. */
-  useEffect(() => escucharPendientes(), []);
-
-  /* ⭐ EL HOGAR QUE NEXO NECESITA — **una lectura por SESIÓN**, acá y no por
-     pantalla. Su condición de existencia es un dato (¿hay mascotas activas?),
-     no una ruta: tiene que ser cierto en cualquier pestaña. */
+     ☠️ **`escucharPendientes()` SE RETIRA CON EL ORBE.** Medido: fuera de este
+     shell no tenía ningún consumidor (`usePendientesAdopcion` sólo se importaba
+     acá), así que sin el orbe alimentaba a nadie. *Una suscripción viva que
+     nadie lee es trabajo y batería para nada.* El dato sigue disponible en su
+     lib el día que otra superficie lo monte. */
   useEffect(() => {
     void recargarHogar();
-  }, []);
-
-  useEffect(() => {
-    let vive = true;
-    void (async () => {
-      // La marca primero: si ya compró, la barra nace con sus cinco tabs y la
-      // red ni siquiera decide el primer frame.
-      try {
-        const marca = await AsyncStorage.getItem(CLAVE_YA_COMPRO);
-        if (vive && marca === '1') setTienePedidos(true);
-      } catch {
-        /* la marca no bloquea — se cae a la lectura */
-      }
-      const r = await listarMisPedidos();
-      if (!vive) return;
-      // 🔴 UN FALLO DE LECTURA NO APAGA LA TAB. `r.ok === false` significa
-      // «no pude preguntar», jamás «no tenés pedidos» — y apagar una tab por
-      // un error de red la haría desaparecer bajo el dedo de alguien que sí
-      // compró. *El silencio no es un no* (L-139).
-      if (!r.ok) return;
-      if (r.data.length > 0) {
-        setTienePedidos(true);
-        try {
-          await AsyncStorage.setItem(CLAVE_YA_COMPRO, '1');
-        } catch {
-          /* sin marca, el próximo arranque paga el salto una vez más */
-        }
-      } else {
-        setTienePedidos((previo) => previo ?? false);
-      }
-    })();
-    return () => {
-      vive = false;
-    };
   }, []);
 
   const items: BarraTabsItem[] = [
@@ -585,43 +214,46 @@ export default function TabsLayout() {
         <Icono nombre="despensa" tinta={color} huella={colorHuella} activa={activa} />
       ),
     },
-    /* 🔴 PEDIDOS — LA CASA DEL POSTVENTA, CUARTA POR EL CICLO DEL TRONO.
-     * *En curso arriba, historial abajo, y los accesos adentro: ahí crece sin
-     * límite y sin esconder nada.* El founder evaluó un menú plegable y la
-     * mesa lo desaconsejó — **esconde lo que contiene, que es la misma cura
-     * que ya falló cuando «Tus pedidos» quedó enterrado al fondo de la
-     * vitrina** (G-15).
+    /* ⭐ **ACTIVIDAD — CUARTA, Y AHORA FIJA.** Letra §1.5: *«Cinco tabs:
+     * Hogar · Explorar · Despensa · Actividad · Cuenta»*, y
+     * *«Actividad = citas + pedidos + postventa, en curso / historial»*.
      *
-     * **Aparece con el primer pedido** (firma del founder): mientras no haya,
-     * el acceso vive en Cuenta — donde ya está. */
-    ...(tienePedidos === true
-      ? [
-          {
-            key: 'pedidos',
-            etiqueta: t('tabs.pedidos'),
-            /* ✅ GLIFO PROPIO — el préstamo duró un commit. Yo había montado
-             * `despensa` **declarando su costo** (dos tabs vecinas con el
-             * mismo dibujo) en vez de inventar una forma, porque *un glifo se
-             * firma por gate* (§2.9); **B lo construyó con el pedido en la
-             * mano y su discriminador es LA TAPA** — una costura horizontal de
-             * lado a lado que ni la bolsa (`despensa`) ni el carro (`carrito`)
-             * tienen, y que **sobrevive a 21 px porque es una recta**, no un
-             * detalle de trazo.
-             *
-             * Con esto los tres momentos de la compra se distinguen en la
-             * misma barra: **bolsa = la sección · carro = lo que llevás sin
-             * comprar · caja = lo que ya compraste y viene en camino.** Hereda
-             * el ocre de `despensa`: misma familia, otro momento.
-             *
-             * ⚠️ **SIN GATE DE ÍCONO todavía** — B declaró que no hay
-             * rasterizador SVG en su entorno, así que **nadie lo vio a 21 px**.
-             * Va al ojo del founder junto con `carrito` y `papelera`. */
-            icono: ({ color, activa, colorHuella }) => (
-              <Icono nombre="pedido" tinta={color} huella={colorHuella} activa={activa} />
-            ),
-          } satisfies BarraTabsItem,
-        ]
-      : []),
+     * 🔴 **ERA CONDICIONAL Y DEJA DE SERLO — el choque se declara, no se
+     * resuelve callado.** La firma S100c-D decía *«aparece con el primer
+     * pedido»*, con esta razón: *«mientras no haya, el acceso vive en Cuenta»*
+     * más el anti-salto (una barra que pasa de 4 a 5 tabs **re-acomoda disco y
+     * valle bajo el pulgar**, porque el ancho de cada pestaña es
+     * `ancho / cantidad`).
+     *
+     * **Por qué la letra nueva gana, y no es sólo que sea más nueva:**
+     *   ① **la premisa de aquella firma era una tab VACÍA sin pedidos.** Con
+     *      Actividad = citas + pedidos + postventa, *toda familia con una
+     *      mascota tiene actividad* — el caso que la firma evitaba deja de
+     *      existir.
+     *   ② **el salto que la marca `CLAVE_YA_COMPRO` evitaba desaparece solo**:
+     *      con cinco tabs fijas la barra nunca cambia de forma. *La cura vieja
+     *      se vuelve innecesaria porque su causa se fue, que es mejor que
+     *      mantenerla.* ⇒ ☠️ la marca muere en este commit.
+     *
+     * ⚠️ **HOY ABRE LA PANTALLA DE PEDIDOS, que ya existe** (encargo del lote:
+     * *«su pantalla propia llega en el lote 6 — no montes un "próximamente"»*).
+     * ⇒ **Sin pedidos, hoy se ve una lista de pedidos vacía.** Se declara
+     * porque es exactamente lo que la firma vieja evitaba, y vive hasta el
+     * lote 6. La ruta sigue llamándose `pedidos`; lo que cambia es su nombre
+     * en la barra.
+     *
+     * **El glifo sigue siendo `pedido` y NO se inventó uno nuevo:** un glifo
+     * se firma por gate del founder a 21 px (§2.9), y el de Actividad no
+     * existe todavía. El de `pedido` tiene su discriminador medido por B —la
+     * tapa, *una recta que sobrevive a 21 px*—. Entra a la cola del lote 6,
+     * que es cuando la pantalla propia le va a dar su significado. */
+    {
+      key: 'pedidos',
+      etiqueta: t('tabs.actividad'),
+      icono: ({ color, activa, colorHuella }) => (
+        <Icono nombre="pedido" tinta={color} huella={colorHuella} activa={activa} />
+      ),
+    },
     {
       key: 'cuenta',
       etiqueta: t('tabs.cuenta'),
@@ -646,7 +278,44 @@ export default function TabsLayout() {
       // atrás (goBack correcto) aterrizaba en la raíz del mundo
       // porque los pasos previos ya no existían.
       screenOptions={{ headerShown: false }}
-      tabBar={({ state, navigation }) => (
+      tabBar={({ state, navigation }) => {
+        /* ⭐ **LA MEDICIÓN, DERIVADA DEL ESTADO QUE YA EXISTE.** Cada ruta de
+           tab lleva su propio stack; su `index` ES la profundidad. Leerla acá
+           mide las cinco tabs sin tocar ninguna de las 106 pantallas — y sin
+           depender de que alguien se acuerde de instrumentar la suya.
+           `registrarProfundidad` es idempotente, así que llamarla en cada
+           render no infla el número (su cabecera lo explica). */
+        for (const r of state.routes) {
+          registrarProfundidad(r.name, r.state?.index ?? 0);
+        }
+        /* **Raíz = el stack de la tab activa está en su fondo.** Es la
+           condición que la mesa firmó para el botón del asistente y para la
+           barra: *en una pantalla empujada lo único fijo abajo es el CTA*. */
+        const enRaiz = (state.routes[state.index]?.state?.index ?? 0) === 0;
+
+        /* ⭐ **LAS PANTALLAS EMPUJADAS NO LLEVAN BARRA — firma de la mesa,
+         * 13-sep-2026:** *«En el sketch, detalle, agendar y pago no la tienen:
+         * el CTA fijo abajo es lo único. C lo aplica en el lote 3 para todo el
+         * cliente»*.
+         *
+         * **Se resuelve acá, en el shell, y no pantalla por pantalla.** Es una
+         * regla de estructura: escrita una vez alcanza a las 106 rutas y no
+         * puede divergir. *Si cada pantalla decidiera, la que nadie tocara
+         * seguiría mostrándola y nadie lo notaría.*
+         *
+         * ⚠️ **Lo que esto cambia y hay que mirar en el recorrido:** una
+         * empujada gana ~85 dp de alto. Las que fijan su CTA contra el borde
+         * inferior con el inset lo siguen haciendo bien (ese cálculo no
+         * dependía de la barra); las que reservaban aire con el alto de la
+         * barra van a tener aire de más abajo. **No se corrigen a ciegas desde
+         * acá** — se ven en el recorrido y se curan en el lote de su pantalla.
+         *
+         * ⚠️ **Y una consecuencia que NO es un defecto: sin barra, la única
+         * salida de una empujada es su flecha** (o el gesto de atrás). Es
+         * justamente lo que la firma quiere: *el CTA fijo abajo es lo único.* */
+        if (!enRaiz) return null;
+
+        return (
         <>
           {/* 🔴 EL CARRITO FLOTANTE VIVE EN EL SHELL — S100d·bis, firma del
               founder: *«si salgo de Despensa, se pierde el carro; mientras
@@ -671,7 +340,7 @@ export default function TabsLayout() {
               del cliente y la pieza es de `packages/ui`. Se toca acá porque el
               montaje ES la firma —el flotante deja de ser de una pantalla— y
               se declara en vez de hacerse callado. */}
-          <NexoDelShell altoBarra={altoBarra} />
+          <AsistenteDelShell raiz={enRaiz} />
           <View
             onLayout={(e) => {
               const alto = e.nativeEvent.layout.height;
@@ -685,6 +354,10 @@ export default function TabsLayout() {
           items={items}
           activo={state.routes[state.index].name}
             onCambiar={(key) => {
+            /* El OTRO número: toques de la barra. Se cuenta acá, en el mismo
+               acto, y no en un efecto — un efecto contaría también los deep
+               links, que no son «el dedo cambió de mundo». */
+            registrarToqueDeTab(key);
             const activa = state.routes[state.index];
             // D-402: el PRESS del tab lleva SIEMPRE a la raíz de ese
             // mundo — sea re-toque del activo o entrada a otro tab
@@ -705,7 +378,8 @@ export default function TabsLayout() {
           />
           </View>
         </>
-      )}
+        );
+      }}
     >
       {/* ⚠️ EL MISMO ORDEN QUE `items`, Y NO POR PROLIJIDAD: son **dos listas
           que describen la misma barra**, y cuando dos listas de lo mismo

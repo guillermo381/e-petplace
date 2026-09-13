@@ -29,6 +29,7 @@ import {
 } from '@epetplace/ui';
 import { cerrarSesion } from '@epetplace/api';
 
+import { ConteoDeMontajes } from '@/components/conteo-de-montajes';
 import { useTraduccion } from '@/i18n';
 
 /* S113-A — EL GROUP DEL UPDATE, leído del manifiesto con guarda.
@@ -183,12 +184,29 @@ export default function Cuenta() {
        del resto es exactamente lo que hay que comunicar.** *Buscarle un
        cuarto glifo por prolijidad las habría disfrazado de filas de
        producto, que es el defecto que `D-878` nombra.* */
-    {
-      etiqueta: t('cuenta.laminaFusion'),
-      ruta: '/lamina-fusion' as const,
-      icono: 'lapiz' as const,
-      detalle: 'herramienta de sesión — no es pantalla de producto',
-    },
+    /* ⭐ **S116-C lote 3 · SÓLO EN DEV — firma de la mesa (13-sep-2026):**
+       *«Las herramientas de sesión no se ven en producto ("Lámina S74 · la
+       fusión del avatar" en Cuenta). Solo en dev, o fuera»*.
+
+       **Se elige «solo en dev» y no «fuera», con el precedente al lado:**
+       cuando S107-C retiró la entrada a la galería, dejó escrito que *«mientras
+       la entrada existiera, la sala retirada seguía teniendo puerta»* — ahí el
+       retiro era el punto, porque la sala YA había salido de revisión. **Acá la
+       lámina sigue siendo un instrumento vivo**, así que sacarla del producto
+       sin dejarla sin puerta es lo que cumple las dos mitades de la firma.
+
+       ⚠️ El camino por deep link sigue existiendo en los dos casos: `__DEV__`
+       gobierna la FILA, no la ruta. */
+    ...(__DEV__
+      ? [
+          {
+            etiqueta: t('cuenta.laminaFusion'),
+            ruta: '/lamina-fusion' as const,
+            icono: 'lapiz' as const,
+            detalle: 'herramienta de sesión — no es pantalla de producto',
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -332,6 +350,25 @@ export default function Cuenta() {
                 ? 'bundle embebido'
                 : 'metro · dev'}
           </Texto>
+
+          {/* ⭐ **EL CONTEO DE MONTAJES POR TAB — S116-C lote 3, encargo del
+              lote:** *«el conteo por tab se ve en el pie de Cuenta debajo del
+              id del update, en modo dev solamente»*.
+
+              **Va debajo del sello y no en otro lado** porque es el mismo
+              acto: quien mira el pie ya está preguntando «qué corre acá». El
+              sello dice QUÉ bundle; esto dice CUÁNTO se navegó sobre él.
+
+              ⚠️ **`__DEV__` y no una preferencia**: es un instrumento, no una
+              función. *Un número de diagnóstico en producción es ruido que la
+              familia no puede interpretar* — y su lugar real es el logcat, que
+              es donde E lo busca por `[montajes]`.
+
+              **Son DOS números y se dicen separados** (`v` = vivas ahora,
+              `pico` = la profundidad más alta, `↑`/`↓` = montajes y
+              desmontajes, `T` = toques de la barra). *El pico es el que
+              importa para `D-1090`: el promedio esconde el momento malo.* */}
+          {__DEV__ ? <ConteoDeMontajes /> : null}
 
           {/* 🔴 S106-A · LA MARCA DE LA BUILD DE PRUEBA (`D-944`), colgada de
               `MAPA_NATIVO_DISPONIBLE` **a propósito**.
