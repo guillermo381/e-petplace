@@ -7496,6 +7496,15 @@ function r78(archivos) {
  * mano en `packages/ui` está declarado y completo», **jamás «nadie enumera a
  * mano en ningún lado»**. */
 const TABLA_R77 = new Map([
+  /* ⭐ S116-C lote 3 · el splash. **EXHAUSTIVO, y la consecuencia de que falte
+     un miembro es visible**: la fila de personajes ES el indicador de que algo
+     está pasando (no hay barra de progreso, por corrección del plan §5), así
+     que una especie afuera se traduce en una cara que nunca aparece mientras
+     se espera. El orden NO es alfabético ni derivable: arranca en perro —la
+     mayoría de las mascotas reales— y **`otro` cierra la vuelta a propósito**,
+     porque es la nariz y cerrar con la marca es lo que hace que el ciclo se
+     lea como una vuelta y no como una lista cortada. */
+  ['splash-marca.tsx::CARAS', 'exhaustivo'],
   // ── EXHAUSTIVOS: si le falta un miembro, la pantalla pierde un paso ──
   ['ConvivenciaInput.tsx::ORDEN', 'exhaustivo'],
   ['EscaleraCaso.tsx::ORDEN_CASO', 'exhaustivo'],

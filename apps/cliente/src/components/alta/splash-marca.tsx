@@ -15,6 +15,7 @@ import {
   Personaje,
   gradients,
   palette,
+  radius,
   spacing,
   type EspeciePersonaje,
 } from '@epetplace/ui'
@@ -116,7 +117,10 @@ export function SplashMarca() {
             position: 'absolute',
             width: 260,
             height: 260,
-            borderRadius: 130,
+            /* `radius.full` y no la mitad del lado: la casa tiene UNA escala y
+               un círculo es la píldora llevada al cuadrado. *Un 130 tecleado
+               además se rompe solo el día que alguien cambie el 260.* */
+            borderRadius: radius.full,
             backgroundColor: palette.magentaLuz,
           },
           estiloHalo,

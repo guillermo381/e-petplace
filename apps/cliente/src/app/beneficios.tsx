@@ -39,7 +39,7 @@ import { ScrollView, View, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Boton, Personaje, Texto, spacing, useTheme, type EspeciePersonaje } from '@epetplace/ui';
+import { Boton, Personaje, Texto, radius, spacing, useTheme, type EspeciePersonaje } from '@epetplace/ui';
 
 import { useTraduccion } from '@/i18n';
 
@@ -145,14 +145,19 @@ export default function Beneficios() {
           accessibilityLabel={t('beneficios.paso', { actual: actual + 1, total: tarjetas.length })}
           style={{ flexDirection: 'row', justifyContent: 'center', gap: spacing[2] }}
         >
+          {/* 🔴 **EL PUNTO ACTIVO VA EN `accent.control`, NO EN `accent.cta`** —
+              y `verify:diseno` me lo cazó con razón (Ley 21: *el CTA lo
+              resuelve `Boton` por el slot*). Además es lo correcto por la
+              letra §1.3: **magenta acciona, ciruela selecciona**. *Un punto de
+              paginación no acciona nada: dice dónde estás.* */}
           {tarjetas.map((c, i) => (
             <View
               key={c.titulo}
               style={{
                 width: i === actual ? spacing[5] : spacing[2],
                 height: spacing[2],
-                borderRadius: spacing[2],
-                backgroundColor: i === actual ? theme.accent.cta : theme.border.subtle,
+                borderRadius: radius.full,
+                backgroundColor: i === actual ? theme.accent.control : theme.border.subtle,
               }}
             />
           ))}
