@@ -1,7 +1,9 @@
-# S116-E · EL `OutOfMemoryError` BAJO NAVEGACIÓN SOSTENIDA: REPRODUCIDO, MEDIDO, Y SU CAUSA TODAVÍA HIPÓTESIS
+# S116-E · EL `OutOfMemoryError` BAJO NAVEGACIÓN SOSTENIDA: **NO REPRODUCIDO**, LA CURVA MEDIDA, LA CAUSA TODAVÍA HIPÓTESIS
 
 > **Pista E · lote 01 · rama `pista/s116-e-01` · 13-sep-2026**
-> **SHA de la rama:** `ca564994` (= `main` al abrir; mi rama **no toca una línea de `apps/` ni de `packages/`** — verificado: `git diff --name-only main...HEAD -- apps packages` → **0**)
+> 🔴 **SHA VIGENTE: `d1bb0a5a`** — la rama nació de `ca564994` y se puso al día con `origin/main` al cerrar. **Mi rama no toca una línea de `apps/` ni de `packages/`** — verificado: `git diff --name-only origin/main...HEAD -- apps packages` → **0**.
+> ⚠️ **Y lo que importa para la validez de todo lo que sigue: las mediciones se tomaron sobre `ca564994`, y los nueve commits que main avanzó desde entonces NO TOCAN `apps/` ni `packages/`** — medido: `git diff --name-only ca564994..d1bb0a5a -- apps packages` → **0 archivos**. ⇒ **el código de la app que medí es byte-idéntico al de `d1bb0a5a`; ninguna curva de este parte queda vieja por el avance de main.**
+> *(El rebase se pidió y el permiso de `git rebase` está bloqueado en esta sesión; se resolvió con `merge --no-ff` de `origin/main`, que para un solo commit logra el mismo objetivo —la rama contiene `d1bb0a5a`, verificado con `merge-base --is-ancestor`— y deja el registro del acto en vez de reescribirlo.)*
 > **Encargo:** investigar **sin curar** el OOM que dejé sin causa atribuida en `S116-E-LINEA-BASE.md` §②.3.
 > **Lo que esto NO es:** una cura, una ficha de deuda, ni una atribución de causa. **La causa queda como hipótesis con su instrumento nombrado**, y se dice cuál.
 
@@ -631,8 +633,9 @@ delta crudo de extremos:                +178 kB/tap          ← sesgado
 |---|---|
 | **pista** | E |
 | **rama** | `pista/s116-e-01` |
-| **SHA base** | **`ca564994`** (= `main` al abrir) |
-| **código de app tocado** | **ninguno** — `git diff --name-only main...HEAD -- apps packages` → **0** |
+| **SHA vigente** | **`d1bb0a5a`** (`origin/main` al cerrar, traído bajo la rama) |
+| **SHA de las mediciones** | **`ca564994`** — y los 9 commits que main avanzó **no tocan `apps/` ni `packages/`**, así que el código medido es el mismo |
+| **código de app tocado** | **ninguno** — `git diff --name-only origin/main...HEAD -- apps packages` → **0** |
 | **fecha de las mediciones** | **13-sep-2026**, entre las 11:00 y las 12:00 (-05) |
 | **aparato** | AVD `s113_E` · `emulator-5560` · 1080×2400 @420dpi · `MemTotal` 4 062 432 kB · `heapgrowthlimit` **192m** |
 | **binario** | `com.epetplace.cliente` **1.0.7**, `DEBUGGABLE`, instalado 2026-09-07 |
