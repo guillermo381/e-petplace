@@ -226,6 +226,7 @@ import { FichaVacuna } from '../components/FichaVacuna'
 import { FichaMascotaHogar } from '../components/FichaMascotaHogar'
 import { ClipSesion } from '../components/ClipSesion'
 import { Icono, type IconoNombre } from '../components/Icono'
+import { NarizNotificacion } from '../brand/NarizNotificacion'
 import { EsperaDeMarca } from '../brand/EsperaDeMarca'
 import { EsperaDeTrabajo } from '../brand/EsperaDeTrabajo'
 import { Guijarro } from '../brand/Guijarro'
@@ -2370,6 +2371,40 @@ function EjemploSetBPrima() {
     // S85-B18: la VENTANA TEMPORAL. Van pegados a `hoy` a propósito — es
     // su hermana mayor y la que define el idioma de la familia.
     'semana', 'mes',
+    /* ══ S116-B · LA TANDA DEL MOCK (lote 2, punto 18) ═══════════════
+     * Veinte entradas: 15 que el §② midió como inexistentes, 3 que
+     * nacieron porque el dibujo decía otra cosa, y 2 redibujos.
+     * 🔴 **SU HOJA DE CONTACTO YA CORRIÓ y está adjunta al parte**
+     * (`docs/loop/capturas-s116-b/`): se rasterizaron a 21 · 48 · 96 px
+     * con `scripts/hoja-de-contacto-glifos.mjs`, y **tres se curaron por
+     * lo que esa medición mostró** — `urgencias` perdió su huella (era
+     * ruido a 21), `microchip` perdió cuatro patas, y `receta` se rehízo
+     * dos veces, la segunda al montarla AL LADO DE `papel`.
+     * *Lo que esta fila agrega a la hoja es lo que la hoja no puede dar:
+     * los tres temas y el pulgar del founder.*
+     *
+     * EL ORDEN NO ES ALFABÉTICO — cada uno va pegado al vecino contra el
+     * que se midió, que es lo que §6b pide juzgar: */
+    // los tres círculos del set, juntos (ver la entrada de `hora`)
+    'hora', 'ayuda', 'info',
+    // la pelota contra el salvavidas — el choque más alto de la tanda
+    'personalidad', 'calificacion', 'favorito',
+    // el par del stepper: tienen que leerse COMO PAR
+    'agregar', 'quitar',
+    // la receta contra el papel: el único choque que se materializó
+    'receta', 'papel', 'medicamento',
+    // la llave contra el candado (abrir contra cerrar)
+    'contrasena', 'candado',
+    // la imagen contra las dos hojas apiladas
+    'galeria', 'copiar',
+    // los de salud, contra sus vecinos clínicos
+    'urgencias', 'laboratorio', 'vacuna', 'alergia', 'microchip',
+    // el bol contra la bolsa
+    'alimento', 'despensa',
+    // los controles de la cámara y la llamada
+    'voltear', 'foto', 'microfono', 'colgar',
+    // los dos que no tienen vecino
+    'salir', 'mas',
   ]
   return (
     <View style={{ gap: spacing[4] }}>
@@ -3945,6 +3980,39 @@ function GaleriaInterna() {
                 ]}
               />
             </View>
+          </View>
+        </Seccion>
+
+        <Seccion titulo="⭐ GATE S116-B — LA SILUETA DE NOTIFICACIÓN (punto 18) · qué decide, y es UNA sola cosa: que a 24 px se lea la marca y no una cara. Va sobre ciruela noche porque la bandeja de Android es oscura, y a los DOS tamaños que Android usa de verdad — 24 dp en la barra, 48 dp en la notificación abierta. El isotipo REAL va al lado a los mismos tamaños: si el original tampoco se lee a 24, el problema no es el recorte">
+          <View style={{ backgroundColor: palette.ciruelaNoche /* la bandeja de Android es oscura SIEMPRE, no por tema — pero el valor igual sale del token, que es de donde tiene que salir */, padding: spacing[5], borderRadius: radius.lg, gap: spacing[4] }}>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: spacing[6] }}>
+              <View style={{ alignItems: 'center', gap: spacing[2] }}>
+                <NarizNotificacion tamano={24} />
+                <Texto variante="apoyo" color="inverso">24 dp · la barra</Texto>
+              </View>
+              <View style={{ alignItems: 'center', gap: spacing[2] }}>
+                <NarizNotificacion tamano={48} />
+                <Texto variante="apoyo" color="inverso">48 dp · abierta</Texto>
+              </View>
+              <View style={{ alignItems: 'center', gap: spacing[2] }}>
+                <NarizNotificacion tamano={96} />
+                <Texto variante="apoyo" color="inverso">96 · para juzgar</Texto>
+              </View>
+              <View style={{ alignItems: 'center', gap: spacing[2] }}>
+                <Isotipo size={24} variant="blanco" />
+                <Isotipo size={96} variant="blanco" />
+                <Texto variante="apoyo" color="inverso">el isotipo real</Texto>
+              </View>
+            </View>
+            {/* 🔴 LA PIEZA NO ES LO QUE ANDROID MONTA, y decirlo acá importa
+                porque esta galería es donde se firma: lo que viaja al aparato
+                es `assets/marca/nariz-notificacion.svg`, que A/C convierten a
+                vector drawable. **Los dos comparten el mismo `d`** — si
+                alguien toca uno y no el otro, el founder firma una silueta y
+                la bandeja muestra otra. */}
+            <Texto variante="apoyo" color="inverso">
+              lo que viaja al aparato es assets/marca/nariz-notificacion.svg — mismo path que esta pieza
+            </Texto>
           </View>
         </Seccion>
 
