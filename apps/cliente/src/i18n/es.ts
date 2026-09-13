@@ -28,11 +28,30 @@ export const clienteEs = {
   },
   // S61-A8 — la bienvenida reescrita (letra founder; LOTE S61, GATE
   // PENDIENTE). heroTitulo/heroSubtitulo murieron con el hero (Ley 37).
+  /* ⭐ S116-C lote 3 · 02 · BENEFICIOS — se ve UNA sola vez (letra §1.6).
+     Tres tarjetas, un personaje y una frase cada una. *Las frases dicen lo
+     que la app HACE, no lo que promete sentir.* */
+  beneficios: {
+    saltar: 'Saltar',
+    unoTitulo: 'Su expediente vive contigo',
+    unoApoyo: 'Carné, vacunas y documentos, siempre a mano',
+    dosTitulo: 'Cuidado cerca de ti',
+    dosApoyo: 'Veterinaria, paseo, estética y guardería',
+    tresTitulo: 'Todo en un lugar',
+    tresApoyo: 'Agendas, compras y pagas una sola vez',
+    comenzar: 'Comenzar',
+    paso: 'Tarjeta {{actual}} de {{total}}',
+  },
   bienvenida: {
     titular: 'Tu mascota no tiene un expediente. Tiene',
     titularAcento: 'una vida.',
     crearCuenta: 'Crear cuenta',
     yaTengoCuenta: 'Ya tengo cuenta',
+    /* ⭐ S116-C lote 3 — la línea de apoyo del claim (encargo, textual).
+       Dice QUÉ hay adentro en una sola línea: la propuesta sin la línea
+       queda en poesía, y alguien que llega por primera vez necesita saber
+       para qué es la app antes de crear una cuenta. */
+    apoyo: 'Salud, vacunas, documentos, servicios y compras en un solo lugar.',
     legales: 'Al crear tu cuenta aceptas nuestros Términos y nuestra Política de privacidad.',
   },
   // S82-A r4 — la frontera del crash (espejo VERBATIM de las voces S79-B

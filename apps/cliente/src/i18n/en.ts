@@ -20,11 +20,23 @@ export const clienteEn = {
   },
   // S61-A8 — the welcome, rewritten (founder letter; LOTE S61, GATE
   // PENDIENTE). heroTitulo/heroSubtitulo died with the hero (Ley 37).
+  beneficios: {
+    saltar: 'Skip',
+    unoTitulo: 'Their record lives with you',
+    unoApoyo: 'Vaccine card, shots and documents, always at hand',
+    dosTitulo: 'Care close to you',
+    dosApoyo: 'Vet, walks, grooming and boarding',
+    tresTitulo: 'All in one place',
+    tresApoyo: 'Book, shop and pay just once',
+    comenzar: 'Get started',
+    paso: 'Card {{actual}} of {{total}}',
+  },
   bienvenida: {
     titular: "Your pet doesn't have a record. It has",
     titularAcento: 'a life.',
     crearCuenta: 'Create account',
     yaTengoCuenta: 'I already have an account',
+    apoyo: 'Health, vaccines, documents, services and shopping in one place.',
     legales: 'By creating your account you accept our Terms and our Privacy Policy.',
   },
   // S82-A r4 — crash boundary (verbatim mirror of prestador S79-B voices)

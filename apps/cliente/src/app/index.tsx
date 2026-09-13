@@ -13,6 +13,8 @@ import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Boton, EstadoVacio, spacing, useTheme } from '@epetplace/ui';
+
+import { SplashMarca } from '@/components/alta/splash-marca';
 import { getEstadoOnboardingDueno, obtenerPreferencias, obtenerSesion } from '@epetplace/api';
 import { cambiarIdioma, obtenerIdiomaActual } from '@epetplace/i18n';
 
@@ -91,6 +93,13 @@ export default function Entrada() {
     );
   }
 
-  // Decisión en curso: superficie base quieta (Ley 13 — nada parpadea).
-  return <View style={{ flex: 1, backgroundColor: theme.bg.base }} />;
+  /* ⭐ **00 · EL SPLASH — S116-C lote 3.** Acá vivía una superficie base
+     quieta, y su razón era la Ley 13 (*nada parpadea*). **Sigue vigente y por
+     eso el splash tampoco simula progreso**: la fila de personajes marca que
+     algo pasa, sin prometer cuánto falta.
+
+     ⚠️ **Es la MISMA pantalla, no una ruta nueva.** Esta ruta resuelve la
+     sesión y redirige; ponerle una ruta propia al splash habría agregado un
+     paso al historial que después hay que esconder. */
+  return <SplashMarca />;
 }
