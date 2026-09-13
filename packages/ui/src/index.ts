@@ -10,6 +10,8 @@ export { radius, type RadiusKey } from './tokens/radius'
    aparte de `spacing` a propósito: `spacing` es ritmo (base 4 estricta),
    `medidas` es cuánto mide una cosa (26, 58, 74… no son múltiplos de 4). */
 export { medidas, type MedidaKey } from './tokens/medidas'
+/* v5 (S116-B lote 2) — las seis caras de la casa y su composición Trío. */
+export { Personaje, TrioPersonajes, type PersonajeProps, type EspeciePersonaje, type TamanoPersonaje } from './components/Personaje'
 export { shadows, type ShadowToken } from './tokens/shadows'
 export { elevacion, type ElevacionNivel, type ElevacionTokens } from './tokens/elevacion'
 export { motion } from './tokens/motion'

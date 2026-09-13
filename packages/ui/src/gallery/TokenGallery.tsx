@@ -116,6 +116,7 @@ import { FilaDato } from '../components/FilaDato'
 import { LogoNegocio } from '../components/LogoNegocio'
 import { FilaCita } from '../components/FilaCita'
 import { PieRevelar } from '../components/PieRevelar'
+import { Personaje, TrioPersonajes, type EspeciePersonaje } from '../components/Personaje'
 import { PantallaConPie } from '../components/PantallaConPie'
 import { GlifoConContador } from '../components/GlifoConContador'
 import { BurbujaPendientes } from '../components/BurbujaPendientes'
@@ -5225,6 +5226,33 @@ function GaleriaInterna() {
             server-side), jamás del oficio. Y el `paddingBottom` de la safe area lo pone la pieza:
             si cada pantalla lo recalcula, vuelve a divergir.
           </Texto>
+        </Seccion>
+
+        <Seccion titulo="Personaje (S116-B) — las SEIS caras · ninguna es vector (ver cabecera)">
+          <View style={{ gap: spacing[4] }}>
+            <View style={{ flexDirection: 'row', gap: spacing[3], alignItems: 'center', flexWrap: 'wrap' }}>
+              {(['perro', 'gato', 'conejo', 'ave', 'roedor', 'otro'] as EspeciePersonaje[]).map((e) => (
+                <Personaje key={e} especie={e} tamano="hogar" />
+              ))}
+            </View>
+            {/* Los cuatro tamaños de la letra §2, con el ave — que es la que
+                peor se lee a `fila` porque viene de cuerpo entero. */}
+            <View style={{ flexDirection: 'row', gap: spacing[3], alignItems: 'flex-end' }}>
+              <Personaje especie="ave" tamano="grande" />
+              <Personaje especie="ave" tamano="hogar" />
+              <Personaje especie="ave" tamano="selector" />
+              <Personaje especie="ave" tamano="fila" />
+            </View>
+            {/* elegido y fondo rosa */}
+            <View style={{ flexDirection: 'row', gap: spacing[3], alignItems: 'center' }}>
+              <Personaje especie="gato" tamano="selector" elegido />
+              <Personaje especie="gato" tamano="selector" fondo="rosa" />
+              {/* `roedor` con su fondo blanco opaco declarado: sobre rosa se
+                  ve el recuadro, y por eso está acá y no escondido. */}
+              <Personaje especie="roedor" tamano="selector" fondo="rosa" />
+            </View>
+            <TrioPersonajes especies={['perro', 'gato', 'conejo']} tamano="hogar" />
+          </View>
         </Seccion>
 
         <Seccion titulo="PieRevelar (60) — revelar el resto de una sección (19.6)">
