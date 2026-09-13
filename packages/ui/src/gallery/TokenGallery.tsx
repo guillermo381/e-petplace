@@ -121,6 +121,7 @@ import { BotonAsistente } from '../components/BotonAsistente'
 import { BadgeFecha } from '../components/BadgeFecha'
 import { BarraPasos } from '../components/BarraPasos'
 import { Cabecera } from '../components/Cabecera'
+import { Opcion } from '../components/Opcion'
 import { PantallaConPie } from '../components/PantallaConPie'
 import { GlifoConContador } from '../components/GlifoConContador'
 import { BurbujaPendientes } from '../components/BurbujaPendientes'
@@ -686,6 +687,22 @@ function MuestraPantallaConPie() {
 
 // S71-A3: muestra viva de PieRevelar — 3 ítems visibles, 2 plegados; el
 // toggle revela y vuelve a plegar (el mismo control, el mismo lugar).
+function MuestraOpcion() {
+  const [elegida, setElegida] = useState('balanza')
+  return (
+    <Opcion
+      opciones={[
+        { clave: 'balanza', texto: 'En una balanza', apoyo: 'La más precisa', derecha: 'Predeterminada' },
+        { clave: 'brazos', texto: 'En brazos, restando tu peso' },
+        { clave: 'veterinaria', texto: 'En la veterinaria' },
+      ]}
+      elegida={elegida}
+      onElegir={setElegida}
+      agregar={{ texto: 'Agregar otro método', onPress: () => {} }}
+    />
+  )
+}
+
 function MuestraPieRevelar() {
   const [revelado, setRevelado] = useState(false)
   const items = ['Thor · gastroenteritis', 'Zeus · profilaxis', 'Kary · control', 'Luna · vacuna', 'Rocco · herida']
@@ -5230,6 +5247,10 @@ function GaleriaInterna() {
             server-side), jamás del oficio. Y el `paddingBottom` de la safe area lo pone la pieza:
             si cada pantalla lo recalcula, vuelve a divergir.
           </Texto>
+        </Seccion>
+
+        <Seccion titulo="Opcion (S116-B) — una entre varias, en FILAS (no es SelectorOpcion)">
+          <MuestraOpcion />
         </Seccion>
 
         <Seccion titulo="Cabecera (S116-B) — raíz y empujada · NO reemplaza a Encabezado todavía">

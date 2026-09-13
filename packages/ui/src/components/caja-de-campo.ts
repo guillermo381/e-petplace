@@ -111,8 +111,7 @@
 import type { Theme } from '../themes'
 import { motion } from '../tokens/motion'
 import { radius } from '../tokens/radius'
-import { medidas } from '../tokens/medidas'
-import { palette } from '../tokens/palette'
+import { halo } from '../tokens/elevacion'
 import { spacing } from '../tokens/spacing'
 import { typography } from '../tokens/typography'
 
@@ -256,7 +255,7 @@ export function estiloDeCaja(theme: Theme, estado: EstadoCaja) {
        estás», una sombra dice «esto está apoyado», y no son lo mismo.* */
     boxShadow: estado.enfocado && !estado.error
       ? v5
-        ? `0 0 0 ${medidas.campoFocoHalo}px ${palette.magentaAccion}1A`
+        ? halo.foco
         : theme.elevacion.reposo
       : undefined,
     /* S104-B — `fast` YA vale **150**, exactamente la duración que la orden
