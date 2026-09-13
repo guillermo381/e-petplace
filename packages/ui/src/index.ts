@@ -9,7 +9,11 @@ export { radius, type RadiusKey } from './tokens/radius'
 /* v5 (S116) — las medidas por objeto de la letra del rediseño. Vive
    aparte de `spacing` a propósito: `spacing` es ritmo (base 4 estricta),
    `medidas` es cuánto mide una cosa (26, 58, 74… no son múltiplos de 4). */
-export { medidas, type MedidaKey } from './tokens/medidas'
+/* `AIRE_RAIZ` (S116-B) — el aire que toda pantalla RAÍZ deja abajo para
+   que la última fila no quede debajo del asistente ni de la barra. Es la
+   parte FIJA: la pantalla le suma `insets.bottom`. **Un solo token, no un
+   número por pantalla** — si el asistente crece, todas lo heredan. */
+export { medidas, AIRE_RAIZ, SEPARACION_ASISTENTE, type MedidaKey } from './tokens/medidas'
 /* v5 (S116-B lote 2) — las seis caras de la casa y su composición Trío. */
 export { Personaje, TrioPersonajes, type PersonajeProps, type EspeciePersonaje, type TamanoPersonaje } from './components/Personaje'
 export { BotonAsistente, type BotonAsistenteProps } from './components/BotonAsistente'

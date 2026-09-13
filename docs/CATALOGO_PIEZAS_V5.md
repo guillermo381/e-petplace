@@ -29,6 +29,15 @@ El botón flotante que abre NEXO. Va en **toda raíz**.
 - **props:** `onPress` · `visible` · `etiqueta`
 - **tokens:** `medidas` · `palette` · `radius` · `shadows` · `spacing` · `theme.accent`
 - **consumidores:** 0
+- 🔴 **FLOTA SOBRE EL CONTENIDO, así que la pantalla tiene que dejarle aire:**
+
+  ```tsx
+  contentContainerStyle={{ paddingBottom: AIRE_RAIZ + insets.bottom }}
+  ```
+
+  **`AIRE_RAIZ` = 168** (`barra 92 + separación 8 + asistente 60 + respiro 8`), y es **la parte FIJA** — la pantalla le suma `insets.bottom`, igual que el shell hace con `ALTO_FILA_TABS`. *Un token que incluyera el inset sería falso en cuanto cambiara el aparato.*
+- ⚠️ **UN SOLO TOKEN, no un número por pantalla.** Nació de un defecto visto: la barra tenía su medida y el asistente la suya, **y nadie tenía la suma** — *dos medidas correctas que nadie compone dejan un hueco que no es de ninguna de las dos.* Se **deriva**, no se escribe: si el asistente crece, las once raíces lo heredan solas.
+- ⚠️ Y la separación la comparten pieza y token (`SEPARACION_ASISTENTE`): **si el botón escribiera su propio número, los dos podrían divergir sin que nada falle** — el botón se movería y el aire quedaría corto.
 
 ### `Opcion`
 Filas con círculo de elección — **no chips**. Para elegir una de varias cosas que se leen como texto.
@@ -178,6 +187,7 @@ La silueta de la marca para la bandeja de Android.
 | `spacing` | la escala de RITMO, base 4, múltiplos estrictos |
 | `typography` | `escala` trae la v5 (Baloo + PJS); `family` conserva DM Sans **como token del PRESTADOR** |
 | `radius` · `shadows` · `elevacion` | radios, sombras por `elevation` (**nunca CSS**) y `halo.foco` |
+| **`AIRE_RAIZ`** | **el aire que toda pantalla RAÍZ deja abajo** para que la última fila no quede debajo del asistente ni de la barra. Derivado; se le suma `insets.bottom` |
 | `motion` | 180–240 ms sin rebote para lo que responde al toque; entrada escalonada 45/300 para lo que llega |
 
 ---
