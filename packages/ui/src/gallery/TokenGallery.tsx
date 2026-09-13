@@ -122,6 +122,7 @@ import { BadgeFecha } from '../components/BadgeFecha'
 import { BarraPasos } from '../components/BarraPasos'
 import { Cabecera } from '../components/Cabecera'
 import { Opcion } from '../components/Opcion'
+import { IsotipoV5, LogoV5 } from '../brand/Marca'
 import { PantallaConPie } from '../components/PantallaConPie'
 import { GlifoConContador } from '../components/GlifoConContador'
 import { BurbujaPendientes } from '../components/BurbujaPendientes'
@@ -5247,6 +5248,22 @@ function GaleriaInterna() {
             server-side), jamás del oficio. Y el `paddingBottom` de la safe area lo pone la pieza:
             si cada pantalla lo recalcula, vuelve a divergir.
           </Texto>
+        </Seccion>
+
+        <Seccion titulo="IsotipoV5 · LogoV5 (S116-B) — NO reemplazan a Isotipo todavía">
+          <View style={{ gap: spacing[4] }}>
+            <View style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center' }}>
+              <IsotipoV5 sobre="claro" tamano="cabecera" />
+              <IsotipoV5 sobre="claro" tamano="splash" />
+              <LogoV5 sobre="claro" tamano="cabecera" />
+            </View>
+            {/* Sobre ciruela: acá se ve la placa negra que el archivo trae
+                y que NO se le quitó (ver la cabecera de la pieza). */}
+            <View style={{ backgroundColor: palette.ciruela, padding: spacing[4], borderRadius: radius.tarjetaV5, flexDirection: 'row', gap: spacing[5], alignItems: 'center' }}>
+              <IsotipoV5 sobre="oscuro" tamano="cabecera" />
+              <LogoV5 sobre="oscuro" tamano="cabecera" />
+            </View>
+          </View>
         </Seccion>
 
         <Seccion titulo="Opcion (S116-B) — una entre varias, en FILAS (no es SelectorOpcion)">

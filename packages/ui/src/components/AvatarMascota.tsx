@@ -39,6 +39,7 @@ import { Text, View } from 'react-native'
 import { Image, type ImageSource } from 'expo-image'
 
 import { useTheme } from '../ThemeProvider'
+import { Personaje, type EspeciePersonaje } from './Personaje'
 import { palette } from '../tokens/palette'
 import { typography } from '../tokens/typography'
 
@@ -275,7 +276,7 @@ function avisarSiNoPuedeSerUrl(fotoUrl: unknown, nombre: string) {
   )
 }
 
-export function AvatarMascota({ nombre, fotoUrl, fotoDeEspecie, tamano = 'md', capa, sobreLleno = false, anidadoEn }: AvatarMascotaProps) {
+export function AvatarMascota({ nombre, fotoUrl, fotoDeEspecie, especie, tamano = 'md', capa, sobreLleno = false, anidadoEn }: AvatarMascotaProps) {
   const { theme } = useTheme()
   const [falloCarga, setFalloCarga] = useState(false)
   const [falloEspecie, setFalloEspecie] = useState(false)
@@ -338,6 +339,34 @@ export function AvatarMascota({ nombre, fotoUrl, fotoDeEspecie, tamano = 'md', c
      queda alta, y aplicárselo a una ilustración que ya viene encuadrada la
      recortaría mal. Dos imágenes distintas, dos tratamientos. */
   const conEspecie = typeof fotoDeEspecie === 'string' && fotoDeEspecie !== '' && !falloEspecie
+
+  /* ═══════════════════════════════════════════════════════════════════
+   * 🔴 **S116-B lote 2 · EL PELDAÑO LOCAL — `Personaje` antes del monograma.**
+   * Punto 15 del encargo. **La prop `especie` existía RESERVADA** con su
+   * nota: *«hoy no cambia el render; el set ilustrado por especie la
+   * consumirá (D-288)»*. `Personaje` **es** ese set: la deuda se cobra acá.
+   *
+   * ⚠️ **No reemplaza a `fotoDeEspecie`, se mete DEBAJO.** El orden queda:
+   * foto → avatar de la casa por raza (del bucket) → **cara local de la
+   * especie** → monograma. *El peldaño nuevo es el que no depende de la
+   * red: cuando la URL del bucket falla —404 o sin señal— hoy se cae hasta
+   * el monograma, saltándose una cara que ya está en el bundle.*
+   *
+   * 🔴 **Y las especies SIN cara propia siguen al monograma, no a la
+   * nariz.** Es la razón declarada en el bloque del residuo, que no se
+   * deroga: el monograma *«dice algo verdadero —esto es Luna— sin afirmar
+   * una identidad animal que no tiene con qué sostener»*. Un pez con cara
+   * de nariz genérica afirmaría menos que su propia inicial.
+   * ═══════════════════════════════════════════════════════════════════ */
+  const CARA_LOCAL: Partial<Record<AvatarMascotaEspecie, EspeciePersonaje>> = {
+    perro: 'perro', gato: 'gato', conejo: 'conejo', ave: 'ave', roedor: 'roedor',
+  }
+  const formaV5Avatar = 'formaV5' in theme.accent && theme.accent.formaV5 === true
+  const caraLocal = especie !== undefined ? CARA_LOCAL[especie] : undefined
+  if (!conEspecie && formaV5Avatar && caraLocal !== undefined) {
+    return <Personaje especie={caraLocal} tamano={tamano === 'md' ? 'hogar' : 'fila'} />
+  }
+
   if (conEspecie) {
     const radio = radioAvatar(tamano, d, anidadoEn === 'chip')
     return (

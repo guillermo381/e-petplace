@@ -28,11 +28,13 @@ import Animated, {
 import { motion } from '../tokens/motion'
 import { useTheme } from '../ThemeProvider'
 import { Huella } from './Huella'
+import { IsotipoV5 } from './Marca'
 
 const CICLO_MS = 1900
 
 export function EsperaDeMarca({ tamano = 64 }: { tamano?: number }) {
   const { theme } = useTheme()
+  const formaV5 = 'formaV5' in theme.accent && theme.accent.formaV5 === true
   const esMemorial = theme.mode === 'memorial'
   const color = esMemorial ? theme.text.secondary : theme.capa.comunidad
 
@@ -85,7 +87,15 @@ export function EsperaDeMarca({ tamano = 64 }: { tamano?: number }) {
   return (
     <Animated.View style={[{ width: tamano, height: tamano }, estilo]}>
       <Svg width={tamano} height={tamano} viewBox="0 0 24 24">
-        <Huella color={color} />
+        {/* 🔴 **S116-B lote 2 · LA NARIZ, NO LA HUELLA** (punto 14 del
+            encargo: *«la nariz, sola, respirando despacio»*).
+            **Por slot de casa (`accent.formaV5`), no por reemplazo**: el
+            prestador y memorial conservan la huella, que es lo que su gate
+            midió. *La letra §1.1 saca la huella como ley madre del ícono
+            **para el cliente**; en la otra casa sigue siendo la marca.*
+            Las tres cláusulas de la espera —ritmo sereno, voz honesta
+            debajo, memorial quieto— no se tocan: viven afuera de esta línea. */}
+        {formaV5 ? <IsotipoV5 sobre="claro" tamano="cabecera" /> : <Huella color={color} />}
       </Svg>
     </Animated.View>
   )
