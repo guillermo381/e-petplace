@@ -34275,6 +34275,59 @@ La medición del mismo día dejó la **memoria PLANA a 120 s en el Hogar en repo
 
 ---
 
+---
+
+### 🔬 ENMIENDA S116-E lote 01 (13-sep-2026) — **NO SE REPRODUJO. LA CURVA ESTÁ MEDIDA; LA CAUSA SIGUE SIENDO HIPÓTESIS.**
+
+**Parte: `docs/loop/S116-E-OOM.md` · evidencia cruda: `docs/loop/medicion-s116-e-oom/` (8 CSV + los scripts).** Ocho corridas, **371 navegaciones** contando todo, **331 sin los 40 toques de barra**. **Cero caídas.**
+
+#### ① Lo que hace crecer el heap es **la ruta nueva**, no la cantidad de navegación
+
+| secuencia | navs | ritmo |
+|---|--:|---|
+| 5 rutas del mismo tab, **repetidas** | 15 | **0,00 MB/nav** (rango 1,1 MB) |
+| **66 rutas ÚNICAS** | 66 | **0,80 MB/nav** · 148 Views/nav |
+| 5 rutas **con `MapView`**, repetidas | 15 | **escalón único +12,7 MB**, después baja |
+| 40 **toques de la barra de tabs** | 40 | **+0,15 MB/tap** (mínimos cuadrados) |
+
+⚠️ **EL 0,80 ES PICO, NO RETENCIÓN — y la diferencia es de 27×.** Es lo que el heap sube *mientras la pila se llena*. **La retención real, post-GC y post-poda, es 0,03 MB/nav** (+2,8 MB por pasada completa de 89 rutas distintas). *Citar 0,80 como «la fuga» convierte un pico transitorio en una fuga permanente, que es la lectura que esta enmienda existe para impedir.*
+
+#### ② 🔶 LA HIPÓTESIS DE E, **marcada como tal** y no ascendida a causa
+
+> *Cada ruta nueva queda **montada en la pila de su tab**, con sus Views y sus datos; y la única poda del código —`StackActions.popToTop()` en `apps/cliente/src/app/(tabs)/_layout.tsx:696`— **está atada al `onCambiar` de `BarraTabs`, o sea al press del tab**, que ni un deep link ni una navegación programática producen.*
+
+**Lo que la sostiene, todo medido:** repetir no crece (0,00) · rutas nuevas sí y monótono (0,80) · `Views` vuelve **al dígito exacto** al repetir (3045, 3328, 5190, 5271) · **`Activities: 1`** en ~180 muestras (no es apilamiento de Activities) · la poda se vio funcionar (Views 1965 → 686).
+
+**🟢 Y la poda es brutal cuando dispara: UNA navegación liberó 42 MB y descartó 10 000 Views**, con el PID sin cambiar (o sea: no fue un reinicio). ⇒ **el crecimiento NO es irreversible**, y eso corrige a la baja toda proyección: **para llegar a 192 MB habría que acumular rutas nuevas SIN entrar nunca a un tab, y no se encontró ninguna secuencia que lo consiga.**
+
+#### ③ 🔴 LA BRECHA NO SE CERRÓ: SE AGRANDÓ, Y SE DECLARA COMO FACTOR NO ENCONTRADO
+
+El barrido original cayó con **~67 navegaciones**. El ritmo de pico pone el techo en **~218** — pero **a la retención real de 0,03 MB/nav, 67 navegaciones son 2 MB sobre una base de 18, contra un techo de 192.** ⇒ **la hipótesis medida explica el crecimiento transitorio y NO explica el OOM. Falta un factor que no se encontró.**
+
+**Y un candidato quedó DESCARTADO con medición, para que nadie lo recorra de nuevo:** no es el tamaño de los datos de la pantalla — `citas/<Thor>` con **148 citas** da 29,6 MB contra ~19,3 de un fixture chico: **~10 MB de diferencia, no el 3× que haría falta.** *El costo es de la pantalla montada, no de sus datos.*
+
+**Descartados antes, también con medición:** pool de OkHttp · apilamiento de Activities · fuga de hilos · suscripciones Realtime · bitmaps · el `uiautomator dump` · el `MapView`.
+
+#### ④ EL INSTRUMENTO QUE LO CONVERTIRÍA EN HECHO — **y no es de E**
+
+**Un contador de montajes DENTRO de la app**: un `useEffect` de montaje/desmontaje que lleve la cuenta de pantallas vivas y la loguee. **Mide el objeto en vez de inferirlo del heap, y lo resuelve en una sola corrida.**
+
+> **DUEÑO: C. ENTRA CON LA BARRA DE TABS NUEVA DEL LOTE 3** — que es cuando esa pieza se toca de todos modos. *No es un desvío del rediseño: es el único momento en que el instrumento sale gratis.*
+
+#### ⑤ LAS TRES CORRECCIONES DE E A SU PROPIA LÍNEA BASE
+
+*Las tres las encontró él, sobre su parte de ayer, y ninguna tenía síntoma.*
+
+1. 🔴 **La columna «Dalvik Alloc» de `S116-E-LINEA-BASE.md` §①.4 era `Heap SIZE`, no `Heap Alloc`** — un bug de parser. *El argumento es de comportamiento: esa columna se movió +320 kB mientras el PSS subía +3 264; un `Alloc` oscila con cada GC, un `Size` sube en escalones y se queda quieto.* ⚠️ **La conclusión de §①.4 SOBREVIVE** —estaba construida sobre el PSS, que está bien medido—; **lo que no sirve es la columna extra, y NO es re-verificable** porque el script de esa corrida no se conservó. *Se declara en vez de corregirse, que es lo único honesto con un número cuyo instrumento ya no existe.*
+2. 🔴 **El AVD no tiene 2 GB de RAM: tiene 3,87 GB** (`MemTotal` = 4 062 432 kB). *El dato venía con su aparato al lado y nadie lo iba a re-medir.*
+3. 🔴 **El control por toque de barra dio +0,15 MB/tap, y NO era el resultado esperado** — E escribió esa sección tres veces y las dos primeras estaban mal. ⇒ **la navegación humana también acumula, a un quinto del ritmo del barrido**, así que **esto no se puede cerrar como «artefacto del instrumento»**, que era la conclusión hacia la que iba.
+
+#### ⑥ Lo que cambia en la ficha
+
+**Sigue 🔴 y sigue ABIERTA**, pero por otra razón que al abrirse: no porque la app se caiga seguido —**no se cayó en 331 navegaciones**— sino porque **cayó dos veces en producción de instrumentación y el factor que lo explica no aparece en ninguna de las ocho corridas.**
+
+**☠️ MUERTE (enmendada):** el contador de montajes de C confirma o descarta la hipótesis **y** aparece el factor de la brecha — o una corrida larga muestra que el piso post-poda **no** crece entre pasadas, en cuyo caso no hay fuga acumulativa y el OOM original tuvo una causa distinta que habrá que buscar en otro lado.
+
 ## `D-1091` 🟡 — EL CENSO DE «MASCOTAS REALES» SOBRE-CUENTA 4,5× EN LA FAMILIA DEL FOUNDER
 
 **Estado:** ABIERTA · **Dueño:** **founder** — *tocar datos de su familia no es de una pista.*
