@@ -1,0 +1,53 @@
+# LETRA DEL REDISEÑO — S116 · app cliente
+
+> **Destino: `docs/LETRA_REDISENO_S116.md`.** Firmada por el founder el 13-sep-2026 sobre `S116-ANALISIS-REDISENO.md` y `S116-PLAN-REDISENO.md` (ambos se depositan en `docs/loop/` como registro; esta letra manda). Rige para las pistas B, C, E y A durante S116. Lo que acá contradiga a DIRECCION_ARTE, DIRECCION_DISENO_S99 o DISEÑO_EXPERIENCIA queda **derogado para la app cliente** en el punto exacto que se nombra; lo que no se nombra, sigue vigente. Prestador y admin no cambian con esta letra.
+
+## 1. Decisiones firmadas
+
+1. **La huella deja de ser ley madre del ícono** (deroga DIRECCION_ARTE §1 leyes 1-3 para el cliente). Sigue como pieza: el mecanismo ① «donde pisa la huella la superficie cede» en chips y en el elegido, y la marca de mapa. Los glifos no llevan huella.
+2. **Las capas de color por categoría mueren en el cliente** (deroga ley 10, §9.1 dos cantos, la huella en hex de capa). La categoría se dice con glifo + palabra + lugar. El color tiene tres empleos: **ciruela = estructura**, **magenta = acción y marca**, **estado con palabra** (verde al día · ámbar pendiente · rosa informativo). Sigue: N5 un acento por pantalla, N23 el color marca clase, «ningún estado solo con color».
+3. **Magenta acciona, ciruela selecciona** (deroga N26: el ocre muere como CTA). El chip activo es ciruela; la opción elegida lleva radio magenta.
+4. **Tipografía: Baloo 2 800 para display, títulos y cifras; Plus Jakarta Sans 400/600/700 para todo lo demás** (deroga N1 y «la casa no titula en bold»). DM Sans sale cuando ningún token la nombre. Tope: cuatro tamaños por pantalla (era tres).
+5. **Cinco tabs: Hogar · Explorar · Despensa · Actividad · Cuenta.** Actividad = citas + pedidos + postventa, en curso / historial (enmienda DISEÑO_EXPERIENCIA §3: la agenda sigue sin ser tab; Actividad es el estado en curso del hogar, no una sección administrativa). El activo es el círculo elevado. El asistente (NEXO) flota en toda raíz.
+6. **Beneficios (02): tres tarjetas deslizables, un personaje y una frase cada una, «Saltar» arriba, se ve UNA sola vez** (primera apertura). Se cuenta cuántos saltan y cuántos recorren; en octubre se decide con dato.
+7. **La bienvenida se mueve con Reanimated, no con video.** Nada nativo entra.
+8. **Modo oscuro después de F&F. Memorial nace ahora** (sección 4). Los tres temas son isomorfos o no se publica ninguno.
+9. **La estrella es Calificación; Personalidad recibe glifo nuevo** (resuelve la colisión escrita en el registry).
+10. **La nariz es la marca.** Logo y seis personajes vienen del founder (carpetas `catalog - svg` y `catalog - png`); se ingieren como assets de `packages/ui`, no se redibujan.
+
+## 2. Los valores del mock — fuente hasta que exista `palette.ts` v5; después manda el token
+
+**Color:** magenta acción `#D10788` · magenta presionado `#A00568` · magenta tinta `#8E0A5D` · magenta luz `#FF7FC4` · ciruela `#4E1160` · ciruela profunda `#3B0B47` · ciruela noche `#26062E` · rosa sobre ciruela `#FFB8DE` · rosa tinte `#FCE4F1` · lienzo `#F8F2F6` · superficie `#FFFFFF` · tinta `#1C1D20` · verde al día `#14584A` (fondo 10 %) · ámbar pendiente `#E0A21F` (fondo 16 %) · degradado cabecera 168° `#4E1160→#3B0B47` · degradado entrada 178° `#3B0B47→#26062E`. Texto secundario tinta 50–58 %; bordes tinta 9–12 %. Nunca magenta sobre magenta ni ciruela sobre ciruela.
+
+**Tipografía (tokens fijos; los rangos del mock se cierran acá):** display Baloo 34/38 · título 1 Baloo 28/31 · título 2 Baloo 22/26 · cifra Baloo 44/44 y 22/22 · CTA PJS 700 16 · fila PJS 700 14/18 · cuerpo PJS 400 14/22 · apoyo PJS 400–600 12/17 · antetítulo PJS 700 11 mayúsculas, tracking 2 (magenta en cuerpo, `#FFB8DE` sobre ciruela).
+
+**Medidas:** margen 26 (20 con flecha) · cabecera raíz padding 70/26/22, radio inferior 28 · cabecera empujada 68/20/20, flecha 42 · tarjeta radio 24, borde 1 tinta 9 %, sombra suave · lista radio 22, fila 16/17 · CTA alto 58 radio 999 con sombra magenta 28 % · secundario alto 52 borde 1,5 magenta · campo radio 18, foco borde 1,5 + halo 4 al 10 % · chip radio 999 · barra inferior alto 92, activo círculo 74 con borde 5 del lienzo, −14 · asistente 60 · avatar hogar 78 / selector 66 / fila 52 · área táctil 44, separación 8.
+
+**Movimiento:** 180–240 ms sin rebote para lo que responde al toque; entrada escalonada de la casa (45/300, bezier `.32,.72,0,1`) para lo que llega; personajes en fundido 500 ms cada 3 s en splash y confirmaciones. L-c sigue: si al quitar la animación dice lo mismo, sobraba.
+
+**Sombras:** por `elevation` + `shadow*` (tokens `shadows.ts`/`elevacion.ts`), nunca CSS. En claro, la superficie en reposo conserva el hairline (enmienda S86 sigue).
+
+## 3. Método (resumen de `S116-PLAN-REDISENO.md`, que rige entero)
+
+- Tokens v4 → v5 **en el lugar**, sin llave. El primer OTA a preview muestra toda la app con piel nueva; la estructura llega lote a lote.
+- Los slots de capa (`capaBg`, `capaText`, …) **no se borran en el lote 1**: apuntan a los valores nuevos y mueren cuando su último lector migre (censo por import). `controlLleno` y `sobreControlLleno` mueren en el lote 1: nadie los lee.
+- Piezas del shell nacen con nombre propio; piezas base se rediseñan conservando contrato; una pieza vieja muere con lápida cuando su último consumidor migró.
+- Nada se rediseña en la pantalla. C consume; si falta, pide por buzón.
+- Las 25 reglas de `verify:diseno` atadas al valor se declaran una por una (recalibrada / derogada con esta firma / pasada a forma). Ninguna se apaga. R12 y `verify:contrast` vuelven a cero contra la paleta nueva antes de que nada se monte.
+- Línea base del 13-sep (`S116-E-LINEA-BASE.md` @ `24d7e692` contra `ca564994`): cada candidato se mide contra ella. Memoria plana a 120 s y arranque no empeoran.
+- Lo intocable (plan §2) se lista en cada prompt de pantalla.
+
+## 4. Memorial en el nuevo lenguaje (letra nueva; enmienda Ley 21 para el cliente)
+
+El memorial es la misma estructura sin la fiesta. Tema `memorial`, mismos 86 slots que claro y oscuro:
+
+- **Sin magenta.** La acción es tinta (Ley 21 sigue: memorial SIEMPRE tinta). Sin verde ni ámbar: no hay estados que cumplir.
+- **Cabecera en ciruela noche plana, sin degradado.** Lienzo y superficie del claro (`#F8F2F6` / `#FFFFFF`), rosa tinte reemplazado por gris cálido (B lo deriva de tinta al 6 %).
+- **Sin personajes, sin trío, sin check festivo, sin entrada escalonada:** solo fundido.
+- **Sin pastillas de progreso ni contadores** (MODELO_LOYALTY §7.1 sigue: el motor calla).
+- Tipografía igual; la cifra en Baloo no aparece (no hay plata ni peso que celebrar).
+- Lo que E midió el 13-sep (fondo 244 vs 237) deja de valer: el memorial se mide de nuevo sobre estos valores.
+
+## 5. Lo que esta letra NO decide
+
+Prestador (sigue con su teal y su dosis). Admin (sesión propia). Modo oscuro (después de F&F: el tema existe isomorfo, no se calibra). Los 17 glifos que hay que dibujar (van por hoja de contacto en el lote 2, no se copian del mock). Los precios y rieles del mock son de Colombia: la app sale en Quito, USD, formato `$45,00`, Nuvei y DeUna.
