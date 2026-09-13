@@ -14835,6 +14835,31 @@ megabyte.
 >
 > ⚠️ **Y lo que sigue sin medirse, declarado:** que el registry no tenga consumidores **no prueba que ningún `node_modules` la pida en runtime** — el censo de S94 midió `SymbolView` y `expo-symbols` en el monorepo, no en el árbol de dependencias. Sacarla se verifica corriendo la app, no leyendo el `package.json`.
 
+> 📏 **RE-MEDIDA S116-A tras el LOTE 1 de B (13-sep-2026) — el export con las cuatro fuentes nuevas.** Mismo comando que la línea base de E, para que los números sean comparables: `cd apps/cliente && npx expo export --platform android`.
+>
+> | | línea base (`24d7e692`) | hoy (lote 1) | Δ |
+> |---|--:|--:|--:|
+> | bundle JS `.hbc` | 11,03 MB | **11,03 MB** | **0** |
+> | fuentes `.ttf` | 7 · 1392 kB | **11 · 1971,9 kB** | **+4 · +579,9 kB** |
+>
+> **Las once, identificadas POR HASH** (el export las guarda sin extensión, con el nombre en hash: `find -name '*.ttf'` sobre el directorio devuelve **cero** y hay que leer el `metadata.json`):
+>
+> | fuente | kB | |
+> |---|--:|---|
+> | `MaterialSymbols_400Regular` | **934,0** | 🔴 **esta ficha** — sin un solo consumidor |
+> | `Baloo2_800ExtraBold` | 407,8 | nueva · display, títulos y cifras |
+> | `JetBrainsMono_400/500` | 224,4 | mono, ya estaba |
+> | `PlusJakartaSans_400/600/700` | 185,7 | nuevas · todo lo demás |
+> | `DMSans_300/400/500/700` | **220,0** | ⬅ **el costo de que DM Sans se quede** |
+>
+> 🔴 **EL NÚMERO QUE LA MESA PIDIÓ: que DM Sans siga viajando cuesta 220,0 kB en 4 archivos** — y **el cliente ya no la usa**: vive por el prestador (enmienda firmada a la letra §1.4). *No es un descuido: es el precio de que el prestador no cambie con esta letra, y ahora está escrito con su número en vez de suponerse.*
+>
+> **Y lo que esto le hace a esta ficha: `MaterialSymbols` pasa del 67 % al 47 % del peso de fuentes — no porque adelgazara, sino porque el denominador creció.** *El porcentaje bajó y el problema es idéntico: 934 kB que nadie pide. Es justo la clase de número que se lee como mejora.*
+>
+> **El bundle JS no se movió un byte** (11,03 MB exactos): los tokens v5, los tres temas y las medidas nuevas **no engordaron el JS**. Lo que crece son los assets.
+>
+> ⚠️ **Una diferencia menor, declarada y no explicada:** las 7 fuentes viejas suman hoy **1378,4 kB** contra los **1392** de la línea base — **13,6 kB** de brecha. No se persiguió. *Se anota para que nadie la descubra después y la lea como un cambio que no ocurrió.*
+
 #### D-736 — ⚪ 284 ÍNDICES SIN UN SOLO ESCANEO (3,4 MB) — censados, NO borrados
 
 `pg_stat_user_indexes` da **284 índices con `idx_scan = 0`** sobre 105 días de
