@@ -34532,6 +34532,48 @@ t('recurrentes.alMes', { precio: m.monto.toFixed(2) })
 
 ---
 
+## `D-1097` 🟢 — LA VARA PREGUNTA POR UNA CABECERA QUE 02 NO DEBE TENER
+
+**Estado:** ABIERTA · **Dueño:** **mesa** (es una decisión sobre la vara, no sobre la pantalla).
+**Origen:** S116-C lote 3, al responder `VARA_COHERENCIA_S116` pregunta 1.
+
+**El choque, con los dos literales:** la vara pregunta *«¿Es la `Cabecera` de la casa (raíz o empujada), sin círculos decorativos, marca de agua ni título propio?»*, y el encargo de **02 · Beneficios** pide lo contrario, textual: *«Fondo lienzo. Arriba a la derecha, "Saltar" en tinta apagada»* — una presentación a pantalla completa cuya única estructura arriba es su salida.
+
+**02 responde «no» y la pantalla está bien.** Son las dos cosas a la vez, y por eso la ficha es de la mesa: o **la vara declara la excepción** («las pantallas de presentación a pantalla completa no llevan cabecera»), o **02 gana cabecera** y deja de parecerse al sketch.
+
+⚠️ *Mientras no se decida, el «no» de esa celda se lee como una deuda de la pantalla y no lo es.* **☠️ MUERTE:** la mesa elige una de las dos y la vara o la pantalla se ajusta.
+
+---
+
+## `D-1098` 🔴 — CREAR CUENTA DESDE LA APP FALLA: `auth.signUp` ES `undefined`
+
+**Estado:** ABIERTA · **Dueño:** **A** (`packages/api`).
+**Origen:** S116-C lote 3, capturando el recorrido en el emulador (13-sep-2026).
+
+### El stack, leído del LogBox — no supuesto
+
+```
+TypeError: undefined is not a function
+  auth.ts:517:56   registrarse   →  await getClient().auth.signUp({...})
+  auth.ts:509:8    registrarse
+  registro.tsx:74  crearCuenta
+  registro.tsx:70  crearCuenta
+  Boton.props.onPress
+```
+
+### Lo que lo acota, y es lo que lo hace accionable
+
+- **No es el cliente entero:** `signInWithPassword` **funciona** — entré con la cuenta de prueba en **el mismo emulador y la misma sesión de Metro**, minutos después. Es ese método.
+- **No es de C:** el último commit de `packages/api/src/wrappers/auth.ts` es de **S105-A**. El lote 3 no tocó `packages/api`.
+- **El botón queda en «cargando» para siempre:** el `throw` ocurre dentro del `await`, antes del `if (error)`, así que **no hay rebote tipado ni voz** — la persona ve un botón que gira y nada más. *Un fallo que no habla es peor que uno que rebota.*
+
+### Por qué es 🔴
+
+**Bloquea el camino exacto de un invitado de F&F el primer día**: 01 → 02 → **05** → alta. Sin él sólo entra quien ya tiene cuenta. El alta del lote 3 se capturó por `/hogar/agregar` —el otro modo de la misma pieza— justamente para poder verla.
+
+**Comando:** el camino real, con una cuenta nueva, en el emulador. **☠️ MUERTE:** una cuenta creada desde la app llega al alta.
+
+---
 ## `D-1096` 🟡 — LA FECHA DE UNA CITA SE MUESTRA EN FORMATO DE MÁQUINA: `2026-09-13 · 15:00 · 30 min`
 
 **Estado:** ABIERTA · **Dueño: C · LOTE 5** (el que toca esa pantalla).

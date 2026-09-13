@@ -388,7 +388,15 @@ export function PasoCierre({ modo, borrador }: { modo: ModoAlta; borrador: Borra
         paddingTop: spacing[12],
       }}
     >
-      {/* Ley 13: esqueleto estático que imita el Home que viene */}
+      {/* 🔴 **EL ESQUELETO SE VA CUANDO LA CONFIRMACIÓN LLEGA — lo mostró la
+          captura, no un gate.** Yo escribí en el comentario de abajo que *«la
+          confirmación ES la pantalla»* y después la monté DEBAJO del
+          esqueleto, así que las dos convivían: el círculo y el bloque de
+          carga quedaban flotando arriba del «¡Listo!».
+          *La Hoja modal vieja tapaba el esqueleto; una pantalla no tapa nada.*
+          ⇒ mientras se crea, el esqueleto (Ley 13: nada parpadea); cuando hay
+          mascota, **sólo** la confirmación. */}
+      {creada !== null ? null : (
       <EsqueletoGrupo etiqueta={t('alta.guardando', { nombre })}>
         <View style={{ alignItems: 'center', gap: spacing[3] }}>
           <Esqueleto forma="circulo" alto={96} />
@@ -397,6 +405,7 @@ export function PasoCierre({ modo, borrador }: { modo: ModoAlta; borrador: Borra
           <Esqueleto forma="bloque" ancho="100%" alto={120} />
         </View>
       </EsqueletoGrupo>
+      )}
 
       {/* ⭐ **10 · EXPEDIENTE CREADO — LA CONFIRMACIÓN DE LA CASA** (S116-C
           lote 3). ⏪ Acá vivía una **Hoja modal** que preguntaba *«¿querés

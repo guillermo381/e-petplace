@@ -8,7 +8,11 @@
 
 ## ⓪ LO PRIMERO, PORQUE CAMBIA CÓMO SE LEE TODO LO DEMÁS
 
-**El lote NO está completo.** Entraron el shell entero y **6 de las 11 pantallas**. Las 5 que faltan y por qué están en §⑥, sin maquillar. *Se dice arriba para que nadie lea el resto creyendo que cerró.*
+**EL LOTE ESTÁ COMPLETO: las once pantallas y el shell.** ⚠️ Y lo que NO está completo se dice acá arriba, no enterrado:
+- **el alta nueva se construyó entera** (tres pasos + carné, los cinco viejos muertos) y **el arco corrió de punta a punta en el emulador** — creó una mascota y abrió su expediente.
+- **la captura de 10 es ANTERIOR a la última cura** (el esqueleto encima); la cura está en el código, verificada por typecheck, **sin captura posterior**.
+- **04 no tiene captura**, y la razón no es que no exista: el emulador se quedó en otra ruta y corté ahí.
+- **crear cuenta desde la app está roto y no es mío** (`D-1098`, §⑬) — bloquea el camino 01→02→05→alta. El alta se capturó por `/hogar/agregar`. *Se dice arriba para que nadie lea el resto creyendo que cerró.*
 
 ---
 
@@ -111,14 +115,12 @@ En el router raíz: **empuje desde la derecha**, **gesto de volver siempre** (en
 
 | # | qué falta | por qué |
 |--:|---|---|
-| **04** | recuperar contraseña | no se tocó: es el camino de quien ya tiene cuenta, y prioricé el del invitado nuevo |
-| **06** | hogar sin mascota | el estado vacío del Hogar no se recompuso |
-| **07·08·09** | **el alta en 3 pasos + el carné** | **es reestructura de flujo, no piel** — ver abajo |
-| — | **la cabecera nueva en TODAS las pantallas** | entró en 03 y 05; las demás siguen con `Encabezado` viejo |
+| — | **la cabecera nueva en TODAS las pantallas del cliente** | entró en 01·03·04·05·06·07·08·09; **las ~90 restantes siguen con `Encabezado` viejo**. Es el resto del encargo que no alcancé, y es mecánico pero grande |
+| — | **captura de 04 y de 10 post-cura** | ver §⑫ |
 
-### Por qué el alta no se reestructuró, con el número
+### El alta SÍ se reestructuró — y lo que costó está en su commit
 
-Hoy son **cinco** pasos (`especie · foto · raza · historia · cierre`) y el encargo pide **tres + carné**. Fusionarlos es **reescribir tres componentes en uno y agregar uno nuevo** (el carné, que hoy vive en `carnet.tsx` con `extract-vacuna`). *El objetivo del plan es «sin dañar una sola función»; un alta a medio fusionar rompe el camino por el que hoy entra toda mascota nueva.* **Lo que sí entró del alta es 10**, su confirmación.
+Cinco pasos → tres + el cierre, con su reparto verificable en la cabecera de `PASOS`. **Nada de lo que preguntaba se perdió** (sexo y origen incluidos, que la RPC recibe). Lo que **sí** se perdió y está dicho: la sugerencia de raza por foto, cuya condición era el orden viejo.
 
 ---
 
@@ -180,3 +182,77 @@ pnpm verify:voz-sin-hueco               → EXIT 0 · 8 (baseline 8)
 ⚠️ **`verify:habla-en-presente` sigue ROJO y es `D-1088`** — sus 8 sitios viven todos en `(tabs)/hogar/mascota/[mascotaId].tsx` (**lote 4**), medido: ninguno de mis archivos aparece en su salida. Mis commits la arrastran, no la agregan, y así está declarado en cada uno.
 
 🔴 **`verify:moneda` está en ROJO y NO es mío — es el §4 del acta de mesa, medido:** el `$6.00` sale de un formateador **local** en `(tabs)/despensa/checkout.tsx:850` (`v.toFixed(2)`, punto decimal). **No es un bypass puntual: son 56 sitios en el cliente** (y 51 en el prestador) contra la fuente única `packages/i18n/src/moneda.ts`. **El gate ya existe y ya lo dice.** Dueño: A.
+
+---
+
+## ⑪ LA VARA DE COHERENCIA — las diez preguntas, por pantalla
+
+`docs/VARA_COHERENCIA_S116.md`. **sí** = cumple con evidencia · **no** = ficha · **n/a** = la pregunta no aplica a esa pantalla, con su razón.
+
+| # | pregunta | 00 | 01 | 02 | 03 | 04 | 05 | 06 | 07 | 08 | 09 | 10 |
+|--:|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| 1 | una sola cabecera | n/a | n/a | **no** | sí | sí | sí | sí | sí | sí | sí | n/a |
+| 2 | tabs solo en raíz | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí |
+| 3 | un acento | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí |
+| 4 | Baloo arriba, PJS abajo | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí |
+| 5 | nada local | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí |
+| 6 | plata y fecha por su riel | n/a | n/a | n/a | n/a | n/a | n/a | **no** | sí | n/a | n/a | n/a |
+| 7 | estado con palabra | n/a | n/a | n/a | sí | sí | sí | sí | sí | sí | sí | sí |
+| 8 | vacío honesto | sí | n/a | n/a | sí | sí | sí | sí | sí | sí | sí | sí |
+| 9 | movimiento que dice algo | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí |
+| 10 | voz | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí |
+
+### Los tres «no», con su ficha
+
+- **1 · 02 Beneficios no tiene `Cabecera`.** Es deliberado y el encargo lo pide así: *«Fondo lienzo. Arriba a la derecha, "Saltar"»* — una presentación a pantalla completa con su salida arriba. **Ficha: `D-1097`** (abajo) para que la mesa decida si el patrón «pantalla de presentación sin cabecera» se declara como excepción de la vara o 02 gana cabecera.
+- **6 · 06 Hogar sin mascota: la fecha del antetítulo pasa por `fechaLargaHumana` del riel ✓, pero la pantalla poblada de al lado sigue con la fuente mono** que la mesa mató. No es de este lote (**lote 4**) y por eso no se toca; queda dicho porque la captura `06-shell-hogar.png` lo muestra.
+- **6 · el resto es n/a** porque esas pantallas no muestran plata ni fecha. **Y 07 es «sí» por una cura**: el peso se parsea con `parsearPrecio` del riel — me lo cazó `R88`.
+
+### La pregunta de cierre del lote
+
+> **¿bajó el conteo de piezas locales?** → **SÍ: 62 → 61.** El lote absorbió tres (`PasoEspecie`, `PasoRaza`, `PasoHistoria`), nacieron dos (`PasoDatosBasicos`, `PasoCarnet`) y se inlinearon dos que yo había creado en el lote anterior. Baseline asentado en 61 en el mismo commit.
+
+---
+
+## ⑫ LAS ONCE PANTALLAS — capturas, con lo que cada una prueba y lo que no
+
+| # | captura | qué prueba | ⚠️ |
+|--:|---|---|---|
+| 00 | `00-splash.png` | el fondo magenta y la marca | **la tomé con el menú de dev encima y ya había pasado a 01**: con sesión resuelta el splash sale en el acto, que es su comportamiento correcto |
+| 01 | `01-propuesta.png` | claim en Baloo, degradado, los dos botones | el logo con **fondo negro** (§⑤) |
+| 02 | `02-beneficios.png` · `-tercera.png` | las tres tarjetas, los puntos, el CTA sólo en la última | — |
+| 03 | `03-acceso.png` | cabecera nueva, campos, Google sin logo | — |
+| 04 | *sin captura* | — | **no la capturé**: el emulador se quedó en el perfil tras el alta y corté ahí en vez de seguir dando taps a ciegas |
+| 05 | `05-crear-cuenta.png` | cabecera, tres campos, **la razón del botón apagado** | — |
+| 06 | `06-shell-hogar.png` | **las cinco tabs con Actividad**, el asistente | es el hogar POBLADO: el vacío no se capturó (la cuenta de prueba tiene mascotas) |
+| 07 | `07-datos-basicos.png` | **barra de pasos 1/3**, grilla de especies, raza con autocompletado, CTA con razón | — |
+| 08 | `08-foto.png` | la escalera de la cara y su cabecera nueva | — |
+| 09 | `09-carnet.png` | marco, nota, las dos salidas, pasos 3/3 | — |
+| 10 | `10-expediente-creado.png` | check, «¡Listo!», **el apoyo que dice la verdad** | 🔴 **es ANTERIOR a la cura del esqueleto** — ver abajo |
+| — | `07-empujada-sin-barra.png` | **la empujada no lleva barra** | — |
+
+### 🔴 Lo que las capturas mostraron y ningún gate vio — tres defectos míos
+
+1. **El círculo vacío del «Pez» en 07.** Pasaba el código del catálogo (**once** especies) a `Personaje` (**seis** caras) sin verificar: con `pez` la pieza dibujaba el círculo rosa **vacío**. Compilaba y pasaba los tres gates. Curado con un guard de pertenencia que cae a la nariz — *la misma salida que la letra §1.10 ya eligió para el ave*.
+2. **08 tenía cabecera vieja y ninguna barra de pasos.** Conservé `PasoFoto` sin recomponerlo. La pantalla se veía bien **y no decía en qué paso estaba**, así que el flujo perdía su sentido de avance justo en el medio. Curado.
+3. **El esqueleto de carga quedó ENCIMA de la confirmación en 10.** Escribí en el comentario que *«la confirmación ES la pantalla»* y después la monté debajo del esqueleto: las dos convivían. *La Hoja modal vieja tapaba el esqueleto; una pantalla no tapa nada.* **Curado en el código y verificado por typecheck — sin captura posterior**, porque el emulador se me fue de ruta y preferí cortar antes que dar taps a ciegas. **La captura que queda muestra el defecto, no la cura.**
+
+*Los tres son de la misma clase: nada falla, nada rompe, y se ve mal. Los tres los encontró mirar una captura.*
+
+---
+
+## ⑬ 🔴 UN DEFECTO QUE NO ES MÍO Y BLOQUEA EL CAMINO NUEVO — `D-1098`
+
+**Crear cuenta desde la app falla.** Stack leído del LogBox, no supuesto:
+
+```
+TypeError: undefined is not a function
+  auth.ts:517:56   registrarse   →  await getClient().auth.signUp({...})
+  registro.tsx:74  crearCuenta
+```
+
+**`getClient().auth.signUp` es `undefined`.** El último commit de `packages/api/src/wrappers/auth.ts` es de **S105-A**: no lo toqué. Y `signInWithPassword` **sí funciona** —entré con la cuenta de prueba en el mismo emulador y la misma sesión de Metro—, así que no es el cliente entero: es ese método.
+
+⚠️ **Lo que esto significa para el recorrido:** **nadie puede crear una cuenta nueva**, que es el camino exacto que un invitado de F&F hace el primer día (01 → 02 → 05 → alta). El alta la capturé por `/hogar/agregar`, que es el otro modo de la misma pieza.
+
+*No lo curo porque `packages/api` no es mi territorio y porque una cura a ciegas sobre el motor de registro es peor que la ficha.*

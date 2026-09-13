@@ -1,5 +1,5 @@
 {
-  "baseline": 62,
+  "baseline": 61,
   "sembrado": "2026-09-13 · S116-A",
   "firmado": "mesa 13-sep-2026 — la vara de coherencia pregunta por lote si este número bajó",
   "que_cuenta": "Los .tsx de apps/cliente/src/components, recursivo: 45 en la raíz + 17 en alta/, reserva/, postventa/ y nexo/. Los .ts NO cuentan (foto-encuadre.ts, alta/tipos.ts): son helpers y tipos, no piezas.",
@@ -11,11 +11,10 @@
     "HojaFotoMascota.tsx",
     "alta/AltaMascota.tsx",
     "alta/BifurcacionDeEntrada.tsx",
+    "alta/PasoCarnet.tsx",
     "alta/PasoCierre.tsx",
-    "alta/PasoEspecie.tsx",
+    "alta/PasoDatosBasicos.tsx",
     "alta/PasoFoto.tsx",
-    "alta/PasoHistoria.tsx",
-    "alta/PasoRaza.tsx",
     "aviso-no-cargo.tsx",
     "busqueda.tsx",
     "canto-curva.tsx",
@@ -69,5 +68,6 @@
     "talla-pelaje-hoja.tsx",
     "traer-papeles.tsx",
     "videollamada-piezas.tsx"
-  ]
+  ],
+  "nota_s116c": "S116-C lote 3 — 62 → 61. El alta paso de cinco pasos a tres: murieron PasoEspecie, PasoRaza y PasoHistoria (absorbidos por PasoDatosBasicos) y nacio PasoCarnet. Los tres viejos se BORRARON en vez de quedar como archivos con lapida: este gate cuenta .tsx, asi que un archivo con solo `export {}` seguia contando como pieza del catalogo sin serlo — una lapida no puede inflar el inventario que la vara mide. La lapida vive en PASOS (tipos.ts). Ademas se inlinearon splash-marca y conteo-de-montajes en su unica pantalla: una pieza de un solo consumidor que no es reutilizable no es una pieza, es la pantalla."
 }
