@@ -23,7 +23,7 @@
  */
 
 import { useState } from 'react'
-import { cubicBezier } from 'react-native-reanimated'
+import { cubicBezier, useReducedMotion } from 'react-native-reanimated'
 
 import { motion } from '../tokens/motion'
 import { useTheme } from '../ThemeProvider'
@@ -36,6 +36,27 @@ export function usePresionado(escala: 0.97 | 0.99 = 0.97) {
   // mínima) pero el cambio es REEMPLAZO DIRECTO, sin transición.
   const esMemorial = theme.mode === 'memorial'
 
+  /* 🔴 **S116-B lote 2 · LA PREFERENCIA DEL SISTEMA APAGA LA TRANSICIÓN
+   * (firma de la mesa, 13-sep-2026).**
+   *
+   * Lo señaló la crítica de Impeccable: *«reduced motion is not optional»*.
+   * Esta primitiva ya apagaba la transición en **memorial** —un momento del
+   * producto— y **nunca miraba la preferencia de la persona**, que es la que
+   * de verdad importa: alguien con vestibular disorder no elige el tema, y
+   * su sistema ya dijo que no quiere movimiento.
+   *
+   * **La escala SE CONSERVA en los dos casos.** Reduced motion no es «sin
+   * respuesta al toque»: es **sin transición**. El botón sigue hundiéndose;
+   * lo que desaparece es la interpolación. *Quitar también la escala dejaría
+   * un control que no contesta, que es peor que uno que se mueve.*
+   *
+   * ⚠️ **Se lee con `useReducedMotion()` de Reanimated y no con el
+   * `AccessibilityInfo` de RN**: es el mismo que ya usan `BarraTabs` y las
+   * 19 piezas que `R41` vigila — una segunda fuente para la misma
+   * preferencia son dos respuestas que pueden diferir. */
+  const prefiereMenosMovimiento = useReducedMotion()
+  const sinTransicion = esMemorial || prefiereMenosMovimiento
+
   return {
     presionado,
     handlers: {
@@ -44,7 +65,7 @@ export function usePresionado(escala: 0.97 | 0.99 = 0.97) {
     },
     estiloPresionado: {
       transform: [{ scale: presionado ? escala : 1 }],
-      ...(esMemorial
+      ...(sinTransicion
         ? null
         : {
             transitionProperty: 'transform' as const,
