@@ -25,6 +25,67 @@ RAIZ=$(git rev-parse --show-toplevel)
 cd "$RAIZ"
 
 # ─────────────────────────────────────────────────────────────────────
+# ⓪ EL GUARDIA DE FORMA: EL ÁRBOL PRINCIPAL SOLO COMMITEA A `main`
+#    (S116-A, orden del founder — lo parió un incidente del mismo día)
+#
+# QUÉ PASÓ, con su evidencia: durante el lote 0 de S116 alguien hizo
+# `checkout` del árbol PRINCIPAL de `main` a `pista/s116-b-01` mientras A
+# conducía. El commit siguiente de A —el depósito del análisis y el plan—
+# salió a esa rama y NO a `main`. El reflog lo dice literal:
+#     38a0661a HEAD@{1}: checkout: moving from main to pista/s116-b-01
+#
+# 🔴 POR QUÉ ESTE GUARDIA Y NO OTRA COSA: el commit SALIÓ VERDE. Todos los
+#    gates pasaron, porque ninguno mira A DÓNDE va el commit: miran QUÉ
+#    entra. La única señal fue la línea `[pista/s116-b-01 d1bb0a5a]` de la
+#    salida de `git commit`, que es exactamente lo que nadie lee cuando el
+#    gate dijo verde. Se recuperó por fast-forward y no se perdió nada,
+#    pero el modo de falla es de los peores: **trabajo bien hecho que
+#    aterriza en el lugar equivocado sin que nada suene.**
+#
+# CÓMO DISTINGUE el árbol principal de un worktree, medido en los dos:
+#    principal       -> git-dir == git-common-dir   (los dos `.git`)
+#    worktree linked -> git-dir = .git/worktrees/<n>, common = .git
+#    Se normalizan con `pwd -P` porque el principal las da RELATIVAS y el
+#    linked ABSOLUTAS: compararlas crudas daría siempre «distinto», y el
+#    guardia no frenaría nunca sin que nadie lo note.
+#
+# ⚠️ ALCANCE DECLARADO: sólo mira el árbol PRINCIPAL. En un worktree no
+#    dice nada — ahí la rama de pista es lo correcto. Y frena también en
+#    `HEAD` desprendido, que en el árbol principal es peor que una rama
+#    ajena: ese commit no queda en ninguna rama y un `checkout` lo entierra.
+GITDIR_N=$(cd "$(git rev-parse --git-dir)" 2>/dev/null && pwd -P)
+COMMON_N=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)
+if [ -n "$GITDIR_N" ] && [ "$GITDIR_N" = "$COMMON_N" ]; then
+  RAMA_ACTUAL=$(git symbolic-ref --quiet --short HEAD || echo "")
+  if [ -z "$RAMA_ACTUAL" ]; then
+    echo ""
+    echo "✗ EL ÁRBOL PRINCIPAL ESTÁ EN HEAD DESPRENDIDO — el commit NO ocurre."
+    echo ""
+    echo "  El árbol principal solo commitea a main; las pistas trabajan en su worktree."
+    echo "  Un commit acá no queda en ninguna rama: el próximo checkout lo entierra."
+    echo ""
+    echo "     git checkout main"
+    echo "  o declaralo:  SALTAR_GATE=\"por qué\" git commit ..."
+    exit 1
+  fi
+  if [ "$RAMA_ACTUAL" != "main" ]; then
+    echo ""
+    echo "✗ EL ÁRBOL PRINCIPAL NO ESTÁ EN main (está en '$RAMA_ACTUAL') — el commit NO ocurre."
+    echo ""
+    echo "  El árbol principal solo commitea a main; las pistas trabajan en su worktree."
+    echo ""
+    echo "  Si sos una pista, tu worktree:   git worktree list"
+    echo "  Si conducís main:                git checkout main"
+    echo "  Si es a propósito:               SALTAR_GATE=\"por qué\" git commit ..."
+    echo ""
+    echo "  (Lo parió un caso real: un commit de A salió a pista/s116-b-01 con"
+    echo "   todos los gates en verde, porque ninguno mira A DÓNDE va el commit.)"
+    exit 1
+  fi
+fi
+
+
+# ─────────────────────────────────────────────────────────────────────
 # EL SALTO DECLARA CONTRA QUÉ MIDIÓ (S85-B9 — propuesta de B, aceptada
 # por la mesa).
 #
