@@ -6,5 +6,5 @@
        NO es un recorte del isotipo: está DIBUJADO. El lote 1 midió que la
        silueta del isotipo no se lee a 24 px (sus dos huecos interiores se
        cierran), y recortarla habría entregado una mancha. -->
-  <path fill="#FFFFFF" fill-rule="evenodd" d="M8.96 20.9A10.2 8.8 0 1 1 15.04 20.9L15.04 17.65A7.1 5.7 0 1 0 8.96 17.65Z M8.1 4.9a3.3 3.3 0 1 0 0 6.6a3.3 3.3 0 1 0 0-6.6Z M15.9 4.9a3.3 3.3 0 1 0 0 6.6a3.3 3.3 0 1 0 0-6.6Z"/>
+  <path fill="#FFFFFF" fill-rule="evenodd" d="M12 21.8C8.3 19.7 2.8 15.7 2.8 10.8 2.8 6.8 5.8 4.1 9.2 4.1 10.6 4.1 11.5 4.8 12 5.7 12.5 4.8 13.4 4.1 14.8 4.1 18.2 4.1 21.2 6.8 21.2 10.8 21.2 15.7 15.7 19.7 12 21.8Z M8.2 6.6a2.3 3 0 1 0 0 6 2.3 3 0 1 0 0-6Z M15.8 6.6a2.3 3 0 1 0 0 6 2.3 3 0 1 0 0-6Z"/>
 </svg>

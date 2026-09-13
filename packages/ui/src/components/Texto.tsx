@@ -191,6 +191,87 @@ export type TextoProps = {
   tabular?: boolean
 }
 
+/* ══════════════════════════════════════════════════════════════════════
+ *  S116-B · LOTE 2b — LA ESCALA v5 ENTRA A `Texto`, Y LA MEDICIÓN QUE LO
+ *  OBLIGÓ ES DEL FOUNDER: **«en tus cuatro capturas ningún título está en
+ *  Baloo».**
+ *
+ * 🔴 **LO MEDIDO, Y CORRIGE LA HIPÓTESIS OBVIA.** La sospecha natural era
+ * que las pantallas leyeran un token propio. **No:** leen `Texto`, que es
+ * el token de la casa — y **`Texto` nunca migró a la escala v5**. De sus
+ * nueve variantes, `antetitulo` fue la única que la consumió (lote 2), y
+ * las otras ocho siguieron leyendo `typography.family.sans.*`, que **es DM
+ * Sans**. ⇒ *La letra §1.4 estaba firmada, el token existía con Baloo
+ * adentro, y nadie lo enchufó. El rediseño tipográfico no falló: no llegó.*
+ *
+ * ⚠️ **Y hay un agravante que lo vuelve un defecto y no un pendiente:** la
+ * enmienda de la letra §1.4 deja DM Sans viva **como token del PRESTADOR**.
+ * O sea que hasta hoy **los títulos del cliente venían pintados con la
+ * fuente de la otra casa**, que es justo lo que esa enmienda separaba.
+ *
+ * ── POR QUÉ SE RESUELVE POR CASA Y NO SE CAMBIA EL TOKEN ────────────
+ * `Texto` lo montan LAS DOS APPS, y la letra §5 deja al prestador sin
+ * cambios. Cambiar `RECETA` a secas le habría cambiado la tipografía al
+ * prestador en silencio — **el mismo problema que el décimo slot resolvió
+ * para la geometría en el lote 2, y por eso se usa el MISMO slot**:
+ * `accent.formaV5` ya significa *«¿esta casa recibió el rediseño?»*.
+ *
+ * **No nace un slot nuevo, y es deliberado.** La nota de `formaV5` en
+ * `themes/` ya dejó escrito el porqué: *«cinco booleanos de casa que
+ * siempre valen lo mismo son un tema paralelo escrito de a poco»*. La
+ * tipografía v5 y la geometría v5 **son la misma decisión de la misma
+ * letra**; separarlas en dos banderas permitiría un estado —cliente con
+ * píldoras y sin Baloo— que ninguna letra describe.
+ *
+ * ⚠️ **MEMORIAL NO RECIBE Baloo**, y sale gratis: su tema resuelve
+ * `formaV5` en `false` (§4 de la letra apaga la fiesta). *La cifra en
+ * Baloo no aparece en memorial porque no hay plata ni peso que celebrar —
+ * y eso ya lo decidía el slot, no hizo falta una rama nueva.*
+ * ══════════════════════════════════════════════════════════════════════ */
+const ESCALA_V5: Partial<Record<TextoVariante, { fontFamily: string; fontSize: number; leading: number }>> = {
+  /** «título 1 Baloo 28/31» — el título de PANTALLA. */
+  titulo: {
+    fontFamily: typography.escala.titulo1.familia,
+    fontSize: typography.escala.titulo1.size,
+    leading: typography.escala.titulo1.lineHeight,
+  },
+  /** «título 2 Baloo 22/26» — el título de SECCIÓN. */
+  seccion: {
+    fontFamily: typography.escala.titulo2.familia,
+    fontSize: typography.escala.titulo2.size,
+    leading: typography.escala.titulo2.lineHeight,
+  },
+  /** «cuerpo PJS 400 14/22». ⚠️ **BAJA de 16 a 14 y se declara**: la
+   *  escala v5 fija los dos números juntos y `D-482` ya había firmado el
+   *  movimiento inverso (md/18 → base/15) *para la escala vieja*. Acá
+   *  manda la letra §2, que cierra los rangos del mock. */
+  cuerpo: {
+    fontFamily: typography.escala.cuerpo.familia,
+    fontSize: typography.escala.cuerpo.size,
+    leading: typography.escala.cuerpo.lineHeight,
+  },
+  /** «apoyo PJS 400 12/17». */
+  apoyo: {
+    fontFamily: typography.escala.apoyo.familia,
+    fontSize: typography.escala.apoyo.size,
+    leading: typography.escala.apoyo.lineHeight,
+  },
+  /** «fila PJS 700 14/18» — el énfasis de la casa es el peso de fila. */
+  enfasis: {
+    fontFamily: typography.escala.fila.familia,
+    fontSize: typography.escala.fila.size,
+    leading: typography.escala.fila.lineHeight,
+  },
+  /* ⚠️ LO QUE **NO** ENTRA, y es decisión medida, no olvido:
+   *  · `dato` y `datoMd` — **la Ley 3 sigue rigiendo**: JetBrains Mono para
+   *    metadata de máquina. La letra §1.4 deroga N1 y «la casa no titula en
+   *    bold»; **no toca la voz del dato**, y el mono no es DM Sans.
+   *  · `voz` — es DM Sans 300, *«lo humano a escala de voz»*, y la letra no
+   *    nombra una variante de voz. **Cambiarla sería decidir algo que nadie
+   *    firmó**; queda para el lote que toque su superficie.
+   *  · `antetitulo` — ya consume la escala v5 desde el lote 2. */
+}
+
 const RECETA: Record<
   TextoVariante,
   {
@@ -313,6 +394,10 @@ const RECETA: Record<
 
 export function Texto({ children, variante = 'cuerpo', color, numberOfLines, centrado, seleccionable, ajustaParaEntrar, tabular }: TextoProps) {
   const { theme } = useTheme()
+  /* La casa decide la escala (ver `ESCALA_V5` arriba). `formaV5` es el
+   * mismo slot que gobierna la geometría: una sola bandera para una sola
+   * decisión de una sola letra. */
+  const v5 = theme.accent.formaV5 ? ESCALA_V5[variante] : undefined
   const receta = RECETA[variante]
   const c = color ?? receta.color
   const colorResuelto =
@@ -340,11 +425,15 @@ export function Texto({ children, variante = 'cuerpo', color, numberOfLines, cen
          en vez de prometer. */
       adjustsFontSizeToFit={ajustaParaEntrar === true && numberOfLines !== undefined}
       style={{
-        fontFamily: receta.fontFamily,
-        fontSize: receta.fontSize,
+        fontFamily: v5?.fontFamily ?? receta.fontFamily,
+        fontSize: v5?.fontSize ?? receta.fontSize,
         color: colorResuelto,
         ...(centrado ? { textAlign: 'center' as const } : null),
-        ...(receta.leading !== undefined ? { lineHeight: receta.leading } : null),
+        ...(v5 !== undefined
+          ? { lineHeight: v5.leading }
+          : receta.leading !== undefined
+            ? { lineHeight: receta.leading }
+            : null),
         ...(receta.letterSpacing !== undefined ? { letterSpacing: receta.letterSpacing } : null),
         ...(receta.textTransform !== undefined ? { textTransform: receta.textTransform } : null),
         ...(receta.tabular || tabular ? { fontVariant: ['tabular-nums' as const] } : null),

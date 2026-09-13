@@ -27,7 +27,7 @@ import { execFileSync } from 'node:child_process'
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-const TRAZO = 1.9
+const TRAZO = 1.8
 const FUENTE = 'packages/ui/src/components/Icono.tsx'
 
 /** Los cuatro óvalos de la primitiva `Huella`, minados de su archivo —
@@ -84,8 +84,20 @@ function traducir(cuerpo, { tinta, huella }) {
   for (const m of trabajo.matchAll(/<Rect x=\{([-\d.]+)\} y=\{([-\d.]+)\} width=\{([-\d.]+)\} height=\{([-\d.]+)\} rx=\{([-\d.]+)\}\s*\{\.\.\.trazo\([^)]*\)\}\s*\/>/g)) {
     piezas.push(`<rect x="${m[1]}" y="${m[2]}" width="${m[3]}" height="${m[4]}" rx="${m[5]}" ${t}/>`)
   }
-  for (const m of trabajo.matchAll(/<Huella color=\{huella\} x=\{([-\d.]+)\} y=\{([-\d.]+)\} escala=\{([-\d.]+)\}\s*\/>/g)) {
-    piezas.push(huellaSvg({ x: +m[1], y: +m[2], escala: +m[3], color: huella }))
+  /* 🔴 **`SIN_HUELLA=1` dibuja el set como lo va a RENDERIZAR LA CASA v5.**
+   * Desde S116-B lote 2b la huella la apaga `resolverHuella` cuando
+   * `accent.formaV5` está encendido (letra §1.1), así que una hoja que las
+   * pinte **estaría mostrando un glifo que el cliente no va a ver**. *Una
+   * hoja de contacto que no muestra lo que sale en pantalla no es una hoja
+   * de contacto: es un dibujo del registry.*
+   * Sin el flag las sigue pintando, que es lo correcto para juzgar los
+   * glifos del PRESTADOR — ahí la huella vive. */
+  if (process.env.SIN_HUELLA !== '1') {
+    for (const m of trabajo.matchAll(/<Huella color=\{huella\} x=\{([-\d.]+)\} y=\{([-\d.]+)\} escala=\{([-\d.]+)\}\s*\/>/g)) {
+      piezas.push(huellaSvg({ x: +m[1], y: +m[2], escala: +m[3], color: huella }))
+    }
+  } else {
+    for (const _ of trabajo.matchAll(/<Huella[^/]*\/>/g)) { /* apagada por la casa */ }
   }
   // lo que quede sin traducir se declara, no se ignora
   const restante = trabajo.replace(/<Path[\s\S]*?\/>|<Circle[\s\S]*?\/>|<Rect[\s\S]*?\/>|<Huella[\s\S]*?\/>|<>|<\/>|\s/g, '')
