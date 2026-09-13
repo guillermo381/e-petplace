@@ -198,7 +198,16 @@ export const palette = {
   // ── Extensiones v3.1 (mismos hex) ──
   violet:         '#9E3AFF',  // Capa 3 · comunidad amplia — rgb(158,58,255)
   violetDark:     '#7C2DD4',  // rgb(124,45,212)
-  violetText:     '#AE59FF',  // violet aclarado MÍNIMO para AA como texto en dark
+  /* 🔴 S116-B · era #AE59FF. **No es un color nuevo: es el mismo token
+     cumpliendo el mismo contrato con el fondo cambiado** — su propia nota
+     decía «aclarado MÍNIMO para AA», o sea calibrado al límite contra el
+     `bg.card` viejo del tema oscuro. Con la ciruela profunda de v5 ese
+     mínimo dejó de alcanzar: **4.28 contra un piso de 4.5**, y
+     `verify:contrast` lo tumbó por el nombre de la cabecera del Coach.
+     #BE79FF da **5.56**. *Un token que promete AA y deja de darlo no es
+     «el tema sin calibrar»: es un token que dejó de cumplir lo que su
+     nombre dice.* */
+  violetText:     '#BE79FF',  // violet aclarado para AA como texto en dark
                               // (S44-B2.3: subió de #A64BFF para pasar también
                               // sobre el tint capaBg — 4.63:1 en el peor par)
                               // (#9E3AFF da 4.16:1 sobre card — gate S43-B2). rgb(166,75,255)
@@ -725,7 +734,7 @@ export const palette = {
    * del Coach de un slot que cambia por otra razón deja una bomba con
    * mecha: *el día que alguien decida dibujar algo del Coach en memorial,
    * el Coach se volvería rosa sin que nadie tocara su color.* */
-  coachClaro:    '#AE59FF',  // = violetText · el barrido y el halo sobre oscuro
+  coachClaro:    '#BE79FF',  // = violetText (S116-B: los dos suben juntos, es el MISMO color por definición)
   coachMedio:    '#9E3AFF',  // = violet · el cuerpo despierto y los arcos de aviso
   coachProfundo: '#7C2DD4',  // = violetDark · la letra del nombre sobre papel (AA)
 

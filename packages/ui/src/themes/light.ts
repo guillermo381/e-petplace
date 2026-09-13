@@ -59,7 +59,15 @@ export const lightTheme = {
     ctaTexto:      palette.white,
     ctaElevado:    true,
 
-    primary:       palette.magentaAccion,
+    /* 🔴 **LA REGLA DE DOS REGISTROS (Ley 2) APLICADA AL MAGENTA.**
+       `accent.primary` es el registro FUNCIONAL —lo que los componentes
+       pintan como TEXTO en el tonal de la Ley 22—, así que va en
+       `magentaTinta`, que es literalmente lo que la letra §2 define:
+       *«magenta tinta #8E0A5D — magenta sobre claro donde hay TEXTO»*.
+       **Medido:** `magentaAccion` sobre `rosaTinte` da **4.27** y
+       `verify:contrast` lo tumbó; `magentaTinta` da **7.44**. El puro se
+       queda donde es fill con blanco encima (`cta`, `active`). */
+    primary:       palette.magentaTinta,
     primaryBg:     palette.rosaTinte,
     primaryBorder: palette.tintaBorde12,
 

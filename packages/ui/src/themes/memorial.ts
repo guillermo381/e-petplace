@@ -54,7 +54,7 @@ export const memorialTheme = {
     tertiary:   palette.tintaTexto50,
     inverse:    palette.white,
     onGradient: palette.white,              // sobre la cabecera ciruela noche
-    warm:       '#2A1A10',
+    warm:       '#2A1A10',   // texto sobre `bg.warm` (cream) — 15.48
   },
 
   accent: {
@@ -89,9 +89,13 @@ export const memorialTheme = {
     activoLleno:      palette.tintaV5,
     sobreActivoLleno: palette.white,
 
-    warm:          palette.cream,
-    warmBg:        palette.creamAlpha06,
-    warmBorder:    'rgba(250,246,232,.18)',
+    /* S116-B · memorial paso a CLARO (§4), asi que su familia `warm` va en
+       registro CLARO: `cream` sobre el lienzo daba 1.02 y verify:contrast
+       lo tumbo. `terracottaDark` da 5.27 sobre lienzo y 5.82 sobre blanco
+       — es el mismo registro que usa el tema claro. */
+    warm:          palette.terracottaDark,
+    warmBg:        palette.terracottaAlphaL,
+    warmBorder:    palette.terracottaBorderL,
 
     /** §4 cláusula 3 — **ciruela noche PLANA, sin degradado.** */
     gradient:       gradients.memorialPlano,

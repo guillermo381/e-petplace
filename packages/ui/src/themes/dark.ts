@@ -35,8 +35,8 @@ export const darkTheme = {
     base:     palette.ciruelaNoche,      // #26062E
     card:     palette.ciruelaProfunda,   // #3B0B47
     elevated: palette.ciruela,           // #4E1160
-    overlay:  'rgba(255,255,255,.06)',
-    hundido:  'rgba(0,0,0,.24)',
+    overlay:  '#33153B',   // = blanco 6 % sobre ciruelaNoche, PRECOMPUTADO (lección Kaxo)
+    hundido:  '#1D0523',   // = negro 24 % sobre ciruelaNoche, PRECOMPUTADO
     border:   'rgba(255,255,255,.12)',
     warm:     palette.cream,
     tinta:    palette.tinta,
@@ -48,7 +48,7 @@ export const darkTheme = {
     tertiary:   'rgba(250,249,247,.48)',
     inverse:    palette.tintaV5,
     onGradient: palette.white,
-    warm:       palette.cream,
+    warm:       '#2A1A10',   // S116-B · va SOBRE `bg.warm` (cream): cream/cream daba 1.00
   },
 
   accent: {
@@ -106,10 +106,10 @@ export const darkTheme = {
     comunidadAmplia: palette.rosaSobreCiruela,
   },
   capaBg: {
-    identidad:       'rgba(255,255,255,.06)',
-    cuidado:         'rgba(255,255,255,.06)',
-    comunidad:       'rgba(255,255,255,.06)',
-    comunidadAmplia: 'rgba(255,255,255,.06)',
+    identidad:       '#33153B',
+    cuidado:         '#33153B',
+    comunidad:       '#33153B',
+    comunidadAmplia: '#33153B',
   },
 
   status: {
@@ -124,7 +124,7 @@ export const darkTheme = {
     danger:        palette.coral,
     dangerBg:      'rgba(255,107,107,.16)',
     dangerBorder:  'rgba(255,107,107,.30)',
-    dangerText:    palette.coral,
+    dangerText:    '#FF9B9B',   // S116-B · `coral` daba 4.11 sobre su tinte; este da holgura
     info:          palette.magentaLuz,
     infoBg:        'rgba(255,127,196,.14)',
     infoBorder:    'rgba(255,127,196,.28)',
