@@ -1,144 +1,122 @@
 /**
- * Bienvenida — EL ACTO I DEL RITUAL DE ENTRADA (S104-C, coreografía founder
- * 23-ago; reparto: B provee los gestos, C compone).
+ * 01 · PROPUESTA — la primera pantalla de alguien que llega (S116-C lote 3).
  *
- * ── LA CEREMONIA (composición de C sobre los gestos de B) ────────────────
- * ① el isotipo RESPIRA una vez (`RespiroDeMarca` de B, 1.0→1.03→1.0) → ② la
- * SENDA se traza y queda (`PaseoDeHuellas` de B, diagonal desde
- * abajo-izquierda) → ③ el MANIFIESTO entra (`Entrada`, 300/120/translateY 15)
- * → ④ las ACCIONES al pie. **Nada bloquea el toque:** `PaseoDeHuellas` y
- * `MarcaDeAgua` son `pointerEvents="none"`, y `RespiroDeMarca`/`Entrada` no
- * capturan el toque de sus hijos — los botones responden aunque la ceremonia
- * corra. *Tocar una acción durante el gesto navega igual: la interacción
- * gana a la coreografía.*
+ * ── QUÉ SE VE ─────────────────────────────────────────────────────────────
+ * Fondo con el degradado de entrada. Arriba, la nariz con el wordmark (clara,
+ * chica). En el medio, el claim de la casa. Debajo, **una** línea de apoyo.
+ * Abajo, dos acciones: «Crear cuenta» primaria y «Ya tengo cuenta» secundaria
+ * en blanco. Todo entra escalonado **la primera vez**. *Nada más en la
+ * pantalla* — el encargo lo dice así y es la mitad de lo que la hace funcionar.
  *
- * ── LO QUE MUERE (Ley 37) ────────────────────────────────────────────────
- * El wordmark `e.petplace` → **`e-PetPlace`** (firma founder: muere la
- * variante con punto, la única que el usuario veía como wordmark).
+ * ── ☠️ LO QUE MURIÓ DE LA VERSIÓN S104, con su razón ─────────────────────
+ * La ceremonia vieja tenía cuatro actos (`RespiroDeMarca` · `PaseoDeHuellas` ·
+ * `MarcaDeAgua` · `Entrada`). **Mueren los tres primeros:**
+ *   · **la marca de agua** y **la senda de huellas**: la revisión de mesa las
+ *     nombró en el Hogar —*«los círculos decorativos translúcidos y la marca de
+ *     agua del isotipo… el sketch no los tiene; son ruido»*— y la razón es la
+ *     misma acá. Además la letra §1.1 retira la huella como ley del ícono.
+ *   · **el respiro**: su lugar es el splash (00), donde la marca está sola.
+ *     *Repetirlo acá lo gastaría: un gesto que ocurre dos veces seguidas deja
+ *     de leerse como un saludo y pasa a leerse como un loader.*
+ * **Queda `Entrada`**, la escalonada de la casa (45/300, bezier .32,.72,0,1).
  *
- * ── LA CONTINUIDAD ENTRE PANTALLAS, declarada ────────────────────────────
- * «El isotipo viaja a la esquina del login» y «el paseo persiste» son
- * coreografía ENTRE rutas (shared-element). Hacerlo pixel-perfect exige un
- * layout compartido de las pantallas de entrada — y esas rutas viven sueltas
- * en `app/`, así que agruparlas toca la navegación (deep-links, el guard
- * raíz). **C no reestructura la navegación sin firma:** la continuidad se
- * monta PER-PANTALLA (el isotipo grande y centrado acá; chico en la esquina
- * en login/registro/recuperar; la senda en las cuatro, misma diagonal). La
- * transición nativa de expo-router hace el «se corre». El shared-element real
- * queda propuesto como refinamiento aparte.
+ * ── LA CONTINUIDAD CON 00, dicha por lo que es ───────────────────────────
+ * El splash termina oscureciéndose a ESTE degradado y la nariz queda arriba,
+ * en el mismo eje. **No es un objeto que viaja entre rutas** (eso es un
+ * *shared element* y exige agrupar estas rutas, que es tocar la navegación:
+ * la nota de S104 sigue rigiendo). *Es continuidad compuesta, y se declara
+ * como tal para que nadie la lea como lo otro.*
  *
- * TESIS: "acá vive la vida de tu mascota — entrá." FIRMA: el isotipo que
- * respira y la senda que se traza — la marca en movimiento sereno. Memorial
- * N/A (pre-sesión); los gestos de B degradan solos.
+ * 🔴 **EL ACENTO DEL CLAIM ESTÁ PENDIENTE DE PIEZA.** El encargo pide *«una
+ * vida.» en rosa sobre ciruela*; `TextoColor` no tiene ese miembro (medido) y
+ * escribir el color acá lo caza `R4`, con razón. **Va entero en `inverso`** y
+ * el pedido está en el buzón: es un cambio de una palabra el día que exista.
+ *
+ * TESIS: «acá vive la vida de tu mascota — entrá». FIRMA: el claim en Baloo
+ * sobre la ciruela. Memorial N/A (pre-sesión).
  */
 
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  Boton,
-  Entrada,
-  Isotipo,
-  MarcaDeAgua,
-  PaseoDeHuellas,
-  RespiroDeMarca,
-  palette,
-  spacing,
-  typography,
-  useTheme,
-} from '@epetplace/ui';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Boton, Entrada, LogoV5, Texto, gradients, spacing } from '@epetplace/ui';
 
 import { useTraduccion } from '@/i18n';
 
 export default function Bienvenida() {
   const router = useRouter();
-  const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
 
   return (
-    <View
+    <LinearGradient
+      colors={gradients.entradaV5.colors as unknown as readonly [string, string, ...string[]]}
+      locations={gradients.entradaV5.locations as unknown as readonly [number, number, ...number[]]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 0.05, y: 1 }}
       style={{
         flex: 1,
-        backgroundColor: theme.bg.base,
         paddingTop: insets.top + spacing[8],
         paddingBottom: insets.bottom + spacing[6],
-        paddingHorizontal: spacing[5],
+        paddingHorizontal: spacing[6],
       }}
     >
-      {/* EL TAPIZ — las dos capas de fondo, las dos pointerEvents none:
-          el papel tapiz (isotipo tenue) y la senda que se traza. */}
-      <MarcaDeAgua />
-      <PaseoDeHuellas />
+      {/* ① LA IDENTIDAD — arriba, chica. Sobre el degradado va la versión
+          para fondo oscuro. El logo queda FUERA de la contabilidad de dosis
+          (Ley 4): es identidad, no acento. */}
+      <Entrada>
+        <View style={{ alignItems: 'center' }}>
+          <LogoV5 sobre="oscuro" tamano="cabecera" />
+        </View>
+      </Entrada>
 
-      {/* ① LA IDENTIDAD — el isotipo respira una vez (gesto de B), el
-          wordmark lo rotula. El isotipo va FUERA de la contabilidad de
-          dosis (Ley 4), UNO por pantalla. */}
-      <View style={{ alignItems: 'center', gap: spacing[3] }}>
-        <RespiroDeMarca>
-          <Isotipo size={72} variant="gradiente" />
-        </RespiroDeMarca>
-        {/* el lockup — identidad de marca. ☠️ `e.petplace` MURIÓ: era la
-            única variante con punto que el usuario veía, y decía otra cosa
-            que las 95 del cuerpo (`e-PetPlace`). */}
-        <Text
-          style={{
-            fontFamily: typography.family.sans.medium,
-            fontSize: typography.size.lg,
-            color: theme.text.primary,
-          }}
-        >
-          e-PetPlace
-        </Text>
-      </View>
-
-      {/* ③ EL MANIFIESTO — EL NORTE respira en el centro, entra escalonado
-          (Entrada: 300 duración · 120 stagger · translateY 15). */}
-      <View style={{ flex: 1, justifyContent: 'center' }}>
-        <Entrada>
-          <Text
-            style={{
-              fontFamily: typography.family.sans.light,
-              fontSize: typography.size['3xl'],
-              lineHeight: Math.round(typography.size['3xl'] * typography.leading.snug),
-              letterSpacing: typography.tracking.tight,
-              color: theme.text.primary,
-            }}
-          >
-            {t('bienvenida.titular')}{' '}
-            <Text style={{ color: palette.pink }}>{t('bienvenida.titularAcento')}</Text>
-          </Text>
-        </Entrada>
-      </View>
-
-      {/* ④ LAS ACCIONES al pie + los legales honestos. Entran después del
-          manifiesto (orden 1 y 2). Tocar acá corta la ceremonia — la
-          interacción no está bloqueada por ningún gesto. */}
-      <View style={{ gap: spacing[2] }}>
+      {/* ② EL CLAIM — el centro de la pantalla, y lo único que se lee de
+          lejos. `titulo` es la variante de display del cliente. */}
+      <View style={{ flex: 1, justifyContent: 'center', gap: spacing[4] }}>
         <Entrada orden={1}>
-          <View style={{ gap: spacing[2] }}>
-            <Boton variante="marca" etiqueta={t('bienvenida.crearCuenta')} bloque onPress={() => router.push('/registro')} />
-            {/* `ghost`, no `sinCaja` (RITUAL §2.4): sobre esta pantalla la
-                acción real es «Crear cuenta» en marca; «ya tengo cuenta» baja
-                a enlace. */}
-            <Boton variante="ghost" etiqueta={t('bienvenida.yaTengoCuenta')} bloque onPress={() => router.push('/login')} />
-          </View>
+          <Texto variante="titulo" color="inverso">
+            {`${t('bienvenida.titular')} ${t('bienvenida.titularAcento')}`}
+          </Texto>
         </Entrada>
+        {/* ③ UNA sola línea de apoyo. *Dos líneas acá convierten una promesa
+            en un folleto.* */}
         <Entrada orden={2}>
-          <Text
-            style={{
-              fontFamily: typography.family.sans.regular,
-              fontSize: typography.size.xs,
-              lineHeight: Math.round(typography.size.xs * typography.leading.normal),
-              color: theme.text.tertiary,
-              textAlign: 'center',
-              marginTop: spacing[2],
-            }}
-          >
-            {t('bienvenida.legales')}
-          </Text>
+          <Texto variante="cuerpo" color="inverso">
+            {t('bienvenida.apoyo')}
+          </Texto>
         </Entrada>
       </View>
-    </View>
+
+      {/* ④ LAS DOS ACCIONES. Una sola es la principal (N5 · Ley 5): «Crear
+          cuenta» en magenta; «Ya tengo cuenta» baja a secundario blanco.
+          Tocar durante la entrada navega igual — la interacción le gana a la
+          coreografía. */}
+      <Entrada orden={3}>
+        <View style={{ gap: spacing[3] }}>
+          <Boton
+            variante="primario"
+            etiqueta={t('bienvenida.crearCuenta')}
+            bloque
+            onPress={() => router.push('/beneficios')}
+          />
+          {/* 🔴 **PEDIDO DE PIEZA, declarado donde muerde:** el encargo dice
+              *«secundario blanco»* y `Boton` no tiene un secundario para fondo
+              oscuro (medido: `primario · marca · secundario · ghost ·
+              destructivo · compacto · apoyada · sinCaja · acento`). El
+              `secundario` de la casa lleva **borde magenta**, que sobre
+              ciruela es magenta sobre ciruela — lo que la letra §2 prohíbe
+              textual. *Es el mismo hueco que `Texto` ya resolvió con el color
+              `inverso`.* Va en el buzón; monto la forma correcta con el color
+              que hay y queda declarado en el parte. */}
+          <Boton
+            variante="secundario"
+            etiqueta={t('bienvenida.yaTengoCuenta')}
+            bloque
+            onPress={() => router.push('/login')}
+          />
+        </View>
+      </Entrada>
+    </LinearGradient>
   );
 }

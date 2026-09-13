@@ -15,6 +15,12 @@ export const clienteEs = {
     // founder). La etiqueta de `explorar` QUEDA: la pantalla sigue viva y
     // se alcanza desde el perfil de la mascota — lo que salió es su botón.
     pedidos: 'Pedidos',
+    /* ⭐ S116-C lote 3 · letra §1.5 — la cuarta tab pasa a ACTIVIDAD
+       (citas + pedidos + postventa, en curso / historial). `pedidos` se
+       CONSERVA y no se renombra: la RUTA sigue llamándose así y su
+       pantalla propia llega en el lote 6. *Renombrar la clave habría
+       obligado a tocar la ruta, que es otra cosa que la etiqueta.* */
+    actividad: 'Actividad',
     // S95-I · el cuarto slot (§3, el ciclo del trono). Le guarda el lugar
     // a Comunidad: cuando ésta nazca, la Despensa le entrega el trono.
     despensa: 'Despensa',
@@ -22,11 +28,30 @@ export const clienteEs = {
   },
   // S61-A8 — la bienvenida reescrita (letra founder; LOTE S61, GATE
   // PENDIENTE). heroTitulo/heroSubtitulo murieron con el hero (Ley 37).
+  /* ⭐ S116-C lote 3 · 02 · BENEFICIOS — se ve UNA sola vez (letra §1.6).
+     Tres tarjetas, un personaje y una frase cada una. *Las frases dicen lo
+     que la app HACE, no lo que promete sentir.* */
+  beneficios: {
+    saltar: 'Saltar',
+    unoTitulo: 'Su expediente vive contigo',
+    unoApoyo: 'Carné, vacunas y documentos, siempre a mano',
+    dosTitulo: 'Cuidado cerca de ti',
+    dosApoyo: 'Veterinaria, paseo, estética y guardería',
+    tresTitulo: 'Todo en un lugar',
+    tresApoyo: 'Agendas, compras y pagas una sola vez',
+    comenzar: 'Comenzar',
+    paso: 'Tarjeta {{actual}} de {{total}}',
+  },
   bienvenida: {
     titular: 'Tu mascota no tiene un expediente. Tiene',
     titularAcento: 'una vida.',
     crearCuenta: 'Crear cuenta',
     yaTengoCuenta: 'Ya tengo cuenta',
+    /* ⭐ S116-C lote 3 — la línea de apoyo del claim (encargo, textual).
+       Dice QUÉ hay adentro en una sola línea: la propuesta sin la línea
+       queda en poesía, y alguien que llega por primera vez necesita saber
+       para qué es la app antes de crear una cuenta. */
+    apoyo: 'Salud, vacunas, documentos, servicios y compras en un solo lugar.',
     legales: 'Al crear tu cuenta aceptas nuestros Términos y nuestra Política de privacidad.',
   },
   // S82-A r4 — la frontera del crash (espejo VERBATIM de las voces S79-B
@@ -249,6 +274,12 @@ export const clienteEs = {
     verAdopcion: 'Ver mascotas en adopción',
     olvide: '¿Olvidaste tu contraseña?',
     titulo: 'Iniciar sesión',
+    /* ⭐ S116-C lote 3 · encabezado de 03. **«Te damos la bienvenida» y
+       NUNCA «Bienvenido»** — tuteo neutro sin género, corrección 01 del
+       plan §5 («todo texto con género → neutro»). */
+    saludo: 'Te damos la bienvenida',
+    volver: 'Volver',
+    apoyo: 'Entra para ver el expediente de tu mascota.',
     emailLabel: 'Email',
     emailPlaceholder: 'ej: ana@correo.com',
     passwordLabel: 'Contraseña',
@@ -257,6 +288,11 @@ export const clienteEs = {
   },
   registro: {
     titulo: 'Crear cuenta',
+    saludo: 'Crea tu cuenta',
+    volver: 'Volver',
+    /* La línea que baja la ansiedad de un formulario: dice cuánto cuesta
+       y que el expediente NO se arma acá. */
+    apoyo: 'Tres datos y listo. El expediente de tu mascota lo armamos contigo después.',
     nombreLabel: 'Tu nombre',
     nombrePlaceholder: 'ej: Ana',
     emailLabel: 'Email',
@@ -308,6 +344,62 @@ export const clienteEs = {
   //      (7-ago: el sujeto es el sistema, el campo dos es el tipo de agua) y
   //      dejó dicho que la voz se firma en el gate de pantalla.
   alta: {
+    /* ⭐ S116-C lote 3 — EL ALTA EN TRES PASOS. Voz en tuteo neutro, sin
+       género. Las claves de los cinco pasos viejos se conservan: varias
+       siguen vivas en el cierre y en la bifurcación. */
+    nuevaMascota: 'Nueva mascota',
+    paso: 'Paso {{actual}} de {{total}}',
+    volver: 'Volver',
+    omitir: 'Omitir',
+    pasoDatosTitulo: 'Datos básicos',
+    especieRotulo: 'ESPECIE',
+    datosRotulo: 'DATOS',
+    nacimientoLabel: 'Nacimiento',
+    pesoLabel: 'Peso',
+    /* El peso es opcional y lo dice: *un campo que parece obligatorio y no lo
+       es hace que alguien invente un número.* */
+    pesoAyuda: 'Opcional, en kilos',
+    pesoPlaceholder: 'ej: 12,5',
+    sexoLabel: 'Sexo',
+    origenLabel: '¿Cómo llegó?',
+    origen_adoptado: 'Adoptado',
+    origen_refugio: 'De un refugio',
+    origen_nacido_en_casa: 'Nació en casa',
+    origen_encontrado: 'Lo encontré',
+    origen_criadero: 'De un criadero',
+    aguaLabel: 'Tipo de agua',
+    agua_dulce: 'Dulce',
+    agua_marino: 'Marino',
+    datosNota: 'Con estos datos creamos su expediente. Vacunas y documentos los agregas cuando quieras.',
+    guardarYCrear: 'Guardar y crear expediente',
+    razonEspecie: 'Elige la especie para seguir.',
+    razonNombre: 'Falta su nombre.',
+    razonAgua: 'Elige el tipo de agua.',
+    /* ── 09 · el carné ─────────────────────────────────────────────── */
+    pasoCarnetTitulo: 'Carné de vacunas',
+    carnetEncuadre: 'Carné completo dentro del marco',
+    carnetNota: 'Leemos las fechas del carné y programamos los recordatorios.',
+    carnetTomar: 'Tomar la foto',
+    carnetGaleria: 'Elegir de la galería',
+    carnetLeyendo: 'Estamos leyendo el carné',
+    carnetLeyendoDetalle: 'Puede tardar un minuto.',
+    carnetLeidoTitulo: 'Encontramos {{n}} vacunas',
+    /* Las dos voces de lo que no se pudo leer — la tercera cláusula de la ley
+       del founder: se dice dónde no pudimos, en vez de dibujar el hueco. */
+    carnetSinFecha: 'Sin fecha — la completas después',
+    carnetSinNombre: 'Sin nombre — la completas después',
+    carnetQuitar: 'Quitar',
+    carnetEditarDespues: 'Puedes corregir y completar cada una desde su carné, cuando quieras.',
+    carnetGuardar: 'Guardar y terminar',
+    carnetSeguirSin: 'Seguir sin carné',
+    carnetSinVacunas: 'No pudimos leer ninguna vacuna en esa foto. Puedes probar con otra o cargarlo después.',
+    carnetFalloPermiso: 'Necesitamos permiso para usar la cámara.',
+    carnetFalloSesion: 'Tu sesión se cortó. Vuelve a entrar para seguir.',
+    carnetFalloLectura: 'No pudimos leer esa imagen. Prueba con otra foto.',
+    /* ── 10 · las cuatro voces del apoyo, según lo que DE VERDAD se guardó */
+    listoApoyoFotoYCarnet: 'Guardamos su foto y su carné. Puedes completar el resto cuando quieras.',
+    listoApoyoFoto: 'Guardamos su foto. Puedes completar el resto cuando quieras.',
+    listoApoyoCarnet: 'Guardamos su carné. Puedes completar el resto cuando quieras.',
     sugEsUn: '¿Es un {{raza}}?',
     sugConf_muyProbable: 'muy probable',
     sugConf_probable: 'probable',
@@ -387,6 +479,18 @@ export const clienteEs = {
     modalCuando: 'Puedes hacerlo ahora o cuando quieras desde su perfil.',
     modalCompletar: 'Completar ahora',
     modalMasTarde: 'Más tarde',
+    /* ⭐ S116-C lote 3 · 10 · EXPEDIENTE CREADO. La confirmación pasa de Hoja
+       modal a PANTALLA con el patrón único de la casa (plan §5). Las claves
+       `modal*` SE CONSERVAN: siguen vivas en el otro camino del alta. */
+    listoExclamacion: '¡Listo!',
+    listoTitulo: 'El expediente de {{nombre}} ya está creado.',
+    /* Dos apoyos, y la pantalla elige: decir «guardamos su foto y su carné»
+       cuando no se guardó ninguno de los dos sería exactamente la clase de
+       frase que la ley del founder prohíbe. */
+    listoApoyoConExtras: 'Guardamos su foto y su carné. Puedes completar el resto cuando quieras.',
+    listoApoyoSolo: 'Guardamos su expediente.',
+    listoVerExpediente: 'Ver expediente',
+    listoExplorar: 'Explorar servicios',
     // ── la celda de entrada en el Hogar (vivía en `agregarMascota`)
     entradaDetalle: 'Cada quien con su propia historia.',
   },
@@ -537,6 +641,16 @@ export const clienteEs = {
     historiaEmpieza: 'La historia empieza acá.',
     historiaEmpiezaDetalle: 'Cada paseo, cada visita al vet, va a quedar guardada.',
     sinMascotas: 'Todavía no hay nadie por acá',
+    /* ⭐ S116-C lote 3 · 06 — el hogar sin mascota. */
+    vacioApoyo: 'Empecemos por presentar a tu mascota.',
+    vacioTitulo: 'Agrega tu primera mascota',
+    vacioDetalle: 'Con su nombre y especie creamos su expediente digital. Toma menos de un minuto.',
+    vacioCta: '+ Agregar mascota',
+    mientrasTanto: 'MIENTRAS TANTO',
+    vacioExplorar: 'Explorar servicios',
+    vacioExplorarDetalle: 'Mira qué hay cerca de ti',
+    vacioTienda: 'Ver la tienda',
+    vacioTiendaDetalle: 'Alimento, juguetes e higiene',
     sinMascotasDetalle: 'Agrega a tu mascota para empezar su historia.',
     sinMascotasAgregar: 'Agregar a mi mascota',
     sinMascotasAdopcion: 'Conoce a los que están esperando',
@@ -971,6 +1085,14 @@ export const clienteEs = {
     filaConfirmar: 'Es correcta',
     estaNoEs: 'Esta no es',
     faltanTocar: 'Faltan {{n}} por revisar',
+    /* ⭐ S116-C lote 3 · `D-1086` — LAS RAZONES DEL BOTÓN APAGADO.
+       Son TRES claves y no una genérica porque el botón se apaga por tres
+       causas distintas: *«revisá los datos» obliga a la persona a buscar
+       cuál de las tres es*, que es exactamente lo que el freno mudo hacía. */
+    razonSinNinguna: 'Todavía no hay ninguna vacuna para sumar',
+    razonDudosas: 'Hay vacunas a las que les falta un dato: revísalas primero',
+    razonSinTocar: 'Confirma cada vacuna antes de sumarlas',
+    razonEdicion: 'Completa el nombre y una fecha que no sea futura',
     faltaTocarUna: 'Falta 1 por revisar',
     campoAplicada: 'Aplicada',
     campoProxima: 'Próxima',
@@ -2842,7 +2964,17 @@ export const clienteEs = {
   /** S103-C · RECUPERAR — heredadas VERBATIM del prestador: ya estaban en
    *  tuteo neutro y es el mismo acto para el mismo humano. */
   recuperar: {
-    titulo: 'Recuperar tu contraseña',
+    titulo: '¿Olvidaste tu contraseña?',
+    apoyo: 'Te ayudamos a entrar de nuevo.',
+    volver: 'Volver',
+    queSigue: 'QUÉ SIGUE',
+    paso1: 'Revisa tu bandeja de entrada',
+    paso2: 'Escribe el código que te enviamos',
+    paso3: 'Crea una contraseña nueva y entra',
+    /* Sin número a propósito — ver el comentario en la pantalla: la config
+       del vencimiento no existe de este lado y no se inventa. */
+    vence: 'El código vence al rato de enviarlo. Si se vence, pedimos otro.',
+    yaLaRecorde: '¿Ya la recordaste? Volver a ingresar',
     ayudaPedir: 'Escribe el correo con el que entras y te enviamos un código de {{n}} dígitos.',
     email: 'Tu correo',
     pedir: 'Enviar el código',
@@ -3611,6 +3743,15 @@ export const clienteEs = {
   autorizacion: {
     tituloAtencion: '{{negocio}} quiere atender a {{mascota}}',
     tituloAlta: '{{negocio}} quiere registrar a {{mascota}} en tu familia y atenderlo hoy',
+    /* ⭐ S116-C lote 3 · `D-1087` — **LAS VOCES DE LO QUE NO SE SABE.**
+       El nombre del negocio puede no llegar (RLS solo-owner sobre la cuenta
+       comercial). Antes se rellenaba con vacío y la frase salía «  quiere
+       atender a Thor». Acá se dice la verdad sin inventar quién — mismo
+       criterio que `citasMascota.coordinaranSinNombre`, que ya lo resolvió
+       así, y la ley del founder del 5-sep: *se dice dónde no pudimos*. */
+    tituloAltaSinNegocio: 'Quieren registrar a {{mascota}} en tu familia y atenderlo hoy',
+    tituloAtencionSinNegocio: 'Quieren atender a {{mascota}}',
+    mascotaSinNombre: 'tu mascota',
     // S82-C L3: voseo→tuteo al tocarse la pantalla (regla 27; C3 de la
     // directiva de craft, re-verificado contra fuente).
     cuerpo: 'Si autorizas, el negocio va a poder ver y cuidar su expediente.',

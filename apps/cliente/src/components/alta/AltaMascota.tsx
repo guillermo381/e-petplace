@@ -22,10 +22,9 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { PasoCierre } from './PasoCierre';
-import { PasoEspecie } from './PasoEspecie';
+import { PasoDatosBasicos } from './PasoDatosBasicos';
+import { PasoCarnet } from './PasoCarnet';
 import { PasoFoto } from './PasoFoto';
-import { PasoHistoria } from './PasoHistoria';
-import { PasoRaza } from './PasoRaza';
 import {
   aParams,
   esPaso,
@@ -45,7 +44,7 @@ export function AltaMascota({ modo, pasoFijo }: { modo: ModoAlta; pasoFijo?: Pas
   const crudo = pasoFijo ?? params.paso;
   // Un `paso` que no existe cae al primero en vez de romper: la ruta es
   // pública y un link viejo o tipeado no puede dejar una pantalla en blanco.
-  const paso: Paso = esPaso(crudo) ? crudo : 'especie';
+  const paso: Paso = esPaso(crudo) ? crudo : 'datos';
   const borrador = leerBorrador(params);
 
   const rutaPaso = MODO[modo].rutaPaso;
@@ -73,28 +72,16 @@ export function AltaMascota({ modo, pasoFijo }: { modo: ModoAlta; pasoFijo?: Pas
     else router.replace(MODO[modo].salida);
   };
 
+  /* ☠️ **EL ALTA PASA DE CINCO PASOS A TRES + EL CIERRE** (S116-C lote 3).
+     `PasoEspecie`, `PasoRaza` y `PasoHistoria` murieron; su reparto está en
+     la cabecera de `PASOS`, en `tipos.ts`. */
   switch (paso) {
-    case 'especie':
-      return (
-        <PasoEspecie
-          modo={modo}
-          borrador={borrador}
-          onAvanzar={avanzar}
-          onAtras={atras}
-          onReintentar={() =>
-            router.replace({
-              pathname: rutaPaso,
-              params: { ...aParams(borrador), paso: 'especie' },
-            })
-          }
-        />
-      );
-    case 'raza':
-      return <PasoRaza borrador={borrador} onAvanzar={avanzar} onAtras={atras} />;
-    case 'historia':
-      return <PasoHistoria borrador={borrador} onAvanzar={avanzar} onAtras={atras} />;
+    case 'datos':
+      return <PasoDatosBasicos modo={modo} borrador={borrador} onAvanzar={avanzar} onAtras={atras} />;
     case 'foto':
       return <PasoFoto borrador={borrador} onAvanzar={avanzar} onAtras={atras} />;
+    case 'carnet':
+      return <PasoCarnet borrador={borrador} onAvanzar={avanzar} onAtras={atras} />;
     case 'cierre':
       // El cierre no tiene «atrás»: el acto ya ocurrió o está ocurriendo.
       return <PasoCierre modo={modo} borrador={borrador} />;

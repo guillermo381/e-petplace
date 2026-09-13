@@ -4,5 +4,5 @@
 import { AltaMascota } from '@/components/alta/AltaMascota';
 
 export default function AgregarInicio() {
-  return <AltaMascota modo="adicional" pasoFijo="especie" />;
+  return <AltaMascota modo="adicional" pasoFijo="datos" />;
 }

@@ -29,7 +29,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   AvatarMascota,
   Boton,
-  Encabezado,
+  Cabecera,
   Texto,
   spacing,
   useTheme,
@@ -92,11 +92,18 @@ export function PasoFoto({
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
+      {/* ⭐ **LA CABECERA DE LA CASA Y SU BARRA DE PASOS — S116-C lote 3.**
+          ⏪ Tenía el `Encabezado` viejo y **ninguna marca de en qué paso
+          estaba**. Lo mostró la captura, no un gate: la pantalla se veía
+          bien y no decía que era el 2 de 3, así que el flujo perdía su
+          sentido de avance justo en el medio. */}
+      <Cabecera
+        variante="empujada"
+        antetitulo={t('alta.nuevaMascota')}
         titulo={t('alta.paso4Titulo', { nombre })}
-        atras
-        onAtras={onAtras}
+        onVolver={onAtras}
+        etiquetaVolver={t('alta.volver')}
+        pasos={{ total: 3, actual: 2, etiqueta: t('alta.paso', { actual: 2, total: 3 }) }}
       />
       <ScrollView
         scrollEnabled={!gestoActivo}

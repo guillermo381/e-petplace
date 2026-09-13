@@ -81,7 +81,23 @@ if (!/t\(\s*['"][a-zA-Z.]+['"]\s*,/.test(control) || HUECO.exec(control) === nul
    ⚠️ **El baseline sube A MANO y con su razón, jamás en el commit que lo
    introduce** — si no, deja de ser un techo y pasa a ser un registro de lo que
    fuimos rompiendo. */
-const BASELINE = 10;
+/* ⭐ **S116-C lote 3 · 10 → 8 (`D-1087`).** Se curaron **5 ocurrencias** y el
+   número bajó 2 respecto del techo: `citas/[mascotaId].tsx:434` (1) y
+   `autorizacion/[solicitudId].tsx:105-106` (4).
+   **Las dos curas son distintas y ésa es la parte que importa:**
+   · en `citas` el hueco era **INALCANZABLE** —el ternario ya garantizaba el
+     dato y el `?? ''` existía sólo para que TypeScript compilara, porque no
+     estrecha una expresión `a ?? b`—. Se hizo **inexpresable** con una const,
+     no se declaró con `HUECO_ACEPTADO`: *el escape deja el `?? ''` vivo para
+     el próximo que lo copie.*
+   · en `autorizacion` el hueco era **REAL** —el nombre del negocio no es
+     legible por el dueño (RLS solo-owner)— y la frase salía «  quiere atender
+     a Thor». Ganó voz propia para el caso sin nombre.
+   ⚠️ **Quedan 8 y NO se tocaron a ciegas**: los 3 de
+   `(tabs)/despensa/checkout.tsx` (el saldo) son de la Despensa, **lote 6**, y
+   curarlos desde acá sería tocar una pantalla sin verla — que es justo lo que
+   la nota de arriba prohíbe. */
+const BASELINE = 8;
 
 di(`\n  interpolaciones con relleno vacío halladas: ${vistos}`);
 di(`  sin declarar: ${malos} · baseline ${BASELINE} (SOLO-BAJA)`);

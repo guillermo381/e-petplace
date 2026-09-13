@@ -22,6 +22,7 @@ import { View } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
   Boton,
+  Confirmacion,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -35,11 +36,15 @@ import {
   crearFamiliaConPrimeraMascota,
   declararFotoMascota,
   obtenerSesion,
+  registrarPesoMascota,
+  registrarVacunasDeCarnet,
 } from '@epetplace/api';
 
 import { esPrecision, esSexo } from '@/lib/params';
 import { subirAvatar } from '@/lib/subir-avatar';
+import { parsearPrecio } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
+import { leerCarnetDelIntento, olvidarCarnetDelIntento } from '@/lib/alta/carnet-del-intento';
 import { esAcuario, esOrigen, esTipoDeAgua, MODO, type BorradorAlta, type ModoAlta } from './tipos';
 
 /**
@@ -125,6 +130,8 @@ export function PasoCierre({ modo, borrador }: { modo: ModoAlta; borrador: Borra
   const [sinFoto, setSinFoto] = useState(false);
   const [intento, setIntento] = useState(0);
   const [creada, setCreada] = useState<string | null>(null);
+  /** ¿El carné llegó a guardarse de verdad? Decide la voz del apoyo. */
+  const [carnetGuardado, setCarnetGuardado] = useState(false);
   const corriendoRef = useRef(false);
 
   const nombre = borrador.nombre ?? t('alta.tuMascota');
@@ -278,6 +285,53 @@ export function PasoCierre({ modo, borrador }: { modo: ModoAlta; borrador: Borra
       // mascota, y «corregir es AGREGAR» (D-544). La propuesta de voz va al
       // gate; encenderlo después es UNA llamada acá.
       ALTAS_YA_HECHAS.set(clave, r.data.mascota_id);
+
+      /* ⭐ **LOS DOS DATOS QUE LA RPC DEL ALTA NO RECIBE — S116-C lote 3.**
+         Se escriben ACÁ y no antes porque los dos **necesitan la mascota**:
+         antes de esta línea no existía a quién colgárselos.
+
+         🔴 **NINGUNO DE LOS DOS PUEDE TUMBAR EL ALTA.** La mascota ya está
+         creada; si el peso o el carné fallan, *lo que corresponde es que la
+         familia lo cargue después desde el expediente, no que el alta parezca
+         rota por algo que ya no puede deshacerse.* Por eso van sin `await`
+         que bloquee el camino y sus fallos no escriben `error`.
+         ⚠️ **Y por eso el apoyo de la confirmación mira el HECHO y no la
+         intención** (ver abajo): decir «guardamos su carné» porque se intentó
+         sería exactamente lo que la ley del founder prohíbe. */
+      if (borrador.peso !== undefined) {
+        /* `parsearPrecio` y no `Number(replace(',','.'))` — me lo cazó `R88`
+           y su razón alcanza al peso igual que a la plata: sobre «1.234,50» un
+           parseo a mano devuelve **1.234**, que es *plausible, equivocado y
+           finito*, así que `Number.isFinite` no lo frena. El formato de la
+           casa es el mismo para los dos (coma decimal, punto de miles). */
+        const kg = parsearPrecio(borrador.peso);
+        if (Number.isFinite(kg) && kg > 0) {
+          void registrarPesoMascota(r.data.mascota_id, { peso_kg: kg });
+        }
+      }
+
+      const carnet = leerCarnetDelIntento(borrador.tokenIntento);
+      /* 🔴 **SOLO LAS QUE TIENEN NOMBRE SE REGISTRAN — la columna es NOT NULL.**
+         Las otras NO se descartaron al leer (eso contradiria la firma
+         S113-D-2.4: *«una fila corregible vale mas que una que desaparece en
+         silencio»*): viajaron, se mostraron diciendo que les faltaba, y se
+         completan en el carnet del expediente, que es la pantalla que tiene
+         ese formulario. *Lo que no se puede guardar no se manda a rebotar al
+         servidor.* */
+      const conNombre = (carnet?.vacunas ?? []).flatMap((v) =>
+        typeof v.nombre === 'string' && v.nombre.length > 0 ? [{ ...v, nombre: v.nombre }] : [],
+      );
+      if (carnet !== null && conNombre.length > 0) {
+        void registrarVacunasDeCarnet({
+          mascota_id: r.data.mascota_id,
+          vacunas: conNombre,
+          archivo_url: carnet.archivo_url,
+        }).then((res) => {
+          if (res.ok) setCarnetGuardado(true);
+        });
+        olvidarCarnetDelIntento(borrador.tokenIntento);
+      }
+
       setCreada(r.data.mascota_id);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -334,7 +388,15 @@ export function PasoCierre({ modo, borrador }: { modo: ModoAlta; borrador: Borra
         paddingTop: spacing[12],
       }}
     >
-      {/* Ley 13: esqueleto estático que imita el Home que viene */}
+      {/* 🔴 **EL ESQUELETO SE VA CUANDO LA CONFIRMACIÓN LLEGA — lo mostró la
+          captura, no un gate.** Yo escribí en el comentario de abajo que *«la
+          confirmación ES la pantalla»* y después la monté DEBAJO del
+          esqueleto, así que las dos convivían: el círculo y el bloque de
+          carga quedaban flotando arriba del «¡Listo!».
+          *La Hoja modal vieja tapaba el esqueleto; una pantalla no tapa nada.*
+          ⇒ mientras se crea, el esqueleto (Ley 13: nada parpadea); cuando hay
+          mascota, **sólo** la confirmación. */}
+      {creada !== null ? null : (
       <EsqueletoGrupo etiqueta={t('alta.guardando', { nombre })}>
         <View style={{ alignItems: 'center', gap: spacing[3] }}>
           <Esqueleto forma="circulo" alto={96} />
@@ -343,50 +405,76 @@ export function PasoCierre({ modo, borrador }: { modo: ModoAlta; borrador: Borra
           <Esqueleto forma="bloque" ancho="100%" alto={120} />
         </View>
       </EsqueletoGrupo>
+      )}
 
-      {/* EL MODAL — texto de la lámina firmada. `onCerrar` hace lo mismo que
-          «Más tarde»: cerrar sin elegir NO puede dejar a la persona en una
-          pantalla de esqueleto para siempre.
+      {/* ⭐ **10 · EXPEDIENTE CREADO — LA CONFIRMACIÓN DE LA CASA** (S116-C
+          lote 3). ⏪ Acá vivía una **Hoja modal** que preguntaba *«¿querés
+          completar el perfil?»*.
 
-          ⚠️ LA PREGUNTA NO VA EN EL SLOT DE `titulo`, y el gate del founder lo
-          encontró: el título de `Hoja` es `numberOfLines={1}` (Hoja.tsx:323) —
-          es un ENCABEZADO, y está bien que lo sea. Meterle una pregunta con un
-          nombre variable adentro garantiza que el nombre se corte justo en las
-          mascotas de nombre largo, que son las que más ganas dan de leerlo.
-          Va como primera línea del cuerpo, donde envuelve. */}
-      <Hoja
-        visible={creada !== null}
-        onCerrar={() => salir(MODO[modo].salida)}
-        apertura="marca"
-      >
-        <View style={{ gap: spacing[4] }}>
-          <Texto variante="titulo">{t('alta.modalTitulo', { nombre })}</Texto>
-          <Texto variante="cuerpo">{t('alta.modalCuerpo')}</Texto>
-          <Texto variante="apoyo">{t('alta.modalCuando')}</Texto>
-          <Boton
-            etiqueta={t('alta.modalCompletar')}
-            bloque
-            /* A4 — este CTA LLEVA: abre el perfil de la mascota recién
-               creada. E14 firmada: acción que navega, chevron `›`. */
-            chevron
-            onPress={() => {
-              if (creada === null) return;
-              // Detrás de esto va EL PERFIL. Jamás una checklist ni una barra
-              // de progreso (MODELO_LOYALTY §2, literal en la lámina).
-              salir({
-                pathname: '/hogar/mascota/[mascotaId]',
-                params: { mascotaId: creada },
-              });
-            }}
-          />
-          <Boton
-            variante="ghost"
-            bloque
-            etiqueta={t('alta.modalMasTarde')}
-            onPress={() => salir(MODO[modo].salida)}
-          />
-        </View>
-      </Hoja>
+          **Por qué cambia, y no es sólo estética:** el plan §5 pide para 10
+          *«confirmación con el patrón único de la casa (check + personajes +
+          dato + dos acciones)»*, y la pieza `Confirmacion` de B es ese patrón.
+          *Una hoja modal sobre un esqueleto deja el logro flotando encima de
+          una pantalla que finge cargar; la confirmación ES la pantalla.*
+
+          **Lo que se CONSERVA de la versión vieja, y es lo que importaba:**
+           · **las dos acciones y sus destinos exactos** — «Ver expediente»
+             abre el perfil recién creado (*detrás de esto va EL PERFIL, jamás
+             una checklist ni una barra de progreso*, `MODELO_LOYALTY` §2) y la
+             segunda sale por `MODO[modo].salida`.
+           · **cerrar sin elegir sigue siendo salir**: el camino secundario
+             hace lo mismo que hacía `onCerrar`. *Nadie queda atrapado en una
+             pantalla de esqueleto.*
+           · las claves `alta.modal*` **NO se borran**: siguen vivas en el otro
+             camino del alta.
+
+          ⚠️ **EL APOYO SE ELIGE, no se afirma de más.** Decir *«guardamos su
+          foto y su carné»* cuando no se guardó ninguno de los dos es
+          exactamente lo que la ley del founder del 5-sep prohíbe. **El carné
+          todavía no existe en este flujo** (ver el parte), así que hoy la
+          condición mira la foto — y el día que el paso del carné entre, la
+          misma línea lo suma sin cambiar de forma. */}
+      {creada !== null ? (
+        <Confirmacion
+          exclamacion={t('alta.listoExclamacion')}
+          titulo={t('alta.listoTitulo', { nombre })}
+          /* 🔴 **EL APOYO MIRA LO QUE DE VERDAD SE GUARDÓ.** Son tres voces
+             y no una con dos huecos: *«guardamos su foto y su carné» con sólo
+             uno de los dos es una frase falsa que compila perfecto* — la ley
+             del founder del 5-sep, en su tercera cláusula. El carné además
+             mira el RESULTADO de su escritura, no la intención. */
+          apoyo={
+            borrador.fotoUri && !sinFoto && carnetGuardado
+              ? t('alta.listoApoyoFotoYCarnet')
+              : borrador.fotoUri && !sinFoto
+                ? t('alta.listoApoyoFoto')
+                : carnetGuardado
+                  ? t('alta.listoApoyoCarnet')
+                  : t('alta.listoApoyoSolo')
+          }
+          /* 🔴 **EL TRÍO SALE DE LA CASA Y NO EMPIEZA POR ESTA MASCOTA — es un
+             hueco declarado, no un olvido.** El encargo pide *«el trío de
+             personajes con la especie de la mascota primero»*, y para eso hay
+             que traducir `borrador.especie` (el string del catálogo, **once**
+             especies) a `EspeciePersonaje` (**seis**).
+
+             **Esa tabla YA EXISTE**: `CARA_LOCAL` dentro de `AvatarMascota`
+             (`packages/ui`), y **no está exportada**. Escribirla acá sería una
+             SEGUNDA tabla de lo mismo, y dos tablas de lo mismo divergen — el
+             día que entre una especie nueva, una de las dos se olvida y nadie
+             lo nota porque las dos compilan. *Preferir el trío genérico antes
+             que duplicar el mapeo.* Pedido a B en el buzón. */
+          primario={{
+            texto: t('alta.listoVerExpediente'),
+            onPress: () =>
+              salir({ pathname: '/hogar/mascota/[mascotaId]', params: { mascotaId: creada } }),
+          }}
+          secundario={{
+            texto: t('alta.listoExplorar'),
+            onPress: () => salir(MODO[modo].salida),
+          }}
+        />
+      ) : null}
     </View>
   );
 }

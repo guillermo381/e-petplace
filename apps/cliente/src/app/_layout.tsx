@@ -24,7 +24,7 @@ import { useTokenDeAvisosAlDia } from '@/lib/token-avisos';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Updates from 'expo-updates';
 import { useFonts } from 'expo-font';
-import { Atmosfera, AvisoProvider, ThemeProvider as EpetThemeProvider, epetplaceFonts } from '@epetplace/ui';
+import { Atmosfera, AvisoProvider, ThemeProvider as EpetThemeProvider, epetplaceFonts, motion } from '@epetplace/ui';
 import { ProveedorI18n } from '@epetplace/i18n';
 
 // Bootstrap de la puerta única (initApi + persistencia de sesión) —
@@ -172,7 +172,39 @@ export default function RootLayout() {
           <Atmosfera origen="arriba-derecha" />
           <AvisoProvider>
             <GateBiometrico>
-              <Stack screenOptions={{ headerShown: false }} />
+              {/* ⭐ **LA NAVEGACIÓN SE DECLARA UNA VEZ, ACÁ — S116-C lote 3,
+                  firma de la mesa.** *«La navegación se declara UNA vez, en el
+                  router, no por pantalla»*.
+
+                  **Por qué acá y no en cada pantalla:** una transición es una
+                  propiedad del SISTEMA, no de un destino. Si cada pantalla la
+                  trae, la que nadie toque va a moverse distinto y **nadie lo
+                  va a notar mirando esa pantalla sola** — sólo se nota al
+                  recorrer, que es exactamente cuando ya es tarde. Escrita una
+                  vez, las 106 rutas se mueven igual por construcción.
+
+                  **Las cuatro reglas, con su token:**
+                   · **empuje desde la derecha** (`slide_from_right`) —
+                     el gesto estándar de un stack.
+                   · **modal desde abajo**: lo resuelve `presentation: 'modal'`
+                     en la ruta que lo pida; el default de arriba no lo pisa.
+                   · **cambio de tab sin transición**: no se declara acá — lo
+                     resuelve el `Tabs` del shell, donde *lo único que se mueve
+                     es el círculo del activo*.
+                   · **gesto de volver siempre disponible** (`gestureEnabled`),
+                     y en Android **también** — RN lo trae apagado ahí por
+                     default, así que «siempre» hay que decirlo.
+                   · **tiempo por token**: `motion.duration.estandar` (300), el
+                     techo de Ley 6. *No hay un número tecleado acá.* */}
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  animation: 'slide_from_right',
+                  animationDuration: motion.duration.estandar,
+                  gestureEnabled: true,
+                  gestureDirection: 'horizontal',
+                }}
+              />
             </GateBiometrico>
           </AvisoProvider>
         </EpetThemeProvider>

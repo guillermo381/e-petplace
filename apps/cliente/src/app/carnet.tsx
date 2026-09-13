@@ -578,6 +578,19 @@ function camposDe(
             bloque
             etiqueta={n === 1 ? t('carnet.guardarUna') : t('carnet.guardarN', { n })}
             deshabilitado={n === 0 || dudosas > 0 || sinTocar > 0}
+            /* ⭐ S116-C lote 3 · `D-1086` — **LA RAZÓN DICE CUÁL DE LAS TRES**.
+               El freno tiene tres causas y una razón genérica («revisá los
+               datos») dejaría a la persona buscando cuál — que es el mismo
+               adivinar que el botón mudo producía. El orden es el del guard. */
+            razonDeshabilitado={
+              n === 0
+                ? t('carnet.razonSinNinguna')
+                : dudosas > 0
+                  ? t('carnet.razonDudosas')
+                  : sinTocar > 0
+                    ? t('carnet.razonSinTocar')
+                    : undefined
+            }
             cargando={guardando}
             onPress={() => void guardar()}
           />
@@ -609,6 +622,11 @@ function camposDe(
             bloque
             etiqueta={t('carnet.guardarCambios')}
             deshabilitado={!edicionValida}
+            /* ⭐ S116-C lote 3 · `D-1086` — `edicionValida` son tres condiciones
+               (nombre, fecha presente, fecha no futura) y la fecha futura ya
+               tiene su propio error en el campo; lo que faltaba era decir por
+               qué el botón no responde. */
+            razonDeshabilitado={!edicionValida ? t('carnet.razonEdicion') : undefined}
             onPress={confirmarEdicion}
           />
         </HojaScroll>
