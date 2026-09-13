@@ -1,0 +1,10 @@
+{
+  "baseline": { "cliente": 41, "prestador": 20 },
+  "sembrado": "2026-09-13 · S116-A",
+  "firmado": "mesa 13-sep-2026 — trinquete del riel de moneda (D-1095)",
+  "por_app": "Heredado del guard de S82-A r16, que este archivo reemplaza: el baseline es POR APP para que el prestador —que se barre en su propia sesión— no tape una regresión del cliente ni al revés. Se conserva porque tenía razón.",
+  "nota_cliente_41": "La medición que abrió D-1095 publicó 42. El objeto dice 41: el 42 traía UN falso positivo, lib/censo-almacenamiento.ts:56, que formatea MEGABYTES y entraba porque el $ de su interpolación contaba como símbolo. El grep original lo esquivaba por casualidad (usaba toFixed(2) literal y las otras dos líneas de ese archivo son toFixed(1)). Corpus: app/ + components/ — las PANTALLAS. lib/ afuera.",
+  "nota_prestador_20": "Medido por A el 13-sep-2026 con el mismo discriminador, para recuperar la pata que el guard de S82 ya tenía. El prestador NO se barre en S116: su cura es de su propia sesión.",
+  "solo_baja": "Sube A MANO y con su razón, jamás en el mismo commit que introdujo el caso.",
+  "muerte": "Se retira el día que las dos apps lleguen a 0 y el riel sea el único camino (condición escrita en S82)."
+}

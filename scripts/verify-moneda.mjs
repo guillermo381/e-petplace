@@ -1,108 +1,145 @@
 #!/usr/bin/env node
 /**
- * verify-moneda — EL GUARD DEL FORMATEO A MANO (S82-A r16).
+ * verify:moneda — TRINQUETE: la plata se formatea en UN solo lugar.
  *
- * LA REGLA: la plata se formatea con el RIEL (`monto` / `montoConCodigo`
- * de `@epetplace/i18n`), jamás a mano. Un `$${x.toFixed(2)}` incrustado
- * asume tres cosas sin decirlo — **el símbolo, los decimales y el país**
- * — y el producto sirve a Ecuador y Colombia con monedas distintas.
+ * LA LEY (S115): coma decimal y UNA sola fuente — `packages/i18n/src/moneda.ts`.
  *
- * ES LA MISMA CURA QUE EL PIE DE RESERVA: lo que se copia, diverge.
+ * POR QUÉ EXISTE, con el caso que lo parió: el founder vio `$6.00` con PUNTO
+ * en «Confirmar y pagar» (D-1095). El sitio era
+ * `apps/cliente/src/components/checkout-reserva.tsx:522`:
  *
- * ── BASELINE SOLO-BAJA ──
- * El barrido no se puede hacer de un saque (ver el porqué abajo), así
- * que el guard NO exige cero: **congela el número de hoy y no deja que
- * suba**. Cada sitio que se cure baja el baseline; ninguno nuevo entra.
- * El baseline es POR APP, para que el prestador —que se barre en su
- * propia sesión— no tape una regresión del cliente ni al revés.
+ *     <Celda titulo={t('checkout.total')} metadataMono={`$${precio.toFixed(2)}`} />
  *
- * ── POR QUÉ NO ES CERO YA (medido S82 r16, y es el dato que importa) ──
- * De los **43 formateos del cliente**, exactamente **UNO** consume un
- * lector que devuelve `country_code`. Los otros 42 leen catálogo/oferta,
- * donde el país es el del PRESTADOR y la fila no lo trae. **Curarlos hoy
- * sería inventar la moneda**, que es peor que dejarlos a mano (orden del
- * founder). El desbloqueo real no es barrer: es **ensanchar esos
- * lectores** — y recién después el barrido es mecánico.
+ * **`toFixed` es JavaScript puro: produce PUNTO siempre y no mira el locale.**
+ * La fuente está sana —`Intl.NumberFormat('es-EC').format(6)` da `6,00`—, así
+ * que lo que hay es BYPASS, no un defecto del riel.
  *
- * ── CONDICIÓN DE MUERTE, escrita al nacer ──
- * Este guard se retira el día que el baseline llegue a **0 en las dos
- * apps** y el riel sea el único camino. Un guard que sobrevive a su
- * razón es basura que después nadie se anima a tocar.
+ * 🔴 Y LO QUE LO VUELVE URGENTE NO ES EL PUNTO, ES LA CONVIVENCIA: en ese mismo
+ *    archivo, la MISMA variable `precio` sale `$6.00` en la línea 522 y `$6,00`
+ *    en la 554, donde `SeccionFacturacion` sí llama a la fuente. *La casa no
+ *    formatea mal: formatea de las dos maneras a la vez, sobre el mismo número.*
  *
- * Exit != 0 = alguien sumó formateo a mano (o el baseline quedó viejo
- * hacia abajo, que también se reporta: el número miente).
+ * ── ESTE ARCHIVO SOBRESCRIBIÓ A SU ANTECESOR, Y HAY QUE SABERLO ────────────
+ * 🔴 Existía `verify-moneda.mjs` desde **S82-A r16** con el mismo propósito, y
+ *    **NUNCA estuvo cableado en `package.json`**: nadie lo corrió nunca. *El
+ *    riel tenía su guard desde el día uno, y el guard estaba tan huérfano como
+ *    el riel — por eso el número no bajó en treinta y pico de sesiones.*
+ *    **De él se conserva lo que tenía mejor** (abajo); se agrega el
+ *    discriminador corregido, la auto-prueba y el reporte con archivo y línea.
+ *
+ * **EL BASELINE ES POR APP, y eso es suyo, no mío:** *«el baseline es POR APP,
+ * para que el prestador —que se barre en su propia sesión— no tape una
+ * regresión del cliente ni al revés»* (S82). Se conserva porque tenía razón.
+ *
+ * **CONDICIÓN DE MUERTE (también de S82, sigue valiendo):** este guard se
+ * retira el día que el baseline llegue a **0 en las dos apps** y el riel sea el
+ * único camino. *Un guard que sobrevive a su razón es basura que después nadie
+ * se anima a tocar.*
+ *
+ * ── POR QUÉ TRINQUETE Y NO GATE DURO ──────────────────────────────────────
+ * Al nacer hay **41 en el cliente y 20 en el prestador**, contra **5 llamadas a
+ * la fuente**. Un gate duro estaría rojo desde el minuto cero y se apagaría por
+ * costumbre. *La cura es de C (lote 3b) y no de este gate.*
+ *
+ * ⚠️ EL DISCRIMINADOR, y es lo que hace que el número signifique algo: se cuenta
+ *    una línea sólo si tiene **`toFixed(` CON un `$` en la línea**, o bien el
+ *    literal **`$${`** (símbolo pegado a la interpolación). Sin esa exigencia,
+ *    `toFixed` también cuenta kilos y megabytes — medido: el 42 que publicó
+ *    `D-1095` traía justamente un falso positivo de MB.
+ *
+ * ALCANCE DECLARADO: las PANTALLAS (`app/` + `components/`) de las dos apps.
+ * `lib/` queda afuera con su razón medida: `lib/censo-almacenamiento.ts`
+ * formatea megabytes. Su verde dice «ninguna app empeoró», jamás «la casa
+ * formatea bien».
+ *
+ * SALIDAS: 0 verde · 1 rojo (subió) · 2 NO CONCLUYENTE (no pudo medir).
  */
+import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs'
+import { join, relative } from 'node:path'
 
-import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+const di = (s) => process.stdout.write(s + '\n')
+const RAIZ = process.cwd()
+const BASE_FILE = join(RAIZ, 'scripts/.baseline-moneda.json')
 
-/** Congelado el 31-jul-2026 con el censo real, medido POR SITIO. SOLO BAJA.
- *
- *  CORRECCIÓN DE MEDICIÓN que este guard destapó en su primera corrida:
- *  el censo de r14 decía "115 formateos" (41 interpolaciones + 74
- *  toFixed) y **los dos conjuntos SE SOLAPAN** — una línea
- *  `$${x.toFixed(2)}` es UN sitio, no dos. Contando por SITIO (que es lo
- *  que hay que curar) son **29 en el cliente y 44 en el prestador**: 73,
- *  no 115. El trabajo es un tercio menor de lo que la ficha decía. */
-const BASELINE = {
-  'apps/cliente/src': 29,
-  'apps/prestador/src': 44,
-};
+const APPS = {
+  cliente: [join(RAIZ, 'apps/cliente/src/app'), join(RAIZ, 'apps/cliente/src/components')],
+  prestador: [join(RAIZ, 'apps/prestador/src/app'), join(RAIZ, 'apps/prestador/src/components')],
+}
 
-/** Interpolación de `$` pegada a una expresión (`$${…}`) o `.toFixed(2)`
- *  —los dos dedos de la misma mano—. `toFixed` con otros decimales no
- *  entra: 2 es la firma del dinero (los porcentajes y los km usan 1). */
-const PATRONES = [/\$\$\{/, /\.toFixed\(2\)/];
+const TIENE_PLATA = (l) => (/toFixed\s*\(/.test(l) && l.includes('$')) || /\$\$\{/.test(l)
+const ES_COMENTARIO = (l) => /^\s*(\*|\/\/|\/\*)/.test(l)
 
 function archivos(dir, out = []) {
-  for (const nombre of readdirSync(dir)) {
-    const ruta = join(dir, nombre);
-    if (statSync(ruta).isDirectory()) archivos(ruta, out);
-    else if (/\.(tsx|ts)$/.test(ruta)) out.push(ruta);
+  if (!existsSync(dir)) return out
+  for (const e of readdirSync(dir)) {
+    if (e === 'node_modules' || e.startsWith('.')) continue
+    const p = join(dir, e)
+    if (statSync(p).isDirectory()) archivos(p, out)
+    else if (/\.(tsx|ts)$/.test(e)) out.push(p)
   }
-  return out;
+  return out
 }
 
-let hayFalla = false;
-const detalle = [];
+/* ══ AUTO-PRUEBA: si no distingue su rojo, su verde no vale (L-459) ══ */
+if (!TIENE_PLATA('metadataMono={`$${precio.toFixed(2)}`}')) { di('ROJO · auto-prueba: no ve el caso de D-1095.'); process.exit(2) }
+if (TIENE_PLATA('const kg = peso.toFixed(2)')) { di('ROJO · auto-prueba: cuenta un toFixed que NO es plata.'); process.exit(2) }
+if (TIENE_PLATA('const s = `${nombre} vino`')) { di('ROJO · auto-prueba: cuenta una interpolación que no es plata.'); process.exit(2) }
 
-for (const [raiz, tope] of Object.entries(BASELINE)) {
-  let n = 0;
-  const sitios = [];
-  for (const archivo of archivos(raiz)) {
-    const lineas = readFileSync(archivo, 'utf8').split('\n');
-    lineas.forEach((linea, i) => {
-      // El propio riel no cuenta: es la cura, no el mal. LA RUTA VA
-      // COMPLETA, no por sufijo — la primera versión decía
-      // /moneda\.ts$/ y eximía TAMBIÉN a `usar-moneda.ts` (y a
-      // cualquier `*-moneda.ts` futuro). **Lo destapó intentar producir
-      // el rojo**: el guard daba verde con un sitio sucio sembrado
-      // adentro de ese archivo. Sin esa prueba, el agujero viajaba.
-      if (archivo.endsWith('packages/i18n/src/moneda.ts')) return;
-      if (PATRONES.some((p) => p.test(linea))) {
-        n += 1;
-        sitios.push(`${archivo}:${i + 1}`);
-      }
-    });
-  }
-  if (n > tope) {
-    hayFalla = true;
-    detalle.push(`✗ ${raiz}: ${n} formateos a mano (baseline ${tope}) — SUBIÓ.`);
-    for (const s of sitios.slice(0, 8)) detalle.push(`     ${s}`);
-    if (sitios.length > 8) detalle.push(`     … y ${sitios.length - 8} más`);
-  } else if (n < tope) {
-    // el baseline viejo hacia abajo TAMBIÉN se reporta: un número que
-    // dice "43" cuando quedan 40 miente sobre cuánto falta
-    detalle.push(`⚠ ${raiz}: ${n} (baseline ${tope}) — BAJÓ: actualizá el baseline a ${n}.`);
-  } else {
-    detalle.push(`✓ ${raiz}: ${n} formateos a mano (baseline ${tope}, sin subir)`);
-  }
+const listas = Object.fromEntries(Object.entries(APPS).map(([a, ds]) => [a, ds.flatMap((d) => archivos(d))]))
+for (const [a, l] of Object.entries(listas)) {
+  if (l.length === 0) { di(`ROJO · la app «${a}» no tiene archivos — no pude medir.`); process.exit(2) }
 }
 
-for (const l of detalle) console.log(l);
-if (hayFalla) {
-  console.error('\n  La plata se formatea con `monto()` del riel (@epetplace/i18n).');
-  console.error('  Si el lector todavía no devuelve country_code: NO adivines la moneda —');
-  console.error('  ensanchá el lector primero (ese es el desbloqueo real).');
-  process.exit(1);
+const porApp = {}
+for (const [app, lista] of Object.entries(listas)) {
+  const hits = []
+  for (const f of lista) {
+    readFileSync(f, 'utf8').split('\n').forEach((l, i) => {
+      if (!ES_COMENTARIO(l) && TIENE_PLATA(l)) hits.push({ f: relative(RAIZ, f), n: i + 1, t: l.trim() })
+    })
+  }
+  porApp[app] = hits
 }
+
+const base = existsSync(BASE_FILE) ? JSON.parse(readFileSync(BASE_FILE, 'utf8')) : null
+if (base === null || typeof base.baseline !== 'object') {
+  const sem = Object.fromEntries(Object.entries(porApp).map(([a, h]) => [a, h.length]))
+  writeFileSync(BASE_FILE, JSON.stringify({ baseline: sem, sembrado: new Date().toISOString() }, null, 2) + '\n')
+  di(`baseline sembrado: ${JSON.stringify(sem)}`)
+  process.exit(0)
+}
+
+di('verify:moneda · plata formateada FUERA de la fuente única · SOLO-BAJA')
+let rojo = false
+let bajo = false
+for (const [app, hits] of Object.entries(porApp)) {
+  const b = base.baseline[app]
+  if (typeof b !== 'number') { di(`ROJO · el baseline no declara la app «${app}» — no pude medir.`); process.exit(2) }
+  const nArch = new Set(hits.map((h) => h.f)).size
+  di(`  ${app.padEnd(10)} ${String(hits.length).padStart(3)} ocurrencia(s) · ${nArch} archivos · baseline ${b}`)
+  if (hits.length > b) {
+    rojo = true
+    di('')
+    di(`✗ ${app}: EL NÚMERO SUBIÓ: ${b} → ${hits.length}. El trinquete NO deja subir.`)
+    for (const h of hits) di(`   · ${h.f}:${h.n}\n       ${h.t.slice(0, 92)}`)
+  } else if (hits.length < b) bajo = true
+}
+
+if (rojo) {
+  di('')
+  di('  La plata se formatea en UN lugar: `formatearPrecio` de @epetplace/i18n.')
+  di('  `toFixed` produce PUNTO siempre y no mira el locale — la ley de S115 es COMA.')
+  di('  Si el caso nuevo es legítimo, se declara y se sube el baseline A MANO,')
+  di('  con su razón — jamás en el mismo commit que lo introdujo. Ver D-1095.')
+  process.exit(1)
+}
+if (bajo) {
+  di('')
+  di('✓ VERDE — y BAJÓ en alguna app. Actualizá el baseline en el mismo commit que lo curó:')
+  di('  un baseline que baja y no se asienta convierte la próxima subida en invisible.')
+  process.exit(0)
+}
+di('')
+di('✓ verify:moneda VERDE — ninguna app subió.')
+di('  (Su verde dice «no empeoró», jamás «está bien». La cura es de C, lote 3b — D-1095.)')
+process.exit(0)

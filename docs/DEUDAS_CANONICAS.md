@@ -34431,3 +34431,118 @@ Un arnés que espera algo —una respuesta, un proceso, un aparato— **tiene qu
 **La forma exigible:** todo arnés que espere declara su techo **adentro** (`perl -e 'alarm N; exec @ARGV'` donde no hay `timeout`, un `AbortController` en JS, `--timeout` del runner), y **al vencerse dice que venció** — porque *un arnés que se corta en silencio vuelve a ser indistinguible de uno que midió*.
 
 *Y se cobró sola mientras se escribía este mismo lote: un `node -c ""` sin argumento se quedó leyendo stdin y colgó su comando entero.*
+
+---
+
+## `D-1095` 🔴 — EL TOTAL DE «CONFIRMAR Y PAGAR» DICE `$6.00` CON PUNTO: BYPASS DE LA FUENTE ÚNICA, EN 32 PANTALLAS DEL CLIENTE
+
+**Estado:** ABIERTA · **Dueño: C** — *es bypass en la pantalla; **la fuente está bien**, medida abajo.*
+**Origen:** el founder, sobre las capturas del lote 2 de B (13-sep-2026). **No salió del rediseño: el rediseño lo destapó.**
+
+### El sitio exacto
+
+`apps/cliente/src/components/checkout-reserva.tsx:522`
+
+```js
+<Celda titulo={t('checkout.total')} metadataMono={`$${precio.toFixed(2)}`} />
+```
+
+**`toFixed` es JavaScript puro: produce punto SIEMPRE y no mira el locale.** Por eso sale `$6.00` donde la ley de S115 manda `$6,00`.
+
+### 🟢 LA FUENTE ÚNICA ESTÁ BIEN, Y POR ESO EL DUEÑO ES C Y NO A
+
+`packages/i18n/src/moneda.ts` usa `Intl.NumberFormat('es-EC')` con el locale **fijo a propósito** —*el número tiene que coincidir con el de la factura en los dos idiomas*—. Medido en este árbol:
+
+```
+new Intl.NumberFormat('es-EC',{minimumFractionDigits:2}).format(6)  →  6,00
+```
+
+⇒ `formatearPrecio(6)` da **`$6,00`**. **La fuente no tiene nada que curar.**
+
+### 🔴 Y EL HALLAZGO QUE LO VUELVE PEOR QUE UN BYPASS: LA MISMA PANTALLA MUESTRA EL MISMO MONTO DE DOS FORMAS
+
+En **el mismo archivo y la misma variable `precio`**:
+
+| línea | qué hace | qué sale |
+|---|---|---|
+| **522** | `` `$${precio.toFixed(2)}` `` | **`$6.00`** |
+| **554** | `<SeccionFacturacion total={precio} />` → y ese componente **sí** llama a `formatearPrecio` | **`$6,00`** |
+
+*No es que la casa formatee mal: es que formatea de las dos maneras a la vez, a quince líneas de distancia, sobre el mismo número.*
+
+### El censo del cliente, con su comando
+
+```bash
+grep -rnE 'toFixed\(2\)|\$\$\{' apps/cliente/src --include="*.tsx" --include="*.ts" | grep '\$'
+```
+
+| | |
+|---|--:|
+| formateos de plata **a mano** | **42 ocurrencias · 32 archivos** |
+| llamadas a la **fuente única** | **5 · 2 archivos** (`seccion-facturacion.tsx`, `lib/use-moneda.ts`) |
+
+*El discriminador es el `$` en la línea: sin él, `toFixed(2)` también cuenta kilos y megabytes, y el número saldría inflado.*
+
+### Lo que esto dice del riel, y es lo de fondo
+
+**`moneda.ts` nació en S82 declarando en su propia cabecera que había «115 formateos a mano en el producto».** Treinta y pico de sesiones después, **el cliente tiene 42 y usa la fuente 5 veces.** *El riel se construyó, se documentó, y casi nadie migró: es `L-318` en su variante más cara —no un motor sin puerta, sino un motor CON puerta que nadie cruza—, y por eso ningún gate lo vio: todo compila.*
+
+### ⚠️ LO QUE NO MEDÍ, declarado
+
+1. **Si `Intl` se comporta igual en Hermes que en Node.** Lo de arriba se midió en Node. **No hay polyfill de `Intl` declarado** en `apps/cliente/package.json` ni en `packages/i18n`. *Si en el aparato `Intl.NumberFormat('es-EC')` cayera a un fallback, la fuente también daría punto y esta ficha tendría un segundo dueño.* **Se cierra con una captura del aparato, no leyendo código.**
+2. **El prestador.** El censo es del cliente, que es lo que se pidió.
+
+### ⊳ ENMIENDA S116-A (13-sep-2026) — NACE SU GATE, Y EL NÚMERO SE CORRIGE A **41**
+
+**`verify:moneda`** (`scripts/verify-moneda.mjs`), **trinquete solo-baja, en el pre-commit** (100 ms). **Baseline POR APP: cliente 41 · prestador 20.**
+
+🔴 **Y al escribirlo apareció algo que cambia la lectura de esta ficha: el gate YA EXISTÍA desde S82-A r16, con el mismo propósito — y NUNCA estuvo cableado en `package.json`.** *Nadie lo corrió nunca.* ⇒ **el riel tenía su guard desde el día uno y el guard estaba tan huérfano como el riel.** Eso explica lo que esta ficha llamaba «casi nadie migró»: no es que la casa ignorara una advertencia, es que **la advertencia nunca sonó**.
+
+*De él se conserva lo que tenía mejor —el **baseline por app**, «para que el prestador, que se barre en su propia sesión, no tape una regresión del cliente ni al revés», y su condición de muerte— y se le agrega el discriminador corregido, la auto-prueba y el reporte con archivo y línea.* **El prestador entra al gate con 20, medido hoy: no se barre en S116, pero desde ahora tampoco crece.**
+
+🔴 **El 42 de esta ficha traía UN FALSO POSITIVO y se corrige acá:** `lib/censo-almacenamiento.ts:56` formatea **megabytes** —`` `${(total/1048576).toFixed(2)}MB` ``— y entraba porque el `$` de su interpolación contaba como símbolo de moneda. *El grep original lo esquivaba por casualidad —usaba `toFixed(2)` literal y las otras dos líneas de ese archivo son `toFixed(1)`—, así que el error entró justo por la única que coincidía.* **El corpus del gate son las PANTALLAS** (`app/` + `components/`, sin `lib/`): **41 en 31 archivos.**
+
+*Por qué se corrige en vez de heredarse: un baseline con un falso positivo adentro deja lugar para que alguien agregue un caso de verdad sin que el trinquete suene.*
+
+**Su rojo, probado sobre el sitio de esta ficha:** una ocurrencia nueva al lado de `checkout-reserva.tsx:522` → **41 → 42, exit 1**, listando archivo y línea. Limpieza verificada: el archivo quedó idéntico.
+
+**Su auto-prueba distingue tres casos** y una de las tres **cazó un error mío** antes de sembrar: el discriminador que escribí primero contaba *cualquier* interpolación, y habría inflado el baseline.
+
+**☠️ MUERTE:** las 41 ocurrencias pasan por la fuente única — *el gate no la cura: impide que crezca mientras C la cura en el lote 3b.*
+
+---
+
+## `D-1096` 🟡 — LA FECHA DE UNA CITA SE MUESTRA EN FORMATO DE MÁQUINA: `2026-09-13 · 15:00 · 30 min`
+
+**Estado:** ABIERTA · **Dueño: C · LOTE 5** (el que toca esa pantalla).
+**Origen:** el founder, sobre las capturas del lote 2 (13-sep-2026).
+
+`apps/cliente/src/components/checkout-reserva.tsx:516` — **la línea de arriba de `D-1095`**, en la misma tarjeta:
+
+```js
+metadataMono={`${fecha} · ${hora.slice(0, 5)} · ${duracion} min`}
+```
+
+`fecha` llega en ISO y se pinta cruda ⇒ **`2026-09-13 · 15:00 · 30 min`**. *Es el formato en que la base guarda, no en el que una familia lee.* **Y está en el último paso antes de pagar**, que es donde la persona confirma que entendió qué compró.
+
+**La casa ya tiene con qué:** `fechas.ts` es el riel hermano de `moneda.ts` —mismo origen, S82, misma razón— y `fechaLargaHumana` existe desde S55 (`D-323`).
+
+📌 **Es la misma tarjeta y la misma clase que `D-1095`: dos datos crudos a quince líneas, uno de plata y otro de tiempo.** *Los dos rieles existen; los dos están sin usar en el mismo componente.* ⇒ **se curan juntos o se vuelve a mirar dos veces.**
+
+**LA VOZ, con el literal de la mesa** (`docs/loop/S116-REVISION-MESA-1.md` §4, 13-sep-2026): *«la familia lee **«sáb 13 sep · 3:00 p. m. · 30 min»**»*. ⇒ **día de semana, mes en palabra, hora en reloj de 12 con a. m./p. m.** — no es «humanizar por gusto»: es el formato que la mesa escribió.
+
+### ⊳ ENMIENDA S116-A — **LA FECHA NO TIENE FORMA MEDIBLE. NO NACE SU GATE, Y ACÁ ESTÁ POR QUÉ**
+
+Se buscó el trinquete gemelo de `verify:moneda` y **no hay discriminador honesto**. Los tres datos que lo deciden:
+
+1. 🔴 **El caso de esta ficha NO es detectable desde la línea.** `fecha` es una **prop** (`fecha: string`), y lo que se pinta es `` `${fecha} · …` `` — **indistinguible de `${nombre}`**. El defecto no está en la línea que lo muestra: está en que el valor llega crudo. *Un gate que mire líneas no puede verlo.*
+2. **`.slice(0, 5)` casi siempre es correcto: 11 de 12 llevan «hora» en la línea** — recortar los segundos de `15:00:00` es lo que hay que hacer.
+3. **`toISOString()` (15) y `.slice(0, 10)` (13) tienen usos legítimos**: armar una clave, comparar, mandar al servidor. *Marcarlos a todos sería un gate que grita sobre código sano, y un gate ruidoso se apaga.*
+
+**El contraste con la plata es lo que cierra el caso: `toFixed` para plata SIEMPRE está mal, sin excepción — por eso ahí el trinquete es sólido. Para la fecha no existe un token equivalente.**
+
+📌 **Y su magnitud es otra: el riel de fechas SÍ se usa — 30 archivos del cliente**, contra los 2 de `moneda.ts`. *El problema de la fecha es puntual; el de la plata era estructural.*
+
+⇒ **queda sólo esta ficha, y la cura de C se verifica con el ojo, no con un gate.**
+
+**☠️ MUERTE:** la fecha sale en voz de familia por el riel, y el gate de voz la cubre.
