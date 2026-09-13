@@ -243,6 +243,23 @@ export interface CampoProps
   /** Mensaje de error (dangerText) — anunciado con liveRegion polite. */
   error?: string
   deshabilitado?: boolean
+  /** POR QUÉ está apagado. **La misma prop que `Boton`, con el mismo
+   *  contrato: `string`, sin default — la voz es del riel.**
+   *
+   * 🔴 **Nace por pedido de C (buzón S116, pedido 1) y cierra el último
+   * freno mudo de `D-1086`.** El caso vivo es `nexo.tsx`: el campo del
+   * asistente se apaga mientras NEXO responde y **no puede decir por qué**.
+   * *Un campo apagado que no dice nada manda a la persona a adivinar —
+   * exactamente lo que `verify:razon-muda` persigue en los botones, y no
+   * hay razón para que un campo esté exento.*
+   *
+   * SE DIBUJA EN EL PIE, y **gana sobre `ayuda`**: mientras el control está
+   * apagado, la ayuda de cómo llenarlo no sirve — lo que la persona
+   * necesita saber es por qué no puede. **`error` le sigue ganando a las
+   * dos**: si además hay algo mal, eso es lo más urgente.
+   * ⚠️ Con `sinPie` **no se dibuja**, igual que `ayuda` y `error` — el
+   * compuesto que lo contiene monta su propio `PieDeCampo`. */
+  razonDeshabilitado?: string
   /** ☠️ S99-B — `sinCaja` MURIÓ, DEROGADA POR N11 y con su choque
    *  declarado en `caja-de-campo.ts`. Era `true` POR DEFAULT: borde
    *  transparente en reposo y el relleno como única señal —medido, el
@@ -281,6 +298,7 @@ export function Campo({
   ayuda,
   error,
   deshabilitado = false,
+  razonDeshabilitado,
   sinPie = false,
   secure = false,
   multilinea,
@@ -420,7 +438,15 @@ export function Campo({
         </View>
       </Animated.View>
 
-      {sinPie ? null : <PieDeCampo ayuda={ayuda} error={error} />}
+      {/* La precedencia es `error` › `razonDeshabilitado` › `ayuda`, y se
+          resuelve acá y no en `PieDeCampo`: ese pie lo montan también los
+          compuestos, que no saben si su hijo está apagado. */}
+      {sinPie ? null : (
+        <PieDeCampo
+          ayuda={deshabilitado && razonDeshabilitado ? razonDeshabilitado : ayuda}
+          error={error}
+        />
+      )}
     </View>
   )
 }
