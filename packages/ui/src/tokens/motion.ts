@@ -192,4 +192,34 @@ export const motion = {
     springConfig: { tension: 180, friction: 12, useNativeDriver: true },
     fadeConfig:   { duration: 250, useNativeDriver: true },
   },
+
+  /* ═══════════════════════════════════════════════════════════════════
+   * 🔴 **v5 · EL MOVIMIENTO DEL REDISEÑO (S116, letra §2).**
+   * Sub-vocabulario cerrado, hermano de `marca` y `coach`. **L-c sigue
+   * rigiendo** (textual en la letra): *si al quitar la animación dice lo
+   * mismo, sobraba.*
+   * ═══════════════════════════════════════════════════════════════════ */
+  v5: {
+    /** «180–240 ms **sin rebote** para lo que responde al toque». Los dos
+     *  extremos con nombre; el «sin rebote» es exigible: `spring` queda
+     *  PROHIBIDO acá — su bezier tiene overshoot (0.34,1.56,…). */
+    respuestaMinMs: 180,
+    respuestaMaxMs: 240,
+    respuestaBezier: [0, 0, 0.2, 1] as const,   // easeOut — el que no rebota
+
+    /** «entrada escalonada de la casa (45/300, bezier .32,.72,0,1) para
+     *  lo que llega». El 45 es stagger NUEVO —`stagger` tenía 60/80/120—
+     *  y el bezier es **el mismo de `marca`**, a propósito: lo que llega
+     *  se mueve con la física de la marca. */
+    entradaStaggerMs: 45,
+    entradaMs: 300,
+    entradaBezier: [0.32, 0.72, 0, 1] as const,
+
+    /** «personajes en fundido 500 ms cada 3 s en splash y confirmaciones».
+     *  ⚠️ **500 supera el techo de Ley 6 (<300 ms en UI) a propósito y con
+     *  firma**: no es UI que responde a un toque — es un fundido de marca
+     *  que corre solo, la misma clase que `EsperaDeMarca` (~1.9 s). */
+    personajeFundidoMs: 500,
+    personajeCadaMs: 3000,
+  },
 } as const

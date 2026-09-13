@@ -6,6 +6,10 @@ export { palette, gradients, type GradientToken } from './tokens/palette'
 export { typography, type TypeSizeKey } from './tokens/typography'
 export { spacing, type SpacingKey } from './tokens/spacing'
 export { radius, type RadiusKey } from './tokens/radius'
+/* v5 (S116) — las medidas por objeto de la letra del rediseño. Vive
+   aparte de `spacing` a propósito: `spacing` es ritmo (base 4 estricta),
+   `medidas` es cuánto mide una cosa (26, 58, 74… no son múltiplos de 4). */
+export { medidas, type MedidaKey } from './tokens/medidas'
 export { shadows, type ShadowToken } from './tokens/shadows'
 export { elevacion, type ElevacionNivel, type ElevacionTokens } from './tokens/elevacion'
 export { motion } from './tokens/motion'
