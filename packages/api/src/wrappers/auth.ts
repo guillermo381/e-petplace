@@ -17,6 +17,11 @@ const CODIGOS_ERROR_AUTH = [
   'password_debil',
   'email_no_confirmado',
   'sin_sesion',
+  /* 🔴 `D-1098` — el método de alta no está en el cliente de auth. NO es un
+     error del servidor ni del usuario: es del motor. Existe para que ese caso
+     deje de salir como `undefined is not a function` y salga como un rebote
+     tipado que la pantalla puede decir. */
+  'motor_de_alta_ausente',
 ] as const;
 
 export type CodigoErrorAuth = (typeof CODIGOS_ERROR_AUTH)[number];
@@ -38,6 +43,7 @@ const MENSAJES_ERROR_AUTH: Record<
   email_no_confirmado:   'Falta confirmar tu email. Revisa tu correo.',
   sin_sesion:            'No hay una sesión activa.',
   datos_inconsistentes:  'La respuesta del servidor no tiene la forma esperada.',
+  motor_de_alta_ausente: 'No pudimos crear la cuenta. Es un problema nuestro, no tuyo — ya lo estamos viendo.',
   error_desconocido:     'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
@@ -503,6 +509,30 @@ export interface InputRegistrarse {
   urlLegalMostrada?: string;
 }
 
+/**
+ * `D-1098` — RESUELVE UN MÉTODO DEL CLIENTE DE AUTH SIN CONFIAR EN LA INSTANCIA.
+ *
+ * Mira la instancia y después **toda la cadena de prototipos**. En un objeto
+ * sano el primer paso acierta y esto no cambia nada; el resto existe para el
+ * caso medido por C, donde `signUp` no estaba donde tiene que estar.
+ *
+ * Devuelve `null` en vez de lanzar: **quien llama decide cómo lo dice**, y ese
+ * es todo el punto — un `undefined is not a function` no se le puede mostrar a
+ * una familia.
+ */
+function resolverMetodo<T>(obj: Record<string, unknown>, nombre: string): T | null {
+  if (typeof obj[nombre] === 'function') return (obj[nombre] as unknown as T);
+  let p: object | null = Object.getPrototypeOf(obj) as object | null;
+  while (p !== null) {
+    const d = Object.getOwnPropertyDescriptor(p, nombre);
+    if (d !== undefined && typeof d.value === 'function') {
+      return (d.value as (...a: unknown[]) => unknown).bind(obj) as unknown as T;
+    }
+    p = Object.getPrototypeOf(p) as object | null;
+  }
+  return null;
+}
+
 /** Alta email+password. El trigger handle_new_user crea el profile con
  *  raw_user_meta_data.nombre. Si el proyecto exige confirmación de email,
  *  devuelve la cuenta sin sesión (sesion_activa=false). */
@@ -514,7 +544,53 @@ export async function registrarse(
     CodigoErrorAuth
   >
 > {
-  const { data, error } = await getClient().auth.signUp({
+  /* ── 🔴 `D-1098` · POR QUÉ ESTA LLAMADA NO ES `auth.signUp(...)` DIRECTO ──
+     C reportó, con el stack del LogBox y no supuesto:
+         TypeError: undefined is not a function
+         auth.ts:517:56  registrarse → await getClient().auth.signUp({...})
+     — y `signInWithPassword` funcionando en el MISMO emulador y la MISMA
+     sesión de Metro. O sea: no es el cliente entero, es ese método.
+
+     **La causa NO está establecida, y se dice antes de la cura.** Descartado
+     con medición, para que nadie lo recorra de nuevo: `signUp` existe en
+     `auth-js` 2.110.0 (`GoTrueClient.js:687`, al lado de
+     `signInWithPassword:883`) · hay UNA sola copia de `supabase-js` y de
+     `auth-js` en el árbol · el worktree de C tiene la misma versión · los dos
+     builds que puede resolver RN —`dist/index.cjs` por el export condicional
+     `react-native`, y el `.mjs`— **tienen los dos el método**, probado
+     instanciando el cliente con esta misma config · `packages/api` no tiene
+     `dist/`: Metro consume `src/` · hay un solo `auth.ts` y un solo
+     `registrarse` · y `metro.config.js` no toca supabase.
+     ⇒ **queda como hipótesis el bundle/runtime del aparato, y eso no se
+     reproduce leyendo: se reproduce con el aparato.**
+
+     LO QUE ESTA CURA HACE, que no depende de conocer la causa:
+     ① busca el método en la instancia **y en la cadena de prototipos** — si
+        está en el prototipo y no en la instancia, esto lo recupera y el alta
+        vuelve a funcionar;
+     ② si no está en ninguna parte, **rebota tipado en vez de romper**, y se
+        lleva puesto el modo de falla mudo: la pantalla puede decir algo.
+     *No se inventa una causa para poder escribir una cura.* */
+  const clienteAuth = getClient().auth as unknown as Record<string, unknown>;
+  const signUp = resolverMetodo<
+    (c: { email: string; password: string; options?: { data?: Record<string, unknown> } }) => Promise<{
+      data: {
+        user: { id: string; email?: string | null; user_metadata?: Record<string, unknown> } | null;
+        session: unknown | null;
+      };
+      error: { code?: string; message: string } | null;
+    }>
+  >(clienteAuth, 'signUp');
+
+  if (signUp === null) {
+    return {
+      ok: false,
+      codigo: 'motor_de_alta_ausente',
+      mensaje: MENSAJES_ERROR_AUTH.motor_de_alta_ausente,
+    };
+  }
+
+  const { data, error } = await signUp({
     email: normalizarEmail(input.email),
     password: input.password,
     options: { data: { nombre: input.nombre } },

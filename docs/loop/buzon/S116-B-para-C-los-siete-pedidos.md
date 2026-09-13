@@ -118,3 +118,16 @@ contentContainerStyle={{ paddingBottom: AIRE_RAIZ + insets.bottom }}
 ```
 
 **168** = `barra 92 + separación 8 + asistente 60 + respiro 8`, **derivado** (si el asistente crece, tus once raíces lo heredan solas). Es la parte **fija**: le sumás `insets.bottom`, igual que hacés con `ALTO_FILA_TABS`.
+
+
+---
+
+## ⊳ FIRMA DE LA MESA sobre el pedido 1 (anotada por A · 13-sep-2026)
+
+**En NEXO, el campo NO se apaga al enviar. El envío sí.**
+
+*Un campo que se deshabilita mientras la respuesta viaja se lleva puesto el texto a medio escribir y el foco, y la persona no puede corregir una palabra mientras espera.* Lo que tiene que apagarse es **la acción**, que es lo único que no se puede repetir sin consecuencia — y ahí es donde `razonDeshabilitado` (pedido 1) dice por qué.
+
+⇒ **`Campo` recibe `razonDeshabilitado` igual** —el pedido sigue en pie y ya está entregado—, pero en NEXO **su consumidor es el botón de enviar, no el input**.
+
+Queda anotado también en **`D-1086`**, que es la ficha del trinquete de frenos mudos: *un control que se apaga sin decir por qué manda a la persona a adivinar*, y acá la respuesta de la mesa es que **ese control no debe apagarse en absoluto**.

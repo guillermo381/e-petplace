@@ -34195,6 +34195,8 @@ El gate imprime su **top 5 por archivo**, y ese top está dominado por `apps/pre
 
 Un botón apagado que no dice por qué **manda a la persona a adivinar** — y los tres viven en pantallas del recorrido: el carnet y el asistente. *`nexo.tsx:538` apaga el envío mientras el asistente piensa; eso es legítimo y probablemente sólo le falta su razón, que es la cura más barata del lote.*
 
+> **⊳ FIRMA DE LA MESA (13-sep-2026) — EL CASO DE NEXO SE RESUELVE SIN APAGAR NADA.** *El campo de NEXO no se apaga al enviar; el envío sí.* Un campo deshabilitado mientras la respuesta viaja se lleva el texto a medio escribir y el foco, y la persona no puede corregir una palabra mientras espera. **Lo que se apaga es la acción** —lo único que no se puede repetir sin consecuencia—, y ahí `razonDeshabilitado` dice por qué. *Es la salida que esta ficha prefiere cuando existe: un freno mudo se cura dándole voz, pero se cura mejor cuando resulta que ese control no debía frenarse.* Anotado también en el buzón #1 de B (`S116-B-para-C-los-siete-pedidos.md`).
+
 **Comando:** `pnpm verify:razon-muda` → hoy EXIT 1. **☠️ MUERTE:** el gate vuelve a EXIT 0 **y el baseline baja a su valor real en el mismo commit que lo cura** — *un baseline que baja y no se asienta convierte la próxima subida en invisible*, que es lo que su propio archivo ya advierte.
 
 ---
@@ -34532,7 +34534,9 @@ t('recurrentes.alMes', { precio: m.monto.toFixed(2) })
 
 ---
 
-## `D-1097` 🟢 — LA VARA PREGUNTA POR UNA CABECERA QUE 02 NO DEBE TENER
+## `D-1097` ☠️ — LA VARA PREGUNTA POR UNA CABECERA QUE 02 NO DEBE TENER
+
+> **☠️ CERRADA S116-A (13-sep-2026) SIN LÁPIDA EN EL CÓDIGO, y por eso se cierra acá y no en un archivo:** no había nada que borrar. La vara ya decía lo correcto; lo que faltaba era la excepción escrita, y **ahora vive dentro de la pregunta 1** (`docs/VARA_COHERENCIA_S116.md`), que es donde la va a leer quien la responda. *Una excepción que vive en una ficha aparte es una excepción que nadie encuentra el día que contesta la vara.*
 
 **Estado:** ABIERTA · **Dueño:** **mesa** (es una decisión sobre la vara, no sobre la pantalla).
 **Origen:** S116-C lote 3, al responder `VARA_COHERENCIA_S116` pregunta 1.
@@ -34574,6 +34578,45 @@ TypeError: undefined is not a function
 **Comando:** el camino real, con una cuenta nueva, en el emulador. **☠️ MUERTE:** una cuenta creada desde la app llega al alta.
 
 ---
+
+### ⊳ RESPUESTA DE A (13-sep-2026) — **CURADA, Y LA CAUSA NO ESTÁ ESTABLECIDA. Las dos cosas, en ese orden.**
+
+#### Lo que se descartó CON MEDICIÓN, para que nadie lo recorra de nuevo
+
+| hipótesis | medición | veredicto |
+|---|---|---|
+| `signUp` no existe en la librería | `GoTrueClient.js:687`, al lado de `signInWithPassword:883` | **falsa** |
+| dos copias de `supabase-js` / `auth-js` | 1 sola de cada una en todo el árbol | **falsa** |
+| el worktree de C tiene otra versión | `auth-js` **2.110.0** en los dos | **falsa** |
+| el build que resuelve RN no lo trae | `dist/index.cjs` (export condicional `react-native`) **y** el `.mjs`: instancié el cliente con ESTA config en los dos y `typeof auth.signUp === 'function'` | **falsa** |
+| `packages/api` sirve un `dist/` viejo | no hay `dist/`: `main` es `./src/index.ts`, Metro consume fuente | **falsa** |
+| hay un `auth.ts` o un `registrarse` duplicado | uno de cada uno | **falsa** |
+| `metro.config.js` toca la resolución de supabase | sólo aliasa LiveKit, y sólo en web | **falsa** |
+
+**La columna del stack cierra el diagnóstico de C:** la línea 517 mide 57 caracteres y `signUp` empieza en la 50 — **la 56 cae exactamente sobre la llamada**. El reporte era preciso.
+
+⇒ **queda como hipótesis el bundle/runtime del aparato, y eso no se reproduce leyendo código.** *No se inventa una causa para poder escribir una cura.*
+
+#### La cura, que no depende de conocer la causa
+
+`registrarse` deja de llamar `auth.signUp(...)` directo y resuelve el método con `resolverMetodo()`, que lo busca **en la instancia y en toda la cadena de prototipos**:
+
+- **si está donde tiene que estar** —el caso sano— esto no cambia absolutamente nada;
+- **si está en el prototipo y no en la instancia**, lo recupera y **el alta vuelve a funcionar**;
+- **si no está en ninguna parte**, rebota **tipado** (`motor_de_alta_ausente`) con voz de familia — *«Es un problema nuestro, no tuyo»* — en vez de reventar con `undefined is not a function`.
+
+**Lo segundo vale aunque lo primero no alcance:** el modo de falla deja de ser mudo. Hoy la pantalla muere; con esto puede decir algo, y el camino 01→02→05→alta deja de cortarse sin explicación.
+
+#### Cómo se cierra
+
+**NO la verifica A.** La verifica **C creando una cuenta real de punta a punta en el aparato** (encargo del founder). Dos resultados posibles y los dos son información:
+
+- **el alta funciona** ⇒ el método estaba en el prototipo, la cura era la correcta, y la ficha cierra;
+- **rebota `motor_de_alta_ausente`** ⇒ la cura hizo su segunda mitad, **el defecto sigue vivo** y ahora tiene un nombre en vez de un crash. La ficha sigue abierta con un dato nuevo.
+
+**☠️ MUERTE:** C crea una cuenta real y llega al alta de mascota.
+
+
 ## `D-1096` 🟡 — LA FECHA DE UNA CITA SE MUESTRA EN FORMATO DE MÁQUINA: `2026-09-13 · 15:00 · 30 min`
 
 **Estado:** ABIERTA · **Dueño: C · LOTE 5** (el que toca esa pantalla).

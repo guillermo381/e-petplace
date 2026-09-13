@@ -2,7 +2,7 @@
 
 > Destino: `docs/VARA_COHERENCIA_S116.md`. Toda pantalla que una pista entregue en S116 responde estas diez preguntas en su parte, con sí/no y evidencia (captura o gate). Un «no» sin ficha no cierra el lote. La mesa usa la misma lista.
 
-1. **Una sola cabecera.** ¿Es la `Cabecera` de la casa (raíz o empujada), sin círculos decorativos, marca de agua ni título propio?
+1. **Una sola cabecera.** ¿Es la `Cabecera` de la casa (raíz o empujada), sin círculos decorativos, marca de agua ni título propio? — **⊳ firma de la mesa (13-sep-2026): las tres pantallas de bienvenida (00, 01, 02) NO llevan cabecera por diseño.** *La pregunta seguía siendo correcta y su respuesta ahí es «no aplica», no «no cumple»: una vara que obliga a justificar lo que ya se decidió enseña a responderla de memoria.*
 2. **Tabs solo en raíz.** ¿Si es empujada, no hay barra de tabs y el único fijo abajo es el CTA? ¿Si es raíz, están las cinco y el asistente?
 3. **Un acento.** ¿Hay UNA cosa magenta que grita (el CTA) y todo lo demás calla? Sin ocre, sin morado del coach, sin bordes negros.
 4. **Baloo arriba, PJS abajo.** ¿Título de pantalla, título de sección y cifra en Baloo; todo lo demás en Plus Jakarta; nada en mono ni serif?
