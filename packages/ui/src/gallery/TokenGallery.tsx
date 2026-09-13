@@ -120,6 +120,7 @@ import { Personaje, TrioPersonajes, type EspeciePersonaje } from '../components/
 import { BotonAsistente } from '../components/BotonAsistente'
 import { BadgeFecha } from '../components/BadgeFecha'
 import { BarraPasos } from '../components/BarraPasos'
+import { Cabecera } from '../components/Cabecera'
 import { PantallaConPie } from '../components/PantallaConPie'
 import { GlifoConContador } from '../components/GlifoConContador'
 import { BurbujaPendientes } from '../components/BurbujaPendientes'
@@ -5229,6 +5230,25 @@ function GaleriaInterna() {
             server-side), jamás del oficio. Y el `paddingBottom` de la safe area lo pone la pieza:
             si cada pantalla lo recalcula, vuelve a divergir.
           </Texto>
+        </Seccion>
+
+        <Seccion titulo="Cabecera (S116-B) — raíz y empujada · NO reemplaza a Encabezado todavía">
+          <View style={{ gap: spacing[4], marginHorizontal: -spacing[4] }}>
+            <Cabecera
+              variante="raiz"
+              antetitulo="domingo, 13 de septiembre"
+              titulo="Buenas tardes"
+              apoyo="Tu hogar está al día"
+            />
+            <Cabecera
+              variante="empujada"
+              titulo="Agendar paseo"
+              apoyo="Zeus · 30 min"
+              onVolver={() => {}}
+              etiquetaVolver="Volver"
+              pasos={{ total: 3, actual: 2, etiqueta: 'Paso 2 de 3' }}
+            />
+          </View>
         </Seccion>
 
         <Seccion titulo="BadgeFecha · BarraPasos · BotonAsistente (S116-B) — shell v5">

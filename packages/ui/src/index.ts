@@ -15,6 +15,7 @@ export { Personaje, TrioPersonajes, type PersonajeProps, type EspeciePersonaje, 
 export { BotonAsistente, type BotonAsistenteProps } from './components/BotonAsistente'
 export { BadgeFecha, type BadgeFechaProps } from './components/BadgeFecha'
 export { BarraPasos, type BarraPasosProps } from './components/BarraPasos'
+export { Cabecera, type CabeceraProps } from './components/Cabecera'
 export { shadows, type ShadowToken } from './tokens/shadows'
 export { elevacion, type ElevacionNivel, type ElevacionTokens } from './tokens/elevacion'
 export { motion } from './tokens/motion'

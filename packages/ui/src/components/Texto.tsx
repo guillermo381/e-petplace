@@ -88,7 +88,14 @@ import { typography } from '../tokens/typography'
 import { useTheme } from '../ThemeProvider'
 import { sobreVideo } from '../tokens/sobreVideo'
 
-export type TextoVariante = 'titulo' | 'seccion' | 'cuerpo' | 'apoyo' | 'enfasis' | 'dato' | 'datoMd' | 'voz'
+/* S116-B lote 2 · entra `antetitulo` — el rótulo chiquito en mayúsculas que
+   la letra §2 firma para la cabecera («la fecha, el barrio, ACTIVIDAD»).
+   ⚠️ **No resucita el eyebrow que S52 mató**: aquel era mono + uppercase +
+   tracking como ESTRUCTURA DECORATIVA (Ley 18); éste lo firma la letra con
+   su color semántico, o sea que codifica una verdad del contenido. La
+   distinción es de FUNCIÓN, no de forma — y la escala v5 ya lo trae con su
+   `textTransform`, así que la pieza no lo pone en mayúsculas a mano. */
+export type TextoVariante = 'titulo' | 'seccion' | 'cuerpo' | 'apoyo' | 'enfasis' | 'dato' | 'datoMd' | 'voz' | 'antetitulo'
 /** S81 (pedido de C, los spreads dangerText de los cierres): entran los
  *  colores de STATUS — 'danger' y 'success' resuelven contra
  *  theme.status.*Text (los registros AA). El resto sigue en theme.text. */
@@ -189,6 +196,10 @@ const RECETA: Record<
   {
     fontFamily: string
     fontSize: number
+    /* S116-B · los dos que pide el antetítulo de la letra §2. Opcionales:
+       ninguna receta viva los usa, así que el resto no cambia. */
+    letterSpacing?: number
+    textTransform?: 'uppercase'
     color: TextoColor
     tabular?: boolean
     /** Interlineado explícito — solo donde la prosa lo necesita (enmienda 2). */
@@ -227,6 +238,16 @@ const RECETA: Record<
   cuerpo:  { fontFamily: typography.family.sans.regular, fontSize: typography.size.base, color: 'primary', leading: 24 }, // D-482: la prosa de la casa · N1: 16/24
 
   apoyo:   { fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: 'secondary', leading: 20 },
+  /* Sale ENTERO de `typography.escala.antetitulo` (letra §2): familia,
+     tamaño, interlínea, tracking 2 y mayúsculas. No se teclea ninguno. */
+  antetitulo: {
+    fontFamily: typography.escala.antetitulo.familia,
+    fontSize: typography.escala.antetitulo.size,
+    color: 'secondary',
+    leading: typography.escala.antetitulo.lineHeight,
+    letterSpacing: typography.escala.antetitulo.letterSpacing,
+    textTransform: typography.escala.antetitulo.textTransform,
+  },
   /* 🔴 `enfasis` — EL ELEMENTO DESTACADO DE UNA LISTA, QUE NO ES UN RÓTULO
      (S100d·bis).
 
@@ -324,6 +345,8 @@ export function Texto({ children, variante = 'cuerpo', color, numberOfLines, cen
         color: colorResuelto,
         ...(centrado ? { textAlign: 'center' as const } : null),
         ...(receta.leading !== undefined ? { lineHeight: receta.leading } : null),
+        ...(receta.letterSpacing !== undefined ? { letterSpacing: receta.letterSpacing } : null),
+        ...(receta.textTransform !== undefined ? { textTransform: receta.textTransform } : null),
         ...(receta.tabular || tabular ? { fontVariant: ['tabular-nums' as const] } : null),
       }}
     >
