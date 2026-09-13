@@ -19,15 +19,45 @@
 
 import type { AvatarMascotaEspecie } from '@epetplace/ui';
 
-/** Los cuatro pasos de la lámina + el cierre (que no es un paso: es el acto). */
-/* 🔴 **LA FOTO SUBE ANTES QUE LA RAZA** (S113-C · 1.2 · C9), y el orden es la
-   condición de la sugerencia: *sin foto no hay nada que mirar*, así que
-   preguntar la raza antes obligaba a que la persona la escribiera sola y
-   después le mostráramos que podíamos haberla adivinado.
-   ⚠️ Cambia un orden que el founder ya conoce. Lo que NO cambia es que la
-   raza siga siendo opcional ni cómo se guarda: el paso es el mismo, se
-   corrió de lugar. */
-export const PASOS = ['especie', 'foto', 'raza', 'historia', 'cierre'] as const;
+/* ☠️ **LOS CINCO PASOS MURIERON — S116-C lote 3, firma del founder.**
+ *
+ * ⏪ Eran `especie · foto · raza · historia · cierre`. El encargo del lote pide
+ * **TRES pasos y el carné**: *«07 datos básicos, 08 foto, 09 carné»* más 10 al
+ * cierre. **Es cambio de flujo y se hace completo, no a medias.**
+ *
+ * **Qué absorbe qué, para que el censo sea verificable:**
+ *   · `PasoEspecie` + `PasoRaza` + `PasoHistoria` ⇒ **`PasoDatosBasicos`** (07).
+ *     *Los tres preguntaban lo mismo —quién es este animal— en tres pantallas;
+ *     el mock las junta porque ninguna sola justificaba un paso.*
+ *   · `PasoFoto` **se conserva** y es 08.
+ *   · **`PasoCarnet`** nace y es 09.
+ *   · `PasoCierre` **se conserva** y es el acto, no un paso.
+ *
+ * ☠️ **LOS TRES ARCHIVOS SE BORRARON, y la lápida vive ACÁ a propósito.**
+ * `PasoEspecie.tsx`, `PasoRaza.tsx` y `PasoHistoria.tsx` ya no existen. La
+ * forma de la casa es dejar lápida (`L-395`), y **ésta es la lápida** — pero
+ * el archivo vacío no era el lugar: `verify:piezas-locales` cuenta `.tsx` de
+ * `components/`, así que tres archivos con sólo un `export {}` **seguían
+ * contando como tres piezas del catálogo** sin serlo. *Una lápida no puede
+ * inflar el inventario que la vara mide.*
+ * ⇒ La nota vive donde alguien la va a leer: **junto al orden de los pasos**,
+ * que es lo que se abre para entender el flujo. La historia está en git.
+ *
+ * 🔴 **LO QUE NO SE PIERDE, y es la mitad del trabajo:** `sexo` y `origen` los
+ * preguntaba `PasoHistoria` y **la RPC los recibe** (`p_sexo`, `p_origen` —
+ * medido en `onboarding.ts`). El encargo nombra cuatro filas para 07 y no los
+ * menciona; **se conservan igual** porque quitarlos no es simplificar la
+ * pantalla: es dejar de guardar dos datos que hoy se guardan. *Si la mesa los
+ * quiere afuera, es una línea — pero es decisión de producto, no de piel.*
+ *
+ * ⚠️ **LA FOTO SIGUE ANTES QUE LA RAZA**, que era la razón del orden viejo
+ * (S113-C: *«sin foto no hay nada que mirar»*, la sugerencia de raza mira la
+ * foto)… **y ahora NO puede cumplirse**, porque la raza vive en 07 y la foto
+ * en 08. **Se declara como lo que es: una consecuencia del orden que el
+ * encargo firma.** La sugerencia por foto queda sin su insumo en el alta; el
+ * selector con autocompletado —que siempre fue el camino principal— no cambia.
+ * *Un orden firmado que rompe una optimización previa se dice, no se esconde.* */
+export const PASOS = ['datos', 'foto', 'carnet', 'cierre'] as const;
 export type Paso = (typeof PASOS)[number];
 
 export function esPaso(v: unknown): v is Paso {
@@ -74,6 +104,12 @@ export interface BorradorAlta {
   precision?: string;
   sexo?: string;
   origen?: string;
+  /** ⭐ **S116-C lote 3 — el peso, opcional, en kg.** Lo pide el encargo de 07.
+   *  ⚠️ **NO viaja a la RPC del alta**: medido, `crear_familia_con_primera_mascota`
+   *  no tiene `p_peso` y el peso vive en su propia serie (`registrarPesoMascota`).
+   *  ⇒ se registra en el CIERRE, después de que la mascota existe. *Un peso es
+   *  una medición con fecha, no un atributo del animal — por eso tiene serie.* */
+  peso?: string;
   /** paso 4 */
   fotoUri?: string;
   /** '1' si el paso 4 declaró que HABÍA foto.
@@ -131,6 +167,7 @@ export function leerBorrador(params: Record<string, string | string[] | undefine
     precision: uno('precision'),
     sexo: uno('sexo'),
     origen: uno('origen'),
+    peso: uno('peso'),
     fotoUri: uno('fotoUri'),
     cx: uno('cx'),
     cy: uno('cy'),

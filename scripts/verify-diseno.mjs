@@ -7504,7 +7504,7 @@ const TABLA_R77 = new Map([
      mayoría de las mascotas reales— y **`otro` cierra la vuelta a propósito**,
      porque es la nariz y cerrar con la marca es lo que hace que el ciclo se
      lea como una vuelta y no como una lista cortada. */
-  ['splash-marca.tsx::CARAS', 'exhaustivo'],
+  ['index.tsx::CARAS', 'exhaustivo'],
   // ── EXHAUSTIVOS: si le falta un miembro, la pantalla pierde un paso ──
   ['ConvivenciaInput.tsx::ORDEN', 'exhaustivo'],
   ['EscaleraCaso.tsx::ORDEN_CASO', 'exhaustivo'],

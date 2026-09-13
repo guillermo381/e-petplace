@@ -344,6 +344,62 @@ export const clienteEs = {
   //      (7-ago: el sujeto es el sistema, el campo dos es el tipo de agua) y
   //      dejó dicho que la voz se firma en el gate de pantalla.
   alta: {
+    /* ⭐ S116-C lote 3 — EL ALTA EN TRES PASOS. Voz en tuteo neutro, sin
+       género. Las claves de los cinco pasos viejos se conservan: varias
+       siguen vivas en el cierre y en la bifurcación. */
+    nuevaMascota: 'Nueva mascota',
+    paso: 'Paso {{actual}} de {{total}}',
+    volver: 'Volver',
+    omitir: 'Omitir',
+    pasoDatosTitulo: 'Datos básicos',
+    especieRotulo: 'ESPECIE',
+    datosRotulo: 'DATOS',
+    nacimientoLabel: 'Nacimiento',
+    pesoLabel: 'Peso',
+    /* El peso es opcional y lo dice: *un campo que parece obligatorio y no lo
+       es hace que alguien invente un número.* */
+    pesoAyuda: 'Opcional, en kilos',
+    pesoPlaceholder: 'ej: 12,5',
+    sexoLabel: 'Sexo',
+    origenLabel: '¿Cómo llegó?',
+    origen_adoptado: 'Adoptado',
+    origen_refugio: 'De un refugio',
+    origen_nacido_en_casa: 'Nació en casa',
+    origen_encontrado: 'Lo encontré',
+    origen_criadero: 'De un criadero',
+    aguaLabel: 'Tipo de agua',
+    agua_dulce: 'Dulce',
+    agua_marino: 'Marino',
+    datosNota: 'Con estos datos creamos su expediente. Vacunas y documentos los agregas cuando quieras.',
+    guardarYCrear: 'Guardar y crear expediente',
+    razonEspecie: 'Elige la especie para seguir.',
+    razonNombre: 'Falta su nombre.',
+    razonAgua: 'Elige el tipo de agua.',
+    /* ── 09 · el carné ─────────────────────────────────────────────── */
+    pasoCarnetTitulo: 'Carné de vacunas',
+    carnetEncuadre: 'Carné completo dentro del marco',
+    carnetNota: 'Leemos las fechas del carné y programamos los recordatorios.',
+    carnetTomar: 'Tomar la foto',
+    carnetGaleria: 'Elegir de la galería',
+    carnetLeyendo: 'Estamos leyendo el carné',
+    carnetLeyendoDetalle: 'Puede tardar un minuto.',
+    carnetLeidoTitulo: 'Encontramos {{n}} vacunas',
+    /* Las dos voces de lo que no se pudo leer — la tercera cláusula de la ley
+       del founder: se dice dónde no pudimos, en vez de dibujar el hueco. */
+    carnetSinFecha: 'Sin fecha — la completas después',
+    carnetSinNombre: 'Sin nombre — la completas después',
+    carnetQuitar: 'Quitar',
+    carnetEditarDespues: 'Puedes corregir y completar cada una desde su carné, cuando quieras.',
+    carnetGuardar: 'Guardar y terminar',
+    carnetSeguirSin: 'Seguir sin carné',
+    carnetSinVacunas: 'No pudimos leer ninguna vacuna en esa foto. Puedes probar con otra o cargarlo después.',
+    carnetFalloPermiso: 'Necesitamos permiso para usar la cámara.',
+    carnetFalloSesion: 'Tu sesión se cortó. Vuelve a entrar para seguir.',
+    carnetFalloLectura: 'No pudimos leer esa imagen. Prueba con otra foto.',
+    /* ── 10 · las cuatro voces del apoyo, según lo que DE VERDAD se guardó */
+    listoApoyoFotoYCarnet: 'Guardamos su foto y su carné. Puedes completar el resto cuando quieras.',
+    listoApoyoFoto: 'Guardamos su foto. Puedes completar el resto cuando quieras.',
+    listoApoyoCarnet: 'Guardamos su carné. Puedes completar el resto cuando quieras.',
     sugEsUn: '¿Es un {{raza}}?',
     sugConf_muyProbable: 'muy probable',
     sugConf_probable: 'probable',

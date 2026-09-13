@@ -37,7 +37,7 @@ export default function OnboardingInicio() {
      alguien tendría que acordarse de moverlo. */
   const volverA = destinoDeVuelta(useLocalSearchParams().volverA);
 
-  if (!ADOPCION_ALCANZABLE) return <AltaMascota modo="primera" pasoFijo="especie" />;
+  if (!ADOPCION_ALCANZABLE) return <AltaMascota modo="primera" pasoFijo="datos" />;
 
   return (
     <BifurcacionDeEntrada
@@ -48,7 +48,7 @@ export default function OnboardingInicio() {
       quieroAdoptar={t('bifurcacion.quieroAdoptar')}
       quieroAdoptarDetalle={t('bifurcacion.quieroAdoptarDetalle')}
       quieroAdoptarAccion={t('bifurcacion.quieroAdoptarAccion')}
-      onTengoMascota={() => router.push('/onboarding/especie')}
+      onTengoMascota={() => router.push('/onboarding/datos')}
       /* «Si toco adoptar, no me pidas nada más: me llevás directo a ver los
          animales» — la cuenta sin mascota la crea el motor de A antes de
          navegar; hoy esta rama no se alcanza (ver la cabecera). */

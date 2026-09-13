@@ -36,11 +36,15 @@ import {
   crearFamiliaConPrimeraMascota,
   declararFotoMascota,
   obtenerSesion,
+  registrarPesoMascota,
+  registrarVacunasDeCarnet,
 } from '@epetplace/api';
 
 import { esPrecision, esSexo } from '@/lib/params';
 import { subirAvatar } from '@/lib/subir-avatar';
+import { parsearPrecio } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
+import { leerCarnetDelIntento, olvidarCarnetDelIntento } from '@/lib/alta/carnet-del-intento';
 import { esAcuario, esOrigen, esTipoDeAgua, MODO, type BorradorAlta, type ModoAlta } from './tipos';
 
 /**
@@ -126,6 +130,8 @@ export function PasoCierre({ modo, borrador }: { modo: ModoAlta; borrador: Borra
   const [sinFoto, setSinFoto] = useState(false);
   const [intento, setIntento] = useState(0);
   const [creada, setCreada] = useState<string | null>(null);
+  /** ¿El carné llegó a guardarse de verdad? Decide la voz del apoyo. */
+  const [carnetGuardado, setCarnetGuardado] = useState(false);
   const corriendoRef = useRef(false);
 
   const nombre = borrador.nombre ?? t('alta.tuMascota');
@@ -279,6 +285,53 @@ export function PasoCierre({ modo, borrador }: { modo: ModoAlta; borrador: Borra
       // mascota, y «corregir es AGREGAR» (D-544). La propuesta de voz va al
       // gate; encenderlo después es UNA llamada acá.
       ALTAS_YA_HECHAS.set(clave, r.data.mascota_id);
+
+      /* ⭐ **LOS DOS DATOS QUE LA RPC DEL ALTA NO RECIBE — S116-C lote 3.**
+         Se escriben ACÁ y no antes porque los dos **necesitan la mascota**:
+         antes de esta línea no existía a quién colgárselos.
+
+         🔴 **NINGUNO DE LOS DOS PUEDE TUMBAR EL ALTA.** La mascota ya está
+         creada; si el peso o el carné fallan, *lo que corresponde es que la
+         familia lo cargue después desde el expediente, no que el alta parezca
+         rota por algo que ya no puede deshacerse.* Por eso van sin `await`
+         que bloquee el camino y sus fallos no escriben `error`.
+         ⚠️ **Y por eso el apoyo de la confirmación mira el HECHO y no la
+         intención** (ver abajo): decir «guardamos su carné» porque se intentó
+         sería exactamente lo que la ley del founder prohíbe. */
+      if (borrador.peso !== undefined) {
+        /* `parsearPrecio` y no `Number(replace(',','.'))` — me lo cazó `R88`
+           y su razón alcanza al peso igual que a la plata: sobre «1.234,50» un
+           parseo a mano devuelve **1.234**, que es *plausible, equivocado y
+           finito*, así que `Number.isFinite` no lo frena. El formato de la
+           casa es el mismo para los dos (coma decimal, punto de miles). */
+        const kg = parsearPrecio(borrador.peso);
+        if (Number.isFinite(kg) && kg > 0) {
+          void registrarPesoMascota(r.data.mascota_id, { peso_kg: kg });
+        }
+      }
+
+      const carnet = leerCarnetDelIntento(borrador.tokenIntento);
+      /* 🔴 **SOLO LAS QUE TIENEN NOMBRE SE REGISTRAN — la columna es NOT NULL.**
+         Las otras NO se descartaron al leer (eso contradiria la firma
+         S113-D-2.4: *«una fila corregible vale mas que una que desaparece en
+         silencio»*): viajaron, se mostraron diciendo que les faltaba, y se
+         completan en el carnet del expediente, que es la pantalla que tiene
+         ese formulario. *Lo que no se puede guardar no se manda a rebotar al
+         servidor.* */
+      const conNombre = (carnet?.vacunas ?? []).flatMap((v) =>
+        typeof v.nombre === 'string' && v.nombre.length > 0 ? [{ ...v, nombre: v.nombre }] : [],
+      );
+      if (carnet !== null && conNombre.length > 0) {
+        void registrarVacunasDeCarnet({
+          mascota_id: r.data.mascota_id,
+          vacunas: conNombre,
+          archivo_url: carnet.archivo_url,
+        }).then((res) => {
+          if (res.ok) setCarnetGuardado(true);
+        });
+        olvidarCarnetDelIntento(borrador.tokenIntento);
+      }
+
       setCreada(r.data.mascota_id);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -376,10 +429,19 @@ export function PasoCierre({ modo, borrador }: { modo: ModoAlta; borrador: Borra
         <Confirmacion
           exclamacion={t('alta.listoExclamacion')}
           titulo={t('alta.listoTitulo', { nombre })}
+          /* 🔴 **EL APOYO MIRA LO QUE DE VERDAD SE GUARDÓ.** Son tres voces
+             y no una con dos huecos: *«guardamos su foto y su carné» con sólo
+             uno de los dos es una frase falsa que compila perfecto* — la ley
+             del founder del 5-sep, en su tercera cláusula. El carné además
+             mira el RESULTADO de su escritura, no la intención. */
           apoyo={
-            borrador.fotoUri && !sinFoto
-              ? t('alta.listoApoyoConExtras')
-              : t('alta.listoApoyoSolo')
+            borrador.fotoUri && !sinFoto && carnetGuardado
+              ? t('alta.listoApoyoFotoYCarnet')
+              : borrador.fotoUri && !sinFoto
+                ? t('alta.listoApoyoFoto')
+                : carnetGuardado
+                  ? t('alta.listoApoyoCarnet')
+                  : t('alta.listoApoyoSolo')
           }
           /* 🔴 **EL TRÍO SALE DE LA CASA Y NO EMPIEZA POR ESTA MASCOTA — es un
              hueco declarado, no un olvido.** El encargo pide *«el trío de
