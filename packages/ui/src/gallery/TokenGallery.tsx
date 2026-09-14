@@ -5,6 +5,7 @@
  * los 3 temas con toggle, isotipo en variantes y las dos cards de dosis.
  */
 
+import { type ReactNode } from 'react'
 import { Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native'
 import Svg, { Path } from 'react-native-svg'
 
@@ -3488,7 +3489,26 @@ function ContanosDemo() {
   )
 }
 
-export function TokenGallery() {
+/** 🔴 **`encabezado` — LO QUE VA ARRIBA, DENTRO DE ESTE SCROLL (S116-B lote
+ *  11, y cura un defecto que me bloqueó tres lotes).**
+ *
+ *  **La causa, medida: DOS `ScrollView` verticales anidados.** La ruta
+ *  `gallery.tsx` envolvía todo en uno para poder poner la lámina arriba, y
+ *  esta pieza trae el suyo. *Un scroll vertical adentro de otro no reparte
+ *  el gesto: se lo queda el de adentro, que con `flex: 1` mide lo que su
+ *  contenido y cree que no tiene nada que desplazar.*
+ *
+ *  **El síntoma que produjo: 360 swipes sin mover un píxel**, parado en una
+ *  sección con campos. Lo declaré como *«el scroll se traba»* sin saber por
+ *  qué; la causa estaba a dos líneas de distancia, en dos archivos.
+ *
+ *  ⚠️ **Consecuencia que lo vuelve grave y no molesto: ninguna pieza que
+ *  viva debajo de ese punto se podía gatear.** Una galería que no se puede
+ *  recorrer entera es una galería que miente sobre lo que contiene.
+ *
+ *  ⇒ el encabezado entra ACÁ, adentro del único scroll. *La ruta deja de
+ *  necesitar el suyo, y con eso el anidamiento se vuelve inexpresable.* */
+export function TokenGallery({ encabezado }: { encabezado?: ReactNode } = {}) {
   // Provider PROPIO (S48/D-305): el provider raíz del app está controlado
   // por el tema del sistema, y el selector manual de esta galería
   // (herramienta de verificación) necesita setMode vivo. Se siembra del
@@ -3497,13 +3517,13 @@ export function TokenGallery() {
   return (
     <ThemeProvider defaultMode={mode}>
       <AvisoProvider>
-        <GaleriaInterna />
+        <GaleriaInterna encabezado={encabezado} />
       </AvisoProvider>
     </ThemeProvider>
   )
 }
 
-function GaleriaInterna() {
+function GaleriaInterna({ encabezado }: { encabezado?: ReactNode }) {
   const [cruceVisible, setCruceVisible] = useState(true)
   // S106-B · el aviso previo de teleconsulta (gate del founder)
   const [avisoTele, setAvisoTele] = useState(false)
@@ -3538,6 +3558,8 @@ function GaleriaInterna() {
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: theme.bg.base }} contentContainerStyle={{ padding: spacing[6], paddingBottom: spacing[16] }}>
+      {/* Va FUERA del `maxWidth`: la lámina se dibuja a sangre. */}
+      {encabezado}
       <View style={{ width: '100%', maxWidth: 720, alignSelf: 'center' }}>
 
         {/* Header + toggle */}
@@ -4064,18 +4086,15 @@ function GaleriaInterna() {
             <FilaBeneficio glifo="paseo" titulo="Quien lo cuida, cerca" apoyo="Paseos, guardería y estética con gente verificada." />
             <FilaBeneficio glifo="despensa" titulo="Lo que come, a tiempo" apoyo="Su alimento llega sin que tengas que acordarte." />
 
-            {/* La hoja se monta por SU BOTÓN, que es como la va a ver la
-                familia: tocá el asistente de esta sección y abrila. *Montar
-                la hoja suelta probaría la hoja y no el camino.* */}
+            {/* El abanico se despliega desde SU BOTÓN, que es como lo va a
+                ver la familia: tocá el asistente y mirá que suban
+                escalonados, que la etiqueta quede a la IZQUIERDA del disco, y
+                que se cierre tocando fuera **o el botón otra vez**. */}
             <View style={{ height: 220 }}>
               <BotonAsistente
                 etiqueta="Abrir el asistente"
-                tituloHoja="Nexo"
-                pregunta={{
-                  placeholder: 'Escribe tu pregunta',
-                  onEnviar: () => {},
-                  etiquetaEnviar: 'Enviar',
-                }}
+                vozPreguntar="Pregúntale a Nexo"
+                onPreguntar={() => {}}
                 atajos={[
                   /* Los CUATRO del orbe viejo, censados del objeto
                      (`lib/nexo/atajos.ts:57`) — acá como demo, no como la

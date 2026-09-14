@@ -101,19 +101,14 @@
 
 **Dónde hay que reemplazar:** toda espera larga que hoy sea un spinner suelto, una línea de progreso o un texto solo, **cuando C la monte**. *Esta tabla no migra nada por sí sola: dice qué poner cuando se toque.*
 
-### `HojaAsistente`
-- **props:** `visible` · `onCerrar` · `titulo` · `pregunta` · `atajos[]` (`glifo` · `texto` · `onPress`)
-- **consumidores:** 0 en pantallas — **la monta `BotonAsistente`, no una app**. *Si cada pantalla la montara, abrir el asistente sería un acto distinto en cada una, y el estado de «abierta» se olvidaría de cerrarse en alguna.*
-- 🔴 **LOS ATAJOS DEL ORBE VIEJO, CENSADOS DEL OBJETO:** `apps/cliente/src/lib/nexo/atajos.ts:57` — `ORDEN_DE_PATA = ['peso','vacuna','antiparasitario','foto']`. ⚠️ **La mesa los nombró de memoria como «agregar recuerdo, carné de vacunas y los demás» y el objeto dice otra cosa**: «carné» ≈ `vacuna` y «recuerdo» ≈ `foto`, pero **`peso` y `antiparasitario` no estaban en la lista dictada y sí en el código**.
-- 🔴 **La pieza NO trae la lista adentro** — *un atajo a «peso» en una pantalla de pago no es un atajo: es ruido.* C decide cuáles monta.
-- ⚠️ **Filas de lista, no los dedos del orbe**, y la consecuencia es buena: *una lista crece a cinco sin rediseñar nada; el abanico no podía pasar de cuatro sin dejar de ser una pata.*
-- ⚠️ **`BotonAsistente` es una UNIÓN**: o abre su hoja (y entonces exige campo **y** atajos), o tiene `onPress`. *Un asistente con atajos y sin campo no es una configuración: es una hoja a medio construir* — y así no compila. La lista **vacía sí es legal**: abre con el campo solo.
-- ⚠️ **La rueda no sortea:** orden fijo, así no puede repetir dos veces la misma cara — *que se lee como que se colgó*. Con **una sola especie no arranca**: no hay a dónde ir.
-- ⚠️ **Dice «la cara» y monta el personaje ENTERO, declarado:** recortar a ojo seis ilustraciones distintas daría seis encuadres distintos, y el que quede mal no se nota hasta que lo ve el founder. El recorte, si la mesa lo quiere, es del ilustrador.
-
----
-
-## ① EL SHELL — las que nacieron en el lote 2 y monta C
+### `AbanicoAsistente`
+- **props:** `atajos[]` (`glifo` · `texto` · `onPress`) · `vozPreguntar` · `onPreguntar` · `onCerrar`
+- **consumidores:** 0 en pantallas — **lo monta `BotonAsistente`, no una app**. *Si cada pantalla lo montara, abrir el asistente sería un acto distinto en cada una.*
+- ☠️ **Reemplaza a `HojaAsistente`, que murió en el lote 11** (lápida en `components/HojaAsistente.LAPIDA.md`). 🔴 **Una hoja modal tapa la pantalla desde la que se la abrió — y el contexto de lo que se va a preguntar ES esa pantalla.** *Preguntar sobre algo no puede empezar por esconderlo.* Segunda razón, de gesto: una hoja pide dos manos o un pulgar que viaje; **el abanico nace donde está el dedo**.
+- 🔴 **LOS ATAJOS DEL ORBE, CENSADOS DEL OBJETO:** `apps/cliente/src/lib/nexo/atajos.ts:57` — `['peso','vacuna','antiparasitario','foto']`. ⚠️ La mesa los nombró de memoria como «agregar recuerdo, carné de vacunas»; **`peso` y `antiparasitario` no estaban en esa lista y sí en el código.**
+- ✅ **Reusa el MOTION del orbe y no su geometría:** `coach.escalonadoMs` al abrir y `coach.cierreMs` al cerrar, con su regla — **se abre escalonado y se recoge de golpe**, *porque escalonar la salida hace esperar a quien ya decidió irse*. El arco de pata NO se reusa: el sketch pide una columna, y heredar el arco sería una coreografía que nadie pidió.
+- ⚠️ **La etiqueta va a la IZQUIERDA y no debajo:** debajo, cuatro etiquetas empujan la columna a lo alto y el último atajo queda fuera del pulgar. *A la izquierda la columna mide lo mismo con etiqueta que sin ella.*
+- ⚠️ **El velo ocupa la pantalla entera**, porque *«se cierra tocando fuera» sólo se cumple si «fuera» es tocable*. Y **el botón también cierra**: uno que sólo abre deja a quien se arrepintió buscando dónde tocar.
 
 ### `Cabecera`
 La banda ciruela de arriba. **Va en TODAS las pantallas del cliente**, no solo en las del lote 3: es lo primero que se ve y lo que hace que la app parezca una sola.
