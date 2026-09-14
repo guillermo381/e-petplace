@@ -303,7 +303,16 @@ export function Encabezado(props: EncabezadoProps) {
       ) : null}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
         {isotipo !== 'ninguno' && varianteIsotipo !== 'ninguno' ? (
-          <Isotipo size={32} variant={varianteIsotipo} />
+          /* 🔴 **EL ISOTIPO v5 (`D-1110`, lote 9).** Esta línea dibujaba el
+             LEGADO, y sale en **cuatro de las cinco tabs** — es la marca más
+             vista de la app. *Se cambia acá y no en las 79 pantallas que
+             montan el encabezado: la pieza es el único lugar donde una marca
+             puede cambiar de una vez.*
+             El `d` es el mismo que ya consumen los ocho papeles exportables
+             y lo sostiene `verify:isotipo-path`. **Las dos marcas de agua
+             (210 y 1000) NO se tocan** — siguen en `'legado'` por default,
+             que es otra decisión y de la mesa. */
+          <Isotipo size={32} variant={varianteIsotipo} dibujo="v5" />
         ) : null}
 
         {busqueda === undefined ? null : (

@@ -4042,7 +4042,7 @@ function GaleriaInterna() {
                 etiqueta="Abrir el asistente"
                 tituloHoja="Nexo"
                 pregunta={{
-                  placeholder: 'Preguntale a Nexo',
+                  placeholder: 'Escribe tu pregunta',
                   onEnviar: () => {},
                   etiquetaEnviar: 'Enviar',
                 }}
