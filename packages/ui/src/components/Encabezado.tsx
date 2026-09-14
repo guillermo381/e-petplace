@@ -268,6 +268,23 @@ export function Encabezado(props: EncabezadoProps) {
   // en línea con la voz; la portada sigue respirando por padding, no por
   // huecos.
   const { saludo, subtitulo, isotipo = 'gradiente', accionDer, busqueda } = props
+  /* 🔴 **EN LA CASA v5 LA CABECERA NO LLEVA ISOTIPO (lote 10, firma del
+     founder sobre el recorrido).** El sketch no pone ninguno, y el que había
+     era el LEGADO.
+
+     ⏪ **Y acá se retira una cura mía del lote 9, con su razón:** cambié esta
+     línea al path derivado (`isotipo-v5-path`) creyendo que arreglaba
+     `D-1110`. **El founder lo rechazó: el path derivado no representa la
+     marca en pantalla.** Es una SILUETA de un solo color — buena para un PDF
+     de un tinte, y no es la marca que la gente reconoce, que tiene su magenta
+     y su contorno. *Que un dibujo sea el correcto para imprimir no lo vuelve
+     el correcto para mirar.*
+
+     ⇒ **el path derivado queda SÓLO para los papeles**, y donde una pantalla
+     necesite la nariz —la espera, el carné— va `IsotipoV5`, que monta el
+     asset del ilustrador tal cual. El prestador conserva el suyo: no es v5 y
+     su gate lo midió con isotipo. */
+  const formaV5 = 'formaV5' in theme.accent && theme.accent.formaV5 === true
   const varianteIsotipo =
     theme.mode === 'memorial' ? 'blanco' : isotipo === 'tinta' && theme.mode === 'dark' ? 'blanco' : isotipo
   return (
@@ -302,17 +319,8 @@ export function Encabezado(props: EncabezadoProps) {
         </View>
       ) : null}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-        {isotipo !== 'ninguno' && varianteIsotipo !== 'ninguno' ? (
-          /* 🔴 **EL ISOTIPO v5 (`D-1110`, lote 9).** Esta línea dibujaba el
-             LEGADO, y sale en **cuatro de las cinco tabs** — es la marca más
-             vista de la app. *Se cambia acá y no en las 79 pantallas que
-             montan el encabezado: la pieza es el único lugar donde una marca
-             puede cambiar de una vez.*
-             El `d` es el mismo que ya consumen los ocho papeles exportables
-             y lo sostiene `verify:isotipo-path`. **Las dos marcas de agua
-             (210 y 1000) NO se tocan** — siguen en `'legado'` por default,
-             que es otra decisión y de la mesa. */
-          <Isotipo size={32} variant={varianteIsotipo} dibujo="v5" />
+        {isotipo !== 'ninguno' && varianteIsotipo !== 'ninguno' && !formaV5 ? (
+          <Isotipo size={32} variant={varianteIsotipo} />
         ) : null}
 
         {busqueda === undefined ? null : (

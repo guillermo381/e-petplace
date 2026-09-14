@@ -9,6 +9,7 @@ import { medidas } from '../tokens/medidas'
 import { motion } from '../tokens/motion'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
+import { Confeti } from './Confeti'
 import { useTheme } from '../ThemeProvider'
 
 /**
@@ -64,6 +65,14 @@ export type ConfirmacionProps = {
   /** ¿Va el trío? **Sin default en la firma: lo decide la CASA** —
    *  encendido en cliente, apagado en prestador y en memorial. Pasalo
    *  `false` sólo si esta pantalla es la excepción. */
+  /** 🔴 **Los papelitos del «¡Listo!»** (lote 10). **Opcional y encendida por
+   *  default en el cliente** — `undefined` quiere decir «lo que corresponda a
+   *  esta casa», no «apagado». *Un default apagado obliga a que cada pantalla
+   *  se acuerde de celebrar, y la que se olvide no falla: simplemente no
+   *  celebra, y nadie lo nota.*
+   *
+   *  **En memorial no se monta pase lo que pase** (Ley 8). */
+  confeti?: boolean
   trio?: boolean
   /** El «¡Listo!» en Baloo. Sin default: la voz es del riel (Ley 3). */
   exclamacion: string
@@ -100,6 +109,7 @@ export function Confirmacion({
   especies,
   trio,
   exclamacion,
+  confeti,
 }: ConfirmacionProps) {
   const { theme } = useTheme()
   const quieto = useReducedMotion() || theme.mode === 'memorial'
@@ -133,8 +143,16 @@ export function Confirmacion({
   const relleno = CASA.filter((e) => !dadas.includes(e))
   const trioFinal = trioEncendido ? [...dadas, ...relleno].slice(0, 3) : undefined
 
+  /* 🔴 **ENCENDIDO POR DEFAULT EN EL CLIENTE Y APAGADO EN MEMORIAL, y lo
+     segundo no es una opción del consumidor: es la Ley 8.** *Una pantalla que
+     confirma una despedida no tira papelitos*, y dejar esa decisión en una
+     prop sería esperar que ninguna pantalla se olvide. El mismo mecanismo que
+     ya gobierna el trío y los destellos de esta pieza. */
+  const confetiEncendido = (confeti ?? esCasaV5) && !esMemorial && !quieto
+
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base, padding: medidas.margen, gap: spacing[5], justifyContent: 'center' }}>
+      {confetiEncendido ? <Confeti /> : null}
       <View style={{ alignItems: 'center', gap: spacing[4] }}>
         <View style={{ alignItems: 'center', justifyContent: 'center' }}>
           {/* Los destellos: **sólo donde hay fiesta.** En memorial no se
