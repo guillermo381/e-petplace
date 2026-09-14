@@ -159,7 +159,8 @@
     "verify:catalogo-v5": "node scripts/verify-catalogo-v5.mjs",
     "verify:assets-resuelven": "node scripts/verify-assets-resuelven.mjs",
     "verify:moneda": "node scripts/verify-moneda.mjs",
-    "verify:piezas-locales": "node scripts/verify-piezas-locales.mjs"
+    "verify:piezas-locales": "node scripts/verify-piezas-locales.mjs",
+    "verify:auth-receptor": "node scripts/verify-auth-receptor.mjs"
   },
   "devDependencies": {
     "eslint": "^10.9.1",

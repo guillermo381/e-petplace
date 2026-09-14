@@ -34616,6 +34616,31 @@ TypeError: undefined is not a function
 - **el alta funciona** ⇒ el método estaba en el prototipo, la cura era la correcta, y la ficha cierra;
 - **rebota `motor_de_alta_ausente`** ⇒ la cura hizo su segunda mitad, **el defecto sigue vivo** y ahora tiene un nombre en vez de un crash. La ficha sigue abierta con un dato nuevo.
 
+### ⊳ SEGUNDA VUELTA (13-sep-2026) — **LA PRIMERA CURA TENÍA EL DEFECTO ADENTRO, Y LO MIDIÓ C**
+
+🔴 **`resolverMetodo()` devolvía el método SUELTO.** La rama que atrapaba todos los casos era ésta:
+
+```js
+if (typeof obj[nombre] === 'function') return obj[nombre];   // ← sin bind
+```
+
+**Y `obj[nombre]` lee POR LA CADENA DE PROTOTIPOS.** Ahí está lo que lo volvía invisible: encontraba el método del prototipo, lo devolvía sin receptor, **y la rama de abajo —la única que sí bindeaba— no se ejecutaba jamás**. Al invocarlo, `supabase-js` perdía su `this` y reventaba sobre su propio estado: **`'storage' of undefined`**.
+
+⇒ *la cura cambió un modo de falla por otro y el camino siguió roto.* **Lo encontró C en el aparato, no un gate** — porque ningún gate miraba si el método se podía **llamar**.
+
+#### Las dos mitades de la cura de verdad
+
+1. **`bind` en TODAS las ramas.** El método sale con su receptor o no sale.
+2. **La invocación queda guardada.** *Un guard de PRESENCIA verifica que el método ESTÉ, no que se pueda INVOCAR* — y esa distinción es exactamente lo que costó esta vuelta. Se captura **sólo `TypeError`**, que es la firma de «el motor se rompió sobre su propio estado»: un fallo de red o de credenciales **no lanza**, viene en `error` y sigue su camino normal. **Cualquier otra excepción se re-lanza**: tapar lo que no se entiende es cómo un rebote tipado se convierte en un silencio.
+
+⇒ hoy, si `signUp` no se puede usar —falte o reviente—, el alta rebota **`motor_de_alta_ausente`** con voz de familia, y no con un crash.
+
+#### Y nace su gate, para que el `bind` no se pueda perder otra vez
+
+**`verify:auth-receptor`** (`scripts/verify-auth-receptor.mjs`, 53 ms, en el hook). Vigila las dos mitades y **trae su control positivo adentro**: simula un objeto cuyo método vive en el prototipo y usa `this`, y **prueba que suelto revienta con `TypeError` y bindeado funciona**. *Si esa sonda dejara de reventar, el gate estaría midiendo otra cosa — y lo dice en vez de dar verde.*
+
+**Sus dos rojos, probados quitando cada mitad:** sin `bind` → exit 1 nombrando el retorno culpable; sin el `catch` → exit 1 diciendo que la invocación no está guardada.
+
 **☠️ MUERTE:** C crea una cuenta real y llega al alta de mascota.
 
 
