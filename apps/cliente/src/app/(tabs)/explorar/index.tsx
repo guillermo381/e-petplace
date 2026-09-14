@@ -40,6 +40,7 @@ import { obtenerAdoptables, obtenerServiciosPais, type ServiciosPais } from '@ep
 // S58 (D-361): adiestramiento migró al set b′ — la estrella murió
 // (violaba el set); el silbato canónico vive en el registry.
 import { useTraduccion } from '@/i18n';
+import { AccionCarrito } from '@/components/accion-carrito';
 import { ADOPCION_ALCANZABLE } from '@/lib/gate-adopcion';
 
 // El soft launch es Ecuador (DEFINICION_SOFTLAUNCH); el país del
@@ -198,7 +199,7 @@ export default function Explorar() {
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <ScrollView contentContainerStyle={{ paddingBottom: AIRE_RAIZ + insets.bottom }}>
-        <Encabezado variante="portada" saludo={t('explorar.titulo')} />
+        <Encabezado variante="portada" saludo={t('explorar.titulo')} accionDer={<AccionCarrito />} />
 
         <View style={{ paddingHorizontal: spacing[4], gap: spacing[6], marginTop: spacing[2] }}>
           {/* ── Servicios activos ── */}
