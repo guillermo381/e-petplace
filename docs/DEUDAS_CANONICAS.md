@@ -34946,3 +34946,22 @@ El splash **no se va antes de dos segundos** la primera vez que la app se abre. 
 Pedir la recuperación con una cuenta real, recibir el correo, **volver por el enlace**, cambiar la contraseña, y **entrar con la nueva**. Menos que eso es fotografiarla otra vez.
 
 **☠️ MUERTE:** alguien recupera su contraseña de punta a punta y entra con ella.
+
+---
+
+## `D-1106` 🟠 — HOGAR Y EXPEDIENTE ENTRAN A LA HOJA, Y `Cabecera` NECESITA UN **SLOT DE CONTENIDO**
+
+**Estado:** ABIERTA · **Dueño: B** · **entra en el LOTE 4.**
+**Origen:** firma de la mesa, 14-sep-2026. Continúa `D-1103`, cuya pieza ya llegó.
+
+`D-1103` entregó la estructura —fondo ciruela + `HojaContenido` con las esquinas superiores redondeadas— y las primeras pantallas la montaron. **Faltan las dos más grandes: Hogar y Expediente.**
+
+### Por qué no es «montar dos pantallas más»
+
+**Las dos tienen contenido que vive ARRIBA, dentro de la cabecera**: en el Hogar, el saludo y las fichas de mascota; en el Expediente, la identidad del animal. *Con la estructura nueva ese contenido queda entre dos planos —el ciruela de arriba y la hoja que empieza abajo— y hoy `Cabecera` no tiene dónde recibirlo.*
+
+⇒ **`Cabecera` gana un slot de contenido**, y **por eso la ficha es de B**: si cada una de las dos pantallas resuelve ese hueco por su cuenta, nacen dos soluciones distintas para el mismo problema — y la siguiente pantalla que lo necesite elegirá una al azar.
+
+📌 **Y hay una razón concreta para que el slot sea de la pieza y no de la pantalla:** la cabecera ya tiene **dos presentaciones** (raíz y empujada, más `presentacion="fondo"` del lote 4). Un contenido metido por fuera tendría que saber en cuál está. **Dentro de la pieza, no.**
+
+**☠️ MUERTE:** Hogar y Expediente montan `HojaContenido` con su contenido superior dentro del slot de `Cabecera`, y `verify:piezas-locales` no subió por ello.
