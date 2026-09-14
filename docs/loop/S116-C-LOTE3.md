@@ -424,6 +424,311 @@ cuesta tiempo de la persona, no código.*
 
 ---
 
+## ⑯ LOTE 3f · EL PISO DEL SPLASH, Y LAS DOS TAREAS QUE NO PUDE HACER
+
+### ⑯.1 · 🔴 LO QUE NO SE PUDO, y por qué NO es una excusa: las piezas no existen
+
+Los puntos **1 y 2** del encargo piden montar cosas que **no existen en ningún
+lado**. Medido antes de pedir, contra `main` @ `dfe004a7` **y contra las siete
+ramas `pista/s116-b*`**:
+
+| lo que pide el encargo | estado medido |
+|---|---|
+| `HojaContenido` | **no existe** — ni en `main`, ni en ninguna rama de B |
+| `FilaAccionesCostura` | **no existe** — ídem |
+| `Cabecera` variante `'fondo'` | hoy es `'raiz' \| 'empujada'` (`Cabecera.tsx:45`) |
+| `LogoV5 tamano="portada"` | hoy es `'cabecera' \| 'splash' \| 'protagonista'` (`Marca.tsx:78`) |
+
+Y **cero menciones** de las dos primeras en todo `docs/` — o sea que tampoco
+están especificadas.
+
+⇒ **No las dibujo local.** Es la regla que manda el lote entero: *«si una pieza
+no te da lo que la pantalla necesita, escribís qué falta en `docs/loop/buzon/`
+y montás lo que hay; no lo resolvés local»*. El pedido con el contrato que cada
+una necesita está en **`docs/loop/buzon/S116-C-para-B-estructura-nueva-y-portada.md`**,
+con las preguntas que C no puede contestar sola —quién paga el
+`paddingBottom` (`R53` lo vigila), si la hoja trae su propio scroll, si
+`'fondo'` cambia el par de texto—.
+
+*Las capturas y los GIF de scroll de Hogar y Expediente salen el día que las
+piezas entren: **no hay nada que fotografiar todavía**.*
+
+### ⑯.2 · ✅ EL PISO DE PERMANENCIA DEL SPLASH
+
+**Dos segundos, sólo en la PRIMERA apertura del aparato.** Firma del founder.
+
+- **Dónde vive la memoria:** `AsyncStorage`, clave `epp.primera_apertura_vista`
+  — el mismo molde que el candado biométrico, *porque la primera apertura es un
+  hecho del APARATO, no de quien se loguea*. Quien instale en otro teléfono
+  vuelve a ver la marca, y eso es correcto: es su primera vez ahí.
+- **El valor viene de config** (`lib/config-arranque.ts`), no tecleado en la
+  pantalla. ⚠️ **Y NO de `app_config`, con su razón medida:** está en
+  `client.ts` que **`anon` ve CERO filas** de esa tabla — y el piso rige
+  exactamente cuando todavía no hay sesión. *Una perilla que no se puede leer
+  cuando hace falta no es una perilla: es una que siempre está en su default.*
+- **Corre EN PARALELO con la red, jamás en fila.** Si se esperara el piso antes
+  de pedir la sesión, la primera apertura tardaría dos segundos **más** de lo
+  que tarda hoy.
+- **El fallo no cuesta la app:** si `AsyncStorage` no contesta se asume que NO
+  es la primera apertura. *Entre mostrar la marca de más y demorar un arranque
+  que alguien está esperando, se elige no demorar* — y el otro modo de falla
+  sería el peor: dos segundos en CADA apertura, para siempre, sin que nada falle.
+
+**Verificado en el aparato, las dos mitades:**
+
+| apertura | qué mide | resultado |
+|---|---|---|
+| **primera** | la coreografía entera | `mov-00-primera-apertura.gif` — la nariz se asienta, **el halo se lee** (antes no llegaba), los seis personajes entran escalonados, y el viaje a 01 |
+| **segunda** | que no demore | sonda temporal: **`[SONDA piso] 0`** ⇒ el piso NO aplica. El ~1,7 s de splash que igual se ve **es la red** (sesión + estado de onboarding), no mi demora |
+
+*La segunda medición existe porque sin ella habría entregado «sólo la primera»
+como una afirmación. Mirando la pantalla las dos se ven iguales.*
+
+### ⚠️ ⑯.3 · LA ROTACIÓN NO ENTRA EN EL PISO, y son dos números tuyos
+
+El encargo pide ver **una rotación** dentro de la primera apertura. **No ocurre,
+y es aritmética:** la cadencia es **3.000 ms** (*«cada tres segundos»*, textual
+del encargo original) y el piso es **2.000 ms**. La primera cara cambia un
+segundo después de que el splash ya se fue.
+
+**No muevo ninguno de los dos**: los dos son firma tuya, y elegir cuál cede es
+decisión de producto. Las dos salidas, con su costo:
+
+- **el piso a ~3,4 s** — se ve la rotación, y **cada persona nueva espera 1,4 s
+  más** en su primer arranque;
+- **la PRIMERA rotación antes** (y de ahí en adelante cada 3 s) — el piso queda
+  en 2 s y la cadencia firmada se conserva para el resto.
+
+*Voto: la segunda. El «cada tres segundos» describe el ritmo del carrusel, no
+cuánto tarda la primera; y el piso existe para que se vea la coreografía, no
+para que se vea más tiempo la misma cara.*
+
+### ⑯.4 · 🔴 LOS GIF DE B: UNO SALIÓ, DOS NO PUDIERON — y la razón es un hallazgo
+
+| animación | GIF | por qué |
+|---|:-:|---|
+| el check con destellos | ✅ `mov-check-con-destellos.gif` | está vivo: **es la pantalla 10**, filmado en el recorrido real |
+| la pata que pisa | ❌ | **`marcaPata` es opt-in con default `false` y NINGUNA pantalla la pasa** |
+| el trío que se funde | ❌ | **`trio` es opcional en `Confirmacion` y nadie lo pasa** |
+
+Medido con grep sobre `apps/cliente`: **cero consumidores** para las dos.
+
+*No es un defecto de B —las piezas están bien y el movimiento entró—: es que la
+prop es opt-in y nadie la declara, así que el trabajo no aparece en ningún
+camino real.* **Es `L-318` con otra ropa: motor sin puerta.** Filmarlas desde la
+galería mostraría que la pieza se mueve, **no que el producto la usa** — y la
+pregunta 11 de la vara acaba de nacer justamente de esa diferencia.
+
+⇒ **dónde va la pata y dónde el trío es decisión de producto, no mía.** En
+cuanto la mesa lo diga, las monto y las filmo.
+
+---
+
+## ⑰ LOTE 3g · LA ESTRUCTURA NUEVA — SEIS DE OCHO, Y LAS DOS QUE FALTAN SON OTRA COSA
+
+### ⑰.1 · Lo montado y verificado
+
+**`HojaContenido` + `Cabecera presentacion="fondo"`** en: **03 · 04 · 05 · 07 ·
+08 · 09**. Ciruela de FONDO, el contenido en una hoja del lienzo que desliza
+encima. Verificadas **en el aparato, no sólo compiladas**.
+
+**Tres cosas que el contrato de B contestó y que hubo que aplicar:**
+
+- **El `paddingBottom` lo paga la hoja** (`insets.bottom + spacing[6]`, en su
+  render) ⇒ **las seis pantallas dejaron de pagarlo**. *Sumarlo también sería
+  pagarlo dos veces — es lo que `R53` vigila.* ⚠️ **Con una excepción medida:**
+  en 07 el **CTA fijo vive FUERA de la hoja**, así que ahí `insets` se queda.
+- **`EvitaTeclado` envuelve a la hoja**, nunca al revés: la hoja trae su propio
+  `ScrollView` y anidar dos rompe el gesto.
+- **`arranque` hay que medirlo.** La `Cabecera` no tiene alto fijo —su propia
+  nota lo dice— así que sale de un `onLayout`. Y **eso vive en UN lugar**
+  (`lib/alto-de-cabecera.ts`) porque son ocho pantallas y *una regla que hay que
+  aplicar ocho veces se aplica siete*. Arranca en `ALTO_CABECERA_*_FIJO` —el
+  valor que B exportó justo para esto— y no en cero: con cero, la hoja se dibuja
+  tapando la cabecera y **salta** en el segundo cuadro.
+
+### ⑰.2 · 🔴 LAS DOS QUE FALTAN, y no es que no me alcanzó el tiempo
+
+**Hogar (poblado) y Expediente NO tienen `Cabecera` v5.** Medido:
+
+| pantalla | qué usa hoy |
+|---|---|
+| Hogar poblado | un **techo LOCAL** (`@override-s82c`) con la fecha, el saludo **y la fila de mascotas adentro del degradado** |
+| Expediente | un `LinearGradient` local con la **identidad de la mascota** (nombre, especie, peso) |
+
+Y el propio comentario del Hogar dice por qué son locales: *«`HeroMarca` no tiene
+slots para fecha-antes-del-saludo ni para la fila de mascotas»*. **Lo mismo vale
+para `Cabecera`.** ⇒ montarles `Cabecera presentacion="fondo"` **perdería la fila
+de mascotas y la identidad**, que es el contenido por el que esos techos existen.
+
+⚠️ **Y la costura depende de eso**: `FilaAccionesCostura` la monta
+`HojaContenido`, no la pantalla —*«su posición depende de dónde arranca la
+hoja, que es un dato de acá»*—. Sin la hoja no hay costura, y sin resolver el
+techo no hay hoja.
+
+**Lo que sí está listo para el día que se resuelva**, medido: los cuatro accesos
+del Expediente son `Citas · Pasaporte y QR · Documentos · Cuéntanos`
+(`FilaAcciones`, `[mascotaId].tsx:1505`) y **«Pasaporte y QR» pasa a
+«Pasaporte»**, como firmaste. ⇒ **pedido a B en el buzón**: `HojaContenido`
+acepta cualquier `fondo`, así que **la salida más barata es pasar el techo local
+como `fondo`** — pero eso es una decisión de composición de esas dos pantallas,
+no un cambio mecánico, y con ella van sus dos GIF de scroll.
+
+### ⑰.3 · 🔴 EL LOGO CLARO TIENE FONDO BLANCO HORNEADO
+
+`LogoV5 tamano="portada"` está en 01 · 03 · 05. Pero **sobre el lienzo dibuja una
+caja blanca**, visto en el emulador y después medido en el asset:
+
+| archivo | esquina RGBA | alfa |
+|---|---|:-:|
+| `logo.png` (claro) | **(255, 255, 255, 255)** | **255 — OPACO** |
+| `logo-sobre-oscuro.png` | (0, 0, 0, 57) | 57 |
+| `isotipo.png` | (0, 0, 0, 0) | **0** |
+| `isotipo-sobre-oscuro.png` | (0, 0, 0, 0) | **0** |
+
+⇒ **es la misma cura del fondo del logo que ya se hizo para el isotipo y que a
+este asset no llegó.** *Los dos isotipos están limpios y el logo claro no* — y
+no se veía porque hasta hoy el logo sólo aparecía en `cabecera`, chico y sobre
+ciruela.
+
+**Mientras tanto la marca va sobre el CIRUELA**, donde rige el asset que sí es
+transparente. Queda declarado para que nadie lo lea como preferencia de
+composición: *el día que el asset se cure, esto puede moverse adentro de la
+hoja si la mesa lo prefiere.*
+
+### ⑰.4 · ✅ LA ROTACIÓN YA ENTRA EN EL PISO
+
+La cadencia vivía en mi pantalla, así que la curé donde estaba: **la primera cara
+dura 1 s; las siguientes, 3 s.** `MS_POR_CARA` **no se toca** —describe el ritmo
+del carrusel— y nace `MS_PRIMERA_CARA`. *Son dos cosas distintas y hasta hoy la
+segunda no tenía nombre propio.*
+
+⚠️ **Es un `setTimeout` y después un `setInterval`, no un intervalo más corto:**
+*un intervalo de 1 s rotaría las seis caras en seis segundos y volvería el
+carrusel una ansiedad.*
+
+### ⑰.5 · ✅ LA PATA Y EL TRÍO, filmados — con una corrección al encargo
+
+| animación | evidencia | nota |
+|---|---|---|
+| el trío que se funde | `10-expediente-creado.png` | ✅ **se ve**: perro, gato y conejo bajo el check |
+| la pata que pisa | `mov-pata-que-pisa.gif` | ✅ se ve pisando la esquina del chip lleno |
+
+🔴 **Pero NO en el selector de especie, y conviene decirlo:** el encargo pide
+*«la pata en 07 (especie)»* y **esa grilla no es `SelectorOpcion`** — es
+`Personaje` + `Boton`, compuesta así en el lote 3. La pata sólo la dibuja
+`SelectorOpcion`. ⇒ **el GIF es del selector de SEXO, en la misma pantalla.**
+
+*Si la mesa quiere la pata sobre la especie, lo que hay que decidir es que esa
+grilla pase a `SelectorOpcion` con adorno — y eso cambia cómo se ve el paso,
+así que no lo hago sin firma.*
+
+---
+
+## ⑱ LOTE 3h · LA ONDA, Y DOS COSAS QUE APARECIERON AL MIRARLA
+
+### ⑱.1 · `OndaAcceso` montada en 03 y 05
+
+03: «Mascotas / más felices», personaje a la **derecha**.
+05: «Empieza / su expediente», personaje a la **izquierda**. Las dos vistas en
+el aparato.
+
+**Va ABSOLUTA al pie y FUERA de `EvitaTeclado`**, a propósito: la pieza se cuida
+sola del teclado —alto fijo para no aplastarse, fundido para no verse salir— y
+meterla adentro la haría subir con el contenido, que es lo contrario de lo que
+pide la orden. **El hueco lo reserva la pantalla con `ALTO_ONDA_ACCESO`**, que
+la pieza exporta justo para eso: *el número no se teclea, se pide.*
+
+⚠️ **Y ahí choqué con `R53`**, que pide `PantallaConPie` para todo pie fijo.
+**No aplica acá: `PantallaConPie` trae su PROPIO `ScrollView` y
+`HojaContenido` ya tiene uno** ⇒ son alternativas, no se componen. Declarado con
+`R53-DECLARADO` y su razón —el mecanismo que el propio gate ofrece— y pedido a B
+que `HojaContenido` gane slot de pie con medición propia, con lo que la
+declaración muere.
+
+### ⑱.2 · ✅ EL TECLADO NO LA APLASTA — 🔴 pero deja la ola
+
+**La mitad del alto fijo funciona**: con el teclado arriba la franja no se
+comprime. **La otra mitad no llega a cero.**
+
+Medido por pixel, **con discriminador** (04 no tiene onda):
+
+| y | 03 | 04 |
+|--:|---|---|
+| 1505 | **(235, 142, 201)** | (248, 243, 247) |
+| 1510 | **(230, 136, 198)** | (248, 243, 247) |
+
+Y en la ampliación **se reconoce la curva de la ola**
+(`onda-resto-sobre-teclado.png`, 03 arriba y 04 abajo, mismo recorte).
+
+*No es mi montaje:* el `View` absoluto no tiene opacidad propia — el fundido es
+enteramente de la pieza. **Va a B con la medición.**
+
+### ⑱.3 · 🔴 EL BRILLO DEL ASISTENTE DEJA LA PANTALLA PERMANENTEMENTE NO-IDLE
+
+`uiautomator dump` sobre cualquier raíz devuelve **`ERROR: could not get idle
+state`**. **Discriminado:** en la Hoja que tapa el orbe responde
+`UI hierchary dumped`; en 03 y 04, que no tienen orbe, también. **Con el orbe a
+la vista, nunca.**
+
+Ese «idle» es el mismo que usa el árbol de accesibilidad de Android ⇒ **una
+animación que no termina nunca deja la ventana ocupada para todo lo que espere
+reposo.** *No es un defecto visual —el brillo se ve bien— es una propiedad del
+sistema que cambia sin que nada falle.* Si la casa lo quiere infinito es una
+decisión válida, **pero hoy no está escrita**, y el próximo que vea el `ERROR`
+va a buscar el problema en su arnés, como hice yo.
+
+### ⑱.4 · El foco en ciruela y el brillo, capturados
+
+- **Foco**: `03-foco-y-teclado.png` y `07-foco.png` — el borde ciruela del campo
+  enfocado, en las dos pantallas.
+- **Brillo**: `mov-asistente-brillo.gif`, el orbe con su halo en la raíz del
+  hogar.
+- **El logo claro ya no tiene caja blanca**: re-medido del objeto tras el merge,
+  su esquina pasó de **alfa 255 a 37**. La cura de B llegó.
+
+---
+
+## ⑰ LA VARA — LAS ONCE PREGUNTAS, con la 11 que nació de mi defecto
+
+> La **11** (*«se usó, no se fotografió»*) la firmó la mesa el 13-sep **sobre el
+> CTA de 03 que yo había borrado**. La respondo primero yo.
+
+| # | pregunta | 00 | 01 | 02 | 03 | 04 | 05 | 05b | 06 | 07 | 08 | 09 | 10 |
+|--:|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| 1 | una sola cabecera | ✳️ | ✳️ | ✳️ | sí | sí | sí | ✳️ | sí | sí | sí | sí | n/a |
+| 2 | tabs solo en raíz | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí |
+| 3 | un acento | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí |
+| 4 | Baloo arriba, PJS abajo | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí |
+| 5 | nada local | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí |
+| 6 | plata y fecha por su riel | n/a | n/a | n/a | n/a | n/a | n/a | n/a | sí | sí | n/a | n/a | n/a |
+| 7 | estado con palabra | n/a | n/a | n/a | sí | sí | sí | sí | sí | sí | sí | sí | sí |
+| 8 | vacío honesto | sí | n/a | n/a | sí | sí | sí | sí | sí | sí | sí | sí | sí |
+| 9 | movimiento que dice algo | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí |
+| 10 | voz | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí |
+| **11** | **se USÓ, no se fotografió** | sí | sí | sí | **sí** | **no** | sí | sí | sí | sí | sí | sí | sí |
+
+**✳️** = excepción firmada (00·01·02 sin cabecera por diseño, `D-1097`; 05b
+lleva flecha sola sobre lienzo, firma de la mesa).
+
+### La 11, respondida de verdad
+
+- **03 · sí, y por fin.** Se usó para entrar: con una cuenta confirmada (llega
+  al hogar) **y con una sin confirmar** (llega a 05b). *Es la primera vez en
+  cuatro lotes que esta pantalla se usa en vez de fotografiarse — y por eso
+  apareció que le faltaba el botón.*
+- **04 · NO, y lo digo.** `recuperar` **sólo se fotografió**: nunca pedí un
+  código de recuperación ni lo canjeé. **Es exactamente la clase de hueco donde
+  vivió el defecto de 03 durante tres lotes**, así que no lo marco verde.
+  ⇒ **ficha: se prueba en el próximo lote, pidiendo el código de verdad.**
+- **00 · sí**: se usó como lo que es —el arranque— y **se midió en sus dos
+  estados** (primera apertura y segunda).
+- **06 · sí** en sus dos estados: vacío (creando la primera mascota desde ahí,
+  que además probó que elige el alta correcta) y poblado.
+- **07·08·09·10 · sí**: tres altas completas de punta a punta en este lote.
+
+---
+
 ## ⑯ LO QUE QUEDA ABIERTO, con dueño
 
 - **Los glifos de oficio de B** — entregados en `pista/s116-b-03` (`e01bb461`),

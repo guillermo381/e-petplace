@@ -15,6 +15,8 @@ import { useRouter } from 'expo-router';
 import { Boton, Entrada, EstadoVacio, IsotipoV5, Personaje, gradients, motion, palette, radius, spacing, type EspeciePersonaje, useTheme } from '@epetplace/ui';
 
 import { getEstadoOnboardingDueno, obtenerPreferencias, obtenerSesion } from '@epetplace/api';
+
+import { pisoDePermanenciaMs } from '@/lib/primera-apertura';
 import { cambiarIdioma, obtenerIdiomaActual } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
@@ -72,6 +74,12 @@ const CARAS: readonly EspeciePersonaje[] = ['perro', 'gato', 'conejo', 'ave', 'r
  *  no sale de `motion.duration`: ese vocabulario es de transiciones. */
 const MS_POR_CARA = 3000
 
+/** Cuánto dura la PRIMERA cara — **un segundo**, para que la rotación entre
+ *  en el piso de dos segundos de la primera apertura. *Sin esto, la primera
+ *  rotación ocurría después de que el splash se fue: un acto de la
+ *  coreografía que no se podía ver nunca.* */
+const MS_PRIMERA_CARA = 1000
+
 /* ── 🔴 LOS TIEMPOS SALEN DEL TOKEN, NO DE LA PANTALLA (firma del founder,
    13-sep-2026) ────────────────────────────────────────────────────────────
    ⏪ Acá había cinco números tecleados: `420`, `380`, `600`, `500` y el bezier
@@ -128,14 +136,36 @@ function SplashMarca() {
      deslizamiento sugeriría una lista que se puede recorrer con el dedo. */
   useEffect(() => {
     if (quieto) return
-    const id = setInterval(() => {
+    /* 🔴 **LA PRIMERA CARA CAMBIA AL SEGUNDO; LAS SIGUIENTES CADA TRES.**
+       (Firma del founder, 14-sep-2026.) Y la razón es aritmética, medida:
+       el piso de permanencia de la primera apertura es de **2 s** y la
+       cadencia era **3 s**, así que la primera rotación caía **un segundo
+       después de que el splash ya se había ido** — la coreografía tenía un
+       acto que nadie podía ver nunca.
+
+       No se toca la cadencia: **`MS_POR_CARA` sigue siendo 3 s**, porque
+       describe el ritmo del carrusel. Lo que cambia es **cuánto dura la
+       PRIMERA**, que es otra cosa y hasta hoy no tenía nombre propio.
+
+       ⚠️ Por eso son un `setTimeout` y después un `setInterval`, y no un
+       intervalo más corto: *un intervalo de 1 s rotaría las seis caras en
+       seis segundos y volvería el carrusel una ansiedad.* */
+    let intervalo: ReturnType<typeof setInterval> | undefined
+    const avanzar = () => {
       caraOpacidad.value = withSequence(
         withTiming(0, { duration: MS_FUNDIDO / 2, easing: Easing.inOut(Easing.quad) }),
         withTiming(1, { duration: MS_FUNDIDO / 2, easing: Easing.inOut(Easing.quad) }),
       )
       setTimeout(() => setIndice((i) => (i + 1) % CARAS.length), MS_FUNDIDO / 2)
-    }, MS_POR_CARA)
-    return () => clearInterval(id)
+    }
+    const primera = setTimeout(() => {
+      avanzar()
+      intervalo = setInterval(avanzar, MS_POR_CARA)
+    }, MS_PRIMERA_CARA)
+    return () => {
+      clearTimeout(primera)
+      if (intervalo !== undefined) clearInterval(intervalo)
+    }
   }, [quieto, caraOpacidad])
 
   const estiloNariz = useAnimatedStyle(() => ({ transform: [{ scale: escala.value }] }))
@@ -247,10 +277,27 @@ export default function Raiz() {
       if (vigente) setColgado(true);
     }, UMBRAL_COLGADO_MS);
 
+    /* 🔴 **EL PISO DE PERMANENCIA ARRANCA ACÁ Y CORRE EN PARALELO, jamás en
+       fila.** Si se esperara el piso ANTES de pedir la sesión, en la primera
+       apertura la app tardaría dos segundos **más** de lo que tarda hoy. Así,
+       el piso y la red se gastan el mismo tiempo: en la práctica no demora
+       nada que no estuviera esperando igual.
+
+       Y se pide UNA vez, fuera del `async` de abajo: `esPrimeraApertura…`
+       **marca en el mismo acto que lee**, así que llamarla dos veces daría
+       `true` y después `false`. */
+    const piso = pisoDePermanenciaMs().then(
+      (ms) => new Promise<void>((listo) => setTimeout(listo, ms)),
+    );
+
     void (async () => {
       const sesion = await obtenerSesion();
       if (!vigente) return;
       if (!sesion.ok || sesion.data === null) {
+        /* El piso se cumple ANTES de irse, no antes de decidir a dónde: lo que
+           se sostiene es la MARCA en pantalla, no el trabajo. */
+        await piso;
+        if (!vigente) return;
         clearTimeout(timer);
         router.replace('/bienvenida');
         return;
@@ -268,6 +315,8 @@ export default function Raiz() {
          sin familia al onboarding. Hoy **las dos van al hogar** — el hogar
          sabe dibujar los dos estados, y tener dos destinos para la misma
          pregunta es cómo nacen dos verdades. */
+      await piso;
+      if (!vigente) return;
       router.replace('/hogar');
     })();
 
