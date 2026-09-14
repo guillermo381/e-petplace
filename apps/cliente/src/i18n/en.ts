@@ -1951,6 +1951,8 @@ export const clienteEn = {
     mediosSinVerificar: "We couldn't confirm your cards with your bank right now. We're showing them as we have them saved.",
     mediosOcultas: "We're not showing the cards your bank no longer has active. You can add them again anytime.",
     titulo: 'Your account',
+    // S116-C lote 6 — the gallery gets its door back, DEV only (R17).
+    galeriaPiezas: 'Component gallery',
     // S74 — temporary gate entry (dies with the founder's signature, Ley 37)
     laminaFusion: 'S74 plate · avatar fusion',
     // S101-B — GATE SCAFFOLD, not the final surface (Ley 37: dies with the
