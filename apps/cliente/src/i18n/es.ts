@@ -4820,7 +4820,10 @@ export const clienteEs = {
      de una pieza vive adentro de la pieza (Ley 3). */
   facturacionCheckout: {
     facturaA: 'Factura a',
-    cambiar: 'Cambiar',
+    /* ☠️ **`cambiar` MURIÓ (S116-C lote 6 · punto ⑤).** Era la etiqueta del
+       `Boton compacto` al costado de la línea; la línea entera pasó a ser la
+       acción (`CeldaNavegacion` con chevrón) y el botón se retiró **en el
+       mismo acto** (Ley 37). Censado: cero consumidores. */
   },
 
   /* S115-C · EL CORREO DE LA FACTURA. Su voz NO es la de un campo de formulario:
