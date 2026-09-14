@@ -84,7 +84,7 @@
 ### `EsperaLarga`
 - **props:** `titulo` · `apoyo` · `pie?`
 - **tokens:** `motion.coach.respiracionMs` · `motion.v5.asistenteHalo*` · `bg.base`
-- **consumidores:** 1 — **la galería**, mientras Metro empaqueta el catálogo. *Su primer consumidor no fue una pantalla de producto: fue el instrumento de gate, que tardaba una eternidad en blanco.* Su lugar sigue siendo toda espera larga: el pago, el carné, lo que dure
+- **consumidores:** 0 · su lugar es toda espera larga: el pago, el carné, lo que dure. ⏪ Tuvo uno —la galería, tras un `lazy` que puse y retiré— y **se fue porque ese `import()` nunca resolvía**: la ruta quedaba en la espera para siempre. *De paso la pieza quedó probada en aparato durante minutos, con su rueda girando y su halo respirando: el defecto de una fue el banco de pruebas de la otra*
 - **consume:** `lib/rueda-de-caras` (la misma de 00, 02 y la onda) y el halo del asistente. **Nada se redibuja.**
 - 🔴 **NO SABE CUÁNTO FALTA Y NO LO FINGE — por eso muere la línea de progreso.** *Una barra que avanza sin saber hacia dónde es una promesa que nadie puede cumplir, y cuando se queda quieta al 80 % lo que comunica es que algo se rompió.* Lo que esta pieza comunica es otra cosa: **que hay alguien acá**.
 - 🔴 **ES LA ÚNICA PIEZA DE LA CASA CON MOVIMIENTO SIN FIN**, firmado. En el asistente el halo respira tres veces y descansa **porque una animación infinita deja la ventana no-idle**; acá esa razón no aplica: *la espera es lo que dura, y una pantalla de espera detenida a los 24 s dice lo contrario de lo que vino a decir.* ⚠️ **Consecuencia declarada: mientras esté, `uiautomator` no reporta `idle`.**
