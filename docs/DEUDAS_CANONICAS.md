@@ -34965,3 +34965,56 @@ Pedir la recuperación con una cuenta real, recibir el correo, **volver por el e
 📌 **Y hay una razón concreta para que el slot sea de la pieza y no de la pantalla:** la cabecera ya tiene **dos presentaciones** (raíz y empujada, más `presentacion="fondo"` del lote 4). Un contenido metido por fuera tendría que saber en cuál está. **Dentro de la pieza, no.**
 
 **☠️ MUERTE:** Hogar y Expediente montan `HojaContenido` con su contenido superior dentro del slot de `Cabecera`, y `verify:piezas-locales` no subió por ello.
+
+---
+
+## `D-1107` 🟠 — TODO LO QUE LA APP **EXPORTA** LLEVA EL LOGO VIEJO — ocho artefactos, por **dos caminos distintos**
+
+**Estado:** ABIERTA · **Dueño: A** (vive entero en `supabase/functions/` y en Storage) · **el asset nuevo lo produce B**, que ya lo entregó.
+**Origen:** la mesa, 14-sep-2026. **Medido sin curar.**
+
+> El rediseño llegó a la app. **No llegó a nada de lo que la app le da a la familia para guardar o mostrarle a otro** — que es justamente donde la marca vive más tiempo: un PDF en el teléfono, un correo en la bandeja, un pasaporte que se enseña en un mostrador.
+
+### Los dos caminos, y son distintos de curar
+
+**① El path SVG HARDCODEADO en `supabase/functions/_shared/papel.ts`.** El isotipo viejo está escrito como `ISOTIPO_PATH_D` (viewBox 471.82×324), con su comentario diciendo que la fuente es `packages/ui/src/brand/Isotipo.tsx`. **Ocho consumidores:**
+
+| artefacto | qué recibe la familia |
+|---|---|
+| `documento-carnet` | el carnet de vacunas |
+| `documento-certificado` | el certificado de salud |
+| `documento-historia-clinica` | la historia clínica |
+| `documento-ficha-identidad` | la ficha de identidad |
+| `documento-receta` | la receta |
+| `_shared/pasaporte-html.ts` → `pasaporte` | el pasaporte |
+| `_shared/facturacion/ride.ts` → `fiscal-ride` | **el RIDE de la factura** |
+| `_shared/ia/mod.ts` | (consumidor interno) |
+
+**② Un PNG HOSTEADO EN STORAGE**, para el correo: `despachar-correo/index.ts:77` apunta a
+`…/storage/v1/object/public/marca-publica/isotipo@2x.png`.
+
+**Medido, no supuesto:** el objeto responde **HTTP 200**, es **128×88 px / 4.828 bytes**, y **NO es el asset nuevo** — el `isotipo@2x.png` que B ingirió del ilustrador pesa **23.056 bytes**. *Son archivos distintos: el correo sigue mostrando el isotipo viejo a cada persona que recibe uno.*
+
+### 🔴 Por qué ② es más delicado que ①
+
+**El PNG vive en el servidor, no en el repo.** Reemplazarlo **cambia el logo de todos los correos ya enviados** —los clientes de correo lo piden cada vez que alguien abre el mensaje— y **no viaja por OTA ni por deploy: es subir un objeto**. *Eso lo vuelve la cura más barata y la más fácil de hacer mal: no hay revisión, no hay diff, y el efecto es retroactivo sobre todo lo que ya salió.*
+
+### Lo que NO lleva logo, medido
+
+**El QR** (`_shared/qr.ts`) **no dibuja ninguna marca.** Se censó porque la mesa lo nombró; está limpio y no hay nada que hacer ahí.
+
+### Lo que esta ficha NO decide
+
+**Si el logo nuevo *puede* ir a un A4.** `papel.ts` ya declara una razón para no usar el del correo — *«el isotipo EN GRADIENTE a 128×88 px en color contradice la firma y a ese tamaño pixela sobre un A4»* — y **el asset nuevo es un PNG del ilustrador, no un path vectorial**. *Poner un PNG en un documento impreso puede verse peor que el path viejo, y eso se mira antes de reemplazar, no después.* ⇒ **puede hacer falta que B entregue el isotipo nuevo como PATH**, y entonces la ficha se reparte.
+
+**☠️ MUERTE:** los ocho artefactos salen con la marca nueva, verificado abriendo un PDF y un correo reales.
+
+---
+
+### 📌 ANOTADO: EL ÍCONO DE LA APP Y EL SPLASH NATIVO SIGUEN PARA EL LOTE 8
+
+**No entran acá y no son de esta ficha.** Los dos son **configuración nativa** (`app.config.ts`, `android/`, `ios/`): **no viajan por OTA**.
+
+**El ícono ya está compuesto** —`packages/ui/assets/marca/icono-app.svg`, con la zona segura en la lectura (B) firmada en el lote 2c—; lo que falta es cablearlo. El splash nativo, igual.
+
+⇒ **el lote 8 junta cinco cosas que esperan el mismo tren**, y por eso vale como lote y no como cinco fichas sueltas: `D-1093` (el vector drawable de la nariz) · `D-1100` (App Links, que desbloquea `D-1099` y `D-1105`) · `D-1101` (el polyfill nativo de `crypto`, que saca el PKCE de `plain`) · **el ícono de la app** · **el splash nativo**. *Ninguna justifica una build por sí sola; las cinco juntas sí.*
