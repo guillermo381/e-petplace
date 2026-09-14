@@ -474,7 +474,27 @@ export type IconoNombre =
    *  geometría intacta y `receta` se redibuja como lo que es. *No se
    *  inventó un segundo dibujo: se le puso su nombre al que había.* */
   | 'medicamento'
-export type IconoRegistro = 'capa' | 'aa' | 'tinta'
+/* ── EL CUARTO REGISTRO: `'glifo'` (S116-B, firma de la mesa) ──────────
+ * *«El color de glifo de fila, de campo, de acceso y de paso numerado
+ * pasa de magenta a ciruela… El magenta queda solo en lo accionable.»*
+ *
+ * 🔴 **Entra como REGISTRO y no como un color que pasa cada pantalla, y
+ * la razón es la que la casa ya paga en otros lados:** el registro es el
+ * único lugar donde esta casa decide de qué color sale un glifo. Si el
+ * par viajara como `tinta={theme.accent.glifo}` habría que escribirlo en
+ * cada consumidor — y el día que la mesa lo mueva otra vez, la lista de
+ * quién lo escribió no existe en ninguna parte.
+ *
+ * ⚠️ **Y lo que MIDE esta entrada, que es lo que la justifica:** hoy
+ * ningún glifo de la casa es magenta — los de la costura salen `'tinta'`
+ * y los de fila heredan `text.primary`. *El comentario de
+ * `FilaAccionesCostura` decía «glifo magenta» y su galería los montaba en
+ * tinta: es la cuarta vez en esta sesión que un comentario afirma lo que
+ * el código no hace.* Así que el cambio real no es «magenta → ciruela»:
+ * es que el glifo **deja de heredar la tinta del texto y pasa a tener
+ * color propio**, que es lo que permite que un día cambie sin arrastrar
+ * a todo lo que está escrito en tinta. */
+export type IconoRegistro = 'capa' | 'aa' | 'tinta' | 'glifo'
 
 /* ══════════════════════════════════════════════════════════════════════
  *  S116-B · LOS NOMBRES DEL MOCK QUE LA CASA YA DIBUJA
@@ -2915,7 +2935,11 @@ export function Icono({
   const nombre = canonico(nombreEntrante)
   const { theme } = useTheme()
   const esMemorial = theme.mode === 'memorial'
-  const colorTinta = tinta ?? theme.text.primary
+  /* El `tinta` explícito GANA sobre el registro a propósito: quien lo
+     pasa ya resolvió el color por su cuenta (la barra de tabs lo hace).
+     `'glifo'` sólo contesta cuando nadie dijo nada. */
+  const colorTinta =
+    tinta ?? (registro === 'glifo' ? theme.accent.glifo : theme.text.primary)
 
   // capa del concepto (§2.2): paseo=cuidado(teal) · vet=identidad
   // (verde vital) · refugio/coach=comunidad(magenta) · grooming/
@@ -3160,7 +3184,9 @@ export function Icono({
         ? colorTinta
         : registro === 'aa'
           ? porConcepto[nombre].aa
-          : porConcepto[nombre].pura)
+          : registro === 'glifo'
+            ? colorTinta
+            : porConcepto[nombre].pura)
 
   /* LEY 6 aplicada — y el registry es quien la contesta (ver arriba).
    * 🔴 **La decisión se MUDÓ a `icono-huella.ts` sin cambiar una coma** (S113-B):

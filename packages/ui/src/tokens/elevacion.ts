@@ -1,3 +1,4 @@
+import { conAlfa } from './con-alfa'
 /**
  * e-PetPlace — Design Tokens · ELEVACIÓN (Ley 20 · D-358, firmado S58)
  *
@@ -94,9 +95,22 @@ export type ElevacionTokens = Readonly<Record<ElevacionNivel, string>> & {
  * Confundirlos fue justamente el defecto que el foco del campo tenía antes
  * de este lote: tomaba prestada `elevacion.reposo`.
  * ═══════════════════════════════════════════════════════════════════════ */
+/* 🔴 **S116-B lote 5 · EL HALO DEJA DE TENER COLOR PROPIO Y LO RECIBE.**
+ * La mesa firmó *«el borde de foco y el halo pasan a ciruela (halo al
+ * 10 %)»*, y al ir a cambiar el rgba apareció el defecto que el string
+ * fijo escondía: **`formaV5` es `true` en el tema CLARO y en el OSCURO
+ * del cliente**, y en oscuro el acento no es ciruela sino rosa. Un halo
+ * horneado miente en una de las dos casas *y no falla* — se ve un cerco
+ * violáceo casi invisible sobre fondo oscuro y nadie lo reporta.
+ *
+ * ⇒ El token conserva lo que de verdad es suyo —**la geometría (4 px) y
+ * la dosis (10 %)**— y el COLOR lo pone quien lo monta, que es el único
+ * que sabe de qué casa y de qué tema es. *Un halo es, por definición de
+ * la letra, su propio borde al 10 %: derivarlo lo vuelve imposible de
+ * desincronizar.* */
 export const halo = {
-  /** 4 px al 10 % del magenta de acción (letra §2). */
-  foco: '0 0 0 4px rgba(209,7,136,.10)',
+  /** El halo de PRESENCIA: 4 px al 10 % del color que lo monta. */
+  presencia: (color: string) => `0 0 0 4px ${conAlfa(color, 0.1)}`,
 } as const
 
 export const elevacion = {

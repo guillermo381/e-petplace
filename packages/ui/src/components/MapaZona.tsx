@@ -28,6 +28,7 @@
 import { View } from 'react-native'
 import MapView, { Circle } from 'react-native-maps'
 
+import { conAlfa } from '../tokens/con-alfa'
 import { radius } from '../tokens/radius'
 import { useTheme } from '../ThemeProvider'
 
@@ -47,13 +48,11 @@ export interface MapaZonaProps {
 const GRADO_POR_METRO = 1 / 111_320
 const AIRE = 2.6
 
-/** El relleno se deriva del acento de la casa (`accent.control` resuelve
- *  teal en el prestador y magenta en el cliente por los ocho slots). Se
- *  compone acá y no se recibe: la app jamás pasa un color crudo (Ley 1). */
-function conAlfa(hex: string, alfa: number): string {
-  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16))
-  return `rgba(${r},${g},${b},${alfa})`
-}
+/* El relleno se deriva del acento de la casa (`accent.control` resuelve
+   teal en el prestador y magenta en el cliente por los ocho slots). Se
+   compone acá y no se recibe: la app jamás pasa un color crudo (Ley 1).
+   ⏪ `conAlfa` vivía en este archivo; subió a `tokens/` al aparecer su
+   segundo consumidor (el halo del foco) — N17. */
 
 export function MapaZona({ zonaLat, zonaLon, radioM, alto = 160 }: MapaZonaProps) {
   const { theme } = useTheme()

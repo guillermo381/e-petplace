@@ -71,7 +71,18 @@ export const darkTheme = {
     brandBorder:   'rgba(255,127,196,.28)',
 
     active:            palette.magentaLuz,
-    control:           palette.rosaSobreCiruela,
+
+
+    /* S116-B · el PAR del glifo (fila · campo · acceso · paso). Ver
+
+
+       `SlotDeTema`: van juntos porque se miden juntos. */
+
+
+    glifo:         palette.rosaSobreCiruela,
+
+
+    glifoBg:       palette.ciruelaProfunda,    control:           palette.rosaSobreCiruela,
     controlBg:         'rgba(255,184,222,.14)',
     controlLleno:      palette.rosaSobreCiruela,
     sobreControlLleno: palette.ciruelaNoche,

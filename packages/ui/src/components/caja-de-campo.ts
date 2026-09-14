@@ -169,7 +169,25 @@ export function colorDeContorno(theme: Theme, { error, enfocado }: EstadoCaja): 
      acusa de algo que no hizo.* La voz sigue en su línea de texto: ahí
      está el «qué falta» (Ley 17.4, intacta). */
   if (error) return formaV5(theme) ? theme.status.warning : theme.status.danger
-  if (enfocado) return theme.accent.active  /* S116-B · memorial ya porta este slot (los 3 temas son isomorfos): el fallback era rama muerta. */
+  /* 🔴 **S116-B lote 5 · EL FOCO PASA A CIRUELA, Y SÓLO EN LA CASA v5.**
+     Orden de la mesa: *«Campo y CampoCodigo: el borde de foco y el halo
+     pasan a ciruela… El magenta queda solo en lo accionable»*. Un campo
+     enfocado no es una acción: es dónde está parada la persona.
+
+     ⚠️ **Se resuelve por `accent.glifo` y no por un slot nuevo, y el
+     acoplamiento se declara en vez de esconderse:** el par del glifo ES
+     «el acento NO accionable de esta casa» —la misma decisión que pintó
+     los glifos—, y en el tema oscuro del cliente resuelve rosa, que es lo
+     que un cerco de foco necesita sobre fondo oscuro. *Si algún día la
+     mesa mueve el color del glifo sin querer mover el foco, este slot se
+     parte en dos — y entonces habrá una razón escrita para partirlo, que
+     hoy no existe.*
+
+     El prestador conserva su `accent.active` (tealDark), que es lo que su
+     gate midió, y **Ley 5 sigue intacta**: el campo enfocado sigue siendo
+     el elemento activo de la vista; lo único que cambió es con qué color
+     lo dice la casa del cliente. */
+  if (enfocado) return formaV5(theme) ? theme.accent.glifo : theme.accent.active  /* S116-B · memorial ya porta este slot (los 3 temas son isomorfos): el fallback era rama muerta. */
   return theme.border.campo
 }
 
@@ -255,7 +273,10 @@ export function estiloDeCaja(theme: Theme, estado: EstadoCaja) {
        estás», una sombra dice «esto está apoyado», y no son lo mismo.* */
     boxShadow: estado.enfocado && !estado.error
       ? v5
-        ? halo.foco
+        ? /* El halo ES el borde al 10 %: se deriva del mismo color en vez
+             de repetirlo, así el día que el foco cambie de acento el halo
+             ya cambió con él. */
+          halo.presencia(colorDeContorno(theme, estado))
         : theme.elevacion.reposo
       : undefined,
     /* S104-B — `fast` YA vale **150**, exactamente la duración que la orden

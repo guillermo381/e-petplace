@@ -3994,9 +3994,9 @@ function GaleriaInterna() {
               costura={
                 <FilaAccionesCostura
                   accesos={[
-                    { clave: 'a', palabra: 'Agendar', icono: <Icono nombre="hoy" tamano={26} registro="tinta" montaje="control" />, onPress: () => {} },
-                    { clave: 'b', palabra: 'Carné', icono: <Icono nombre="carnet" tamano={26} registro="tinta" montaje="control" />, onPress: () => {} },
-                    { clave: 'c', palabra: 'Tienda', icono: <Icono nombre="despensa" tamano={26} registro="tinta" montaje="control" />, onPress: () => {} },
+                    { clave: 'a', palabra: 'Agendar', icono: <Icono nombre="hoy" tamano={26} registro="glifo" montaje="control" />, onPress: () => {} },
+                    { clave: 'b', palabra: 'Carné', icono: <Icono nombre="carnet" tamano={26} registro="glifo" montaje="control" />, onPress: () => {} },
+                    { clave: 'c', palabra: 'Tienda', icono: <Icono nombre="despensa" tamano={26} registro="glifo" montaje="control" />, onPress: () => {} },
                   ]}
                 />
               }

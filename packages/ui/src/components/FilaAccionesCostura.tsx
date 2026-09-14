@@ -1,7 +1,7 @@
 /**
  * FilaAccionesCostura — LOS ACCESOS QUE PISAN LA COSTURA.
  *
- * De dos a cuatro círculos blancos con glifo magenta y su palabra debajo,
+ * De dos a cuatro círculos blancos con glifo en CIRUELA y su palabra debajo,
  * **colocados de modo que la mitad de arriba pisa el ciruela y la de abajo
  * la hoja**. Firma de la mesa.
  *
@@ -46,7 +46,15 @@ const DISCO = 64
 export interface AccesoCostura {
   clave: string
   /** El glifo, ya montado. **La pieza no lo elige** — quien la usa sabe
-   *  qué acceso es; acá sólo se sabe que va magenta y centrado. */
+   *  qué acceso es; acá sólo se sabe que va centrado.
+   *
+   *  🔴 **Se monta con `registro="glifo"`, y eso NO es un detalle de
+   *  estilo: es de dónde sale el color.** El par glifo/tinte vive en el
+   *  tema (`accent.glifo`) y el registro es el único lugar donde la casa
+   *  lo resuelve — *un `tinta={...}` acá sería el color escrito por
+   *  fuera, y el día que la mesa lo mueva no habría lista de quién lo
+   *  escribió.* ⏪ Esta línea decía «va magenta» y la galería los montaba
+   *  en `'tinta'`: el comentario afirmaba lo que el código no hacía. */
   icono: ReactNode
   /** UNA palabra (ver la regla arriba). */
   palabra: string
