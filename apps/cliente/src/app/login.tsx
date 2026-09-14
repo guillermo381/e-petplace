@@ -34,7 +34,6 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as WebBrowser from 'expo-web-browser';
 import {
-  ALTO_ONDA_ACCESO,
   Boton,
   BotonMarcaAjena,
   Cabecera,
@@ -252,19 +251,22 @@ export default function Login() {
             contentContainerStyle: { flexGrow: 1 },
             keyboardShouldPersistTaps: 'handled',
           }}
+          /* 🔴 **LA ONDA PASA AL SLOT DE PIE — S116-C lote 3i, y con eso MUERE
+             mi excepción de `R53`.**
+             ⏪ La tenía en un `View` absoluto `bottom: 0` con el hueco reservado
+             a mano por `ALTO_ONDA_ACCESO`. Funcionaba, pero era **el consumidor
+             estimando el alto de un pie** — justo lo que `R53` existe para
+             impedir, y por eso hubo que declarar la excepción.
+             El slot de B lo resuelve donde corresponde: **la reserva sale del
+             alto MEDIDO del pie**, y el `paddingBottom` de esta pantalla se
+             retira porque ya no lo paga ella. */
+          pie={<OndaAcceso frase={[t('login.ondaA'), t('login.ondaB')]} lado="der" />}
         >
           <View
             style={{
               padding: spacing[5],
               gap: spacing[6],
               flexGrow: 1,
-              /* 🔴 **EL LUGAR DE LA ONDA, reservado por la pantalla.**
-                 `ALTO_ONDA_ACCESO` es lo que la pieza ocupa de punta a punta
-                 (banda + ola) y se exporta justo para esto: la onda va
-                 ABSOLUTA al pie, así que **no empuja el contenido** — sin este
-                 hueco, lo último de la hoja queda debajo de ella. *Y el número
-                 no se teclea: se pide.* */
-              paddingBottom: ALTO_ONDA_ACCESO,
             }}
           >
           <Entrada>
@@ -417,20 +419,6 @@ export default function Login() {
         </HojaContenido>
       </EvitaTeclado>
 
-      {/* R53-DECLARADO: el alto NO se estima — `OndaAcceso` exporta
-          `ALTO_ONDA_ACCESO` (banda + ola) y es exactamente ese número el que la
-          hoja reserva arriba. `PantallaConPie` no aplica acá: trae su PROPIO
-          `ScrollView` y `HojaContenido` ya tiene uno, así que son alternativas
-          y no se componen. Pedido a B: que `HojaContenido` gane slot de pie con
-          medición propia, y esta declaración muere. */}
-      {/* ⭐ **`OndaAcceso` — S116-C lote 3h.** Va ABSOLUTA al pie y FUERA de
-          `EvitaTeclado`: **la pieza se cuida sola del teclado** (alto fijo para
-          no aplastarse + fundido para no verse salir), y meterla adentro la
-          haría subir con el contenido, que es lo contrario de lo que la orden
-          pide. Su lugar en la hoja lo reserva `paddingBottom`, arriba. */}
-      <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
-        <OndaAcceso frase={[t('login.ondaA'), t('login.ondaB')]} lado="der" />
-      </View>
 
       {/* §5 · LA LLEGADA — la huella se completa una vez, sobre el tapiz.
           R53-DECLARADO: NO es un pie fijo — es un overlay de PANTALLA COMPLETA

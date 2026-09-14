@@ -689,6 +689,106 @@ va a buscar el problema en su arnés, como hice yo.
 
 ---
 
+## ⑲ LOTE 3i · LAS TRES DEL RECORRIDO, Y LA CADENA DEL CARRITO
+
+### ⑲.1 · 🔴 EL CARRITO — medido antes de curar, y el último eslabón es mío
+
+**Sin carrito no se compra**, así que primero medí qué había pasado. La cadena
+tiene **tres commits**:
+
+| # | commit | qué hizo |
+|--:|---|---|
+| ① | **S100d-C** | sacó la canasta de `accionDer` **«EN EL MISMO COMMIT»** en que entraba el carrito flotante |
+| ② | **S112-C** (`8c2d87b6`) | *«CarritoFlotante murió en el mismo commit»* — su trabajo pasó a la burbuja del shell |
+| ③ | **mi lote 3** | reemplacé la burbuja por el asistente, y la rama del carrito se fue con ella |
+
+**Ninguno de los tres dejó una puerta.** Medido hoy: `grep` de
+`/despensa/carrito` en `apps/` daba **CERO navegaciones** — la ruta viva y nadie
+que llegue.
+
+🔴 **Y lo peor no es que la saqué: es que declaré que había otra.** En la
+cabecera del shell escribí *«el carrito sigue alcanzable por la tab Despensa»*
+**sin recorrerlo**. *Una afirmación sobre un camino que nadie caminó es
+exactamente lo que la pregunta 11 existe para cazar — y la escribí yo, en el
+mismo lote en que esa pregunta nació de otro defecto mío.*
+
+**La cura: la canasta vuelve al techo**, que es de donde salió y cuya razón de
+salir (el flotante) ya no existe. `GlifoConContador` con las unidades,
+`dentroDeTocable` para que la voz la ponga el tocable.
+
+⚠️ **Lo que NO resuelve, y es de la mesa:** la firma de S100d-bis dice
+*«mientras tenga productos debe estar visible en TODA la app»*, y eso choca con
+el retiro del orbe. **Con la canasta en el techo el carrito se alcanza, pero
+sólo desde la Despensa.** Lo declaro en vez de elegir por la mesa.
+
+**✅ VARA 11 — LA USÉ, no la fotografié:** agregué un producto (el contador pasó
+a **1**), abrí el carrito (el producto adentro, con su stepper y «¿Para quién
+es?»), elegí mascota y llegué al checkout con su botón. *El botón está apagado
+porque falta la dirección, y lo dice: «Falta tu dirección de entrega».*
+Capturas: `despensa-con-carrito.png` · `carrito-abierto.png` ·
+`checkout-boton-comprar.png`.
+
+### ⑲.2 · 🔴 EL «AGREGAR» CORTADO — es de la pieza, y es la tercera vez de su clase
+
+`despensa-rejilla-completa.png` lo muestra en sus dos caras: la tarjeta que ya
+está en el carrito muestra su stepper **entero**; la que no, tiene el pill de
+«Agregar» **rebanado en plano — las dos esquinas inferiores cortadas**.
+
+**El mecanismo ya está escrito dentro de `TarjetaProducto`, dos veces y con
+números:** `flex: 1` incluye `flexShrink: 1` ⇒ *«el bloque se deja ENCOGER y lo
+que sobra se corta en silencio»*, y el contenedor lleva `overflow: 'hidden'`.
+**Lo que cambió es el contenido**: nombres de dos y tres líneas
+(«Aceite de Salmon Brilliant Piel y Pelaje»). *No es un caso raro: es el catálogo
+real.*
+
+⇒ **no lo curo desde la pantalla.** La rejilla está bien (`width: 50%` y
+paddings, sin alto) y meterle un `minHeight` a la celda sería tapar en la
+pantalla un recorte de la pieza. **Va a B con la medición.**
+
+### ⑲.3 · ⚠️ LA FRANJA CIRUELA DE 09 — curé lo mío y NO alcanzó
+
+**Lo mío estaba mal y lo corregí:** el CTA vivía en un `View` propio **después
+de `</HojaContenido>`**, así que la hoja terminaba arriba de él. Pasó al slot
+`pie` que B agregó.
+
+**Y no alcanzó**, verificado en el aparato: la franja sigue.
+`antes/09-carnet-franja-ciruela.png` y `09-carnet.png`.
+
+**Medido en la pieza:** el pie se dibuja **FUERA del `ScrollView`** (correcto, es
+lo que lo hace fijo) y **la hoja es un `View` con `minHeight: 400` y ningún
+`flexGrow`** ⇒ con contenido corto **la hoja mide lo que mide su contenido**, el
+`flexGrow: 1` del consumidor estira el CONTENEDOR pero no la hoja, y **entre las
+dos asoma el degradado**.
+
+*La franja no es del botón: es de la hoja.* Mover el botón no podía curarla — y
+lo verifiqué antes de decirlo. **Pedido a B: `flexGrow: 1` en la hoja, o una
+prop `llenarAlto`.** Desde el consumidor la única salida sería un `minHeight`
+estimado, que es lo que `R53` existe para impedir.
+
+### ⑲.4 · ✅ EL LOGO DE 01, UNIFICADO (adenda del founder)
+
+**Medido:** 01 consumía `tamano="cabecera"` = **120 px FIJOS**; 05 usa
+`portada` = **46 % del ancho** (≈497 en 1080). **Cuatro veces más chico**, en la
+pantalla donde la marca preside. *No es que «se veía chica»: consumía otro
+token, y los dos existen, así que nada fallaba.*
+
+⚠️ **Y hubo que recalibrar el viaje**, que no es cosmética: iba de **1,9× a 1**
+porque aterrizaba en `cabecera`. Con `portada` ya llega grande —46 % contra el
+50 % de `protagonista`— así que pasa a **1,15 → 1**. *Dejar el 1,9 con el token
+nuevo lo lanzaría a casi el ancho entero: el mismo viaje con otro destino deja
+de ser un viaje y pasa a ser un salto.*
+Evidencia: `01-y-05-mismo-logo.png`, las dos al lado.
+
+### ⑲.5 · Y de paso, muere mi excepción de `R53`
+
+La onda de 03 y 05 pasó del `View` absoluto **al slot `pie`**, que es lo que su
+contrato nombra. Con eso **la reserva sale del alto MEDIDO** y no del
+`ALTO_ONDA_ACCESO` que la pantalla reservaba a mano ⇒ **`R53-DECLARADO` se
+retira de las dos**. *Una excepción que se puede borrar es mejor que una bien
+declarada.*
+
+---
+
 ## ⑰ LA VARA — LAS ONCE PREGUNTAS, con la 11 que nació de mi defecto
 
 > La **11** (*«se usó, no se fotografió»*) la firmó la mesa el 13-sep **sobre el
@@ -707,6 +807,28 @@ va a buscar el problema en su arnés, como hice yo.
 | 9 | movimiento que dice algo | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí |
 | 10 | voz | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí |
 | **11** | **se USÓ, no se fotografió** | sí | sí | sí | **sí** | **no** | sí | sí | sí | sí | sí | sí | sí |
+
+### ⑲bis · LA 11, RE-RESPONDIDA TRAS EL RECORRIDO DEL FOUNDER
+
+**La tabla de arriba queda, y esta sección la corrige donde el aparato me
+contradijo.** *Un «sí» que el founder desmiente con el dedo no se edita en
+silencio: se dice qué lo desmintió.*
+
+| pantalla | antes decía | hoy | qué pasó |
+|---|:-:|:-:|---|
+| **Despensa** | *(no estaba en la tabla)* | **sí** | **agregué, abrí el carrito y llegué al botón de comprar.** Y sólo por usarla apareció que **no había puerta al carrito** |
+| **09 carné** | sí | **sí, y encontró un defecto** | se usó tres veces en el lote; la franja ciruela la vio el founder en aparato real, no mi emulador |
+| **01** | sí | **sí, y encontró otro** | el logo chico salió de COMPARARLA con 05, que es usar dos pantallas juntas y no mirar una |
+
+🔴 **LO QUE ESTO ENSEÑA, y es más incómodo que los tres defectos:** las tres
+pantallas estaban en «sí» y las tres tenían algo. **Mi «sí» significaba "la
+recorrí"; el del founder significa "la usé para comprar".** *Recorrer una
+pantalla y usarla para lo que existe siguen sin ser lo mismo — la pregunta 11
+nació de eso y todavía me gana.*
+
+⚠️ **Y la 11 de `recuperar` (04) SIGUE EN «NO»**: el envío se probó y sale, pero
+**el código no se canjeó** — falta que el founder me lo pase. *No lo muevo a
+«sí» por haber probado la mitad.*
 
 **✳️** = excepción firmada (00·01·02 sin cabecera por diseño, `D-1097`; 05b
 lleva flecha sola sobre lienzo, firma de la mesa).
