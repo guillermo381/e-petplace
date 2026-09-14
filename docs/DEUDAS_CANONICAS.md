@@ -35311,3 +35311,39 @@ Se cruzaron `MODELOS`, `TEMPERATURA_CERO` y `PENSAR` para las 13 piezas:
 Ahora dice **«No pudimos leer la foto. Probá con otra.»** — describe el efecto y no inventa la causa; el cuerpo real de Anthropic ya se loguea en `[ia] Anthropic non-ok`.
 
 **☠️ MUERTE:** muerta al desplegarse, con la sonda de camino real en verde sobre dos fotos.
+
+---
+
+## `D-1113` 🟢 — LO QUE VIVE EN EL SLOT `fondo` DE `HojaContenido` NO SE PODÍA TOCAR — curado por C en territorio de B, por urgencia
+
+**Estado:** **CURADA** (14-sep-2026) · **la curó C**, en `packages/ui`, que es de **B** · **A la deposita** para que el cruce quede en el canon y no sólo en un buzón.
+**Origen:** C, lote 7, midiendo en el aparato antes de tocar.
+
+> **Era 🔴 y dejaba sin salida dos pantallas de entrada** (03 acceso y 05 crear cuenta): la flecha de volver se veía y **ningún toque suyo llegaba nunca**.
+
+### La medición, que es lo que justifica el cruce
+
+En el emulador, sobre 03: se toca la flecha en **(108, 212)** y no pasa nada. El volcado de `uiautomator` sobre ese punto, **en orden de render**:
+
+```
+View       [0,136][221,357]     ← el nodo de la flecha
+ScrollView [0,0][1080,2400]     ← la hoja, hermana POSTERIOR
+```
+
+`HojaContenido` montaba el slot `fondo` como bloque ② y el `ScrollView` como ③. **Hermana posterior gana el toque, y su marco es la pantalla entera.** ⇒ *la flecha no estaba rota ni desconectada: estaba debajo.*
+
+⚠️ **Y no eran dos pantallas: era la clase.** Hoy 03 y 05 porque son las que tienen `onVolver`; **la próxima que pusiera algo tocable en `fondo` heredaba el mismo silencio.** *Un defecto que se arregla pantalla por pantalla vuelve con la próxima pantalla.*
+
+### La cura, y por qué no inventó técnica
+
+El bloque del fondo pasa **después** del `ScrollView`, con **`pointerEvents="box-none"`**.
+
+- **`box-none` y no `auto`**, con su razón: esa capa no debe comerse el gesto del scroll —el diseño es que la hoja suba arrastrando desde cualquier lado, incluido el aire de la cabecera—; **lo único que captura son sus hijos tocables**.
+- **No es técnica nueva: es la que el pie fijo de la misma pieza ya usaba** (*«con `box-none`, así el gesto pasa al scroll por el aire entre sus hijos»*). *Copiar al vecino de la propia pieza en vez de inventar es lo que hace que la cura no traiga criterio nuevo que revisar.*
+- **El orden visual no cambia en la práctica, y está medido:** `estiloFondo` lleva ese contenido a opacidad 0 justo en el recorrido en que la hoja llega a taparlo ⇒ la ventana en la que pasaría «por debajo» es la misma en la que ya se desvaneció. **Verificado en el aparato**: 03 se scrollea y la hoja sube igual que antes.
+
+### El cruce, declarado y con su forma
+
+**`packages/ui` es de B.** C tocó y lo dijo en el buzón (`S116-C-para-B-el-fondo-no-se-podia-tocar.md`) con la medición completa, **para que B revise y cambie la forma si prefiere otra**. *Lo que hace legítimo el cruce no es la urgencia sola: es que llegó con el número, con la técnica copiada de la propia pieza y con el después verificado — B tiene todo para juzgarlo sin re-medir.*
+
+**☠️ MUERTE:** ya está curada. Vive como registro del cruce y de la clase — **si algún día el slot `fondo` vuelve a montarse antes del `ScrollView`, esto vuelve entero.**
