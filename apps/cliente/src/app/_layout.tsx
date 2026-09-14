@@ -27,6 +27,12 @@ import { useFonts } from 'expo-font';
 import { Atmosfera, AvisoProvider, ThemeProvider as EpetThemeProvider, epetplaceFonts, motion } from '@epetplace/ui';
 import { ProveedorI18n } from '@epetplace/i18n';
 
+// 🔴 `D-1098` — el polyfill VA ANTES que la puerta única, y el orden es la
+// mitad de la cura: `initApi` crea el cliente de auth, y ese cliente usa
+// `crypto.getRandomValues` para el verificador PKCE. Va como IMPORT por efecto
+// —y arriba de éste— porque los imports se izan: una llamada escrita entre
+// medio correría DESPUÉS, y no curaría nada.
+import '@/lib/crypto-getrandomvalues';
 // Bootstrap de la puerta única (initApi + persistencia de sesión) —
 // efecto de módulo, patrón S44-B4 de prestador. Auth REAL, sin atajo dev.
 import '@/lib/api';

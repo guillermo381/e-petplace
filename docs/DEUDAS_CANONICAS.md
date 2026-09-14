@@ -34551,7 +34551,87 @@ t('recurrentes.alMes', { precio: m.monto.toFixed(2) })
 
 ---
 
-## `D-1098` 🔴 — CREAR CUENTA DESDE LA APP FALLA: `auth.signUp` ES `undefined`
+## `D-1099` 🟠 — EL PROYECTO EXIGE CONFIRMAR EL CORREO, Y EL RECORRIDO DE F&F NO LO CONTEMPLA
+
+**Estado:** ABIERTA · **Dueño:** **founder** (es una perilla del panel) + **mesa** (es una decisión de producto).
+**Origen:** S116-C lote 3c (13-sep-2026), midiendo el camino de una cuenta nueva.
+
+### Lo medido, por el camino real
+
+Creé una cuenta por la API con la anon key de la app (`POST /auth/v1/signup` → **HTTP 200**, usuario creado con su `id`). Al entrar con ella en la app, la pantalla dice —con su voz correcta—:
+
+> **«Falta confirmar tu email. Revisa tu correo.»**
+
+⇒ **el proyecto tiene la confirmación de correo ENCENDIDA.**
+
+### Por qué importa más de lo que parece
+
+El encargo del lote 3 describe el camino de un invitado de F&F como **01 → 02 → 05 → 06 → alta**, es decir: *crear cuenta y seguir de largo hasta presentar a su mascota*. **Con la confirmación encendida ese camino se corta en seco**: entre 05 y 06 hay un paso que no está en ninguna pantalla del mock — ir al correo, abrir un mail y volver.
+
+⚠️ **La app YA lo contempla parcialmente**: `registro.tsx` navega a `/verificar-correo` cuando el alta vuelve sin sesión. *No es que falte el camino: es que el recorrido que la mesa diseñó no lo incluye, y el primer día de F&F alguien lo va a encontrar sin que nadie lo haya decidido.*
+
+**Son dos decisiones distintas y conviene no mezclarlas:**
+1. **¿Se apaga la confirmación para F&F?** (perilla del panel, founder) — hace el camino continuo, a cambio de aceptar correos no verificados en el piloto.
+2. **Si se deja encendida, ¿la pantalla de verificación entra al rediseño?** (mesa) — hoy existe con estructura vieja y **no está en las once del lote**.
+
+**☠️ MUERTE:** la mesa elige una de las dos y queda escrito cuál.
+
+---
+
+## `D-1098` 🔴 — CREAR CUENTA DESDE LA APP FALLA · **REABIERTA: la cura cambió el síntoma, no el defecto**
+
+> ⊳ **TERCERA MEDICIÓN — C, 13-sep-2026 sobre `origin/main` @ `2160fc4c`.** La segunda cura de A **eliminó el crash** (mejora real: ahora hay voz honesta en vez de botón muerto) **y crear cuenta SIGUE sin funcionar**. Esto es lo que rige.
+>
+> **Lo que se ve ahora:** la app rebota con *«No pudimos crear la cuenta. Es un problema nuestro, no tuyo — ya lo estamos viendo.»* — que es el mensaje de **`motor_de_alta_ausente`** ⇒ **`resolverMetodo(clienteAuth, 'signUp')` está devolviendo `null`**.
+>
+> **Las cuatro mediciones que acotan el problema, para que A no tenga que repetirlas:**
+> 1. **NO es el servidor.** `POST /auth/v1/signup` con **la misma anon key de la app** → **HTTP 200** y usuario creado con su `id`.
+> 2. **NO es el cliente entero.** `signInWithPassword` funciona en el mismo emulador y la misma sesión — y **se llama DIRECTO** (`auth.ts:662`), sin pasar por `resolverMetodo`.
+> 3. **NO es la lógica de `resolverMetodo`.** Probada en Node contra un cliente real: `typeof auth.signUp === 'function'` ⇒ **entraría por su primera rama y bindearía**. (`own signUp?: false · en la cadena de prototipos: sí, nivel 1`.)
+> 4. **El método existe en la librería**: `signUp` está en `GoTrueClient.js` de `auth-js` **2.110.0**.
+>
+> ⇒ **Lo único que queda en pie es que, en el runtime de la app, `getClient().auth` no resuelve `signUp` por la vía que `resolverMetodo` usa** — y la ÚNICA diferencia entre el camino que funciona y el que no **es `resolverMetodo` mismo**.
+>
+> **Sugerencia concreta:** llamar `getClient().auth.signUp(...)` **directo**, exactamente como `signInWithPassword`, y dejar el guard sólo como red. *El guard nuevo es bueno y hay que conservarlo: convirtió un crash en una voz honesta. Lo que no puede es reemplazar a la llamada que funciona.*
+>
+> ⏪ La segunda medición (`'storage' of undefined`, sobre `29753b2b`) queda abajo como historia.
+
+### El error de hoy, con su stack leído del LogBox
+
+```
+TypeError: Cannot read property 'storage' of undefined
+  auth.ts:593:39   registrarse   →  const { data, error } = await signUp({ ... })
+  auth.ts:539:8    registrarse
+  registro.tsx:74  crearCuenta
+```
+
+### La causa, medida en el código de la cura
+
+`auth.ts:575` extrae el método del cliente y lo llama **suelto**:
+
+```ts
+const signUp = resolverMetodo<...>(clienteAuth, 'signUp');
+...
+const { data, error } = await signUp({ ... });   // ← sin receptor
+```
+
+**Un método arrancado de su objeto pierde su `this`.** Dentro de `supabase-js`, `signUp` usa su propio estado (`this.storage`) ⇒ `undefined.storage`. *No es que el método no exista: es que se lo llama sin el objeto al que pertenece.*
+
+🔴 **Y por eso el guard nuevo no ayuda: `motor_de_alta_ausente` NO se dispara.** `resolverMetodo` **encuentra** `signUp` —existe— así que el guard da por bueno el camino y el error ocurre un paso después. *Un guard que verifica presencia no puede ver un problema de invocación, y su verde se lee como «el motor está».*
+
+**La cura es de una línea: llamarlo con su receptor** — `clienteAuth.signUp(...)`, o `signUp.call(clienteAuth, ...)`, o atarlo al extraerlo (`.bind(clienteAuth)`). Dueño: **A**.
+
+### Lo que bloquea, sin cambio
+
+**Nadie puede crear una cuenta**: 01 → 02 → **05** → alta. Verificado hoy con una cuenta nueva (`c3b…@epetplace.dev`), datos correctos en los tres campos —email y clave confirmados por `uiautomator` antes de tocar— y el botón devolviendo el `TypeError`.
+⚠️ **Consecuencia para el lote 3: `06 · Hogar sin mascota` no se pudo capturar**, porque su precondición es una cuenta recién creada, que es justo lo que falla.
+
+**Comando:** el camino real con una cuenta nueva. **☠️ MUERTE:** una cuenta creada desde la app llega al alta.
+
+---
+
+### ⏪ El diagnóstico original (S116-C lote 3) — historia
+
 
 **Estado:** ABIERTA · **Dueño:** **A** (`packages/api`).
 **Origen:** S116-C lote 3, capturando el recorrido en el emulador (13-sep-2026).

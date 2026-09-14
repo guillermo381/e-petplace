@@ -8,6 +8,7 @@ import {
   CampoFecha,
   EvitaTeclado,
   Personaje,
+  caraDePersonaje,
   SelectorOpcion,
   Texto,
   spacing,
@@ -51,24 +52,18 @@ import { esAcuario, esOrigen, TIPOS_DE_AGUA, type BorradorAlta, type ModoAlta } 
  * NULL**. *Nada se rellena con un valor plausible para que el formulario se
  * vea completo.*
  */
-/** 🔴 **EL CÍRCULO VACÍO DEL PEZ — lo mostró la captura, no un gate.**
- *
- * `Personaje` acepta **seis** caras y el catálogo trae **once** especies. Yo
- * pasaba `codigo as EspeciePersonaje` a ciegas: con `pez` la pieza no
- * encontraba imagen y **dibujaba el círculo rosa vacío** — compila, pasa
- * typecheck y `verify:diseno`, y se ve como un hueco.
- *
- * **Esto NO duplica la tabla de `AvatarMascota`** (la que pedí exportar a B):
- * aquélla traduce once códigos a seis caras *sabiendo cuál es cuál*. Esto es
- * sólo un **guard de pertenencia** — *¿esta especie tiene cara propia?*— y su
- * salida es la misma que la letra §1.10 ya eligió para el ave: **la nariz**.
- * Cuando B exporte el mapeo, esta función se reemplaza por él y el fallback
- * deja de hacer falta. */
-const CON_CARA_PROPIA: readonly EspeciePersonaje[] = ['perro', 'gato', 'conejo', 'ave', 'roedor', 'otro']
-function caraDe(codigo: string): EspeciePersonaje {
-  return (CON_CARA_PROPIA as readonly string[]).includes(codigo) ? (codigo as EspeciePersonaje) : 'otro'
-}
+/* ✅ **LA TABLA DE B REEMPLAZA A MI GUARD** (pedido 7 del buzón).
+   `caraDePersonaje` vive en `packages/ui` y es la MISMA que usa el avatar, así
+   que el dato dejó de estar en dos lugares — que era el punto del pedido.
 
+   🔴 **Devuelve `undefined` y NO `'otro'`, a propósito, y B tenía razón en no
+   ponerle el fallback adentro:** las especies sin cara propia siguen al
+   MONOGRAMA, no a la nariz —*«un pez con cara de nariz genérica afirmaría
+   menos que su propia inicial»*—, y un `?? 'otro'` escondido en la pieza
+   borraba ese criterio para todos sus llamadores, incluido el avatar.
+   ⇒ **acá el fallback es legítimo y va a la vista**: esta grilla es un
+   SELECTOR y cada opción necesita una imagen tocable; un monograma sin nombre
+   todavía no tiene qué decir. */
 export function PasoDatosBasicos({
   modo,
   borrador,
@@ -176,7 +171,7 @@ export function PasoDatosBasicos({
                 {(especies ?? []).map((e) => (
                   <View key={e.codigo} style={{ alignItems: 'center', gap: spacing[1], width: '30%' }}>
                     <Personaje
-                      especie={caraDe(e.codigo)}
+                      especie={caraDePersonaje(e.codigo) ?? 'otro'}
                       tamano="selector"
                       fondo="rosa"
                       elegido={especie === e.codigo}

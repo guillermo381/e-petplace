@@ -14,6 +14,7 @@ import * as Updates from 'expo-updates';
 import { abrirAltaDeTarjeta } from '@/lib/pagos/alta-tarjeta';
 import { MAPA_NATIVO_DISPONIBLE } from '@/lib/mapa-nativo';
 import {
+  AIRE_RAIZ,
   Boton,
   Celda,
   CeldaNavegacion,
@@ -245,7 +246,7 @@ export default function Cuenta() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: AIRE_RAIZ + insets.bottom }}>
         <Encabezado variante="portada" saludo={t('cuenta.titulo')} />
 
         <View style={{ paddingHorizontal: spacing[4], gap: spacing[6], marginTop: spacing[2] }}>

@@ -285,10 +285,37 @@ export const clienteEs = {
     passwordLabel: 'Contraseña',
     entrar: 'Entrar',
     conGoogle: 'Continuar con Google',
+    /* La voz del lector para Apple. **Existe aunque el botón todavía no se
+       dibuje**: la pieza decide si hay asset, y el día que entre no hay que
+       acordarse de nada. */
+    conApple: 'Continuar con Apple',
+  },
+  /* ⭐ S116-C lote 3d · **05b · REVISA TU CORREO** — firmada por la mesa.
+     La pantalla que vive entre crear cuenta y el hogar cuando el proyecto
+     exige confirmar el correo (`D-1099`). */
+  revisaCorreo: {
+    volver: 'Volver',
+    titulo: 'Revisa tu correo',
+    /* El correo se nombra ENTERO: quien se equivocó al escribirlo lo ve acá
+       y tiene su camino para corregirlo abajo. */
+    apoyo: 'Te enviamos un código a {{correo}}. Escríbelo aquí para confirmar tu cuenta.',
+    queSigue: 'QUÉ SIGUE',
+    paso1: 'Abre el correo que te enviamos',
+    paso2: 'Copia el código que trae',
+    paso3: 'Escríbelo aquí y entras',
+    etiquetaCodigo: 'Código del correo',
+    placeholderCodigo: 'ej: 123456',
+    confirmar: 'Confirmar',
+    faltaCodigo: 'Escribe el código que te llegó por correo.',
+    reenviar: 'Reenviar código',
+    reenviarEn: 'Reenviar en {{n}} s',
+    reenviado: 'Te enviamos otro código.',
+    cambiarCorreo: '¿Correo equivocado? Cambiarlo',
   },
   registro: {
     titulo: 'Crear cuenta',
     saludo: 'Crea tu cuenta',
+    oRegistrateCon: 'O regístrate con',
     volver: 'Volver',
     /* La línea que baja la ansiedad de un formulario: dice cuánto cuesta
        y que el expediente NO se arma acá. */

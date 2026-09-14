@@ -19,6 +19,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import {
+  AIRE_RAIZ,
   Celda,
   CeldaNavegacion,
   Boton,
@@ -196,7 +197,7 @@ export default function Explorar() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: AIRE_RAIZ + insets.bottom }}>
         <Encabezado variante="portada" saludo={t('explorar.titulo')} />
 
         <View style={{ paddingHorizontal: spacing[4], gap: spacing[6], marginTop: spacing[2] }}>

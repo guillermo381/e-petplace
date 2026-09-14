@@ -27,10 +27,12 @@
  * la nota de S104 sigue rigiendo). *Es continuidad compuesta, y se declara
  * como tal para que nadie la lea como lo otro.*
  *
- * 🔴 **EL ACENTO DEL CLAIM ESTÁ PENDIENTE DE PIEZA.** El encargo pide *«una
- * vida.» en rosa sobre ciruela*; `TextoColor` no tiene ese miembro (medido) y
- * escribir el color acá lo caza `R4`, con razón. **Va entero en `inverso`** y
- * el pedido está en el buzón: es un cambio de una palabra el día que exista.
+ * ✅ **EL ACENTO DEL CLAIM YA ESTÁ** — B entregó `acentoSobreOscuro` (pedido 4
+ * del buzón) y *«una vida.»* deja de ser un párrafo blanco. **Resuelve a la
+ * PALETA y no al tema**, porque la superficie ciruela es oscura *aunque el
+ * tema sea claro*; en memorial cae a `inverso`, que es §4 apagando la fiesta.
+ * ⚠️ Por eso el claim se parte en dos `Texto` y no es un string: **el acento
+ * es un color, no una palabra** — y un color no viaja adentro de una clave.
  *
  * TESIS: «acá vive la vida de tu mascota — entrá». FIRMA: el claim en Baloo
  * sobre la ciruela. Memorial N/A (pre-sesión).
@@ -76,7 +78,10 @@ export default function Bienvenida() {
       <View style={{ flex: 1, justifyContent: 'center', gap: spacing[4] }}>
         <Entrada orden={1}>
           <Texto variante="titulo" color="inverso">
-            {`${t('bienvenida.titular')} ${t('bienvenida.titularAcento')}`}
+            {`${t('bienvenida.titular')} `}
+            <Texto variante="titulo" color="acentoSobreOscuro">
+              {t('bienvenida.titularAcento')}
+            </Texto>
           </Texto>
         </Entrada>
         {/* ③ UNA sola línea de apoyo. *Dos líneas acá convierten una promesa
@@ -96,21 +101,21 @@ export default function Bienvenida() {
         <View style={{ gap: spacing[3] }}>
           <Boton
             variante="primario"
+            superficie="oscura"
             etiqueta={t('bienvenida.crearCuenta')}
             bloque
             onPress={() => router.push('/beneficios')}
           />
-          {/* 🔴 **PEDIDO DE PIEZA, declarado donde muerde:** el encargo dice
-              *«secundario blanco»* y `Boton` no tiene un secundario para fondo
-              oscuro (medido: `primario · marca · secundario · ghost ·
-              destructivo · compacto · apoyada · sinCaja · acento`). El
-              `secundario` de la casa lleva **borde magenta**, que sobre
-              ciruela es magenta sobre ciruela — lo que la letra §2 prohíbe
-              textual. *Es el mismo hueco que `Texto` ya resolvió con el color
-              `inverso`.* Va en el buzón; monto la forma correcta con el color
-              que hay y queda declarado en el parte. */}
+          {/* ✅ **`superficie="oscura"`** — B lo entregó (pedido 5). Va como
+              SUPERFICIE y no como variante porque *la superficie es ortogonal
+              a la variante*: el día que otra variante necesite este fondo cae
+              en la tabla sola. El primario conserva su magenta —es la acción,
+              y magenta sobre ciruela es el par de la letra §2—; el secundario
+              pasa a blanco y deja de ser magenta sobre ciruela, que §2
+              prohíbe textual. */}
           <Boton
             variante="secundario"
+            superficie="oscura"
             etiqueta={t('bienvenida.yaTengoCuenta')}
             bloque
             onPress={() => router.push('/login')}
