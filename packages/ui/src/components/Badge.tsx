@@ -35,21 +35,9 @@
 
 import type { ReactNode } from 'react'
 import { View } from 'react-native'
-import Svg from 'react-native-svg'
 
-import { Insignia } from './Insignia'
-import { Huella } from '../brand/Huella'
-import { useTheme } from '../ThemeProvider'
-import { palette } from '../tokens/palette'
+import { DiscoContador } from './disco-contador'
 import { useTraduccionUi } from '../i18n'
-
-/** El lado de la huella-novedad (forma 'huella'). ⚖️ 14 por ENMIENDA DE
- *  LÁMINA (S89 orden 7, firmada por el founder EN DISPOSITIVO sobre el
- *  bundle 019fd7ef/019fd7f0): «apenas más grande — muy poco». 14 es el
- *  TERCER ESCALÓN del estudio 10/12/14 ya servido en la galería (el ojo
- *  del founder lo vio; un 13 sería un número que nadie gateó). Sin prop
- *  de tamaño: la geometría es de la pieza, no de cada pantalla. */
-const LADO_HUELLA = 14
 
 export interface BadgeProps {
   /** Cuántas cosas esperan. `<= 0` = nada se dibuja (regla de existencia). */
@@ -97,57 +85,28 @@ export interface BadgeProps {
   children: ReactNode
 }
 
-export function Badge({ n, forma = 'contador', superficie = 'clara', children }: BadgeProps) {
-  const { theme } = useTheme()
-  const accentActive = theme.accent.active  /* S116-B · memorial ya porta este slot (los 3 temas son isomorfos): el fallback era rama muerta. */
-  // Sobre el muro, ORO (firma S89 orden 4; el hex sale de palette —
-  // fuente única, jamás inline) — SALVO memorial, que no se celebra:
-  // ahí conserva papel, lo de siempre. Sobre lo claro, el acento por
-  // casa (papel 1.62 no pasa el mínimo — la medición mandó).
-  const colorHuella =
-    superficie === 'muro'
-      ? theme.mode === 'memorial'
-        ? palette.light0
-        : palette.ctaOro
-      : accentActive
+export function Badge({ n, children }: BadgeProps) {
+  /* 🔴 **LA PATA MURIÓ ACÁ (lote 13, orden del founder en el recorrido 4):
+     *«el contador es un círculo magenta con el número adentro en blanco…
+     la pata muere ahí. Misma pieza para campana y carrito.»***
+
+     Lo que se va con ella, y conviene que quede escrito porque era letra
+     firmada en su momento: la huella decía la novedad **por PRESENCIA y
+     jamás con un número**, para no invitar a vaciarla (`MODELO_LOYALTY`
+     §3). *Esa razón sigue siendo buena y el founder decidió otra cosa —
+     se ejecuta, y se anota lo que se paga: el contador vuelve a decir
+     cuántos, así que la mecánica de «bajarlo a cero» vuelve a estar a la
+     vista.*
+
+     ⚠️ **`forma` y `superficie` siguen en el tipo y ya no hacen nada.**
+     No se retiran hoy porque `apps/cliente` y la galería las pasan, y
+     romperles el typecheck a mitad de sesión cuesta más que dos props
+     inertes — **con su fecha de muerte escrita: se van cuando su último
+     consumidor migre.** */
   return (
     <View>
       {children}
-      {n > 0 ? (
-        <View
-          style={
-            forma === 'huella'
-              ? // ⚖️ LA PATA PISA LA CAMPANA (enmienda de lámina S89 orden 7,
-                // firmada en dispositivo): SUPERPUESTA al glifo, no al lado.
-                // Con lado 14 sobre el glifo de 24, la pata queda centrada en
-                // el HOMBRO derecho del domo (~62% de su área sobre el bbox
-                // del glifo) y DEJA DE ASOMAR al gap de la esquina — la
-                // posición vieja (top -3 / right -5) sacaba 5dp de tinta
-                // hacia el gap de 20dp de la lámina de la esquina, invisible
-                // para R32 (el absoluto no afecta layout). Occlusión simple
-                // v1: la pata OPACA cubre el trazo donde pisa; el FOSO (2dp
-                // de recorte del trazo bajo la pata) quedó PROPUESTO a la
-                // mesa — exige integración misma-SVG (enmienda de Icono)
-                // para vivir también sobre el degradado del cliente.
-                // Números: 2026-08-06-s89b-ENMIENDA-pata-pisa-campana.md.
-                { position: 'absolute', top: -1, right: 0 }
-              : { position: 'absolute', top: -6, right: -14 }
-          }
-          // El aviso viaja en el label del tocable (mitad ① del contrato);
-          // lo de acá es presentación — anunciarlo sería decirlo dos veces.
-          importantForAccessibility="no-hide-descendants"
-          accessibilityElementsHidden
-        >
-          {forma === 'huella' ? (
-            // Estática por ley (Ley 6): la novedad se dice con PRESENCIA.
-            <Svg width={LADO_HUELLA} height={LADO_HUELLA} viewBox="0 0 24 24">
-              <Huella color={colorHuella} />
-            </Svg>
-          ) : (
-            <Insignia estado="atencion" etiqueta={String(n)} tamaño="sm" />
-          )}
-        </View>
-      ) : null}
+      <DiscoContador cuenta={n} />
     </View>
   )
 }

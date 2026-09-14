@@ -232,7 +232,7 @@ import { NarizNotificacion } from '../brand/NarizNotificacion'
 import { BotonMarcaAjena } from '../components/BotonMarcaAjena'
 import { HojaContenido } from '../components/HojaContenido'
 import { FilaAccionesCostura } from '../components/FilaAccionesCostura'
-import { OndaAcceso } from '../components/OndaAcceso'
+import { OndaAcceso, ALTO_ONDA_ACCESO } from '../components/OndaAcceso'
 import { FilaBeneficio } from '../components/FilaBeneficio'
 import { EsperaLarga } from '../components/EsperaLarga'
 import { EsperaDeMarca } from '../brand/EsperaDeMarca'
@@ -4022,8 +4022,13 @@ function GaleriaInterna({ encabezado }: { encabezado?: ReactNode }) {
                  forma de ver, en la galería, que la onda desaparece del
                  todo y vuelve entera. *Sin un campo, esta sección probaría
                  la mitad que no estaba rota.* */
-              pie={<OndaAcceso frase={['Mascotas', 'más felices']} lado="der" />}
-              materialDelPie="sangrado"
+              /* ⏪ **LA ONDA SALIÓ DEL SLOT `pie` (lote 13).** Ahora es
+                 absoluta al piso de la pantalla, así que **no puede vivir en
+                 un slot que mide su alto para reservarlo**: el pie mediría
+                 cero. Se monta como hermana, abajo, y lo que reserva el
+                 espacio es `ALTO_ONDA_ACCESO` en el `paddingBottom` del
+                 scroll. *El slot no se rompió — dejó de ser su lugar.* */
+              scroll={{ contentContainerStyle: { paddingBottom: ALTO_ONDA_ACCESO } }}
               costura={
                 <FilaAccionesCostura
                   accesos={[
@@ -4046,6 +4051,10 @@ function GaleriaInterna({ encabezado }: { encabezado?: ReactNode }) {
                 <Campo label="Tocá para subir el teclado" placeholder="la onda se va entera y vuelve" />
               </View>
             </HojaContenido>
+            {/* Hermana de la hoja y anclada al piso de la maqueta: así se ve
+                lo que el founder pidió ver —magenta hasta abajo, sin margen y
+                sin radio— y, con el teclado arriba, que no queda NADA. */}
+            <OndaAcceso frase={['Mascotas', 'más felices']} lado="der" />
           </View>
         </Seccion>
 
@@ -4148,20 +4157,31 @@ function GaleriaInterna({ encabezado }: { encabezado?: ReactNode }) {
 
         <Seccion titulo="⭐ GATE S116-B lote 5 — LA ONDA DE ACCESO · qué decide, y se juzga MIRÁNDOLA UNOS SEGUNDOS, no en una foto: (a) que el borde de arriba se lea como una OLA —dos inflexiones— y no como un domo ni como un borde redondeado; (b) que la cara cambie por FUNDIDO y no por corte, la primera al segundo y después cada tres; (c) que la frase de dos líneas respire adentro de la franja; (d) que el círculo sea CÍRCULO. ⚠️ La rueda queda QUIETA si el sistema pide menos movimiento — eso es correcto, no un defecto">
           <View style={{ gap: spacing[4] }}>
-            <View style={{ borderRadius: radius.lg, overflow: 'hidden' }}>
+            {/* 🔴 **MAQUETA DE PANTALLA, Y SIN RADIO — el contenedor de antes
+                ERA PARTE DEL DEFECTO.** Los tres montajes vivían en un `View`
+                con `borderRadius: radius.lg`, así que **la galería mostraba
+                la onda con las esquinas de abajo redondeadas** y nadie podía
+                ver el borde que el founder venía señalando. *Una galería que
+                envuelve la pieza en algo que la pieza no tiene no la está
+                mostrando: la está disfrazando.* */}
+            {/* ⚠️ **`marginHorizontal` negativo: la maqueta cancela el padding
+                de la galería.** La onda es absoluta y se ancla al padding box
+                de su padre — dentro del aire de la galería mostraría un margen
+                que la pieza no tiene. *Mismo idioma que `GRILLA_DE_DOS`.* */}
+            <View style={{ height: 240, marginHorizontal: -spacing[6], overflow: 'hidden', backgroundColor: theme.bg.base }}>
               <OndaAcceso frase={['Mascotas', 'más felices']} lado="der" />
             </View>
             {/* El mismo contrato del otro lado: la frase se corre y la cara
                 también. **Montar los dos lados en la galería no es
                 exhaustividad**: es lo único que prueba que `lado` invierte
                 la fila entera y no sólo mueve el círculo. */}
-            <View style={{ borderRadius: radius.lg, overflow: 'hidden' }}>
+            <View style={{ height: 240, marginHorizontal: -spacing[6], overflow: 'hidden', backgroundColor: theme.bg.base }}>
               <OndaAcceso frase={['Cuidar es', 'más fácil']} lado="izq" />
             </View>
             {/* Acotada a UNA especie: la rueda NO arranca (no hay a dónde
                 ir) y se ve la franja quieta. *Es el caso que un consumidor
                 va a producir sin querer el día que filtre por especie.* */}
-            <View style={{ borderRadius: radius.lg, overflow: 'hidden' }}>
+            <View style={{ height: 240, marginHorizontal: -spacing[6], overflow: 'hidden', backgroundColor: theme.bg.base }}>
               <OndaAcceso frase={['Sólo para', 'gatos']} lado="der" especies={['gato']} />
             </View>
           </View>
@@ -6502,6 +6522,37 @@ function GaleriaInterna({ encabezado }: { encabezado?: ReactNode }) {
             «todavía no llegó» son dos cosas distintas. Es el estado permanente del
             granel, la marca chica y el producto del vendedor local.
           </Texto>
+          {/* ⭐ GATE lote 13 — LA FILA PAREJA. Una tarjeta de nombre CORTO al
+              lado de una de TRES líneas: las dos tienen que medir lo mismo y
+              los dos «Agregar» tienen que quedar a la misma altura, pegados
+              al borde de abajo. *Si la de nombre corto queda más baja, la
+              cadena de estiramiento está cortada en algún eslabón.* */}
+          <View style={GRILLA_DE_DOS}>
+            <View style={CELDA_DE_GRILLA}>
+              <Entrada estira>
+                <TarjetaProducto
+                  nombre="Arena"
+                  presentacion="10 kg"
+                  precio={12.4}
+                  compra={{ modo: 'vitrina', hayStock: true, cantidad: 0, onAgregar: () => {}, onCambiarCantidad: () => {} }}
+                  onPress={() => {}}
+                />
+              </Entrada>
+            </View>
+            <View style={CELDA_DE_GRILLA}>
+              <Entrada estira>
+                <TarjetaProducto
+                  nombre="Alimento húmedo de cordero con arroz para gatos adultos esterilizados"
+                  marca="Nature's Pet"
+                  presentacion="85 g"
+                  precio={2.15}
+                  compra={{ modo: 'vitrina', hayStock: true, cantidad: 0, onAgregar: () => {}, onCambiarCantidad: () => {} }}
+                  onPress={() => {}}
+                />
+              </Entrada>
+            </View>
+          </View>
+
           <View style={GRILLA_DE_DOS}>
             <View style={CELDA_DE_GRILLA}>
               <TarjetaProducto

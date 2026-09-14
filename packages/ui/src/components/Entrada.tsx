@@ -73,10 +73,15 @@ const ESCALON = motion.stagger.slow
 export interface EntradaProps {
   /** Posición en el ORDEN DE LECTURA (0 = lo primero). Semántica, no física. */
   orden?: number
+  /** **Que la entrada llene el alto de su contenedor** en vez de medir su
+   *  contenido. Se enciende en rejillas: sin esto, la pieza que entra no
+   *  puede estirarse a la fila y **dos tarjetas de la misma fila miden
+   *  distinto**. Default `false` — ver la nota del render. */
+  estira?: boolean
   children: ReactNode
 }
 
-export function Entrada({ orden = 0, children }: EntradaProps) {
+export function Entrada({ orden = 0, estira = false, children }: EntradaProps) {
   const { theme } = useTheme()
   /** 🔴 S97+-B · REDUCE-MOTION ENTRA AL MISMO BRAZO QUE MEMORIAL, y el
    *  hallazgo es de CLASE: esta pieza —el portador de §5, la entrada de
@@ -150,5 +155,14 @@ export function Entrada({ orden = 0, children }: EntradaProps) {
     transform: [{ translateY: quieto ? 0 : (1 - v.value) * DESDE_Y }],
   }))
 
-  return <Animated.View style={estilo}>{children}</Animated.View>
+  /* 🔴 **`estira` (lote 13) — el otro eslabón de la cadena de la rejilla.**
+     Sin él, `Entrada` mide su contenido, y una tarjeta con `flex: 1` adentro
+     **no puede llenar la celda estirada**: en una fila de dos, la de nombre
+     corto queda más baja y su botón no alinea con el de al lado.
+     ⚠️ **Default `false` y no `flex: 1` siempre**, a propósito: la pieza
+     tiene 64 consumidores y `flexGrow` reparte espacio libre **allá donde lo
+     haya** — encenderlo para todos cambiaría pantallas que hoy están bien,
+     en silencio y sin que ningún gate lo vea. *La capacidad se ofrece; quien
+     la necesita la pide.* */
+  return <Animated.View style={[estira ? { flex: 1 } : null, estilo]}>{children}</Animated.View>
 }

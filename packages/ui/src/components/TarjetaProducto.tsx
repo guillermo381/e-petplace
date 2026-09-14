@@ -388,7 +388,16 @@ export function TarjetaProducto({
   const { handlers, estiloPresionado } = usePresionado()
 
   return (
-    <Animated.View style={estiloPresionado}>
+    /* 🔴 **`flex: 1` EN EL WRAPPER — el eslabón que faltaba (lote 13).**
+       El `Pressable` de abajo ya llevaba `flex: 1` *«para que la tarjeta
+       ocupe el alto de su fila»*, y no lo ocupaba: **este `Animated.View`
+       medía su contenido**, así que el `flex` del hijo no tenía contra qué
+       crecer. *Una cadena de estiramiento se corta en el primer eslabón que
+       mide contenido, y ese eslabón era invisible: lo pone `usePresionado`,
+       no el autor de la tarjeta.*
+       ⚠️ En un contenedor sin espacio libre `flex: 1` no hace nada — por eso
+       la cura no cambia la tarjeta suelta ni la de la ficha. */
+    <Animated.View style={[{ flex: 1 }, estiloPresionado]}>
       <Pressable
         onPress={onPress}
         {...handlers}

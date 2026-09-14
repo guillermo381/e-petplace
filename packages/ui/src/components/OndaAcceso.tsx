@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Keyboard, View } from 'react-native'
+import { Keyboard, View, useWindowDimensions } from 'react-native'
 import Animated, {
   runOnJS,
   useAnimatedStyle,
@@ -55,15 +55,40 @@ import { Texto } from './Texto'
  * el fundido la onda DEJA DE PINTARSE.** Lo que no está dibujado no puede
  * dejar píxeles, y eso no depende de que un listener haya disparado.
  *
- * ⚠️ **Lo que NO cambia es el lugar que ocupa.** El contenedor conserva su
- * alto siempre, pintada o no: *si además se encogiera, el contenido de
- * arriba saltaría al subir el teclado — y «no salta» es de la misma orden
- * que «desaparece».* Se deja de pintar, no de existir.
+ * ── LA GEOMETRÍA, DICTADA POR EL FOUNDER EN EL RECORRIDO 4 ────────────
+ * **Cuarta vez que se pide, y esta vez viene con números — así que acá
+ * quedan escritos, no descritos:**
  *
- * ⚠️ **LO QUE ESTA PIEZA NO PUEDE HACER SOLA, declarado:** si la pantalla
- * la monta dentro de un contenedor con `flex: 1` y reparto, el reparto es
- * de la pantalla y esta constante no lo gobierna. *La pieza garantiza que
- * ella no se encoge; que nadie la encoja desde afuera es del consumidor.*
+ *   `position:'absolute'` · `bottom:0` · `left:0` · ancho = **el de la
+ *   PANTALLA** (`useWindowDimensions`) · **cero margen propio** (ni
+ *   horizontal, ni inferior) · **cero radio en las esquinas de abajo**.
+ *
+ * 🔴 **LA PIEZA NO OCUPA LUGAR EN EL FLUJO — y eso es el cambio, no un
+ * detalle.** Antes era un bloque al final de una columna, así que **el
+ * margen y el radio se los ponía quien la montaba** y ella no tenía cómo
+ * impedirlo: *una pieza que pide «sin márgenes» en su documentación está
+ * pidiendo que el consumidor se acuerde.* Absoluta y anclada al piso, **no
+ * hay dónde ponerle un margen**.
+ *
+ * ⚠️ **Su contracara, y es el contrato nuevo:** si no ocupa lugar, **la
+ * pantalla tiene que reservárselo** — de ahí `ALTO_ONDA_ACCESO`, que es
+ * exactamente para eso (el mismo trato que `AIRE_RAIZ` con el asistente).
+ * *Quien no lo reserve no ve un error: ve la última fila tapada por el
+ * magenta*, que es el defecto que esta constante existe para matar.
+ *
+ * ⚠️ **Y el contrato del padre, que la pieza no puede sostener sola:** un
+ * absoluto se ancla al **padding box de su padre**, así que **se monta
+ * como hija directa de la raíz de la pantalla, sin padding horizontal**.
+ * Montada dentro de un contenedor con aire lateral, el aire vuelve — *y
+ * eso se ve en la primera captura, que es la razón por la que la captura
+ * es parte del encargo y no un adorno.*
+ *
+ * ── CON TECLADO: SE DESVANECE Y SE DESMONTA ───────────────────────────
+ * 🔴 **Ya no deja un hueco de su alto:** devuelve `null`. *Cuando la pieza
+ * ocupaba lugar, el hueco era necesario para que el contenido de arriba no
+ * saltara; siendo absoluta no hay nada que saltar* — y el hueco vacío
+ * era, además, la última forma en que un nodo suyo seguía en pantalla.
+ * **Cero magenta con el teclado arriba significa cero nodo.**
  *
  * ── LO QUE SE DECLARA Y NO SE DISIMULA ────────────────────────────────
  * La orden dice «la CARA de un personaje» y lo que la casa tiene es el
@@ -82,10 +107,14 @@ const ALTO_BANDA = 132
 /** La cresta. Poca: *«una ola suave»* — con 40 deja de ser una ola y pasa
  *  a ser una montaña. */
 const ALTO_OLA = 24
-/** Lo que la pieza ocupa de punta a punta. **Se exporta** por el mismo
- *  motivo que `ALTO_CABECERA_RAIZ_FIJO`: quien la monte al pie de una
- *  hoja que scrollea tiene que reservarle el lugar, y ese número no se
- *  teclea dos veces. */
+/** 🔴 **LO QUE LA PANTALLA TIENE QUE RESERVAR.** La pieza es absoluta:
+ *  no ocupa lugar, así que **este número es la única forma que tiene el
+ *  contenido de no quedar debajo del magenta**.
+ *
+ *  ⚠️ **Es la parte FIJA y NO incluye el inset** — mismo trato que
+ *  `AIRE_RAIZ`: la pantalla le suma `insets.bottom`, porque *un token que
+ *  se llevara el inset adentro sería falso en cuanto cambie el aparato*.
+ *  Lo dibujado es `ALTO_ONDA_ACCESO + insets.bottom`. */
 export const ALTO_ONDA_ACCESO = ALTO_BANDA + ALTO_OLA
 
 /* ⏪ **LA RUEDA VIVE EN `lib/rueda-de-caras.ts`, y eso NO se revierte.**
@@ -131,6 +160,13 @@ export function OndaAcceso({ frase, lado, especies = LAS_SEIS }: OndaAccesoProps
      forma correcta; le sobraba una medición y le faltaba un número.* */
   const insets = useSafeAreaInsets()
   const insetInferior = insets.bottom
+  /* 🔴 **EL ANCHO ES EL DE LA PANTALLA, no el del padre.** Un absoluto con
+     `left:0 right:0` se estira al padre — y si el padre tiene padding, el
+     magenta arranca adentro de ese padding: **el margen lateral que el
+     founder viene señalando cuatro veces**. Con el ancho de la ventana la
+     franja mide lo que mide el aparato, y lo único que puede correrla es un
+     padre desplazado (ver el contrato en la cabecera). */
+  const { width: anchoDePantalla } = useWindowDimensions()
   const { cara, opacidad } = useRuedaDeCaras(especies)
 
   /* ── EL TECLADO ────────────────────────────────────────────────────
@@ -183,17 +219,42 @@ export function OndaAcceso({ frase, lado, especies = LAS_SEIS }: OndaAccesoProps
     </View>
   )
 
-  /* El lugar que ocupa, SIEMPRE — pintada o no (ver la cabecera). El inset
-     se suma acá y no adentro de la banda: el magenta tiene que llegar al
-     filo de la pantalla, y lo que no puede quedar debajo de la barra del
-     sistema es el CONTENIDO. */
+  /* Lo dibujado: la parte fija + lo que mida la barra del sistema. El inset
+     crece el MAGENTA (que llega hasta el piso físico) y adentro se convierte
+     en padding: **lo que se aparta de las teclas es el CONTENIDO, no el
+     color.** */
   const alto = ALTO_ONDA_ACCESO + insetInferior
 
-  if (!pintada) return <View style={{ height: alto }} />
+  /* 🔴 **DESMONTADA, no escondida.** Con el teclado arriba no queda ningún
+     nodo de esta pieza en pantalla — ni siquiera uno vacío. *Un hueco de su
+     alto era necesario cuando ocupaba lugar en el flujo; ahora sería un nodo
+     invisible sin trabajo, y «cero magenta» se cumple mejor no existiendo
+     que siendo transparente.* */
+  if (!pintada) return null
 
   return (
     <Animated.View
-      style={[{ height: alto }, estiloOnda]}
+      style={[
+        {
+          /* La geometría dictada, en un solo lugar y sin nada alrededor:
+             pegada al piso, sin margen y sin radio abajo. */
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          width: anchoDePantalla,
+          height: alto,
+          /* 🔴 **`zIndex` PROPIO, y lo destapó la cura de la hoja del mismo
+             lote.** `HojaContenido` pasó a llevar `zIndex: 1` en su scroll
+             para que el fondo no se transparente — y con eso **la hoja tapó
+             a la onda**, que es su hermana posterior sin capa declarada.
+             *Dos piezas sin `zIndex` se ordenan por el árbol; en cuanto UNA
+             lo declara, todas las demás caen debajo.* La onda se dibuja
+             SOBRE el contenido: es el piso de la pantalla, no parte del
+             scroll. */
+          zIndex: 2,
+        },
+        estiloOnda,
+      ]}
       /* La onda no es un control: no recibe toques ni los roba a lo que
          tenga debajo mientras está desvanecida. */
       pointerEvents="none"
@@ -207,7 +268,13 @@ export function OndaAcceso({ frase, lado, especies = LAS_SEIS }: OndaAccesoProps
       </Svg>
       <View
         style={{
-          height: ALTO_BANDA + insetInferior,
+          /* `flex: 1` y no un alto propio: el contenedor ya mide
+             `ola + banda + inset`, y así la banda **come el píxel del
+             `marginTop` negativo** en vez de dejar una línea transparente
+             contra el piso. *Un hairline transparente en el borde inferior
+             es exactamente la clase de resto que se ve en una foto y no en
+             el código.* */
+          flex: 1,
           /* Ley 8: el inset lo pone la pieza, no el consumidor — mismo
              precedente que `Hoja` (S65) y que `PantallaConPie`. Va como
              padding y no como margen para que **el color siga sangrando
@@ -218,9 +285,10 @@ export function OndaAcceso({ frase, lado, especies = LAS_SEIS }: OndaAccesoProps
           alignItems: 'center',
           gap: spacing[4],
           paddingHorizontal: spacing[5],
-          /* La banda se pega al borde de abajo: la pantalla no tiene nada
-             más allá. El respiro de la barra del sistema lo pone quien la
-             monta, que es el que sabe si hay una. */
+          /* La banda llega al piso físico: **por debajo de la barra de
+             teclas de Android**, que es lo que el founder pidió ver. El
+             respiro de esa barra lo pone el `paddingBottom` de arriba, y
+             sólo para el contenido. */
           marginTop: -1, // el hairline entre el SVG y el bloque, que en Android se ve
         }}
       >

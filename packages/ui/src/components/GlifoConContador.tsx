@@ -25,11 +25,13 @@
  * prop para lograr una combinación legítima*, que es cuando la casa ya
  * declaró que **el defecto es de la pieza** (§12.2).
  *
- * ── EL COLOR: SE REUSA UN PAR YA MEDIDO, NO SE INVENTA UNO ─────────
- * `accent.control` de fondo con el número en `bg.base` — **exactamente
- * el par que `TarjetaProducto` ya usa en su timbre `+`**, y que por eso
- * ya está en el gate de contraste. *Un par nuevo acá habría sumado una
- * medición; reusar el que la casa ya firmó no suma ninguna.*
+ * ── EL COLOR (lote 13): EL DISCO ES UNO Y VIVE EN `disco-contador` ──
+ * ⏪ Decía `accent.control` sobre `bg.base`, *«el par que `TarjetaProducto`
+ * ya usa en su timbre +»*. **Era correcto y dejó de alcanzar** cuando el
+ * founder pidió *«misma pieza para campana y carrito»*: ese par **cambia
+ * con la casa**, así que en oscuro el «círculo magenta con número blanco»
+ * salía ciruela con número lienzo. Hoy el disco es **magenta de acción con
+ * blanco puro, fijo**, y lo dibuja un solo módulo.
  *
  * ── LO QUE NO HACE ─────────────────────────────────────────────────
  * No sabe de carrito ni de avisos: recibe un número. **No anima** — un
@@ -39,19 +41,10 @@
  * un contador es ruido con forma de dato*).
  */
 
-import { Text, View } from 'react-native'
+import { View } from 'react-native'
 
+import { DiscoContador } from './disco-contador'
 import { Icono, type IconoNombre } from './Icono'
-import { radius } from '../tokens/radius'
-import { typography } from '../tokens/typography'
-import { useTheme } from '../ThemeProvider'
-
-/** El disco. 18 sostiene dos cifras sin apretarlas y no tapa el glifo. */
-const DISCO = 18
-/** Arriba de esto el número deja de leerse a este tamaño — y **la salida
- *  es decir «muchos», jamás encoger la letra**: un contador ilegible no
- *  cuenta nada. */
-const TOPE = 99
 
 type Base = {
   nombre: IconoNombre
@@ -105,9 +98,6 @@ export type GlifoConContadorProps = Base &
 export function GlifoConContador(props: GlifoConContadorProps) {
   const { nombre, tamano = 24, cuenta } = props
   const anidada = props.dentroDeTocable === true
-  const { theme } = useTheme()
-  const hay = cuenta > 0
-  const texto = cuenta > TOPE ? `${TOPE}+` : String(cuenta)
 
   return (
     <View
@@ -122,42 +112,12 @@ export function GlifoConContador(props: GlifoConContadorProps) {
       style={{ width: tamano, height: tamano }}
     >
       <Icono nombre={nombre} tamano={tamano} />
-
-      {hay ? (
-        <View
-          // `importantForAccessibility` no hace falta: el contenedor ya es
-          // `accessible`, así que este subárbol no se anuncia aparte.
-          style={{
-            position: 'absolute',
-            // Sobresale a propósito: un disco contenido adentro del glifo
-            // le come el dibujo, y el glifo es lo que dice QUÉ se cuenta.
-            top: -DISCO / 3,
-            right: -DISCO / 3,
-            minWidth: DISCO,
-            height: DISCO,
-            paddingHorizontal: 4,
-            borderRadius: radius.full,
-            backgroundColor: theme.accent.control,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Text
-            style={{
-              fontFamily: typography.family.sans.medium,
-              fontSize: typography.size.xs,
-              lineHeight: DISCO,
-              // El par ya medido (ver la cabecera): número en papel sobre
-              // el acento. No se inventa un color acá.
-              color: theme.bg.base,
-              // Tabular: con 1 y 2 cifras el disco no baila al cambiar.
-              fontVariant: ['tabular-nums'],
-            }}
-          >
-            {texto}
-          </Text>
-        </View>
-      ) : null}
+      {/* 🔴 **EL DISCO ES COMPARTIDO CON LA CAMPANA (lote 13).** Antes esta
+          pieza dibujaba el suyo con `accent.control` sobre `bg.base`: un par
+          medido, sí, **pero distinto del de la campana y distinto en cada
+          casa**. *Dos contadores que se ven distinto no son «la misma señal
+          en dos lugares»: son dos señales.* */}
+      <DiscoContador cuenta={cuenta} />
     </View>
   )
 }

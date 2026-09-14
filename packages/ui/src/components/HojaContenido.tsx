@@ -133,8 +133,15 @@ export function HojaContenido({ fondo, costura, arranque, children, scroll, pie,
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
 
-      {/* ② EL CONTENIDO DEL FONDO — lo único que se desvanece. */}
-      <Animated.View style={[{ position: 'absolute', top: 0, left: 0, right: 0 }, estiloFondo]}>
+      {/* ② EL CONTENIDO DEL FONDO — lo único que se desvanece.
+          🔴 **`zIndex: 0` EXPLÍCITO (lote 13).** El founder vio *el wordmark
+          del fondo a través de la hoja, bajo «Email»*. En Android el orden de
+          pintado **no lo decide sólo el árbol**: una `elevation` de cualquier
+          cosa montada acá adentro sube su capa por encima de sus hermanos, y
+          entonces el fondo atraviesa una hoja que es opaca. *El síntoma se lee
+          como transparencia y la causa es orden de pintado* — por eso la cura
+          no es un color, son dos números. */}
+      <Animated.View style={[{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 0 }, estiloFondo]}>
         {fondo}
       </Animated.View>
 
@@ -142,6 +149,10 @@ export function HojaContenido({ fondo, costura, arranque, children, scroll, pie,
           movemos nosotros —eso duplicaría el scroll— la mueve su propio
           `paddingTop`, que es contenido del ScrollView. */}
       <Animated.ScrollView
+        /* La otra mitad del par: la hoja va SIEMPRE por encima del fondo.
+           *Sin esto, el orden depende de que nadie monte en el fondo algo con
+           sombra — y eso es una condición que ningún gate mira.* */
+        style={{ zIndex: 1 }}
         onScroll={alScrollear}
         scrollEventThrottle={16}
         bounces={false}
@@ -174,8 +185,15 @@ export function HojaContenido({ fondo, costura, arranque, children, scroll, pie,
                la misma cura. */
             flexGrow: 1,
             minHeight: 400,
-            /* El LIENZO de la letra §2 (`#F8F2F6`), que es el slot
-               `bg.base` — la hoja es del color del lienzo, no blanca. */
+            /* 🔴 **LA HOJA ES OPACA, COLOR LIENZO, SIEMPRE** (orden del
+               founder, lote 13). El LIENZO de la letra §2 (`#F8F2F6`) es el
+               slot `bg.base` — la hoja es del color del lienzo, no blanca.
+               ⚠️ **El color nunca fue el problema y por eso no alcanzaba
+               mirarlo:** los tres temas traen `bg.base` sin alfa. Lo que
+               dejaba pasar el fondo era el ORDEN DE PINTADO en Android, que
+               se cura arriba con los dos `zIndex`. *Un fondo opaco tapado por
+               un hermano que se pinta después sigue siendo opaco y se ve
+               transparente igual.* */
             backgroundColor: theme.bg.base,
             borderTopLeftRadius: radius.cabeceraV5,
             borderTopRightRadius: radius.cabeceraV5,
