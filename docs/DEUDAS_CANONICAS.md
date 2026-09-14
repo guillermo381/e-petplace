@@ -34735,6 +34735,24 @@ C lo acotó y no dejó lugar: **el servidor responde 200** · **`signInWithPassw
 
 ⚠️ **Lo que esta ficha deja como método, y es lo que costó tres vueltas:** *una cura que no se puede ejercer se verifica sola en el papel.* Las dos primeras pasaron typecheck y gates, y estaban rotas. **Lo único que las cazó fue invocarlas en el aparato** — y eso lo hizo C, no yo.
 
+### ⊳ 🟢 LA CAUSA RAÍZ, ENCONTRADA POR C (S116-C lote 3d) — **Y NO ERA NINGUNA DE LAS MÍAS**
+
+**Hermes define `crypto` con UNA SOLA propiedad: `randomUUID`.** Medido con una sonda dentro de la pantalla 05, en el emulador:
+
+```
+crypto=object   getRandomValues=undefined   subtle=undefined
+crypto own=randomUUID    randomUUID=function
+crypto.getRandomValues(new Uint32Array(4))  →  TypeError: undefined is not a function
+```
+
+**Y acá está por qué rompía el alta y no el login, que era el enigma de tres vueltas:** `auth-js` guarda así — `if (typeof crypto === 'undefined') { …fallback… }` — y después llama `crypto.getRandomValues(...)`. **El guard pregunta por el OBJETO, no por el MÉTODO**: el objeto existe, el fallback nunca entra, y se llama a una función que no está.
+
+Ese camino lo toma `signUp` **sólo porque el cliente usa `flowType: 'pkce'`** — que a su vez es lo que el flujo de Google exige. **`signInWithPassword` no toca PKCE, y por eso funcionaba.** Toda la asimetría era ésa.
+
+🔴 **Y lo tuve delante.** El comentario de `client.ts` que explica por qué PKCE es obligatorio lo leí en la primera vuelta — **lo cité en la tabla de descartes** — y no lo relacioné. **Descarté siete hipótesis y la octava era la línea que estaba citando.** *Medir bien siete cosas no compensa no haber mirado la que estaba escrita en el archivo que abrí primero.*
+
+**La cura vive en `apps/cliente/src/lib/crypto-getrandomvalues.ts`** (import por efecto, **antes** de `initApi`, porque los imports se izan). **Es un PUENTE y tiene su ficha: `D-1101`** — el polyfill nativo va al lote 8, y hasta entonces **el desafío PKCE viaja en `plain`, no en `s256`**, porque `crypto.subtle` tampoco existe.
+
 **☠️ MUERTE:** C crea una cuenta real y llega al alta de mascota.
 
 
@@ -34821,3 +34839,41 @@ La persona crea la cuenta, recibe el correo, toca el enlace, **se abre el navega
 ⇒ **la mesa decide**: encender igual con la pantalla de C explicando que hay que volver a la app, o esperar al lote 8. *Lo que no se puede es encenderlo creyendo que el enlace trae de vuelta.*
 
 **☠️ MUERTE:** el enlace del correo abre la app, verificado en el aparato con una cuenta real.
+
+---
+
+## `D-1101` 🟠 — EL PUENTE DE `crypto.getRandomValues` SOBRE `randomUUID` ES **PUENTE, NO DESTINO**
+
+**Estado:** ABIERTA · **Dueño: A** · **entra en el LOTE 8**, con `D-1093` y `D-1100`: los tres necesitan el mismo tren.
+**Origen:** S116-C lote 3d (13-sep-2026), que midió la causa de `D-1098` en el aparato.
+
+### Lo que hay hoy, y por qué existe
+
+`apps/cliente/src/lib/crypto-getrandomvalues.ts`, importado **por efecto y antes que `initApi`** en el `_layout` — *el orden es la mitad de la cura: los imports se izan, así que una llamada escrita entre medio correría después y no curaría nada.*
+
+**Su entropía sale de `crypto.randomUUID()`**, que por especificación es criptográficamente aleatorio: un UUID v4 trae ~122 bits impredecibles, se descartan los nibbles de versión y el resto se usa como bytes. **No se usa `Math.random()` en ningún caso** — *eso sí sería debilitar el verificador PKCE.*
+
+### 🔴 EL RESIDUO, DECLARADO: **PKCE VIAJA EN `plain`, NO EN `s256`**
+
+`crypto.subtle` **tampoco existe** en Hermes, así que `auth-js` avisa que usa `plain` en vez de SHA-256. *El puente destraba el alta y deja el desafío sin hashear* — es menos de lo que PKCE promete, y se dice acá en vez de descubrirse en una auditoría.
+
+### El destino
+
+El polyfill **nativo** (`react-native-get-random-values` o `expo-crypto`), que trae `getRandomValues` **y** `subtle`. **No viaja por OTA: es dependencia nativa y necesita BUILD.**
+
+⇒ **lote 8, junto a `D-1093`** (el vector drawable de la nariz) **y `D-1100`** (App Links). *Los tres esperan el mismo tren, y ninguno justifica una build por sí solo — juntos sí.*
+
+**☠️ MUERTE:** el polyfill nativo entra, `crypto.subtle` existe, el desafío viaja en `s256`, y este archivo se retira con lápida.
+
+---
+
+## `D-1102` 🟡 — LA PANTALLA `/onboarding` VIEJA ESTÁ ROTA Y **MUERE**
+
+**Estado:** ABIERTA · **Dueño: C**, en **este** lote.
+**Origen:** firma de la mesa sobre lo que C capturó (13-sep-2026) — la evidencia vive en `docs/loop/capturas-s116-c/06b-onboarding-roto.png`.
+
+**La mesa firmó que muere.** No se cura: **la reemplaza `06 · Hogar sin mascota`**, que es la pantalla del recorrido nuevo, y **la ruta `/onboarding` redirige** en vez de desaparecer.
+
+*Por qué redirige y no se borra: una ruta que se borra rompe todo enlace viejo que apunte ahí —un push, un correo, un back del sistema— y esos no se pueden censar.* **Redirigir cuesta una línea y no deja ningún camino muerto.**
+
+**☠️ MUERTE:** `/onboarding` redirige a la pantalla nueva y el archivo viejo se retira con lápida.
