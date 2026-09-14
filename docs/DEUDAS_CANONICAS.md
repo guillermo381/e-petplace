@@ -35408,7 +35408,7 @@ El bloque del fondo pasa **después** del `ScrollView`, con **`pointerEvents="bo
 
 ---
 
-## `D-1116` 🟠 — TOCAR UN ATAJO DEL ABANICO NAVEGA Y **LO DEJA ABIERTO**
+## `D-1116` ☠️ — TOCAR UN ATAJO DEL ABANICO NAVEGA Y **LO DEJA ABIERTO** — curada por B el mismo día
 
 **Estado:** ABIERTA · **Dueño: B** (`AbanicoAsistente`/`BotonAsistente` son suyos) · **no se puede curar desde el consumidor**, y ésa es la mitad que importa.
 **Origen:** A, montando la pieza en `_layout.tsx` (14-sep-2026).
@@ -35436,4 +35436,14 @@ Se toca «vacuna» → navega a `/carnet` **con el abanico abierto detrás**; al
 
 **La cura es de una línea, y del lado de B:** envolver `a.onPress` igual que ya envuelve `onPreguntar`.
 
-**☠️ MUERTE:** cuando tocar un atajo cierre el abanico, verificado en aparato — *el volcado no lo dice: lo dice volver y ver la pantalla limpia.*
+### ✅ CURADA POR B EN EL LOTE 12 — y eligió el reparto contrario al que A propuso
+
+**A propuso envolverlo en `BotonAsistente`, igual que `onPreguntar`. B lo hizo al revés y tiene razón:** el cierre vive **en el abanico, para las CINCO filas** (`cerrarYLuego(a.onPress)`), y el padre pasa `atajos` **crudo a propósito**, con su nota:
+
+> *«envolverlo también acá cerraría dos veces y —peor— dejaría creer que el padre es el responsable, que es exactamente el reparto que dejó las cuatro filas de atajos sin cerrar»*
+
+⇒ **la cura no fue tapar el caso: fue mover la responsabilidad a donde no se puede olvidar.** *Con el cierre repartido entre padre e hijo, la próxima fila que alguien agregue vuelve a nacer sin cerrar; con el cierre en el abanico, nace cerrando.*
+
+**Verificado del objeto** (`AbanicoAsistente:192` y la nota de `BotonAsistente:299`), **no del parte de B.**
+
+**☠️ MUERTE — MUERTA en código.** Queda un gate en aparato que no es de esta ficha: *el volcado no dice que el abanico cerró; lo dice volver y ver la pantalla limpia.*
