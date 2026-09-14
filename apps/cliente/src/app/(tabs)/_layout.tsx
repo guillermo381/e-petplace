@@ -61,7 +61,6 @@ import {
   ALTO_FILA_TABS,
   BarraTabs,
   BotonAsistente,
-  HojaAsistente,
   type AtajoAsistente,
   Icono,
   type BarraTabsItem,
@@ -146,7 +145,6 @@ function AsistenteDelShell({ raiz }: { raiz: boolean }) {
   const params = useGlobalSearchParams<{ mascotaId?: string }>();
   const mascotas = useHogarVivo();
 
-  const [hoja, setHoja] = useState(false);
   const [eligiendoPeso, setEligiendoPeso] = useState(false);
   const [pesoDe, setPesoDe] = useState<{ id: string; nombre: string } | null>(null);
 
@@ -192,7 +190,6 @@ function AsistenteDelShell({ raiz }: { raiz: boolean }) {
     glifo: a,
     texto: t(`nexo.atajo_${a}` as 'nexo.atajo_peso'),
     onPress: () => {
-      setHoja(false);
       if (a === 'vacuna') { router.push('/carnet'); return; }
       if (a === 'antiparasitario') { router.push('/antiparasitario'); return; }
       if (a === 'foto') { router.push('/recuerdo'); return; }
@@ -204,24 +201,29 @@ function AsistenteDelShell({ raiz }: { raiz: boolean }) {
 
   return (
     <>
+      {/* ⭐ **S116-C lote 9 · EL ABANICO, CON SUS CUATRO ATAJOS CABLEADOS.**
+          ☠️ **Muere `HojaAsistente`** —B la retiró en su lote 11 con su lápida—
+          y con ella mi `setHoja`. **La razón es de contexto, no de estilo:** una
+          hoja modal tapa la pantalla desde la que se la abrió, *y el contexto
+          de lo que se va a preguntar ES esa pantalla*. Preguntar sobre algo no
+          puede empezar por esconderlo.
+
+          🔴 **Y lo que había acá era la variante SIN atajos.** `BotonAsistente`
+          es una UNIÓN: o recibe `vozPreguntar`+`onPreguntar`+`atajos` —y monta
+          el abanico él mismo—, o recibe `onPress` y hace otra cosa. Yo estaba
+          en la segunda: **el botón abría, y el abanico nunca veía un atajo.**
+          *No faltaba la pieza: faltaba estar del lado correcto de su unión.*
+
+          Los cuatro salen de `ORDEN_DE_PATA`, del objeto, y **el abanico no
+          trae la lista adentro a propósito** —lo dice su entrada del catálogo:
+          *un atajo a «peso» en una pantalla de pago no es un atajo, es ruido*—
+          así que quién los monta y cuáles es decisión de esta casa. */}
       <BotonAsistente
-        onPress={() => setHoja(true)}
         etiqueta={t('nexo.etiqueta', { nombre: t('coach.nombre') })}
-      />
-      <HojaAsistente
-        visible={hoja}
-        onCerrar={() => setHoja(false)}
-        titulo={t('coach.nombre')}
         atajos={atajos}
-        pregunta={{
-          placeholder: t('nexo.placeholder'),
-          etiquetaEnviar: t('nexo.enviar'),
-          /* La hoja **no pregunta**: entrega el texto y lo lleva a la pantalla
-             que sí sabe preguntar. Es lo que su propia cabecera declara — *una
-             hoja que además consultara sería la IA metida adentro de una pieza
-             de presentación.* */
-          onEnviar: (texto) => { setHoja(false); router.push({ pathname: '/nexo', params: { q: texto } }); },
-        }}
+        vozPreguntar={t('nexo.placeholder')}
+        /* La pieza **no pregunta**: abre la pantalla que sí sabe. */
+        onPreguntar={() => router.push('/nexo')}
       />
       <ElegirMascotaHoja
         visible={eligiendoPeso}
