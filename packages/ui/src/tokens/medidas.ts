@@ -89,6 +89,13 @@ export const medidas = {
   marcaProtagonistaFraccion: 0.5,
   /** Cuánto ocupa en el splash, donde acompaña y no preside. */
   marcaSplashFraccion: 0.34,
+  /** 🔴 **PORTADA (S116-B) — el LOGO, con wordmark, presidiendo 01 · 03 ·
+   *  05.** Es el hermano de `marcaProtagonistaFraccion` para el isotipo, y
+   *  **es más chico a propósito**: el logo lleva el wordmark, así que al
+   *  mismo ancho su nariz se ve la mitad que la del isotipo solo. *Igualar
+   *  las fracciones habría igualado las CAJAS y desigualado las marcas, que
+   *  es lo contrario de lo que «cerca de la mitad» quiere decir.* */
+  marcaPortadaFraccion: 0.46,
   /** El logo en una cabecera: acá sí es un alto fijo — la cabecera tiene
    *  su propia medida y la marca se para adentro. */
   marcaCabeceraAncho: 120,
