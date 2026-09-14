@@ -135,6 +135,9 @@ export interface SelectorOpcionProps {
    *  espec propia (S73) y no consume esta prop. Memorial degrada a
    *  contorno solo (sin tinte — patrón 'capaBg' in theme). */
   naturaleza?: 'existe' | 'seFija'
+  /** ¿Marca la elegida con la pata que pisa? **Sin default en la firma: lo
+   *  decide la CASA** (encendida en cliente, apagada en prestador). Pasala
+   *  `false` sólo si esta pantalla es la excepción. */
   marcaPata?: boolean
   /** ⚠️ S81 — LA CLASE «ELEGIDOR» (la respuesta de Campo sinCaja,
    *  generalizada): el elegidor SOLITARIO — una decisión suelta en su
@@ -493,9 +496,27 @@ export function SelectorOpcion({
   etiquetaVisible = true,
   naturaleza = 'seFija',
   solitario = false,
-  marcaPata = false,
+  marcaPata,
 }: SelectorOpcionProps) {
   const { theme } = useTheme()
+  /* ══════════════════════════════════════════════════════════════════
+   *  LA PATA VIENE ENCENDIDA EN EL CLIENTE — S116-B, firma de la mesa.
+   *
+   * 🔴 **Hasta hoy era `marcaPata = false` y NADIE la pasaba.** Medido por
+   * C y confirmado acá: **cero ocurrencias en `apps/`**. ⇒ la pata existía
+   * desde S91, se rediseñó en el lote 2 y **aprendió a pisar en el 03**…
+   * y no se veía en ninguna pantalla. *Una firma visual que hay que pedir
+   * explícitamente no es la firma de la casa: es una opción que nadie
+   * eligió, y por eso ninguna captura la mostró nunca.*
+   *
+   * **`?? esCasaV5`, no `= true`:** el prestador **no la recibe** (letra §5
+   * lo deja sin cambios), y quien quiera apagarla en una pantalla del
+   * cliente pasa `marcaPata={false}` **explícito** — que es la orden: *lo
+   * raro se pide, lo normal se hereda.*
+   *
+   * ⚠️ Y memorial queda afuera solo: su tema resuelve `formaV5` en `false`. */
+  const esCasaV5 = theme.accent.formaV5 === true
+  const pataEncendida = marcaPata ?? esCasaV5
 
   const chips = opciones.map((opcion, i) => (
     <Chip
@@ -511,7 +532,7 @@ export function SelectorOpcion({
       modo={multiple ? 'checkbox' : 'radio'}
       acento={acento}
       naturaleza={naturaleza}
-      marcaPata={marcaPata === true}
+      marcaPata={pataEncendida}
       solitario={solitario}
     />
   ))

@@ -171,3 +171,29 @@ El isotipo estaba en **78 px de alto** (`avatarHogar`, el tamaño de un avatar d
 ## Y las cuentas del catálogo están al día
 
 `verify:catalogo-v5` estaba en rojo con **13 desajustes** por lo que montaste — incluidas **dos que bajaron** (`SelectorOpcion` y `AvatarMascota`: las desmontaste de algún lado). Ya están medidas contra el objeto. *No hace falta que las toques: el gate las va a volver a marcar cuando montes lo próximo, y es mío mantenerlas.*
+
+---
+
+# ⏪ ADENDA 2 — la pata y el trío se encienden solos, y una cosa que es tuya
+
+## No pidas `marcaPata` ni `especies`: vienen puestos
+
+**Tu medición era exacta y explica por qué nunca se vieron:** cero consumidores pasaban `marcaPata`, cero pasaban `especies`. *Una firma visual que hay que pedir explícitamente no es la firma de la casa — es una opción que nadie eligió.*
+
+Desde ahora **la casa decide**: encendidos en cliente, apagados en prestador y en memorial. **No agregues nada a tus pantallas.** Si alguna es la excepción, `marcaPata={false}` o `trio={false}`.
+
+⚠️ **Un matiz del trío, porque no es un booleano:** necesita saber QUÉ caras. El default no es «true», es **completar** — lo que le pases va **primero** y la casa pone el resto hasta tres, sin repetir. Así que en 10 · Expediente creado:
+
+```tsx
+<Confirmacion especies={[caraDePersonaje(borrador.especie) ?? 'otro']} … />
+```
+
+…y la mascota queda de protagonista con dos acompañantes. **Si no pasás nada igual hay trío** (perro · gato · conejo), pero entonces no es su familia: es la de la casa.
+
+## 🔴 La cadencia del splash es TUYA — medido
+
+Buscaste bien al preguntar. **No vive en mi pieza:** `Personaje` no rota, y el único `setInterval` de `packages/ui` está en `Guijarro`, que es otra cosa.
+
+**Vive en `apps/cliente/src/app/index.tsx:73`** — `const MS_POR_CARA = 3000`, con su `setInterval` en la línea 131.
+
+Lo que la mesa pide: **la primera rotación llega al segundo; las siguientes cada tres.** O sea un primer disparo más corto y después la cadencia normal — hoy el `setInterval` te da 3 s también para el primero, y por eso la primera cara se queda quieta el triple de lo que debería en el momento en que la persona está mirando.

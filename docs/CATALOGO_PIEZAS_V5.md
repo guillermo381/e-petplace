@@ -88,6 +88,7 @@ La pantalla de «¡Listo!» a lienzo completo.
 - **props:** `titulo` · `apoyo` · `dato` · `lineaExtra` · `primario` · `secundario` · `especies` · `exclamacion`
 - **tokens:** `medidas` · `radius` · `spacing` · `motion` · `elevacion` · `theme.accent` · `theme.bg` · `theme.mode`
 - **consumidores:** 1
+- 🔴 **El trío VIENE ENCENDIDO en el cliente (S116-B) — no lo pidas.** Era opt-in y **nadie pasaba `especies`**: cero en `apps/`. ⚠️ **No es un booleano como la pata: el trío necesita saber QUÉ caras**, así que el default no es «true», es **completar** — lo que le pases va PRIMERO (la especie de la mascota) y la casa pone el resto hasta tres, **sin repetir la protagonista**. *Un trío con el mismo gato tres veces no es una familia: es un error de render que nadie reporta porque «se ve bien».* Apagalo con `trio={false}`; memorial y prestador ya quedan afuera solos.
 - ⚠️ **`lineaExtra` es STRING, no nodo** — es el slot fiscal de S115 y `R74`/`R84` mantienen la plata fuera de las piezas.
 - ⚠️ **Memorial no monta trío ni destellos, y lo decide el TEMA**, no el consumidor. Con `useReducedMotion` la pantalla **aparece hecha**.
 
@@ -174,7 +175,7 @@ La superficie que agrupa.
 - **props:** `opciones[]` · `seleccionada`/`seleccionadas` · `onSelect` · `disposicion` (`fila`|`tira`|`grilla`) · `multiple` · `adorno` · `entidad` · `marcaPata` · `cargando` (por chip)
 - **tokens:** `radius` · `spacing` · `motion` · `elevacion` · `theme.accent` · `theme.capa`
 - **consumidores:** 56 · 16
-- 🔴 **La pata que pisa ya está montada desde S91** (`MarcaEleccion`). En el chip lleno pasa a `rosaSobreCiruela` — *pintada del mismo ciruela que el relleno se volvía invisible, y los tres gates daban verde.*
+- 🔴 **La pata VIENE ENCENDIDA en el cliente (S116-B) — no la pidas.** Era `marcaPata = false` y **nadie la pasaba**: medido, cero ocurrencias en `apps/`. *Una firma visual que hay que pedir explícitamente no es la firma de la casa: es una opción que nadie eligió, y por eso ninguna captura la mostró nunca.* **Pasá `marcaPata={false}` sólo si tu pantalla es la excepción**; el prestador no la recibe (la decide la casa). En el chip lleno pasa a `rosaSobreCiruela` — *pintada del mismo ciruela que el relleno se volvía invisible, y los tres gates daban verde.*
 - 🔴 **Y desde S116-B PISA de verdad:** tenía cero movimiento — *una pata que aparece de golpe no pisó nada, se materializó encima*. Ahora entra, **se pasa a 1,12 y vuelve**: el excedente es lo que la hace leer como PESO. Va con `easeOut` y **no con `spring`**, aunque spring sea la curva de la confirmación táctil: *algo que se apoya no rebota, se detiene.*
 - ⚠️ **Los chips NO son tabs.** Para vistas exclusivas va `SelectorSegmentado`, salvo que convivan tres ejes hermanos (ahí manda la gramática de la pantalla).
 
