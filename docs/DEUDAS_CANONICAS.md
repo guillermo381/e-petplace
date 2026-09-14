@@ -35352,7 +35352,7 @@ El bloque del fondo pasa **después** del `ScrollView`, con **`pointerEvents="bo
 
 ## `D-1114` 🟡 — LOS CONTEOS DEL CATÁLOGO SE VENCEN **EN CADA MERGE**, y ninguna pista puede verlo sola
 
-**Estado:** ABIERTA · **Dueño: B** (el catálogo y su gate son suyos) · **la mide A**, que es quien paga el costo en cada tanda.
+**Estado:** ABIERTA · **FIRMADA POR LA MESA** (14-sep-2026) · **Dueño: B**, próxima tanda · **la midió A**, que es quien pagaba el costo en cada tanda.
 **Origen:** A, tras curarlo **dos veces seguidas** en dos merges consecutivos (14-sep-2026).
 
 > **No es que alguien se olvide de actualizar: es que el número correcto no existe en ninguna de las dos ramas.** B es dueño del catálogo y C es quien monta las piezas ⇒ **en la rama de B el gate está verde porque los consumidores de C no existen ahí, y en la de C el catálogo es el viejo.** *El desajuste NACE en `main`, que es el único lugar donde nadie estaba mirando.*
@@ -35372,14 +35372,68 @@ El bloque del fondo pasa **después** del `ScrollView`, con **`pointerEvents="bo
 
 ⚠️ **La diferencia acá, y es lo que hace que NO se pueda copiar esa cura sin pensar:** este número **tiene gate**, así que no envejece en silencio — se cobra en el merge siguiente. *El daño no es desinformar: es que la conducción cure a mano, en territorio ajeno, un número que una máquina puede derivar.*
 
-### Tres salidas, para que B elija — ninguna es mía
+### ✅ FIRMA DE LA MESA (14-sep-2026): **gana la salida 2**
 
-1. **El gate escribe además de medir** (`--fix`): corre, actualiza los conteos y vuelve verde. *La más barata; el riesgo es que un `--fix` automático oculte que una pieza perdió TODOS sus consumidores, que es un hecho que alguien debería mirar.*
-2. **El catálogo deja de publicar el número** y publica el comando, como hizo el canon con las piezas y las migraciones. *Pierde la lectura de un vistazo, que es justamente para lo que C lo abre.*
-3. **Queda como está y lo cura quien conduce**, declarado como costo del método paralelo. *Es lo que pasó hoy dos veces; funciona, y cuesta que A toque `docs/` de B en cada tanda.*
+> **El catálogo deja de publicar conteos y publica el COMANDO que los produce.** Dueño **B**, próxima tanda.
 
-**Mientras tanto rige la 3**, y A lo declara en cada commit que lo toque.
+**Es la tercera vez que esta casa cura esta clase de la misma manera** —el contador de piezas de `packages/ui` y el de migraciones ya salieron del canon y dejaron su comando— *y las dos veces la conclusión fue que corregir un número derivado no lo arregla: lo vuelve a vencer.*
+
+**Lo que la firma descarta, y por qué importa que quede escrito:**
+
+- **La 1 (`--fix`)** era la más barata y **esconde el caso que hay que mirar**: una pieza que pierde TODOS sus consumidores es un hecho —`L-318`, motor sin puerta— y un arreglo automático lo borraría sin que nadie se entere. *Un gate que se auto-repara deja de avisar justo cuando lo que cambió importa.*
+- **La 3 (curarlo a mano cada tanda)** funcionaba y **se cobró tres veces en un día**: 2 desajustes, después 6, después el conflicto de `HojaAsistente` en el mismo archivo. *Lo que empezó como prolijidad terminó siendo la conducción editando `docs/` de otra pista en cada merge.*
+
+⚠️ **Lo que B tiene que resolver al hacerlo, y no es obvio: el catálogo se lee de un vistazo.** C lo abre para decidir qué montar, y *«corré este comando»* no reemplaza a un número que está ahí. **La salida no es borrar y ya** — el gate puede seguir midiendo y **decir el número en su salida**, que es donde un número derivado no envejece.
+
+**Mientras B no lo haga, rige la 3** y A lo declara en cada commit que lo toque.
 
 ⚠️ **Y un hallazgo de paso que no es de esta ficha, para B:** `EsperaLarga` tiene **11** consumidores y `EsperaDeMarca` **6** — *dos piezas de espera conviviendo*. Puede ser correcto (esperas de distinta duración) o puede ser una mudanza a medias; **A no lo decide**.
 
-**☠️ MUERTE:** cuando dos merges seguidos de B+C den `verify:catalogo-v5` verde sin que nadie toque el catálogo a mano.
+**☠️ MUERTE:** cuando el catálogo no publique un solo conteo y el gate los diga en su salida — verificado por un merge de B+C que no obligue a nadie a editar el documento.
+
+---
+
+## `D-1115` 🟡 — EL ABANICO NO TIENE CAMPO: la pregunta escrita se pierde en el camino de NEXO
+
+**Estado:** ABIERTA · **Dueño: C** (el camino es del cliente) · **la forma la firmó B** al retirar la hoja.
+**Origen:** A, migrando `_layout.tsx` tras el lote 11 (14-sep-2026).
+
+> **`HojaAsistente` dejaba escribir la pregunta ahí mismo** (`pregunta.placeholder` · `onEnviar(texto)`) **y la llevaba a `/nexo` en `params.q`.** El `AbanicoAsistente` que la reemplaza tiene **una fila que navega, sin campo** ⇒ hoy se entra a `/nexo` **sin pregunta escrita**.
+
+**La forma nueva está bien firmada y no se discute:** *una hoja modal tapa la pantalla desde la que se la abrió, y el contexto de lo que se va a preguntar ES esa pantalla*. **Lo que esta ficha registra es lo que costó**, porque el que pierde un paso no es la pieza: es el camino.
+
+**Qué queda por decidir, y es de producto:** si `/nexo` abre con el foco puesto en su propio campo —y entonces el paso perdido es sólo un toque— o si hace falta otra cosa. **A no lo decide y lo dejó dicho en el código**, junto al montaje, para que no viva sólo acá.
+
+**☠️ MUERTE:** cuando alguien camine «abrir el asistente → preguntar» y declare que el paso de más es aceptable, o lo cure.
+
+---
+
+## `D-1116` 🟠 — TOCAR UN ATAJO DEL ABANICO NAVEGA Y **LO DEJA ABIERTO**
+
+**Estado:** ABIERTA · **Dueño: B** (`AbanicoAsistente`/`BotonAsistente` son suyos) · **no se puede curar desde el consumidor**, y ésa es la mitad que importa.
+**Origen:** A, montando la pieza en `_layout.tsx` (14-sep-2026).
+
+### Lo medido, en la fuente
+
+`AbanicoAsistente:178` llama **`onPress={a.onPress}` crudo**. La fila de preguntar, en cambio, sí se envuelve:
+
+```tsx
+onPreguntar={() => { setAbanicoAbierto(false); props.onPreguntar() }}   // BotonAsistente:299
+onPress={a.onPress}                                                     // AbanicoAsistente:178
+```
+
+⇒ **la fila de arriba cierra y las cuatro de abajo no.** *Dos filas del mismo abanico, con el mismo gesto, y sólo una se comporta como el resto de la casa.*
+
+### 🔴 Y por qué el consumidor no puede taparlo
+
+**El estado de «abierto» vive DENTRO de `BotonAsistente`**, que es exactamente la decisión correcta de B —*si cada pantalla lo montara, abrir el asistente sería un acto distinto en cada una*— **pero entonces el consumidor no tiene handle para cerrarlo.** El `setHoja(false)` que el cliente tenía en cada atajo **dejó de cerrar nada** al migrar, y se retiró con su nota.
+
+*Una pieza que se guarda el estado se queda también con la obligación de cerrarlo.*
+
+### Lo que se ve
+
+Se toca «vacuna» → navega a `/carnet` **con el abanico abierto detrás**; al volver sigue abierto. **No rompe nada** —el velo se toca y cierra— *y por eso es de los que sobreviven: funciona mal sin fallar.*
+
+**La cura es de una línea, y del lado de B:** envolver `a.onPress` igual que ya envuelve `onPreguntar`.
+
+**☠️ MUERTE:** cuando tocar un atajo cierre el abanico, verificado en aparato — *el volcado no lo dice: lo dice volver y ver la pantalla limpia.*
