@@ -35311,3 +35311,75 @@ Se cruzaron `MODELOS`, `TEMPERATURA_CERO` y `PENSAR` para las 13 piezas:
 Ahora dice **«No pudimos leer la foto. Probá con otra.»** — describe el efecto y no inventa la causa; el cuerpo real de Anthropic ya se loguea en `[ia] Anthropic non-ok`.
 
 **☠️ MUERTE:** muerta al desplegarse, con la sonda de camino real en verde sobre dos fotos.
+
+---
+
+## `D-1113` 🟢 — LO QUE VIVE EN EL SLOT `fondo` DE `HojaContenido` NO SE PODÍA TOCAR — curado por C en territorio de B, por urgencia
+
+**Estado:** **CURADA** (14-sep-2026) · **la curó C**, en `packages/ui`, que es de **B** · **A la deposita** para que el cruce quede en el canon y no sólo en un buzón.
+**Origen:** C, lote 7, midiendo en el aparato antes de tocar.
+
+> **Era 🔴 y dejaba sin salida dos pantallas de entrada** (03 acceso y 05 crear cuenta): la flecha de volver se veía y **ningún toque suyo llegaba nunca**.
+
+### La medición, que es lo que justifica el cruce
+
+En el emulador, sobre 03: se toca la flecha en **(108, 212)** y no pasa nada. El volcado de `uiautomator` sobre ese punto, **en orden de render**:
+
+```
+View       [0,136][221,357]     ← el nodo de la flecha
+ScrollView [0,0][1080,2400]     ← la hoja, hermana POSTERIOR
+```
+
+`HojaContenido` montaba el slot `fondo` como bloque ② y el `ScrollView` como ③. **Hermana posterior gana el toque, y su marco es la pantalla entera.** ⇒ *la flecha no estaba rota ni desconectada: estaba debajo.*
+
+⚠️ **Y no eran dos pantallas: era la clase.** Hoy 03 y 05 porque son las que tienen `onVolver`; **la próxima que pusiera algo tocable en `fondo` heredaba el mismo silencio.** *Un defecto que se arregla pantalla por pantalla vuelve con la próxima pantalla.*
+
+### La cura, y por qué no inventó técnica
+
+El bloque del fondo pasa **después** del `ScrollView`, con **`pointerEvents="box-none"`**.
+
+- **`box-none` y no `auto`**, con su razón: esa capa no debe comerse el gesto del scroll —el diseño es que la hoja suba arrastrando desde cualquier lado, incluido el aire de la cabecera—; **lo único que captura son sus hijos tocables**.
+- **No es técnica nueva: es la que el pie fijo de la misma pieza ya usaba** (*«con `box-none`, así el gesto pasa al scroll por el aire entre sus hijos»*). *Copiar al vecino de la propia pieza en vez de inventar es lo que hace que la cura no traiga criterio nuevo que revisar.*
+- **El orden visual no cambia en la práctica, y está medido:** `estiloFondo` lleva ese contenido a opacidad 0 justo en el recorrido en que la hoja llega a taparlo ⇒ la ventana en la que pasaría «por debajo» es la misma en la que ya se desvaneció. **Verificado en el aparato**: 03 se scrollea y la hoja sube igual que antes.
+
+### El cruce, declarado y con su forma
+
+**`packages/ui` es de B.** C tocó y lo dijo en el buzón (`S116-C-para-B-el-fondo-no-se-podia-tocar.md`) con la medición completa, **para que B revise y cambie la forma si prefiere otra**. *Lo que hace legítimo el cruce no es la urgencia sola: es que llegó con el número, con la técnica copiada de la propia pieza y con el después verificado — B tiene todo para juzgarlo sin re-medir.*
+
+**☠️ MUERTE:** ya está curada. Vive como registro del cruce y de la clase — **si algún día el slot `fondo` vuelve a montarse antes del `ScrollView`, esto vuelve entero.**
+
+---
+
+## `D-1114` 🟡 — LOS CONTEOS DEL CATÁLOGO SE VENCEN **EN CADA MERGE**, y ninguna pista puede verlo sola
+
+**Estado:** ABIERTA · **Dueño: B** (el catálogo y su gate son suyos) · **la mide A**, que es quien paga el costo en cada tanda.
+**Origen:** A, tras curarlo **dos veces seguidas** en dos merges consecutivos (14-sep-2026).
+
+> **No es que alguien se olvide de actualizar: es que el número correcto no existe en ninguna de las dos ramas.** B es dueño del catálogo y C es quien monta las piezas ⇒ **en la rama de B el gate está verde porque los consumidores de C no existen ahí, y en la de C el catálogo es el viejo.** *El desajuste NACE en `main`, que es el único lugar donde nadie estaba mirando.*
+
+### Medido, dos veces
+
+| tanda | desajustes | cuáles |
+|---|--:|---|
+| merge de `b-05 @ f5bf8423` + `c-05 @ baa2bbcc` | **2** | `Personaje` 4→5 · `CeldaNavegacion` 49→50 |
+| merge de `b-05 @ e6c6f1a2` + `c-05 @ 1d094908` | **6** | `FilaBeneficio` 0→1 · `EsperaLarga` 0→11 · `HojaAsistente` 0→1 · `Confirmacion` 1→2 · `Celda` 91→90 · `EsperaDeMarca` 9→6 |
+
+**Va en aumento, y tiene sentido que vaya:** cuanto más monta C las piezas nuevas de B, más se mueve. *La segunda tanda triplicó la primera.*
+
+### Por qué es la misma clase que ya se curó dos veces en esta casa
+
+**Es un número derivado publicado a mano.** Igual que el contador de piezas de `packages/ui` (**53 publicado, 171 real, 28 sesiones**) y el de migraciones (**cuatro caídas: 9 → 77 → 138 → 186**). **Y las dos veces la cura NO fue corregirlo otra vez: fue sacarlo y declarar el comando.**
+
+⚠️ **La diferencia acá, y es lo que hace que NO se pueda copiar esa cura sin pensar:** este número **tiene gate**, así que no envejece en silencio — se cobra en el merge siguiente. *El daño no es desinformar: es que la conducción cure a mano, en territorio ajeno, un número que una máquina puede derivar.*
+
+### Tres salidas, para que B elija — ninguna es mía
+
+1. **El gate escribe además de medir** (`--fix`): corre, actualiza los conteos y vuelve verde. *La más barata; el riesgo es que un `--fix` automático oculte que una pieza perdió TODOS sus consumidores, que es un hecho que alguien debería mirar.*
+2. **El catálogo deja de publicar el número** y publica el comando, como hizo el canon con las piezas y las migraciones. *Pierde la lectura de un vistazo, que es justamente para lo que C lo abre.*
+3. **Queda como está y lo cura quien conduce**, declarado como costo del método paralelo. *Es lo que pasó hoy dos veces; funciona, y cuesta que A toque `docs/` de B en cada tanda.*
+
+**Mientras tanto rige la 3**, y A lo declara en cada commit que lo toque.
+
+⚠️ **Y un hallazgo de paso que no es de esta ficha, para B:** `EsperaLarga` tiene **11** consumidores y `EsperaDeMarca` **6** — *dos piezas de espera conviviendo*. Puede ser correcto (esperas de distinta duración) o puede ser una mudanza a medias; **A no lo decide**.
+
+**☠️ MUERTE:** cuando dos merges seguidos de B+C den `verify:catalogo-v5` verde sin que nadie toque el catálogo a mano.

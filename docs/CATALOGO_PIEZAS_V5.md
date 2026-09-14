@@ -77,14 +77,14 @@
 ### `FilaBeneficio`
 - **props:** `glifo` · `titulo` · `apoyo`
 - **tokens:** `accent.glifo` · `accent.glifoBg` · `radius.chipV5`
-- **consumidores:** 0 · C la monta una vez por beneficio en la propuesta, una tarjeta cada una
+- **consumidores:** 1 · C la monta una vez por beneficio en la propuesta, una tarjeta cada una
 - 🔴 **NO ANUNCIA TOQUE, y no es «una celda con el `onPress` apagado»:** ni `Pressable`, ni `accessibilityRole`, ni chevrón, ni hundido — **no están apagados: no están.** *Una celda de navegación dice «acá se entra» con todo su cuerpo; quitarle el toque deja una puerta que no abre, y quien la toque concluye que la app está rota.* Para el lector de pantalla la diferencia es total: una celda se anuncia «botón», y acá no hay botón que anunciar.
 - ⚠️ **Cuatro tarjetas, no una lista con divisores:** *una lista dice «estos ítems van juntos»; cuatro tarjetas dicen «cada uno vale por sí mismo»*, que es lo que una pantalla de propuesta necesita.
 
 ### `EsperaLarga`
 - **props:** `titulo` · `apoyo` · `pie?`
 - **tokens:** `motion.coach.respiracionMs` · `motion.v5.asistenteHalo*` · `bg.base`
-- **consumidores:** 0 · su lugar es toda espera larga: el pago, el carné, lo que dure. ⏪ Tuvo uno —la galería, tras un `lazy` que puse y retiré— y **se fue porque ese `import()` nunca resolvía**: la ruta quedaba en la espera para siempre. *De paso la pieza quedó probada en aparato durante minutos, con su rueda girando y su halo respirando: el defecto de una fue el banco de pruebas de la otra*
+- **consumidores:** 11 · su lugar es toda espera larga: el pago, el carné, lo que dure. ⏪ Tuvo uno —la galería, tras un `lazy` que puse y retiré— y **se fue porque ese `import()` nunca resolvía**: la ruta quedaba en la espera para siempre. *De paso la pieza quedó probada en aparato durante minutos, con su rueda girando y su halo respirando: el defecto de una fue el banco de pruebas de la otra*
 - **consume:** `lib/rueda-de-caras` (la misma de 00, 02 y la onda) y el halo del asistente. **Nada se redibuja.**
 - 🔴 **NO SABE CUÁNTO FALTA Y NO LO FINGE — por eso muere la línea de progreso.** *Una barra que avanza sin saber hacia dónde es una promesa que nadie puede cumplir, y cuando se queda quieta al 80 % lo que comunica es que algo se rompió.* Lo que esta pieza comunica es otra cosa: **que hay alguien acá**.
 - 🔴 **ES LA ÚNICA PIEZA DE LA CASA CON MOVIMIENTO SIN FIN**, firmado. En el asistente el halo respira tres veces y descansa **porque una animación infinita deja la ventana no-idle**; acá esa razón no aplica: *la espera es lo que dura, y una pantalla de espera detenida a los 24 s dice lo contrario de lo que vino a decir.* ⚠️ **Consecuencia declarada: mientras esté, `uiautomator` no reporta `idle`.**
@@ -103,7 +103,7 @@
 
 ### `HojaAsistente`
 - **props:** `visible` · `onCerrar` · `titulo` · `pregunta` · `atajos[]` (`glifo` · `texto` · `onPress`)
-- **consumidores:** 0 en pantallas — **la monta `BotonAsistente`, no una app**. *Si cada pantalla la montara, abrir el asistente sería un acto distinto en cada una, y el estado de «abierta» se olvidaría de cerrarse en alguna.*
+- **consumidores:** 1 — **la monta `BotonAsistente`, no una app**. *Si cada pantalla la montara, abrir el asistente sería un acto distinto en cada una, y el estado de «abierta» se olvidaría de cerrarse en alguna.*
 - 🔴 **LOS ATAJOS DEL ORBE VIEJO, CENSADOS DEL OBJETO:** `apps/cliente/src/lib/nexo/atajos.ts:57` — `ORDEN_DE_PATA = ['peso','vacuna','antiparasitario','foto']`. ⚠️ **La mesa los nombró de memoria como «agregar recuerdo, carné de vacunas y los demás» y el objeto dice otra cosa**: «carné» ≈ `vacuna` y «recuerdo» ≈ `foto`, pero **`peso` y `antiparasitario` no estaban en la lista dictada y sí en el código**.
 - 🔴 **La pieza NO trae la lista adentro** — *un atajo a «peso» en una pantalla de pago no es un atajo: es ruido.* C decide cuáles monta.
 - ⚠️ **Filas de lista, no los dedos del orbe**, y la consecuencia es buena: *una lista crece a cinco sin rediseñar nada; el abanico no podía pasar de cuatro sin dejar de ser una pata.*
@@ -151,7 +151,7 @@ Filas con círculo de elección — **no chips**. Para elegir una de varias cosa
 La pantalla de «¡Listo!» a lienzo completo.
 - **props:** `titulo` · `apoyo` · `dato` · `lineaExtra` · `primario` · `secundario` · `especies` · `exclamacion`
 - **tokens:** `medidas` · `radius` · `spacing` · `motion` · `elevacion` · `theme.accent` · `theme.bg` · `theme.mode`
-- **consumidores:** 1
+- **consumidores:** 2
 - 🔴 **El trío VIENE ENCENDIDO en el cliente (S116-B) — no lo pidas.** Era opt-in y **nadie pasaba `especies`**: cero en `apps/`. ⚠️ **No es un booleano como la pata: el trío necesita saber QUÉ caras**, así que el default no es «true», es **completar** — lo que le pases va PRIMERO (la especie de la mascota) y la casa pone el resto hasta tres, **sin repetir la protagonista**. *Un trío con el mismo gato tres veces no es una familia: es un error de render que nadie reporta porque «se ve bien».* Apagalo con `trio={false}`; memorial y prestador ya quedan afuera solos.
 - ⚠️ **`lineaExtra` es STRING, no nodo** — es el slot fiscal de S115 y `R74`/`R84` mantienen la plata fuera de las piezas.
 - ⚠️ **Memorial no monta trío ni destellos, y lo decide el TEMA**, no el consumidor. Con `useReducedMotion` la pantalla **aparece hecha**.
@@ -247,7 +247,7 @@ La superficie que agrupa.
 `CeldaNavegacion` entra a una sección (glifo + título + chevrón); `Celda` muestra un dato.
 - **props:** `icono` · `titulo` · `detalle` · `onPress` · `registro` · `chevron` — `subtitulo` · `inicio` · `densidad` · `tituloEntero` · `elegida`
 - **tokens:** `radius` · `spacing` · `motion` · `typography` · `theme.accent` · `theme.bg`
-- **consumidores:** 50 · 91
+- **consumidores:** 50 · 90
 - ⚠️ **El contorno transparente murió como acción de fila.** Información despliega; acción lleva. El glifo va en círculo rosa tinte.
 
 ### `Insignia` — *el estado*
@@ -302,7 +302,7 @@ Las cinco tabs. **El activo es el círculo elevado.**
 ### `EsperaDeMarca`
 La espera de la casa: la nariz respirando. **Única animación de espera legal**, y siempre con voz honesta debajo.
 - **tokens:** `motion` · `theme.accent` · `theme.capa`
-- **consumidores:** 9
+- **consumidores:** 6
 - ⚠️ En memorial **queda quieta**.
 
 ### `NarizNotificacion`
