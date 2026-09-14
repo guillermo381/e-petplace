@@ -1525,7 +1525,12 @@ const EXENTOS_R17 = new Set([
   // Montada aparte se vería la hoja y no el acto, y habría DOS formas de
   // abrir lo mismo en la misma sección. Su entrada de galería es la del
   // botón, que la lleva adentro; su entrada de catálogo es propia.
-  'HojaAsistente',
+  // ⏪ Era `HojaAsistente`; murió en el lote 11 y su lugar lo toma el abanico
+  // **por la misma razón**: lo que la mesa juzga es *«que al tocar el botón se
+  // desplieguen»* — **el camino es parte de lo que se firma**. Montado aparte
+  // se vería el abanico y no el acto, y habría DOS formas de abrirlo en la
+  // misma sección. Su entrada de galería es la del botón; la de catálogo, propia.
+  'AbanicoAsistente',
   'ThemeProvider', 'useTheme', 'EvidenciaFotoCapturar',
   // NÚMEROS, no piezas: la anatomía firmada de la pata (S82 r37). Se
   // exportan para que el consumidor CALCULE el aire que la pata invade

@@ -813,6 +813,18 @@ todos.push(
   { nombre: 'CAMPO v5 · borde en reposo (ciruela) / lienzo', fg: lightTheme.border.campoV5, bg: lightTheme.bg.base, noTextual: true },
   { nombre: 'CAMPO v5 · borde en reposo, en oscuro / interior del campo', fg: darkTheme.border.campoV5, bg: darkTheme.bg.overlay, noTextual: true },
   { nombre: 'CAMPO v5 · borde en reposo, en oscuro / tarjeta', fg: darkTheme.border.campoV5, bg: darkTheme.bg.card, noTextual: true },
+
+  /* 🔴 **LA LETRA DEL CTA (lote 11), y entra porque su ausencia fue el
+     defecto.** El founder vio *«botones magenta con la letra en tinta»*: un
+     CTA a mano ponía `color` sin definir ⇒ `text.primary`. **Tinta sobre
+     magenta da 3,29 — por debajo del 4,5 de texto.**
+     ⚠️ Y el par de OSCURO es el que impide obedecer «blanco siempre» al pie:
+     ahí el CTA no es magenta sino `magentaLuz`, un rosa claro, donde la
+     tinta da 7,91 y el blanco **2,31**. *La regla verdadera es «blanco sobre
+     MAGENTA», no «blanco siempre».* */
+  { nombre: 'CTA · su letra sobre el CTA (claro)', fg: lightTheme.accent.ctaTexto, bg: lightTheme.accent.cta },
+  { nombre: 'CTA · su letra sobre el CTA (oscuro)', fg: darkTheme.accent.ctaTexto, bg: darkTheme.accent.cta },
+  { nombre: 'CTA · su letra sobre el CTA (memorial)', fg: memorialTheme.accent.ctaTexto, bg: memorialTheme.accent.cta },
 )
 console.log(
   '  (info) CARNET · el punto de las ausencias en text.tertiary medía ' +

@@ -59,12 +59,16 @@ export { FilaBeneficio, type FilaBeneficioProps } from './components/FilaBenefic
    sola.** El día que aparezca el segundo, se exporta y gana su entrada —
    que es el mismo momento en que dejaría de ser una copia potencial. */
 export { EsperaLarga, type EsperaLargaProps } from './components/EsperaLarga'
+/* ☠️ **`HojaAsistente` MURIÓ EN EL LOTE 11** — su lápida vive al lado de
+   donde estaba el archivo (`HojaAsistente.LAPIDA.md`). La reemplaza el
+   abanico, que es lo que el founder tenía en su captura del orbe: *una hoja
+   modal tapa la pantalla desde la que se la abrió, y el contexto de lo que se
+   va a preguntar ES esa pantalla.* **El contrato de atajos viajó intacto.** */
 export {
-  HojaAsistente,
-  type HojaAsistenteProps,
+  AbanicoAsistente,
+  type AbanicoAsistenteProps,
   type AtajoAsistente,
-  type PreguntaNexo,
-} from './components/HojaAsistente'
+} from './components/AbanicoAsistente'
 
 /* La rueda de caras — UNA para 00, 02, la onda y la espera larga. Se exporta
    el hook y la lista, no un componente: **no dibuja**, dice qué cara toca y

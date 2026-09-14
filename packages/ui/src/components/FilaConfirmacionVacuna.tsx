@@ -378,7 +378,14 @@ export function FilaConfirmacionVacuna({
           backgroundColor: bloqueada || tocada ? theme.bg.hundido : theme.accent.cta,
         }}
       >
-        <Texto variante="enfasis" color={bloqueada ? 'tertiary' : tocada ? 'secondary' : undefined}>
+        {/* 🔴 **`sobreCta` Y NO `undefined` (lote 11).** Sin color, `Texto` cae
+            a `text.primary` — **tinta sobre magenta, 3,29:1**, que es
+            exactamente lo que el founder vio. *Un CTA dibujado a mano hereda
+            el fondo del acento y se olvida de su letra: el fondo es una línea
+            de estilo y la letra es una ausencia, y una ausencia no se revisa.*
+            Con el slot, la letra sale **5,13** en claro y sigue siendo la
+            correcta en oscuro, donde el CTA es un rosa claro. */}
+        <Texto variante="enfasis" color={bloqueada ? 'tertiary' : tocada ? 'secondary' : 'sobreCta'}>
           {vozConfirmar}
         </Texto>
       </Pressable>
@@ -512,7 +519,7 @@ export function PieConfirmacionVacunas({ filas, vozGuardar, vozFaltan, vozIncomp
           backgroundColor: listo ? theme.accent.cta : theme.bg.hundido,
         }}
       >
-        <Texto variante="enfasis" color={listo ? undefined : 'tertiary'}>
+        <Texto variante="enfasis" color={listo ? 'sobreCta' : 'tertiary'}>
           {vozGuardar(aGuardar)}
         </Texto>
       </Pressable>
