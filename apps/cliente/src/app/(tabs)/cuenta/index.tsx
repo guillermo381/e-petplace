@@ -31,6 +31,7 @@ import {
 import { cerrarSesion } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { AccionCarrito } from '@/components/accion-carrito';
 import { escucharConteos, leerConteos } from '@/lib/medicion/montajes';
 
 /**
@@ -258,7 +259,7 @@ export default function Cuenta() {
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <ScrollView contentContainerStyle={{ paddingBottom: AIRE_RAIZ + insets.bottom }}>
-        <Encabezado variante="portada" saludo={t('cuenta.titulo')} />
+        <Encabezado variante="portada" saludo={t('cuenta.titulo')} accionDer={<AccionCarrito />} />
 
         <View style={{ paddingHorizontal: spacing[4], gap: spacing[6], marginTop: spacing[2] }}>
           <Tarjeta relleno="ninguno">

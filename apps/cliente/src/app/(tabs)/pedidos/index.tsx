@@ -59,6 +59,7 @@ import {
 } from '@/lib/despensa/escalera';
 import { ventanaVencida } from '@/lib/despensa/ventana';
 import { useTraduccion } from '@/i18n';
+import { AccionCarrito } from '@/components/accion-carrito';
 
 type Fase<T> = T | 'cargando' | 'error';
 
@@ -365,7 +366,7 @@ export default function DespensaPedidos() {
           casa no tiene flecha de atrás. *Un «atrás» en la raíz de un tab
           ofrece un camino que no existe* (Ley 23), y encima `router.back()`
           desde acá saltaría a cualquier pantalla anterior. */}
-      <Encabezado variante="portada" saludo={t('despensa.tusPedidos')} />
+      <Encabezado variante="portada" saludo={t('despensa.tusPedidos')} accionDer={<AccionCarrito />} />
 
       <ScrollView
         contentContainerStyle={{
