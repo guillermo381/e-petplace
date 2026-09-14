@@ -45,6 +45,11 @@ export {
    lugar — mismo criterio que los dos altos de `Cabecera`. */
 export { OndaAcceso, type OndaAccesoProps, ALTO_ONDA_ACCESO } from './components/OndaAcceso'
 
+/* El mecanismo del pie fijo, en un solo lugar: lo consumen `PantallaConPie`
+   y el slot `pie` de `HojaContenido`. Se exporta el TIPO del material, no el
+   hook — quien necesite un pie monta una de las dos piezas, no arma el suyo. */
+export { type MaterialDelPie } from './components/pie-fijo'
+
 export { Cabecera, type CabeceraProps , ALTO_CABECERA_RAIZ_FIJO, ALTO_CABECERA_EMPUJADA_FIJO } from './components/Cabecera'
 export { Opcion, type OpcionProps, type OpcionItem } from './components/Opcion'
 export { IsotipoV5, LogoV5, type SobreFondo, type TamanoMarca } from './brand/Marca'

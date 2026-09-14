@@ -87,11 +87,10 @@
  * de todo lo que quedaba debajo.*
  */
 
-import { useRef, useState, type ReactNode } from 'react'
-import { Dimensions, ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { type ReactNode } from 'react'
+import { ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native'
+import { PieFijo, usePieFijo } from './pie-fijo'
 
-import { spacing } from '../tokens/spacing'
 import { useTheme } from '../ThemeProvider'
 
 export interface PantallaConPieProps {
@@ -134,18 +133,15 @@ export interface PantallaConPieProps {
 
 export function PantallaConPie({ pie, children, contentContainerStyle, scrollProps }: PantallaConPieProps) {
   const { theme } = useTheme()
-  const insets = useSafeAreaInsets()
-  /** El alto REAL del pie, medido. Arranca en 0 y se corrige en el primer
-   *  layout — un frame sin reserva no se ve porque el pie tampoco está
-   *  dibujado todavía. */
-  const [altoPie, setAltoPie] = useState(0)
-  /** 🔴 LO QUE FALTA DEL INSET, DERIVADO (ver cabecera).
-   *
-   *  Arranca en `insets.bottom` —el valor CONSERVADOR: si la medición nunca
-   *  llegara, el pie queda separado de más, jamás pegado al borde. *De los
-   *  dos errores posibles se elige el que no tapa nada.* */
-  const [insetFaltante, setInsetFaltante] = useState(insets.bottom)
-  const contenedor = useRef<View>(null)
+  /* 🔴 **EL MECANISMO SE MUDÓ A `pie-fijo.tsx` (S116-B) Y ACÁ NO QUEDÓ UNA
+     COPIA.** `HojaContenido` ganó slot de pie por firma de la mesa, y su
+     pie necesitaba **exactamente** estas tres curas —la reserva medida, el
+     inset derivado y el `box-none`—, que se pagaron acá con dos defectos
+     de aparato. *Escribirlas de nuevo allá habría sido escribir la versión
+     que no las pagó.* El porqué de cada una vive en la cabecera del módulo
+     nuevo; esta pieza **no cambia de comportamiento**, cambia de dónde lo
+     saca. */
+  const { contenedor, medirContenedor, medirPie, altoPie, insetFaltante } = usePieFijo()
 
   const propio = StyleSheet.flatten(contentContainerStyle) ?? {}
   /** `paddingBottom` puede venir como número o como porcentaje/string; solo
@@ -157,19 +153,7 @@ export function PantallaConPie({ pie, children, contentContainerStyle, scrollPro
   return (
     <View
       ref={contenedor}
-      /* LA DERIVACIÓN DEL INSET: cuánto de la barra del sistema queda
-         REALMENTE debajo de esta pieza. Adentro de `(tabs)` el navegador ya
-         la reservó y su base coincide con la del área útil ⇒ falta 0. En una
-         pantalla suelta la base llega al borde físico ⇒ falta el inset
-         entero. **La pieza no pregunta dónde está montada: lo mide.** */
-      onLayout={() => {
-        contenedor.current?.measureInWindow((_x, y, _w, alto) => {
-          const baseDePantalla = Dimensions.get('screen').height
-          const yaReservado = Math.max(0, baseDePantalla - (y + alto))
-          const falta = Math.max(0, insets.bottom - yaReservado)
-          setInsetFaltante((previo) => (Math.abs(previo - falta) < 0.5 ? previo : falta))
-        })
-      }}
+      onLayout={medirContenedor}
       style={{ flex: 1, backgroundColor: theme.bg.base }}
     >
       <ScrollView
@@ -187,57 +171,9 @@ export function PantallaConPie({ pie, children, contentContainerStyle, scrollPro
       </ScrollView>
 
       {pie === undefined ? null : (
-        <View
-          /* 🔴 `box-none` — LA ZONA MUERTA DE GESTO, CURADA (S100b-B).
-           *
-           * **El defecto, y lo encontré equivocándome:** reporté que la
-           * ficha «no scrollea». La pista C midió la fuente y dijo que sí.
-           * Al preguntarme POR QUÉ me había equivocado apareció la causa
-           * real: **mi swipe empezó dentro de la banda del pie, y el pie
-           * se comió el gesto.** La captura salió idéntica y la leí como
-           * «no scrollea».
-           *
-           * ⇒ **Un pie que captura el toque en toda su banda deja sin
-           * scroll el tercio inferior de la pantalla.** Y ahí es
-           * exactamente donde una familia apoya el pulgar: *quien sostiene
-           * el teléfono con una mano arrastra abajo, no arriba.* Con el pie
-           * capturando, la pantalla se siente trabada y la persona
-           * concluye que no hay más contenido.
-           *
-           * **`box-none` = el contenedor no es blanco de toque; sus hijos
-           * sí.** Los botones siguen funcionando; el aire entre ellos deja
-           * pasar el gesto al `ScrollView` de abajo.
-           *
-           * ✅ **Y es SEGURO precisamente por la otra mitad de esta pieza:**
-           * como la reserva se deriva del alto medido, **debajo del pie no
-           * queda contenido** — el toque que pasa cae sobre espacio vacío
-           * del scroll y lo único que puede hacer es desplazar. *Sin la
-           * reserva derivada, `box-none` habría dejado tocar contenido
-           * escondido; las dos mitades se necesitan.* */
-          pointerEvents="box-none"
-          onLayout={(e) => {
-            const h = e.nativeEvent.layout.height
-            // Solo escribimos si cambió: `onLayout` puede repetir el mismo
-            // valor y un `setState` por frame haría re-render en vano.
-            setAltoPie((previo) => (Math.abs(previo - h) < 0.5 ? previo : h))
-          }}
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            paddingHorizontal: spacing[5],
-            paddingTop: spacing[3],
-            // El inset del sistema es de la pieza (ver la cabecera), y va
-            // DERIVADO: solo lo que falta. Adentro de tabs esto es 0 y el
-            // pie deja de tener ~52 dp de hueco muerto debajo.
-            paddingBottom: insetFaltante + spacing[3],
-            backgroundColor: theme.bg.base,
-            gap: spacing[2],
-          }}
-        >
+        <PieFijo insetFaltante={insetFaltante} onLayout={medirPie}>
           {pie}
-        </View>
+        </PieFijo>
       )}
     </View>
   )
