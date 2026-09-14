@@ -35014,7 +35014,8 @@ Pedir la recuperación con una cuenta real, recibir el correo, **volver por el e
 
 ## `D-1107` 🟠 — TODO LO QUE LA APP **EXPORTA** LLEVA EL LOGO VIEJO — ocho artefactos, por **dos caminos distintos**
 
-**Estado:** **PARCIAL** — **② el correo: CURADO y verificado contra el objeto (14-sep-2026)** · **① los ocho documentos: FRENADO, y el freno está medido** · **Dueño: A** (vive entero en `supabase/functions/` y en Storage) · **el asset nuevo lo produce B** — y lo que entregó **no sirve para ①**: ver abajo.
+**Estado:** **CERRADA** (14-sep-2026) — **② el correo: curado y verificado contra el objeto** · **① los papeles: CABLEADOS con el path v5 de B, mirados en A4** · **Dueño: A** · **el asset lo produjo B**.
+**⚠️ Y el encargo corrige a esta ficha DOS veces: no eran ocho consumidores, son SEIS** (abajo) **y el primer intento de ① se FRENÓ con su medición** — el freno queda escrito porque es la mitad útil de la historia.
 **Origen:** la mesa, 14-sep-2026. **Medido sin curar.**
 
 > El rediseño llegó a la app. **No llegó a nada de lo que la app le da a la familia para guardar o mostrarle a otro** — que es justamente donde la marca vive más tiempo: un PDF en el teléfono, un correo en la bandeja, un pasaporte que se enseña en un mostrador.
@@ -35051,7 +35052,40 @@ Pedir la recuperación con una cuenta real, recibir el correo, **volver por el e
 
 **Si el logo nuevo *puede* ir a un A4.** `papel.ts` ya declara una razón para no usar el del correo — *«el isotipo EN GRADIENTE a 128×88 px en color contradice la firma y a ese tamaño pixela sobre un A4»* — y **el asset nuevo es un PNG del ilustrador, no un path vectorial**. *Poner un PNG en un documento impreso puede verse peor que el path viejo, y eso se mira antes de reemplazar, no después.* ⇒ **puede hacer falta que B entregue el isotipo nuevo como PATH**, y entonces la ficha se reparte.
 
-**☠️ MUERTE:** los ocho artefactos salen con la marca nueva, verificado abriendo un PDF real. **② ya murió** (14-sep-2026, verificado contra el objeto). **① muere cuando llegue el path limpio de B y un A4 generado lo confirme.**
+### ① CABLEADO — y lo que destrabó fue una ENTREGA, como la ficha había previsto
+
+**B entregó `packages/ui/src/brand/isotipo-v5-path.ts`: UNA silueta, un `d` de 5.083 caracteres, 2 subpaths, cero clips.** Verificado **del lado del consumidor** — no con un navegador: con **`pdf-lib` 1.17.1, la misma versión que usa `papel.ts`**, dibujando con `drawSvgPath` a 380 pt sobre A4 en tinta al 6 %. **Rinde.** Después se generó **el carnet entero con el `Papel` real** y se miró contra el mismo carnet con el path viejo: la nariz nueva se lee mejor que los dos lazos finos, que a 6 % casi se borraban.
+
+**El cableado, en `_shared/papel.ts`:** el `d` nuevo + **`ISO_CAJA = { x: 339, y: 393, ancho: 627, alto: 372 }`**, y `marcaDeAgua()` **encuadra por esa caja y no por el viewBox**. *Es la trampa que B dejó advertida y que se paga sola: el lienzo del archivo es CUADRADO y el dibujo ocupa una banda adentro ⇒ centrar por el viewBox centra el PAPEL del archivo, no el dibujo.* Mueren `ISO_VW`/`ISO_VH`.
+
+⚠️ **El aspecto cambió y queda escrito en el código: 627×372 = 1,685 contra el 471,82×324 = 1,456 del viejo.** *Quien reemplace números sueltos ahí sin mirar la página va a dejar la marca estirada — y a 6 % de opacidad eso no se ve hasta que se imprime.*
+
+### 🔴 LA CORRECCIÓN QUE EL CABLEADO OBLIGÓ: son SEIS consumidores, no ocho
+
+**Censado por import, no por memoria** (`grep -rl "papel.ts'" supabase/functions`):
+
+`documento-carnet` · `documento-certificado` · `documento-historia-clinica` · `documento-ficha-identidad` · `documento-receta` · `_shared/facturacion/ride.ts` → `fiscal-ride`.
+
+**Los dos que sobraban, y el error es de la misma clase que esta ficha vino a medir:**
+
+- **`_shared/pasaporte-html.ts` NO importa `papel.ts` y no dibuja ningún isotipo.** Es HTML, no PDF: su única imagen es la foto de la mascota. *La palabra «papel» aparece en su cabecera hablando del COLOR de la tinta, y eso fue suficiente para contarlo como consumidor.* ⇒ **el pasaporte está limpio, igual que el QR** — los dos los nombró la mesa y los dos resultaron no tener logo.
+- **`_shared/ia/mod.ts` menciona `papel.ts` en un COMENTARIO** que lista importadores vivos. No lo importa.
+
+⇒ **un censo por mención cuenta los comentarios como código** (`L-170`, cobrada otra vez). *El número viejo era más grande, que es la dirección que nadie audita: un ocho asusta y un seis se verifica.*
+
+### El control del gate — porque la copia se puede volver a vencer
+
+`supabase/functions/_shared/papel.ts` **no puede importar de `packages/ui`** (es Deno, se despliega aparte) ⇒ el `d` vive **copiado**. **Y una copia sin control es exactamente lo que produjo esta ficha:** B midió que el path del papel y el de `brand/Isotipo.tsx` eran **idénticos byte a byte** — *el papel no había copiado mal: había copiado bien de una fuente que ya estaba vencida, y nada los comparaba.*
+
+⇒ **`pnpm verify:isotipo-path` gana dos brazos** (A, sobre el gate de B): que la copia del papel sea **idéntica** a la fuente única, y que el papel **encuadre por la caja** y no queden residuos de `ISO_VW`/`ISO_VH`. **Los dos probados EN ROJO** antes de confiar en su verde (`L-459`): un carácter cambiado en la copia → rojo; un `ISO_VW` reintroducido → rojo.
+
+### ⚠️ Lo que el cableado NO prueba
+
+**Ningún documento se generó contra la base real.** El carnet se dibujó con el `Papel` verdadero pero **datos de fixture**: lo que se miró es LA CARA — marca de agua, banda, filete, pie —, que es lo único que esta tanda cambió. **Y nada está desplegado: las edge functions viajan por deploy, no por OTA.** *El path está en `main`; los ocho papeles siguen imprimiendo el viejo hasta que alguien despliegue.*
+
+**`deno check` sobre los seis consumidores: sin errores nuevos.** Dos (`documento-receta`, `documento-historia-clinica`) fallan por inferencia de tipos de Supabase — **verificado contra el `papel.ts` viejo: fallaban igual antes**.
+
+**☠️ MUERTE — MUERTA.** ② el correo, verificado contra el objeto. ① los seis papeles, cableados y mirados en A4. **Queda UNA cosa viva y no es de esta ficha: el DEPLOY de las seis edge functions** — hasta entonces el path nuevo está en `main` y no en la impresora.
 
 ---
 
@@ -35062,3 +35096,44 @@ Pedir la recuperación con una cuenta real, recibir el correo, **volver por el e
 **El ícono ya está compuesto** —`packages/ui/assets/marca/icono-app.svg`, con la zona segura en la lectura (B) firmada en el lote 2c—; lo que falta es cablearlo. El splash nativo, igual.
 
 ⇒ **el lote 8 junta cinco cosas que esperan el mismo tren**, y por eso vale como lote y no como cinco fichas sueltas: `D-1093` (el vector drawable de la nariz) · `D-1100` (App Links, que desbloquea `D-1099` y `D-1105`) · `D-1101` (el polyfill nativo de `crypto`, que saca el PKCE de `plain`) · **el ícono de la app** · **el splash nativo**. *Ninguna justifica una build por sí sola; las cinco juntas sí.*
+
+---
+
+## `D-1108` 🟢 — EL CARRITO VIVE EN LA **CABECERA DE LA DESPENSA**, y la firma de «visible en TODA la app» queda **derogada**
+
+**Estado:** **CERRADA POR FIRMA DE MESA** (14-sep-2026) · **Dueño: C** (la canasta ya está construida) · **A** deposita la derogación donde la letra vieja vive.
+**Origen:** la mesa, cerrando lo que C dejó declarado y no eligió.
+
+> **LA FIRMA:** *el carrito vive en la **cabecera de la Despensa y de sus empujadas**, con contador. La firma de `S100d-bis` —«mientras tenga productos debe estar visible en TODA la app»— **queda derogada por la letra del rediseño**.*
+
+### Por qué esto es una derogación y no un olvido
+
+**`N28` de `DIRECCION_DISENO_S99` no era una preferencia: era una LEY con su condición escrita** — *una pieza sube al shell cuando su condición de existencia es un DATO y no una ruta*. El carrito la cumplía: *«¿tiene que estar acá?»* se contestaba mirando el estado, no la pantalla.
+
+**Lo que cambió es el shell.** El rediseño le dio al shell **una sola pieza flotante —el asistente—** y esa decisión ya está firmada en `LETRA_REDISENO_S116` (§2: *el asistente es la única pieza con movimiento en reposo*). **Dos cosas flotando compiten**, y la que pierde no es la que se decide: es la que el pulgar tapa. ⇒ *no es que el carrito deje de importar: es que el lugar donde vivía ya tiene dueño.*
+
+⚠️ **Y la ley `N28` NO se deroga — se deroga su aplicación al carrito.** *Sigue siendo la vara correcta para la próxima pieza que se postule al shell: lo que cambió es que el shell tiene un solo asiento y está ocupado.*
+
+### La cadena que lo mató, que es lo que esta ficha existe para no repetir
+
+**Tres commits, ninguno dejó una puerta** (medido por C, que además nombró el tercero como suyo):
+
+| # | quién | qué hizo |
+|--:|---|---|
+| ① | `S100d-C` | sacó la canasta del techo **en el mismo commit** en que entraba el carrito flotante |
+| ② | `S112-C` | mató `CarritoFlotante`; su trabajo pasó a la burbuja del shell |
+| ③ | `S116-C` lote 3 | la burbuja se reemplazó por el asistente, **y la rama del carrito se fue con ella** |
+
+**Ningún gate lo vio, y no podía:** cada commit era correcto por separado, la ruta `/despensa/carrito` siguió viva todo el tiempo, y lo que faltaba era **un camino**, no una pieza. Medido al curar: **cero navegaciones** a esa ruta en `apps/`.
+
+🔴 **Y el eslabón que vale como lección está declarado por su propio autor:** C escribió en la cabecera del shell *«el carrito sigue alcanzable por la tab Despensa»* **sin recorrerlo**. *Es exactamente lo que la pregunta 11 de la vara existe para cazar —«se usó, no se fotografió»— y se escribió en el mismo lote en que esa pregunta nació de otro defecto suyo.* ⇒ **una afirmación sobre un camino es una medición sólo si alguien lo caminó.**
+
+### Lo construido, y su vara 11 corrida
+
+La canasta vuelve al techo con `GlifoConContador` y `dentroDeTocable` (la voz la pone el tocable). **C la USÓ, no la fotografió:** agregó un producto (contador a **1**), abrió el carrito, eligió mascota y llegó al checkout — *con su botón apagado diciendo por qué: «Falta tu dirección de entrega»*.
+
+### Lo que esta firma NO decide
+
+**El memorial.** El orbe tenía ahí una razón propia —*«el carrito y los mensajes conservan su única puerta también acá»*— y **este retiro no la reemplaza**. Queda como pregunta abierta de C, no como algo resuelto de callado.
+
+**☠️ MUERTE:** ya está muerta — nace cerrada. Vive como registro de la derogación y de la cadena, para que nadie reabra `N28` sobre el carrito creyendo que sigue rigiendo.

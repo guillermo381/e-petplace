@@ -1079,11 +1079,26 @@ techo.*
 
 ## N28 · LO QUE VIVE EN EL SHELL — y bajo qué condición
 
-**FIRMA DEL FOUNDER (S100d·bis), sobre el carrito flotante:** *«si salgo de
+**FIRMA DEL FOUNDER (S100d·bis), sobre el carrito flotante:** ~~*«si salgo de
 Despensa, se pierde el carro; **mientras tenga productos debe estar visible en
-TODA la app**, y desaparece cuando no tiene productos»* — y después, sobre el
+TODA la app**, y desaparece cuando no tiene productos»*~~ — y después, sobre el
 cruce de territorio que hizo falta para cumplirla: *«el montaje **ES** la
 decisión, no un detalle de implementación»*.
+
+> 🔴 **DEROGADA POR FIRMA DE MESA (14-sep-2026, S116 · `D-1108`): el carrito
+> vive en la CABECERA de la Despensa y de sus empujadas, con contador.** No
+> sube al shell. **La razón no es que el carrito importe menos: es que el shell
+> del rediseño tiene UN solo asiento flotante y lo ocupa el asistente**
+> (`LETRA_REDISENO_S116` §2, firmada). *Dos piezas flotando compiten, y la que
+> pierde no es la que se decide: es la que el pulgar tapa.*
+>
+> ⚠️ **Lo que se deroga es la APLICACIÓN al carrito, jamás la ley `N28` de
+> abajo** — sigue siendo la vara correcta para la próxima pieza que se postule
+> al shell. *Lo que cambió no es el criterio: es que el asiento está ocupado.*
+>
+> Se tacha y no se borra, y se tacha **acá**, donde la letra vive: *dos letras
+> firmadas que se contradicen son peores que una equivocada — cualquiera cita
+> la que le conviene y está «en regla».*
 
 **LA LEY:**
 
