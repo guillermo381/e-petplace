@@ -34692,3 +34692,52 @@ Se buscó el trinquete gemelo de `verify:moneda` y **no hay discriminador honest
 ⇒ **queda sólo esta ficha, y la cura de C se verifica con el ojo, no con un gate.**
 
 **☠️ MUERTE:** la fecha sale en voz de familia por el riel, y el gate de voz la cubre.
+
+---
+
+## `D-1099` 🟠 — LA CONFIRMACIÓN DE CORREO QUEDA ENCENDIDA, Y LA BIENVENIDA GANA «REVISA TU CORREO»
+
+**Estado:** ABIERTA · **Dueño: C**, en **este** lote.
+**Origen:** firma de la mesa, 13-sep-2026.
+
+> **La confirmación de correo queda ENCENDIDA.** No es un interruptor que se apaga para desbloquear el recorrido: es cómo se verifica que una cuenta pertenece a quien dice.
+
+**Lo que falta es la pantalla**, y el motor ya la habilitó desde el día uno: `registrarse()` devuelve **`sesion_activa: false`** cuando el proyecto exige confirmación —*«devuelve la cuenta sin sesión»*, escrito en su propia cabecera— y `apps/cliente/src/app/verificar-correo.tsx` **ya existe**.
+
+⇒ **lo de C es la pantalla del recorrido nuevo**: después de crear la cuenta, la bienvenida lleva a «Revisa tu correo» en vez de dejar a la persona mirando un formulario que ya no tiene nada que hacer.
+
+**☠️ MUERTE:** alguien crea una cuenta, ve «Revisa tu correo», confirma, y entra.
+
+---
+
+## `D-1100` 🔴 — EL ENLACE DEL CORREO DE CONFIRMACIÓN ABRE EL NAVEGADOR, NO LA APP
+
+**Estado:** ABIERTA · **Dueño: A** · **bloquea a `D-1099`**: encender la confirmación sin esto deja a la familia en el navegador, no en la app.
+**Origen:** medido por A el 13-sep-2026, a pedido de la mesa.
+
+### Las tres mediciones, y las tres dan lo mismo
+
+| qué | valor medido | consecuencia |
+|---|---|---|
+| `scheme` de la app | **`cliente`** | existe, y es lo único que existe |
+| `android.intentFilters` | **NO HAY** | Android **no asocia** ningún `https://` a la app |
+| `ios.associatedDomains` | **NO HAY** | iOS **no abre** Universal Links |
+| `emailRedirectTo` | **nadie lo pasa** — ni `registrarse` ni ninguna pantalla | el correo lleva al **Site URL del proyecto**, que es web |
+
+⇒ **el enlace del correo abre el navegador.** Y aunque se pasara `emailRedirectTo: 'cliente://…'`, **un cliente de correo no resuelve un scheme propio**: lo trata como texto o lo entrega al navegador, que no sabe qué es `cliente://`.
+
+### Por qué esto no es nuevo y por eso duele más
+
+**Es exactamente `D-509`**, que el canon ya nombró: *«el link sin canal — scheme muerto en dispositivo: WhatsApp no linkea, navegador busca; la respuesta nombrada: **App Links https = build nativa**»*. *La respuesta se escribió hace sesiones y el trabajo nunca se hizo, así que el mismo muro aparece cada vez que algo necesita volver del correo a la app.*
+
+### Lo que hace falta, y por qué no entra en un OTA
+
+**App Links (Android) + Universal Links (iOS)**: `intentFilters` con `autoVerify`, `associatedDomains`, y los dos archivos servidos desde el dominio —`.well-known/assetlinks.json` y `apple-app-site-association`—. **Toca `app.config.ts` y `android/`/`ios/` ⇒ es configuración nativa: NO viaja por OTA, necesita build.** Su lugar natural es el **lote 8**, junto a `D-1093` (el vector drawable de la nariz), que necesita el mismo tren.
+
+### ⚠️ Lo que pasa HOY si se enciende la confirmación sin esto
+
+La persona crea la cuenta, recibe el correo, toca el enlace, **se abre el navegador**, y ahí la cuenta se confirma — *pero la app no se entera*: sigue en su pantalla, sin sesión, hasta que la persona vuelva sola y reintente. **No es un camino roto: es un camino que funciona y no lo parece**, que en la práctica se abandona igual.
+
+⇒ **la mesa decide**: encender igual con la pantalla de C explicando que hay que volver a la app, o esperar al lote 8. *Lo que no se puede es encenderlo creyendo que el enlace trae de vuelta.*
+
+**☠️ MUERTE:** el enlace del correo abre la app, verificado en el aparato con una cuenta real.
