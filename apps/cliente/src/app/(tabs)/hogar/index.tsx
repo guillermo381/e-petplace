@@ -115,6 +115,7 @@ import { diaSemanaCorto, fechaCortaMono, fechaLargaHumana } from '@epetplace/i18
 
 import { InvitacionAvisos } from '@/components/invitacion-avisos';
 import { ventanaVencida } from '@/lib/despensa/ventana';
+import { unidadesEnCarrito, useCarrito } from '@/lib/despensa/carrito';
 import { useTraduccion } from '@/i18n';
 import { ADOPCION_ALCANZABLE } from '@/lib/gate-adopcion';
 import { vozServicio } from '@/lib/voz-servicio';
@@ -626,11 +627,46 @@ function FilaCampanaTecho({
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const etiquetaBadge = useEtiquetaBadge();
+  const unidades = unidadesEnCarrito(useCarrito());
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[5] }}>
       <View style={{ flex: 1 }}>
         <Isotipo size={28} variant="blanco" />
       </View>
+      {/* ⭐ **S116-C lote 9 · EL CARRITO, AL LADO DE LA CAMPANA.** Firma de
+          la mesa, con su vencimiento escrito adentro: *«hasta que el lote 4
+          cambie ese techo»*.
+
+          🔴 **Y NO monta `AccionCarrito` ni la prop `carrito` de `Cabecera`,
+          por una razón medida y no por gusto:** las dos terminan en un
+          `GlifoConContador`, **que resuelve su tinta del tema y no acepta
+          override** — sobre este degradado el glífo saldría en tinta oscura,
+          invisible. B ya pagó ese problema en `Cabecera` envolviéndolo en un
+          `DiscoVidrio`, **que es privado de ese archivo** y no se exporta.
+
+          ⇒ acá se compone **exactamente como su vecina**: `Badge` + `Icono`
+          en papel. *Dos hermanos en la misma fila con dos gramáticas distintas
+          es peor que una gramática prestada.* El pedido a B —`tinta`/
+          `superficie` en `GlifoConContador`, o exportar el disco— va al buzón;
+          el día que exista, esto colapsa a una pieza.
+
+          ⚠️ **Va a la IZQUIERDA y la campana NO se mueve**: el pulgar ya sabe
+          dónde está la campana, y correrla para hacerle lugar a algo nuevo le
+          cobra el cambio a quien no pidió nada. */}
+      <Pressable
+        onPress={() => router.push('/despensa/carrito')}
+        hitSlop={10}
+        accessibilityRole="button"
+        accessibilityLabel={t('despensa.abrirCarrito', { n: unidades })}
+      >
+        <Badge n={unidades} forma="contador" superficie={esMemorial ? 'clara' : 'muro'}>
+          <Icono
+            nombre="carrito"
+            tamano={24}
+            tinta={esMemorial ? theme.text.primary : palette.light0}
+          />
+        </Badge>
+      </Pressable>
       <Pressable
         onPress={onAvisos}
         hitSlop={10}
