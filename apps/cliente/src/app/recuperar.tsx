@@ -70,7 +70,7 @@ import {
   Celda,
   EvitaTeclado,
   HojaContenido,
-  HuellaDeLlegada,
+  EsperaDeMarca,
   Icono,
   LogoV5,
   Tarjeta,
@@ -423,7 +423,20 @@ export default function Recuperar() {
             backgroundColor: theme.bg.base,
           }}
         >
-          <HuellaDeLlegada tamano={64} />
+          {/* ⭐ **S116-C lote 10 · LA PATA SALE, ENTRA LA NARIZ.** Recorrido 4:
+              *«al entrar con correo y contraseña aparece una pata mientras
+              carga: es la espera vieja. Que sea `EsperaDeMarca`»*.
+
+              🔴 **Y EL CENSO CONTESTÓ TRES, NO UNA.** `HuellaDeLlegada` vivía en
+              `login`, `registro` y `recuperar` — las TRES pantallas de acceso,
+              el mismo instante en las tres. *Curar sólo la que el founder vio
+              habría dejado dos caminos de entrada con otra espera, y esa es la
+              clase de divergencia que nadie descubre hasta que alguien recorre
+              el tercero.*
+
+              ⚠️ **`HuellaDeLlegada` queda con CERO consumidores** y no la mato yo:
+              es de `packages/ui`. Va al buzón. */}
+          <EsperaDeMarca tamano={64} />
         </View>
       )}
     </View>

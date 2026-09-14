@@ -29,9 +29,10 @@ import {
   Entrada,
   EvitaTeclado,
   HojaContenido,
-  HuellaDeLlegada,
+  EsperaDeMarca,
   LogoV5,
   OndaAcceso,
+  ALTO_ONDA_ACCESO,
   Texto,
   spacing,
   useAviso,
@@ -210,22 +211,17 @@ export default function Registro() {
             contentContainerStyle: { flexGrow: 1 },
             keyboardShouldPersistTaps: 'handled',
           }}
-          /* 🔴 **LA ONDA PASA AL SLOT DE PIE — S116-C lote 3i, y con eso MUERE
-             mi excepción de `R53`.**
-             ⏪ La tenía en un `View` absoluto `bottom: 0` con el hueco reservado
-             a mano por `ALTO_ONDA_ACCESO`. Funcionaba, pero era **el consumidor
-             estimando el alto de un pie** — justo lo que `R53` existe para
-             impedir, y por eso hubo que declarar la excepción.
-             El slot de B lo resuelve donde corresponde: **la reserva sale del
-             alto MEDIDO del pie**, y el `paddingBottom` de esta pantalla se
-             retira porque ya no lo paga ella. */
-          pie={<OndaAcceso frase={[t('registro.ondaA'), t('registro.ondaB')]} lado="izq" />}
         >
           <View
             style={{
               flexGrow: 1,
               padding: spacing[5],
               gap: spacing[6],
+              /* ⭐ EL AIRE DE LA ONDA. Va DESPUÉS de `padding` para pisarle
+                 el lado de abajo, y sale de `ALTO_ONDA_ACCESO` — la constante
+                 que la pieza exporta, jamás un número medido a ojo. Es lo que
+                 deja «Crear mi cuenta» y el botón de Google ENTEROS sobre la ola. */
+              paddingBottom: ALTO_ONDA_ACCESO,
             }}
           >
           <Entrada>
@@ -327,6 +323,41 @@ export default function Registro() {
           </View>
         </HojaContenido>
       </EvitaTeclado>
+      {/* ⭐ **S116-C lote 10 · LA ONDA SALE DE LA HOJA — recorrido 4 del
+          founder: *«va FUERA de la hoja: montala en la raíz de la pantalla,
+          hermana de la hoja, no dentro de su pie ni de ningún contenedor con
+          relleno»*.
+
+          🔴 **LO QUE EL SLOT DE PIE LE HACÍA, medido en `PieFijo:135`:** con
+          `material='lienzo'` (el default) el pie envuelve a su hijo en
+          `paddingHorizontal: spacing[5]` + `paddingTop` + `paddingBottom` **y
+          un `backgroundColor: theme.bg.base`**. ⇒ la onda quedaba **metida
+          20 dp hacia adentro por cada lado y con una franja de lienzo detrás**:
+          *el magenta no llegaba al filo de la pantalla, que es exactamente lo
+          que la pieza dice que tiene que hacer* («el magenta tiene que llegar
+          al filo… lo que no puede quedar debajo de la barra es el CONTENIDO»,
+          `OndaAcceso:185`).
+
+          ⏪ **Y esto REVIERTE mi lote 3i, que la había movido al pie.** Lo
+          digo entero porque entonces escribí que con eso *«muere mi excepción
+          de R53»*: la excepción vuelve, y vuelve **declarada**. La razón por
+          la que R53 existe —*un consumidor que TECLEA el alto de un pie*— **no
+          aplica acá**: el número es `ALTO_ONDA_ACCESO`, la constante que la
+          propia pieza exporta para esto. *Lo que R53 mató fue un `96`
+          tecleado; esto es el alto que la pieza publica.*
+
+          ⚠️ **Va FUERA de `EvitaTeclado` a propósito**: es decoración, no un
+          control. Con el teclado arriba se queda en el borde de la pantalla y
+          el teclado la tapa — *subirla con el teclado le robaría al formulario
+          los 156 dp que la persona necesita justo cuando está escribiendo*.
+
+          R53-DECLARADO: no es un pie de controles sino una banda decorativa
+          que TIENE que sangrar hasta el filo, y su reserva no es una
+          estimación: es `ALTO_ONDA_ACCESO`, el alto que la propia pieza
+          exporta. Nada tocable vive debajo de ella. */}
+      <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }} pointerEvents="none">
+        <OndaAcceso frase={[t('registro.ondaA'), t('registro.ondaB')]} lado="izq" />
+      </View>
 
 
       {/* R53-DECLARADO: NO es un pie fijo — es el overlay de LLEGADA a pantalla
@@ -345,7 +376,20 @@ export default function Registro() {
             backgroundColor: theme.bg.base,
           }}
         >
-          <HuellaDeLlegada tamano={64} />
+          {/* ⭐ **S116-C lote 10 · LA PATA SALE, ENTRA LA NARIZ.** Recorrido 4:
+              *«al entrar con correo y contraseña aparece una pata mientras
+              carga: es la espera vieja. Que sea `EsperaDeMarca`»*.
+
+              🔴 **Y EL CENSO CONTESTÓ TRES, NO UNA.** `HuellaDeLlegada` vivía en
+              `login`, `registro` y `recuperar` — las TRES pantallas de acceso,
+              el mismo instante en las tres. *Curar sólo la que el founder vio
+              habría dejado dos caminos de entrada con otra espera, y esa es la
+              clase de divergencia que nadie descubre hasta que alguien recorre
+              el tercero.*
+
+              ⚠️ **`HuellaDeLlegada` queda con CERO consumidores** y no la mato yo:
+              es de `packages/ui`. Va al buzón. */}
+          <EsperaDeMarca tamano={64} />
         </View>
       )}
     </View>
