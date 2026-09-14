@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Keyboard, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Animated, {
-  Easing,
   runOnJS,
   useAnimatedStyle,
-  useReducedMotion,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated'
@@ -12,7 +11,7 @@ import Svg, { Path } from 'react-native-svg'
 import { motion } from '../tokens/motion'
 import { palette } from '../tokens/palette'
 import { spacing } from '../tokens/spacing'
-import { useInsetQueFalta } from './pie-fijo'
+import { LAS_SEIS, useRuedaDeCaras } from '../lib/rueda-de-caras'
 import { Personaje, type EspeciePersonaje } from './Personaje'
 import { Texto } from './Texto'
 
@@ -89,10 +88,11 @@ const ALTO_OLA = 24
  *  teclea dos veces. */
 export const ALTO_ONDA_ACCESO = ALTO_BANDA + ALTO_OLA
 
-/** Las seis. Orden fijo y no aleatorio: *una rueda que sortea puede
- *  repetir dos veces seguidas la misma cara, y eso se lee como que se
- *  colgó.* */
-const LAS_SEIS: EspeciePersonaje[] = ['perro', 'gato', 'conejo', 'ave', 'roedor', 'otro']
+/* ⏪ **LA RUEDA SALIÓ DE ACÁ (lote 8).** Nació en esta pieza y la mesa la
+   pidió compartida con 00, 02 y la espera larga, *«sin copiarla»*: vive en
+   `lib/rueda-de-caras.ts` con sus dos cadencias y su regla de orden fijo.
+   **Acá no quedó una copia** — lo que se pierde al copiar una rueda no es
+   código, es que las cuatro giren al mismo ritmo. */
 
 export interface OndaAccesoProps {
   /** La frase, **ya partida en dos líneas**. Llega partida y no se parte
@@ -105,77 +105,27 @@ export interface OndaAccesoProps {
   /** Por cuáles rota. Default: **las seis**. Se puede acotar (una pantalla
    *  de gatos rota gatos), y con UNA sola la rueda no arranca — no hay a
    *  dónde ir. */
-  especies?: EspeciePersonaje[]
+  especies?: readonly EspeciePersonaje[]
 }
 
 export function OndaAcceso({ frase, lado, especies = LAS_SEIS }: OndaAccesoProps) {
-  const sinMovimiento = useReducedMotion()
-  /* 🔴 **EL INSET SE MIDE, NO SE PIDE (lote 6, corrección del aparato).**
-     El founder vio en un Samsung con tres teclas *«el texto cortado por la
-     barra»*. La pieza ya sumaba `insets.bottom` — y `insets.bottom` dice
-     **cuánto mide la barra**, no **cuánto de ella queda debajo de esta
-     franja**: adentro de `(tabs)` el navegador ya la reservó y el valor
-     sobra; montada al filo, falta entero. *El mismo par descoordinado que
-     `PantallaConPie` mató, cobrado acá por segunda vez.*
-     ⚠️ **Adenda del founder:** *«la franja magenta se queda como está,
-     llegando hasta el borde. Lo único que sube es el CONTENIDO.»* Es lo que
-     hace el `paddingBottom` de abajo: el color sangra, el contenido se
-     corre. Lo que cambia en este lote es **con qué número**. */
-  const [refOnda, medirOnda, insetInferior] = useInsetQueFalta()
-  const [indice, setIndice] = useState(0)
-  const opacidad = useSharedValue(1)
-  /* El índice se lee de un ref adentro del intervalo y no de la clausura:
-     un `setInterval` capturaría el valor del primer render y la rueda
-     avanzaría de 0 a 1 para siempre. */
-  const indiceRef = useRef(0)
+/* 🔴 **EL INSET VUELVE A SER EL CRUDO, y el aparato lo decidió (lote 8).**
 
-  /* ── LA RUEDA ──────────────────────────────────────────────────────
-     Dos cadencias, y por eso son un `setTimeout` que se re-arma y no un
-     `setInterval`: el primero llega al segundo y los siguientes cada
-     tres. Con `useReducedMotion` **la rueda no arranca**: queda la
-     primera cara, quieta. *Apagar el fundido y dejar el salto sería peor
-     que no moverse — un cambio brusco cada tres segundos es exactamente
-     lo que la preferencia pide evitar.* */
-  useEffect(() => {
-    if (sinMovimiento || especies.length < 2) return
-    /* **Los relojes se juntan y se apagan TODOS**, no sólo el último: el
-       giro arma dos —el cambio de cara a mitad del fundido y la próxima
-       vuelta— y un `clearTimeout` sobre una sola variable deja vivo al
-       otro. *Un timer huérfano que llama a `setIndice` sobre una pieza
-       desmontada no rompe nada visible y avisa por consola una vez cada
-       tres segundos.* */
-    const relojes = new Set<ReturnType<typeof setTimeout>>()
-    const enMs = (ms: number, fn: () => void) => {
-      const id = setTimeout(() => {
-        relojes.delete(id)
-        fn()
-      }, ms)
-      relojes.add(id)
-    }
+     ⏪ En el lote 6 lo pasé a derivado (`useInsetQueFalta`) y el founder vio
+     en 03 **la franja ENTERA subida, con lienzo a los lados y abajo**. La
+     derivación mide *cuánto de la barra queda debajo del contenedor*, y eso
+     es lo correcto para un pie que vive DENTRO de un contenedor — **no para
+     una franja que tiene que llegar al borde físico**. *Es la misma lección
+     que el asistente ya me había cobrado: dos piezas con el mismo síntoma no
+     tienen por qué tener la misma cura.*
 
-    /* El fundido CRUZADO con una sola capa: baja a 0 y sube a 1 con el
-       cambio de cara en el medio. La casa no tiene una primitiva de
-       crossfade y montar dos capas apiladas costaría el doble de imágenes
-       en memoria por una diferencia que a 500 ms nadie ve. */
-    const mitad = motion.v5.personajeFundidoMs / 2
-    const suave = Easing.bezier(...motion.easing.easeInOut.bezier)
-
-    const girar = () => {
-      opacidad.value = withTiming(0, { duration: mitad, easing: suave })
-      enMs(mitad, () => {
-        indiceRef.current = (indiceRef.current + 1) % especies.length
-        setIndice(indiceRef.current)
-        opacidad.value = withTiming(1, { duration: mitad, easing: suave })
-      })
-      enMs(motion.v5.personajeCadaMs, girar)
-    }
-
-    enMs(motion.v5.personajePrimeraMs, girar)
-    return () => {
-      relojes.forEach(clearTimeout)
-      relojes.clear()
-    }
-  }, [sinMovimiento, especies.length, opacidad])
+     La orden es literal y no admite interpretación: *«la franja magenta llega
+     hasta los bordes y hasta el fondo, PINTADA; lo único que se aparta de las
+     teclas es el CONTENIDO»*. ⇒ el inset **empuja el contenido** y no mueve
+     un píxel del color. */
+  const insets = useSafeAreaInsets()
+  const insetInferior = insets.bottom
+  const { cara, opacidad } = useRuedaDeCaras(especies)
 
   /* ── EL TECLADO ────────────────────────────────────────────────────
      `Keyboard` y no `useAnimatedKeyboard`: la segunda está bajo sospecha
@@ -207,19 +157,12 @@ export function OndaAcceso({ frase, lado, especies = LAS_SEIS }: OndaAccesoProps
     }
   }, [visible])
 
-  /* Con la lista vacía la pieza no adivina: cae a `'otro'`, que es la
-     especie que esta casa ya usa para «no sé cuál». *Un `especies[0]`
-     sobre un arreglo vacío daría `undefined` y `Personaje` reventaría al
-     buscar su archivo — y el consumidor que pasó la lista vacía se
-     enteraría en el teléfono.* */
-  const enRueda: EspeciePersonaje = especies[indice] ?? especies[0] ?? 'otro'
-
   const estiloCara = useAnimatedStyle(() => ({ opacity: opacidad.value }))
   const estiloOnda = useAnimatedStyle(() => ({ opacity: visible.value }))
 
-  const cara = (
+  const laCara = (
     <Animated.View style={estiloCara}>
-      <Personaje especie={enRueda} tamano="hogar" forma="circulo" />
+      <Personaje especie={cara} tamano="hogar" forma="circulo" />
     </Animated.View>
   )
 
@@ -240,13 +183,21 @@ export function OndaAcceso({ frase, lado, especies = LAS_SEIS }: OndaAccesoProps
      sistema es el CONTENIDO. */
   const alto = ALTO_ONDA_ACCESO + insetInferior
 
-  if (!pintada) return <View ref={refOnda} onLayout={medirOnda} style={{ height: alto }} />
+  /* 🔴 **EL MAGENTA VIVE EN LA RAÍZ, y ésa es la cura de los huecos.**
+     Antes el color lo ponían la ola y la banda, cada una en su caja: **todo
+     lo que quedara entre ellas o alrededor salía lienzo** —el SVG a 100 %
+     deja subpíxeles en los cantos, y cualquier redondeo de alto abre una
+     línea abajo—. *Un color que se compone de dos piezas tiene tantas
+     junturas como piezas.* Con el fondo en la raíz, **cualquier superficie
+     que la onda ocupe es magenta por construcción**, y las junturas dejan de
+     poder existir. */
+  const fondoDeLaFranja = { height: alto, backgroundColor: palette.magentaAccion }
+
+  if (!pintada) return <View style={fondoDeLaFranja} />
 
   return (
     <Animated.View
-      ref={refOnda}
-      onLayout={medirOnda}
-      style={[{ height: alto }, estiloOnda]}
+      style={[fondoDeLaFranja, estiloOnda]}
       /* La onda no es un control: no recibe toques ni los roba a lo que
          tenga debajo mientras está desvanecida. */
       pointerEvents="none"
@@ -278,7 +229,7 @@ export function OndaAcceso({ frase, lado, especies = LAS_SEIS }: OndaAccesoProps
         }}
       >
         {palabras}
-        {cara}
+        {laCara}
       </View>
     </Animated.View>
   )

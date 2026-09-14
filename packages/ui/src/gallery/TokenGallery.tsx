@@ -231,6 +231,8 @@ import { BotonMarcaAjena } from '../components/BotonMarcaAjena'
 import { HojaContenido } from '../components/HojaContenido'
 import { FilaAccionesCostura } from '../components/FilaAccionesCostura'
 import { OndaAcceso } from '../components/OndaAcceso'
+import { FilaBeneficio } from '../components/FilaBeneficio'
+import { EsperaLarga } from '../components/EsperaLarga'
 import { EsperaDeMarca } from '../brand/EsperaDeMarca'
 import { EsperaDeTrabajo } from '../brand/EsperaDeTrabajo'
 import { Guijarro } from '../brand/Guijarro'
@@ -4021,6 +4023,48 @@ function GaleriaInterna() {
                 <Campo label="Tocá para subir el teclado" placeholder="la onda se va entera y vuelve" />
               </View>
             </HojaContenido>
+          </View>
+        </Seccion>
+
+        <Seccion titulo="⭐ GATE S116-B lote 8 — LAS TRES DEL RECORRIDO 2 · qué decide cada una: (a) FilaBeneficio NO tiene que parecer tocable — si tu dedo va solo hacia ella, está mal; (b) EsperaLarga tiene que sostener sin mentir: mirala unos segundos y fijate si te dice «hay alguien acá» o «esto se colgó»; (c) la hoja del asistente tiene que ser CORTA y abrir con el campo primero. ⚠️ La espera NO tiene tope de ciclos: es la única pieza de la casa con movimiento sin fin, firmado">
+          <View style={{ gap: spacing[4] }}>
+            {/* Cuatro beneficios, una tarjeta cada uno, como el sketch de 02. */}
+            <FilaBeneficio glifo="carnet" titulo="Su carné, siempre a mano" apoyo="Vacunas y documentos en un solo lugar." />
+            <FilaBeneficio glifo="veterinaria" titulo="Su salud, ordenada" apoyo="Consultas, recetas y estudios que no se pierden." />
+            <FilaBeneficio glifo="paseo" titulo="Quien lo cuida, cerca" apoyo="Paseos, guardería y estética con gente verificada." />
+            <FilaBeneficio glifo="despensa" titulo="Lo que come, a tiempo" apoyo="Su alimento llega sin que tengas que acordarte." />
+
+            {/* La hoja se monta por SU BOTÓN, que es como la va a ver la
+                familia: tocá el asistente de esta sección y abrila. *Montar
+                la hoja suelta probaría la hoja y no el camino.* */}
+            <View style={{ height: 220 }}>
+              <BotonAsistente
+                etiqueta="Abrir el asistente"
+                tituloHoja="Nexo"
+                pregunta={{
+                  placeholder: 'Preguntale a Nexo',
+                  onEnviar: () => {},
+                  etiquetaEnviar: 'Enviar',
+                }}
+                atajos={[
+                  /* Los CUATRO del orbe viejo, censados del objeto
+                     (`lib/nexo/atajos.ts:57`) — acá como demo, no como la
+                     lista de la pieza: C decide cuáles monta por pantalla. */
+                  { glifo: 'peso', texto: 'Registrar el peso', onPress: () => {} },
+                  { glifo: 'vacuna', texto: 'Cargar una vacuna', onPress: () => {} },
+                  { glifo: 'antiparasitario', texto: 'Cargar un antiparasitario', onPress: () => {} },
+                  { glifo: 'foto', texto: 'Agregar una foto', onPress: () => {} },
+                ]}
+              />
+            </View>
+
+            <View style={{ height: 420, borderRadius: radius.lg, overflow: 'hidden' }}>
+              <EsperaLarga
+                titulo="Leyendo el carné"
+                apoyo="Esto puede tardar un minuto. No cierres la app."
+                pie={<Boton etiqueta="Cancelar" variante="secundario" onPress={() => {}} />}
+              />
+            </View>
           </View>
         </Seccion>
 

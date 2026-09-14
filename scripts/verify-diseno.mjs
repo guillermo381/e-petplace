@@ -1514,6 +1514,18 @@ const EXENTOS_R17 = new Set([
   // que el shell monte la nueva, el archivo y esta línea se borran juntos.
   'CarritoFlotante',
   'usePresionado', 'useTraduccionUi', 'recursosUi', 'useAviso', 'AvisoProvider',
+  // S116-B lote 8 · la rueda de caras NO DIBUJA: devuelve qué cara toca y
+  // cuánta opacidad, y quien la monta decide tamaño, forma y fondo. **No hay
+  // nada que poner en una galería** — se ve a través de sus consumidores
+  // (00, 02, la onda y la espera larga), que sí tienen su entrada.
+  'useRuedaDeCaras', 'LAS_SEIS',
+  // S116-B lote 8 · `HojaAsistente` SE GATEA ABRIENDO SU BOTÓN, y por eso no
+  // se monta suelta: lo que la mesa juzga es *«que el asistente al tocarse
+  // abra una hoja corta»* — **el camino es parte de lo que se firma**.
+  // Montada aparte se vería la hoja y no el acto, y habría DOS formas de
+  // abrir lo mismo en la misma sección. Su entrada de galería es la del
+  // botón, que la lleva adentro; su entrada de catálogo es propia.
+  'HojaAsistente',
   'ThemeProvider', 'useTheme', 'EvidenciaFotoCapturar',
   // NÚMEROS, no piezas: la anatomía firmada de la pata (S82 r37). Se
   // exportan para que el consumidor CALCULE el aire que la pata invade
@@ -7548,7 +7560,10 @@ const TABLA_R77 = new Map([
      rueda giraría sin esa cara y **nadie lo notaría** —una rueda de cinco
      se ve exactamente igual que una de seis—, que es justo el modo de
      falla que esta regla existe para cazar. */
-  ['OndaAcceso.tsx::LAS_SEIS', 'exhaustivo'],
+  /* ⏪ Vivía en `OndaAcceso.tsx`; se mudó a `lib/rueda-de-caras.ts` al
+     compartirse con 00, 02 y la espera larga. **R77 cazó la mudanza sola**:
+     la entrada vieja apuntaba a un sitio que ya no existe. */
+  ['rueda-de-caras.ts::LAS_SEIS', 'exhaustivo'],
   ['ConvivenciaInput.tsx::ORDEN', 'exhaustivo'],
   ['EscaleraCaso.tsx::ORDEN_CASO', 'exhaustivo'],
   /* S115-B · los tres tipos de identificación del SRI. **EXHAUSTIVO, y la

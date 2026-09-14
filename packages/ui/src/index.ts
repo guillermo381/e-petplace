@@ -45,6 +45,26 @@ export {
    lugar — mismo criterio que los dos altos de `Cabecera`. */
 export { OndaAcceso, type OndaAccesoProps, ALTO_ONDA_ACCESO } from './components/OndaAcceso'
 
+/* S116-B lote 8 · las tres del recorrido 2, y una regla común: **cada una
+   dice lo que es y no lo que no es.** `FilaBeneficio` NO anuncia toque (ni
+   rol, ni chevrón, ni Pressable: no están, no están apagados) · `EsperaLarga`
+   NO finge saber cuánto falta · `HojaAsistente` NO trae la lista de atajos
+   adentro, la recibe. */
+export { FilaBeneficio, type FilaBeneficioProps } from './components/FilaBeneficio'
+export { EsperaLarga, type EsperaLargaProps } from './components/EsperaLarga'
+export {
+  HojaAsistente,
+  type HojaAsistenteProps,
+  type AtajoAsistente,
+  type PreguntaNexo,
+} from './components/HojaAsistente'
+
+/* La rueda de caras — UNA para 00, 02, la onda y la espera larga. Se exporta
+   el hook y la lista, no un componente: **no dibuja**, dice qué cara toca y
+   cuánta opacidad. *Una rueda que además dibujara obligaría a las cuatro
+   superficies a verse igual, y no lo son.* */
+export { useRuedaDeCaras, LAS_SEIS, type RuedaDeCaras } from './lib/rueda-de-caras'
+
 /* El mecanismo del pie fijo, en un solo lugar: lo consumen `PantallaConPie`
    y el slot `pie` de `HojaContenido`. Se exporta el TIPO del material, no el
    hook — quien necesite un pie monta una de las dos piezas, no arma el suyo. */

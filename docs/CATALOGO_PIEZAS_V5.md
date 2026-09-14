@@ -71,6 +71,32 @@
 - 🔴 **El teclado: alto constante + fundido + DEJAR DE PINTARSE.** Las dos primeras no alcanzaban — C midió **píxeles magenta a y≈1505-1510 con el teclado arriba**. *Una opacidad que llega a 0 no deja nada visible: o el fundido no corrió, o lo que se ve no es esta pieza.* La tercera cierra las dos puertas: **al terminar el fundido la onda deja de dibujarse**, y lo que no está dibujado no deja píxeles pase lo que pase con el listener. ⚠️ **Conserva su alto siempre, pintada o no:** si además se encogiera, el contenido de arriba saltaría — y *«no salta»* es de la misma orden que *«desaparece»*.
 - ⚠️ **Absorbe `insets.bottom` como padding, no como margen:** el magenta sangra hasta el filo y sólo el contenido se corre (Ley 8, precedente `Hoja`/`PantallaConPie`).
 - **Su lugar es el `pie` de `HojaContenido` con `materialDelPie="sangrado"`** (ver §⓪).
+- 🔴 **EL MAGENTA VIVE EN LA RAÍZ** (lote 8). ⏪ Lo ponían la ola y la banda, cada una en su caja: **todo lo que quedara entre ellas o alrededor salía lienzo** —el SVG a 100 % deja subpíxeles en los cantos, y cualquier redondeo abre una línea abajo—. *Un color que se compone de dos piezas tiene tantas junturas como piezas.* Con el fondo en la raíz, las junturas **no pueden existir**.
+- ⚠️ **El inset es el CRUDO, no el derivado** — el derivado mide *cuánto de la barra queda debajo del contenedor*, correcto para un pie y **equivocado para una franja que tiene que llegar al borde físico**. *La misma lección que el asistente ya había cobrado.*
+
+### `FilaBeneficio`
+- **props:** `glifo` · `titulo` · `apoyo`
+- **tokens:** `accent.glifo` · `accent.glifoBg` · `radius.chipV5`
+- **consumidores:** 0 · C la monta una vez por beneficio en la propuesta, una tarjeta cada una
+- 🔴 **NO ANUNCIA TOQUE, y no es «una celda con el `onPress` apagado»:** ni `Pressable`, ni `accessibilityRole`, ni chevrón, ni hundido — **no están apagados: no están.** *Una celda de navegación dice «acá se entra» con todo su cuerpo; quitarle el toque deja una puerta que no abre, y quien la toque concluye que la app está rota.* Para el lector de pantalla la diferencia es total: una celda se anuncia «botón», y acá no hay botón que anunciar.
+- ⚠️ **Cuatro tarjetas, no una lista con divisores:** *una lista dice «estos ítems van juntos»; cuatro tarjetas dicen «cada uno vale por sí mismo»*, que es lo que una pantalla de propuesta necesita.
+
+### `EsperaLarga`
+- **props:** `titulo` · `apoyo` · `pie?`
+- **tokens:** `motion.coach.respiracionMs` · `motion.v5.asistenteHalo*` · `bg.base`
+- **consumidores:** 0 · **la espera larga de toda la casa** (pago, carné, lo que dure)
+- **consume:** `lib/rueda-de-caras` (la misma de 00, 02 y la onda) y el halo del asistente. **Nada se redibuja.**
+- 🔴 **NO SABE CUÁNTO FALTA Y NO LO FINGE — por eso muere la línea de progreso.** *Una barra que avanza sin saber hacia dónde es una promesa que nadie puede cumplir, y cuando se queda quieta al 80 % lo que comunica es que algo se rompió.* Lo que esta pieza comunica es otra cosa: **que hay alguien acá**.
+- 🔴 **ES LA ÚNICA PIEZA DE LA CASA CON MOVIMIENTO SIN FIN**, firmado. En el asistente el halo respira tres veces y descansa **porque una animación infinita deja la ventana no-idle**; acá esa razón no aplica: *la espera es lo que dura, y una pantalla de espera detenida a los 24 s dice lo contrario de lo que vino a decir.* ⚠️ **Consecuencia declarada: mientras esté, `uiautomator` no reporta `idle`.**
+- ⚠️ Con reducir movimiento: la rueda **no arranca** y el halo **se queda puesto**. *Lo que descansa es el movimiento, no la presencia.*
+
+### `HojaAsistente`
+- **props:** `visible` · `onCerrar` · `titulo` · `pregunta` · `atajos[]` (`glifo` · `texto` · `onPress`)
+- **consumidores:** 0 en pantallas — **la monta `BotonAsistente`, no una app**. *Si cada pantalla la montara, abrir el asistente sería un acto distinto en cada una, y el estado de «abierta» se olvidaría de cerrarse en alguna.*
+- 🔴 **LOS ATAJOS DEL ORBE VIEJO, CENSADOS DEL OBJETO:** `apps/cliente/src/lib/nexo/atajos.ts:57` — `ORDEN_DE_PATA = ['peso','vacuna','antiparasitario','foto']`. ⚠️ **La mesa los nombró de memoria como «agregar recuerdo, carné de vacunas y los demás» y el objeto dice otra cosa**: «carné» ≈ `vacuna` y «recuerdo» ≈ `foto`, pero **`peso` y `antiparasitario` no estaban en la lista dictada y sí en el código**.
+- 🔴 **La pieza NO trae la lista adentro** — *un atajo a «peso» en una pantalla de pago no es un atajo: es ruido.* C decide cuáles monta.
+- ⚠️ **Filas de lista, no los dedos del orbe**, y la consecuencia es buena: *una lista crece a cinco sin rediseñar nada; el abanico no podía pasar de cuatro sin dejar de ser una pata.*
+- ⚠️ **`BotonAsistente` es una UNIÓN**: o abre su hoja (y entonces exige campo **y** atajos), o tiene `onPress`. *Un asistente con atajos y sin campo no es una configuración: es una hoja a medio construir* — y así no compila. La lista **vacía sí es legal**: abre con el campo solo.
 - ⚠️ **La rueda no sortea:** orden fijo, así no puede repetir dos veces la misma cara — *que se lee como que se colgó*. Con **una sola especie no arranca**: no hay a dónde ir.
 - ⚠️ **Dice «la cara» y monta el personaje ENTERO, declarado:** recortar a ojo seis ilustraciones distintas daría seis encuadres distintos, y el que quede mal no se nota hasta que lo ve el founder. El recorte, si la mesa lo quiere, es del ilustrador.
 
