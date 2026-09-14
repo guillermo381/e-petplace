@@ -40,6 +40,11 @@ export {
   type AccesoCostura,
 } from './components/FilaAccionesCostura'
 
+/* S116-B lote 5 · la franja del pie de 03 y 05. Exporta su ALTO porque
+   quien la monte al pie de una hoja que scrollea tiene que reservarle el
+   lugar — mismo criterio que los dos altos de `Cabecera`. */
+export { OndaAcceso, type OndaAccesoProps, ALTO_ONDA_ACCESO } from './components/OndaAcceso'
+
 export { Cabecera, type CabeceraProps , ALTO_CABECERA_RAIZ_FIJO, ALTO_CABECERA_EMPUJADA_FIJO } from './components/Cabecera'
 export { Opcion, type OpcionProps, type OpcionItem } from './components/Opcion'
 export { IsotipoV5, LogoV5, type SobreFondo, type TamanoMarca } from './brand/Marca'

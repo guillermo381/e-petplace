@@ -7521,6 +7521,12 @@ const TABLA_R77 = new Map([
      acepta. */
   ['Confirmacion.tsx::CASA', 'subconjunto'],
   // ── EXHAUSTIVOS: si le falta un miembro, la pantalla pierde un paso ──
+  /* S116-B lote 5 · la rueda de la onda de acceso. **EXHAUSTIVO y la orden
+     lo dice con número**: *«recorriendo las seis»*. Si le faltara una, la
+     rueda giraría sin esa cara y **nadie lo notaría** —una rueda de cinco
+     se ve exactamente igual que una de seis—, que es justo el modo de
+     falla que esta regla existe para cazar. */
+  ['OndaAcceso.tsx::LAS_SEIS', 'exhaustivo'],
   ['ConvivenciaInput.tsx::ORDEN', 'exhaustivo'],
   ['EscaleraCaso.tsx::ORDEN_CASO', 'exhaustivo'],
   /* S115-B · los tres tipos de identificación del SRI. **EXHAUSTIVO, y la
