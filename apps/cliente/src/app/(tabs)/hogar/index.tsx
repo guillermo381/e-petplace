@@ -40,6 +40,7 @@ import { router, useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import {
+  AIRE_RAIZ,
   AvatarMascota,
   Badge,
   Boton,
@@ -1676,7 +1677,7 @@ export default function Hogar() {
       </View>
     <ScrollView
       style={{ flex: 1 }}
-      contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}
+      contentContainerStyle={{ paddingBottom: AIRE_RAIZ + insets.bottom }}
     >
       {/* @override-s82c — EL TECHO DEL HOGAR, local (r4: la lámina no
           había llegado completa — las mascotas van ADENTRO del

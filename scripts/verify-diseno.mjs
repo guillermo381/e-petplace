@@ -7505,14 +7505,6 @@ const TABLA_R77 = new Map([
      porque es la nariz y cerrar con la marca es lo que hace que el ciclo se
      lea como una vuelta y no como una lista cortada. */
   ['index.tsx::CARAS', 'exhaustivo'],
-  /* ⭐ S116-C lote 3 · el guard de pertenencia del alta. **EXHAUSTIVO**: son
-     las seis caras que `Personaje` tiene, y la consecuencia de que falte una
-     es la que la captura mostró — la especie cae al fallback y **se dibuja la
-     nariz donde había una cara propia**. No es un orden: es el conjunto
-     completo de lo que la pieza sabe dibujar.
-     ☠️ Se retira cuando B exporte el mapeo `especie → EspeciePersonaje`
-     (pedido 7 del buzón): ahí este guard se reemplaza por la tabla real. */
-  ['PasoDatosBasicos.tsx::CON_CARA_PROPIA', 'exhaustivo'],
   // ── EXHAUSTIVOS: si le falta un miembro, la pantalla pierde un paso ──
   ['ConvivenciaInput.tsx::ORDEN', 'exhaustivo'],
   ['EscaleraCaso.tsx::ORDEN_CASO', 'exhaustivo'],

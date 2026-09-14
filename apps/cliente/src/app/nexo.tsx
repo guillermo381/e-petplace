@@ -535,7 +535,20 @@ export default function Nexo() {
                  Nexo es también el buscador, y *el teclado tiene que decir qué
                  va a pasar al tocar su tecla.* */
               returnKeyType="search"
-              deshabilitado={pensando}
+              /* ☠️ **`deshabilitado={pensando}` MURIÓ — firma de la mesa,
+                 13-sep-2026: en NEXO el campo NO se apaga; el envío sí.**
+
+                 Era uno de los tres frenos mudos de `D-1086`, y la salida no
+                 fue darle una razón: fue **quitar el freno**. *Un campo que se
+                 deshabilita mientras la respuesta viaja se lleva puesto el
+                 texto a medio escribir y el foco, y la persona no puede
+                 corregir una palabra mientras espera.* Escribir siempre está
+                 disponible; lo que no se puede repetir sin consecuencia es
+                 **enviar**, y ése es el que se apaga — abajo, con su razón.
+
+                 ⚠️ `Campo` **sí recibió `razonDeshabilitado`** (pedido 1 del
+                 buzón, entregado por B): sirve para todo campo que de verdad
+                 no pueda usarse. *Éste no era uno de ésos.* */
               sinPie
             />
           </View>

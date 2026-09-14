@@ -8,11 +8,12 @@
 
 ## ⓪ LO PRIMERO, PORQUE CAMBIA CÓMO SE LEE TODO LO DEMÁS
 
-**EL LOTE ESTÁ COMPLETO: las once pantallas y el shell.** ⚠️ Y lo que NO está completo se dice acá arriba, no enterrado:
-- **el alta nueva se construyó entera** (tres pasos + carné, los cinco viejos muertos) y **el arco corrió de punta a punta en el emulador** — creó una mascota y abrió su expediente.
-- **la captura de 10 es ANTERIOR a la última cura** (el esqueleto encima); la cura está en el código, verificada por typecheck, **sin captura posterior**.
-- **04 no tiene captura**, y la razón no es que no exista: el emulador se quedó en otra ruta y corté ahí.
-- **crear cuenta desde la app está roto y no es mío** (`D-1098`, §⑬) — bloquea el camino 01→02→05→alta. El alta se capturó por `/hogar/agregar`. *Se dice arriba para que nadie lea el resto creyendo que cerró.*
+**EL LOTE ESTÁ COMPLETO: las once pantallas y el shell**, con las piezas del buzón de B ya montadas. ⚠️ Lo que NO está completo se dice acá arriba, no enterrado:
+- **El alta nueva corre de punta a punta** y está capturada paso por paso (07 · 08 · 09 · 10), con sus tres barras de progreso.
+- ✅ **Las tres curas que pediste verificar están en pantalla**: el logo sin fondo negro, el «Pez» con su cara, el esqueleto fuera de la confirmación.
+- 🔴 **`D-1098` NO está curada: crear cuenta sigue fallando**, con un error distinto y su causa medida (§⑬). **Es el resultado de la verificación que pediste.**
+- ⚠️ **Dos pantallas sin captura, las dos con su razón medida**: `00` sale en el acto (su ausencia es la prueba) y `06 · hogar SIN mascota` depende de crear una cuenta, que es justo lo que falla.
+- **La cabecera nueva** entró en ocho pantallas; las ~90 restantes del cliente siguen con la vieja. *Se dice arriba para que nadie lea el resto creyendo que cerró.*
 
 ---
 
@@ -187,11 +188,11 @@ pnpm verify:voz-sin-hueco               → EXIT 0 · 8 (baseline 8)
 
 ## ⑪ LA VARA DE COHERENCIA — las diez preguntas, por pantalla
 
-`docs/VARA_COHERENCIA_S116.md`. **sí** = cumple con evidencia · **no** = ficha · **n/a** = la pregunta no aplica a esa pantalla, con su razón.
+`docs/VARA_COHERENCIA_S116.md`. **sí** = cumple con evidencia · **no** = ficha · **n/a** = no aplica · **✳️** = excepción firmada por la mesa (00·01·02 no llevan cabecera por diseño, `D-1097`).
 
 | # | pregunta | 00 | 01 | 02 | 03 | 04 | 05 | 06 | 07 | 08 | 09 | 10 |
 |--:|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| 1 | una sola cabecera | n/a | n/a | **no** | sí | sí | sí | sí | sí | sí | sí | n/a |
+| 1 | una sola cabecera | ✳️ | ✳️ | ✳️ | sí | sí | sí | sí | sí | sí | sí | n/a |
 | 2 | tabs solo en raíz | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí |
 | 3 | un acento | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí |
 | 4 | Baloo arriba, PJS abajo | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí |
@@ -204,7 +205,7 @@ pnpm verify:voz-sin-hueco               → EXIT 0 · 8 (baseline 8)
 
 ### Los tres «no», con su ficha
 
-- **1 · 02 Beneficios no tiene `Cabecera`.** Es deliberado y el encargo lo pide así: *«Fondo lienzo. Arriba a la derecha, "Saltar"»* — una presentación a pantalla completa con su salida arriba. **Ficha: `D-1097`** (abajo) para que la mesa decida si el patrón «pantalla de presentación sin cabecera» se declara como excepción de la vara o 02 gana cabecera.
+- **1 · 00·01·02 no llevan `Cabecera`.** ✅ **RESUELTO POR FIRMA DE LA MESA (13-sep-2026): no la llevan POR DISEÑO y quedan como están.** `D-1097` cierra con esa firma. *La celda sigue diciendo «no» y ahora eso significa «excepción declarada», no deuda.*
 - **6 · 06 Hogar sin mascota: la fecha del antetítulo pasa por `fechaLargaHumana` del riel ✓, pero la pantalla poblada de al lado sigue con la fuente mono** que la mesa mató. No es de este lote (**lote 4**) y por eso no se toca; queda dicho porque la captura `06-shell-hogar.png` lo muestra.
 - **6 · el resto es n/a** porque esas pantallas no muestran plata ni fecha. **Y 07 es «sí» por una cura**: el peso se parsea con `parsearPrecio` del riel — me lo cazó `R88`.
 
@@ -214,45 +215,62 @@ pnpm verify:voz-sin-hueco               → EXIT 0 · 8 (baseline 8)
 
 ---
 
-## ⑫ LAS ONCE PANTALLAS — capturas, con lo que cada una prueba y lo que no
+## ⑫ LA HOJA DE CAPTURAS — las once, en orden de flujo
 
-| # | captura | qué prueba | ⚠️ |
+> **Todas sobre `origin/main` @ `29753b2b` + esta rama**, con las piezas del buzón de B ya montadas. Emulador `s114_C` (puerto **5578**, `adb -s` siempre), Metro en **8097** desde este worktree, binario `com.epetplace.cliente` **1.0.7**, `Android Bundled … (3092 modules)`.
+> **El recorrido se hizo por el camino real de la app**, ubicando cada control por su texto (`uiautomator`) en vez de tocar coordenadas a ciegas — *un tap ciego que cae fuera abre los ajustes de Android y la captura sale de otra app*.
+
+| # | pantalla | archivo | qué prueba |
 |--:|---|---|---|
-| 00 | `00-splash.png` | el fondo magenta y la marca | **la tomé con el menú de dev encima y ya había pasado a 01**: con sesión resuelta el splash sale en el acto, que es su comportamiento correcto |
-| 01 | `01-propuesta.png` | claim en Baloo, degradado, los dos botones | el logo con **fondo negro** (§⑤) |
-| 02 | `02-beneficios.png` · `-tercera.png` | las tres tarjetas, los puntos, el CTA sólo en la última | — |
-| 03 | `03-acceso.png` | cabecera nueva, campos, Google sin logo | — |
-| 04 | *sin captura* | — | **no la capturé**: el emulador se quedó en el perfil tras el alta y corté ahí en vez de seguir dando taps a ciegas |
-| 05 | `05-crear-cuenta.png` | cabecera, tres campos, **la razón del botón apagado** | — |
-| 06 | `06-shell-hogar.png` | **las cinco tabs con Actividad**, el asistente | es el hogar POBLADO: el vacío no se capturó (la cuenta de prueba tiene mascotas) |
-| 07 | `07-datos-basicos.png` | **barra de pasos 1/3**, grilla de especies, raza con autocompletado, CTA con razón | — |
-| 08 | `08-foto.png` | la escalera de la cara y su cabecera nueva | — |
-| 09 | `09-carnet.png` | marco, nota, las dos salidas, pasos 3/3 | — |
-| 10 | `10-expediente-creado.png` | check, «¡Listo!», **el apoyo que dice la verdad** | 🔴 **es ANTERIOR a la cura del esqueleto** — ver abajo |
-| — | `07-empujada-sin-barra.png` | **la empujada no lleva barra** | — |
+| **00** | splash | — | ⚠️ **sin captura, y su ausencia ES la evidencia** — ver abajo |
+| **01** | propuesta | `01-propuesta.png` | ✅ **logo sin fondo negro** · ✅ **«una vida.» en rosa** (`acentoSobreOscuro`) · secundario blanco sobre ciruela (`superficie="oscura"`) |
+| **02** | beneficios · 1ª | `02-beneficios.png` | personaje, Baloo, puntos en ciruela, «Saltar» |
+| **02** | beneficios · 3ª | `02-beneficios-tercera.png` | el CTA aparece **sólo** en la última |
+| **03** | acceso | `03-acceso.png` | cabecera nueva, «Te damos la bienvenida» (neutro), Google sin logo |
+| **04** | recuperar | `04-recuperar.png` | candado, **«QUÉ SIGUE» con sus tres pasos**, vencimiento **sin número inventado** |
+| **05** | crear cuenta | `05-crear-cuenta.png` | tres campos con datos reales cargados |
+| **06** | hogar | `06-shell-hogar.png` | **las cinco tabs con Actividad** · el asistente · «Ponte al día» con el pendiente de la mascota recién creada |
+| **07** | datos básicos | `07-datos-basicos.png` | **barra 1/3** · ✅ **el «Pez» ya tiene cara** (`caraDePersonaje`) · raza con autocompletado · especie elegida con su anillo |
+| **08** | foto | `08-foto.png` | **barra 2/3** y cabecera nueva · la escalera de la cara |
+| **09** | carné | `09-carnet.png` | **barra 3/3** · marco, nota, «Omitir» y las dos salidas |
+| **10** | expediente creado | `10-expediente-creado.png` | ✅ **el esqueleto ya NO está** · el apoyo dice la verdad («Guardamos su expediente», sin foto ni carné) |
+| — | empujada | `07-empujada-sin-barra.png` | **sin barra de tabs** (firma de la mesa) |
 
-### 🔴 Lo que las capturas mostraron y ningún gate vio — tres defectos míos
+### Las tres verificaciones que pediste
 
-1. **El círculo vacío del «Pez» en 07.** Pasaba el código del catálogo (**once** especies) a `Personaje` (**seis** caras) sin verificar: con `pez` la pieza dibujaba el círculo rosa **vacío**. Compilaba y pasaba los tres gates. Curado con un guard de pertenencia que cae a la nariz — *la misma salida que la letra §1.10 ya eligió para el ave*.
-2. **08 tenía cabecera vieja y ninguna barra de pasos.** Conservé `PasoFoto` sin recomponerlo. La pantalla se veía bien **y no decía en qué paso estaba**, así que el flujo perdía su sentido de avance justo en el medio. Curado.
-3. **El esqueleto de carga quedó ENCIMA de la confirmación en 10.** Escribí en el comentario que *«la confirmación ES la pantalla»* y después la monté debajo del esqueleto: las dos convivían. *La Hoja modal vieja tapaba el esqueleto; una pantalla no tapa nada.* **Curado en el código y verificado por typecheck — sin captura posterior**, porque el emulador se me fue de ruta y preferí cortar antes que dar taps a ciegas. **La captura que queda muestra el defecto, no la cura.**
+1. **✅ El fondo del logo está curado.** En `01` el logo va sobre el degradado **sin la caja negra**. En `00` no se puede ver (no hay captura) y en `06` el logo no se monta — el techo del Hogar usa su propio isotipo, que es **lote 4**.
+2. **✅ `AIRE_RAIZ` aplicado** en las tres raíces que lo necesitaban (`hogar`, `explorar`, `cuenta`). ⚠️ **Y una precisión honesta:** en `06` se ve el asistente sobre una tarjeta intermedia. **Eso no es el defecto que `AIRE_RAIZ` cura**: el token garantiza que **la última fila** sea alcanzable al final del scroll, no que un botón flotante no se superponga a nada en posiciones intermedias — *eso es lo que un flotante es*. Si la mesa quiere que nunca tape contenido, es otra decisión (un botón que se esconde al bajar, por ejemplo) y es de B.
+3. **✅ El «Pez» y el esqueleto de 10, curados y verificados en pantalla.**
 
-*Los tres son de la misma clase: nada falla, nada rompe, y se ve mal. Los tres los encontró mirar una captura.*
+### 🔴 Por qué 00 no tiene captura, y por qué eso vale como medición
+
+**Intentado tres veces, la última con ráfaga de capturas sin pausa entre una y otra: en la segunda captura la app ya estaba en 01.** El splash sale **en el acto** cuando la sesión resuelve — *hacer esperar a alguien para terminar una animación es cobrarle el adorno*, y es exactamente lo que el código hace.
+⇒ **su ausencia en la hoja no es un hueco de trabajo: es la prueba de que no se queda.** Para fotografiarlo haría falta red lenta o una sesión que tarde; queda para tu recorrido, donde un arranque en frío real dura más que un emulador con todo en caché.
+
+### 🔴 06 · el hogar SIN mascota tampoco pudo capturarse — y su causa es `D-1098`
+
+La captura de `06` es el hogar **poblado**. El vacío exige **una cuenta recién creada**, que es justo lo que sigue roto. *No es que no lo haya intentado: es que su precondición no existe hoy.*
 
 ---
 
-## ⑬ 🔴 UN DEFECTO QUE NO ES MÍO Y BLOQUEA EL CAMINO NUEVO — `D-1098`
+## ⑬ 🔴 `D-1098` — LA CURA DE A ENTRÓ Y CREAR CUENTA SIGUE FALLANDO
 
-**Crear cuenta desde la app falla.** Stack leído del LogBox, no supuesto:
+**Verificado por el camino real, con una cuenta nueva, sobre `origin/main` @ `29753b2b`.** Es la tarea que pediste y su resultado es rojo.
+
+**El error cambió, el camino sigue roto:**
 
 ```
-TypeError: undefined is not a function
-  auth.ts:517:56   registrarse   →  await getClient().auth.signUp({...})
-  registro.tsx:74  crearCuenta
+TypeError: Cannot read property 'storage' of undefined
+  auth.ts:593:39   registrarse  →  const { data, error } = await signUp({ ... })
 ```
 
-**`getClient().auth.signUp` es `undefined`.** El último commit de `packages/api/src/wrappers/auth.ts` es de **S105-A**: no lo toqué. Y `signInWithPassword` **sí funciona** —entré con la cuenta de prueba en el mismo emulador y la misma sesión de Metro—, así que no es el cliente entero: es ese método.
+**La causa, medida en el código de la cura** (`auth.ts:575-597`): `signUp` se extrae del cliente con `resolverMetodo(clienteAuth, 'signUp')` y después **se llama suelto**. Un método arrancado de su objeto **pierde su `this`**, y adentro de `supabase-js` usa su propio estado ⇒ `undefined.storage`.
 
-⚠️ **Lo que esto significa para el recorrido:** **nadie puede crear una cuenta nueva**, que es el camino exacto que un invitado de F&F hace el primer día (01 → 02 → 05 → alta). El alta la capturé por `/hogar/agregar`, que es el otro modo de la misma pieza.
+🔴 **Y el guard nuevo no puede verlo: `motor_de_alta_ausente` NO se dispara**, porque `resolverMetodo` **encuentra** el método —existe— y da el camino por bueno. *Un guard que verifica presencia no puede ver un problema de invocación, y su verde se lee como «el motor está».*
 
-*No lo curo porque `packages/api` no es mi territorio y porque una cura a ciegas sobre el motor de registro es peor que la ficha.*
+**La cura es de una línea:** llamarlo con su receptor — `clienteAuth.signUp(...)`, `signUp.call(clienteAuth, ...)` o atarlo al extraerlo. **Dueño: A.** La ficha quedó reabierta con esta medición.
+
+**Cómo se verificó, para que se pueda repetir:** cuenta nueva `c3b…@epetplace.dev`, los tres campos confirmados por `uiautomator` **antes** de tocar el botón (el email completo y la clave con sus 11 puntos), y el `TypeError` en el log de Metro al tocar «Crear mi cuenta».
+
+---
+

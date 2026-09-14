@@ -34551,7 +34551,46 @@ t('recurrentes.alMes', { precio: m.monto.toFixed(2) })
 
 ---
 
-## `D-1098` 🔴 — CREAR CUENTA DESDE LA APP FALLA: `auth.signUp` ES `undefined`
+## `D-1098` 🔴 — CREAR CUENTA DESDE LA APP FALLA · **REABIERTA: la cura cambió el síntoma, no el defecto**
+
+> ⊳ **RE-MEDIDO POR C EL 13-sep-2026 sobre `origin/main` @ `29753b2b`, con el camino real en el emulador.** La cura de A entró y **crear cuenta sigue fallando**, con un error **distinto**. Esto es lo que rige; el diagnóstico original queda abajo como historia.
+
+### El error de hoy, con su stack leído del LogBox
+
+```
+TypeError: Cannot read property 'storage' of undefined
+  auth.ts:593:39   registrarse   →  const { data, error } = await signUp({ ... })
+  auth.ts:539:8    registrarse
+  registro.tsx:74  crearCuenta
+```
+
+### La causa, medida en el código de la cura
+
+`auth.ts:575` extrae el método del cliente y lo llama **suelto**:
+
+```ts
+const signUp = resolverMetodo<...>(clienteAuth, 'signUp');
+...
+const { data, error } = await signUp({ ... });   // ← sin receptor
+```
+
+**Un método arrancado de su objeto pierde su `this`.** Dentro de `supabase-js`, `signUp` usa su propio estado (`this.storage`) ⇒ `undefined.storage`. *No es que el método no exista: es que se lo llama sin el objeto al que pertenece.*
+
+🔴 **Y por eso el guard nuevo no ayuda: `motor_de_alta_ausente` NO se dispara.** `resolverMetodo` **encuentra** `signUp` —existe— así que el guard da por bueno el camino y el error ocurre un paso después. *Un guard que verifica presencia no puede ver un problema de invocación, y su verde se lee como «el motor está».*
+
+**La cura es de una línea: llamarlo con su receptor** — `clienteAuth.signUp(...)`, o `signUp.call(clienteAuth, ...)`, o atarlo al extraerlo (`.bind(clienteAuth)`). Dueño: **A**.
+
+### Lo que bloquea, sin cambio
+
+**Nadie puede crear una cuenta**: 01 → 02 → **05** → alta. Verificado hoy con una cuenta nueva (`c3b…@epetplace.dev`), datos correctos en los tres campos —email y clave confirmados por `uiautomator` antes de tocar— y el botón devolviendo el `TypeError`.
+⚠️ **Consecuencia para el lote 3: `06 · Hogar sin mascota` no se pudo capturar**, porque su precondición es una cuenta recién creada, que es justo lo que falla.
+
+**Comando:** el camino real con una cuenta nueva. **☠️ MUERTE:** una cuenta creada desde la app llega al alta.
+
+---
+
+### ⏪ El diagnóstico original (S116-C lote 3) — historia
+
 
 **Estado:** ABIERTA · **Dueño:** **A** (`packages/api`).
 **Origen:** S116-C lote 3, capturando el recorrido en el emulador (13-sep-2026).
