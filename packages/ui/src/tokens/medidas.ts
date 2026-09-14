@@ -66,6 +66,34 @@ export const medidas = {
   asistenteDiametro: 60,
 
   /* ══════════════════════════════════════════════════════════════════
+   *  LA MARCA CUANDO ES LA PROTAGONISTA (00 · splash, 01 · propuesta)
+   *
+   * 🔴 **ES UNA FRACCIÓN DEL ANCHO, NO UN PX, Y ESA ES LA DECISIÓN.** La
+   * orden dice *«cerca de la mitad del ancho del teléfono»* — eso **no es
+   * un tamaño: es una proporción**. Un `200` en píxeles cumple la orden en
+   * el aparato donde se midió y la incumple en todos los demás: en un
+   * teléfono chico tapa la pantalla, en una tablet queda perdido en el
+   * medio. *Un token fijo convertiría «la mitad del ancho» en «200», que
+   * es otra cosa que resulta parecida en un solo aparato.*
+   *
+   * ⚠️ **Y por eso la pieza necesita `useWindowDimensions`** — el ancho lo
+   * sabe el aparato, igual que `insets`. Misma familia que `AIRE_RAIZ`:
+   * el token trae lo que es de la casa, el aparato pone lo suyo.
+   *
+   * ⏪ **LO QUE HABÍA, medido:** `IsotipoV5` en `splash` usaba
+   * `avatarHogar` (**78**) — o sea **el tamaño de un avatar de ficha para
+   * el protagonista de la primera pantalla** — y `LogoV5` tenía un **200
+   * escrito a mano dentro de la pieza**. Los dos salen acá.
+   * ══════════════════════════════════════════════════════════════════ */
+  /** Cuánto del ancho de la pantalla ocupa la marca cuando PRESIDE. */
+  marcaProtagonistaFraccion: 0.5,
+  /** Cuánto ocupa en el splash, donde acompaña y no preside. */
+  marcaSplashFraccion: 0.34,
+  /** El logo en una cabecera: acá sí es un alto fijo — la cabecera tiene
+   *  su propia medida y la marca se para adentro. */
+  marcaCabeceraAncho: 120,
+
+  /* ══════════════════════════════════════════════════════════════════
    *  EL AIRE QUE TODA PANTALLA RAÍZ TIENE QUE DEJAR ABAJO
    *
    * 🔴 **NACE DE UN DEFECTO VISTO: `BotonAsistente` tapaba contenido.**

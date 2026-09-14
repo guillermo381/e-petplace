@@ -227,6 +227,7 @@ import { FichaMascotaHogar } from '../components/FichaMascotaHogar'
 import { ClipSesion } from '../components/ClipSesion'
 import { Icono, type IconoNombre } from '../components/Icono'
 import { NarizNotificacion } from '../brand/NarizNotificacion'
+import { BotonMarcaAjena } from '../components/BotonMarcaAjena'
 import { EsperaDeMarca } from '../brand/EsperaDeMarca'
 import { EsperaDeTrabajo } from '../brand/EsperaDeTrabajo'
 import { Guijarro } from '../brand/Guijarro'
@@ -3980,6 +3981,21 @@ function GaleriaInterna() {
                 ]}
               />
             </View>
+          </View>
+        </Seccion>
+
+        <Seccion titulo="⭐ GATE S116-B — ENTRAR CON UNA CUENTA AJENA · qué decide: (a) que el botón de Google se vea EXACTAMENTE como Google lo entrega —si algo se ve estirado, deformado o recoloreado, está mal y es un incumplimiento de sus guidelines, no una preferencia nuestra—; (b) que conviva con el CTA de la casa sin pelearle. Apple NO está y es correcto: su motor no existe, y un botón que no funciona no se muestra">
+          <View style={{ gap: spacing[4] }}>
+            <BotonMarcaAjena marca="google" etiqueta="Continuar con Google" onPress={() => {}} />
+            {/* 🔴 **Apple se monta acá y NO SE DIBUJA, a propósito.** Es la
+                prueba del mecanismo: la pantalla lo monta igual y la pieza
+                decide. Si algún día aparece un botón de Apple en esta fila
+                sin que nadie haya ingresado su asset, el mecanismo se
+                rompió. */}
+            <BotonMarcaAjena marca="apple" etiqueta="Continuar con Apple" onPress={() => {}} />
+            <Texto variante="apoyo">
+              Arriba hay UN botón, no dos: Apple está montado y no se dibuja porque no tiene asset.
+            </Texto>
           </View>
         </Seccion>
 
