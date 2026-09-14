@@ -138,16 +138,43 @@ worktree no hay llaves para bajarla. La vara 11 queda cumplida sobre el FLUJO y
 | 10 | sí | capturas de cada cambio, antes y después donde el cambio es visible. |
 | 11 | **sí, con un límite** | se USÓ: la última fila de la Despensa, la fila «Factura a», la galería, y el alta entera de punta a punta. **El límite: la foto del alta no es de Thor.** |
 
-## Lo que queda en mi cola
+## Lo que estaba en mi cola — las tres, curadas (firma de la mesa)
 
-1. **El monograma «T» del paso de la foto** — con la foto primero no hay nombre,
-   y el marco vacío dibuja la inicial de «tu mascota». Es consecuencia de mi
-   inversión y es mío.
-2. **El toast de dev `Cannot update a component (ConteoDeMontajes)`** — el
-   contador del pie de Cuenta que monté en el lote 3. Es `__DEV__`, no llega al
-   producto, pero ensucia toda captura.
-3. **Una vez abierto el editor de facturación no hay vuelta a la línea compacta**
-   (`editando` sólo va a `true`). Declarado, no curado: cambia un comportamiento
-   que el encargo no nombra.
-4. **Pedido a A:** marcar `creado_por_sistema` en la mascota «Thor» que creó la
-   corrida del alta, o infla todo censo de mascotas reales.
+1. ☠️ **El monograma «T» del paso de la foto.** Con la foto primero no hay nombre
+   y el monograma era la inicial de la palabra «tu». Ahora: `especie` **se pasa**
+   —sin ella el peldaño de `Personaje` de `AvatarMascota` no podía dispararse
+   aunque la especie se supiera— y sin nada que mostrar, **la nariz**
+   (`Personaje especie="otro"`, la del catálogo). *No se tocó la doctrina de
+   `AvatarMascota`: ahí el monograma es legítimo porque hay nombre; acá no lo
+   hay.*
+2. ☠️ **El toast `Cannot update a component (ConteoDeMontajes)`.** El shell
+   llamaba a `registrarProfundidad` dentro del render del `tabBar` y el módulo
+   avisaba **sincrónicamente**. Curado en el módulo y no en el llamador: *un
+   contrato que sólo es seguro si el llamador se acuerda de algo no es seguro, es
+   una convención.* `queueMicrotask` + coalescido.
+3. ☠️ **Del editor de facturación se vuelve.** Y la vuelta **restaura**, no sólo
+   colapsa: la sección avisa al padre en cada tecla, así que colapsar a secas
+   dejaría la línea compacta mostrando el perfil viejo con el checkout ya en el
+   nuevo. Voz: «Dejar los datos guardados» — el resultado, no el gesto.
+
+🔴 **Y una cura que me costó una corrida:** la sugerencia de raza era muda
+**también en el log**. En una de tres corridas no pre-seleccionó y no pude
+distinguir «falló» de «no disparó». Ahora habla bajo `__DEV__` con su razón
+exacta. *La mudez declarada es de la superficie; un instrumento que calla para
+quien lo depura no es discreto, es ciego.*
+
+⚠️ **La medición honesta de la sugerencia: 2 de 3 corridas pre-seleccionaron.**
+Es un modelo ⇒ **es una tendencia, no una garantía**, y la casa ya lo tiene
+escrito. El diseño lo aguanta: sin sugerencia queda el selector con
+autocompletado, que siempre fue el camino principal.
+
+## Lo que sigue abierto
+
+1. **Pedido a A:** marcar `creado_por_sistema` en las mascotas «Thor» que
+   crearon las corridas del alta (son **dos**), o inflan todo censo de mascotas
+   reales.
+2. **La hoja de atajos de B** — se monta cuando llegue su SHA; ahí decido qué
+   atajos van por pantalla.
+3. **El SHA de B para el ⑥** (02 con cuatro `FilaBeneficio`, `Confirmacion`,
+   `EsperaLarga`).
+4. **La barra «perdida»** — espera la captura y el dato del founder.
