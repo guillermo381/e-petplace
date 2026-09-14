@@ -406,6 +406,13 @@ export {
   type NombreDeIcono,
   type IconoRegistro,
 } from './components/Icono'
+
+/* S116-B · LA TRADUCCIÓN OFICIO → GLIFO, en un solo lugar. Nace de un
+   censo: hoy cada superficie escribe el nombre a mano —veinte lugares— y
+   una lo DERIVA del nombre del oficio, que coincide por accidente.
+   ⚠️ La jeringa NO está acá: `vacuna` es un acto clínico, no un oficio. */
+export { glifoDeOficio, esOficio, type Oficio } from './components/glifo-de-oficio'
+
 export { Guijarro, type GuijarroCapa } from './brand/Guijarro'
 export { BarrasSemana, type BarrasSemanaCapa } from './components/BarrasSemana'
 // ClipSesion — S63 (Ley 11, espec aprobada por el arquitecto): el clip
