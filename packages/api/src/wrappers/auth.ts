@@ -521,7 +521,16 @@ export interface InputRegistrarse {
  * una familia.
  */
 function resolverMetodo<T>(obj: Record<string, unknown>, nombre: string): T | null {
-  if (typeof obj[nombre] === 'function') return (obj[nombre] as unknown as T);
+  /* 🔴 EL `bind` NO ES DECORACIÓN — su ausencia fue el defecto que C midió.
+     La primera versión devolvía `obj[nombre]` **suelto**, y `obj[nombre]` lee
+     POR LA CADENA DE PROTOTIPOS: encontraba el método del prototipo, lo
+     devolvía sin receptor, y la rama de abajo —la única que bindeaba— no se
+     ejecutaba nunca. Al invocarlo, `supabase-js` perdía su `this` y reventaba
+     sobre su propio estado (`'storage' of undefined`).
+     *La cura cambió un modo de falla por otro y el camino siguió roto.* */
+  if (typeof obj[nombre] === 'function') {
+    return (obj[nombre] as (...a: unknown[]) => unknown).bind(obj) as unknown as T;
+  }
   let p: object | null = Object.getPrototypeOf(obj) as object | null;
   while (p !== null) {
     const d = Object.getOwnPropertyDescriptor(p, nombre);
@@ -590,11 +599,31 @@ export async function registrarse(
     };
   }
 
-  const { data, error } = await signUp({
-    email: normalizarEmail(input.email),
-    password: input.password,
-    options: { data: { nombre: input.nombre } },
-  });
+  /* 🔴 EL GUARD DE PRESENCIA NO ALCANZA: verifica que el método ESTÉ, no que se
+     pueda INVOCAR. C midió la diferencia en el aparato — el método estaba y
+     reventaba igual, porque llegaba sin receptor. Se captura sólo `TypeError`,
+     que es la firma de «el motor se rompió sobre su propio estado»: un fallo de
+     red o de credenciales NO lanza, viene en `error` y sigue su camino normal.
+     Cualquier otra excepción se re-lanza: tapar lo que no se entiende es cómo
+     un rebote tipado se convierte en un silencio. */
+  let respuesta: Awaited<ReturnType<typeof signUp>>;
+  try {
+    respuesta = await signUp({
+      email: normalizarEmail(input.email),
+      password: input.password,
+      options: { data: { nombre: input.nombre } },
+    });
+  } catch (e) {
+    if (e instanceof TypeError) {
+      return {
+        ok: false,
+        codigo: 'motor_de_alta_ausente',
+        mensaje: MENSAJES_ERROR_AUTH.motor_de_alta_ausente,
+      };
+    }
+    throw e;
+  }
+  const { data, error } = respuesta;
 
   if (error) return mapeoErrorAuth(error.code, error.message);
   if (!data.user) return mapeoErrorAuth(undefined, 'datos_inconsistentes');
