@@ -463,10 +463,11 @@ function camposDe(
           centro —la rueda de caras— y dos círculos compitiendo por el medio de
           una pantalla de espera es exactamente el descentrado que el founder
           nombró en el paso del alta. */}
+      {/* El inset lo paga el montaje (ver la nota larga en `PasoFoto`). Acá la
+          pantalla ya vive dentro de su `SafeAreaView`, así que sólo hace falta
+          dejarla crecer. */}
       {fase.t === 'leyendo' && (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing[5] }}>
-          <EsperaLarga titulo={t('carnet.esperaTitulo')} apoyo={t('carnet.espera')} />
-        </View>
+        <EsperaLarga titulo={t('carnet.esperaTitulo')} apoyo={t('carnet.espera')} />
       )}
 
       {/* B3 · fallos con voz y salida — la foto JAMÁS desaparece */}

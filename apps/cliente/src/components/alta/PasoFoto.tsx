@@ -25,7 +25,7 @@
 import { useRef, useState } from 'react';
 import { useSharedValue } from 'react-native-reanimated';
 import { View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   AvatarMascota,
   Boton,
@@ -209,10 +209,22 @@ export function PasoFoto({
           persona no lee «dos pantallas»: lee «esto no es el mismo producto»*.
           **Centrada, con su título propio**, y sin pie: de esta espera no se
           sale — la identificación termina sola y avanza. */}
+      {/* ⚠️ **El contenedor sólo da el alto: `EsperaLarga` se acomoda sola.**
+          Es `flex: 1` con el título arriba y la rueda centrada en lo que sobra
+          —su propio comentario lo dice—, así que **un `alignItems`/`padding`
+          de afuera no la centra más: la pelea.** *Centrar algo que ya se
+          centra es la forma de descentrarlo.* */}
       {mirando ? (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing[5] }}>
+        <SafeAreaView edges={['top']} style={{ flex: 1 }}>
+          {/* 🔴 **EL INSET LO PAGA EL MONTAJE, no la pieza.** Medido en el emulador:
+          `EsperaLarga` es `flex: 1` con `paddingVertical` propio y **sin inset
+          de seguridad** —correcto, porque no sabe si la monta una pantalla con
+          cabecera o una a sangre— así que a pantalla completa **su título se
+          metía debajo del reloj**. *Un padding no es un inset: uno es aire de
+          composición y el otro es lo que el aparato se reserva.* Lo pone quien
+          la coloca, que es el único que sabe que acá va a sangre. */}
           <EsperaLarga titulo={t('alta.mirandoTitulo')} apoyo={t('alta.mirandoApoyo')} />
-        </View>
+        </SafeAreaView>
       ) : (
       <HojaContenido
         arranque={cabecera.arranque}

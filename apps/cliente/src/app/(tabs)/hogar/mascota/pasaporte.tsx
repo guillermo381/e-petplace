@@ -213,7 +213,10 @@ export default function Pasaporte() {
              Acá el servidor firma un token y arma el QR; la pantalla no tiene
              nada que ofrecer mientras tanto. *Es el mismo hecho que el carné y
              que el pago, y por eso lleva la misma pieza.* */
-          <View style={{ alignItems: 'center', paddingVertical: spacing[8] }}>
+          <View style={{ height: 420 }}>
+            {/* Alto explícito: acá la espera vive DENTRO de un scroll, y una
+                pieza `flex: 1` adentro de un contenedor sin alto colapsa a
+                cero. *El número es de este montaje, no de la pieza.* */}
             <EsperaLarga titulo={t('pasaporte.generandoTitulo')} apoyo={t('pasaporte.generandoApoyo')} />
           </View>
         ) : (

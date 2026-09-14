@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import {
   Boton,
   Cabecera,
@@ -178,17 +178,16 @@ export function PasoCarnet({
      puede cumplir.* */
   if (fase.t === 'leyendo') {
     return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: theme.bg.base,
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: spacing[5],
-        }}
-      >
+      <SafeAreaView edges={['top']} style={{ flex: 1 }}>
+        {/* 🔴 **EL INSET LO PAGA EL MONTAJE, no la pieza.** Medido en el emulador:
+          `EsperaLarga` es `flex: 1` con `paddingVertical` propio y **sin inset
+          de seguridad** —correcto, porque no sabe si la monta una pantalla con
+          cabecera o una a sangre— así que a pantalla completa **su título se
+          metía debajo del reloj**. *Un padding no es un inset: uno es aire de
+          composición y el otro es lo que el aparato se reserva.* Lo pone quien
+          la coloca, que es el único que sabe que acá va a sangre. */}
         <EsperaLarga titulo={t('alta.carnetLeyendo')} apoyo={t('alta.carnetLeyendoDetalle')} />
-      </View>
+      </SafeAreaView>
     )
   }
 
