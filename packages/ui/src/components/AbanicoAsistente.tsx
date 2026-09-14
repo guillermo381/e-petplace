@@ -137,6 +137,20 @@ function FilaDelAbanico({
 }
 
 export function AbanicoAsistente({ atajos, vozPreguntar, onPreguntar, onCerrar }: AbanicoAsistenteProps) {
+  /* 🔴 **TODA FILA CIERRA ANTES DE DELEGAR — `D-1116`, y la cura va ACÁ y no
+     en el padre por una razón de forma:** cuando el que envuelve es el padre,
+     **hay que acordarse de envolver cada lista nueva**, y el que no se acuerde
+     no rompe nada visible — deja el abanico abierto encima de la pantalla a la
+     que acaba de llevar. Envolviendo en el abanico, *una fila que no cierre se
+     vuelve inexpresable*: no hay forma de agregar una sin que pase por acá.
+     ⚠️ **Y el orden importa: cierra PRIMERO y navega DESPUÉS.** Al revés, la
+     navegación desmonta el abanico y el `setState` del cierre cae sobre un
+     componente que ya no está. */
+  const cerrarYLuego = (accion: () => void) => () => {
+    onCerrar()
+    accion()
+  }
+
   /* 🔴 **EL VELO ES EL QUE CIERRA, y ocupa la pantalla entera.** *«Se cierran
      tocando fuera»* sólo se puede cumplir si «fuera» es tocable — un
      contenedor del tamaño del abanico dejaría el resto de la pantalla sin
@@ -167,7 +181,7 @@ export function AbanicoAsistente({ atajos, vozPreguntar, onPreguntar, onCerrar }
             final, que es como se lee «y además, preguntá».* */}
         <FilaDelAbanico
           texto={vozPreguntar}
-          onPress={onPreguntar}
+          onPress={cerrarYLuego(onPreguntar)}
           demora={atajos.length * motion.coach.escalonadoMs}
         />
         {atajos.map((a, i) => (
@@ -175,7 +189,7 @@ export function AbanicoAsistente({ atajos, vozPreguntar, onPreguntar, onCerrar }
             key={a.texto}
             texto={a.texto}
             glifo={a.glifo}
-            onPress={a.onPress}
+            onPress={cerrarYLuego(a.onPress)}
             /* El de más abajo —el más cerca del dedo— sale primero. */
             demora={(atajos.length - 1 - i) * motion.coach.escalonadoMs}
           />

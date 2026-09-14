@@ -1,13 +1,12 @@
 import { type ReactNode } from 'react'
-import { Pressable, View, type ViewStyle } from 'react-native'
-import Animated from 'react-native-reanimated'
+import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import { BarraPasos } from './BarraPasos'
 import { Chevron } from './chevron'
+import { DiscoVidrio } from './DiscoVidrio'
 import { GlifoConContador } from './GlifoConContador'
 import { Texto } from './Texto'
-import { usePresionado } from './usePresionado'
 import { palette } from '../tokens/palette'
 import { medidas } from '../tokens/medidas'
 import { radius } from '../tokens/radius'
@@ -101,40 +100,6 @@ export type CabeceraProps = {
    * Quien la monta como fondo es `HojaContenido`, que sabe que hay una
    * hoja encima. */
   presentacion?: 'tarjeta' | 'fondo'
-}
-
-/** El círculo translúcido de las acciones sobre la banda. Vive acá porque
- *  es geometría de ESTA pieza: un disco de vidrio sobre ciruela. */
-function DiscoVidrio({ children, onPress, etiqueta }: { children: ReactNode; onPress?: () => void; etiqueta?: string }) {
-  const { handlers, estiloPresionado } = usePresionado(0.97)
-  const caja: ViewStyle = {
-    width: medidas.cabeceraEmpujada.flecha,
-    height: medidas.cabeceraEmpujada.flecha,
-    borderRadius: radius.chipV5,
-    backgroundColor: 'rgba(255,255,255,.16)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  }
-  if (onPress === undefined) return <View style={caja}>{children}</View>
-  /* ⚠️ El `estiloPresionado` va en un `Animated.View` y NO en el `style` del
-     `Pressable`: ahí compila en `packages/ui` y **rompe el typecheck de
-     `apps/prestador`** (su `ViewStyle` no acepta los campos de transición
-     de Reanimated). Es el molde que `Boton` ya usa. *Segunda vez en este
-     lote que un tipo pasa en el paquete y falla en la app — el typecheck de
-     `packages/ui` NO alcanza para una pieza nueva.* */
-  return (
-    <Animated.View style={[caja, estiloPresionado]}>
-      <Pressable
-        {...handlers}
-        onPress={onPress}
-        accessibilityRole="button"
-        accessibilityLabel={etiqueta}
-        style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}
-      >
-        {children}
-      </Pressable>
-    </Animated.View>
-  )
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -288,7 +253,9 @@ export function Cabecera({
   )
 }
 
-/** El disco de vidrio, exportado para que quien monte la acción derecha use
- *  EL de la cabecera y no dibuje otro (el molde de R57: la superficie es
- *  UNA). */
+/** ☠️ **ALIAS CON FECHA DE MUERTE.** La puerta del disco es la pieza
+ *  `DiscoVidrio`, exportada desde el índice y con entrada de catálogo.
+ *  Esto queda para no romper las ramas que ya lo montan así, y **se retira
+ *  cuando su último consumidor migre** — *dos puertas al mismo disco son
+ *  exactamente lo que produjo la copia que esta pieza vino a borrar.* */
 Cabecera.Disco = DiscoVidrio

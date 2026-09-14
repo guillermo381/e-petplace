@@ -120,6 +120,20 @@ La banda ciruela de arriba. **Va en TODAS las pantallas del cliente**, no solo e
 - **captura:** `docs/loop/capturas-s116-b-lote2/piezas-v5-montadas.png`
 - ⚠️ **El degradado lo resuelve el TEMA, no un `if memorial`** — memorial cae a ciruela noche plana solo.
 
+### `DiscoVidrio`
+El círculo translúcido de las acciones **sobre la banda ciruela** (la flecha de volver, el carrito).
+- **props:** `children` · `onPress?` · `etiqueta?`
+- **tokens:** `medidas.cabeceraEmpujada.flecha` · `radius.chipV5` · blanco al 16 %
+- **consumidores:** 0
+- ⚠️ **Y EL CERO ES EL DATO, no un olvido:** `Cabecera` la monta *dentro de `packages/ui`*, que no cuenta como consumidor. **Deja de ser cero el día que el carrito de la Despensa migre de su copia a esta pieza** — que es exactamente lo que esta entrada existe para habilitar.
+- 🔴 **NACE COMO PIEZA (lote 12) PORQUE ESTAR EXPUESTO NO ALCANZÓ.** Vivía dentro de `Cabecera.tsx` y desde el lote 2 estaba disponible como `Cabecera.Disco`, **con un comentario que pedía literalmente lo que después pasó** —*«que quien monte la acción derecha use EL de la cabecera y no dibuje otro»*—. **C lo copió igual** para el carrito de la Despensa.
+
+  > **Exponer no es publicar.** Una propiedad estática no entra al índice del paquete, no tiene entrada de catálogo, no tiene fila en la galería y no aparece en un autocompletado de `@epetplace/ui`. **Para quien no leyó ese archivo es indistinguible de una pieza privada** — y la salida barata siempre es volver a dibujarla.
+
+- ⚠️ **SU MATERIAL EXIGE CIRUELA DEBAJO:** es blanco al 16 %, así que sobre lienzo no se ve. **Montarlo en fondo claro no lo muestra mal: lo muestra ausente.** Quien lo necesite sobre una superficie clara está buscando otra pieza.
+- ⚠️ **Sin `onPress` es CONTENEDOR** (no anuncia toque ni toma rol); con `onPress` es botón y **la etiqueta deja de ser opcional en la práctica**.
+- ☠️ **`Cabecera.Disco` queda como alias** y **muere cuando su último consumidor migre**: *dos puertas al mismo disco son exactamente lo que produjo la copia que esta pieza vino a borrar.*
+
 ### `BotonAsistente`
 El botón flotante que abre NEXO. Va en **toda raíz**.
 - **props:** `onPress` · `visible` · `etiqueta`
