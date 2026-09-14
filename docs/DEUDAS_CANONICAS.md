@@ -34641,6 +34641,20 @@ if (typeof obj[nombre] === 'function') return obj[nombre];   // ← sin bind
 
 **Sus dos rojos, probados quitando cada mitad:** sin `bind` → exit 1 nombrando el retorno culpable; sin el `catch` → exit 1 diciendo que la invocación no está guardada.
 
+### ⊳ TERCERA VUELTA Y ÚLTIMA (13-sep-2026) — **EL RESOLVEDOR ERA LA CAUSA. SE RETIRA.**
+
+C lo acotó y no dejó lugar: **el servidor responde 200** · **`signInWithPassword` funciona llamándose directo** · **lo único distinto en el camino roto era `resolverMetodo`**.
+
+⇒ **`registrarse` llama `clienteAuth.signUp(...)` directo, igual que el login** — el camino que se sabe sano. **`resolverMetodo()` se retira con lápida**, en el mismo acto que su último consumidor (`L-395`).
+
+> *La primera vuelta devolvía el método suelto y rompía el `this`; la segunda lo bindeó y el camino siguió sin funcionar.* **Un intermediario que hay que arreglar dos veces para hacer lo que una llamada directa hace sola no es una cura: es el defecto.**
+
+**El guard de invocación QUEDA como red** (`TypeError` → `motor_de_alta_ausente` con voz de familia). No cuesta nada y cubre el día que el motor se rompa sobre su propio estado por otra razón.
+
+**Y `verify:auth-receptor` sigue en pie, midiendo donde quede:** hoy declara *«sin resolvedor intermedio: la llamada es directa»* —que es la forma sana— y **mantiene armado su brazo del `bind` para el día que alguien vuelva a meter un intermediario**. Sus dos rojos, reprobados sobre esta versión: un resolvedor sin `bind` → exit 1; sin el `catch` → exit 1.
+
+⚠️ **Lo que esta ficha deja como método, y es lo que costó tres vueltas:** *una cura que no se puede ejercer se verifica sola en el papel.* Las dos primeras pasaron typecheck y gates, y estaban rotas. **Lo único que las cazó fue invocarlas en el aparato** — y eso lo hizo C, no yo.
+
 **☠️ MUERTE:** C crea una cuenta real y llega al alta de mascota.
 
 

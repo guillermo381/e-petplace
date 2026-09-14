@@ -509,38 +509,21 @@ export interface InputRegistrarse {
   urlLegalMostrada?: string;
 }
 
-/**
- * `D-1098` — RESUELVE UN MÉTODO DEL CLIENTE DE AUTH SIN CONFIAR EN LA INSTANCIA.
- *
- * Mira la instancia y después **toda la cadena de prototipos**. En un objeto
- * sano el primer paso acierta y esto no cambia nada; el resto existe para el
- * caso medido por C, donde `signUp` no estaba donde tiene que estar.
- *
- * Devuelve `null` en vez de lanzar: **quien llama decide cómo lo dice**, y ese
- * es todo el punto — un `undefined is not a function` no se le puede mostrar a
- * una familia.
- */
-function resolverMetodo<T>(obj: Record<string, unknown>, nombre: string): T | null {
-  /* 🔴 EL `bind` NO ES DECORACIÓN — su ausencia fue el defecto que C midió.
-     La primera versión devolvía `obj[nombre]` **suelto**, y `obj[nombre]` lee
-     POR LA CADENA DE PROTOTIPOS: encontraba el método del prototipo, lo
-     devolvía sin receptor, y la rama de abajo —la única que bindeaba— no se
-     ejecutaba nunca. Al invocarlo, `supabase-js` perdía su `this` y reventaba
-     sobre su propio estado (`'storage' of undefined`).
-     *La cura cambió un modo de falla por otro y el camino siguió roto.* */
-  if (typeof obj[nombre] === 'function') {
-    return (obj[nombre] as (...a: unknown[]) => unknown).bind(obj) as unknown as T;
-  }
-  let p: object | null = Object.getPrototypeOf(obj) as object | null;
-  while (p !== null) {
-    const d = Object.getOwnPropertyDescriptor(p, nombre);
-    if (d !== undefined && typeof d.value === 'function') {
-      return (d.value as (...a: unknown[]) => unknown).bind(obj) as unknown as T;
-    }
-    p = Object.getPrototypeOf(p) as object | null;
-  }
-  return null;
-}
+/* ⏪ ACÁ VIVIÓ `resolverMetodo()` — `D-1098`, primera y segunda vuelta.
+   Buscaba `signUp` en la instancia y en la cadena de prototipos porque el
+   método parecía ausente. **Se retira: era él la causa.**
+
+   La tercera medición de C lo acotó y no dejó lugar: el servidor responde
+   **200**, `signInWithPassword` **funciona llamándose directo**, y lo único
+   distinto en el camino roto era este resolvedor. *La primera vuelta devolvía
+   el método suelto y rompía el `this`; la segunda lo bindeó y el camino siguió
+   sin funcionar. Un intermediario que hay que arreglar dos veces para hacer lo
+   que una llamada directa hace sola no es una cura: es el defecto.*
+
+   ⇒ `registrarse` llama `clienteAuth.signUp(...)` **igual que el login**, que
+   es el camino que se sabe sano. Se retira en el mismo acto que su último
+   consumidor (L-395: un puente que sobrevive a su río manda al próximo a
+   construir otro). */
 
 /** Alta email+password. El trigger handle_new_user crea el profile con
  *  raw_user_meta_data.nombre. Si el proyecto exige confirmación de email,
@@ -580,24 +563,7 @@ export async function registrarse(
      ② si no está en ninguna parte, **rebota tipado en vez de romper**, y se
         lleva puesto el modo de falla mudo: la pantalla puede decir algo.
      *No se inventa una causa para poder escribir una cura.* */
-  const clienteAuth = getClient().auth as unknown as Record<string, unknown>;
-  const signUp = resolverMetodo<
-    (c: { email: string; password: string; options?: { data?: Record<string, unknown> } }) => Promise<{
-      data: {
-        user: { id: string; email?: string | null; user_metadata?: Record<string, unknown> } | null;
-        session: unknown | null;
-      };
-      error: { code?: string; message: string } | null;
-    }>
-  >(clienteAuth, 'signUp');
-
-  if (signUp === null) {
-    return {
-      ok: false,
-      codigo: 'motor_de_alta_ausente',
-      mensaje: MENSAJES_ERROR_AUTH.motor_de_alta_ausente,
-    };
-  }
+  const clienteAuth = getClient().auth;
 
   /* 🔴 EL GUARD DE PRESENCIA NO ALCANZA: verifica que el método ESTÉ, no que se
      pueda INVOCAR. C midió la diferencia en el aparato — el método estaba y
@@ -606,9 +572,9 @@ export async function registrarse(
      red o de credenciales NO lanza, viene en `error` y sigue su camino normal.
      Cualquier otra excepción se re-lanza: tapar lo que no se entiende es cómo
      un rebote tipado se convierte en un silencio. */
-  let respuesta: Awaited<ReturnType<typeof signUp>>;
+  let respuesta: Awaited<ReturnType<typeof clienteAuth.signUp>>;
   try {
-    respuesta = await signUp({
+    respuesta = await clienteAuth.signUp({
       email: normalizarEmail(input.email),
       password: input.password,
       options: { data: { nombre: input.nombre } },
