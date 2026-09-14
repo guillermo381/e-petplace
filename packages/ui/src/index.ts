@@ -26,6 +26,20 @@ export { BotonMarcaAjena, type BotonMarcaAjenaProps, type MarcaAjena } from './c
 export { BotonAsistente, type BotonAsistenteProps } from './components/BotonAsistente'
 export { BadgeFecha, type BadgeFechaProps } from './components/BadgeFecha'
 export { BarraPasos, type BarraPasosProps } from './components/BarraPasos'
+/* ══ S116-B · LA ESTRUCTURA NUEVA (firma de la mesa) ══════════════════
+   El ciruela deja de ser una TARJETA y pasa a ser el FONDO de la pantalla;
+   el contenido vive en una HOJA del color del lienzo que se apoya encima y
+   sube con el scroll. `HojaContenido` pinta el degradado y monta la
+   cabecera como fondo — **la cabecera no cambia props**, le pasa
+   `presentacion="fondo"` la pieza. Y los accesos de `FilaAccionesCostura`
+   pisan la costura: media mitad sobre el ciruela, media sobre la hoja. */
+export { HojaContenido, type HojaContenidoProps } from './components/HojaContenido'
+export {
+  FilaAccionesCostura,
+  type FilaAccionesCosturaProps,
+  type AccesoCostura,
+} from './components/FilaAccionesCostura'
+
 export { Cabecera, type CabeceraProps , ALTO_CABECERA_RAIZ_FIJO, ALTO_CABECERA_EMPUJADA_FIJO } from './components/Cabecera'
 export { Opcion, type OpcionProps, type OpcionItem } from './components/Opcion'
 export { IsotipoV5, LogoV5, type SobreFondo, type TamanoMarca } from './brand/Marca'

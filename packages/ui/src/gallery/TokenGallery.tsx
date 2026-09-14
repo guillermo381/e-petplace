@@ -228,6 +228,8 @@ import { ClipSesion } from '../components/ClipSesion'
 import { Icono, type IconoNombre } from '../components/Icono'
 import { NarizNotificacion } from '../brand/NarizNotificacion'
 import { BotonMarcaAjena } from '../components/BotonMarcaAjena'
+import { HojaContenido } from '../components/HojaContenido'
+import { FilaAccionesCostura } from '../components/FilaAccionesCostura'
 import { EsperaDeMarca } from '../brand/EsperaDeMarca'
 import { EsperaDeTrabajo } from '../brand/EsperaDeTrabajo'
 import { Guijarro } from '../brand/Guijarro'
@@ -3981,6 +3983,33 @@ function GaleriaInterna() {
                 ]}
               />
             </View>
+          </View>
+        </Seccion>
+
+        <Seccion titulo="⭐ GATE S116-B — LA HOJA SOBRE EL FONDO · qué decide, y es lo único que importa acá: (a) que al scrollear se SIENTA que la hoja está ENCIMA del ciruela y no que son dos bloques apilados; (b) que el fondo se desvanezca a medida que lo tapan, no antes ni después; (c) que al soltar NO rebote; (d) que los accesos de la costura se lean sobre las DOS superficies. ⚠️ Se juzga SCROLLEANDO — quieta, esta sección no prueba nada">
+          <View style={{ height: 420, borderRadius: radius.lg, overflow: 'hidden' }}>
+            <HojaContenido
+              fondo={<Cabecera variante="raiz" presentacion="fondo" antetitulo="SÁBADO 13" titulo="Hola, Guillermo" apoyo="Thor está al día." />}
+              arranque={150}
+              costura={
+                <FilaAccionesCostura
+                  accesos={[
+                    { clave: 'a', palabra: 'Agendar', icono: <Icono nombre="hoy" tamano={26} registro="tinta" montaje="control" />, onPress: () => {} },
+                    { clave: 'b', palabra: 'Carné', icono: <Icono nombre="carnet" tamano={26} registro="tinta" montaje="control" />, onPress: () => {} },
+                    { clave: 'c', palabra: 'Tienda', icono: <Icono nombre="despensa" tamano={26} registro="tinta" montaje="control" />, onPress: () => {} },
+                  ]}
+                />
+              }
+            >
+              <View style={{ paddingHorizontal: spacing[5], gap: spacing[3] }}>
+                {Array.from({ length: 8 }, (_, i) => (
+                  <Tarjeta key={i} elevacion="plana">
+                    <Texto variante="seccion">Fila {i + 1}</Texto>
+                    <Texto variante="apoyo">Scrolleá: la hoja sube y el fondo se apaga detrás.</Texto>
+                  </Tarjeta>
+                ))}
+              </View>
+            </HojaContenido>
           </View>
         </Seccion>
 

@@ -1,0 +1,158 @@
+/**
+ * HojaContenido — LA HOJA QUE SE APOYA SOBRE EL FONDO.
+ *
+ * ══════════════════════════════════════════════════════════════════════
+ * EL CAMBIO DE ESTRUCTURA, en una línea: **el ciruela deja de ser una
+ * tarjeta y pasa a ser el FONDO de la pantalla.** El contenido vive en una
+ * hoja del color del lienzo, con las dos esquinas de arriba redondeadas,
+ * apoyada encima. Firma de la mesa.
+ * ══════════════════════════════════════════════════════════════════════
+ *
+ * ── QUIÉN PINTA QUÉ, que es la decisión que ordena todo lo demás ──────
+ * **El degradado lo pinta ESTA pieza, no la `Cabecera`.** Parece un
+ * detalle de implementación y no lo es: la orden pide que al scrollear
+ * *«el fondo se queda y su CONTENIDO se desvanece»*. Si el degradado
+ * viniera dentro del nodo que se desvanece, **se desvanecería con él** y
+ * la pantalla quedaría blanca detrás de la hoja.
+ * ⇒ acá: el degradado es la superficie; `fondo` es lo que va ENCIMA de
+ * ella (la `Cabecera` en `presentacion="fondo"`), y **sólo eso** se apaga.
+ *
+ * ── EL MOVIMIENTO, y por qué pasa L-c ─────────────────────────────────
+ * *«si al quitar la animación dice lo mismo, sobraba.»* Acá no dice lo
+ * mismo: **sin el deslizamiento, la hoja y el fondo se leen como dos
+ * bloques apilados; con él, se lee que uno está ENCIMA del otro y que el
+ * de abajo sigue ahí.** El movimiento es la única forma de comunicar
+ * profundidad en una superficie plana — no adorna el scroll, lo explica.
+ *
+ * **NO REBOTA, y es de la orden:** `bounces={false}` + `overScrollMode`.
+ * *Una hoja que rebota al soltar se comporta como una tarjeta suelta; ésta
+ * está apoyada, y lo apoyado no rebota.*
+ *
+ * ⚠️ **EL DESVANECIDO SE ACOPLA AL SCROLL, no a un `withTiming`.** Va por
+ * `interpolate` sobre la posición: la opacidad es **una función de dónde
+ * está la hoja**, no una animación que se dispara. *Una transición
+ * temporal se desincroniza del dedo en cuanto alguien scrollea rápido, y
+ * entonces el fondo se apaga cuando ya no lo tapa nada.*
+ *
+ * ⚠️ **`useReducedMotion`: la hoja SIGUE SUBIENDO** —eso es el scroll, no
+ * una animación— y lo que se apaga es el **desvanecido** del fondo, que
+ * pasa a ser instantáneo al llegar al tope. *Quitar el scroll dejaría la
+ * pantalla inservible; quitar el fundido no le saca información a nadie.*
+ */
+
+import { type ReactNode } from 'react'
+import { View, type ScrollViewProps } from 'react-native'
+import Animated, {
+  Extrapolation,
+  interpolate,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+} from 'react-native-reanimated'
+import { LinearGradient } from 'expo-linear-gradient'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
+import { radius } from '../tokens/radius'
+import { spacing } from '../tokens/spacing'
+import { useTheme } from '../ThemeProvider'
+
+/** Cuánto scroll hace falta para que el fondo termine de desvanecerse.
+ *  **Es una distancia, no un tiempo**, porque el desvanecido se acopla al
+ *  dedo (ver arriba). Sale del alto de la cabecera raíz: el fondo termina
+ *  de apagarse justo cuando la hoja lo terminó de tapar. */
+const RECORRIDO_DEL_FUNDIDO = 120
+
+export interface HojaContenidoProps {
+  /** Lo que se ve DETRÁS de la hoja — típicamente una `Cabecera` con
+   *  `presentacion="fondo"`. **Es lo único que se desvanece**; el
+   *  degradado lo pinta esta pieza y se queda. */
+  fondo: ReactNode
+  /** Los accesos que pisan la costura (`FilaAccionesCostura`). Van entre
+   *  el fondo y la hoja, **montados por esta pieza y no por la pantalla**:
+   *  su posición depende de dónde arranca la hoja, que es un dato de acá. */
+  costura?: ReactNode
+  /** Dónde arranca la hoja sin scroll. Si no se pasa, la hoja se apoya
+   *  justo debajo del fondo — que es lo que «la altura que la cabecera
+   *  pide» significa cuando nadie la mide. */
+  arranque?: number
+  children: ReactNode
+  /** Para que la pantalla pueda pasar `refreshControl`, `onScroll` propio
+   *  o `contentContainerStyle`. **No incluye `bounces`**: ésa la fija la
+   *  pieza (ver arriba) y dejarla abierta permitiría el rebote que la
+   *  orden prohíbe. */
+  scroll?: Omit<ScrollViewProps, 'bounces' | 'overScrollMode' | 'onScroll'>
+}
+
+export function HojaContenido({ fondo, costura, arranque, children, scroll }: HojaContenidoProps) {
+  const { theme } = useTheme()
+  const insets = useSafeAreaInsets()
+  const sinMovimiento = useReducedMotion()
+  const y = useSharedValue(0)
+
+  const alScrollear = useAnimatedScrollHandler((e) => {
+    y.value = e.contentOffset.y
+  })
+
+  /* El fondo se apaga a medida que la hoja lo tapa. `clamp` para que el
+     over-scroll hacia abajo no lo vuelva a encender más allá de 1. */
+  const estiloFondo = useAnimatedStyle(() => ({
+    opacity: sinMovimiento
+      ? y.value > 0 ? 0 : 1
+      : interpolate(y.value, [0, RECORRIDO_DEL_FUNDIDO], [1, 0], Extrapolation.CLAMP),
+  }))
+
+  return (
+    <View style={{ flex: 1 }}>
+      {/* ① LA SUPERFICIE. El degradado del tema, a pantalla completa.
+          Memorial resuelve plano solo —`gradients.memorialPlano` lleva el
+          mismo color en los dos stops— así que acá no hay rama por tema. */}
+      <LinearGradient
+        colors={theme.accent.gradient.colors as unknown as readonly [string, string, ...string[]]}
+        locations={theme.accent.gradient.locations as unknown as readonly [number, number, ...number[]]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0.2, y: 1 }}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      />
+
+      {/* ② EL CONTENIDO DEL FONDO — lo único que se desvanece. */}
+      <Animated.View style={[{ position: 'absolute', top: 0, left: 0, right: 0 }, estiloFondo]}>
+        {fondo}
+      </Animated.View>
+
+      {/* ③ LA HOJA. Sube con el scroll y desliza sobre el fondo: no la
+          movemos nosotros —eso duplicaría el scroll— la mueve su propio
+          `paddingTop`, que es contenido del ScrollView. */}
+      <Animated.ScrollView
+        onScroll={alScrollear}
+        scrollEventThrottle={16}
+        bounces={false}
+        overScrollMode="never"
+        showsVerticalScrollIndicator={false}
+        {...scroll}
+      >
+        <View style={{ height: arranque }} />
+        <View
+          style={{
+            minHeight: 400,
+            /* El LIENZO de la letra §2 (`#F8F2F6`), que es el slot
+               `bg.base` — la hoja es del color del lienzo, no blanca. */
+            backgroundColor: theme.bg.base,
+            borderTopLeftRadius: radius.cabeceraV5,
+            borderTopRightRadius: radius.cabeceraV5,
+            paddingBottom: insets.bottom + spacing[6],
+          }}
+        >
+          {/* ④ LA COSTURA. Los accesos van acá adentro y desplazados
+              hacia arriba: **la mitad superior pisa el ciruela y la
+              inferior la hoja**, que es lo que la orden pide. Viven en el
+              flujo de la hoja y no en absoluto, así que **suben con ella**
+              — un absoluto se quedaría clavado y la costura se despegaría
+              de su borde al primer scroll. */}
+          {costura}
+          {children}
+        </View>
+      </Animated.ScrollView>
+    </View>
+  )
+}

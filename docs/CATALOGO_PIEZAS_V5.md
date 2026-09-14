@@ -15,11 +15,46 @@
 
 ---
 
+## ⓪ LA ESTRUCTURA — cómo se arma una pantalla
+
+> 🔴 **Cambió en S116-B y cambia TODA pantalla: el ciruela dejó de ser una tarjeta y pasó a ser el FONDO.** El contenido vive en una **hoja del color del lienzo** que se apoya encima y sube con el scroll.
+
+```tsx
+<HojaContenido
+  fondo={<Cabecera variante="raiz" presentacion="fondo" titulo={…} />}
+  costura={<FilaAccionesCostura accesos={[…]} />}
+  arranque={150}
+>
+  {tu contenido}
+</HojaContenido>
+```
+
+### `HojaContenido`
+- **props:** `fondo` · `costura` · `arranque` · `scroll` · `children`
+- **tokens:** `radius.cabeceraV5` · `theme.bg.base` (el lienzo) · `theme.accent.gradient`
+- **consumidores:** 0
+- 🔴 **EL DEGRADADO LO PINTA ESTA PIEZA, no la `Cabecera`** — y no es un detalle de implementación: al scrollear *«el fondo se queda y su CONTENIDO se desvanece»*. **Si el degradado viniera dentro del nodo que se desvanece, se apagaría con él** y la pantalla quedaría blanca detrás de la hoja.
+- ⚠️ **El desvanecido se acopla al SCROLL, no a un `withTiming`:** la opacidad es una función de **dónde está la hoja**. *Una transición temporal se desincroniza del dedo en cuanto alguien scrollea rápido, y el fondo se apaga cuando ya no lo tapa nada.*
+- ⚠️ **No rebota**, y la pieza no te deja cambiarlo (`bounces` no está en `scroll`). *Una hoja que rebota al soltar se comporta como una tarjeta suelta; ésta está apoyada.*
+- ⚠️ Con `useReducedMotion` **la hoja sigue subiendo** —eso es el scroll— y lo que se apaga es el fundido. *Quitar el scroll dejaría la pantalla inservible; quitar el fundido no le saca información a nadie.*
+
+### `FilaAccionesCostura`
+- **props:** `accesos[]` (`clave` · `icono` · `palabra` · `onPress`)
+- **tokens:** `medidas.margen` · `theme.elevacion.elevada` · `theme.bg.card`
+- **consumidores:** 0
+- 🔴 **De DOS a CUATRO.** Con uno no hay fila (es un botón); con cinco los círculos bajan del área táctil.
+- 🔴 **UNA palabra por acceso. Si necesita dos, el círculo NO crece: se cambia la palabra.** La pieza la dibuja en **una línea con `numberOfLines={1}`**, así que dos palabras **se ven cortadas** — *y eso es la señal, no un defecto que haya que disimular: cuatro círculos de distinto ancho dejan de ser una fila.*
+- ⚠️ **El desplazamiento es `DISCO / 2`, no un número:** por eso sigue siendo media mitad el día que el disco cambie de tamaño. *Una pantalla que escribe `marginTop: -32` no sabe por qué es 32.*
+- ⚠️ **La sombra no es adorno:** un círculo blanco sobre el lienzo casi no tiene contorno y sobre el ciruela lo tiene de sobra. La sombra le da el mismo borde a las dos mitades.
+
+---
+
 ## ① EL SHELL — las que nacieron en el lote 2 y monta C
 
 ### `Cabecera`
 La banda ciruela de arriba. **Va en TODAS las pantallas del cliente**, no solo en las del lote 3: es lo primero que se ve y lo que hace que la app parezca una sola.
-- **props:** `variante` (`raiz` | `empujada`) · `antetitulo` · `titulo` · `apoyo` · `accionDerecha` · `pasos` · `onVolver` · `etiquetaVolver`
+- **props:** `variante` (`raiz` | `empujada`) · **`presentacion`** (`tarjeta` | `fondo`) · `antetitulo` · `titulo` · `apoyo` · `accionDerecha` · `pasos` · `onVolver` · `etiquetaVolver`
+- 🔴 **`presentacion="fondo"` (S116-B)**: sin radio inferior ni sombra, porque **deja de ser una tarjeta apoyada** — *una sombra sobre el fondo no despega nada: no hay nada debajo.* **Es prop y no un tercer valor de `variante`** porque `raíz`/`empujada` siguen vivas: una dice QUÉ ES, la otra CÓMO SE PINTA (mismo criterio que `Boton.superficie`). **Default `tarjeta`: los consumidores no cambian nada** — se la pasa `HojaContenido`.
 - ⚠️ **No tiene un alto fijo y no se puede exportar uno:** mide `inset + padding + CONTENIDO + padding`, y el contenido es variable por diseño. Se exportan `ALTO_CABECERA_RAIZ_FIJO` / `ALTO_CABECERA_EMPUJADA_FIJO` (**sólo el padding**) como piso de arranque para medir con `onLayout`. *Un alto único sería correcto para una combinación y falso para las otras siete.*
 - **tokens:** `gradients` · `medidas` · `palette` · `radius` · `spacing` · `elevacion` · `theme.accent`
 - **consumidores:** 7
@@ -96,8 +131,8 @@ El recuadro de fecha (mes sobre día) y la barra de progreso de un flujo.
 
 ### `IsotipoV5` · `LogoV5`
 La marca v5 por imagen. **Las dos se dimensionan por ANCHO** — el logo lleva wordmark y fijarle el alto lo deja ilegible; el isotipo lo necesita para poder pedirle *«la mitad del ancho»*.
-- **props:** `sobre` (`claro` | `oscuro`) · `tamano` (`cabecera` | `splash` | **`protagonista`**)
-- 🔴 **`protagonista` (S116-B)** para 00 · splash y 01 · propuesta, donde la marca **ES la pantalla**: ocupa el **50 % del ancho** (`splash` el 34 %, `cabecera` 120 px fijos).
+- **props:** `sobre` (`claro` | `oscuro`) · `tamano` (`cabecera` | `splash` | **`protagonista`** | **`portada`**)
+- 🔴 **`protagonista`** para 00, donde el ISOTIPO es la pantalla: **50 % del ancho**. **`portada`** para 01 · 03 · 05, donde preside el LOGO: **46 %** — *más chico a propósito, porque lleva el wordmark: al mismo ancho su nariz se vería la mitad. Igualar las fracciones habría igualado las CAJAS y desigualado las marcas.*
 - ⚠️ **SON FRACCIONES DEL ANCHO, NO PÍXELES, y no es un detalle:** *«cerca de la mitad del ancho del teléfono» no es un tamaño, es una proporción.* Un px fijo la cumple en el aparato donde se midió y la incumple en los demás — en un teléfono chico tapa la pantalla, en una tablet queda perdido. La pieza resuelve con `useWindowDimensions`; **vos no pasás números.**
 - ⏪ Lo que había, medido: el `splash` del isotipo usaba **`avatarHogar` (78)** —*el tamaño de un avatar de ficha para el protagonista de la primera pantalla*— y `LogoV5` tenía un **200 escrito a mano adentro de la pieza**, debajo de un comentario que decía «salen de `medidas`, no de números sueltos».
 - **consumidores:** 1 · 1

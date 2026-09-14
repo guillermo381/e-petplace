@@ -61,7 +61,10 @@ const LOGO: Record<SobreFondo, ImageSourcePropType> = {
 /** Qué papel juega la marca en la pantalla:
  *  · `cabecera` — se para en una barra, junto a otra cosa.
  *  · `splash` — acompaña la espera.
- *  · **`protagonista`** — ES la pantalla (00 · splash, 01 · propuesta).
+ *  · **`protagonista`** — el ISOTIPO es la pantalla (00 · splash).
+ *  · **`portada`** — el LOGO preside (01 · propuesta, 03 · acceso,
+ *    05 · crear cuenta). Más chico que `protagonista` **porque lleva el
+ *    wordmark**: al mismo ancho, su nariz se vería la mitad.
  *
  * 🔴 **LOS DOS GRANDES SON FRACCIÓN DEL ANCHO, NO PX** (ver el bloque de
  * `marcaProtagonistaFraccion` en `medidas`): la orden pide *«cerca de la
@@ -75,13 +78,16 @@ const LOGO: Record<SobreFondo, ImageSourcePropType> = {
  * comentario de Baloo en `Confirmacion`: un texto que afirma lo correcto
  * refuerza la creencia de que está bien, y el próximo que lo lea tampoco
  * va a ir a mirar.* Hoy es cierto. */
-export type TamanoMarca = 'cabecera' | 'splash' | 'protagonista'
+export type TamanoMarca = 'cabecera' | 'splash' | 'protagonista' | 'portada'
 
 /** El ancho de la marca según su papel. **Es una función y no una tabla**
  *  porque dos de los tres salen del ancho de la pantalla, que sólo se sabe
  *  en runtime. */
 function anchoDeMarca(tamano: TamanoMarca, anchoPantalla: number): number {
   if (tamano === 'protagonista') return anchoPantalla * medidas.marcaProtagonistaFraccion
+  /* `portada` es el del LOGO en 01 · 03 · 05. Ver su token: es más chico
+     que `protagonista` porque el wordmark se lleva parte del ancho. */
+  if (tamano === 'portada') return anchoPantalla * medidas.marcaPortadaFraccion
   if (tamano === 'splash') return anchoPantalla * medidas.marcaSplashFraccion
   return medidas.marcaCabeceraAncho
 }
