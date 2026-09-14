@@ -625,6 +625,70 @@ así que no lo hago sin firma.*
 
 ---
 
+## ⑱ LOTE 3h · LA ONDA, Y DOS COSAS QUE APARECIERON AL MIRARLA
+
+### ⑱.1 · `OndaAcceso` montada en 03 y 05
+
+03: «Mascotas / más felices», personaje a la **derecha**.
+05: «Empieza / su expediente», personaje a la **izquierda**. Las dos vistas en
+el aparato.
+
+**Va ABSOLUTA al pie y FUERA de `EvitaTeclado`**, a propósito: la pieza se cuida
+sola del teclado —alto fijo para no aplastarse, fundido para no verse salir— y
+meterla adentro la haría subir con el contenido, que es lo contrario de lo que
+pide la orden. **El hueco lo reserva la pantalla con `ALTO_ONDA_ACCESO`**, que
+la pieza exporta justo para eso: *el número no se teclea, se pide.*
+
+⚠️ **Y ahí choqué con `R53`**, que pide `PantallaConPie` para todo pie fijo.
+**No aplica acá: `PantallaConPie` trae su PROPIO `ScrollView` y
+`HojaContenido` ya tiene uno** ⇒ son alternativas, no se componen. Declarado con
+`R53-DECLARADO` y su razón —el mecanismo que el propio gate ofrece— y pedido a B
+que `HojaContenido` gane slot de pie con medición propia, con lo que la
+declaración muere.
+
+### ⑱.2 · ✅ EL TECLADO NO LA APLASTA — 🔴 pero deja la ola
+
+**La mitad del alto fijo funciona**: con el teclado arriba la franja no se
+comprime. **La otra mitad no llega a cero.**
+
+Medido por pixel, **con discriminador** (04 no tiene onda):
+
+| y | 03 | 04 |
+|--:|---|---|
+| 1505 | **(235, 142, 201)** | (248, 243, 247) |
+| 1510 | **(230, 136, 198)** | (248, 243, 247) |
+
+Y en la ampliación **se reconoce la curva de la ola**
+(`onda-resto-sobre-teclado.png`, 03 arriba y 04 abajo, mismo recorte).
+
+*No es mi montaje:* el `View` absoluto no tiene opacidad propia — el fundido es
+enteramente de la pieza. **Va a B con la medición.**
+
+### ⑱.3 · 🔴 EL BRILLO DEL ASISTENTE DEJA LA PANTALLA PERMANENTEMENTE NO-IDLE
+
+`uiautomator dump` sobre cualquier raíz devuelve **`ERROR: could not get idle
+state`**. **Discriminado:** en la Hoja que tapa el orbe responde
+`UI hierchary dumped`; en 03 y 04, que no tienen orbe, también. **Con el orbe a
+la vista, nunca.**
+
+Ese «idle» es el mismo que usa el árbol de accesibilidad de Android ⇒ **una
+animación que no termina nunca deja la ventana ocupada para todo lo que espere
+reposo.** *No es un defecto visual —el brillo se ve bien— es una propiedad del
+sistema que cambia sin que nada falle.* Si la casa lo quiere infinito es una
+decisión válida, **pero hoy no está escrita**, y el próximo que vea el `ERROR`
+va a buscar el problema en su arnés, como hice yo.
+
+### ⑱.4 · El foco en ciruela y el brillo, capturados
+
+- **Foco**: `03-foco-y-teclado.png` y `07-foco.png` — el borde ciruela del campo
+  enfocado, en las dos pantallas.
+- **Brillo**: `mov-asistente-brillo.gif`, el orbe con su halo en la raíz del
+  hogar.
+- **El logo claro ya no tiene caja blanca**: re-medido del objeto tras el merge,
+  su esquina pasó de **alfa 255 a 37**. La cura de B llegó.
+
+---
+
 ## ⑰ LA VARA — LAS ONCE PREGUNTAS, con la 11 que nació de mi defecto
 
 > La **11** (*«se usó, no se fotografió»*) la firmó la mesa el 13-sep **sobre el

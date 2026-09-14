@@ -271,6 +271,8 @@ export const clienteEs = {
     probarDeNuevo: 'Probar de nuevo',
   },
   login: {
+    ondaA: 'Mascotas',
+    ondaB: 'más felices',
     verAdopcion: 'Ver mascotas en adopción',
     olvide: '¿Olvidaste tu contraseña?',
     titulo: 'Iniciar sesión',
@@ -315,6 +317,8 @@ export const clienteEs = {
     cambiarCorreo: '¿Correo equivocado? Cambiarlo',
   },
   registro: {
+    ondaA: 'Empieza',
+    ondaB: 'su expediente',
     titulo: 'Crear cuenta',
     saludo: 'Crea tu cuenta',
     oRegistrateCon: 'O regístrate con',

@@ -178,6 +178,8 @@ export const clienteEn = {
     probarDeNuevo: 'Try again',
   },
   login: {
+    ondaA: 'Happier',
+    ondaB: 'pets',
     verAdopcion: 'See pets up for adoption',
     olvide: 'Forgot your password?',
     titulo: 'Sign in',
@@ -211,6 +213,8 @@ export const clienteEn = {
     cambiarCorreo: 'Wrong email? Change it',
   },
   registro: {
+    ondaA: 'Start',
+    ondaB: 'their record',
     titulo: 'Create account',
     saludo: 'Create your account',
     oRegistrateCon: 'Or sign up with',

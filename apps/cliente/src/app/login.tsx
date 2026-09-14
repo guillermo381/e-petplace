@@ -28,14 +28,13 @@
  * completa la llegada.
  */
 
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { correoARuta } from '../lib/auth/correo-en-ruta';
-import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as WebBrowser from 'expo-web-browser';
 import {
+  ALTO_ONDA_ACCESO,
   Boton,
   BotonMarcaAjena,
   Cabecera,
@@ -45,12 +44,15 @@ import {
   HojaContenido,
   HuellaDeLlegada,
   LogoV5,
+  OndaAcceso,
   Separador,
   spacing,
   typography,
   useAviso,
   useTheme,
 } from '@epetplace/ui';
+import { correoARuta } from '../lib/auth/correo-en-ruta';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 import { iniciarSesion } from '@epetplace/api';
 import { entrarConGoogle } from '@/lib/auth/entrar-con-google';
 
@@ -256,6 +258,13 @@ export default function Login() {
               padding: spacing[5],
               gap: spacing[6],
               flexGrow: 1,
+              /* 🔴 **EL LUGAR DE LA ONDA, reservado por la pantalla.**
+                 `ALTO_ONDA_ACCESO` es lo que la pieza ocupa de punta a punta
+                 (banda + ola) y se exporta justo para esto: la onda va
+                 ABSOLUTA al pie, así que **no empuja el contenido** — sin este
+                 hueco, lo último de la hoja queda debajo de ella. *Y el número
+                 no se teclea: se pide.* */
+              paddingBottom: ALTO_ONDA_ACCESO,
             }}
           >
           <Entrada>
@@ -407,6 +416,21 @@ export default function Login() {
           </View>
         </HojaContenido>
       </EvitaTeclado>
+
+      {/* R53-DECLARADO: el alto NO se estima — `OndaAcceso` exporta
+          `ALTO_ONDA_ACCESO` (banda + ola) y es exactamente ese número el que la
+          hoja reserva arriba. `PantallaConPie` no aplica acá: trae su PROPIO
+          `ScrollView` y `HojaContenido` ya tiene uno, así que son alternativas
+          y no se componen. Pedido a B: que `HojaContenido` gane slot de pie con
+          medición propia, y esta declaración muere. */}
+      {/* ⭐ **`OndaAcceso` — S116-C lote 3h.** Va ABSOLUTA al pie y FUERA de
+          `EvitaTeclado`: **la pieza se cuida sola del teclado** (alto fijo para
+          no aplastarse + fundido para no verse salir), y meterla adentro la
+          haría subir con el contenido, que es lo contrario de lo que la orden
+          pide. Su lugar en la hoja lo reserva `paddingBottom`, arriba. */}
+      <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
+        <OndaAcceso frase={[t('login.ondaA'), t('login.ondaB')]} lado="der" />
+      </View>
 
       {/* §5 · LA LLEGADA — la huella se completa una vez, sobre el tapiz.
           R53-DECLARADO: NO es un pie fijo — es un overlay de PANTALLA COMPLETA

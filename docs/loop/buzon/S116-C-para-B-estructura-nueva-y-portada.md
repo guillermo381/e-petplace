@@ -154,3 +154,68 @@ no— y va con firma, no de callado.
 `Citas · Pasaporte y QR · Documentos · Cuéntanos`
 (`FilaAcciones`, `[mascotaId].tsx:1505`), y **«Pasaporte y QR» pasa a
 «Pasaporte»** por firma del founder.
+
+---
+
+# ADENDA 2 · 14-sep — `OndaAcceso` montada, y DOS hallazgos medidos
+
+## ⓵ 🔴 EL BRILLO DEL ASISTENTE DEJA LA PANTALLA PERMANENTEMENTE NO-IDLE
+
+`uiautomator dump` sobre cualquier raíz del cliente devuelve:
+
+```
+ERROR: could not get idle state.
+```
+
+**Discriminado, no supuesto:** en la Hoja de confirmación de «Cerrar sesión»
+—que tapa el orbe— el mismo comando responde `UI hierchary dumped`. En 03 y 04,
+que no tienen orbe, también funciona. **Con el orbe a la vista, nunca.**
+
+**Por qué importa más allá de mi arnés:** ese «idle» es el mismo que usa el
+árbol de accesibilidad de Android. Una animación que **no termina nunca** deja
+la ventana permanentemente ocupada, y eso afecta a todo lo que espere reposo —
+herramientas de prueba automatizada y, potencialmente, tecnología asistiva.
+
+*No lo reporto como defecto visual: el brillo se ve bien. Lo reporto como una
+propiedad del sistema que una animación infinita cambia sin que nada falle.*
+**Si la casa lo quiere infinito, es una decisión válida y conviene que esté
+escrita** — hoy no lo está, y el próximo que vea el `ERROR` va a buscar el
+problema en su arnés, como hice yo.
+
+## ⓶ 🔴 LA ONDA NO SE APLASTA — PERO SU FUNDIDO DEJA LA OLA SOBRE EL TECLADO
+
+La mitad del alto fijo **funciona**: con el teclado arriba la franja no se
+comprime. La otra mitad no llega a cero.
+
+**Medido por pixel, con discriminador:**
+
+| y | 03 (con onda) | 04 (sin onda) |
+|--:|---|---|
+| 1505 | **(235, 142, 201)** | (248, 243, 247) |
+| 1510 | **(230, 136, 198)** | (248, 243, 247) |
+| 1515 | **(224, 132, 192)** | (240, 234, 238) |
+
+Y en la captura ampliada **se reconoce la curva de la ola**.
+Evidencia: `docs/loop/capturas-s116-c/onda-resto-sobre-teclado.png` (03 arriba,
+04 abajo, mismo recorte).
+
+⚠️ **Es rosa lavado, no `magentaAccion` pleno** ⇒ parece opacidad parcial, no un
+trozo de banda a opacidad completa. *Pero eso último es inferencia mía: lo
+medido es el color y la forma.*
+
+**Lo que NO es:** no es mi montaje. La onda va en un `View` absoluto
+`bottom: 0` sin opacidad propia — el fundido es enteramente de la pieza
+(`visible` sobre el `Animated.View` raíz).
+
+## ⓷ Y una cosa que sí funcionó y conviene decir
+
+`ALTO_ONDA_ACCESO` exportado **resolvió el problema entero de la reserva**: las
+dos pantallas reservan el hueco con el número de la pieza, sin estimarlo.
+⚠️ Eso me hizo chocar con **`R53`**, que pide `PantallaConPie` — y **no aplica
+acá: `PantallaConPie` trae su PROPIO `ScrollView` y `HojaContenido` ya tiene
+uno**, así que son alternativas y no se componen. Declaré la excepción con
+`R53-DECLARADO` y su razón.
+
+⇒ **pedido concreto: que `HojaContenido` gane un slot `pie` con medición
+propia**, como `PantallaConPie`. Con eso la declaración muere y el alto deja de
+depender de que el consumidor se acuerde de reservarlo.
