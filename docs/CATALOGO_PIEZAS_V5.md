@@ -150,7 +150,7 @@ Las seis caras del founder. **`TrioPersonajes` es la mitad de `Confirmacion`.**
 - 🔴 **El trío entra en FUNDIDO ESCALONADO (S116-B).** Tenía cero movimiento: el check de `Confirmacion` crecía y *los tres personajes aparecían de golpe debajo*. Es `FadeIn` y no una entrada con desplazamiento —la letra §2 dice **fundido**— y el escalonado usa `stagger.normal`: *tres caras a la vez son una imagen; de a una es que llegaron.*
 - **props:** `especie` (`perro`|`gato`|`conejo`|`ave`|`roedor`|`otro`) · `tamano` (`grande`|`hogar`|`selector`|`fila`) · `elegido` · `fondo` · (trío: `especies` de exactamente 3)
 - **tokens:** `medidas` · `palette` · `radius` · `theme.bg`
-- **consumidores:** 4 · 0
+- **consumidores:** 5 · 0
 - 🔴 **El `ave` usa la nariz como cara** hasta que llegue su archivo — el único que entró trae el wordmark encima. Enmienda firmada de la letra §1.10.
 - ⚠️ **Ninguna es vector**; el `roedor` tiene fondo blanco opaco.
 
@@ -236,7 +236,7 @@ La superficie que agrupa.
 `CeldaNavegacion` entra a una sección (glifo + título + chevrón); `Celda` muestra un dato.
 - **props:** `icono` · `titulo` · `detalle` · `onPress` · `registro` · `chevron` — `subtitulo` · `inicio` · `densidad` · `tituloEntero` · `elegida`
 - **tokens:** `radius` · `spacing` · `motion` · `typography` · `theme.accent` · `theme.bg`
-- **consumidores:** 49 · 91
+- **consumidores:** 50 · 91
 - ⚠️ **El contorno transparente murió como acción de fila.** Información despliega; acción lleva. El glifo va en círculo rosa tinte.
 
 ### `Insignia` — *el estado*
