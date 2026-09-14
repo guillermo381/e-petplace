@@ -34897,6 +34897,8 @@ La pantalla deja de ser **una superficie plana con una cabecera encima** y pasa 
 
 La **cabecera** (las dos variantes, raíz y empujada), el **fondo de pantalla** de todas las rutas, y **la relación con la barra de tabs** en las raíces. *No es un cambio de color: es un cambio de cómo está construida la pantalla*, y por eso entra como ficha y no como ajuste.
 
+> 🟢 **LA PIEZA LLEGÓ (S116-B lote 04, en main desde el 13-sep-2026):** `HojaContenido`, `Cabecera presentacion="fondo"`, `FilaAccionesCostura` y `LogoV5` de portada — *«el ciruela deja de ser tarjeta y pasa a ser fondo»*. **Queda el MONTAJE, que es de C**, como esta ficha repartió. ⇒ lo que falta ya no es construir: es montar, y sin que `verify:piezas-locales` suba por ello.
+
 **☠️ MUERTE:** la hoja es una pieza del catálogo v5, montada en las pantallas del lote, y `verify:piezas-locales` no subió por ella.
 
 ---
@@ -34919,3 +34921,28 @@ El splash **no se va antes de dos segundos** la primera vez que la app se abre. 
 📌 **Y lo que el piso NO puede hacer: tapar un error.** Si la app falla mientras el splash espera, el piso no puede retrasar el aviso — la permanencia es para la marca, no para esconder lo que salió mal.
 
 **☠️ MUERTE:** la primera apertura muestra la marca dos segundos, la segunda no, y el valor vive en una constante.
+
+---
+
+## `D-1105` 🟠 — LA PANTALLA 04 «RECUPERAR CONTRASEÑA» ESTÁ **FOTOGRAFIADA Y NO USADA**
+
+**Estado:** ABIERTA · **Dueño: C · lote 3b.**
+**Origen:** la vara de coherencia, **pregunta 11**, respondida **NO** (13-sep-2026).
+
+> **Es la primera ficha que nace de la pregunta 11**, y eso es exactamente para lo que se escribió — una tanda después de agregarla.
+
+**La pantalla tiene captura y no tiene uso.** Nadie pidió un enlace de recuperación, nadie lo recibió, nadie volvió con él y cambió una contraseña. *Existe, se ve bien, y no se sabe si funciona.*
+
+### Por qué esto no es una formalidad
+
+**La 04 es el único camino de vuelta de alguien que quedó afuera.** Una pantalla de alta que falla se nota el primer día; **una de recuperación que falla se nota el día que alguien la necesita** — y esa persona ya está en el peor momento posible para encontrarse con algo roto.
+
+### Y hay una razón concreta para sospechar de este camino en particular
+
+**`D-1100`:** el enlace del correo de confirmación **abre el navegador, no la app** —sin `intentFilters`, sin `associatedDomains`, sin `emailRedirectTo`—. **La recuperación vuelve por el mismo riel.** *No está medido que la 04 tenga el problema; está medido que el riel por el que vuelve lo tiene.* ⇒ probarla no es tocar un botón: es **pedir el enlace, abrir el correo, tocar el enlace y ver dónde cae**.
+
+### Qué cuenta como usada
+
+Pedir la recuperación con una cuenta real, recibir el correo, **volver por el enlace**, cambiar la contraseña, y **entrar con la nueva**. Menos que eso es fotografiarla otra vez.
+
+**☠️ MUERTE:** alguien recupera su contraseña de punta a punta y entra con ella.

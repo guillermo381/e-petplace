@@ -7505,6 +7505,21 @@ const TABLA_R77 = new Map([
      porque es la nariz y cerrar con la marca es lo que hace que el ciclo se
      lea como una vuelta y no como una lista cortada. */
   ['index.tsx::CARAS', 'exhaustivo'],
+  /* ⭐ S116-B · el relleno del trío de `Confirmacion`. **SUBCONJUNTO, y es
+     deliberado en las dos direcciones.** `EspeciePersonaje` tiene seis y acá
+     hay tres, porque estas NO son «las especies»: son **las caras con las que
+     se completa un trío** cuando la familia aporta menos de tres.
+     · **`otro` queda afuera a propósito**: es la nariz, la marca — rellenar
+       con la marca diría que la casa es parte de la familia.
+     · **`ave` y `roedor` también**, y por una razón medida: son las dos caras
+       menos reconocibles a tamaño `hogar` (el ave viene de un cuerpo entero,
+       el roedor trae fondo blanco opaco). *El relleno acompaña; si se lo
+       mira, dejó de acompañar.*
+     ⚠️ **Si mañana el trío tuviera que representar a la familia real, esto
+     deja de ser relleno y pasa a ser dato** — y entonces no se amplía esta
+     lista: se le pasan las especies por prop, que es lo que la pieza ya
+     acepta. */
+  ['Confirmacion.tsx::CASA', 'subconjunto'],
   // ── EXHAUSTIVOS: si le falta un miembro, la pantalla pierde un paso ──
   ['ConvivenciaInput.tsx::ORDEN', 'exhaustivo'],
   ['EscaleraCaso.tsx::ORDEN_CASO', 'exhaustivo'],

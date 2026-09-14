@@ -62,6 +62,28 @@ export type CabeceraProps = {
   onVolver?: () => void
   /** La voz del botón de volver. Sin default (Ley 3). */
   etiquetaVolver?: string
+  /* ══════════════════════════════════════════════════════════════════
+   *  CÓMO SE PINTA — `'tarjeta'` (default, lo de siempre) o `'fondo'`.
+   *
+   * 🔴 **ES UNA PROP Y NO UN TERCER VALOR DE `variante`, y la orden misma
+   * lo obliga:** pide *«mismos contenidos… **flecha en empujada**»*, o sea
+   * que `raiz`/`empujada` siguen vivas. **`fondo` no es QUÉ ES la cabecera:
+   * es CÓMO SE PINTA**, y son dos ejes.
+   *
+   * *La casa ya resolvió este caso exacto en `Boton`, y su entrada lo dejó
+   * escrito: «la superficie es ORTOGONAL a la variante».* Meterlo en
+   * `variante` habría obligado a `fondoRaiz` y `fondoEmpujada` el día
+   * siguiente.
+   *
+   * QUÉ CAMBIA: **nada de contenido.** Pierde el radio inferior y la
+   * sombra, porque deja de ser una tarjeta apoyada y pasa a ser el FONDO
+   * de la pantalla — *una sombra sobre el fondo no despega nada: no hay
+   * nada debajo.*
+   *
+   * ⚠️ **Default `'tarjeta'`: los siete consumidores no cambian una prop.**
+   * Quien la monta como fondo es `HojaContenido`, que sabe que hay una
+   * hoja encima. */
+  presentacion?: 'tarjeta' | 'fondo'
 }
 
 /** El círculo translúcido de las acciones sobre la banda. Vive acá porque
@@ -138,10 +160,12 @@ export function Cabecera({
   pasos,
   onVolver,
   etiquetaVolver,
+  presentacion = 'tarjeta',
 }: CabeceraProps) {
   const { theme } = useTheme()
   const insets = useSafeAreaInsets()
   const esRaiz = variante === 'raiz'
+  const esFondo = presentacion === 'fondo'
   const m = esRaiz ? medidas.cabeceraRaiz : medidas.cabeceraEmpujada
 
   /* Memorial: ciruela noche PLANA, sin degradado (§4). El gradiente del
@@ -160,11 +184,14 @@ export function Cabecera({
         paddingTop: insets.top + (esRaiz ? spacing[3] : spacing[2]),
         paddingHorizontal: m.lados,
         paddingBottom: m.bottom,
-        borderBottomLeftRadius: radius.cabeceraV5,
-        borderBottomRightRadius: radius.cabeceraV5,
+        /* Como FONDO no lleva radio ni sombra: no está apoyada sobre
+           nada — es lo que está debajo de todo. La hoja que se le monta
+           encima pone su propio radio, que es el que se ve. */
+        borderBottomLeftRadius: esFondo ? 0 : radius.cabeceraV5,
+        borderBottomRightRadius: esFondo ? 0 : radius.cabeceraV5,
         gap: spacing[3],
         /* Apenas perceptible: despega, no levanta. */
-        boxShadow: theme.elevacion.reposo,
+        boxShadow: esFondo ? undefined : theme.elevacion.reposo,
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing[3] }}>

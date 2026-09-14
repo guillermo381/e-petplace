@@ -55,10 +55,16 @@ export type ConfirmacionProps = {
   lineaExtra?: string
   primario: { texto: string; onPress: () => void }
   secundario?: { texto: string; onPress: () => void }
-  /** Las caras de la familia. Si no llegan tres, se completa con las tres
-   *  de la casa — pero **la decisión de completar es del consumidor**, que
-   *  es quien sabe cuántas mascotas hay. */
+  /** Las caras de la familia, **la primera es la protagonista**. Si llegan
+   *  menos de tres se COMPLETA con las de la casa (ver abajo).
+   *  ⏪ *El comentario que estaba acá ya prometía ese completado y el
+   *  código hacía lo contrario: sin tres exactas, no dibujaba trío. Hoy es
+   *  cierto.* */
   especies?: EspeciePersonaje[]
+  /** ¿Va el trío? **Sin default en la firma: lo decide la CASA** —
+   *  encendido en cliente, apagado en prestador y en memorial. Pasalo
+   *  `false` sólo si esta pantalla es la excepción. */
+  trio?: boolean
   /** El «¡Listo!» en Baloo. Sin default: la voz es del riel (Ley 3). */
   exclamacion: string
 }
@@ -92,18 +98,40 @@ export function Confirmacion({
   primario,
   secundario,
   especies,
+  trio,
   exclamacion,
 }: ConfirmacionProps) {
   const { theme } = useTheme()
   const quieto = useReducedMotion() || theme.mode === 'memorial'
   const esMemorial = theme.mode === 'memorial'
+  /* La casa decide si el trío va, igual que la pata en el chip. */
+  const esCasaV5 = theme.accent.formaV5 === true
 
   /* La entrada escalonada de la casa (letra §2: 45/300). Con la preferencia
      activa o en memorial, `delay` y `duration` en 0 = aparece hecha. */
   const entrada = (i: number) =>
     quieto ? undefined : FadeIn.delay(i * motion.v5.entradaStaggerMs).duration(motion.v5.entradaMs)
 
-  const trio = especies !== undefined && especies.length >= 3 ? especies.slice(0, 3) : undefined
+  /* ══════════════════════════════════════════════════════════════════
+   *  EL TRÍO VIENE ENCENDIDO EN EL CLIENTE — S116-B, firma de la mesa.
+   *
+   * 🔴 **Era opt-in y NADIE lo pasaba**: medido por C y confirmado acá —
+   * **cero `especies=` en `apps/`**. ⇒ `TrioPersonajes` se construyó en el
+   * lote 2, aprendió a fundirse escalonado en el 03, y **no se vio nunca**.
+   *
+   * ⚠️ **NO es un booleano como la pata: el trío necesita SABER QUÉ CARAS.**
+   * Por eso el default no es «true»: es **completar**. Lo que llegue va
+   * primero —la especie de la mascota, que es la protagonista— y el resto
+   * lo pone la casa hasta tres.
+   *
+   * **LAS DE RELLENO NO REPITEN la protagonista**, y esa es toda la lógica
+   * que hay acá: un trío con el mismo gato tres veces no es una familia,
+   * es un error de render que nadie va a reportar porque «se ve bien». */
+  const CASA: EspeciePersonaje[] = ['perro', 'gato', 'conejo']
+  const trioEncendido = (trio ?? esCasaV5) && !esMemorial
+  const dadas = especies ?? []
+  const relleno = CASA.filter((e) => !dadas.includes(e))
+  const trioFinal = trioEncendido ? [...dadas, ...relleno].slice(0, 3) : undefined
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base, padding: medidas.margen, gap: spacing[5], justifyContent: 'center' }}>
@@ -135,9 +163,9 @@ export function Confirmacion({
           </Animated.View>
         </View>
 
-        {trio !== undefined && !esMemorial ? (
+        {trioFinal !== undefined && trioFinal.length === 3 ? (
           <Animated.View entering={entrada(3)}>
-            <TrioPersonajes especies={trio as [EspeciePersonaje, EspeciePersonaje, EspeciePersonaje]} tamano="hogar" />
+            <TrioPersonajes especies={trioFinal as [EspeciePersonaje, EspeciePersonaje, EspeciePersonaje]} tamano="hogar" />
           </Animated.View>
         ) : null}
 
