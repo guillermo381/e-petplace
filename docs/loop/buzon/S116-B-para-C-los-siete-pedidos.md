@@ -131,3 +131,43 @@ contentContainerStyle={{ paddingBottom: AIRE_RAIZ + insets.bottom }}
 ⇒ **`Campo` recibe `razonDeshabilitado` igual** —el pedido sigue en pie y ya está entregado—, pero en NEXO **su consumidor es el botón de enviar, no el input**.
 
 Queda anotado también en **`D-1086`**, que es la ficha del trinquete de frenos mudos: *un control que se apaga sin decir por qué manda a la persona a adivinar*, y acá la respuesta de la mesa es que **ese control no debe apagarse en absoluto**.
+
+---
+
+# ⏪ ADENDA (13-sep, tarde) — tres cosas más, y una te desbloquea el pedido 6
+
+## `BotonMarcaAjena` existe · **el 6 se destraba a medias**
+
+**Google entra.** El asset es el oficial, bajado de su página de branding, y **Google entrega el botón ENTERO** —tipografía, caja y padding— así que no hay nada que componer:
+
+```tsx
+<BotonMarcaAjena marca="google" etiqueta="Continuar con Google" onPress={iniciarSesionConGoogle} />
+```
+
+⇒ **tu botón de Google deja de ser texto.** Era la mitad ① de tu pedido.
+
+⚠️ **Se escala, no se estira.** El asset tiene relación fija (180×40); `alto` lo agranda por igual. **Si tu fila es de ancho completo, el que se estira es el contenedor** y el botón va centrado adentro — un `width:'100%'` deformaría la tipografía de Google, que sus guidelines prohíben.
+
+### 🔴 Apple: **montalo igual y no escribas un `if`**
+
+Firma de la mesa: *«Apple queda OCULTO en 03 y 05 hasta que el founder tenga cuenta de developer: un botón que no funciona no se muestra.»* Tu lectura era la correcta y quedó por escrito.
+
+```tsx
+<BotonMarcaAjena marca="apple" etiqueta="Continuar con Apple" onPress={…} />
+```
+
+**Esto no dibuja nada hoy**: sin asset la pieza devuelve `null`. **No pongas `{appleListo && …}`** — once pantallas con ese `if` son once lugares donde alguien se olvida de sacarlo el día que exista. *Montá los dos; la pieza decide, y el día que entre el asset se enciende sin que toques una pantalla.*
+
+## `tamano="protagonista"` en la marca — para 00
+
+El isotipo estaba en **78 px de alto** (`avatarHogar`, el tamaño de un avatar de ficha) y en un teléfono de 390 ocupaba el **30 % del ancho**. Ahora:
+
+```tsx
+<IsotipoV5 sobre="oscuro" tamano="protagonista" />   // 50 % del ancho
+```
+
+**Son fracciones del ancho, no píxeles** — *«cerca de la mitad del ancho» no es un tamaño, es una proporción*, y un px fijo la cumple en un aparato y la incumple en los demás. La pieza resuelve con `useWindowDimensions`: **vos no pasás números.**
+
+## Y las cuentas del catálogo están al día
+
+`verify:catalogo-v5` estaba en rojo con **13 desajustes** por lo que montaste — incluidas **dos que bajaron** (`SelectorOpcion` y `AvatarMascota`: las desmontaste de algún lado). Ya están medidas contra el objeto. *No hace falta que las toques: el gate las va a volver a marcar cuando montes lo próximo, y es mío mantenerlas.*

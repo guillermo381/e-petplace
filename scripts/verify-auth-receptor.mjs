@@ -16,9 +16,13 @@
  * roto.* Lo midió C en el aparato.
  *
  * ── LAS DOS COSAS QUE VIGILA ───────────────────────────────────────────────
- * ① **El resolvedor bindea en TODAS sus ramas.** Una rama sin `bind` devuelve
- *    un método que funciona en cualquier prueba de presencia y revienta al
- *    usarse.
+ * ① **Si hay un resolvedor intermedio, bindea en TODAS sus ramas.** Una rama
+ *    sin `bind` devuelve un método que pasa cualquier prueba de presencia y
+ *    revienta al usarse.
+ *    ⚠️ **Hoy NO hay resolvedor y ésa es la forma sana:** la tercera vuelta de
+ *    `D-1098` lo retiró y `registrarse` llama directo, igual que el login —
+ *    una llamada directa no puede perder el receptor. Este brazo queda armado
+ *    para el día que alguien vuelva a meter un intermediario.
  * ② **La invocación está guardada.** Un guard de PRESENCIA no alcanza:
  *    verifica que el método esté, no que se pueda llamar — que es exactamente
  *    la diferencia que costó esta ficha.
@@ -64,13 +68,21 @@ di('verify:auth-receptor · control positivo ✓ (suelto revienta con TypeError 
 if (!existsSync(ARCHIVO)) { di(`ROJO · no existe ${ARCHIVO} — no pude medir.`); process.exit(2) }
 const src = readFileSync(ARCHIVO, 'utf8')
 
+/* ⚠️ EL RESOLVEDOR PUEDE NO EXISTIR, Y ESO NO ES UN ROJO. En la tercera vuelta
+   de `D-1098` se retiró: `registrarse` llama `clienteAuth.signUp(...)` directo,
+   igual que el login. **Su ausencia es la forma sana** — la llamada directa no
+   puede perder el receptor. Este brazo queda para el día que alguien vuelva a
+   meter un intermediario: ahí sí tiene que bindear. */
 const i = src.indexOf('function resolverMetodo')
-if (i < 0) { di('ROJO · no encontré resolverMetodo() — no pude medir.'); process.exit(2) }
-const cuerpo = src.slice(i, src.indexOf('\n}', i) + 2)
-
-const retornos = [...cuerpo.matchAll(/return\s+(?!null)([^;]+);/g)].map((m) => m[1])
-const sinBind = retornos.filter((r) => !r.includes('.bind('))
-di(`  ${retornos.length} retorno(s) de método en resolverMetodo() · sin bind: ${sinBind.length}`)
+let sinBind = []
+if (i < 0) {
+  di('  sin resolvedor intermedio: la llamada es directa (la forma sana de D-1098) ✓')
+} else {
+  const cuerpo = src.slice(i, src.indexOf('\n}', i) + 2)
+  const retornos = [...cuerpo.matchAll(/return\s+(?!null)([^;]+);/g)].map((m) => m[1])
+  sinBind = retornos.filter((r) => !r.includes('.bind('))
+  di(`  hay un resolvedor: ${retornos.length} retorno(s) · sin bind: ${sinBind.length}`)
+}
 
 if (sinBind.length > 0) {
   di('')
