@@ -276,9 +276,35 @@ export function estiloDeCaja(theme: Theme, estado: EstadoCaja) {
      * el `as const` de una anatomía que TRES piezas consumen entera — el
      * precio no lo paga el efecto.*
      *
+     * 🔴 **S116-B · EL HALO ENTRA A LA TRANSICIÓN, y su ausencia era un
+     * defecto medible, no una decisión.** La lista decía sólo
+     * `borderColor` **desde antes de que el halo existiera** —nació en el
+     * lote 2— así que el borde llegaba suave y **el halo aparecía de
+     * golpe**: dos mitades del mismo estado de foco entrando distinto.
+     * *Nadie lo decidió: la lista se quedó donde estaba cuando la cosa que
+     * describe creció.*
+     *
+     * ⚠️ **Y NO CONTRADICE la regla rectora de abajo.** «Nada se mueve
+     * mientras alguien tipea» prohíbe animar el CONTENIDO —el label, el
+     * layout, el texto—; el foco es lo que pasa ANTES de tipear, y su
+     * borde ya se animaba. *Lo que se agrega no es movimiento nuevo: es la
+     * otra mitad del que ya había.*
+     *
      * Sigue sin animarse nada más (Ley 6 · regla rectora: nada se mueve
      * mientras alguien tipea). */
-    transitionProperty: 'borderColor',
+    /* ⚠️ **ARRAY y no `'borderColor, boxShadow'`** — el tipo de Reanimated
+     * es `'all' | 'none' | keyof S | (…)[]`: **la cadena con coma es CSS,
+     * no su API**.
+     * ⚠️ **Y el cast no es decoración: el `as const` del return vuelve el
+     * array `readonly`, y el tipo pide uno mutable.** Sin él la pieza
+     * compila igual pero **el objeto entero deja de matchear** y el error
+     * sale en los CONSUMIDORES, no acá.
+     * 🔴 Las dos cosas las cazó el gate del hook —que compila las apps— y
+     * NO el tsc de `packages/ui`, que daba 0 en los dos intentos. *Un
+     * verde del paquete es un verde sobre un tsconfig que ningún usuario
+     * ejecuta.* Medido con `stash`: sin este cambio, `apps/prestador` da
+     * EXIT 0 — el rojo era mío. */
+    transitionProperty: ['borderColor', 'boxShadow'] as ('borderColor' | 'boxShadow')[],
     transitionDuration: motion.duration.fast,
   } as const
 }

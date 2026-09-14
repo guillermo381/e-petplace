@@ -1,4 +1,7 @@
 import { View, Image, type ViewStyle, type ImageSourcePropType } from 'react-native'
+import Animated, { FadeIn } from 'react-native-reanimated'
+
+import { motion } from '../tokens/motion'
 import { medidas } from '../tokens/medidas'
 import { palette } from '../tokens/palette'
 import { radius } from '../tokens/radius'
@@ -154,9 +157,36 @@ export function TrioPersonajes({
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
       {especies.map((e, i) => (
-        <View key={`${e}-${i}`} style={i === 0 ? null : { marginLeft: -solape }}>
+        <Animated.View
+          key={`${e}-${i}`}
+          /* ══════════════════════════════════════════════════════════
+           *  EL FUNDIDO ESCALONADO — S116-B
+           *
+           * 🔴 Medido: esta pieza tenía **cero movimiento**, y la letra
+           * §2 lo pide textual: *«personajes en fundido 500 ms cada 3 s en
+           * splash y confirmaciones»*. El trío es justamente la mitad de
+           * `Confirmacion`, que sí anima su check — o sea que **el check
+           * crecía y los tres personajes aparecían de golpe debajo.**
+           *
+           * ES `FadeIn` Y NO una entrada con desplazamiento: la letra dice
+           * FUNDIDO. *Tres caras que suben desde abajo compiten con el
+           * check que crece arriba; un fundido las deja llegar sin pelearle
+           * al momento.*
+           *
+           * EL ESCALONADO usa `stagger.normal` (80) — el token de la casa,
+           * no un número. Tres caras a la vez es una imagen; **de a una es
+           * que llegaron**.
+           *
+           * ⚠️ **`FadeIn` de Reanimated respeta `useReducedMotion` SOLO.**
+           * No hace falta el hook acá: la librería apaga las entradas
+           * declarativas cuando el sistema lo pide. *Se declara para que
+           * nadie agregue un guard redundante — y para que, si algún día
+           * la librería cambia eso, se sepa dónde mirar.* */
+          entering={FadeIn.duration(motion.duration.fast * 2).delay(i * motion.stagger.normal)}
+          style={i === 0 ? null : { marginLeft: -solape }}
+        >
           <Personaje especie={e} tamano={tamano} />
-        </View>
+        </Animated.View>
       ))}
     </View>
   )
