@@ -45,6 +45,35 @@ import { medidas } from '../tokens/medidas'
  * se rasterizan aparte — *tres rasterizados independientes no son la misma
  * imagen: el antialiasing cae distinto y las densidades divergen sin que
  * nada avise.*
+ *
+ * ── 🔴 S116-B lote 5 · LA VERSIÓN CLARA TAMBIÉN LO TENÍA, Y SU FONDO SÍ
+ *    ERA UNA FORMA APARTE (al revés que la oscura) ──────────────────────
+ * Orden de la mesa: *«logo.png (la versión clara) tiene fondo blanco
+ * horneado: misma cura que le hiciste al isotipo»*. **Medido antes:
+ * alfa mínimo 247 sobre 255 en toda la imagen** —o sea opaca entera— y la
+ * esquina en blanco pleno. **Después: 55 % transparente, 35 % opaco.**
+ *
+ * ⚠️ **Y acá la cura del isotipo NO ALCANZABA, que es el hallazgo:** los
+ * dos rasterizados veían el blanco igual, así que el despeje daba α = 1 y
+ * **devolvía exactamente lo que entró**. *Un resultado idéntico al
+ * original es el síntoma, y se lee como «ya estaba bien».* El blanco
+ * resultó ser un `<path fill="#ffffff">` propio —un rectángulo de
+ * 1255×903 sobre un lienzo de 1254×1254— **y por eso la respuesta a la
+ * pregunta de la mesa es distinta en cada logo: en el oscuro NO era una
+ * forma aparte y en el claro SÍ.**
+ *
+ * ⚠️ **LO QUE QUEDA Y NO SE DISIMULA:** el trazo del marco del SVG
+ * sobrevive en el borde, con **alfa ~100/255 en las esquinas**. Sobre
+ * lienzo es blanco sobre casi-blanco y no se ve (montado y mirado:
+ * `docs/loop/capturas-s116-b/logo-claro-alfa.png`); **sobre ciruela SÍ se
+ * ve como un rectángulo tenue** — y no llega a ninguna pantalla porque
+ * `sobre="claro"` es, por contrato, sólo para lienzo y superficie. *No se
+ * quita porque su trazo es el MISMO path que contornea la marca entera:
+ * sacarlo se lleva el contorno del logo.*
+ *
+ * El camino quedó como script —`scripts/curar-alfa-horneado.py`— porque
+ * ésta fue la segunda vez: *derivar la fórmula de nuevo cada vez es la
+ * misma deuda que un número tecleado dos veces.*
  * ═══════════════════════════════════════════════════════════════════════
  */
 export type SobreFondo = 'claro' | 'oscuro'
