@@ -8,7 +8,8 @@
 
 ## CÓMO SE LEE
 
-- **consumidores** = archivos de `apps/` que importan la pieza desde `@epetplace/ui`. **`0` no significa «no sirve»: significa «todavía nadie la montó»** — las nueve del shell nacieron en el lote 2 para que C las monte en el 3.
+- **consumidores** = archivos de `apps/` que importan la pieza desde `@epetplace/ui`. **`0` no significa «no sirve»: significa «todavía nadie la montó».**
+  ⏪ *Cuando este catálogo nació, las nueve del shell estaban en 0 porque acababan de entregarse. **C montó el lote 3 y siete de ellas subieron** — y el gate lo dijo solo, que es para lo que existe: encontró **13** desajustes, no los 3 que se esperaban, incluidas dos que **bajaron** (`SelectorOpcion` y `AvatarMascota`: C las desmontó de algún lado). Los números de esta página son de hoy, no del día que se escribió.*
 - **tokens** = lo que la pieza consume. *Si una pantalla necesita un color o una medida que la pieza no expone, **no se pasa por prop**: se pide por buzón.*
 - **la casa v5** = `theme.accent.formaV5`. Es UN slot que responde una sola pregunta —*¿esta casa recibió el rediseño?*— y gobierna **geometría, tipografía y huella** a la vez. Cliente `true` · prestador `false` · **memorial `false`** (§4 de la letra apaga la fiesta).
 
@@ -21,7 +22,7 @@ La banda ciruela de arriba. **Va en TODAS las pantallas del cliente**, no solo e
 - **props:** `variante` (`raiz` | `empujada`) · `antetitulo` · `titulo` · `apoyo` · `accionDerecha` · `pasos` · `onVolver` · `etiquetaVolver`
 - ⚠️ **No tiene un alto fijo y no se puede exportar uno:** mide `inset + padding + CONTENIDO + padding`, y el contenido es variable por diseño. Se exportan `ALTO_CABECERA_RAIZ_FIJO` / `ALTO_CABECERA_EMPUJADA_FIJO` (**sólo el padding**) como piso de arranque para medir con `onLayout`. *Un alto único sería correcto para una combinación y falso para las otras siete.*
 - **tokens:** `gradients` · `medidas` · `palette` · `radius` · `spacing` · `elevacion` · `theme.accent`
-- **consumidores:** 0
+- **consumidores:** 7
 - **captura:** `docs/loop/capturas-s116-b-lote2/piezas-v5-montadas.png`
 - ⚠️ **El degradado lo resuelve el TEMA, no un `if memorial`** — memorial cae a ciruela noche plana solo.
 
@@ -29,7 +30,7 @@ La banda ciruela de arriba. **Va en TODAS las pantallas del cliente**, no solo e
 El botón flotante que abre NEXO. Va en **toda raíz**.
 - **props:** `onPress` · `visible` · `etiqueta`
 - **tokens:** `medidas` · `palette` · `radius` · `shadows` · `spacing` · `theme.accent`
-- **consumidores:** 0
+- **consumidores:** 1
 - 🔴 **FLOTA SOBRE EL CONTENIDO, así que la pantalla tiene que dejarle aire:**
 
   ```tsx
@@ -51,7 +52,7 @@ Filas con círculo de elección — **no chips**. Para elegir una de varias cosa
 La pantalla de «¡Listo!» a lienzo completo.
 - **props:** `titulo` · `apoyo` · `dato` · `lineaExtra` · `primario` · `secundario` · `especies` · `exclamacion`
 - **tokens:** `medidas` · `radius` · `spacing` · `motion` · `elevacion` · `theme.accent` · `theme.bg` · `theme.mode`
-- **consumidores:** 0
+- **consumidores:** 1
 - ⚠️ **`lineaExtra` es STRING, no nodo** — es el slot fiscal de S115 y `R74`/`R84` mantienen la plata fuera de las piezas.
 - ⚠️ **Memorial no monta trío ni destellos, y lo decide el TEMA**, no el consumidor. Con `useReducedMotion` la pantalla **aparece hecha**.
 
@@ -59,7 +60,7 @@ La pantalla de «¡Listo!» a lienzo completo.
 Las seis caras del founder. **`TrioPersonajes` es la mitad de `Confirmacion`.**
 - **props:** `especie` (`perro`|`gato`|`conejo`|`ave`|`roedor`|`otro`) · `tamano` (`grande`|`hogar`|`selector`|`fila`) · `elegido` · `fondo` · (trío: `especies` de exactamente 3)
 - **tokens:** `medidas` · `palette` · `radius` · `theme.bg`
-- **consumidores:** 0 · 0
+- **consumidores:** 4 · 0
 - 🔴 **El `ave` usa la nariz como cara** hasta que llegue su archivo — el único que entró trae el wordmark encima. Enmienda firmada de la letra §1.10.
 - ⚠️ **Ninguna es vector**; el `roedor` tiene fondo blanco opaco.
 
@@ -72,7 +73,7 @@ El recuadro de fecha (mes sobre día) y la barra de progreso de un flujo.
 ### `IsotipoV5` · `LogoV5`
 La marca v5 por imagen. **`LogoV5` lleva el wordmark y se dimensiona por ANCHO; `IsotipoV5` por alto.**
 - **props:** `sobre` (`claro` | `oscuro`) · `tamano`
-- **consumidores:** 0 · 0
+- **consumidores:** 1 · 1
 - ⚠️ **No reemplazan a `Isotipo` todavía** — aquél sigue vivo con sus 18 consumidores.
 
 ---
@@ -102,14 +103,14 @@ Entrada de texto con su pie.
 La superficie que agrupa.
 - **props:** `tinte` · `elevacion` (`plana`|`reposo`|`elevada`) · `relleno` (`normal`|`amplio`|`ninguno`) · `luz`
 - **tokens:** `radius` · `shadows` · `elevacion` · `spacing` · `theme.bg` · `theme.border` · `theme.capa`
-- **consumidores:** 138
+- **consumidores:** 141
 - ⚠️ **Tarjetas anidadas: nunca.** Y en claro la superficie en reposo conserva su hairline.
 
 ### `SelectorOpcion` · `FiltroPills` — *el chip*
 `SelectorOpcion` elige (una o varias); `FiltroPills` filtra.
 - **props:** `opciones[]` · `seleccionada`/`seleccionadas` · `onSelect` · `disposicion` (`fila`|`tira`|`grilla`) · `multiple` · `adorno` · `entidad` · `marcaPata` · `cargando` (por chip)
 - **tokens:** `radius` · `spacing` · `motion` · `elevacion` · `theme.accent` · `theme.capa`
-- **consumidores:** 57 · 16
+- **consumidores:** 56 · 16
 - 🔴 **La pata que pisa ya está montada desde S91** (`MarcaEleccion`, física S62). En el chip lleno pasa a `rosaSobreCiruela` — *pintada del mismo ciruela que el relleno se volvía invisible, y los tres gates daban verde.*
 - ⚠️ **Los chips NO son tabs.** Para vistas exclusivas va `SelectorSegmentado`, salvo que convivan tres ejes hermanos (ahí manda la gramática de la pantalla).
 
@@ -117,7 +118,7 @@ La superficie que agrupa.
 `CeldaNavegacion` entra a una sección (glifo + título + chevrón); `Celda` muestra un dato.
 - **props:** `icono` · `titulo` · `detalle` · `onPress` · `registro` · `chevron` — `subtitulo` · `inicio` · `densidad` · `tituloEntero` · `elegida`
 - **tokens:** `radius` · `spacing` · `motion` · `typography` · `theme.accent` · `theme.bg`
-- **consumidores:** 49 · 87
+- **consumidores:** 49 · 89
 - ⚠️ **El contorno transparente murió como acción de fila.** Información despliega; acción lleva. El glifo va en círculo rosa tinte.
 
 ### `Insignia` — *el estado*
@@ -139,7 +140,7 @@ Sumar y restar unidades.
 El set b′. **Nombre tipado: cero strings mágicos.**
 - **props:** `nombre` (canónico **o** nombre del mock) · `tamano` · `registro` (`capa`|`aa`|`tinta`) · `tinta` · `huella` · `activa` · `montaje`
 - **tokens:** `medidas` · `palette` · `theme.capa` · `theme.status` · `theme.accent`
-- **consumidores:** 58
+- **consumidores:** 59
 - 🔴 **En la casa v5 NINGÚN glifo lleva huella** (letra §1.1). Lo decide `resolverHuella`, no la pantalla — y lo vigila `verify:huella-por-casa`.
 - ⚠️ **C puede montar los nombres del mock** (`buscar`, `agenda`, `chat`, `camara`…): 14 alias resuelven al canónico, y un alias mal escrito **rompe el compilador**.
 - ⚠️ `Volver`/`Avanzar`/`Flecha` **no son del registry**: son `Chevron`, otra pieza.
@@ -148,7 +149,7 @@ El set b′. **Nombre tipado: cero strings mágicos.**
 Toda la tipografía.
 - **props:** `variante` (`titulo`|`seccion`|`cuerpo`|`apoyo`|`enfasis`|`antetitulo`|`dato`|`datoMd`|`voz`) · `color` (+ **`acentoSobreOscuro`**) · `numberOfLines` · `centrado` · `tabular`
 - **tokens:** `typography` · `theme.text` · `theme.status`
-- **consumidores:** 227
+- **consumidores:** 231
 - 🔴 **En la casa v5, `titulo` y `seccion` son Baloo 2 800** (28/31 y 22/26); `cuerpo`/`apoyo`/`enfasis` son Plus Jakarta Sans. **No hay que pasar nada: la pieza resuelve por casa.**
 - ⚠️ **`dato` y `datoMd` siguen en JetBrains Mono** (Ley 3: metadata de máquina) y **`voz` sigue en DM Sans 300** — la letra no nombra una variante de voz, y cambiarla sería decidir algo que nadie firmó.
 - 🔴 **`acentoSobreOscuro` (S116-B)** = el rosa sobre ciruela, para el acento de un claim sobre el degradado. **Resuelve a la paleta, no al tema**, igual que `sobreVideo`: la superficie ciruela es oscura aunque el tema sea claro. En memorial cae a `inverso` — *un acento rosa es fiesta, y §4 dice «la misma estructura sin la fiesta»*.
@@ -159,7 +160,7 @@ La cara de la mascota — **el último peldaño de la escalera de la cara**.
 - **props:** `nombre` · `fotoUrl` · `fotoDeEspecie` · `especie` · `tamano` (`xs`|`sm`|`entidad`|`md`|`lg`) · `capa`
 - 🔴 **`caraDePersonaje(especie)` (S116-B)** exporta la tabla especie→cara para que no viva en dos lugares. **Devuelve `undefined` cuando no hay cara propia** —ésas van al monograma— así que la pantalla que necesite una cara sí o sí **escribe su fallback a la vista**. *Un `?? 'otro'` adentro borraría ese criterio para todos.*
 - **tokens:** `palette` · `typography` · `theme.capaBg` · `theme.text`
-- **consumidores:** 31
+- **consumidores:** 30
 
 ### `BarraTabs`
 Las cinco tabs. **El activo es el círculo elevado.**
@@ -172,7 +173,7 @@ Las cinco tabs. **El activo es el círculo elevado.**
 ### `EsperaDeMarca`
 La espera de la casa: la nariz respirando. **Única animación de espera legal**, y siempre con voz honesta debajo.
 - **tokens:** `motion` · `theme.accent` · `theme.capa`
-- **consumidores:** 8
+- **consumidores:** 9
 - ⚠️ En memorial **queda quieta**.
 
 ### `NarizNotificacion`
