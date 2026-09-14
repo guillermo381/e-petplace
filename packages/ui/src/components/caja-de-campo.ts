@@ -188,7 +188,18 @@ export function colorDeContorno(theme: Theme, { error, enfocado }: EstadoCaja): 
      el elemento activo de la vista; lo único que cambió es con qué color
      lo dice la casa del cliente. */
   if (enfocado) return formaV5(theme) ? theme.accent.glifo : theme.accent.active  /* S116-B · memorial ya porta este slot (los 3 temas son isomorfos): el fallback era rama muerta. */
-  return theme.border.campo
+  /* 🔴 **S116-B lote 6 · EL REPOSO PASA A CIRUELA TENUE, CON SU PISO.**
+     Firma del founder: *«el borde de los campos en reposo es gris; en el
+     sketch es ciruela tenue»*.
+     ⚠️ **«Tenue» tiene un piso y no es negociable:** el borde de un campo
+     es contorno de control ⇒ **3:1 (WCAG 1.4.11)**, que `R43` vigila.
+     Ciruela al 25 % —lo que «tenue» sugiere a ojo— da **1,82:1**: *se ve
+     tenue y deja de existir para quien no distingue bien los tonos bajos.*
+     El token es el primero que pasa contra las tres superficies, y **mejora
+     los números del gris que reemplaza** (3,82 vs 3,68 sobre tarjeta).
+     Sólo en la casa v5: el prestador conserva su gris, que es lo que su
+     gate midió. */
+  return formaV5(theme) ? theme.border.campoV5 : theme.border.campo
 }
 
 /** El grosor del contorno. S104-B: el foco suma **1** sobre el reposo —

@@ -24,13 +24,27 @@
   fondo={<Cabecera variante="raiz" presentacion="fondo" titulo={…} />}
   costura={<FilaAccionesCostura accesos={[…]} />}
   arranque={150}
+  pie={<Boton … />}            {/* o <OndaAcceso …/> con materialDelPie="sangrado" */}
 >
   {tu contenido}
 </HojaContenido>
 ```
 
+### 🔴 EL PIE FIJO — CUÁL SE USA CUÁNDO (S116-B, y **no son dos alternativas**)
+
+| la pantalla… | monta | por qué |
+|---|---|---|
+| tiene **hoja** (ciruela de fondo, contenido en la hoja) | **`HojaContenido` con `pie`** | el pie va en el slot. **`PantallaConPie` NO se envuelve alrededor**: serían **dos pies y dos reservas**, y la de afuera no sabe del scroll de adentro |
+| **no** tiene hoja (una pantalla de flujo, un formulario, una ficha) | **`PantallaConPie`** | sigue siendo suya; no cambió nada |
+| tiene hoja y el pie es la **onda** | `HojaContenido` con `pie` + **`materialDelPie="sangrado"`** | la onda tiene que llegar al filo: sin fondo de lienzo ni padding, y el inset lo absorbe ella |
+
+**El mecanismo es UNO (`pie-fijo.tsx`) y las dos piezas lo consumen.** Lleva adentro las tres curas que se pagaron con defectos de aparato: la **reserva medida** (el pie tapaba contenido en cinco pantallas), el **inset derivado** (se contaba dos veces adentro de `(tabs)`) y el **`box-none`** (el pie se comía el gesto en el tercio inferior). *Un segundo pie escrito a mano no tendría ninguna de las tres, porque no las pagó.*
+
+⚠️ **Consecuencia para `R53`:** la regla vigila pies fijos escritos a mano y hoy lleva **cuatro declarados**. Con el slot, esas pantallas dejan de necesitar la declaración — **pero la declaración muere cuando migran, no antes**: retirarla hoy pondría a `R53` en rojo sobre pantallas que todavía no cambiaron. *Migración y baja de baseline son el mismo acto.*
+
 ### `HojaContenido`
-- **props:** `fondo` · `costura` · `arranque` · `scroll` · `children`
+- **props:** `fondo` · `costura` · `arranque` · `scroll` · `children` · **`pie`** · **`materialDelPie`**
+- 🔴 **La hoja CRECE HASTA EL PIE siempre** (`flexGrow` en la hoja **y** en el `contentContainer`). ⏪ Con `minHeight: 400` sin `flexGrow`, el contenido corto dejaba asomar el ciruela entre la hoja y el pie: *un mínimo garantiza que no sea más chica, no que llegue abajo*. **El defecto sólo existe cuando sobra pantalla — justo la pantalla con la que nadie prueba.**
 - **tokens:** `radius.cabeceraV5` · `theme.bg.base` (el lienzo) · `theme.accent.gradient`
 - **consumidores:** 6
 - 🔴 **EL DEGRADADO LO PINTA ESTA PIEZA, no la `Cabecera`** — y no es un detalle de implementación: al scrollear *«el fondo se queda y su CONTENIDO se desvanece»*. **Si el degradado viniera dentro del nodo que se desvanece, se apagaría con él** y la pantalla quedaría blanca detrás de la hoja.
@@ -54,7 +68,9 @@
 - **exporta:** `ALTO_ONDA_ACCESO` — quien la monte al pie de una hoja que scrollea **tiene que reservarle el lugar**, igual que con los dos altos de `Cabecera`.
 - 🔴 **La ola es un `Path`, no un `borderRadius`:** un radio da un DOMO —simétrico, una sola inflexión— y *una ola tiene dos*. El `viewBox` de 100 con `preserveAspectRatio="none"` la estira con la pantalla en vez de repetirla.
 - 🔴 **La frase llega YA PARTIDA en dos líneas.** Dónde corta es una decisión de redacción; un `numberOfLines={2}` la tomaría por su cuenta con el ancho de cada teléfono.
-- 🔴 **El teclado: alto CONSTANTE + fundido, y hacen falta las dos mitades.** El alto fijo es lo que impide que se aplaste (una franja que mide un número no se comprime); el fundido es lo que impide que se vea salir. ⚠️ **Lo que la pieza no puede sola:** si la pantalla la mete en un reparto `flex`, el reparto es de la pantalla.
+- 🔴 **El teclado: alto constante + fundido + DEJAR DE PINTARSE.** Las dos primeras no alcanzaban — C midió **píxeles magenta a y≈1505-1510 con el teclado arriba**. *Una opacidad que llega a 0 no deja nada visible: o el fundido no corrió, o lo que se ve no es esta pieza.* La tercera cierra las dos puertas: **al terminar el fundido la onda deja de dibujarse**, y lo que no está dibujado no deja píxeles pase lo que pase con el listener. ⚠️ **Conserva su alto siempre, pintada o no:** si además se encogiera, el contenido de arriba saltaría — y *«no salta»* es de la misma orden que *«desaparece»*.
+- ⚠️ **Absorbe `insets.bottom` como padding, no como margen:** el magenta sangra hasta el filo y sólo el contenido se corre (Ley 8, precedente `Hoja`/`PantallaConPie`).
+- **Su lugar es el `pie` de `HojaContenido` con `materialDelPie="sangrado"`** (ver §⓪).
 - ⚠️ **La rueda no sortea:** orden fijo, así no puede repetir dos veces la misma cara — *que se lee como que se colgó*. Con **una sola especie no arranca**: no hay a dónde ir.
 - ⚠️ **Dice «la cara» y monta el personaje ENTERO, declarado:** recortar a ojo seis ilustraciones distintas daría seis encuadres distintos, y el que quede mal no se nota hasta que lo ve el founder. El recorte, si la mesa lo quiere, es del ilustrador.
 
@@ -284,6 +300,10 @@ import { glifoDeOficio, esOficio, type Oficio } from '@epetplace/ui'
 | `spacing` | la escala de RITMO, base 4, múltiplos estrictos |
 | `typography` | `escala` trae la v5 (Baloo + PJS); `family` conserva DM Sans **como token del PRESTADOR** |
 | `radius` · `shadows` · `elevacion` | radios, sombras por `elevation` (**nunca CSS**) y el halo. ⚠️ **`halo.presencia(color)` RECIBE su color** — el token conserva la geometría (4 px) y la dosis (10 %) y nada más: `formaV5` es `true` en el tema claro **y en el oscuro**, y un color horneado miente en una de las dos casas sin fallar |
+| **`border.campoV5`** | **el borde del campo en REPOSO, en ciruela tenue** (`#9A76A4` = ciruela 55 % sobre lienzo). ⚠️ **«Tenue» tiene piso: 3:1 (WCAG 1.4.11, lo vigila `R43`)** — ciruela al 25 % da **1,82** y *deja de existir para quien no distingue tonos bajos*. El token elegido **mejora al gris que reemplaza en las tres superficies** (3,82 / 3,46 / 3,53 contra 3,68 / 3,33 / 3,41). Sólo v5; el prestador conserva su gris |
+| **`COLUMNA_ASISTENTE`** | **el ancho que el asistente ocupa desde el borde derecho** (margen + disco + halo + respiro = 112). Nace porque `AIRE_RAIZ` es un `paddingBottom` y **el asistente flota sobre el scroll**: cualquier cosa pegada al borde derecho pasa por su esquina *en algún punto del recorrido*. *Ningún padding inferior protege a algo que viaja* ⇒ la pastilla de `CitaEnVivo` se corrió a la izquierda |
+| **`motion.v5.asistenteHaloEscala` · `…Opacidad`** | cuánto crece y cuánto se ve el halo del asistente. ⏪ eran 1,3 y 0,35 y el founder midió *«casi no se nota»*: sobre un disco de 52 el halo asomaba **7,8 px**. Hoy 1,6 y 0,55 ⇒ **15,6 px**. *El ritmo no cambió: sólo cuánto aire mueve* |
+| **`ISOTIPO_V5_PATH` · `ISOTIPO_V5_CAJA`** | **el isotipo nuevo como VECTOR, para los ocho papeles que se imprimen** (`D-1107`). No es pieza: el consumidor es una edge de Deno que dibuja un PDF. ⚠️ Va con **su viewBox (cuadrado, 1254) Y la caja medida del contenido** — *un viewBox no dice dónde está el dibujo, dice cuál es el papel*. Aspecto **1,685**, contra 1,456 del viejo: quien reemplace conservando el alto necesita **~16 % más de ancho** |
 | **`accent.glifo` · `accent.glifoBg`** | **el par del glifo, y son DOS slots porque se miden juntos.** Ciruela sobre `ciruelaTinte` en el cliente; el prestador conserva su teal. Se monta con `registro="glifo"` en `Icono` — **nunca pasando el color**, que es lo que deja la decisión sin lista de dónde se escribió. **El foco del campo toma el mismo slot bajo v5**: es la misma decisión (el acento NO accionable), y el acoplamiento está declarado en `caja-de-campo.ts` |
 | **`AIRE_RAIZ`** | **el aire que toda pantalla RAÍZ deja abajo** para que la última fila no quede debajo del asistente ni de la barra. Derivado; se le suma `insets.bottom` |
 | `motion` | 180–240 ms sin rebote para lo que responde al toque; entrada escalonada 45/300 para lo que llega |

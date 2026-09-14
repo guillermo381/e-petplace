@@ -201,6 +201,9 @@ export const lightTheme = {
     default:  palette.tintaBorde12,
     presente: palette.tintaBorde12,
     campo:    palette.campoBordeL,   // conserva su piso medido de 3:1 (R43)
+    /* S116-B lote 6 · el reposo de la casa v5. Memorial NO es v5 y conserva
+       su verde sereno: el slot existe porque los tres temas son isomorfos. */
+    campoV5:  palette.campoBordeCiruelaL,
     subtle:   palette.tintaBorde09,  // el hairline de tarjeta (§2: «borde 1 tinta 9 %»)
     accent:   palette.magentaAccion,
     brand:    palette.magentaAccion,

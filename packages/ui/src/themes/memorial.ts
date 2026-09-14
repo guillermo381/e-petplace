@@ -177,6 +177,9 @@ export const memorialTheme = {
     default:  palette.tintaBorde12,
     presente: palette.tintaBorde12,
     campo:    palette.campoBordeL,
+    /* S116-B lote 6 · el reposo de la casa v5. Memorial NO es v5 y conserva
+       su verde sereno: el slot existe porque los tres temas son isomorfos. */
+    campoV5:  palette.campoBordeM,
     subtle:   palette.tintaBorde09,
     accent:   palette.tintaBorde12,
     brand:    palette.tintaBorde12,

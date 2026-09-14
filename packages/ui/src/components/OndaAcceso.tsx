@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Keyboard, View } from 'react-native'
 import Animated, {
   Easing,
+  runOnJS,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -11,6 +12,7 @@ import Svg, { Path } from 'react-native-svg'
 import { motion } from '../tokens/motion'
 import { palette } from '../tokens/palette'
 import { spacing } from '../tokens/spacing'
+import { useInsetQueFalta } from './pie-fijo'
 import { Personaje, type EspeciePersonaje } from './Personaje'
 import { Texto } from './Texto'
 
@@ -40,12 +42,24 @@ import { Texto } from './Texto'
  * estira con la pantalla en vez de repetirse o recortarse**: la misma ola
  * en un teléfono angosto y en una tablet.
  *
- * ── EL TECLADO: ALTO FIJO + FUNDIDO, y las dos mitades hacen falta ────
+ * ── EL TECLADO: ALTO FIJO + FUNDIDO + DEJAR DE PINTAR ─────────────────
  * **El alto es una constante, no un `flex`.** Ésa es la mitad que impide
  * que se aplaste: una franja que mide `ALTO_ONDA` no se puede comprimir
  * cuando la ventana se achica — se sale de la pantalla, que es otra cosa.
- * **El fundido es la mitad que impide que se vea salir.** Con las dos, el
- * teclado sube y la onda ya no está; baja y vuelve.
+ * **El fundido es la mitad que impide que se vea salir.**
+ *
+ * 🔴 **Y HACE FALTA UNA TERCERA, que C midió: el fundido no alcanzaba.**
+ * Con el teclado arriba quedaban **píxeles magenta a y≈1505-1510**. *Una
+ * opacidad que llega a 0 no deja nada visible — salvo que el fundido no
+ * llegue a correr, o que lo que se ve no sea esta pieza.* Sea cual sea de
+ * las dos, **la cura que cierra las dos puertas es la misma: al terminar
+ * el fundido la onda DEJA DE PINTARSE.** Lo que no está dibujado no puede
+ * dejar píxeles, y eso no depende de que un listener haya disparado.
+ *
+ * ⚠️ **Lo que NO cambia es el lugar que ocupa.** El contenedor conserva su
+ * alto siempre, pintada o no: *si además se encogiera, el contenido de
+ * arriba saltaría al subir el teclado — y «no salta» es de la misma orden
+ * que «desaparece».* Se deja de pintar, no de existir.
  *
  * ⚠️ **LO QUE ESTA PIEZA NO PUEDE HACER SOLA, declarado:** si la pantalla
  * la monta dentro de un contenedor con `flex: 1` y reparto, el reparto es
@@ -96,6 +110,18 @@ export interface OndaAccesoProps {
 
 export function OndaAcceso({ frase, lado, especies = LAS_SEIS }: OndaAccesoProps) {
   const sinMovimiento = useReducedMotion()
+  /* 🔴 **EL INSET SE MIDE, NO SE PIDE (lote 6, corrección del aparato).**
+     El founder vio en un Samsung con tres teclas *«el texto cortado por la
+     barra»*. La pieza ya sumaba `insets.bottom` — y `insets.bottom` dice
+     **cuánto mide la barra**, no **cuánto de ella queda debajo de esta
+     franja**: adentro de `(tabs)` el navegador ya la reservó y el valor
+     sobra; montada al filo, falta entero. *El mismo par descoordinado que
+     `PantallaConPie` mató, cobrado acá por segunda vez.*
+     ⚠️ **Adenda del founder:** *«la franja magenta se queda como está,
+     llegando hasta el borde. Lo único que sube es el CONTENIDO.»* Es lo que
+     hace el `paddingBottom` de abajo: el color sangra, el contenido se
+     corre. Lo que cambia en este lote es **con qué número**. */
+  const [refOnda, medirOnda, insetInferior] = useInsetQueFalta()
   const [indice, setIndice] = useState(0)
   const opacidad = useSharedValue(1)
   /* El índice se lee de un ref adentro del intervalo y no de la clausura:
@@ -156,12 +182,23 @@ export function OndaAcceso({ frase, lado, especies = LAS_SEIS }: OndaAccesoProps
      en esta casa desde `SuperficieChat` (ver su cabecera) y acá no hace
      falta seguir el teclado píxel a píxel — sólo saber si está. */
   const visible = useSharedValue(1)
+  const [pintada, setPintada] = useState(true)
   useEffect(() => {
     const dur = motion.duration.fast
     const subio = Keyboard.addListener('keyboardDidShow', () => {
-      visible.value = withTiming(0, { duration: dur })
+      /* Se deja de pintar CUANDO TERMINA el fundido, no al empezar: apagarla
+         de golpe sería el salto que la orden prohíbe. */
+      visible.value = withTiming(0, { duration: dur }, (fin) => {
+        'worklet'
+        if (fin) runOnJS(setPintada)(false)
+      })
     })
     const bajo = Keyboard.addListener('keyboardDidHide', () => {
+      /* Al revés: primero vuelve a existir —invisible— y recién entonces
+         aparece. *Montar y fundir en el mismo frame deja el primer cuadro
+         a opacidad 1, que es un parpadeo.* */
+      setPintada(true)
+      visible.value = 0
       visible.value = withTiming(1, { duration: dur })
     })
     return () => {
@@ -197,9 +234,19 @@ export function OndaAcceso({ frase, lado, especies = LAS_SEIS }: OndaAccesoProps
     </View>
   )
 
+  /* El lugar que ocupa, SIEMPRE — pintada o no (ver la cabecera). El inset
+     se suma acá y no adentro de la banda: el magenta tiene que llegar al
+     filo de la pantalla, y lo que no puede quedar debajo de la barra del
+     sistema es el CONTENIDO. */
+  const alto = ALTO_ONDA_ACCESO + insetInferior
+
+  if (!pintada) return <View ref={refOnda} onLayout={medirOnda} style={{ height: alto }} />
+
   return (
     <Animated.View
-      style={estiloOnda}
+      ref={refOnda}
+      onLayout={medirOnda}
+      style={[{ height: alto }, estiloOnda]}
       /* La onda no es un control: no recibe toques ni los roba a lo que
          tenga debajo mientras está desvanecida. */
       pointerEvents="none"
@@ -213,7 +260,12 @@ export function OndaAcceso({ frase, lado, especies = LAS_SEIS }: OndaAccesoProps
       </Svg>
       <View
         style={{
-          height: ALTO_BANDA,
+          height: ALTO_BANDA + insetInferior,
+          /* Ley 8: el inset lo pone la pieza, no el consumidor — mismo
+             precedente que `Hoja` (S65) y que `PantallaConPie`. Va como
+             padding y no como margen para que **el color siga sangrando
+             hasta el borde** y sólo el contenido se corra. */
+          paddingBottom: insetInferior,
           backgroundColor: palette.magentaAccion,
           flexDirection: lado === 'der' ? 'row' : 'row-reverse',
           alignItems: 'center',

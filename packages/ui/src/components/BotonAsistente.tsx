@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Pressable, View, type ViewStyle } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -42,6 +43,22 @@ import { useTheme } from '../ThemeProvider'
  * única pieza con movimiento en reposo, firmado por la mesa**; respeta
  * useReducedMotion (quieto). Sin cambiar tamaño ni posición.»*
  *
+ * **②bis 🔴 EL «SIN PARAR» SE RETIRA — y la razón es de máquina, no de
+ * gusto.** C midió que **una animación infinita deja la ventana de Android
+ * permanentemente NO-IDLE**: `uiautomator` nunca vuelve a reportar reposo,
+ * así que **toda captura y toda prueba automatizada de esa pantalla se
+ * vuelve imposible** — no sólo las de esta pieza: las de cualquiera que
+ * comparta pantalla con el asistente. *Un elemento decorativo que apaga el
+ * instrumental de toda la casa cuesta más de lo que aporta.*
+ *
+ * Firma de la mesa: **respira TRES CICLOS al montar y descansa; vuelve a
+ * respirar al volver a la raíz o al scrollear.** Lo segundo lo dispara el
+ * consumidor con `despertar` — la pieza no sabe qué es «volver a la raíz».
+ *
+ * ⚠️ **Y el «algo vivo esperando» NO se pierde:** el halo **se queda
+ * puesto** en su punto más contraído y más visible. *Lo que descansa es el
+ * movimiento, no la presencia.*
+ *
  * **③ Por qué la Ley 5 no se rompe, y no es un tecnicismo:** la mesa no
  * levantó la regla — **declaró la excepción y la acotó a UNA pieza**. La
  * Ley 5 prohíbe que compitan DOS; con una sola firmada, lo que hay es un
@@ -70,20 +87,39 @@ export type BotonAsistenteProps = {
    *  llama el asistente en el idioma de quien mira (Ley 3 — la voz es del
    *  riel, jamás de la pieza). */
   etiqueta: string
+  /** 🔴 **EL DESPERTADOR.** Cada vez que este número CAMBIA, el halo vuelve
+   *  a respirar sus tres ciclos. La orden pide que respire *«al volver a la
+   *  raíz o al scrollear»* y **ninguna de las dos cosas las puede saber
+   *  esta pieza**: no conoce la navegación ni el scroll de quien la monta.
+   *
+   *  ⚠️ **Es un número que cambia y no un `boolean`** a propósito: con un
+   *  booleano habría que apagarlo y volverlo a prender para pedir otra
+   *  vuelta, y *quien se olvide del apagado deja el asistente sin respirar
+   *  para siempre sin que nada falle*. Un contador que sube siempre
+   *  dispara.
+   *
+   *  Sin pasarlo, respira una vez al montar y descansa — que es el
+   *  comportamiento mínimo que la orden pide. */
+  despertar?: number
 }
 
 /** Cuánto se sale el halo del botón en su punto más ancho, en píxeles.
  *  **Se DERIVA de la escala y del lado, no se teclea**: el contenedor
  *  tiene que ser exactamente lo bastante grande para que el halo quepa, y
  *  el día que la escala cambie el margen la sigue solo. */
+/** Cuántas respiraciones al montar (y en cada `despertar`). Firma de la
+ *  mesa: *«respira tres ciclos… y descansa»*. */
+const CICLOS_AL_LLEGAR = 3
+
 function margenDelHalo(lado: number): number {
   return Math.ceil((lado * (motion.v5.asistenteHaloEscala - 1)) / 2)
 }
 
-export function BotonAsistente({ onPress, visible = true, etiqueta }: BotonAsistenteProps) {
+export function BotonAsistente({ onPress, visible = true, etiqueta, despertar = 0 }: BotonAsistenteProps) {
   const { theme } = useTheme()
   const { handlers, estiloPresionado } = usePresionado(0.97)
   const sinMovimiento = useReducedMotion()
+  const insets = useSafeAreaInsets()
 
   /* ── LA RESPIRACIÓN ────────────────────────────────────────────────
      Un solo valor de 0 a 1 que va y vuelve para siempre; la escala y la
@@ -103,19 +139,32 @@ export function BotonAsistente({ onPress, visible = true, etiqueta }: BotonAsist
       respiro.value = 0
       return
     }
+    /* Arranca siempre desde el punto contraído: si `despertar` cambia a
+       mitad de una respiración anterior, la nueva no empieza por la mitad. */
+    respiro.value = 0
     respiro.value = withRepeat(
       withTiming(1, {
         /* 🔴 **La cadencia se toma del ORBE y no se copia** — la orden
            pide que «se lea como el orbe viejo», y dos respiraciones con el
            mismo número escrito en dos lados se separan el día que alguien
-           ajuste una. */
+           ajuste una.
+           ⚠️ **DISCREPANCIA MEDIDA, declarada y NO curada acá:** el
+           comentario del token dice *«el ciclo… ida y vuelta»*, pero su
+           otro consumidor —`PresenciaCoach`, el orbe— lo usa **por
+           dirección**, así que su ciclo completo son 8 s y no 4. *Se copia
+           al orbe porque la orden pide que se lean IGUAL; corregir el
+           token cambiaría el ritmo del orbe, y el orbe no es de este
+           lote.* Consecuencia a la vista: tres ciclos son **~24 s**. */
         duration: motion.coach.respiracionMs,
         easing: Easing.bezier(...motion.easing.easeInOut.bezier),
       }),
-      -1,
+      /* 🔴 **TRES CICLOS Y DESCANSA.** Con `reverse` cada repetición es una
+         dirección ⇒ un ciclo son DOS. Y el número par importa: termina
+         donde empezó —contraído y visible—, no a mitad de camino. */
+      CICLOS_AL_LLEGAR * 2,
       true,
     )
-  }, [sinMovimiento, respiro])
+  }, [sinMovimiento, respiro, despertar])
 
   const estiloHalo = useAnimatedStyle(() => ({
     transform: [{ scale: 1 + respiro.value * (motion.v5.asistenteHaloEscala - 1) }],
@@ -145,8 +194,18 @@ export function BotonAsistente({ onPress, visible = true, etiqueta }: BotonAsist
      * `AIRE_RAIZ` la usa para calcular cuánto aire deja toda pantalla raíz
      * abajo, y si acá se escribiera el número suelto **los dos podrían
      * divergir sin que nada falle** — el botón se movería y el aire
-     * quedaría corto, que es el defecto que este token vino a curar. */
-    bottom: medidas.barraAlto + SEPARACION_ASISTENTE - margen,
+     * quedaría corto, que es el defecto que este token vino a curar.
+     *
+     * 🔴 **Y SE APOYA SOBRE LA BARRA, no al lado (lote 6).** El founder lo
+     * vio tapado por la barra de tabs en un Samsung con tres teclas. La
+     * cuenta era `barraAlto + separación` **y le faltaba la barra del
+     * sistema**: donde el navegador no reserva el inset, los 92 de la barra
+     * empiezan más arriba de lo que este `bottom` supone y el disco queda
+     * por debajo. ⇒ se suma **el inset que falta de verdad, medido** — no
+     * `insets.bottom` crudo, que adentro de `(tabs)` lo contaría dos veces
+     * y lo dejaría flotando. *Es el mismo par descoordinado de la onda, en
+     * el otro extremo de la misma pantalla.* */
+    bottom: insets.bottom + medidas.barraAlto + SEPARACION_ASISTENTE - margen,
     width: lado + margen * 2,
     height: lado + margen * 2,
     alignItems: 'center',

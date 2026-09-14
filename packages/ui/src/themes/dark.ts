@@ -164,6 +164,9 @@ export const darkTheme = {
     default:  'rgba(255,255,255,.12)',
     presente: 'rgba(255,255,255,.22)',
     campo:    palette.campoBordeD,
+    /* S116-B lote 6 · el reposo de la casa v5. Memorial NO es v5 y conserva
+       su verde sereno: el slot existe porque los tres temas son isomorfos. */
+    campoV5:  palette.campoBordeCiruelaD,
     subtle:   'rgba(255,255,255,.09)',
     accent:   'rgba(255,127,196,.28)',
     brand:    'rgba(255,127,196,.28)',

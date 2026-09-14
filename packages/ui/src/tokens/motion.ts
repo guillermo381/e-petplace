@@ -248,9 +248,18 @@ export const motion = {
      *  sí mismo y eso en un halo no se ve —un aro que crece un 6 % y se
      *  atenúa a la vez es invisible—. *Un halo no es el cuerpo respirando:
      *  es el aire que el cuerpo mueve.* */
-    asistenteHaloEscala: 1.3,
+    /* ⏪ **ERA 1,3 y el founder lo midió con el ojo: «casi no se nota».**
+       Con 1,3 sobre un disco de 52 el halo asoma **7,8 px** — a un brazo de
+       distancia eso es un borde, no un aura. A 1,6 asoma **15,6**, que es lo
+       que el orbe viejo mostraba. *No se cambió el ritmo: sólo cuánto aire
+       mueve.* */
+    asistenteHaloEscala: 1.6,
     /** La opacidad del halo en su punto más contraído. Se apaga hacia
      *  fuera: cuanto más crece, menos se ve. */
-    asistenteHaloOpacidad: 0.35,
+    /* ⏪ **ERA 0,35.** La otra mitad del «casi no se nota»: el halo nace en
+       su punto MÁS visible y se apaga al crecer, así que 0,35 era su techo.
+       0,55 lo acerca al orbe sin volverlo un segundo botón — *el límite es
+       que se lea como aura y no como borde sólido.* */
+    asistenteHaloOpacidad: 0.55,
   },
 } as const

@@ -513,6 +513,30 @@ export const palette = {
    *  que miente sobre su propia calibración es peor que ninguna: la siguiente
    *  persona la cita.* */
   campoBordeL: '#88829A',  // claro    → 3.41:1 sobre papelTapiz #F6F6F6
+  /* ── S116-B lote 6 · EL BORDE DE CAMPO EN REPOSO, EN CIRUELA ─────────
+     Firma del founder sobre el aparato: *«el borde de los campos en reposo
+     es gris; en el sketch es ciruela tenue»*.
+
+     🔴 **«Tenue» TIENE PISO, y el piso no es negociable:** el borde de un
+     campo es contorno de control ⇒ **WCAG 1.4.11, 3:1**, y `R43` lo
+     vigila. Medido: ciruela al **25 %** da **1,82:1** — *se ve tenue y
+     deja de existir para quien no distingue bien los tonos bajos.*
+     El primero que pasa contra las TRES superficies es el **55 %**.
+
+     **#9A76A4 = ciruela al 55 % sobre lienzo, compuesto y no a ojo.**
+     Medido: **3,82** sobre tarjeta · **3,46** sobre lienzo · **3,53** sobre
+     papel tapiz. *Es más ciruela que el gris Y mejor número que el gris en
+     las tres* (el gris daba 3,68 / 3,33 / 3,41) — la orden no costó
+     accesibilidad, la mejoró.
+
+     ⚠️ **Y su par oscuro destapó un defecto viejo, declarado y curado:**
+     `campoBordeD` (#62627A) publica *«3.40:1 sobre tapizDark»* y **contra
+     el interior real del campo da 2,68** — se midió contra el TAPIZ, que
+     es lo que hay detrás de la pantalla, no contra la caja del campo.
+     *Un número correcto contra la superficie equivocada.* El nuevo se mide
+     donde el borde de verdad se apoya: **4,17** sobre tarjeta oscura. */
+  campoBordeCiruelaL: '#9A76A4',
+  campoBordeCiruelaD: '#9A76A8',
   campoBordeD: '#62627A',  // oscuro   → 3.40:1 sobre tapizDark  #0D050D
   campoBordeM: '#5A695A',  // memorial → 3.34:1 sobre bosque nocturno #0A0E0A (verde sereno)
 

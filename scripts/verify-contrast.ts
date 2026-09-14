@@ -800,6 +800,19 @@ todos.push(
      que impidió hornear el ciruela en el token del halo.* */
   { nombre: 'FOCO v5 · ciruela / interior del campo (claro)', fg: lightTheme.accent.glifo, bg: lightTheme.bg.card, noTextual: true },
   { nombre: 'FOCO v5 · el acento de foco en oscuro / interior del campo', fg: darkTheme.accent.glifo, bg: darkTheme.bg.overlay, noTextual: true },
+
+  /* 🔴 **EL BORDE DEL CAMPO EN REPOSO, EN CIRUELA (lote 6).** Contorno de
+     control ⇒ 3:1 (WCAG 1.4.11), la misma vara que `R43` ya aplicaba al
+     gris que reemplaza. **Entra contra las TRES superficies donde un campo
+     se apoya** y no sólo contra una: *el gris que sale medía 3,41 contra el
+     papel tapiz y nadie lo había medido contra la tarjeta.*
+     ⚠️ Y su par oscuro corrige un número viejo: `campoBordeD` publicaba
+     3,40 **contra el tapiz** —lo que hay detrás de la pantalla— y contra el
+     interior real del campo daba **2,68**, o sea por debajo del piso. */
+  { nombre: 'CAMPO v5 · borde en reposo (ciruela) / tarjeta', fg: lightTheme.border.campoV5, bg: lightTheme.bg.card, noTextual: true },
+  { nombre: 'CAMPO v5 · borde en reposo (ciruela) / lienzo', fg: lightTheme.border.campoV5, bg: lightTheme.bg.base, noTextual: true },
+  { nombre: 'CAMPO v5 · borde en reposo, en oscuro / interior del campo', fg: darkTheme.border.campoV5, bg: darkTheme.bg.overlay, noTextual: true },
+  { nombre: 'CAMPO v5 · borde en reposo, en oscuro / tarjeta', fg: darkTheme.border.campoV5, bg: darkTheme.bg.card, noTextual: true },
 )
 console.log(
   '  (info) CARNET · el punto de las ausencias en text.tertiary medía ' +

@@ -13,7 +13,7 @@ export { radius, type RadiusKey } from './tokens/radius'
    que la última fila no quede debajo del asistente ni de la barra. Es la
    parte FIJA: la pantalla le suma `insets.bottom`. **Un solo token, no un
    número por pantalla** — si el asistente crece, todas lo heredan. */
-export { medidas, AIRE_RAIZ, SEPARACION_ASISTENTE, type MedidaKey } from './tokens/medidas'
+export { medidas, AIRE_RAIZ, COLUMNA_ASISTENTE, SEPARACION_ASISTENTE, type MedidaKey } from './tokens/medidas'
 /* v5 (S116-B lote 2) — las seis caras de la casa y su composición Trío. */
 export { Personaje, TrioPersonajes, type PersonajeProps, type EspeciePersonaje, type TamanoPersonaje } from './components/Personaje'
 /* 🔴 S116-B · ENTRAR CON UNA CUENTA AJENA. **El botón lo entrega su
@@ -44,6 +44,24 @@ export {
    quien la monte al pie de una hoja que scrollea tiene que reservarle el
    lugar — mismo criterio que los dos altos de `Cabecera`. */
 export { OndaAcceso, type OndaAccesoProps, ALTO_ONDA_ACCESO } from './components/OndaAcceso'
+
+/* El mecanismo del pie fijo, en un solo lugar: lo consumen `PantallaConPie`
+   y el slot `pie` de `HojaContenido`. Se exporta el TIPO del material, no el
+   hook — quien necesite un pie monta una de las dos piezas, no arma el suyo. */
+export { type MaterialDelPie } from './components/pie-fijo'
+
+/* 🔴 **EL ISOTIPO v5 COMO PATH — para los papeles que se IMPRIMEN** (`D-1107`).
+   Se exporta el `d` y su viewBox, no una pieza: **el consumidor es una edge
+   de Deno que dibuja un PDF**, no React. *Un componente no le sirve a quien
+   no monta nada.* Su cabecera trae la medición que corrige el encargo: el
+   path que el papel tenía y el de `brand/Isotipo.tsx` eran IDÉNTICOS — la
+   pieza vector de esta casa también era la vieja. */
+export {
+  ISOTIPO_V5_PATH,
+  ISOTIPO_V5_VB_W,
+  ISOTIPO_V5_VB_H,
+  ISOTIPO_V5_CAJA,
+} from './brand/isotipo-v5-path'
 
 export { Cabecera, type CabeceraProps , ALTO_CABECERA_RAIZ_FIJO, ALTO_CABECERA_EMPUJADA_FIJO } from './components/Cabecera'
 export { Opcion, type OpcionProps, type OpcionItem } from './components/Opcion'
