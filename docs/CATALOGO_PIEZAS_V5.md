@@ -71,8 +71,11 @@ El recuadro de fecha (mes sobre día) y la barra de progreso de un flujo.
 - **consumidores:** 0 · 0
 
 ### `IsotipoV5` · `LogoV5`
-La marca v5 por imagen. **`LogoV5` lleva el wordmark y se dimensiona por ANCHO; `IsotipoV5` por alto.**
-- **props:** `sobre` (`claro` | `oscuro`) · `tamano`
+La marca v5 por imagen. **Las dos se dimensionan por ANCHO** — el logo lleva wordmark y fijarle el alto lo deja ilegible; el isotipo lo necesita para poder pedirle *«la mitad del ancho»*.
+- **props:** `sobre` (`claro` | `oscuro`) · `tamano` (`cabecera` | `splash` | **`protagonista`**)
+- 🔴 **`protagonista` (S116-B)** para 00 · splash y 01 · propuesta, donde la marca **ES la pantalla**: ocupa el **50 % del ancho** (`splash` el 34 %, `cabecera` 120 px fijos).
+- ⚠️ **SON FRACCIONES DEL ANCHO, NO PÍXELES, y no es un detalle:** *«cerca de la mitad del ancho del teléfono» no es un tamaño, es una proporción.* Un px fijo la cumple en el aparato donde se midió y la incumple en los demás — en un teléfono chico tapa la pantalla, en una tablet queda perdido. La pieza resuelve con `useWindowDimensions`; **vos no pasás números.**
+- ⏪ Lo que había, medido: el `splash` del isotipo usaba **`avatarHogar` (78)** —*el tamaño de un avatar de ficha para el protagonista de la primera pantalla*— y `LogoV5` tenía un **200 escrito a mano adentro de la pieza**, debajo de un comentario que decía «salen de `medidas`, no de números sueltos».
 - **consumidores:** 1 · 1
 - ⚠️ **No reemplazan a `Isotipo` todavía** — aquél sigue vivo con sus 18 consumidores.
 
