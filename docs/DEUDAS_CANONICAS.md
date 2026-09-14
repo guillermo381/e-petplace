@@ -35260,3 +35260,46 @@ Más **seis montajes directos** fuera de `Encabezado`, entre ellos **dos marcas 
 **C consolidó lo suyo y lo declaró en una lápida**, con la razón escrita: *«02 nació con la misma rotación y la `OndaAcceso` de B ya tenía una tercera. Tres relojes iguales son tres que se desincronizan, y peor: tres lugares donde alguien tiene que acordarse de `useReducedMotion`»*. **C sabía de la de B y no podía tocarla: `packages/ui` no es su territorio.** *Hizo exactamente lo que la regla de territorios pide — y por eso la deuda es de la mesa, no suya.*
 
 **☠️ MUERTE:** cuando exista UN solo `useRuedaDeCaras` y las cuatro superficies lo consuman. **Disparo real, no calendario: la primera pantalla que monte una pieza de B con rueda Y una rueda de C** — *ahí deja de ser duplicación y pasa a ser dos relojes visibles a la vez.*
+
+---
+
+## `D-1112` 🔴 — LA SUGERENCIA DE RAZA ESTABA **MUERTA EN PRODUCCIÓN**, y su mensaje de error mandaba a mirar la foto
+
+**Estado:** **CERRADA EL MISMO DÍA** (14-sep-2026) · **Dueño: A** · **la encontró A** construyendo la sugerencia de especie, no buscándola.
+**Origen:** `TEMPERATURA_CERO.raza = true`, encendida el 7-sep-2026.
+
+> **`temperature: 0` sobre Sonnet 5 devuelve 400.** La edge traducía **todo** 400 del proveedor a *«El modelo rechazó la imagen»* ⇒ **durante una semana la sugerencia de raza no funcionó una sola vez, y el producto decía que el problema era la foto de la familia.**
+
+### Cómo apareció, que importa más que la cura
+
+**No la buscaba.** Estaba probando el camino nuevo de especie y **falló también el camino viejo, sin tocarlo** — ése fue el discriminador: *si lo que no cambié falla igual, lo que falla no es mi cambio.*
+
+### El discriminador, y es una tabla
+
+Se cruzaron `MODELOS`, `TEMPERATURA_CERO` y `PENSAR` para las 13 piezas:
+
+| | modelo | `temperature: 0` |
+|---|---|---|
+| carnet · documento · nota_clinica · presencia · coach · coach_parte · papel · postventa_hoja | **Sonnet 5** | no |
+| coach_router · busqueda · coach_clasifica · postventa_intake | Haiku 4.5 | sí |
+| **`raza`** | **Sonnet 5** | **sí** |
+
+**`raza` era la ÚNICA de las trece que combinaba las dos cosas.** Y las seis piezas de Sonnet con `pensar: false` mandan `thinking: {type:'disabled'}` y funcionan ⇒ **el `thinking` no es la causa; la temperatura sí.**
+
+**Confirmado por camino real, no por tabla:** misma foto, mismo prompt, `modelo: claude-haiku-4-5` → **200 y acierta** (`bulldog-ingles/alta` sobre la foto de Thor, cuya ficha declara «Bulldog inglés»); `claude-sonnet-5` → **400**.
+
+🔴 **Y el canon ya lo traía escrito desde S48**, sobre el carnet: *«v21 = Sonnet (contrato distinto: **sin temperature — 400 en no-default**)»*. *La casa había pagado esta lección y la volvió a comprar quince sesiones después, en otra pieza.*
+
+### La cura, y lo que le cuesta a E
+
+`TEMPERATURA_CERO.raza` → **`false`**. Un valor.
+
+⚠️ **E pierde su línea de base reproducible, y su argumento sigue siendo correcto:** *una línea de base que no es reproducible no es una línea de base.* **Lo que cambió no es que su razón fuera mala: es que en Sonnet 5 ese determinismo NO ESTÁ DISPONIBLE.** La única alternativa que lo daría es Haiku — y ahí manda su propio número: **84 % contra 45 %** sobre su matriz de 1.759 fotos. *Un 84 % que varía le gana a un 45 % reproducible.* **Si E prefiere lo contrario, es una decisión suya y esta ficha le deja los dos números.**
+
+### 🔴 Y la segunda cura, que es la que habría ahorrado la semana
+
+**El mensaje mentía sobre la causa.** `if (r.estadoHttp === 400) return error('imagen_invalida', 'El modelo rechazó la imagen.')` — **un 400 del proveedor puede ser el cuerpo, el modelo, los techos o la imagen**, y esta línea elegía una y la afirmaba. *Un mensaje de error que nombra una causa que no midió no ayuda a diagnosticar: desvía* — y desvió a todo el que miró esto, que por eso creyó que el problema era la foto.
+
+Ahora dice **«No pudimos leer la foto. Probá con otra.»** — describe el efecto y no inventa la causa; el cuerpo real de Anthropic ya se loguea en `[ia] Anthropic non-ok`.
+
+**☠️ MUERTE:** muerta al desplegarse, con la sonda de camino real en verde sobre dos fotos.

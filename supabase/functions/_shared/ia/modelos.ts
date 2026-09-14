@@ -449,7 +449,28 @@ export const TEMPERATURA_CERO: Record<Pieza, boolean> = {
      a conservarla sin poder usarla.* Re-corre y ése pasa a ser el piso.
      Su salida es enteramente cerrada: un código de lista blanca y una confianza
      de tres valores, cero texto libre. Misma clase que los otros tres. */
-  raza: true,
+  /* 🔴 REVERTIDA EN S116-A, y NO por preferencia: **la API la rechaza.**
+     ~~`raza: true`~~ ⇒ `false`.
+
+     **Medido:** con `temperature: 0`, Sonnet 5 devuelve **400** y la edge lo
+     traducía a *«El modelo rechazó la imagen»* ⇒ **la sugerencia de raza estaba
+     MUERTA en producción desde que esta bandera se encendió (7-sep-2026)**, y
+     el mensaje mandaba a todo el mundo a mirar la foto.
+
+     **El discriminador es la tabla de al lado: `raza` era la ÚNICA pieza que
+     combinaba Sonnet 5 con `temperature: 0`.** Las otras seis de Sonnet la
+     tienen en `false` y funcionan; las cuatro que la tienen en `true` corren
+     Haiku. *Y el canon ya lo traía escrito desde S48, sobre el carnet: «v21 =
+     Sonnet (contrato distinto: **sin temperature — 400 en no-default**)».*
+
+     ⚠️ **LO QUE E PIERDE, y es suyo para re-decidir:** su línea de base de 1.759
+     fotos deja de ser reproducible. *Su argumento sigue siendo correcto —una
+     línea de base que no es reproducible no es una línea de base—; lo que pasa
+     es que en Sonnet 5 ese determinismo NO ESTÁ DISPONIBLE.* La alternativa
+     sería Haiku, que sí acepta la temperatura, y ahí el número manda: **84 %
+     contra 45 %** en su propia matriz. *Un 84 % que varía le gana a un 45 %
+     reproducible.* Ver `D-1112`. */
+  raza: false,
   // Los tres clasificadores de salida cerrada.
   coach_router: true, coach_clasifica: true, busqueda: true,  // Salida cerrada: el código sale de una lista de 19. Determinismo medible.
   postventa_intake: true,
