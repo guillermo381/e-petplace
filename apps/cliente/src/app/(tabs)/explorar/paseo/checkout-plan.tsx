@@ -43,7 +43,7 @@ import { View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  Boton, Celda, Encabezado, EsperaDeTrabajo, EstadoVacio, Icono,
+  Boton, Celda, Encabezado, EsperaLarga, EstadoVacio, Icono,
   PantallaConPie, Separador, Tarjeta, Texto, spacing, useAviso, useTheme,
 } from '@epetplace/ui';
 import { contratarPlanPaseo } from '@epetplace/api';
@@ -204,12 +204,13 @@ export default function CheckoutPlanPaseo() {
       <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing[4], padding: spacing[6] }}>
           {/* El nombre de lo que se está comprando, quieto y centrado. */}
-          <Texto variante="titulo">{t('checkoutPlan.esperaTitulo')}</Texto>
-          <Texto variante="cuerpo">{t('checkoutPlan.esperaCuerpo')}</Texto>
-          {/* La rampa que trabaja — la MISMA de la casa: pulso sobrio, sin
-              rebotes ni confeti, y sin botón de reintentar en los primeros
-              segundos (no hay ninguno acá: la pantalla cambia sola). */}
-          <EsperaDeTrabajo />
+              {/* ⭐ **S116-C lote 7 · `EsperaLarga` — LA ESPERA LARGA DE LA CASA.**
+                  ☠️ Mueren el par `Texto titulo`/`Texto cuerpo` y **la línea de
+                  progreso** (`EsperaDeTrabajo`, la rampa con degradado): el
+                  founder la nombró y la pieza nueva lo dice en su cabecera —
+                  *no sabe cuánto falta y no lo finge*. La voz **no se pierde**:
+                  la misma que estaba pasa a `titulo` y `apoyo`. */}
+          <EsperaLarga titulo={t('checkoutPlan.esperaTitulo')} apoyo={t('checkoutPlan.esperaCuerpo')} />
         </View>
       </SafeAreaView>
     );

@@ -6,7 +6,7 @@ import {
   Cabecera,
   HojaContenido,
   Celda,
-  EsperaDeMarca,
+  EsperaLarga,
   Separador,
   Tarjeta,
   Texto,
@@ -156,6 +156,42 @@ export function PasoCarnet({
     onAvanzar({})
   }
 
+  /* ⭐ **S116-C lote 7 · LA ESPERA DEL CARNÉ ES `EsperaLarga`, Y SE COME LA
+     PANTALLA ENTERA** (punto ⑤ del encargo).
+
+     ⏪ **Las dos cosas que el founder vio, y las dos salen de la misma causa:**
+     la espera vivía DENTRO de la hoja —así que el isotipo y el texto quedaban
+     descentrados, empujados por el aire de la hoja y el pie— **y el CTA del pie
+     seguía montado, deshabilitado, mostrando su `razonDeshabilitado`: el
+     segundo «Estamos leyendo el carné», abajo a la izquierda y fuera de la
+     hoja.** *No era un texto duplicado por descuido: era el mismo texto puesto
+     dos veces a propósito en dos lugares que nadie había visto juntos.*
+
+     ⇒ mientras lee, **no hay hoja, no hay pie y no hay cabecera**: hay una
+     espera. Con eso el centrado es del contenedor —no hay nada que lo empuje—
+     y el duplicado desaparece **con su productor**, no tapándolo.
+
+     ⚠️ **Se pierde «Omitir» durante la lectura, y es correcto:** omitir el
+     carné mientras se está leyendo dejaría una extracción huérfana corriendo
+     contra una mascota que ya avanzó. *Antes tampoco se podía —el CTA estaba
+     deshabilitado—; lo que cambia es que ahora la pantalla no ofrece lo que no
+     puede cumplir.* */
+  if (fase.t === 'leyendo') {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: theme.bg.base,
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: spacing[5],
+        }}
+      >
+        <EsperaLarga titulo={t('alta.carnetLeyendo')} apoyo={t('alta.carnetLeyendoDetalle')} />
+      </View>
+    )
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       {/* ⭐ **LA ESTRUCTURA NUEVA — S116-C lote 3g.** Ciruela de FONDO y el
@@ -196,24 +232,17 @@ export function PasoCarnet({
             variante={fase.t === 'leido' ? 'primario' : 'apoyada'}
             bloque
             etiqueta={fase.t === 'leido' ? t('alta.carnetGuardar') : t('alta.carnetSeguirSin')}
-            deshabilitado={fase.t === 'leyendo'}
-            razonDeshabilitado={fase.t === 'leyendo' ? t('alta.carnetLeyendo') : undefined}
+            /* ☠️ Acá vivían `deshabilitado` y `razonDeshabilitado` para la
+               fase `leyendo`. **Esa fase ya no llega hasta acá** —sale antes,
+               con la espera a pantalla completa— así que la rama era código
+               muerto Y el productor del texto duplicado. Se retira en el
+               mismo acto que la causa (Ley 37). */
             onPress={seguir}
           />
         }
       >
         <View style={{ padding: spacing[5], gap: spacing[5], flexGrow: 1 }}>
-        {fase.t === 'leyendo' ? (
-          /* La espera de la casa — la nariz respirando. Y la voz dice que
-             puede tardar: *un minuto sin explicación se lee como colgado.* */
-          <View style={{ alignItems: 'center', gap: spacing[4], paddingVertical: spacing[10] }}>
-            <EsperaDeMarca tamano={64} />
-            <Texto variante="cuerpo">{t('alta.carnetLeyendo')}</Texto>
-            <Texto variante="apoyo" color="secondary">
-              {t('alta.carnetLeyendoDetalle')}
-            </Texto>
-          </View>
-        ) : fase.t === 'leido' ? (
+        {fase.t === 'leido' ? (
           <View style={{ gap: spacing[4] }}>
             <Texto variante="seccion">{t('alta.carnetLeidoTitulo', { n: fase.vacunas.length })}</Texto>
             <Tarjeta>

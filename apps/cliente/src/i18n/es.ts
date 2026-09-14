@@ -98,6 +98,14 @@ export const clienteEs = {
     enMemorial: 'Acá no hay nada que preguntar.',
     titulo: 'Nexo',
     autor: 'Nexo',
+    /* ⭐ **S116-C lote 7 · LOS CUATRO DEDOS DE LA HOJA DEL ASISTENTE.**
+       Voz de ACTO, no de sustantivo: la familia no va a «peso», va a *anotar*
+       su peso. Y el orden es el de `ORDEN_DE_PATA`, que vive en el objeto. */
+    atajo_peso: 'Anotar su peso',
+    atajo_vacuna: 'Cargar su carné',
+    atajo_antiparasitario: 'Anotar un antiparasitario',
+    atajo_foto: 'Guardar un recuerdo',
+    placeholder: 'Pregúntale a Nexo',
     enviar: 'Enviar',
     caja: 'Escribe tu pregunta',
     cajaPlaceholder: 'Pregunta o busca algo…',
@@ -415,6 +423,12 @@ export const clienteEs = {
        modelo; le importa que ese dato no lo escribió ella y puede cambiarlo.
        *Y no se disculpa: proponer bien no es pedir permiso.* */
     razaSugeridaPorFoto: 'La reconocimos en la foto. Confírmala o cámbiala.',
+    /* ⭐ **S116-C lote 7 · LA ESPERA DE LA IDENTIFICACIÓN.** Dice lo que está
+       pasando y no promete cuánto falta — la pieza no sabe el tiempo y no lo
+       finge. *«Mirando» y no «analizando»: la app está haciendo lo mismo que
+       haría una persona con la foto en la mano.* */
+    mirandoTitulo: 'Mirando la foto',
+    mirandoApoyo: 'Vamos a reconocer su especie y su raza. Puedes cambiarlas después.',
     razonEspecie: 'Elige la especie para seguir.',
     razonNombre: 'Falta su nombre.',
     razonAgua: 'Elige el tipo de agua.',
@@ -1146,6 +1160,7 @@ export const clienteEs = {
     capturaTitulo: 'Sácale una foto al carnet de {{nombre}} — nosotros leemos las vacunas',
     capturaDetalle: 'Con buena luz y el carnet bien plano, mejor. Después vas a poder revisar y corregir todo antes de guardar.',
     multiPagina: '¿El carnet tiene varias páginas? Escanéalas de a una — cada tanda se suma a su historia.',
+    esperaTitulo: 'Estamos leyendo el carné',
     espera: 'Estamos leyendo el carnet. Esto puede tardar un minuto — cada vacuna que encontremos se suma a su historia.',
     esperaLarga: 'Seguimos leyendo. Los carnets escritos a mano tardan un poco más.',
     permisoCamara: 'Necesitamos permiso para usar la cámara. Puedes habilitarlo en los ajustes del teléfono, o elegir una foto de la galería.',
@@ -2513,6 +2528,10 @@ export const clienteEs = {
     // «abandonada» acá sería deducirla del retorno del navegador.
     altaPendiente: 'El alta sigue abierta — todavía no vence.',
     altaAbandonada: 'El alta venció sin completarse.',
+    /* S116-C lote 7 — la carga de la página del proveedor es espera larga:
+       su reloj no es nuestro. */
+    altaCargandoTitulo: 'Abriendo el pago seguro',
+    altaCargandoApoyo: 'Tu banco está cargando la pantalla para verificar la tarjeta.',
     altaNoAbrio: 'No pudimos abrir el formulario. Prueba de nuevo.',
     idioma: 'Idioma',
     idiomaEs: 'Español',
@@ -3468,6 +3487,12 @@ export const clienteEs = {
        la recurrencia: la pantalla pivotaba a ofrecer algo antes de terminar
        de contestar. */
     exitoPagoTitulo: 'Tu pago se confirmó',
+    /* ⭐ S116-C lote 7 — lo que la `Confirmacion` de la casa pide y acá no
+       existía. **La línea fiscal se dice porque si no, se pregunta**: el
+       comprobante no viaja con el pedido y nadie lo adivina. */
+    exitoExclamacion: '¡Listo!',
+    exitoFactura: 'La factura te llega aparte por correo.',
+    exitoSeguirComprando: 'Seguir comprando',
     /* ☠️ `exitoCuerpo` MURIÓ (Ley 37, S105-C). Decía «Tu pedido quedó
        creado» y era el TÍTULO del éxito; al subir el pago a título quedó
        sin consumidor —medido: 0—. *Una clave sin lector es una voz que
@@ -4547,6 +4572,8 @@ export const clienteEs = {
     entradaDetalle: 'Su chapita y la página de quien la encuentre',
     vozQr: 'Código para {{nombre}}',
     verPasaporte: 'Ver el pasaporte',
+    generandoTitulo: 'Armando su pasaporte',
+    generandoApoyo: 'Estamos preparando su código. Tarda unos segundos.',
     ampliarQr: 'Ampliar el código',
     qrGrandeAyuda: 'Ponlo frente a la cámara del otro teléfono. Toca para cerrar.',
     cerrar: 'Cerrar',

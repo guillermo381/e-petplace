@@ -55,18 +55,23 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Tabs, useRouter, useSegments } from 'expo-router';
+import { useGlobalSearchParams, Tabs, useRouter, useSegments } from 'expo-router';
 import { StackActions } from 'expo-router/react-navigation';
 import {
   ALTO_FILA_TABS,
   BarraTabs,
   BotonAsistente,
+  HojaAsistente,
+  type AtajoAsistente,
   Icono,
   type BarraTabsItem,
 } from '@epetplace/ui';
 import { nexoVisibleEn } from '@/lib/nexo/estado';
 import { registrarProfundidad, registrarToqueDeTab } from '@/lib/medicion/montajes';
-import { recargarHogar } from '@/lib/nexo/hogar-vivo';
+import { recargarHogar, useHogarVivo } from '@/lib/nexo/hogar-vivo';
+import { focoNexo, ORDEN_DE_PATA } from '@/lib/nexo/atajos';
+import { ElegirMascotaHoja } from '@/components/nexo/elegir-mascota-hoja';
+import { RegistrarPesoHoja } from '@/components/registrar-peso-hoja';
 
 import { useTraduccion } from '@/i18n';
 
@@ -138,14 +143,103 @@ function AsistenteDelShell({ raiz }: { raiz: boolean }) {
   const { t } = useTraduccion();
   const router = useRouter();
   const segmentos = useSegments() as string[];
+  const params = useGlobalSearchParams<{ mascotaId?: string }>();
+  const mascotas = useHogarVivo();
+
+  const [hoja, setHoja] = useState(false);
+  const [eligiendoPeso, setEligiendoPeso] = useState(false);
+  const [pesoDe, setPesoDe] = useState<{ id: string; nombre: string } | null>(null);
+
+  /* ⭐ **S116-C lote 7 · EL BOTÓN ABRE UNA HOJA, NO LA PANTALLA.**
+   *
+   * ⏪ Empujaba directo a `/nexo`. **La hoja de B es del SHELL y la usa toda
+   * raíz** (firma de la mesa), así que el toque abre los cuatro dedos y el
+   * campo de preguntar; `/nexo` sigue existiendo y se llega desde el campo.
+   *
+   * **Los cuatro atajos salen de `lib/nexo/atajos.ts`, del objeto y no de una
+   * lista escrita acá** — `ORDEN_DE_PATA` ya fija cuáles y en qué orden
+   * (`peso → vacuna → antiparasitario → foto`). *Dos listas de lo mismo
+   * divergen, y ésta ya existía.*
+   *
+   * **A dónde va cada uno, con el mapeo que la mesa dictó:**
+   *   · `vacuna` → **el carné** (*«carné es vacuna»*)
+   *   · `foto`   → **el recuerdo** (*«recuerdo es foto»*)
+   *   · `antiparasitario` → su pantalla propia
+   *   · `peso`   → **no tiene pantalla**: vive en una Hoja del perfil. Se monta
+   *     acá, que es donde vivía con el orbe.
+   *
+   * 🔴 **Las tres rutas NO reciben `mascotaId` a propósito.** Medido: las tres
+   * lo declaran opcional y **resuelven la mascota ellas mismas**. *Pasárselo
+   * desde acá sería una segunda resolución del mismo dato, y el día que una
+   * cambie de criterio las dos dejarían de coincidir sin que nada falle.* El
+   * peso sí lo necesita —la Hoja pide `mascotaId`— y por eso es el único que
+   * usa `focoNexo`.
+   *
+   * ⚠️ **`razonDeApagado` NO se consume todavía**: hoy la hoja de B no tiene
+   * estado apagado por atajo. El único caso vivo es el acuario, y se declara
+   * en vez de dibujar un atajo que rebota. Pedido a B junto con la captura. */
+  const abrirConFoco = (accion: (m: { id: string; nombre: string }) => void) => {
+    const foco = focoNexo({ mascotaIdEnRuta: params.mascotaId, mascotas });
+    if (foco.modo === 'directa') { accion({ id: foco.mascota.id, nombre: foco.mascota.nombre }); return; }
+    if (foco.modo === 'elegir') { setEligiendoPeso(true); return; }
+    /* `cargando`, `memorial` y `ninguna`: no hay sobre quién actuar y no se
+       inventa uno. La hoja se cierra y no pasa nada — *actuar sobre otra
+       mascota «porque había una» es el defecto que `focoNexo` existe para
+       impedir.* */
+  };
+
+  const atajos: AtajoAsistente[] = ORDEN_DE_PATA.map((a) => ({
+    glifo: a,
+    texto: t(`nexo.atajo_${a}` as 'nexo.atajo_peso'),
+    onPress: () => {
+      setHoja(false);
+      if (a === 'vacuna') { router.push('/carnet'); return; }
+      if (a === 'antiparasitario') { router.push('/antiparasitario'); return; }
+      if (a === 'foto') { router.push('/recuerdo'); return; }
+      abrirConFoco((m) => setPesoDe(m));
+    },
+  }));
 
   if (!raiz || !nexoVisibleEn(segmentos)) return null;
 
   return (
-    <BotonAsistente
-      onPress={() => router.push('/nexo')}
-      etiqueta={t('nexo.etiqueta', { nombre: t('coach.nombre') })}
-    />
+    <>
+      <BotonAsistente
+        onPress={() => setHoja(true)}
+        etiqueta={t('nexo.etiqueta', { nombre: t('coach.nombre') })}
+      />
+      <HojaAsistente
+        visible={hoja}
+        onCerrar={() => setHoja(false)}
+        titulo={t('coach.nombre')}
+        atajos={atajos}
+        pregunta={{
+          placeholder: t('nexo.placeholder'),
+          etiquetaEnviar: t('nexo.enviar'),
+          /* La hoja **no pregunta**: entrega el texto y lo lleva a la pantalla
+             que sí sabe preguntar. Es lo que su propia cabecera declara — *una
+             hoja que además consultara sería la IA metida adentro de una pieza
+             de presentación.* */
+          onEnviar: (texto) => { setHoja(false); router.push({ pathname: '/nexo', params: { q: texto } }); },
+        }}
+      />
+      <ElegirMascotaHoja
+        visible={eligiendoPeso}
+        titulo={t('nexo.elegirMascota')}
+        mascotas={mascotas ?? []}
+        onElegir={(m) => { setEligiendoPeso(false); setPesoDe({ id: m.id, nombre: m.nombre }); }}
+        onCerrar={() => setEligiendoPeso(false)}
+      />
+      {pesoDe === null ? null : (
+        <RegistrarPesoHoja
+          visible
+          nombre={pesoDe.nombre}
+          mascotaId={pesoDe.id}
+          onCerrar={() => setPesoDe(null)}
+          onRegistrado={() => setPesoDe(null)}
+        />
+      )}
+    </>
   );
 }
 

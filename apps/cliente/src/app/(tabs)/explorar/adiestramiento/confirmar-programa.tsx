@@ -20,7 +20,7 @@ import {
   Boton,
   Celda,
   Encabezado,
-  EsperaDeTrabajo,
+  EsperaLarga,
   EstadoVacio,
   Icono,
   Separador,
@@ -171,9 +171,13 @@ export default function ConfirmarPrograma() {
     return (
       <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing[4], padding: spacing[6] }}>
-          <Texto variante="titulo">{t('pago.esperaTitulo')}</Texto>
-          <Texto variante="cuerpo">{t('adiestramiento.esperaCuerpo')}</Texto>
-          <EsperaDeTrabajo />
+              {/* ⭐ **S116-C lote 7 · `EsperaLarga` — LA ESPERA LARGA DE LA CASA.**
+                  ☠️ Mueren el par `Texto titulo`/`Texto cuerpo` y **la línea de
+                  progreso** (`EsperaDeTrabajo`, la rampa con degradado): el
+                  founder la nombró y la pieza nueva lo dice en su cabecera —
+                  *no sabe cuánto falta y no lo finge*. La voz **no se pierde**:
+                  la misma que estaba pasa a `titulo` y `apoyo`. */}
+          <EsperaLarga titulo={t('pago.esperaTitulo')} apoyo={t('adiestramiento.esperaCuerpo')} />
           {/* 🔴 El tope habla y NO declara desenlace. Y acá su voz es la que
               antes vivía en el éxito: **el programa quedó registrado y el pago
               se sigue confirmando** — que es exactamente lo que pasa. */}

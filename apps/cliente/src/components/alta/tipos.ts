@@ -122,6 +122,12 @@ export interface BorradorAlta {
    *  aunque haya raza, y eso es correcto. */
   raza?: string;
   razaSlug?: string;
+  /** ⭐ **'1' si `especie`/`raza` los trajo la IDENTIFICACIÓN de la foto**
+   *  (S116-C lote 7). Sin esta marca, 2/3 no puede distinguir *«lo trajo la
+   *  foto»* de *«lo escribió la persona al volver atrás»* — y diría «la
+   *  reconocimos» sobre un dato propio, que es afirmar de más sobre el trabajo
+   *  de otro. **Sólo se pone si algo se resolvió de verdad.** */
+  deLaFoto?: string;
   /** paso 3 */
   fecha?: string;
   precision?: string;
@@ -200,6 +206,7 @@ export function leerBorrador(params: Record<string, string | string[] | undefine
        no falla: aprueba.* Medido al invertir el orden, que es cuando la foto
        pasó a viajar por TODOS los pasos siguientes. */
     conFoto: uno('conFoto'),
+    deLaFoto: uno('deLaFoto'),
     cx: uno('cx'),
     cy: uno('cy'),
     z: uno('z'),

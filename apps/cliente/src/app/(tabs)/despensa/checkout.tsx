@@ -55,7 +55,8 @@ import {
   Campo,
   CeldaNavegacion,
   Encabezado,
-  EsperaDeTrabajo,
+  Confirmacion,
+  EsperaLarga,
   EstadoVacio,
   EvitaTeclado,
   GotaUbicacion,
@@ -1571,13 +1572,13 @@ export default function DespensaCheckout() {
               />
             ) : (
               <>
-                <Texto variante="titulo">{t('pago.esperaTitulo')}</Texto>
-                <Texto variante="cuerpo">{t('pago.esperaCuerpo')}</Texto>
-                {/* ⑦ LA RAMPA QUE TRABAJA — **la misma que el checkout de
-                    reserva**. Antes acá no había NADA en movimiento y en el
-                    paseo respiraba una huella: *dos pantallas que dicen la
-                    misma frase y se mueven distinto son dos productos.* */}
-                <EsperaDeTrabajo />
+              {/* ⭐ **S116-C lote 7 · `EsperaLarga` — LA ESPERA LARGA DE LA CASA.**
+                  ☠️ Mueren el par `Texto titulo`/`Texto cuerpo` y **la línea de
+                  progreso** (`EsperaDeTrabajo`, la rampa con degradado): el
+                  founder la nombró y la pieza nueva lo dice en su cabecera —
+                  *no sabe cuánto falta y no lo finge*. La voz **no se pierde**:
+                  la misma que estaba pasa a `titulo` y `apoyo`. */}
+              <EsperaLarga titulo={t('pago.esperaTitulo')} apoyo={t('pago.esperaCuerpo')} />
               </>
             )}
             {/* El tope habla y **no declara desenlace**: la compra sigue viva
@@ -1618,22 +1619,49 @@ export default function DespensaCheckout() {
                 **La recurrencia NO se movió ni se achicó** —§6.1 está firmada—
                 pero ahora va **después de una respuesta completa**, separada
                 por su `Separador`. */}
-            <View
-              style={{
-                paddingHorizontal: spacing[5],
-                paddingTop: spacing[4],
-                paddingBottom: spacing[2],
-                gap: spacing[3],
-                alignItems: 'center',
-              }}
-            >
-              <Icono nombre="nodoConfirmado" tamano={48} />
-              <Texto variante="titulo">{t('despensa.exitoPagoTitulo')}</Texto>
-              <Texto variante="cuerpo">{t('despensa.exitoDetalle')}</Texto>
-              {metodo === 'retiro' ? (
-                <Texto variante="cuerpo">{t('despensa.exitoRetiro')}</Texto>
-              ) : null}
-            </View>
+            {/* ⭐ **S116-C lote 7 · `Confirmacion` DE LA CASA** (punto ③ del
+                encargo: *«check, destellos, trío, dato del pedido, "La factura
+                te llega aparte por correo", dos acciones»*).
+
+                ☠️ Muere la composición local —glifo 48 + dos `Texto`— que este
+                mismo archivo había copiado del vecino. *Copiar al vecino era lo
+                correcto mientras no existía la pieza; con la pieza, seguir
+                copiando es fabricar la tercera versión de lo mismo.*
+
+                **El `dato` es el TOTAL, no el número de pedido**, y es una
+                decisión: lo que la familia fue a verificar en esta pantalla es
+                que la plata pasó y por cuánto. *El id del pedido es lo que
+                necesita el soporte, no ella, y vive a un toque en Tus pedidos.*
+
+                **La línea fiscal va en `lineaExtra`**, que es el slot que la
+                pieza creó para eso. `metodo === 'retiro'` **conserva su frase**
+                —el código del mostrador— porque no es adorno: es cómo se
+                retira. Va en `apoyo`, junto a la de siempre.
+
+                **Dos acciones**: ver el pedido (primaria) y volver a la
+                Despensa (secundaria). ⏪ *Antes había UNA sola, en el pie; la
+                pieza pide las dos y la segunda faltaba —salir del éxito sin ir
+                a Pedidos exigía la barra de tabs.* */}
+            <Confirmacion
+              exclamacion={t('despensa.exitoExclamacion')}
+              titulo={t('despensa.exitoPagoTitulo')}
+              apoyo={
+                metodo === 'retiro'
+                  ? `${t('despensa.exitoDetalle')} ${t('despensa.exitoRetiro')}`
+                  : t('despensa.exitoDetalle')
+              }
+              dato={(() => {
+                /* `dinero` puede devolver `null` cuando no hay moneda resuelta
+                   —lo dice su tipo— y **un total a medias no se dibuja**: el
+                   dato de esta pantalla es exactamente la plata, y mostrarlo
+                   vacío sería peor que no mostrarlo. */
+                const v = compraTotal === null ? null : dinero(compraTotal);
+                return v === null ? undefined : { etiqueta: t('despensa.total'), valor: v };
+              })()}
+              lineaExtra={t('despensa.exitoFactura')}
+              primario={{ texto: t('despensa.verTusPedidos'), onPress: () => router.replace('/pedidos') }}
+              secundario={{ texto: t('despensa.exitoSeguirComprando'), onPress: () => router.replace('/despensa') }}
+            />
 
             {/* §6.1 — LA RECURRENCIA, con el mensaje honesto VERBATIM. */}
             <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>

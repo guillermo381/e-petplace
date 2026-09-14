@@ -133,11 +133,6 @@ export function HojaContenido({ fondo, costura, arranque, children, scroll, pie,
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
 
-      {/* ② EL CONTENIDO DEL FONDO — lo único que se desvanece. */}
-      <Animated.View style={[{ position: 'absolute', top: 0, left: 0, right: 0 }, estiloFondo]}>
-        {fondo}
-      </Animated.View>
-
       {/* ③ LA HOJA. Sube con el scroll y desliza sobre el fondo: no la
           movemos nosotros —eso duplicaría el scroll— la mueve su propio
           `paddingTop`, que es contenido del ScrollView. */}
@@ -197,6 +192,58 @@ export function HojaContenido({ fondo, costura, arranque, children, scroll, pie,
           {children}
         </View>
       </Animated.ScrollView>
+
+      {/* ② EL CONTENIDO DEL FONDO — lo único que se desvanece.
+          ⚠️ **SE DIBUJA DESPUÉS DE LA HOJA A PROPÓSITO. Ver el bloque 🔴 de
+          abajo: antes iba antes y NADA de lo que vive acá se podía tocar.** */}
+      <Animated.View
+        /* 🔴 **S116-C lote 7 · `box-none` — LA CURA DE LAS FLECHAS DE VOLVER
+         * QUE NO VOLVÍAN.**
+         *
+         * ⏪ Esta capa se montaba **ANTES** de la hoja (era el bloque ②, encima
+         * del degradado y debajo del `ScrollView`). Como hermana anterior,
+         * **el `ScrollView` la tapaba entera**: el `fondo` se veía —está en
+         * absoluto, arriba— pero **ningún toque suyo llegaba nunca**, porque el
+         * scroll se queda con todos los que caen sobre su marco, y su marco es
+         * la pantalla completa.
+         *
+         * **Medido en el emulador antes de tocar** (03 · `login.tsx`): la
+         * flecha se toca en (108, 212) y no pasa nada; el volcado de
+         * `uiautomator` sobre ese punto muestra, EN ORDEN, el nodo de la flecha
+         * `View [0,136][221,357]` y **después** `ScrollView [0,0][1080,2400]`.
+         * *La flecha no estaba rota ni desconectada: estaba debajo.*
+         *
+         * ⚠️ **Alcanza a TODA pantalla que ponga algo tocable en `fondo`**, no
+         * a dos: hoy son 03 y 05 porque son las que tienen `onVolver`, pero la
+         * siguiente que ponga un botón ahí habría heredado el mismo silencio.
+         * *Un defecto que se arregla pantalla por pantalla vuelve con la
+         * próxima pantalla.*
+         *
+         * **`box-none` y no `box-only`/`auto`:** esta capa **no debe** comerse
+         * el gesto del scroll —el diseño es que la hoja suba arrastrando desde
+         * cualquier lado, incluido el aire de la cabecera—; lo único que tiene
+         * que capturar son sus hijos tocables. Es **exactamente lo que el pie
+         * fijo ya hacía** (bloque ⑤, *«con `box-none`, así el gesto pasa al
+         * scroll por el aire entre sus hijos»*): acá no se inventa una técnica,
+         * se aplica la que esta misma pieza ya declaró.
+         *
+         * **Y el orden visual no cambia en la práctica**, que es la razón por la
+         * que la mudanza es barata: `estiloFondo` lleva este contenido a opacidad
+         * 0 justo en el recorrido en que la hoja llega a taparlo —`RECORRIDO`
+         * sale del alto de la cabecera— así que la ventana en la que la hoja
+         * pasaría «por debajo» es la misma en la que esto ya se desvaneció.
+         *
+         * ⚠️ **CRUCE DE TERRITORIO DECLARADO:** el archivo es de `packages/ui`
+         * (B) y lo toca C. Se toca acá porque **el defecto es de la pieza y no
+         * del montaje** —desde el consumidor no hay forma de subir la flecha sin
+         * duplicar la cabecera— y porque bloquea dos pantallas de entrada en
+         * 🔴. Va pedido con su medición en
+         * `docs/loop/buzon/S116-C-para-B-el-fondo-no-se-podia-tocar.md`. */
+        pointerEvents="box-none"
+        style={[{ position: 'absolute', top: 0, left: 0, right: 0 }, estiloFondo]}
+      >
+        {fondo}
+      </Animated.View>
 
       {/* ⑤ EL PIE. Fuera del scroll —se queda— y con `box-none`, así el
           gesto pasa al scroll por el aire entre sus hijos. */}

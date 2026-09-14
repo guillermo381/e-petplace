@@ -30,6 +30,7 @@ import {
   ConfiguracionPasaporte,
   Encabezado,
   EsperaDeMarca,
+  EsperaLarga,
   EstadoVacio,
   TarjetaPasaporte,
   Texto,
@@ -152,6 +153,12 @@ export default function Pasaporte() {
   );
 
   if (perfil === 'cargando') {
+    /* ⚠️ **ESTA NO ES UNA ESPERA LARGA, y por eso conserva `EsperaDeMarca`**
+       (censo del lote 7). Es la LECTURA de la pantalla —un `select` del
+       expediente— y dura lo que dura una consulta. *Montar acá la espera larga
+       —rueda de caras, título propio, halo sin fin— sería anunciar un minuto
+       para algo que tarda menos que el dedo en soltarse.* La espera larga de
+       esta pantalla es la de abajo: la que GENERA el pasaporte. */
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <EsperaDeMarca />
@@ -202,7 +209,13 @@ export default function Pasaporte() {
       />
       <View style={{ padding: spacing[5], gap: spacing[5] }}>
         {token === null ? (
-          <EsperaDeMarca />
+          /* ⭐ **S116-C lote 7 · la GENERACIÓN del pasaporte es espera larga.**
+             Acá el servidor firma un token y arma el QR; la pantalla no tiene
+             nada que ofrecer mientras tanto. *Es el mismo hecho que el carné y
+             que el pago, y por eso lleva la misma pieza.* */
+          <View style={{ alignItems: 'center', paddingVertical: spacing[8] }}>
+            <EsperaLarga titulo={t('pasaporte.generandoTitulo')} apoyo={t('pasaporte.generandoApoyo')} />
+          </View>
         ) : (
           <>
             {/* 🔴 **EL QR SE TOCA Y SE AGRANDA.** Es lo que hace que OTRO

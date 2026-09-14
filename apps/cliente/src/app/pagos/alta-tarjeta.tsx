@@ -21,7 +21,7 @@ import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { WebView } from 'react-native-webview';
-import { Encabezado, EsperaDeMarca, useTheme, useAviso } from '@epetplace/ui';
+import { Encabezado, EsperaLarga, useTheme, useAviso } from '@epetplace/ui';
 import { obtenerAltaTarjeta, type EstadoAlta } from '@epetplace/api';
 import { obtenerIdiomaActual } from '@epetplace/i18n';
 
@@ -110,10 +110,16 @@ export default function AltaTarjeta() {
              positivo que declarar: era un patrón que el componente ya
              resuelve.* */
           startInLoadingState
+          /* ⭐ **S116-C lote 7 · espera larga.** Lo que carga acá no es una
+             pantalla nuestra: es la página del proveedor, por red, y su tiempo
+             **no lo controlamos**. *Una espera cuyo reloj es de otro es la
+             definición de larga* — y es el momento en que la familia está por
+             entregar su tarjeta, que es cuando menos se le puede dejar una
+             pantalla muda. */
           renderLoading={() => (
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center',
                            backgroundColor: theme.bg.base }}>
-              <EsperaDeMarca />
+              <EsperaLarga titulo={t('cuenta.altaCargandoTitulo')} apoyo={t('cuenta.altaCargandoApoyo')} />
             </View>
           )}
           onMessage={(e) => {

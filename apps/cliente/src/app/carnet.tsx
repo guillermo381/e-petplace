@@ -32,7 +32,7 @@ import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  EsperaDeMarca,
+  EsperaLarga,
   Boton,
   Campo,
   CampoFecha,
@@ -453,19 +453,19 @@ function camposDe(
         </View>
       )}
 
-      {/* B3 · leyendo — espera honesta, spinner solo pasado 150ms (Ley 13) */}
+      {/* ⭐ **S116-C lote 7 · `EsperaLarga`, LA ESPERA LARGA DE LA CASA.**
+          ☠️ Muere `EsperaDeMarca` acá y con ella **el umbral de 150 ms**: ese
+          umbral existía para no parpadear un spinner en una espera corta, y
+          *la lectura de un carné no es una espera corta* — su propia voz dice
+          que puede tardar un minuto. **Aparece de una**, porque el silencio en
+          ese segundo es lo que se lee como que algo se rompió.
+          ☠️ Muere también **la miniatura de la foto**: la pieza trae su propio
+          centro —la rueda de caras— y dos círculos compitiendo por el medio de
+          una pantalla de espera es exactamente el descentrado que el founder
+          nombró en el paso del alta. */}
       {fase.t === 'leyendo' && (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing[5], gap: spacing[4] }}>
-          {foto && (
-            <Image source={{ uri: foto.uri }} contentFit="cover" transition={0} style={{ width: 160, height: 160, borderRadius: radius.lg }} />
-          )}
-          {/* S53-B2d: la espera de marca (§5.3) — la huella respirando
-              reemplaza al spinner; la voz honesta de abajo se conserva
-              VERBATIM. Mismo umbral de visibilidad (Ley 13). */}
-          {spinnerVisible && <EsperaDeMarca tamano={64} />}
-          <Text style={{ fontFamily: voz.cuerpo, fontSize: typography.size.base, lineHeight: typography.size.base * 1.4, color: theme.text.secondary, textAlign: 'center' }}>
-            {t('carnet.espera')}
-          </Text>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing[5] }}>
+          <EsperaLarga titulo={t('carnet.esperaTitulo')} apoyo={t('carnet.espera')} />
         </View>
       )}
 

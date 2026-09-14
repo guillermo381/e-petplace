@@ -31,6 +31,7 @@ import {
   Boton,
   Cabecera,
   caraDePersonaje,
+  EsperaLarga,
   HojaContenido,
   Personaje,
   Texto,
@@ -39,6 +40,8 @@ import {
   type AvatarMascotaEspecie,
   type FotoCapturada,
 } from '@epetplace/ui';
+import { obtenerRazasDeEspecie, sugerirRaza } from '@epetplace/api';
+import { leerBase64 } from '@/lib/subir-avatar';
 
 import { EncuadreFoto, PreviewSuperficies } from '@/components/EncuadreFoto';
 import { HojaFotoMascota } from '@/components/HojaFotoMascota';
@@ -83,18 +86,109 @@ export function PasoFoto({
   const zFijo = useSharedValue(1);
   const caraGaleria = caraDeMascota({ especie: borrador.especie, razaSlug: borrador.razaSlug });
 
-  const avanzar = () =>
-    onAvanzar(
-      foto !== null
-        ? {
-            fotoUri: foto.uri,
-            conFoto: '1',
-            cx: String(encuadreRef.current.cx),
-            cy: String(encuadreRef.current.cy),
-            z: String(encuadreRef.current.z),
+  /* ⭐ **S116-C lote 7 · LA IDENTIFICACIÓN VIVE ACÁ, NO EN 2/3** (puntos ④ y ⑤
+     del encargo).
+
+     ⏪ En el lote 6 la sugerencia se disparaba en `PasoDatosBasicos`, al elegir
+     la especie. Funcionaba, y **dejaba 2/3 llegando vacío**: la persona veía la
+     grilla de especies en blanco, elegía, y recién ahí aparecía la raza. El
+     encargo lo nombra: *«hoy no carga nada; tiene que llegar con la ESPECIE ya
+     elegida y la RAZA de la foto ya escrita»*.
+
+     ⇒ **se mira la foto al salir de 1/3**, y 2/3 llega resuelto. Y de paso el
+     dibujo de la espera cae en su lugar: **acá la persona no puede hacer nada**,
+     que es la condición que `EsperaLarga` declara para existir. *Con la
+     sugerencia en 2/3 no había dónde ponerla sin bloquear un formulario que sí
+     se podía llenar.*
+
+     **La especie ya se puede proponer** (edge v12 de A): se manda sin `especie`
+     y vuelve `especie_sugerida` con **su propia confianza**.
+
+     ── LAS REGLAS, cada una con su razón ──────────────────────────────────
+     · **Sólo `alta` pre-selecciona**, y especie y raza se juzgan por SEPARADO
+       con su propia confianza. *Ése fue el pedido a A y es lo que permite
+       llegar con la especie puesta y la raza vacía cuando el animal es un
+       mestizo — que es el caso real con el que él lo probó.*
+     · **`mestizo` y `sin_animal` no pre-seleccionan raza.** Son respuestas
+       legítimas y ninguna es una raza del catálogo. **La especie sí sobrevive a
+       `mestizo`**: un mestizo sigue siendo un perro.
+     · **Si la foto se saltó, no se pregunta nada** y 2/3 llega vacío como
+       antes. *No hay foto que mirar.*
+     · **El fallo NO frena el alta**: se avanza igual, con lo que haya. *Una
+       identificación que no salió no puede costarle a la familia el alta
+       entera.* Habla en el log bajo `__DEV__` (la lección del lote 6).
+     · **`deLaFoto` viaja** para que 2/3 pueda decir que esos dos datos no los
+       escribió la persona. Sin esa marca, la pantalla no puede distinguir «lo
+       trajo la foto» de «lo escribió ella al volver atrás». */
+  const [mirando, setMirando] = useState(false);
+
+  const avanzar = () => {
+    if (foto === null) {
+      onAvanzar({});
+      return;
+    }
+    const encuadre = {
+      fotoUri: foto.uri,
+      conFoto: '1',
+      cx: String(encuadreRef.current.cx),
+      cy: String(encuadreRef.current.cy),
+      z: String(encuadreRef.current.z),
+    };
+    setMirando(true);
+    void (async () => {
+      const deLaFoto: Record<string, string> = {};
+      try {
+        const base64 = await leerBase64(foto.uri);
+        /* Sin `especie`: que la proponga. La clave no viaja —no se manda `''`—
+           porque la edge rebota la cadena vacía a propósito. */
+        const r = await sugerirRaza({ imageBase64: base64 });
+        if (!r.ok) {
+          if (__DEV__) console.warn(`[sugerir-raza] no se pudo · codigo=${r.codigo}`);
+        } else {
+          const esp = r.data.especie_sugerida;
+          if (esp !== null && esp.confianza === 'alta') {
+            deLaFoto.especie = esp.codigo;
+            /* El catálogo de razas se pide por la especie RESUELTA —la
+               propuesta o la que ya viniera— porque el código que devuelve el
+               modelo es un slug de ESA especie. */
+            const mejor =
+              r.data.mestizo || r.data.sin_animal
+                ? undefined
+                : r.data.candidatas.find((c) => c.confianza === 'alta');
+            if (mejor !== undefined) {
+              const cat = await obtenerRazasDeEspecie(esp.codigo);
+              const fila = cat.ok ? cat.data.find((x) => x.slug === mejor.raza_codigo) : undefined;
+              if (fila !== undefined) {
+                deLaFoto.raza = fila.nombre;
+                deLaFoto.razaSlug = fila.slug;
+              } else if (__DEV__) {
+                console.warn(`[sugerir-raza] código fuera del catálogo de ${esp.codigo}: ${mejor.raza_codigo}`);
+              }
+            } else if (__DEV__) {
+              console.warn(
+                `[sugerir-raza] sin raza con confianza alta · mestizo=${r.data.mestizo} · sin_animal=${r.data.sin_animal} · ` +
+                  r.data.candidatas.map((c) => `${c.raza_codigo}:${c.confianza}`).join(', '),
+              );
+            }
+          } else if (__DEV__) {
+            console.warn(`[sugerir-raza] especie no resuelta · ${esp === null ? 'null' : esp.confianza}`);
           }
-        : {},
-    );
+        }
+      } catch (e) {
+        if (__DEV__) {
+          console.warn(`[sugerir-raza] excepción · ${e instanceof Error ? `${e.name}: ${e.message}` : String(e)}`);
+        }
+      }
+      /* Se avanza SIEMPRE. `deLaFoto` sólo se marca si algo se resolvió: una
+         marca sin datos haría que 2/3 dijera «lo reconocimos» sobre campos
+         vacíos. */
+      onAvanzar({
+        ...encuadre,
+        ...deLaFoto,
+        ...(Object.keys(deLaFoto).length > 0 ? { deLaFoto: '1' } : {}),
+      });
+    })();
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -109,6 +203,17 @@ export function PasoFoto({
           ⚠️ **`scrollEnabled` viaja adentro de `scroll`**: el gesto del
           encuadre de la foto tiene que poder frenar el scroll de la hoja, o
           mover la imagen arrastraría la pantalla entera. */}
+      {/* ⭐ **LA ESPERA LARGA DE LA CASA** (punto ⑤ del encargo). Reemplaza a
+          cualquier espera propia: es la MISMA pieza que el carné y el pago, y
+          ésa es toda su razón de ser — *si cada pantalla arma la suya, la
+          persona no lee «dos pantallas»: lee «esto no es el mismo producto»*.
+          **Centrada, con su título propio**, y sin pie: de esta espera no se
+          sale — la identificación termina sola y avanza. */}
+      {mirando ? (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing[5] }}>
+          <EsperaLarga titulo={t('alta.mirandoTitulo')} apoyo={t('alta.mirandoApoyo')} />
+        </View>
+      ) : (
       <HojaContenido
         arranque={cabecera.arranque}
         fondo={
@@ -245,6 +350,7 @@ export function PasoFoto({
         )}
         </View>
       </HojaContenido>
+      )}
 
       <HojaFotoMascota
         visible={hojaAbierta}
