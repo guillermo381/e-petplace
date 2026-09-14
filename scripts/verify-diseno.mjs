@@ -7527,6 +7527,14 @@ const TABLA_R77 = new Map([
      porque es la nariz y cerrar con la marca es lo que hace que el ciclo se
      lea como una vuelta y no como una lista cortada. */
   ['index.tsx::CARAS', 'exhaustivo'],
+  /* ⭐ S116-C lote 5 · la rueda de 02. **EXHAUSTIVO, y por la MISMA razón que
+     el splash: es la misma rueda.** Las dos listas son idénticas a propósito —
+     ahora comparten reloj (`lib/rueda-de-caras`) y lo que queda en cada
+     pantalla es el dibujo. *Si una especie faltara acá, 02 mostraría cinco
+     caras y 00 seis: la misma marca contando dos historias distintas sobre
+     quiénes viven en la app.* El orden también es el mismo, con `otro`
+     cerrando la vuelta. */
+  ['beneficios.tsx::CARAS', 'exhaustivo'],
   /* ⭐ S116-B · el relleno del trío de `Confirmacion`. **SUBCONJUNTO, y es
      deliberado en las dos direcciones.** `EspeciePersonaje` tiene seis y acá
      hay tres, porque estas NO son «las especies»: son **las caras con las que

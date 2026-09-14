@@ -22,14 +22,16 @@ export const clienteEn = {
   // PENDIENTE). heroTitulo/heroSubtitulo died with the hero (Ley 37).
   beneficios: {
     saltar: 'Skip',
-    unoTitulo: 'Their record lives with you',
-    unoApoyo: 'Vaccine card, shots and documents, always at hand',
-    dosTitulo: 'Care close to you',
-    dosApoyo: 'Vet, walks, grooming and boarding',
-    tresTitulo: 'All in one place',
-    tresApoyo: 'Book, shop and pay just once',
+    titulo: 'Everything for their wellbeing, in one place',
+    buscarTitulo: 'Find services near you',
+    buscarApoyo: 'Vet, walks, grooming and boarding',
+    verificadoTitulo: 'Verified professionals',
+    verificadoApoyo: 'We check who cares for your pet',
+    agendaTitulo: 'Book in minutes',
+    agendaApoyo: 'Pick the day and time, and done',
+    documentoTitulo: 'Health history always available',
+    documentoApoyo: 'Record, vaccines and documents, one tap away',
     comenzar: 'Get started',
-    paso: 'Card {{actual}} of {{total}}',
   },
   bienvenida: {
     titular: "Your pet doesn't have a record. It has",

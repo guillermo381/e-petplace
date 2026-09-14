@@ -17,6 +17,7 @@ import { Boton, Entrada, EstadoVacio, IsotipoV5, Personaje, gradients, motion, p
 import { getEstadoOnboardingDueno, obtenerPreferencias, obtenerSesion } from '@epetplace/api';
 
 import { pisoDePermanenciaMs } from '@/lib/primera-apertura';
+import { useRuedaDeCaras } from '@/lib/rueda-de-caras';
 import { cambiarIdioma, obtenerIdiomaActual } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
@@ -69,16 +70,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 /** El orden de las caras. `otro` es la nariz, que cierra la vuelta. */
 const CARAS: readonly EspeciePersonaje[] = ['perro', 'gato', 'conejo', 'ave', 'roedor', 'otro']
 
-/** Cada tres segundos, textual en el encargo. **No es una duración de
- *  animación sino una CADENCIA** —cuánto dura una cara en pantalla—, y por eso
- *  no sale de `motion.duration`: ese vocabulario es de transiciones. */
-const MS_POR_CARA = 3000
 
-/** Cuánto dura la PRIMERA cara — **un segundo**, para que la rotación entre
- *  en el piso de dos segundos de la primera apertura. *Sin esto, la primera
- *  rotación ocurría después de que el splash se fue: un acto de la
- *  coreografía que no se podía ver nunca.* */
-const MS_PRIMERA_CARA = 1000
 
 /* ── 🔴 LOS TIEMPOS SALEN DEL TOKEN, NO DE LA PANTALLA (firma del founder,
    13-sep-2026) ────────────────────────────────────────────────────────────
@@ -88,11 +80,6 @@ const MS_PRIMERA_CARA = 1000
    la curva de la marca a mano. *Dos copias de la misma curva no se ven
    distintas hoy: se ven distintas el día que alguien afine una.* */
 
-/** «personajes en fundido 500 ms» — letra §2. El token de la casa para una
- *  transición grande es **520** (`grande`), y es el que rige: *la letra dice
- *  medio segundo, y el vocabulario de la casa ya tiene ese medio segundo con
- *  nombre.* */
-const MS_FUNDIDO = motion.duration.grande
 /** El respiro de la marca — ida y vuelta con la curva de marca. */
 const MS_RESPIRO = motion.marca.aperturaMs
 /** El halo entra después de la nariz: es luz que aparece, no un gesto.
@@ -107,8 +94,9 @@ const ESCALA_RESPIRO = 1.06
 const CURVA_MARCA = Easing.bezier(...motion.marca.aperturaBezier)
 
 function SplashMarca() {
-  const [indice, setIndice] = useState(0)
   const quieto = useReducedMotion()
+  const rueda = useRuedaDeCaras(CARAS)
+  const indice = rueda.indice
 
   /* El respiro de la nariz: crece apenas y vuelve. UNA vez y después queda —
      un latido permanente convertiría la marca en un indicador de actividad,
@@ -117,7 +105,6 @@ function SplashMarca() {
   /* El halo entra DESPUÉS del respiro: primero la marca sola, como pide el
      encargo («Nada más al principio»). */
   const halo = useSharedValue(0)
-  const caraOpacidad = useSharedValue(1)
 
   useEffect(() => {
     if (quieto) {
@@ -134,43 +121,17 @@ function SplashMarca() {
   /* El fundido cruzado de la cara grande. **Se apaga y se prende sobre el
      cambio de índice**, no se desliza: el encargo lo pide así y además un
      deslizamiento sugeriría una lista que se puede recorrer con el dedo. */
-  useEffect(() => {
-    if (quieto) return
-    /* 🔴 **LA PRIMERA CARA CAMBIA AL SEGUNDO; LAS SIGUIENTES CADA TRES.**
-       (Firma del founder, 14-sep-2026.) Y la razón es aritmética, medida:
-       el piso de permanencia de la primera apertura es de **2 s** y la
-       cadencia era **3 s**, así que la primera rotación caía **un segundo
-       después de que el splash ya se había ido** — la coreografía tenía un
-       acto que nadie podía ver nunca.
-
-       No se toca la cadencia: **`MS_POR_CARA` sigue siendo 3 s**, porque
-       describe el ritmo del carrusel. Lo que cambia es **cuánto dura la
-       PRIMERA**, que es otra cosa y hasta hoy no tenía nombre propio.
-
-       ⚠️ Por eso son un `setTimeout` y después un `setInterval`, y no un
-       intervalo más corto: *un intervalo de 1 s rotaría las seis caras en
-       seis segundos y volvería el carrusel una ansiedad.* */
-    let intervalo: ReturnType<typeof setInterval> | undefined
-    const avanzar = () => {
-      caraOpacidad.value = withSequence(
-        withTiming(0, { duration: MS_FUNDIDO / 2, easing: Easing.inOut(Easing.quad) }),
-        withTiming(1, { duration: MS_FUNDIDO / 2, easing: Easing.inOut(Easing.quad) }),
-      )
-      setTimeout(() => setIndice((i) => (i + 1) % CARAS.length), MS_FUNDIDO / 2)
-    }
-    const primera = setTimeout(() => {
-      avanzar()
-      intervalo = setInterval(avanzar, MS_POR_CARA)
-    }, MS_PRIMERA_CARA)
-    return () => {
-      clearTimeout(primera)
-      if (intervalo !== undefined) clearInterval(intervalo)
-    }
-  }, [quieto, caraOpacidad])
+  /* 🪦 ACÁ VIVÍA EL RELOJ DE LA RUEDA, y se muda a `lib/rueda-de-caras`.
+     **02 nació con la misma rotación** (lote 5) y la `OndaAcceso` de B ya
+     tenía una tercera. *Tres relojes iguales son tres que se desincronizan, y
+     peor: tres lugares donde alguien tiene que acordarse de `useReducedMotion`*
+     — la doctrina la escribió la casa al construir la onda, y acá se aplica.
+     Lo que se mudó es el TIEMPO; el dibujo —la fila de seis, la cara grande—
+     sigue siendo de esta pantalla. */
 
   const estiloNariz = useAnimatedStyle(() => ({ transform: [{ scale: escala.value }] }))
   const estiloHalo = useAnimatedStyle(() => ({ opacity: halo.value * 0.18 }))
-  const estiloCara = useAnimatedStyle(() => ({ opacity: caraOpacidad.value }))
+  const estiloCara = useAnimatedStyle(() => ({ opacity: rueda.opacidad.value }))
 
   return (
     <View style={{ flex: 1, backgroundColor: palette.magentaAccion, alignItems: 'center', justifyContent: 'center' }}>
@@ -212,7 +173,7 @@ function SplashMarca() {
           dice que algo está pasando.* */}
       <View style={{ position: 'absolute', bottom: spacing[10], alignItems: 'center', gap: spacing[4] }}>
         <Animated.View style={estiloCara}>
-          <Personaje especie={CARAS[indice]} tamano="hogar" fondo="blanco" />
+          <Personaje especie={rueda.actual} tamano="hogar" fondo="blanco" />
         </Animated.View>
         <View style={{ flexDirection: 'row', gap: spacing[2] }}>
           {/* 🔴 **ENTRAN ESCALONADOS — S116-C lote 3e.**

@@ -33,14 +33,18 @@ export const clienteEs = {
      que la app HACE, no lo que promete sentir.* */
   beneficios: {
     saltar: 'Saltar',
-    unoTitulo: 'Su expediente vive contigo',
-    unoApoyo: 'Carné, vacunas y documentos, siempre a mano',
-    dosTitulo: 'Cuidado cerca de ti',
-    dosApoyo: 'Veterinaria, paseo, estética y guardería',
-    tresTitulo: 'Todo en un lugar',
-    tresApoyo: 'Agendas, compras y pagas una sola vez',
+    /* ⭐ El título de la pantalla, firma del founder (14-sep). Reemplaza a los
+       tres de las tarjetas: **una pantalla, una promesa**. */
+    titulo: 'Todo para su bienestar, en un solo lugar',
+    buscarTitulo: 'Encuentra servicios cerca de ti',
+    buscarApoyo: 'Veterinaria, paseo, estética y guardería',
+    verificadoTitulo: 'Profesionales verificados',
+    verificadoApoyo: 'Revisamos quién atiende a tu mascota',
+    agendaTitulo: 'Agenda en minutos',
+    agendaApoyo: 'Eliges el día y la hora, y listo',
+    documentoTitulo: 'Historial de salud siempre disponible',
+    documentoApoyo: 'Carné, vacunas y documentos, a un toque',
     comenzar: 'Comenzar',
-    paso: 'Tarjeta {{actual}} de {{total}}',
   },
   bienvenida: {
     titular: 'Tu mascota no tiene un expediente. Tiene',
