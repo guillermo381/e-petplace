@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Keyboard, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Animated, {
   runOnJS,
   useAnimatedStyle,
@@ -11,6 +10,7 @@ import Svg, { Path } from 'react-native-svg'
 import { motion } from '../tokens/motion'
 import { palette } from '../tokens/palette'
 import { spacing } from '../tokens/spacing'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LAS_SEIS, useRuedaDeCaras } from '../lib/rueda-de-caras'
 import { Personaje, type EspeciePersonaje } from './Personaje'
 import { Texto } from './Texto'
@@ -88,11 +88,14 @@ const ALTO_OLA = 24
  *  teclea dos veces. */
 export const ALTO_ONDA_ACCESO = ALTO_BANDA + ALTO_OLA
 
-/* ⏪ **LA RUEDA SALIÓ DE ACÁ (lote 8).** Nació en esta pieza y la mesa la
-   pidió compartida con 00, 02 y la espera larga, *«sin copiarla»*: vive en
-   `lib/rueda-de-caras.ts` con sus dos cadencias y su regla de orden fijo.
-   **Acá no quedó una copia** — lo que se pierde al copiar una rueda no es
-   código, es que las cuatro giren al mismo ritmo. */
+/* ⏪ **LA RUEDA VIVE EN `lib/rueda-de-caras.ts`, y eso NO se revierte.**
+   Es orden aparte de la mesa —*«la misma de 00, 02 y la onda, sin
+   copiarla»*— y **nada tuvo que ver con la regresión visual**. *Devolver una
+   copia acá sería deshacer algo que funciona para curar otra cosa.*
+
+   ⚠️ El revert fue del ARCHIVO ENTERO desde git, así que la copia volvió con
+   él y hubo que sacarla de nuevo: **un revert trae todo lo que había, incluso
+   lo que después se mudó a propósito.** */
 
 export interface OndaAccesoProps {
   /** La frase, **ya partida en dos líneas**. Llega partida y no se parte
@@ -109,20 +112,23 @@ export interface OndaAccesoProps {
 }
 
 export function OndaAcceso({ frase, lado, especies = LAS_SEIS }: OndaAccesoProps) {
-/* 🔴 **EL INSET VUELVE A SER EL CRUDO, y el aparato lo decidió (lote 8).**
+/* 🔴 **REVERTIDO A ESTA VERSIÓN DESDE GIT (lote 10), y lo único que se le
+     aplica es el inset CRUDO.**
 
-     ⏪ En el lote 6 lo pasé a derivado (`useInsetQueFalta`) y el founder vio
-     en 03 **la franja ENTERA subida, con lienzo a los lados y abajo**. La
-     derivación mide *cuánto de la barra queda debajo del contenedor*, y eso
-     es lo correcto para un pie que vive DENTRO de un contenedor — **no para
-     una franja que tiene que llegar al borde físico**. *Es la misma lección
-     que el asistente ya me había cobrado: dos piezas con el mismo síntoma no
-     tienen por qué tener la misma cura.*
+     Firma del founder tras el recorrido: *«la versión que salió en el primer
+     OTA estaba bien: ola curva, magenta hasta los bordes y hasta abajo… lo
+     único que hacía falta era subir la frase y el personaje unos píxeles por
+     encima de las teclas»*. **La reescritura del lote 8 —el fondo en la raíz—
+     rompió más de lo que arregló:** dejó un rectángulo con aire a los lados y
+     abajo, y con el teclado arriba pintaba una franja magenta sobre la
+     pantalla.
 
-     La orden es literal y no admite interpretación: *«la franja magenta llega
-     hasta los bordes y hasta el fondo, PINTADA; lo único que se aparta de las
-     teclas es el CONTENIDO»*. ⇒ el inset **empuja el contenido** y no mueve
-     un píxel del color. */
+     ⚠️ **Y el cambio que sí hacía falta es de UNA LÍNEA, no de anatomía:** el
+     valor. `useInsetQueFalta` mide *cuánto de la barra queda debajo del
+     contenedor* — correcto para un pie que vive DENTRO de uno, y el que hacía
+     subir la franja entera acá. El crudo es el que corre el contenido por
+     encima de las teclas sin mover el color. *La versión buena ya tenía la
+     forma correcta; le sobraba una medición y le faltaba un número.* */
   const insets = useSafeAreaInsets()
   const insetInferior = insets.bottom
   const { cara, opacidad } = useRuedaDeCaras(especies)
@@ -183,21 +189,11 @@ export function OndaAcceso({ frase, lado, especies = LAS_SEIS }: OndaAccesoProps
      sistema es el CONTENIDO. */
   const alto = ALTO_ONDA_ACCESO + insetInferior
 
-  /* 🔴 **EL MAGENTA VIVE EN LA RAÍZ, y ésa es la cura de los huecos.**
-     Antes el color lo ponían la ola y la banda, cada una en su caja: **todo
-     lo que quedara entre ellas o alrededor salía lienzo** —el SVG a 100 %
-     deja subpíxeles en los cantos, y cualquier redondeo de alto abre una
-     línea abajo—. *Un color que se compone de dos piezas tiene tantas
-     junturas como piezas.* Con el fondo en la raíz, **cualquier superficie
-     que la onda ocupe es magenta por construcción**, y las junturas dejan de
-     poder existir. */
-  const fondoDeLaFranja = { height: alto, backgroundColor: palette.magentaAccion }
-
-  if (!pintada) return <View style={fondoDeLaFranja} />
+  if (!pintada) return <View style={{ height: alto }} />
 
   return (
     <Animated.View
-      style={[fondoDeLaFranja, estiloOnda]}
+      style={[{ height: alto }, estiloOnda]}
       /* La onda no es un control: no recibe toques ni los roba a lo que
          tenga debajo mientras está desvanecida. */
       pointerEvents="none"

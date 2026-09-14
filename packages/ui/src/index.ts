@@ -51,6 +51,13 @@ export { OndaAcceso, type OndaAccesoProps, ALTO_ONDA_ACCESO } from './components
    NO finge saber cuánto falta · `HojaAsistente` NO trae la lista de atajos
    adentro, la recibe. */
 export { FilaBeneficio, type FilaBeneficioProps } from './components/FilaBeneficio'
+/* ⏪ **`Confeti` NO SE EXPORTA, y lo decidió `R17`.** Lo exporté pensando en
+   una futura pantalla de celebración — y la regla contestó lo correcto: *una
+   exportación sin consumidor es una pieza que nadie sabe que existe*, y
+   además obliga a una entrada de galería para algo que sólo se ve adentro
+   del «¡Listo!». **Hoy su único consumidor es `Confirmacion`, que la monta
+   sola.** El día que aparezca el segundo, se exporta y gana su entrada —
+   que es el mismo momento en que dejaría de ser una copia potencial. */
 export { EsperaLarga, type EsperaLargaProps } from './components/EsperaLarga'
 export {
   HojaAsistente,

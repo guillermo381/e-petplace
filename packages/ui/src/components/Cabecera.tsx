@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import { BarraPasos } from './BarraPasos'
 import { Chevron } from './chevron'
+import { GlifoConContador } from './GlifoConContador'
 import { Texto } from './Texto'
 import { usePresionado } from './usePresionado'
 import { palette } from '../tokens/palette'
@@ -56,6 +57,22 @@ export type CabeceraProps = {
    *  **Es un nodo y no una lista**: *«un lugar para UN botón»* — el plural
    *  llenaría la cabecera de acentos y la Ley 5 ya dice cuántos van. */
   accionDerecha?: ReactNode
+  /** 🔴 **EL CARRITO VUELVE A LA CABECERA (S116-B lote 10, firma del
+   *  founder: revierte `D-1108`).** Vive en el slot derecho de **las cinco
+   *  tabs**, con su contador, como estaba antes del rediseño (S100d·bis).
+   *
+   *  🔴 **SÓLO SE DIBUJA EN `variante="raiz"`, y eso es la mitad que
+   *  importa.** La adenda es literal: *«NO en las pantallas de checkout
+   *  —carrito, pago, confirmación—: ahí no se muestra»*. Esas pantallas son
+   *  EMPUJADAS, así que **la regla no se recuerda: se cumple sola.** *Una
+   *  pantalla de checkout que pase `carrito` no va a dibujarlo aunque
+   *  quiera, y eso es mejor que una lista de excepciones que alguien tiene
+   *  que mantener.*
+   *
+   *  ⚠️ **Ocupa el MISMO slot que `accionDerecha`**, así que los dos a la
+   *  vez no compilan: *«un lugar para UN botón»* — dos acentos en la
+   *  cabecera es la Ley 5 rota. */
+  carrito?: { cantidad: number; onPress: () => void; etiqueta: string }
   /** Cuando la pantalla es un paso de un flujo. Se dibuja bajo el título
    *  con la pieza `BarraPasos`, que la cabecera no redibuja. */
   pasos?: { total: number; actual: number; etiqueta: string }
@@ -157,6 +174,7 @@ export function Cabecera({
   titulo,
   apoyo,
   accionDerecha,
+  carrito,
   pasos,
   onVolver,
   etiquetaVolver,
@@ -237,7 +255,16 @@ export function Cabecera({
           ) : null}
         </View>
 
-        {accionDerecha !== undefined ? <View>{accionDerecha}</View> : null}
+        {/* El carrito gana el slot cuando está; si no, lo que la pantalla
+            mande. **En `empujada` el carrito no se dibuja pase lo que
+            pase** — ver su nota en las props. */}
+        {esRaiz && carrito !== undefined ? (
+          <DiscoVidrio onPress={carrito.onPress} etiqueta={carrito.etiqueta}>
+            <GlifoConContador nombre="carrito" cuenta={carrito.cantidad} dentroDeTocable />
+          </DiscoVidrio>
+        ) : accionDerecha !== undefined ? (
+          <View>{accionDerecha}</View>
+        ) : null}
       </View>
 
       {pasos !== undefined ? <BarraPasos {...pasos} /> : null}

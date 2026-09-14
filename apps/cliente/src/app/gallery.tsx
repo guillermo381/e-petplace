@@ -14,7 +14,7 @@
 // hace firmar algo que no corre"*. Así que la lámina se monta donde las
 // piezas SÍ se pueden importar: la galería del cliente.
 
-import { Suspense, lazy, useState } from 'react';
+import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -26,7 +26,7 @@ import {
   radius,
   spacing,
   useTheme,
-  EsperaLarga,
+  TokenGallery,
 } from '@epetplace/ui';
 
 import { GrillaElegir, SelectorDia, type DiaOpcion } from '@/components/reserva-piezas';
@@ -159,28 +159,28 @@ function LaminaSeparacionOscuro() {
   );
 }
 
-/* 🔴 **EL CATÁLOGO ENTRA APARTE, Y ESO DESBLOQUEA LAS CAPTURAS (S116-B lote
- * 9 · deuda medida por C: **más de 7 s la primera vez en dev, y la pantalla
- * no dice nada**).
+/* ⏪ **EL `lazy` SE RETIRA — MI CURA DEL LOTE 9 DEJÓ LA GALERÍA PEOR.**
  *
- * **La causa es de bundling, no de render:** este módulo importaba
- * `TokenGallery` de forma estática, así que **Metro tenía que empaquetar el
- * catálogo entero antes de poder mostrar la ruta**. Durante esos segundos la
- * navegación ya ocurrió y **no hay nada dibujado**.
+ * La deuda que midió C era real: más de 7 s en blanco la primera vez, porque
+ * Metro tenía que empaquetar el catálogo entero antes de mostrar la ruta.
+ * Puse `lazy` + `Suspense` con la espera de la casa.
  *
- * 🔴 **Y probablemente explica los SIETE caminos que declaré fallidos en los
- * lotes 5b a 8.** Cada vez mandé el deep link, esperé 4-8 s y saqué la
- * captura: *si la ruta tardaba más que eso en aparecer, lo que fotografié no
- * fue «no navegó» sino «todavía no dibujó»*. **Declarar un camino muerto por
- * medir antes de tiempo es peor que no medirlo**: manda a nadie a buscar una
- * puerta que existe.
+ * 🔴 **Medido en el emulador: el `import()` del paquete NUNCA RESUELVE.** La
+ * ruta abre al instante y se queda en la espera **minutos**, con la rueda
+ * girando y el catálogo sin llegar jamás. *Cambié siete segundos en blanco
+ * por una espera infinita bien dibujada* — y lo segundo es peor: el blanco
+ * al menos termina.
  *
- * ⇒ `lazy` + `Suspense`: la ruta aparece **al instante** con la espera de la
- * casa, y el catálogo llega cuando llega. *La espera no acelera nada — hace
- * que los segundos se vean, que es lo que faltaba.* */
-const TokenGallery = lazy(async () => ({
-  default: (await import('@epetplace/ui')).TokenGallery,
-}));
+ * ⇒ vuelve el import estático. **La deuda de los 7 s queda ABIERTA y con su
+ * causa medida**, que es más de lo que tenía: el bundling ocurre **antes de
+ * que React renderice nada**, así que *ninguna espera dibujada puede
+ * cubrirlo desde adentro de la ruta* — sólo partir el catálogo de verdad, o
+ * que el bundler lo tenga listo antes.
+ *
+ * ⚠️ **Y la espera SÍ quedó probada de paso:** en la corrida donde el `lazy`
+ * no resolvía, `EsperaLarga` estuvo minutos en pantalla, con su rueda
+ * girando y su halo respirando. *El defecto de una pieza fue el banco de
+ * pruebas de la otra.* */
 
 export default function GalleryRoute() {
   return (
@@ -192,18 +192,7 @@ export default function GalleryRoute() {
         <ThemeProvider defaultMode="dark">
           <LaminaSeparacionOscuro />
         </ThemeProvider>
-        <Suspense
-          fallback={
-            <View style={{ height: 420 }}>
-              <EsperaLarga
-                titulo="Armando la galería"
-                apoyo="La primera vez tarda: se está empaquetando el catálogo entero."
-              />
-            </View>
-          }
-        >
-          <TokenGallery />
-        </Suspense>
+        <TokenGallery />
       </ScrollView>
     </SafeAreaView>
   );

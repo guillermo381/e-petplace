@@ -4026,6 +4026,36 @@ function GaleriaInterna() {
           </View>
         </Seccion>
 
+        <Seccion titulo="⭐ GATE S116-B lote 10 — EL CONFETI Y EL CARRITO · qué decide: (a) el confeti cae UNA vez y se apaga ANTES del botón — si tapa el CTA, está mal; (b) dura un segundo y medio y no vuelve: recargá la galería para verlo de nuevo; (c) el carrito ocupa el slot derecho de la cabecera RAÍZ, y en la empujada no está aunque se le pase. ⚠️ Con reducir movimiento NO cae nada, y eso es correcto: lo que la pieza aporta es el movimiento">
+          <View style={{ gap: spacing[4] }}>
+            <View style={{ height: 380, borderRadius: radius.lg, overflow: 'hidden' }}>
+              <Confirmacion
+                exclamacion="¡Listo!"
+                titulo="Tu pedido quedó confirmado"
+                apoyo="Te avisamos cuando salga."
+                primario={{ texto: 'Volver al inicio', onPress: () => {} }}
+              />
+            </View>
+
+            {/* Las DOS variantes, una al lado de la otra: es lo único que
+                prueba que el carrito NO puede aparecer en la empujada. */}
+            <Cabecera
+              variante="raiz"
+              antetitulo="LAS CINCO TABS"
+              titulo="Con carrito"
+              apoyo="El slot derecho, como antes del rediseño."
+              carrito={{ cantidad: 3, onPress: () => {}, etiqueta: 'Carrito, 3 productos' }}
+            />
+            <Cabecera
+              variante="empujada"
+              titulo="Checkout"
+              apoyo="Acá el carrito NO se dibuja, aunque se le pase."
+              onVolver={() => {}}
+              carrito={{ cantidad: 3, onPress: () => {}, etiqueta: 'Carrito, 3 productos' }}
+            />
+          </View>
+        </Seccion>
+
         <Seccion titulo="⭐ GATE S116-B lote 8 — LAS TRES DEL RECORRIDO 2 · qué decide cada una: (a) FilaBeneficio NO tiene que parecer tocable — si tu dedo va solo hacia ella, está mal; (b) EsperaLarga tiene que sostener sin mentir: mirala unos segundos y fijate si te dice «hay alguien acá» o «esto se colgó»; (c) la hoja del asistente tiene que ser CORTA y abrir con el campo primero. ⚠️ La espera NO tiene tope de ciclos: es la única pieza de la casa con movimiento sin fin, firmado">
           <View style={{ gap: spacing[4] }}>
             {/* Cuatro beneficios, una tarjeta cada uno, como el sketch de 02. */}
