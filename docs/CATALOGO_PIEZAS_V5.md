@@ -64,6 +64,17 @@ Las seis caras del founder. **`TrioPersonajes` es la mitad de `Confirmacion`.**
 - 🔴 **El `ave` usa la nariz como cara** hasta que llegue su archivo — el único que entró trae el wordmark encima. Enmienda firmada de la letra §1.10.
 - ⚠️ **Ninguna es vector**; el `roedor` tiene fondo blanco opaco.
 
+### `BotonMarcaAjena`
+Entrar con una cuenta que no es nuestra (Google hoy; Apple tiene su lugar y **no se puede montar**).
+- **props:** `marca` (`google` | `apple`) · `onPress` · `etiqueta` · `alto`
+- **tokens:** `medidas.secundarioAlto`
+- **consumidores:** 0
+- 🔴 **El botón lo entrega su DUEÑO entero** — tipografía, caja y padding incluidos — y la casa sólo le da lugar. *La marca ajena no se redibuja, no se re-colorea y no se estira.* El asset es el oficial de Google, bajado de su página de branding; su procedencia y su licencia están en `assets/marcas-ajenas/PROCEDENCIA.md`.
+- ⚠️ **SE ESCALA, NO SE ESTIRA.** El asset es 180×40 con relación fija; `alto` lo agranda por igual en los dos ejes (52 ⇒ 234×52). **Un `width:'100%'` deformaría la tipografía de otro**, que es lo que sus guidelines prohíben. *Si tu fila es de ancho completo, el que se estira es el contenedor y este botón va centrado adentro.*
+- ⚠️ **Por qué el botón entero y no sólo el logo:** poner su logo en un botón nuestro **también está permitido, pero exige Google Sans Medium 14/20**, que la casa no tiene. *Un botón «casi» conforme a las guidelines de otro no es un atajo: es un incumplimiento con mejor aspecto.*
+- 🔴 **APPLE: montalo igual y no lo dibujes vos.** `marca="apple"` **devuelve `null`** porque no hay asset — el motor de Apple no existe (medido) y la mesa firmó que *un botón que no funciona no se muestra*. **No escribas `{apple && …}` en tu pantalla:** once pantallas con ese `if` son once lugares donde alguien se olvida de sacarlo el día que exista. Montá los dos; la pieza decide.
+- ⚠️ **`etiqueta` la ponés vos y no es opcional de hecho:** el texto va DIBUJADO en el asset, así que ningún lector de pantalla lo puede leer.
+
 ### `BadgeFecha` · `BarraPasos`
 El recuadro de fecha (mes sobre día) y la barra de progreso de un flujo.
 - **props:** `mes` · `dia` — `total` · `actual` · `etiqueta`

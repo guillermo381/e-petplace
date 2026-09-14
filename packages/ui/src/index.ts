@@ -16,6 +16,13 @@ export { radius, type RadiusKey } from './tokens/radius'
 export { medidas, AIRE_RAIZ, SEPARACION_ASISTENTE, type MedidaKey } from './tokens/medidas'
 /* v5 (S116-B lote 2) — las seis caras de la casa y su composición Trío. */
 export { Personaje, TrioPersonajes, type PersonajeProps, type EspeciePersonaje, type TamanoPersonaje } from './components/Personaje'
+/* 🔴 S116-B · ENTRAR CON UNA CUENTA AJENA. **El botón lo entrega su
+   dueño entero** —tipografía y caja incluidas— y la casa sólo le da lugar:
+   la marca ajena no se redibuja, no se re-colorea y no se estira.
+   ⚠️ **Apple tiene su lugar previsto y NO se puede montar**: sin asset la
+   pieza devuelve `null`, así que «Apple visible y roto» es inexpresable.
+   Firma de la mesa: un botón que no funciona no se muestra. */
+export { BotonMarcaAjena, type BotonMarcaAjenaProps, type MarcaAjena } from './components/BotonMarcaAjena'
 export { BotonAsistente, type BotonAsistenteProps } from './components/BotonAsistente'
 export { BadgeFecha, type BadgeFechaProps } from './components/BadgeFecha'
 export { BarraPasos, type BarraPasosProps } from './components/BarraPasos'
