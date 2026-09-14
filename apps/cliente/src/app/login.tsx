@@ -29,20 +29,23 @@
  */
 
 import { useState, useCallback } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { correoARuta } from '../lib/auth/correo-en-ruta';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as WebBrowser from 'expo-web-browser';
 import {
   Boton,
-  Separador,
   BotonMarcaAjena,
   Cabecera,
   Campo,
   Entrada,
   EvitaTeclado,
+  HojaContenido,
   HuellaDeLlegada,
+  LogoV5,
+  Separador,
   spacing,
   typography,
   useAviso,
@@ -123,6 +126,7 @@ export default function Login() {
     router.replace({ pathname: destino, params: { suscripcionId: volverASujeto } });
   }, [destino, volverASujeto, router]);
   const insets = useSafeAreaInsets();
+  const cabecera = useAltoDeCabecera('empujada');
   const aviso = useAviso();
 
   const [email, setEmail] = useState('');
@@ -199,29 +203,61 @@ export default function Login() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      {/* ☠️ **MUEREN EL TAPIZ, LA SENDA Y EL ISOTIPO DE ESQUINA** (S116-C
-          lote 3) — misma razón que en 05: la mesa los llamó ruido y del
-          isotipo fino dijo que no se reconoce. La identidad la pone la
-          cabecera, que además trae el título y el apoyo en su lugar. */}
-      <Cabecera
-        variante="empujada"
-        titulo={t('login.saludo')}
-        apoyo={t('login.apoyo')}
-        onVolver={() => router.back()}
-        etiquetaVolver={t('login.volver')}
-      />
+      {/* ⭐ **LA ESTRUCTURA NUEVA — S116-C lote 3g.** El ciruela deja de ser
+          una tarjeta y pasa a ser el FONDO; el contenido vive en una hoja del
+          lienzo apoyada encima, que desliza. Lo monta `HojaContenido`.
 
+          ⚠️ **`EvitaTeclado` envuelve a la hoja, no al revés**: la hoja trae
+          su propio `ScrollView` y anidar dos rompe el gesto.
+
+          🔴 **Y ESTA PANTALLA DEJA DE PAGAR `insets.bottom`** — lo paga la
+          hoja (`paddingBottom: insets.bottom + spacing[6]`, en su render).
+          *Sumarlo acá lo pagaría dos veces, y es justo lo que `R53` vigila.* */}
       <EvitaTeclado>
-        <ScrollView
-          style={{ backgroundColor: 'transparent' }}
-          contentContainerStyle={{
-            flexGrow: 1,
-            padding: spacing[5],
-            paddingBottom: insets.bottom + spacing[6],
-            gap: spacing[6],
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada"
+                presentacion="fondo"
+                titulo={t('login.saludo')}
+                apoyo={t('login.apoyo')}
+                onVolver={() => router.back()}
+                etiquetaVolver={t('login.volver')}
+              />
+              {/* ⭐ **`LogoV5 tamano="portada"` — S116-C lote 3g.**
+                  Es identidad, así que queda fuera de la contabilidad de dosis
+                  (Ley 4).
+
+                  🔴 **VA SOBRE EL CIRUELA Y NO DENTRO DE LA HOJA, y es una
+                  MEDICIÓN, no una preferencia:** el asset `logo.png` —el de
+                  fondo claro— tiene **fondo blanco horneado** (su esquina mide
+                  RGBA 255,255,255,**255**, contra alfa **0** en los dos
+                  isotipos). Puesto sobre el lienzo dibuja **una caja blanca
+                  alrededor de la marca**: visto en el emulador. Sobre ciruela
+                  rige `logo-sobre-oscuro.png`, que sí es transparente.
+                  *Es la misma cura del fondo del logo que ya se hizo para el
+                  isotipo y que a este asset no llegó* — pedido a B; el día que
+                  entre, esto puede moverse adentro de la hoja si la mesa lo
+                  prefiere. */}
+              <View style={{ alignItems: 'center', paddingBottom: spacing[5] }}>
+                <LogoV5 sobre="oscuro" tamano="portada" />
+              </View>
+            </View>
+          }
+          scroll={{
+            contentContainerStyle: { flexGrow: 1 },
+            keyboardShouldPersistTaps: 'handled',
           }}
-          keyboardShouldPersistTaps="handled"
         >
+          <View
+            style={{
+              padding: spacing[5],
+              gap: spacing[6],
+              flexGrow: 1,
+            }}
+          >
           <Entrada>
             <View style={{ gap: spacing[2] }}>
               <Campo
@@ -368,7 +404,8 @@ export default function Login() {
               ) : null}
             </View>
           </Entrada>
-        </ScrollView>
+          </View>
+        </HojaContenido>
       </EvitaTeclado>
 
       {/* §5 · LA LLEGADA — la huella se completa una vez, sobre el tapiz.

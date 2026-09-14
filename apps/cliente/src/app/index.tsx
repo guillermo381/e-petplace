@@ -74,6 +74,12 @@ const CARAS: readonly EspeciePersonaje[] = ['perro', 'gato', 'conejo', 'ave', 'r
  *  no sale de `motion.duration`: ese vocabulario es de transiciones. */
 const MS_POR_CARA = 3000
 
+/** Cuánto dura la PRIMERA cara — **un segundo**, para que la rotación entre
+ *  en el piso de dos segundos de la primera apertura. *Sin esto, la primera
+ *  rotación ocurría después de que el splash se fue: un acto de la
+ *  coreografía que no se podía ver nunca.* */
+const MS_PRIMERA_CARA = 1000
+
 /* ── 🔴 LOS TIEMPOS SALEN DEL TOKEN, NO DE LA PANTALLA (firma del founder,
    13-sep-2026) ────────────────────────────────────────────────────────────
    ⏪ Acá había cinco números tecleados: `420`, `380`, `600`, `500` y el bezier
@@ -130,14 +136,36 @@ function SplashMarca() {
      deslizamiento sugeriría una lista que se puede recorrer con el dedo. */
   useEffect(() => {
     if (quieto) return
-    const id = setInterval(() => {
+    /* 🔴 **LA PRIMERA CARA CAMBIA AL SEGUNDO; LAS SIGUIENTES CADA TRES.**
+       (Firma del founder, 14-sep-2026.) Y la razón es aritmética, medida:
+       el piso de permanencia de la primera apertura es de **2 s** y la
+       cadencia era **3 s**, así que la primera rotación caía **un segundo
+       después de que el splash ya se había ido** — la coreografía tenía un
+       acto que nadie podía ver nunca.
+
+       No se toca la cadencia: **`MS_POR_CARA` sigue siendo 3 s**, porque
+       describe el ritmo del carrusel. Lo que cambia es **cuánto dura la
+       PRIMERA**, que es otra cosa y hasta hoy no tenía nombre propio.
+
+       ⚠️ Por eso son un `setTimeout` y después un `setInterval`, y no un
+       intervalo más corto: *un intervalo de 1 s rotaría las seis caras en
+       seis segundos y volvería el carrusel una ansiedad.* */
+    let intervalo: ReturnType<typeof setInterval> | undefined
+    const avanzar = () => {
       caraOpacidad.value = withSequence(
         withTiming(0, { duration: MS_FUNDIDO / 2, easing: Easing.inOut(Easing.quad) }),
         withTiming(1, { duration: MS_FUNDIDO / 2, easing: Easing.inOut(Easing.quad) }),
       )
       setTimeout(() => setIndice((i) => (i + 1) % CARAS.length), MS_FUNDIDO / 2)
-    }, MS_POR_CARA)
-    return () => clearInterval(id)
+    }
+    const primera = setTimeout(() => {
+      avanzar()
+      intervalo = setInterval(avanzar, MS_POR_CARA)
+    }, MS_PRIMERA_CARA)
+    return () => {
+      clearTimeout(primera)
+      if (intervalo !== undefined) clearInterval(intervalo)
+    }
   }, [quieto, caraOpacidad])
 
   const estiloNariz = useAnimatedStyle(() => ({ transform: [{ scale: escala.value }] }))

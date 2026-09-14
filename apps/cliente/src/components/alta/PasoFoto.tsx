@@ -24,12 +24,13 @@
 
 import { useRef, useState } from 'react';
 import { useSharedValue } from 'react-native-reanimated';
-import { ScrollView, View } from 'react-native';
+import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   AvatarMascota,
   Boton,
   Cabecera,
+  HojaContenido,
   Texto,
   spacing,
   useTheme,
@@ -39,6 +40,7 @@ import {
 import { EncuadreFoto, PreviewSuperficies } from '@/components/EncuadreFoto';
 import { HojaFotoMascota } from '@/components/HojaFotoMascota';
 import { ENCUADRE_DEFAULT, type Encuadre } from '@/components/foto-encuadre';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 import { useTraduccion } from '@/i18n';
 import { caraDeMascota } from '@/lib/cara-mascota';
 import type { BorradorAlta } from './tipos';
@@ -55,6 +57,7 @@ export function PasoFoto({
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
+  const cabecera = useAltoDeCabecera('empujada');
 
   const nombre = borrador.nombre ?? t('alta.tuMascota');
 
@@ -97,23 +100,30 @@ export function PasoFoto({
           estaba**. Lo mostró la captura, no un gate: la pantalla se veía
           bien y no decía que era el 2 de 3, así que el flujo perdía su
           sentido de avance justo en el medio. */}
-      <Cabecera
-        variante="empujada"
-        antetitulo={t('alta.nuevaMascota')}
-        titulo={t('alta.paso4Titulo', { nombre })}
-        onVolver={onAtras}
-        etiquetaVolver={t('alta.volver')}
-        pasos={{ total: 3, actual: 2, etiqueta: t('alta.paso', { actual: 2, total: 3 }) }}
-      />
-      <ScrollView
-        scrollEnabled={!gestoActivo}
-        contentContainerStyle={{
-          padding: spacing[5],
-          paddingTop: spacing[6],
-          paddingBottom: insets.bottom + spacing[8],
-          gap: spacing[5],
-        }}
+      {/* ⭐ **LA ESTRUCTURA NUEVA — S116-C lote 3g.** Ciruela de FONDO y el
+          contenido en una hoja del lienzo que desliza encima.
+          🔴 El paso **deja de pagar `insets.bottom`**: lo paga la hoja.
+          ⚠️ **`scrollEnabled` viaja adentro de `scroll`**: el gesto del
+          encuadre de la foto tiene que poder frenar el scroll de la hoja, o
+          mover la imagen arrastraría la pantalla entera. */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              presentacion="fondo"
+              antetitulo={t('alta.nuevaMascota')}
+              titulo={t('alta.paso4Titulo', { nombre })}
+              onVolver={onAtras}
+              etiquetaVolver={t('alta.volver')}
+              pasos={{ total: 3, actual: 2, etiqueta: t('alta.paso', { actual: 2, total: 3 }) }}
+            />
+          </View>
+        }
+        scroll={{ scrollEnabled: !gestoActivo, contentContainerStyle: { flexGrow: 1 } }}
       >
+        <View style={{ padding: spacing[5], paddingTop: spacing[6], gap: spacing[5], flexGrow: 1 }}>
         {foto === null ? (
           /**
            * A3 (gate del founder, 2ª pasada) — LOS DOS CAMINOS TERMINAN IGUAL.
@@ -193,7 +203,8 @@ export function PasoFoto({
             <Boton etiqueta={t('alta.continuar')} bloque onPress={avanzar} />
           </>
         )}
-      </ScrollView>
+        </View>
+      </HojaContenido>
 
       <HojaFotoMascota
         visible={hojaAbierta}

@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { ScrollView, View } from 'react-native'
+import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import {
   Boton,
   Cabecera,
+  HojaContenido,
   Celda,
   EsperaDeMarca,
   Separador,
@@ -16,6 +17,7 @@ import {
 import { extraerVacunasDeCarnet, obtenerSesion } from '@epetplace/api'
 import { borrarFotoMascota, leerBase64, subirFotoMascota } from '@/lib/subir-avatar'
 
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera'
 import { useTraduccion } from '@/i18n'
 import { guardarCarnetDelIntento, type VacunaDelCarnet } from '@/lib/alta/carnet-del-intento'
 import type { BorradorAlta } from './tipos'
@@ -64,6 +66,7 @@ export function PasoCarnet({
   const { theme } = useTheme()
   const { t } = useTraduccion()
   const insets = useSafeAreaInsets()
+  const cabecera = useAltoDeCabecera('empujada')
   const [fase, setFase] = useState<Fase>({ t: 'vacio' })
   const [hoja, setHoja] = useState(false)
 
@@ -155,26 +158,31 @@ export function PasoCarnet({
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Cabecera
-        variante="empujada"
-        antetitulo={t('alta.nuevaMascota')}
-        titulo={t('alta.pasoCarnetTitulo')}
-        onVolver={onAtras}
-        etiquetaVolver={t('alta.volver')}
-        pasos={{ total: 3, actual: 3, etiqueta: t('alta.paso', { actual: 3, total: 3 }) }}
-        /* «Omitir» vive arriba y SIEMPRE — ver la cabecera de la pieza. */
-        accionDerecha={
-          <Boton variante="ghost" tamaño="sm" etiqueta={t('alta.omitir')} onPress={() => onAvanzar({})} />
+      {/* ⭐ **LA ESTRUCTURA NUEVA — S116-C lote 3g.** Ciruela de FONDO y el
+          contenido en una hoja del lienzo que desliza encima.
+          🔴 El paso **deja de pagar `insets.bottom`**: lo paga la hoja. */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              presentacion="fondo"
+              antetitulo={t('alta.nuevaMascota')}
+              titulo={t('alta.pasoCarnetTitulo')}
+              onVolver={onAtras}
+              etiquetaVolver={t('alta.volver')}
+              pasos={{ total: 3, actual: 3, etiqueta: t('alta.paso', { actual: 3, total: 3 }) }}
+              /* «Omitir» vive arriba y SIEMPRE — ver la cabecera de la pieza. */
+              accionDerecha={
+                <Boton variante="ghost" tamaño="sm" etiqueta={t('alta.omitir')} onPress={() => onAvanzar({})} />
+              }
+            />
+          </View>
         }
-      />
-
-      <ScrollView
-        contentContainerStyle={{
-          padding: spacing[5],
-          paddingBottom: insets.bottom + spacing[10],
-          gap: spacing[5],
-        }}
+        scroll={{ contentContainerStyle: { flexGrow: 1 } }}
       >
+        <View style={{ padding: spacing[5], gap: spacing[5], flexGrow: 1 }}>
         {fase.t === 'leyendo' ? (
           /* La espera de la casa — la nariz respirando. Y la voz dice que
              puede tardar: *un minuto sin explicación se lee como colgado.* */
@@ -261,7 +269,8 @@ export function PasoCarnet({
             />
           </View>
         )}
-      </ScrollView>
+        </View>
+      </HojaContenido>
 
       <View
         style={{

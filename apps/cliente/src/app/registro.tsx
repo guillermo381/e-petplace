@@ -21,6 +21,7 @@ import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { correoARuta, correoDeRuta } from '../lib/auth/correo-en-ruta';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
@@ -29,7 +30,9 @@ import {
   Campo,
   Entrada,
   EvitaTeclado,
+  HojaContenido,
   HuellaDeLlegada,
+  LogoV5,
   Texto,
   spacing,
   useAviso,
@@ -58,6 +61,7 @@ export default function Registro() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
+  const cabecera = useAltoDeCabecera('empujada');
   const aviso = useAviso();
 
   const [nombre, setNombre] = useState('');
@@ -174,25 +178,39 @@ export default function Registro() {
           isotipo… el sketch no los tiene»*— y del isotipo fino dijo que *«no
           se reconoce»*. La razón alcanza igual acá: son las mismas piezas
           haciendo lo mismo. La identidad la pone la cabecera. */}
-      <Cabecera
-        variante="empujada"
-        titulo={t('registro.saludo')}
-        apoyo={t('registro.apoyo')}
-        onVolver={() => router.back()}
-        etiquetaVolver={t('registro.volver')}
-      />
-
+      {/* ⭐ **LA ESTRUCTURA NUEVA — S116-C lote 3g.** Ciruela de FONDO, el
+          contenido en una hoja del lienzo que desliza encima.
+          🔴 Esta pantalla **deja de pagar `insets.bottom`**: lo paga la hoja
+          (`R53`). */}
       <EvitaTeclado>
-        <ScrollView
-          style={{ backgroundColor: 'transparent' }}
-          contentContainerStyle={{
-            flexGrow: 1,
-            padding: spacing[5],
-            paddingBottom: insets.bottom + spacing[6],
-            gap: spacing[6],
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada"
+                presentacion="fondo"
+                titulo={t('registro.saludo')}
+                apoyo={t('registro.apoyo')}
+                onVolver={() => router.back()}
+                etiquetaVolver={t('registro.volver')}
+              />
+              {/* ⭐ `LogoV5 tamano="portada"`. **Sobre el CIRUELA por medición:**
+                  `logo.png` —el de fondo claro— tiene fondo blanco horneado
+                  (esquina RGBA 255,255,255,**255**, contra alfa **0** en los
+                  dos isotipos) y sobre el lienzo dibuja una caja blanca.
+                  Pedido a B. */}
+              <View style={{ alignItems: 'center', paddingBottom: spacing[5] }}>
+                <LogoV5 sobre="oscuro" tamano="portada" />
+              </View>
+            </View>
+          }
+          scroll={{
+            contentContainerStyle: { flexGrow: 1 },
+            keyboardShouldPersistTaps: 'handled',
           }}
-          keyboardShouldPersistTaps="handled"
         >
+          <View style={{ flexGrow: 1, padding: spacing[5], gap: spacing[6] }}>
           <Entrada>
             <View style={{ gap: spacing[2] }}>
               <Campo
@@ -289,7 +307,8 @@ export default function Registro() {
               />
             </View>
           </Entrada>
-        </ScrollView>
+          </View>
+        </HojaContenido>
       </EvitaTeclado>
 
       {/* R53-DECLARADO: NO es un pie fijo — es el overlay de LLEGADA a pantalla

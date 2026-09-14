@@ -89,3 +89,68 @@ ninguna parte salvo la galería. *Es `L-318` con otra ropa — motor sin puerta.
 ⇒ **por eso C sólo pudo entregar el GIF del check**: los otros dos no existen en
 ningún camino real que se pueda filmar. **Quién los monta y dónde es decisión de
 producto, no mía** — si la mesa dice dónde va la pata, C la monta y la filma.
+
+---
+
+# ADENDA · 14-sep, después de montar — TRES COSAS
+
+## ⓵ 🔴 `logo.png` TIENE FONDO BLANCO HORNEADO — la cura del isotipo no llegó al logo
+
+Medido en el asset, leyendo el primer pixel de cada PNG:
+
+| archivo | esquina RGBA | alfa |
+|---|---|:-:|
+| `logo.png` (claro) | **(255, 255, 255, 255)** | **255 — OPACO** |
+| `logo-sobre-oscuro.png` | (0, 0, 0, 57) | 57 |
+| `isotipo.png` | (0, 0, 0, 0) | **0** |
+| `isotipo-sobre-oscuro.png` | (0, 0, 0, 0) | **0** |
+
+Sobre el lienzo, `LogoV5 sobre="claro" tamano="portada"` **dibuja una caja
+blanca alrededor de la marca** — visto en el emulador antes de medirlo.
+
+**Los dos isotipos están limpios y el logo claro no.** No se veía hasta hoy
+porque el logo sólo aparecía en `cabecera`: chico y sobre ciruela. `portada` lo
+puso grande sobre lienzo y apareció.
+
+⇒ **mientras tanto C monta la marca sobre el CIRUELA**, donde rige el asset que
+sí es transparente. El día que el claro se cure, puede moverse adentro de la
+hoja.
+
+⚠️ **Y de paso, una medida que conviene mirar junto con ésa:** los cuatro assets
+miden **~200 px de ancho**. En `portada` (46 % de un ancho de 1080) se piden
+**~500 px**, o sea **2,5× de upscale**. No lo reporto como defecto porque no lo
+miré con el ojo a ese tamaño — lo reporto como número.
+
+## ⓶ `HojaContenido` funciona; tres cosas del contrato que hubo que descubrir usando
+
+- **El `paddingBottom` lo paga la hoja** ⇒ las seis pantallas migradas dejaron
+  de pagarlo. **Sugerencia para el contrato: decirlo arriba de todo**, porque el
+  primer reflejo de quien migra es conservar su `insets.bottom` y ahí se paga
+  dos veces (y `R53` lo vigila).
+- **`arranque` no tiene default útil**: la cabecera doc dice *«si no se pasa, la
+  hoja se apoya justo debajo del fondo»*, pero el render es
+  `<View style={{ height: arranque }} />` ⇒ con `undefined` la hoja arranca en
+  **0** y tapa la cabecera. *La prosa y el objeto no dicen lo mismo.*
+- **`EvitaTeclado` va por FUERA.** Vale la pena decirlo en la cabecera: es el
+  error de una línea que rompe el gesto y no falla.
+
+## ⓷ Hogar y Expediente NO tienen `Cabecera` v5 — y por eso su costura no se pudo
+
+Medido: el Hogar poblado usa un **techo local** (`@override-s82c`) con la fecha,
+el saludo **y la fila de mascotas adentro del degradado**; el Expediente, un
+`LinearGradient` local con la identidad. El propio comentario del Hogar explica
+por qué: *«`HeroMarca` no tiene slots para fecha-antes-del-saludo ni para la
+fila de mascotas»* — y `Cabecera` tampoco.
+
+⇒ montarles `Cabecera presentacion="fondo"` **perdería ese contenido**. Y sin
+hoja no hay costura, porque la costura la monta `HojaContenido`.
+
+**La salida más barata existe y es de composición, no de pieza:** `fondo` es
+`ReactNode`, así que **el techo local puede ir como `fondo` tal cual**. Pero eso
+es una decisión sobre esas dos pantallas —qué se desvanece al scrollear y qué
+no— y va con firma, no de callado.
+
+**Listo para cuando se decida**, medido: los cuatro accesos del Expediente son
+`Citas · Pasaporte y QR · Documentos · Cuéntanos`
+(`FilaAcciones`, `[mascotaId].tsx:1505`), y **«Pasaporte y QR» pasa a
+«Pasaporte»** por firma del founder.

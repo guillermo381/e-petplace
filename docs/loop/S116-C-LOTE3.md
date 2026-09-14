@@ -524,6 +524,107 @@ cuanto la mesa lo diga, las monto y las filmo.
 
 ---
 
+## ⑰ LOTE 3g · LA ESTRUCTURA NUEVA — SEIS DE OCHO, Y LAS DOS QUE FALTAN SON OTRA COSA
+
+### ⑰.1 · Lo montado y verificado
+
+**`HojaContenido` + `Cabecera presentacion="fondo"`** en: **03 · 04 · 05 · 07 ·
+08 · 09**. Ciruela de FONDO, el contenido en una hoja del lienzo que desliza
+encima. Verificadas **en el aparato, no sólo compiladas**.
+
+**Tres cosas que el contrato de B contestó y que hubo que aplicar:**
+
+- **El `paddingBottom` lo paga la hoja** (`insets.bottom + spacing[6]`, en su
+  render) ⇒ **las seis pantallas dejaron de pagarlo**. *Sumarlo también sería
+  pagarlo dos veces — es lo que `R53` vigila.* ⚠️ **Con una excepción medida:**
+  en 07 el **CTA fijo vive FUERA de la hoja**, así que ahí `insets` se queda.
+- **`EvitaTeclado` envuelve a la hoja**, nunca al revés: la hoja trae su propio
+  `ScrollView` y anidar dos rompe el gesto.
+- **`arranque` hay que medirlo.** La `Cabecera` no tiene alto fijo —su propia
+  nota lo dice— así que sale de un `onLayout`. Y **eso vive en UN lugar**
+  (`lib/alto-de-cabecera.ts`) porque son ocho pantallas y *una regla que hay que
+  aplicar ocho veces se aplica siete*. Arranca en `ALTO_CABECERA_*_FIJO` —el
+  valor que B exportó justo para esto— y no en cero: con cero, la hoja se dibuja
+  tapando la cabecera y **salta** en el segundo cuadro.
+
+### ⑰.2 · 🔴 LAS DOS QUE FALTAN, y no es que no me alcanzó el tiempo
+
+**Hogar (poblado) y Expediente NO tienen `Cabecera` v5.** Medido:
+
+| pantalla | qué usa hoy |
+|---|---|
+| Hogar poblado | un **techo LOCAL** (`@override-s82c`) con la fecha, el saludo **y la fila de mascotas adentro del degradado** |
+| Expediente | un `LinearGradient` local con la **identidad de la mascota** (nombre, especie, peso) |
+
+Y el propio comentario del Hogar dice por qué son locales: *«`HeroMarca` no tiene
+slots para fecha-antes-del-saludo ni para la fila de mascotas»*. **Lo mismo vale
+para `Cabecera`.** ⇒ montarles `Cabecera presentacion="fondo"` **perdería la fila
+de mascotas y la identidad**, que es el contenido por el que esos techos existen.
+
+⚠️ **Y la costura depende de eso**: `FilaAccionesCostura` la monta
+`HojaContenido`, no la pantalla —*«su posición depende de dónde arranca la
+hoja, que es un dato de acá»*—. Sin la hoja no hay costura, y sin resolver el
+techo no hay hoja.
+
+**Lo que sí está listo para el día que se resuelva**, medido: los cuatro accesos
+del Expediente son `Citas · Pasaporte y QR · Documentos · Cuéntanos`
+(`FilaAcciones`, `[mascotaId].tsx:1505`) y **«Pasaporte y QR» pasa a
+«Pasaporte»**, como firmaste. ⇒ **pedido a B en el buzón**: `HojaContenido`
+acepta cualquier `fondo`, así que **la salida más barata es pasar el techo local
+como `fondo`** — pero eso es una decisión de composición de esas dos pantallas,
+no un cambio mecánico, y con ella van sus dos GIF de scroll.
+
+### ⑰.3 · 🔴 EL LOGO CLARO TIENE FONDO BLANCO HORNEADO
+
+`LogoV5 tamano="portada"` está en 01 · 03 · 05. Pero **sobre el lienzo dibuja una
+caja blanca**, visto en el emulador y después medido en el asset:
+
+| archivo | esquina RGBA | alfa |
+|---|---|:-:|
+| `logo.png` (claro) | **(255, 255, 255, 255)** | **255 — OPACO** |
+| `logo-sobre-oscuro.png` | (0, 0, 0, 57) | 57 |
+| `isotipo.png` | (0, 0, 0, 0) | **0** |
+| `isotipo-sobre-oscuro.png` | (0, 0, 0, 0) | **0** |
+
+⇒ **es la misma cura del fondo del logo que ya se hizo para el isotipo y que a
+este asset no llegó.** *Los dos isotipos están limpios y el logo claro no* — y
+no se veía porque hasta hoy el logo sólo aparecía en `cabecera`, chico y sobre
+ciruela.
+
+**Mientras tanto la marca va sobre el CIRUELA**, donde rige el asset que sí es
+transparente. Queda declarado para que nadie lo lea como preferencia de
+composición: *el día que el asset se cure, esto puede moverse adentro de la
+hoja si la mesa lo prefiere.*
+
+### ⑰.4 · ✅ LA ROTACIÓN YA ENTRA EN EL PISO
+
+La cadencia vivía en mi pantalla, así que la curé donde estaba: **la primera cara
+dura 1 s; las siguientes, 3 s.** `MS_POR_CARA` **no se toca** —describe el ritmo
+del carrusel— y nace `MS_PRIMERA_CARA`. *Son dos cosas distintas y hasta hoy la
+segunda no tenía nombre propio.*
+
+⚠️ **Es un `setTimeout` y después un `setInterval`, no un intervalo más corto:**
+*un intervalo de 1 s rotaría las seis caras en seis segundos y volvería el
+carrusel una ansiedad.*
+
+### ⑰.5 · ✅ LA PATA Y EL TRÍO, filmados — con una corrección al encargo
+
+| animación | evidencia | nota |
+|---|---|---|
+| el trío que se funde | `10-expediente-creado.png` | ✅ **se ve**: perro, gato y conejo bajo el check |
+| la pata que pisa | `mov-pata-que-pisa.gif` | ✅ se ve pisando la esquina del chip lleno |
+
+🔴 **Pero NO en el selector de especie, y conviene decirlo:** el encargo pide
+*«la pata en 07 (especie)»* y **esa grilla no es `SelectorOpcion`** — es
+`Personaje` + `Boton`, compuesta así en el lote 3. La pata sólo la dibuja
+`SelectorOpcion`. ⇒ **el GIF es del selector de SEXO, en la misma pantalla.**
+
+*Si la mesa quiere la pata sobre la especie, lo que hay que decidir es que esa
+grilla pase a `SelectorOpcion` con adorno — y eso cambia cómo se ve el paso,
+así que no lo hago sin firma.*
+
+---
+
 ## ⑰ LA VARA — LAS ONCE PREGUNTAS, con la 11 que nació de mi defecto
 
 > La **11** (*«se usó, no se fotografió»*) la firmó la mesa el 13-sep **sobre el

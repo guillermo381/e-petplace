@@ -60,17 +60,20 @@
 import { useEffect, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
+  Cabecera,
   Campo,
   CampoCodigo,
-  Cabecera,
   Celda,
-  Icono,
-  Tarjeta,
   EvitaTeclado,
+  HojaContenido,
   HuellaDeLlegada,
+  Icono,
+  LogoV5,
+  Tarjeta,
   Texto,
   spacing,
   useAviso,
@@ -104,6 +107,7 @@ export default function Recuperar() {
   const router = useRouter();
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
+  const cabecera = useAltoDeCabecera('empujada');
   const { mostrar } = useAviso();
   const { t } = useTraduccion();
 
@@ -213,19 +217,41 @@ export default function Recuperar() {
       {/* ☠️ **MUEREN EL TAPIZ, LA SENDA Y EL ISOTIPO DE ESQUINA** — misma
           razón que en 01/03/05: la mesa los llamó ruido y del isotipo fino
           dijo que no se reconoce. La identidad la pone la cabecera. */}
-      <Cabecera
-        variante="empujada"
-        titulo={t('recuperar.titulo')}
-        apoyo={t('recuperar.apoyo')}
-        onVolver={() => router.back()}
-        etiquetaVolver={t('recuperar.volver')}
-      />
+      {/* ⭐ **LA ESTRUCTURA NUEVA — S116-C lote 3g.** Ciruela de FONDO, el
+          contenido en una hoja del lienzo que desliza encima.
+          🔴 Y esta pantalla **deja de pagar `insets.bottom`**: lo paga la hoja.
+          *Sumarlo acá lo pagaría dos veces — es lo que `R53` vigila.* */}
       <EvitaTeclado>
-        <ScrollView
-          style={{ backgroundColor: 'transparent' }}
-          contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[8], gap: spacing[2] }}
-          keyboardShouldPersistTaps="handled"
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada"
+                presentacion="fondo"
+                titulo={t('recuperar.titulo')}
+                apoyo={t('recuperar.apoyo')}
+                onVolver={() => router.back()}
+                etiquetaVolver={t('recuperar.volver')}
+              />
+              {/* ⭐ `LogoV5 tamano="portada"`. **Sobre el CIRUELA y no dentro de
+                  la hoja, por medición:** `logo.png` —el de fondo claro— tiene
+                  fondo blanco horneado (esquina RGBA 255,255,255,**255**,
+                  contra alfa **0** en los dos isotipos) y sobre el lienzo
+                  dibuja una caja blanca. *Es la misma cura del fondo del logo
+                  que ya se hizo para el isotipo y que a este asset no llegó* —
+                  pedido a B. */}
+              <View style={{ alignItems: 'center', paddingBottom: spacing[5] }}>
+                <LogoV5 sobre="oscuro" tamano="portada" />
+              </View>
+            </View>
+          }
+          scroll={{
+            contentContainerStyle: { flexGrow: 1 },
+            keyboardShouldPersistTaps: 'handled',
+          }}
         >
+          <View style={{ padding: spacing[5], gap: spacing[2], flexGrow: 1 }}>
           {paso === 'pedir' ? (
             <>
               {/* El glifo en su círculo — el patrón de la casa para la fila de
@@ -376,7 +402,8 @@ export default function Recuperar() {
               </View>
             </>
           )}
-        </ScrollView>
+          </View>
+        </HojaContenido>
       </EvitaTeclado>
 
       {/* §5 · LA LLEGADA — al validar la clave nueva, la huella se completa.

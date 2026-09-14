@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ScrollView, View } from 'react-native'
+import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import {
   Boton,
@@ -7,6 +7,7 @@ import {
   Campo,
   CampoFecha,
   EvitaTeclado,
+  HojaContenido,
   Personaje,
   caraDePersonaje,
   SelectorOpcion,
@@ -18,6 +19,7 @@ import {
 } from '@epetplace/ui'
 import { obtenerEspeciesActivas } from '@epetplace/api'
 
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera'
 import { useTraduccion } from '@/i18n'
 import { CODIGO_NO_SE, SelectorDeRaza, type RazaElegida } from '@/components/selector-de-raza'
 import { esAcuario, esOrigen, TIPOS_DE_AGUA, type BorradorAlta, type ModoAlta } from './tipos'
@@ -77,7 +79,11 @@ export function PasoDatosBasicos({
 }) {
   const { theme } = useTheme()
   const { t } = useTraduccion()
+  /* El inset SIGUE HACIENDO FALTA: el CTA fijo vive FUERA de la hoja, y
+     quien está fuera de la hoja paga su propio inset. Lo que se retiró es el
+     del scroll, que ahora paga `HojaContenido`. */
   const insets = useSafeAreaInsets()
+  const cabecera = useAltoDeCabecera('empujada')
 
   const [especie, setEspecie] = useState<string | undefined>(borrador.especie)
   const [nombre, setNombre] = useState(borrador.nombre ?? '')
@@ -139,26 +145,29 @@ export function PasoDatosBasicos({
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Cabecera
-        variante="empujada"
-        antetitulo={t('alta.nuevaMascota')}
-        titulo={t('alta.pasoDatosTitulo')}
-        onVolver={onAtras}
-        etiquetaVolver={t('alta.volver')}
-        /* La barra de pasos la dibuja la propia `Cabecera` — no se redibuja
-           acá (su contrato lo dice). 1-based: el paso, no el índice. */
-        pasos={{ total: 3, actual: 1, etiqueta: t('alta.paso', { actual: 1, total: 3 }) }}
-      />
-
+      {/* ⭐ **LA ESTRUCTURA NUEVA — S116-C lote 3g.** Ciruela de FONDO y el
+          contenido en una hoja del lienzo que desliza encima.
+          🔴 El paso **deja de pagar `insets.bottom`**: lo paga la hoja. */}
       <EvitaTeclado>
-        <ScrollView
-          contentContainerStyle={{
-            padding: spacing[5],
-            paddingBottom: insets.bottom + spacing[10],
-            gap: spacing[6],
-          }}
-          keyboardShouldPersistTaps="handled"
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada"
+                presentacion="fondo"
+                antetitulo={t('alta.nuevaMascota')}
+                titulo={t('alta.pasoDatosTitulo')}
+                onVolver={onAtras}
+                etiquetaVolver={t('alta.volver')}
+                /* La barra de pasos la dibuja la propia `Cabecera`. 1-based. */
+                pasos={{ total: 3, actual: 1, etiqueta: t('alta.paso', { actual: 1, total: 3 }) }}
+              />
+            </View>
+          }
+          scroll={{ contentContainerStyle: { flexGrow: 1 }, keyboardShouldPersistTaps: 'handled' }}
         >
+          <View style={{ padding: spacing[5], gap: spacing[6], flexGrow: 1 }}>
           {/* ── ESPECIE ─────────────────────────────────────────────────── */}
           <View style={{ gap: spacing[3] }}>
             <Texto variante="antetitulo">{t('alta.especieRotulo')}</Texto>
@@ -267,7 +276,8 @@ export function PasoDatosBasicos({
           <Texto variante="apoyo" color="secondary">
             {t('alta.datosNota')}
           </Texto>
-        </ScrollView>
+          </View>
+        </HojaContenido>
       </EvitaTeclado>
 
       {/* EL CTA FIJO ABAJO — lo único fijo en una empujada (firma de mesa). */}
