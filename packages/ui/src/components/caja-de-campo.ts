@@ -233,7 +233,7 @@ export function interiorDeCaja(theme: Theme): string {
 /** ¿Esta casa recibió la geometría del rediseño? (`accent.formaV5`, el
  *  décimo slot — nace en el lote 2 de S116-B). Cliente sí; prestador y
  *  memorial no. */
-function formaV5(theme: Theme): boolean {
+export function formaV5(theme: Theme): boolean {
   return 'formaV5' in theme.accent && theme.accent.formaV5 === true
 }
 

@@ -50,13 +50,21 @@
  * `valor.length === largo` — dueña del flujo, como en todo Campo).
  */
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Pressable, Text, TextInput, View } from 'react-native'
-import Animated, { cubicBezier } from 'react-native-reanimated'
+import Animated, {
+  cubicBezier,
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated'
 
 import { typography } from '../tokens/typography'
 import { spacing } from '../tokens/spacing'
-import { estiloDeCaja } from './caja-de-campo'
+import { estiloDeCaja, formaV5 } from './caja-de-campo'
 import { motion } from '../tokens/motion'
 import { opacity } from '../tokens/opacity'
 import { useTheme } from '../ThemeProvider'
@@ -159,6 +167,10 @@ export function CampoCodigo({
   deshabilitado = false,
 }: CampoCodigoProps) {
   const { theme } = useTheme()
+  /* La casa v5 decide la tipografía del dígito y el temblor del error.
+     Se lee del MISMO helper que la caja y no de `theme.accent.formaV5`
+     a mano: *dos lecturas del mismo slot pueden divergir.* */
+  const v5Campo = formaV5(theme)
   const { t } = useTraduccionUi()
   const inputRef = useRef<TextInput>(null)
   const [enfocado, setEnfocado] = useState(false)
@@ -167,6 +179,43 @@ export function CampoCodigo({
   // La caja ACTIVA es la del próximo dígito a tipear; con el código
   // completo, la última (el cursor no puede pasar del final).
   const indiceActivo = Math.min(valor.length, largo - 1)
+
+  /* ══════════════════════════════════════════════════════════════════
+   *  EL TEMBLOR DEL ERROR — S116-B, firma de la mesa
+   *
+   * *«con error, las ocho tiemblan una vez (corto, sin rebote)»*.
+   *
+   * 🔴 **SIN REBOTE, Y NO ES UN DETALLE:** el rebote de la casa
+   * (`easing.spring`) es la curva de las CONFIRMACIONES táctiles — dice
+   * *«salió bien»*. Un error que rebota **celebra el fallo**. Va con
+   * `easeOut`, que es la curva de lo que entra y se detiene.
+   *
+   * **UNA VEZ, y por eso es `withSequence` y no `withRepeat`:** un
+   * temblor que se repite pide atención otra vez cuando la persona ya
+   * está leyendo el mensaje. *Lo que informa es el mensaje; el temblor
+   * sólo dice dónde mirar.*
+   *
+   * ⚠️ **RESPETA `useReducedMotion`, y acá importa más que en un botón:**
+   * un temblor es exactamente el movimiento que dispara el malestar
+   * vestibular. Con la preferencia activa **el error se ve igual** —las
+   * cajas ya cambian de color y el pie dice qué pasó—, sólo no se mueve.
+   * *Un estado que sólo se comunica con movimiento es inaccesible; éste
+   * no lo es, y por eso quitarle el movimiento no le quita información.*
+   *
+   * ⚠️ **Se dispara por el CAMBIO de `error`, no por su presencia:** sin
+   * esto, cada re-render con el error puesto volvería a temblar. */
+  const sinMovimiento = useReducedMotion()
+  const desplazamiento = useSharedValue(0)
+  const errorPrevio = useRef(error)
+  useEffect(() => {
+    const aparecio = !!error && !errorPrevio.current
+    errorPrevio.current = error
+    if (!aparecio || sinMovimiento) return
+    const paso = (a: number) =>
+      withTiming(a, { duration: motion.duration.fast / 3, easing: Easing.bezier(...motion.easing.easeOut.bezier) })
+    desplazamiento.value = withSequence(paso(-6), paso(6), paso(-3), paso(0))
+  }, [error, sinMovimiento, desplazamiento])
+  const estiloTemblor = useAnimatedStyle(() => ({ transform: [{ translateX: desplazamiento.value }] }))
 
   const alTipear = (crudo: string) => {
     // Sanear SIEMPRE: solo dígitos, cortado a largo. Cubre tipeo, pegado
@@ -217,8 +266,8 @@ export function CampoCodigo({
             primera versión lo puso arriba y escondió también al input — el
             «un solo campo» quedó en CERO campos. Lo cazó el smoke (el
             getByLabel no encontraba nada), no el ojo. */}
-        <View
-          style={{ flexDirection: 'row', gap: spacing[1.5] }}
+        <Animated.View
+          style={[{ flexDirection: 'row', gap: spacing[1.5] }, estiloTemblor]}
           importantForAccessibility="no-hide-descendants"
           accessibilityElementsHidden
         >
@@ -239,10 +288,24 @@ export function CampoCodigo({
                 transitionTimingFunction: cubicBezier(...motion.easing.easeOut.bezier),
               }}
             >
+              {/* 🔴 **S116-B · EL DÍGITO PASA A BALOO CIFRA, y choca con la
+                  Ley 3 en apariencia — se declara cómo se reconcilia.**
+                  La Ley 3 manda mono para metadata de máquina, y un código
+                  de verificación lo es. **Pero la casa ya resolvió este
+                  caso exacto (MATIZ S53):** *«A ESCALA DISPLAY el dato
+                  viste sans — el dato sigue siendo de máquina; el traje
+                  cambia con la escala»*. Acá el dígito no es metadata en
+                  una fila: **es el contenido de una casilla de 48 px**, y
+                  la letra §1.4 pone las cifras en Baloo.
+                  ⚠️ `tabular-nums` SE CONSERVA: ocho casillas de ancho
+                  igual con un dígito cada una necesitan que el 1 ocupe lo
+                  mismo que el 8, o la fila late al escribir. */}
               <Text
                 style={{
-                  fontFamily: typography.family.mono.medium,
-                  fontSize: typography.size.md,
+                  fontFamily: v5Campo
+                    ? typography.escala.cifraChica.familia
+                    : typography.family.mono.medium,
+                  fontSize: v5Campo ? typography.escala.cifraChica.size : typography.size.md,
                   fontVariant: ['tabular-nums'],
                   color: theme.text.primary,
                 }}
@@ -251,7 +314,7 @@ export function CampoCodigo({
               </Text>
             </Animated.View>
           ))}
-        </View>
+        </Animated.View>
 
         <TextInput
           ref={inputRef}
