@@ -35352,7 +35352,7 @@ El bloque del fondo pasa **después** del `ScrollView`, con **`pointerEvents="bo
 
 ## `D-1114` 🟡 — LOS CONTEOS DEL CATÁLOGO SE VENCEN **EN CADA MERGE**, y ninguna pista puede verlo sola
 
-**Estado:** ABIERTA · **Dueño: B** (el catálogo y su gate son suyos) · **la mide A**, que es quien paga el costo en cada tanda.
+**Estado:** ABIERTA · **FIRMADA POR LA MESA** (14-sep-2026) · **Dueño: B**, próxima tanda · **la midió A**, que es quien pagaba el costo en cada tanda.
 **Origen:** A, tras curarlo **dos veces seguidas** en dos merges consecutivos (14-sep-2026).
 
 > **No es que alguien se olvide de actualizar: es que el número correcto no existe en ninguna de las dos ramas.** B es dueño del catálogo y C es quien monta las piezas ⇒ **en la rama de B el gate está verde porque los consumidores de C no existen ahí, y en la de C el catálogo es el viejo.** *El desajuste NACE en `main`, que es el único lugar donde nadie estaba mirando.*
@@ -35372,17 +35372,24 @@ El bloque del fondo pasa **después** del `ScrollView`, con **`pointerEvents="bo
 
 ⚠️ **La diferencia acá, y es lo que hace que NO se pueda copiar esa cura sin pensar:** este número **tiene gate**, así que no envejece en silencio — se cobra en el merge siguiente. *El daño no es desinformar: es que la conducción cure a mano, en territorio ajeno, un número que una máquina puede derivar.*
 
-### Tres salidas, para que B elija — ninguna es mía
+### ✅ FIRMA DE LA MESA (14-sep-2026): **gana la salida 2**
 
-1. **El gate escribe además de medir** (`--fix`): corre, actualiza los conteos y vuelve verde. *La más barata; el riesgo es que un `--fix` automático oculte que una pieza perdió TODOS sus consumidores, que es un hecho que alguien debería mirar.*
-2. **El catálogo deja de publicar el número** y publica el comando, como hizo el canon con las piezas y las migraciones. *Pierde la lectura de un vistazo, que es justamente para lo que C lo abre.*
-3. **Queda como está y lo cura quien conduce**, declarado como costo del método paralelo. *Es lo que pasó hoy dos veces; funciona, y cuesta que A toque `docs/` de B en cada tanda.*
+> **El catálogo deja de publicar conteos y publica el COMANDO que los produce.** Dueño **B**, próxima tanda.
 
-**Mientras tanto rige la 3**, y A lo declara en cada commit que lo toque.
+**Es la tercera vez que esta casa cura esta clase de la misma manera** —el contador de piezas de `packages/ui` y el de migraciones ya salieron del canon y dejaron su comando— *y las dos veces la conclusión fue que corregir un número derivado no lo arregla: lo vuelve a vencer.*
+
+**Lo que la firma descarta, y por qué importa que quede escrito:**
+
+- **La 1 (`--fix`)** era la más barata y **esconde el caso que hay que mirar**: una pieza que pierde TODOS sus consumidores es un hecho —`L-318`, motor sin puerta— y un arreglo automático lo borraría sin que nadie se entere. *Un gate que se auto-repara deja de avisar justo cuando lo que cambió importa.*
+- **La 3 (curarlo a mano cada tanda)** funcionaba y **se cobró tres veces en un día**: 2 desajustes, después 6, después el conflicto de `HojaAsistente` en el mismo archivo. *Lo que empezó como prolijidad terminó siendo la conducción editando `docs/` de otra pista en cada merge.*
+
+⚠️ **Lo que B tiene que resolver al hacerlo, y no es obvio: el catálogo se lee de un vistazo.** C lo abre para decidir qué montar, y *«corré este comando»* no reemplaza a un número que está ahí. **La salida no es borrar y ya** — el gate puede seguir midiendo y **decir el número en su salida**, que es donde un número derivado no envejece.
+
+**Mientras B no lo haga, rige la 3** y A lo declara en cada commit que lo toque.
 
 ⚠️ **Y un hallazgo de paso que no es de esta ficha, para B:** `EsperaLarga` tiene **11** consumidores y `EsperaDeMarca` **6** — *dos piezas de espera conviviendo*. Puede ser correcto (esperas de distinta duración) o puede ser una mudanza a medias; **A no lo decide**.
 
-**☠️ MUERTE:** cuando dos merges seguidos de B+C den `verify:catalogo-v5` verde sin que nadie toque el catálogo a mano.
+**☠️ MUERTE:** cuando el catálogo no publique un solo conteo y el gate los diga en su salida — verificado por un merge de B+C que no obligue a nadie a editar el documento.
 
 ---
 
