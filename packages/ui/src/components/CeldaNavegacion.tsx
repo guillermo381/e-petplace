@@ -117,12 +117,22 @@ export function CeldaNavegacion({ icono, titulo, detalle, onPress, registro = 'c
                 width: 40,
                 height: 40,
                 borderRadius: radius.chipV5,
-                backgroundColor: theme.bg.overlay,
+                /* S116-B · EL PAR DEL GLIFO. El círculo deja de ser el
+                   `bg.overlay` genérico y pasa al tinte que le corresponde
+                   al glifo que sostiene — son DOS tokens que se miden
+                   juntos, y por eso viajan juntos. *Con `overlay` el
+                   círculo decía «acá hay una superficie»; con `glifoBg`
+                   dice de qué es.* */
+                backgroundColor: theme.accent.glifoBg,
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
             >
-              <Icono nombre={icono} registro={registro} />
+              {/* El registro se FUERZA a `'glifo'` bajo v5 y se ignora el
+                  que llegue por props: quien monta una fila no elige de qué
+                  color sale su glifo — lo decide la casa. Fuera de v5 el
+                  prestador conserva el suyo, que es lo que su gate midió. */}
+              <Icono nombre={icono} registro="glifo" />
             </View>
           ) : (
             <Icono nombre={icono} registro={registro} />

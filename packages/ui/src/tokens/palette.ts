@@ -66,7 +66,25 @@ export const palette = {
   rosaSobreCiruela: '#FFB8DE',  // rgb(255,184,222) — antetítulo y apoyo SOBRE ciruela
 
   // ── v5 · Superficies ──
-  rosaTinte:        '#FCE4F1',  // rgb(252,228,241) — el tinte que reemplaza a las capas
+  rosaTinte:        '#FCE4F1',
+  /* ══════════════════════════════════════════════════════════════════
+   *  S116-B · CIRUELA-TINTE — el fondo del círculo de glifo.
+   *
+   * 🔴 **Es ciruela al 8 % sobre el lienzo, COMPUESTO y no elegido a
+   * ojo:** `#4E1160` al 8 % sobre `#F8F2F6` da exactamente esto. *Un
+   * «ciruela clarito» elegido con el cuentagotas no es derivable, y el día
+   * que la ciruela cambie queda huérfano.*
+   *
+   * **Por qué opaco y no `rgba(…, .08)`:** el círculo se para sobre dos
+   * superficies distintas —el lienzo de la hoja y el blanco de una
+   * tarjeta— y con alfa cambiaría de color entre una y otra. *Un token de
+   * fondo que cambia según lo que tiene debajo no es un fondo: es un
+   * velo.*
+   *
+   * ⚠️ **MEDIDO:** ciruela sobre este tinte da **10,39:1**; el magenta que
+   * había antes daba **3,99:1**. El cambio de la mesa no sólo mueve el
+   * color — mejora la lectura del glifo casi tres veces. */
+  ciruelaTinte:     '#EAE0EA',  // rgb(252,228,241) — el tinte que reemplaza a las capas
   lienzo:           '#F8F2F6',  // rgb(248,242,246) — el fondo de la app cliente
   superficie:       '#FFFFFF',  // la tarjeta
   tintaV5:          '#1C1D20',  // rgb(28,29,32) — el texto y el trazo

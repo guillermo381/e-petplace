@@ -24,10 +24,13 @@
  *   · Caja blanca (`bg.card` / dark `bg.elevated`) con borde 1.5 de la
  *     casa — la lámina pide caja, así que `sinCaja` de Campo NO aplica
  *     acá: es otra anatomía, firmada aparte.
- *   · La caja ACTIVA (la del próximo dígito) marca con `accent.active`
- *     — el campo enfocado ES el elemento activo de la vista (Ley 5,
- *     mismo criterio que Campo). El error pinta TODAS las cajas con
- *     `status.danger` y gana sobre el foco — sin gritar: el mensaje va
+ *   · La caja ACTIVA (la del próximo dígito) marca con el acento de foco
+ *     de su casa — el campo enfocado ES el elemento activo de la vista
+ *     (Ley 5, mismo criterio que Campo). ⏪ **S116-B lote 5: en la casa
+ *     v5 ese acento pasó de `accent.active` (magenta) a CIRUELA**, y esta
+ *     pieza no tuvo que tocarse porque comparte `estiloDeCaja` — que es
+ *     exactamente para lo que esa frontera existe. El error pinta TODAS
+ *     las cajas y gana sobre el foco — sin gritar: el mensaje va
  *     en el pie, la caja solo cambia de color.
  *   · Dígito en `tabular-nums` (precedente Cronometro/SelectorDia).
  *     El traje es MONO: un código de recuperación es dato de máquina

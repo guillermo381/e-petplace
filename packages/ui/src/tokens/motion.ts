@@ -221,5 +221,36 @@ export const motion = {
      *  que corre solo, la misma clase que `EsperaDeMarca` (~1.9 s). */
     personajeFundidoMs: 500,
     personajeCadaMs: 3000,
+    /** 🔴 **S116-B lote 5 · LA PRIMERA LLEGA AL SEGUNDO.** Firma de la
+     *  mesa: *«cambia por fundido cruzado cada tres segundos (la primera
+     *  al segundo)»*. **Es un token y no un `3000` menos en la primera
+     *  vuelta** porque son DOS decisiones distintas: cuánto tarda en
+     *  arrancar la rueda y cada cuánto gira. *Quien las mezcle en un solo
+     *  número va a mover las dos el día que la mesa pida mover una.*
+     *
+     *  ⚠️ La cadencia se firmó primero para el splash, donde vive en la
+     *  PANTALLA (territorio de C). Acá tiene su primer consumidor en
+     *  `packages/ui` —`OndaAcceso`—, así que el número deja de estar
+     *  escrito en dos lados y pasa a estar en uno. */
+    personajePrimeraMs: 1000,
+
+    /** 🔴 **S116-B lote 5 · EL HALO DEL ASISTENTE, cuánto crece.**
+     *  Firma de la mesa: *«un halo que respira lento (crece y se atenúa en
+     *  un ciclo largo, sin parar)… que se lea como el orbe viejo»*.
+     *
+     *  **La CADENCIA no está acá a propósito: se toma de
+     *  `motion.coach.respiracionMs` (4000).** Es literalmente lo que la
+     *  orden pide —*que se lea como el orbe viejo*— y duplicar el 4000 en
+     *  este bloque sería tener dos respiraciones que el día que alguien
+     *  ajuste una se separan sin que nada falle.
+     *
+     *  Lo que SÍ es propio es cuánto crece: el orbe respira **1,06** sobre
+     *  sí mismo y eso en un halo no se ve —un aro que crece un 6 % y se
+     *  atenúa a la vez es invisible—. *Un halo no es el cuerpo respirando:
+     *  es el aire que el cuerpo mueve.* */
+    asistenteHaloEscala: 1.3,
+    /** La opacidad del halo en su punto más contraído. Se apaga hacia
+     *  fuera: cuanto más crece, menos se ve. */
+    asistenteHaloOpacidad: 0.35,
   },
 } as const

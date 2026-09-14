@@ -85,6 +85,13 @@ export const lightTheme = {
     /** El estado ACTIVO — magenta, que es el empleo «acción y marca». */
     active:        palette.magentaAccion,
 
+    /* S116-B · el PAR del glifo (fila · campo · acceso · paso). Ver
+
+       `SlotDeTema`: van juntos porque se miden juntos. */
+
+    glifo:         palette.ciruela,
+
+    glifoBg:       palette.ciruelaTinte,
     /** El acento de ELECCIÓN — **ciruela**: «el chip activo es ciruela». */
     control:       palette.ciruela,
     controlBg:     palette.rosaTinte,

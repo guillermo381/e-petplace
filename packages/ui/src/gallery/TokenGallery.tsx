@@ -230,6 +230,7 @@ import { NarizNotificacion } from '../brand/NarizNotificacion'
 import { BotonMarcaAjena } from '../components/BotonMarcaAjena'
 import { HojaContenido } from '../components/HojaContenido'
 import { FilaAccionesCostura } from '../components/FilaAccionesCostura'
+import { OndaAcceso } from '../components/OndaAcceso'
 import { EsperaDeMarca } from '../brand/EsperaDeMarca'
 import { EsperaDeTrabajo } from '../brand/EsperaDeTrabajo'
 import { Guijarro } from '../brand/Guijarro'
@@ -3994,9 +3995,9 @@ function GaleriaInterna() {
               costura={
                 <FilaAccionesCostura
                   accesos={[
-                    { clave: 'a', palabra: 'Agendar', icono: <Icono nombre="hoy" tamano={26} registro="tinta" montaje="control" />, onPress: () => {} },
-                    { clave: 'b', palabra: 'Carné', icono: <Icono nombre="carnet" tamano={26} registro="tinta" montaje="control" />, onPress: () => {} },
-                    { clave: 'c', palabra: 'Tienda', icono: <Icono nombre="despensa" tamano={26} registro="tinta" montaje="control" />, onPress: () => {} },
+                    { clave: 'a', palabra: 'Agendar', icono: <Icono nombre="hoy" tamano={26} registro="glifo" montaje="control" />, onPress: () => {} },
+                    { clave: 'b', palabra: 'Carné', icono: <Icono nombre="carnet" tamano={26} registro="glifo" montaje="control" />, onPress: () => {} },
+                    { clave: 'c', palabra: 'Tienda', icono: <Icono nombre="despensa" tamano={26} registro="glifo" montaje="control" />, onPress: () => {} },
                   ]}
                 />
               }
@@ -4010,6 +4011,27 @@ function GaleriaInterna() {
                 ))}
               </View>
             </HojaContenido>
+          </View>
+        </Seccion>
+
+        <Seccion titulo="⭐ GATE S116-B lote 5 — LA ONDA DE ACCESO · qué decide, y se juzga MIRÁNDOLA UNOS SEGUNDOS, no en una foto: (a) que el borde de arriba se lea como una OLA —dos inflexiones— y no como un domo ni como un borde redondeado; (b) que la cara cambie por FUNDIDO y no por corte, la primera al segundo y después cada tres; (c) que la frase de dos líneas respire adentro de la franja; (d) que el círculo sea CÍRCULO. ⚠️ La rueda queda QUIETA si el sistema pide menos movimiento — eso es correcto, no un defecto">
+          <View style={{ gap: spacing[4] }}>
+            <View style={{ borderRadius: radius.lg, overflow: 'hidden' }}>
+              <OndaAcceso frase={['Mascotas', 'más felices']} lado="der" />
+            </View>
+            {/* El mismo contrato del otro lado: la frase se corre y la cara
+                también. **Montar los dos lados en la galería no es
+                exhaustividad**: es lo único que prueba que `lado` invierte
+                la fila entera y no sólo mueve el círculo. */}
+            <View style={{ borderRadius: radius.lg, overflow: 'hidden' }}>
+              <OndaAcceso frase={['Cuidar es', 'más fácil']} lado="izq" />
+            </View>
+            {/* Acotada a UNA especie: la rueda NO arranca (no hay a dónde
+                ir) y se ve la franja quieta. *Es el caso que un consumidor
+                va a producir sin querer el día que filtre por especie.* */}
+            <View style={{ borderRadius: radius.lg, overflow: 'hidden' }}>
+              <OndaAcceso frase={['Sólo para', 'gatos']} lado="der" especies={['gato']} />
+            </View>
           </View>
         </Seccion>
 

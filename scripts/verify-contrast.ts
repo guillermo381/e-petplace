@@ -749,10 +749,57 @@ todos.push(
   { nombre: 'CARNET · punto de estado: vencida / tarjeta', fg: lightTheme.status.dangerText, bg: lightTheme.bg.card, noTextual: true },
   { nombre: 'CARNET · punto de las AUSENCIAS: tinta secundaria / tarjeta', fg: lightTheme.text.secondary, bg: lightTheme.bg.card, noTextual: true },
   { nombre: 'CARNET · punto de las AUSENCIAS, en oscuro', fg: darkTheme.text.secondary, bg: darkTheme.bg.card, noTextual: true },
+
+
   { nombre: 'CARNET · punto de las AUSENCIAS, en memorial', fg: memorialTheme.text.secondary, bg: memorialTheme.bg.card, noTextual: true },
   /* El aro de «todavía no le toca» aparece también sobre la tarjeta hundida
      de una fila descartada; se mide ahí porque es su peor fondo. */
   { nombre: 'CARNET · punto de las AUSENCIAS / tarjeta hundida', fg: lightTheme.text.secondary, bg: lightTheme.bg.hundido, noTextual: true },
+
+/* ══════════════════════════════════════════════════════════════════════
+ *  S116-B · EL PAR DEL GLIFO — y entra acá porque si no, el verde MIENTE.
+ *
+ * 🔴 La mesa firmó *«el glifo pasa de magenta a ciruela y su círculo de
+ * rosa tinte a ciruela-tinte; `verify:contrast` tiene que seguir en
+ * cero»*. **Y seguía en cero SIN medirlo**: el par nuevo no estaba
+ * declarado, así que el gate daba 450/0 igual que antes del cambio.
+ * *Un gate que no conoce lo que cambiaste te dice que todo está bien
+ * porque no lo miró — es la clase que esta casa persigue, y acá la
+ * habría producido la propia orden de mantenerlo verde.*
+ *
+ * Son **no textuales** (un glifo es gráfica, mín 3:1) y van en las TRES
+ * casas, porque el par se resuelve por tema: cliente en ciruela,
+ * prestador en su teal, memorial en tinta.
+ * ══════════════════════════════════════════════════════════════════════ */
+  { nombre: 'GLIFO v5 · ciruela / su círculo ciruela-tinte', fg: lightTheme.accent.glifo, bg: lightTheme.accent.glifoBg, noTextual: true },
+  /* ⏪ **ACÁ HABÍA DOS PARES MÁS Y LOS SAQUÉ YO, con su razón.** Medí el
+     CÍRCULO contra el lienzo (1,16) y contra la tarjeta (1,28) y los
+     declaré como falla. **La vara estaba mal, no el color:** 3:1 es para
+     elementos que TRANSMITEN información, y el círculo es una SUPERFICIE —
+     un tinte deliberadamente suave cuyo trabajo es sostener al glifo, no
+     distinguirse del fondo. *Pedirle 3:1 sería pedir que deje de ser un
+     tinte y pase a ser un bloque de color, que es lo contrario de lo que
+     la orden pide.*
+     ⚠️ Lo que sí tiene que dar contraste es el **glifo contra su círculo**,
+     y eso se mide arriba: **10,39:1**. */
+  { nombre: 'GLIFO v5 · en oscuro', fg: darkTheme.accent.glifo, bg: darkTheme.accent.glifoBg, noTextual: true },
+  { nombre: 'GLIFO v5 · en memorial', fg: memorialTheme.accent.glifo, bg: memorialTheme.accent.glifoBg, noTextual: true },
+  /* ⚠️ El prestador compone su tinte con ALFA sobre su papel, así que el par
+     lleva `surface`: sin ella el gate lanza, y tiene razón — *un alfa sin
+     superficie no se puede medir, se puede estimar.* */
+  { nombre: 'GLIFO v5 · el prestador conserva su teal (claro)', fg: getTheme('light','oficio').accent.glifo, bg: getTheme('light','oficio').accent.glifoBg, surface: getTheme('light','oficio').bg.card, noTextual: true },
+  { nombre: 'GLIFO v5 · el prestador conserva su teal (oscuro)', fg: getTheme('dark','oficio').accent.glifo, bg: getTheme('dark','oficio').accent.glifoBg, surface: getTheme('dark','oficio').bg.card, noTextual: true },
+
+  /* 🔴 **EL FOCO DEL CAMPO (lote 5, punto 2), y entra por la misma razón
+     que el par de arriba: si no se declara, el verde no dice nada de lo
+     que se cambió.** Es contorno de un control, así que la vara es la de
+     WCAG 1.4.11 — **3:1 contra lo que tiene al lado**, que es el interior
+     de la caja (`bg.card` en claro, `bg.overlay` en los oscuros).
+     ⚠️ Se mide en las DOS casas v5 porque `formaV5` es `true` en el tema
+     claro Y en el oscuro del cliente — *y fue justamente esa medición la
+     que impidió hornear el ciruela en el token del halo.* */
+  { nombre: 'FOCO v5 · ciruela / interior del campo (claro)', fg: lightTheme.accent.glifo, bg: lightTheme.bg.card, noTextual: true },
+  { nombre: 'FOCO v5 · el acento de foco en oscuro / interior del campo', fg: darkTheme.accent.glifo, bg: darkTheme.bg.overlay, noTextual: true },
 )
 console.log(
   '  (info) CARNET · el punto de las ausencias en text.tertiary medía ' +
