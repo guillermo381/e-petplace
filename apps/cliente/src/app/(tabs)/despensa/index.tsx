@@ -812,12 +812,42 @@ export default function DespensaDescubrir() {
         variante="portada"
         saludo={t('despensa.titulo')}
         isotipo="gradiente"
-        /* ☠️ ACÁ VIVÍA `accionDer` CON LA CANASTA. Su historia completa —el
-           disco que B construyó, la unión `dentroDeTocable` que mató la voz
-           duplicada del lector— vive en el git; **lo que importa hoy es por
-           qué el slot queda vacío**, y eso está al pie de esta pantalla.
-           *Nada de eso se perdió: `GlifoConContador` sigue vivo y lo monta
-           el control de filtro, dos renglones más abajo.* */
+        /* 🔴 **LA CANASTA VUELVE — S116-C lote 3i. Y vuelve acá porque de acá
+           salió.**
+
+           ── LA CADENA, MEDIDA DE TRES COMMITS ────────────────────────────
+           ① **S100d-C** la sacó de este slot **«EN EL MISMO COMMIT»** en que
+              entraba el carrito flotante — su razón de irse era que había otra
+              puerta.
+           ② **S112-C** mató el carrito flotante y le pasó el trabajo a la
+              burbuja del shell.
+           ③ **mi lote 3** reemplazó esa burbuja por el asistente, y la rama
+              del carrito se fue con ella.
+
+           ⇒ **ninguno de los tres dejó una puerta, y el tercero fui yo.** Peor:
+           declaré en la cabecera del shell que *«el carrito sigue alcanzable
+           por la tab Despensa»* **sin recorrerlo** — medido hoy, `grep` de
+           `/despensa/carrito` en `apps/` daba **CERO** navegaciones. *Una
+           afirmación sobre un camino que nadie caminó es exactamente lo que la
+           pregunta 11 de la vara existe para cazar, y la escribí yo.*
+
+           **Vuelve al techo y no como flotante** porque la firma de S100d-bis
+           —*«mientras tenga productos debe estar visible en TODA la app»*—
+           choca con el retiro del orbe, y esa contradicción **es de la mesa**.
+           Lo que no se puede es seguir sin ninguna: sin carrito no se compra.
+
+           `dentroDeTocable` porque el `Pressable` es el que se activa: dos
+           voces para un gesto es lo que ese brazo existe para impedir. */
+        accionDer={
+          <Pressable
+            onPress={() => router.push('/despensa/carrito')}
+            accessibilityRole="button"
+            accessibilityLabel={t('despensa.abrirCarrito', { n: unidades })}
+            hitSlop={8}
+          >
+            <GlifoConContador nombre="carrito" cuenta={unidades} dentroDeTocable />
+          </Pressable>
+        }
       />
 
       {/* ═══════════════════════════════════════════════════════════════

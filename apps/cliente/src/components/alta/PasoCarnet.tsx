@@ -181,6 +181,26 @@ export function PasoCarnet({
           </View>
         }
         scroll={{ contentContainerStyle: { flexGrow: 1 } }}
+        /* 🔴 **EL CTA ENTRA A LA HOJA — S116-C lote 3i.**
+           ⏪ Vivía en un `View` propio DESPUÉS de `</HojaContenido>`, y eso
+           producía exactamente lo que el founder vio en el aparato: **la hoja
+           terminaba arriba del botón, así que entre los dos se veía una franja
+           del ciruela de fondo**, y «Seguir sin carné» quedaba afuera, pegado
+           al borde. *La hoja tiene que llegar hasta abajo y contener sus dos
+           acciones.*
+           Con el slot, además, **la reserva del scroll sale del alto MEDIDO
+           del pie** y no de un número que la pantalla estime — que es lo mismo
+           que `R53` pide y lo que me hizo declarar una excepción en 03/05. */
+        pie={
+          <Boton
+            variante={fase.t === 'leido' ? 'primario' : 'apoyada'}
+            bloque
+            etiqueta={fase.t === 'leido' ? t('alta.carnetGuardar') : t('alta.carnetSeguirSin')}
+            deshabilitado={fase.t === 'leyendo'}
+            razonDeshabilitado={fase.t === 'leyendo' ? t('alta.carnetLeyendo') : undefined}
+            onPress={seguir}
+          />
+        }
       >
         <View style={{ padding: spacing[5], gap: spacing[5], flexGrow: 1 }}>
         {fase.t === 'leyendo' ? (
@@ -271,23 +291,6 @@ export function PasoCarnet({
         )}
         </View>
       </HojaContenido>
-
-      <View
-        style={{
-          paddingHorizontal: spacing[5],
-          paddingBottom: insets.bottom + spacing[4],
-          paddingTop: spacing[3],
-        }}
-      >
-        <Boton
-          variante={fase.t === 'leido' ? 'primario' : 'apoyada'}
-          bloque
-          etiqueta={fase.t === 'leido' ? t('alta.carnetGuardar') : t('alta.carnetSeguirSin')}
-          deshabilitado={fase.t === 'leyendo'}
-          razonDeshabilitado={fase.t === 'leyendo' ? t('alta.carnetLeyendo') : undefined}
-          onPress={seguir}
-        />
-      </View>
 
       <HojaCaptura
         visible={hoja}

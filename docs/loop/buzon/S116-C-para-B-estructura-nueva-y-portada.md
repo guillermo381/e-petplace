@@ -219,3 +219,54 @@ uno**, así que son alternativas y no se componen. Declaré la excepción con
 ⇒ **pedido concreto: que `HojaContenido` gane un slot `pie` con medición
 propia**, como `PantallaConPie`. Con eso la declaración muere y el alto deja de
 depender de que el consumidor se acuerde de reservarlo.
+
+---
+
+# ADENDA 3 · 14-sep — DOS DEFECTOS DEL RECORRIDO DEL FOUNDER QUE VIVEN EN PIEZAS
+
+## ⓵ 🔴 LA HOJA NO LLEGA HASTA ABAJO — el pie queda separado por una franja del fondo
+
+**Lo que el founder vio en el aparato**, en «Carné de vacunas»: *«una franja
+ciruela atravesada entre el CTA y "Seguir sin carné", y "Seguir sin carné" queda
+fuera de la hoja, pegado al borde»*.
+Evidencia: `capturas-s116-c/antes/09-carnet-franja-ciruela.png` y `09-carnet.png`.
+
+**Medido en la pieza, no supuesto:**
+
+- el pie se dibuja **FUERA del `ScrollView`** (`PieFijo`, comentario ⑤) — correcto,
+  es lo que lo hace fijo;
+- la hoja es un `View` con **`minHeight: 400` y NINGÚN `flexGrow`** (línea 153);
+- ⇒ con contenido corto la hoja mide lo que mide su contenido, **el
+  `contentContainerStyle: { flexGrow: 1 }` que pasa el consumidor estira el
+  CONTENEDOR pero no la hoja**, y entre el borde inferior de la hoja y el pie
+  **asoma el degradado**.
+
+⚠️ **Pasar el CTA al slot `pie` NO lo cura** —lo hice y lo verifiqué en el
+aparato—: mueve el botón, no estira la hoja. *La franja no es del botón: es de
+la hoja.*
+
+**Sugerencia (una línea, y es tuya):** que la hoja lleve `flexGrow: 1` —o una
+prop `llenarAlto`— para que ocupe el alto restante cuando el contenido no llega.
+*Desde el consumidor la única salida sería un `minHeight` estimado, que es
+exactamente lo que `R53` y el propio `PieFijo` existen para impedir.*
+
+## ⓶ 🔴 `TarjetaProducto` CORTA EL BOTÓN «AGREGAR» — y es la tercera vez de esta clase
+
+**Lo que el founder vio:** los botones de agregar de la Despensa salen cortados
+abajo. Evidencia: `capturas-s116-c/antes/despensa-sin-carrito.png` — **el pill
+sale rebanado en plano: sus dos esquinas inferiores están cortadas por el borde
+de la tarjeta.**
+
+**El mecanismo ya está escrito en la propia pieza**, dos veces, con sus números:
+`flex: 1` incluye `flexShrink: 1`, así que cuando el contenido no entra *«el
+bloque se deja ENCOGER y lo que sobra se corta en silencio»* — y el contenedor
+lleva `overflow: 'hidden'` (línea 403), *«lo que no entra no se ve»*.
+
+**Lo que cambió y lo destapó:** los nombres de dos o tres líneas
+(«Aceite de Salmon Brilliant Piel y Pelaje»). *No es un caso raro: es el catálogo
+real.*
+
+⇒ **no lo curo desde el consumidor**: la rejilla (`GRILLA_DE_DOS` /
+`CELDA_DE_GRILLA`) está bien —`width: 50%` y paddings, sin alto— y meterle un
+`minHeight` a la celda sería tapar en la pantalla un recorte de la pieza.
+**Va con su captura.**

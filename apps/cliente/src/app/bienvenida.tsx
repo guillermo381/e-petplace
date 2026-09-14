@@ -86,7 +86,15 @@ export default function Bienvenida() {
   const estiloViaje = useAnimatedStyle(() => ({
     /* De 1.9× —cerca del protagonista del splash— a su tamaño de cabecera. */
     transform: [
-      { scale: 1 + (1 - viaje.value) * 0.9 },
+      /* 🔴 **LA AMPLITUD SE RECALIBRA CON EL TOKEN, y por eso se toca acá.**
+         El viaje iba de 1,9× a 1 porque el logo aterrizaba en `cabecera`
+         (120 px) y tenía que salir del tamaño del splash. Con `portada` ya
+         llega grande —46 % contra el 50 % de `protagonista`—, así que lo que
+         queda por recorrer es **poco**: de 1,15 a 1. *Dejar el 1,9 con el
+         token nuevo lo lanzaría a casi el ancho entero de la pantalla: el
+         mismo viaje con otro destino deja de ser un viaje y pasa a ser un
+         salto.* */
+      { scale: 1 + (1 - viaje.value) * 0.15 },
       /* Y bajada: en el splash estaba al centro de la pantalla. */
       { translateY: (1 - viaje.value) * VIAJE_CAIDA },
     ],
@@ -130,7 +138,14 @@ export default function Bienvenida() {
           elemento compartido y entregar una ilusión sería el verosímil-falso
           de siempre; entregar la ilusión diciendo que lo es, es honesto.* */}
       <Animated.View style={[{ alignItems: 'center' }, estiloViaje]}>
-        <LogoV5 sobre="oscuro" tamano="cabecera" />
+        {/* ⭐ **`portada`, el MISMO token que 05 — S116-C lote 3i.**
+            ⏪ Acá decía `cabecera`, que es **120 px FIJOS**; `portada` es el
+            **46 % del ancho** (≈497 en un teléfono de 1080). *Cuatro veces más
+            chico, y en la pantalla donde la marca preside.* El founder lo vio
+            en el aparato comparándola con 05.
+            **No es que 01 «se veía chica»: consumía otro token** — y los dos
+            existían, así que nada fallaba. */}
+        <LogoV5 sobre="oscuro" tamano="portada" />
       </Animated.View>
 
       {/* ② EL CLAIM — el centro de la pantalla, y lo único que se lee de
