@@ -1119,7 +1119,13 @@ export default function Hogar() {
        todavía no existe**. Se decide por el DATO, no por la pantalla — y vive
        en UNA constante porque abajo hay dos CTA que llevan al mismo lado, y
        *una regla que hay que aplicar dos veces se aplica una sola.* */
-    const rutaAlta = tieneFamilia ? '/hogar/agregar' : '/onboarding/datos';
+    /* 🔴 **S116-C lote 6 · `/onboarding/foto`, no `/onboarding/datos`.** El
+       alta se invirtió y **esta puerta llevaba al paso 2**. Va como LITERAL y
+       no como `/onboarding/${PRIMER_PASO}`: las rutas tipadas rechazan una
+       plantilla (se ensancha a `string`), que es justo lo que existen para no
+       aceptar. *El precio de la ruta tipada es este literal; el control de que
+       coincida con `PASOS[0]` es leerlos juntos, y por eso se nombra acá.* */
+    const rutaAlta = tieneFamilia ? '/hogar/agregar' : '/onboarding/foto';
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
         {/* ⭐ **06 · EL HOGAR SIN MASCOTA — S116-C lote 3.**

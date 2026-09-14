@@ -76,6 +76,13 @@ import type { AvatarMascotaEspecie } from '@epetplace/ui';
 export const PASOS = ['foto', 'datos', 'carnet', 'cierre'] as const;
 export type Paso = (typeof PASOS)[number];
 
+/** 🔴 **EL PRIMER PASO SE DERIVA, NO SE ESCRIBE.** Estaba tecleado en las dos
+ *  entradas (`pasoFijo="datos"` y el literal `/onboarding/datos`) ⇒ **al
+ *  invertir el orden, `PASOS` decía «foto» y las dos puertas seguían abriendo
+ *  en «datos»** — el flujo arrancaba en el paso 2 con su barra marcando 2 de 3.
+ *  *Dos listas de lo mismo divergen, y ésta divergió en el primer cambio.* */
+export const PRIMER_PASO: Paso = PASOS[0];
+
 export function esPaso(v: unknown): v is Paso {
   return typeof v === 'string' && (PASOS as readonly string[]).includes(v);
 }
