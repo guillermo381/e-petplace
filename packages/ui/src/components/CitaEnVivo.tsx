@@ -107,10 +107,27 @@ export function CitaEnVivo({ capa, children }: CitaEnVivoProps) {
       <View
         accessibilityRole="text"
         accessibilityLabel={vozEstado}
+        /* 🔴 **LA PASTILLA SE CORRE A LA IZQUIERDA (S116-B lote 7).**
+           El founder la vio superpuesta con el botón del asistente. La orden
+           daba dos salidas —que el aire cubra el ancho, o que la pastilla se
+           corra— y **medirlo eligió la segunda**: el asistente **flota sobre
+           el scroll**, así que una pastilla pegada al borde derecho pasa por
+           su esquina **en algún punto del recorrido**, no sólo al final.
+           *Ningún `paddingBottom` protege a algo que viaja.*
+
+           ⇒ la única salida que funciona **en todo el scroll** es no
+           compartir la columna. Y se decide acá, en la pieza, no en la
+           pantalla: *si cada pantalla eligiera el lado, la misma señal
+           aparecería en dos lugares distintos según dónde esté montada.*
+
+           ⚠️ **No había razón firmada para la derecha** — se verificó antes
+           de moverla. Lo que sí hay ahora es una razón para la izquierda, y
+           es que el lado derecho **está ocupado por una pieza que flota**
+           (`COLUMNA_ASISTENTE` mide cuánto). */
         style={{
           position: 'absolute',
           top: -(PILL_ALTO / 2),
-          right: spacing[3],
+          left: spacing[3],
           zIndex: 1,
           flexDirection: 'row',
           alignItems: 'center',

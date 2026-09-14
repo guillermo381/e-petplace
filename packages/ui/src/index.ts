@@ -13,7 +13,7 @@ export { radius, type RadiusKey } from './tokens/radius'
    que la última fila no quede debajo del asistente ni de la barra. Es la
    parte FIJA: la pantalla le suma `insets.bottom`. **Un solo token, no un
    número por pantalla** — si el asistente crece, todas lo heredan. */
-export { medidas, AIRE_RAIZ, SEPARACION_ASISTENTE, type MedidaKey } from './tokens/medidas'
+export { medidas, AIRE_RAIZ, COLUMNA_ASISTENTE, SEPARACION_ASISTENTE, type MedidaKey } from './tokens/medidas'
 /* v5 (S116-B lote 2) — las seis caras de la casa y su composición Trío. */
 export { Personaje, TrioPersonajes, type PersonajeProps, type EspeciePersonaje, type TamanoPersonaje } from './components/Personaje'
 /* 🔴 S116-B · ENTRAR CON UNA CUENTA AJENA. **El botón lo entrega su

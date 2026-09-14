@@ -148,10 +148,31 @@ export function HojaContenido({ fondo, costura, arranque, children, scroll, pie,
         overScrollMode="never"
         showsVerticalScrollIndicator={false}
         {...scroll}
+        /* La otra mitad de la cura de arriba. Va DESPUÉS del spread a
+           propósito: el `contentContainerStyle` del consumidor se conserva
+           —se compone, no se pisa— pero **el crecimiento no es negociable**,
+           porque de él depende que no se vea el fondo por debajo. */
+        contentContainerStyle={[{ flexGrow: 1 }, scroll?.contentContainerStyle]}
       >
         <View style={{ height: arranque }} />
         <View
           style={{
+            /* 🔴 **LA HOJA CRECE HASTA EL PIE, SIEMPRE (lote 7).** El founder
+               vio en 09 *«una franja de fondo entre la hoja y el pie»*: con
+               contenido corto la hoja terminaba donde terminaba su contenido
+               y el ciruela asomaba debajo.
+
+               **La causa era `minHeight: 400` sin `flexGrow`:** un mínimo
+               garantiza que no sea MÁS CHICA que 400 y **no dice nada sobre
+               llegar abajo**. *Con contenido largo nadie lo notaba — el
+               defecto sólo existe cuando sobra pantalla, que es justo la
+               pantalla que nadie usa para probar.*
+
+               ⚠️ **El `flexGrow` va con `flexGrow` en el `contentContainer`
+               del scroll, no solo acá:** un hijo no puede crecer dentro de un
+               contenedor que mide lo que su contenido. Son las dos mitades de
+               la misma cura. */
+            flexGrow: 1,
             minHeight: 400,
             /* El LIENZO de la letra §2 (`#F8F2F6`), que es el slot
                `bg.base` — la hoja es del color del lienzo, no blanca. */

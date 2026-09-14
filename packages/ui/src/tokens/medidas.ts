@@ -1,3 +1,4 @@
+import { spacing } from './spacing'
 /**
  * e-PetPlace — Design Tokens **v5** · LAS MEDIDAS DEL REDISEÑO DEL CLIENTE
  *
@@ -172,5 +173,26 @@ const RESPIRO_ULTIMA_FILA = 8
  *  `barra 92 + separación 8 + asistente 60 + respiro 8 = 168` */
 export const AIRE_RAIZ =
   medidas.barraAlto + SEPARACION_ASISTENTE + medidas.asistenteDiametro + RESPIRO_ULTIMA_FILA
+
+/** 🔴 **LA COLUMNA DEL ASISTENTE — el aire que faltaba, y es HORIZONTAL
+ *  (S116-B lote 7).**
+ *
+ *  Firma del founder: *«el `AIRE_RAIZ` tiene que cubrir también el ANCHO del
+ *  botón, no sólo su alto, o la pastilla se corre»*.
+ *
+ *  **Y medirlo cambió cuál de las dos salidas sirve.** `AIRE_RAIZ` es un
+ *  `paddingBottom`: protege lo que está DEBAJO de una línea. Pero el
+ *  asistente **flota sobre el scroll**, así que cualquier contenido pegado al
+ *  borde derecho pasa por su esquina **en algún punto del recorrido** — no
+ *  sólo al final. *Ningún padding inferior puede proteger a algo que viaja.*
+ *
+ *  ⇒ **se corre la pastilla** (la otra salida que el founder ofrece), y este
+ *  número es el que dice cuánto: lo ocupa el botón con su halo, medido desde
+ *  el borde derecho de la pantalla. Vive acá para que la pieza que decida no
+ *  lo teclee.
+ *
+ *  `margen derecho 20 + disco 52 + halo 2×16 + respiro 8 = 112` */
+export const COLUMNA_ASISTENTE =
+  spacing[5] + medidas.asistenteDiametro + Math.ceil((medidas.asistenteDiametro * 0.6) / 2) * 2 + RESPIRO_ULTIMA_FILA
 
 export type MedidaKey = keyof typeof medidas

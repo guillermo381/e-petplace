@@ -2349,6 +2349,28 @@ const FIXTURES = {
       src: "await rpc('cobrar', { p_monto: formatearPrecio(total) })\n",
     })),
   ],
+  /* R91 · la celda que corta en silencio.
+     🔴 **EL FIXTURE SACA UNA SOLA DE LAS TRES, y es a propósito:** el defecto
+     real que esta regla persigue no fue «faltaban las tres» — fue que una se
+     cayera sola y nadie lo notara. *Un fixture que las saca todas prueba que
+     el gate ve el archivo vacío; sacar UNA prueba que ve la regresión que de
+     verdad puede pasar.*
+     ⚠️ Se saca `flexShrink: 0`, que es la que más fácil se pierde: no tiene
+     efecto visible con nombres cortos y parece un estilo sobrante. */
+  R91: [{
+    path: 'packages/ui/src/components/TarjetaProducto.tsx',
+    src:
+      "export function TarjetaProducto() {\n" +
+      "  return (\n" +
+      "    <View>\n" +
+      "      <Texto variante=\"cuerpo\" numberOfLines={2}>{nombre}</Texto>\n" +
+      "      <View style={{ marginTop: 'auto', paddingTop: 8 }}>\n" +
+      "        <Mutacion alto={ALTO_STEPPER_ANCHO} />\n" +
+      "      </View>\n" +
+      "    </View>\n" +
+      "  )\n" +
+      "}\n",
+  }],
   /* R90 · un regex de correo suelto.
      🔴 **EL FIXTURE ES LA FORMA DE C — constante arriba, uso abajo — y NO la
      mía.** El primero usaba `/…/.test(v)` todo pegado, que es exactamente lo
@@ -8621,7 +8643,72 @@ function r90(archivos) {
   }
 }
 
-const REGLAS = { R90: r90, R89: r89, R88: r88, R87: r87, R86: r86, R85: r85, R84: r84, R83: r83, R82: r82, R81: r81, R80: r80, R79: r79, R78: r78, R77: r77, R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+
+/** R91 · NINGUNA CELDA CORTA CONTENIDO EN SILENCIO (S116-B · firma del founder
+ *  sobre el recorrido: *«que el nombre se limite a dos líneas con elipsis y el
+ *  botón siempre tenga su alto; ninguna celda corta contenido en silencio»*).
+ *
+ * 🔴 **NACE PORQUE LAS TRES CURAS YA ESTABAN Y NADA LAS SOSTENÍA.** Medido al
+ * recibir el pedido: `TarjetaProducto` ya tenía `numberOfLines={2}` en el
+ * nombre, `flexShrink: 0` en el bloque del precio y un alto declarado en la
+ * mutación del control — las tres puestas en S100d-B **con medición de
+ * aparato** (el stepper salía a 18,1 dp de sus 36 y `overflow:'hidden'` lo
+ * tijereteaba).
+ *
+ * ⇒ *lo que faltaba no era la cura: era que nadie la estuviera mirando.* Y
+ * **su modo de falla es el silencio** — quitar cualquiera de las tres
+ * compila, se ve bien con nombres cortos, y recorta el control con los
+ * largos. El propio comentario de la pieza lo dice: *«esto se midió sobre el
+ * bundle viejo y la cura no se vio correr»*.
+ *
+ * ⚠️ **Lo que su verde dice:** «las tres siguen puestas». **JAMÁS** «nada se
+ * corta»: `overflow:'hidden'` sigue existiendo y es correcto que exista — lo
+ * que la regla sostiene es que **el que cede sea el texto, que tiene tope de
+ * líneas y degrada legiblemente, y no el control con el que se compra.**
+ */
+function r91(fixture) {
+  /* El corpus llega por ARGUMENTO cuando corre la auto-prueba. ⏪ Mi primera
+     versión lo ignoraba y leía siempre `ui`, así que **daba verde contra su
+     propio rojo** y el gate la marcó «REGLA DECORATIVA». *La auto-prueba se
+     cazó a sí misma dos veces seguidas, que es exactamente para lo que está.* */
+  const corpus = fixture ?? ui
+  /* Se busca DENTRO del corpus de `ui` y no con `readFileSync` directo: así
+     el fixture de la auto-prueba —que vive en memoria, no en disco— llega
+     acá igual que el archivo real. *Una regla que lee el disco no se puede
+     probar en rojo.* */
+  const P = /components\/TarjetaProducto\.tsx$/
+  /* **TODAS las entradas que coincidan, no la primera.** La auto-prueba
+     AGREGA su fixture al corpus en vez de reemplazar el archivo ⇒ un
+     `.find()` devolvía el real, las tres curas estaban, y la regla daba verde
+     contra su propio rojo. *Se cazó sola: el gate dijo «REGLA DECORATIVA».* */
+  const piezas = corpus.filter(({ path }) => P.test(path))
+  if (piezas.length === 0) {
+    return { fallos: ['R91 no encuentro `TarjetaProducto.tsx` en el corpus de `ui` — la regla mide UNA pieza y su corpus no puede faltar.'] }
+  }
+  const fallos = []
+  const tres = [
+    ['numberOfLines={2}', 'el NOMBRE con techo de dos líneas', 'sin techo, un nombre de catálogo empuja al control fuera de la caja'],
+    ['flexShrink: 0', 'el bloque del precio que NO se encoge', '`flex: 1` incluye `flexShrink: 1`: cuando no entra, el bloque cede y lo que sobra se corta en silencio'],
+    ['alto={ALTO_STEPPER_ANCHO}', 'el control con ALTO declarado', 'sin alto propio, el control mide lo que le sobre'],
+  ]
+  for (const pieza of piezas) {
+    const limpio = sinComentarios(pieza.src)
+    for (const [aguja, qué, porqué] of tres) {
+      if (!limpio.includes(aguja)) {
+        fallos.push(`R91 **falta \`${aguja}\` en \`${pieza.path}\`** — ${qué}. ${porqué}.`)
+      }
+    }
+  }
+  return {
+    fallos,
+    info:
+      `${tres.length * piezas.length - fallos.length}/${tres.length * piezas.length} cura(s) en su lugar · DURA EN 3 · ` +
+      `su verde dice «las tres siguen puestas», JAMÁS «nada se corta» — ` +
+      `\`overflow:'hidden'\` sigue ahí y debe seguir: lo que la regla sostiene es QUIÉN cede`,
+  }
+}
+
+const REGLAS = { R91: r91, R90: r90, R89: r89, R88: r88, R87: r87, R86: r86, R85: r85, R84: r84, R83: r83, R82: r82, R81: r81, R80: r80, R79: r79, R78: r78, R77: r77, R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -9136,6 +9223,7 @@ corridas.push(['R53 (un pie fijo reserva su propio lugar)', r53([...apps, ...app
 corridas.push(['R56 (el oro no es tinta en el cliente)', r56([...apps, ...appsCodigo])]);
 corridas.push(['R55 (el tope lo paga Encabezado, y nadie mas)', r55([...apps, ...appsCodigo])]);
 corridas.push(['R54 (el pie no se envuelve en un View que capture)', r54([...apps, ...appsCodigo])]);
+corridas.push(['R91 (ninguna celda corta contenido en silencio)', r91()]);
 
 /** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré
  *  construyendo R24: una regla puede estar en REGLAS, tener su fixture,
