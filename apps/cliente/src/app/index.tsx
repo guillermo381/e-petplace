@@ -15,6 +15,8 @@ import { useRouter } from 'expo-router';
 import { Boton, Entrada, EstadoVacio, IsotipoV5, Personaje, gradients, motion, palette, radius, spacing, type EspeciePersonaje, useTheme } from '@epetplace/ui';
 
 import { getEstadoOnboardingDueno, obtenerPreferencias, obtenerSesion } from '@epetplace/api';
+
+import { pisoDePermanenciaMs } from '@/lib/primera-apertura';
 import { cambiarIdioma, obtenerIdiomaActual } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
@@ -247,10 +249,27 @@ export default function Raiz() {
       if (vigente) setColgado(true);
     }, UMBRAL_COLGADO_MS);
 
+    /* 🔴 **EL PISO DE PERMANENCIA ARRANCA ACÁ Y CORRE EN PARALELO, jamás en
+       fila.** Si se esperara el piso ANTES de pedir la sesión, en la primera
+       apertura la app tardaría dos segundos **más** de lo que tarda hoy. Así,
+       el piso y la red se gastan el mismo tiempo: en la práctica no demora
+       nada que no estuviera esperando igual.
+
+       Y se pide UNA vez, fuera del `async` de abajo: `esPrimeraApertura…`
+       **marca en el mismo acto que lee**, así que llamarla dos veces daría
+       `true` y después `false`. */
+    const piso = pisoDePermanenciaMs().then(
+      (ms) => new Promise<void>((listo) => setTimeout(listo, ms)),
+    );
+
     void (async () => {
       const sesion = await obtenerSesion();
       if (!vigente) return;
       if (!sesion.ok || sesion.data === null) {
+        /* El piso se cumple ANTES de irse, no antes de decidir a dónde: lo que
+           se sostiene es la MARCA en pantalla, no el trabajo. */
+        await piso;
+        if (!vigente) return;
         clearTimeout(timer);
         router.replace('/bienvenida');
         return;
@@ -268,6 +287,8 @@ export default function Raiz() {
          sin familia al onboarding. Hoy **las dos van al hogar** — el hogar
          sabe dibujar los dos estados, y tener dos destinos para la misma
          pregunta es cómo nacen dos verdades. */
+      await piso;
+      if (!vigente) return;
       router.replace('/hogar');
     })();
 

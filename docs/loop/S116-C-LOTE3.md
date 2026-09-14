@@ -424,6 +424,146 @@ cuesta tiempo de la persona, no código.*
 
 ---
 
+## ⑯ LOTE 3f · EL PISO DEL SPLASH, Y LAS DOS TAREAS QUE NO PUDE HACER
+
+### ⑯.1 · 🔴 LO QUE NO SE PUDO, y por qué NO es una excusa: las piezas no existen
+
+Los puntos **1 y 2** del encargo piden montar cosas que **no existen en ningún
+lado**. Medido antes de pedir, contra `main` @ `dfe004a7` **y contra las siete
+ramas `pista/s116-b*`**:
+
+| lo que pide el encargo | estado medido |
+|---|---|
+| `HojaContenido` | **no existe** — ni en `main`, ni en ninguna rama de B |
+| `FilaAccionesCostura` | **no existe** — ídem |
+| `Cabecera` variante `'fondo'` | hoy es `'raiz' \| 'empujada'` (`Cabecera.tsx:45`) |
+| `LogoV5 tamano="portada"` | hoy es `'cabecera' \| 'splash' \| 'protagonista'` (`Marca.tsx:78`) |
+
+Y **cero menciones** de las dos primeras en todo `docs/` — o sea que tampoco
+están especificadas.
+
+⇒ **No las dibujo local.** Es la regla que manda el lote entero: *«si una pieza
+no te da lo que la pantalla necesita, escribís qué falta en `docs/loop/buzon/`
+y montás lo que hay; no lo resolvés local»*. El pedido con el contrato que cada
+una necesita está en **`docs/loop/buzon/S116-C-para-B-estructura-nueva-y-portada.md`**,
+con las preguntas que C no puede contestar sola —quién paga el
+`paddingBottom` (`R53` lo vigila), si la hoja trae su propio scroll, si
+`'fondo'` cambia el par de texto—.
+
+*Las capturas y los GIF de scroll de Hogar y Expediente salen el día que las
+piezas entren: **no hay nada que fotografiar todavía**.*
+
+### ⑯.2 · ✅ EL PISO DE PERMANENCIA DEL SPLASH
+
+**Dos segundos, sólo en la PRIMERA apertura del aparato.** Firma del founder.
+
+- **Dónde vive la memoria:** `AsyncStorage`, clave `epp.primera_apertura_vista`
+  — el mismo molde que el candado biométrico, *porque la primera apertura es un
+  hecho del APARATO, no de quien se loguea*. Quien instale en otro teléfono
+  vuelve a ver la marca, y eso es correcto: es su primera vez ahí.
+- **El valor viene de config** (`lib/config-arranque.ts`), no tecleado en la
+  pantalla. ⚠️ **Y NO de `app_config`, con su razón medida:** está en
+  `client.ts` que **`anon` ve CERO filas** de esa tabla — y el piso rige
+  exactamente cuando todavía no hay sesión. *Una perilla que no se puede leer
+  cuando hace falta no es una perilla: es una que siempre está en su default.*
+- **Corre EN PARALELO con la red, jamás en fila.** Si se esperara el piso antes
+  de pedir la sesión, la primera apertura tardaría dos segundos **más** de lo
+  que tarda hoy.
+- **El fallo no cuesta la app:** si `AsyncStorage` no contesta se asume que NO
+  es la primera apertura. *Entre mostrar la marca de más y demorar un arranque
+  que alguien está esperando, se elige no demorar* — y el otro modo de falla
+  sería el peor: dos segundos en CADA apertura, para siempre, sin que nada falle.
+
+**Verificado en el aparato, las dos mitades:**
+
+| apertura | qué mide | resultado |
+|---|---|---|
+| **primera** | la coreografía entera | `mov-00-primera-apertura.gif` — la nariz se asienta, **el halo se lee** (antes no llegaba), los seis personajes entran escalonados, y el viaje a 01 |
+| **segunda** | que no demore | sonda temporal: **`[SONDA piso] 0`** ⇒ el piso NO aplica. El ~1,7 s de splash que igual se ve **es la red** (sesión + estado de onboarding), no mi demora |
+
+*La segunda medición existe porque sin ella habría entregado «sólo la primera»
+como una afirmación. Mirando la pantalla las dos se ven iguales.*
+
+### ⚠️ ⑯.3 · LA ROTACIÓN NO ENTRA EN EL PISO, y son dos números tuyos
+
+El encargo pide ver **una rotación** dentro de la primera apertura. **No ocurre,
+y es aritmética:** la cadencia es **3.000 ms** (*«cada tres segundos»*, textual
+del encargo original) y el piso es **2.000 ms**. La primera cara cambia un
+segundo después de que el splash ya se fue.
+
+**No muevo ninguno de los dos**: los dos son firma tuya, y elegir cuál cede es
+decisión de producto. Las dos salidas, con su costo:
+
+- **el piso a ~3,4 s** — se ve la rotación, y **cada persona nueva espera 1,4 s
+  más** en su primer arranque;
+- **la PRIMERA rotación antes** (y de ahí en adelante cada 3 s) — el piso queda
+  en 2 s y la cadencia firmada se conserva para el resto.
+
+*Voto: la segunda. El «cada tres segundos» describe el ritmo del carrusel, no
+cuánto tarda la primera; y el piso existe para que se vea la coreografía, no
+para que se vea más tiempo la misma cara.*
+
+### ⑯.4 · 🔴 LOS GIF DE B: UNO SALIÓ, DOS NO PUDIERON — y la razón es un hallazgo
+
+| animación | GIF | por qué |
+|---|:-:|---|
+| el check con destellos | ✅ `mov-check-con-destellos.gif` | está vivo: **es la pantalla 10**, filmado en el recorrido real |
+| la pata que pisa | ❌ | **`marcaPata` es opt-in con default `false` y NINGUNA pantalla la pasa** |
+| el trío que se funde | ❌ | **`trio` es opcional en `Confirmacion` y nadie lo pasa** |
+
+Medido con grep sobre `apps/cliente`: **cero consumidores** para las dos.
+
+*No es un defecto de B —las piezas están bien y el movimiento entró—: es que la
+prop es opt-in y nadie la declara, así que el trabajo no aparece en ningún
+camino real.* **Es `L-318` con otra ropa: motor sin puerta.** Filmarlas desde la
+galería mostraría que la pieza se mueve, **no que el producto la usa** — y la
+pregunta 11 de la vara acaba de nacer justamente de esa diferencia.
+
+⇒ **dónde va la pata y dónde el trío es decisión de producto, no mía.** En
+cuanto la mesa lo diga, las monto y las filmo.
+
+---
+
+## ⑰ LA VARA — LAS ONCE PREGUNTAS, con la 11 que nació de mi defecto
+
+> La **11** (*«se usó, no se fotografió»*) la firmó la mesa el 13-sep **sobre el
+> CTA de 03 que yo había borrado**. La respondo primero yo.
+
+| # | pregunta | 00 | 01 | 02 | 03 | 04 | 05 | 05b | 06 | 07 | 08 | 09 | 10 |
+|--:|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| 1 | una sola cabecera | ✳️ | ✳️ | ✳️ | sí | sí | sí | ✳️ | sí | sí | sí | sí | n/a |
+| 2 | tabs solo en raíz | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí |
+| 3 | un acento | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí |
+| 4 | Baloo arriba, PJS abajo | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí |
+| 5 | nada local | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí |
+| 6 | plata y fecha por su riel | n/a | n/a | n/a | n/a | n/a | n/a | n/a | sí | sí | n/a | n/a | n/a |
+| 7 | estado con palabra | n/a | n/a | n/a | sí | sí | sí | sí | sí | sí | sí | sí | sí |
+| 8 | vacío honesto | sí | n/a | n/a | sí | sí | sí | sí | sí | sí | sí | sí | sí |
+| 9 | movimiento que dice algo | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí |
+| 10 | voz | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí | sí |
+| **11** | **se USÓ, no se fotografió** | sí | sí | sí | **sí** | **no** | sí | sí | sí | sí | sí | sí | sí |
+
+**✳️** = excepción firmada (00·01·02 sin cabecera por diseño, `D-1097`; 05b
+lleva flecha sola sobre lienzo, firma de la mesa).
+
+### La 11, respondida de verdad
+
+- **03 · sí, y por fin.** Se usó para entrar: con una cuenta confirmada (llega
+  al hogar) **y con una sin confirmar** (llega a 05b). *Es la primera vez en
+  cuatro lotes que esta pantalla se usa en vez de fotografiarse — y por eso
+  apareció que le faltaba el botón.*
+- **04 · NO, y lo digo.** `recuperar` **sólo se fotografió**: nunca pedí un
+  código de recuperación ni lo canjeé. **Es exactamente la clase de hueco donde
+  vivió el defecto de 03 durante tres lotes**, así que no lo marco verde.
+  ⇒ **ficha: se prueba en el próximo lote, pidiendo el código de verdad.**
+- **00 · sí**: se usó como lo que es —el arranque— y **se midió en sus dos
+  estados** (primera apertura y segunda).
+- **06 · sí** en sus dos estados: vacío (creando la primera mascota desde ahí,
+  que además probó que elige el alta correcta) y poblado.
+- **07·08·09·10 · sí**: tres altas completas de punta a punta en este lote.
+
+---
+
 ## ⑯ LO QUE QUEDA ABIERTO, con dueño
 
 - **Los glifos de oficio de B** — entregados en `pista/s116-b-03` (`e01bb461`),
