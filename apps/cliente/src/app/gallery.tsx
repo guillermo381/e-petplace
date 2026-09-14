@@ -15,7 +15,7 @@
 // piezas SÍ se pueden importar: la galería del cliente.
 
 import { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   palette,
@@ -185,15 +185,19 @@ function LaminaSeparacionOscuro() {
 export default function GalleryRoute() {
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1 }}>
-      <ScrollView>
-        {/* La lámina va PRIMERA: es la decisión más grande que queda abierta.
-            **Fuera del `Suspense` a propósito**: es liviana y entra con la
-            ruta, así que *la pantalla nunca está en blanco*. */}
-        <ThemeProvider defaultMode="dark">
-          <LaminaSeparacionOscuro />
-        </ThemeProvider>
-        <TokenGallery />
-      </ScrollView>
+      {/* 🔴 **UN SOLO SCROLL.** Acá había un `ScrollView` envolviendo a
+          `TokenGallery`, que trae el suyo — **dos verticales anidados**, y el
+          de adentro se quedaba el gesto sin tener qué desplazar. *Medido: 360
+          swipes sin mover un píxel.* La lámina entra ahora como `encabezado`
+          de la galería, adentro de su scroll. */}
+      <TokenGallery
+        encabezado={
+          /* La lámina va PRIMERA: es la decisión más grande que queda abierta. */
+          <ThemeProvider defaultMode="dark">
+            <LaminaSeparacionOscuro />
+          </ThemeProvider>
+        }
+      />
     </SafeAreaView>
   );
 }

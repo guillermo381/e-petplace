@@ -35383,3 +35383,50 @@ El bloque del fondo pasa **después** del `ScrollView`, con **`pointerEvents="bo
 ⚠️ **Y un hallazgo de paso que no es de esta ficha, para B:** `EsperaLarga` tiene **11** consumidores y `EsperaDeMarca` **6** — *dos piezas de espera conviviendo*. Puede ser correcto (esperas de distinta duración) o puede ser una mudanza a medias; **A no lo decide**.
 
 **☠️ MUERTE:** cuando dos merges seguidos de B+C den `verify:catalogo-v5` verde sin que nadie toque el catálogo a mano.
+
+---
+
+## `D-1115` 🟡 — EL ABANICO NO TIENE CAMPO: la pregunta escrita se pierde en el camino de NEXO
+
+**Estado:** ABIERTA · **Dueño: C** (el camino es del cliente) · **la forma la firmó B** al retirar la hoja.
+**Origen:** A, migrando `_layout.tsx` tras el lote 11 (14-sep-2026).
+
+> **`HojaAsistente` dejaba escribir la pregunta ahí mismo** (`pregunta.placeholder` · `onEnviar(texto)`) **y la llevaba a `/nexo` en `params.q`.** El `AbanicoAsistente` que la reemplaza tiene **una fila que navega, sin campo** ⇒ hoy se entra a `/nexo` **sin pregunta escrita**.
+
+**La forma nueva está bien firmada y no se discute:** *una hoja modal tapa la pantalla desde la que se la abrió, y el contexto de lo que se va a preguntar ES esa pantalla*. **Lo que esta ficha registra es lo que costó**, porque el que pierde un paso no es la pieza: es el camino.
+
+**Qué queda por decidir, y es de producto:** si `/nexo` abre con el foco puesto en su propio campo —y entonces el paso perdido es sólo un toque— o si hace falta otra cosa. **A no lo decide y lo dejó dicho en el código**, junto al montaje, para que no viva sólo acá.
+
+**☠️ MUERTE:** cuando alguien camine «abrir el asistente → preguntar» y declare que el paso de más es aceptable, o lo cure.
+
+---
+
+## `D-1116` 🟠 — TOCAR UN ATAJO DEL ABANICO NAVEGA Y **LO DEJA ABIERTO**
+
+**Estado:** ABIERTA · **Dueño: B** (`AbanicoAsistente`/`BotonAsistente` son suyos) · **no se puede curar desde el consumidor**, y ésa es la mitad que importa.
+**Origen:** A, montando la pieza en `_layout.tsx` (14-sep-2026).
+
+### Lo medido, en la fuente
+
+`AbanicoAsistente:178` llama **`onPress={a.onPress}` crudo**. La fila de preguntar, en cambio, sí se envuelve:
+
+```tsx
+onPreguntar={() => { setAbanicoAbierto(false); props.onPreguntar() }}   // BotonAsistente:299
+onPress={a.onPress}                                                     // AbanicoAsistente:178
+```
+
+⇒ **la fila de arriba cierra y las cuatro de abajo no.** *Dos filas del mismo abanico, con el mismo gesto, y sólo una se comporta como el resto de la casa.*
+
+### 🔴 Y por qué el consumidor no puede taparlo
+
+**El estado de «abierto» vive DENTRO de `BotonAsistente`**, que es exactamente la decisión correcta de B —*si cada pantalla lo montara, abrir el asistente sería un acto distinto en cada una*— **pero entonces el consumidor no tiene handle para cerrarlo.** El `setHoja(false)` que el cliente tenía en cada atajo **dejó de cerrar nada** al migrar, y se retiró con su nota.
+
+*Una pieza que se guarda el estado se queda también con la obligación de cerrarlo.*
+
+### Lo que se ve
+
+Se toca «vacuna» → navega a `/carnet` **con el abanico abierto detrás**; al volver sigue abierto. **No rompe nada** —el velo se toca y cierra— *y por eso es de los que sobreviven: funciona mal sin fallar.*
+
+**La cura es de una línea, y del lado de B:** envolver `a.onPress` igual que ya envuelve `onPreguntar`.
+
+**☠️ MUERTE:** cuando tocar un atajo cierre el abanico, verificado en aparato — *el volcado no lo dice: lo dice volver y ver la pantalla limpia.*

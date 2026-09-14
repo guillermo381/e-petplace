@@ -61,6 +61,11 @@ export const clienteEn = {
     atajo_antiparasitario: 'Log a dewormer',
     atajo_foto: 'Save a memory',
     placeholder: 'Ask Nexo',
+    /* La fila de arriba del abanico. **Es voz propia y no reusa
+       `placeholder`**: ese nombre describe un campo de texto que murió con
+       `HojaAsistente` (lote 11 de B) — *una clave cuyo nombre miente sobre
+       dónde vive se copia mal la próxima vez.* Mismo texto, otro sujeto. */
+    preguntar: 'Ask Nexo',
     enviar: 'Send',
     caja: 'Type your question',
     cajaPlaceholder: 'Ask or search for something…',

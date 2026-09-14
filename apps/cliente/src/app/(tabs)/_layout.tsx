@@ -61,7 +61,6 @@ import {
   ALTO_FILA_TABS,
   BarraTabs,
   BotonAsistente,
-  HojaAsistente,
   type AtajoAsistente,
   Icono,
   type BarraTabsItem,
@@ -146,7 +145,6 @@ function AsistenteDelShell({ raiz }: { raiz: boolean }) {
   const params = useGlobalSearchParams<{ mascotaId?: string }>();
   const mascotas = useHogarVivo();
 
-  const [hoja, setHoja] = useState(false);
   const [eligiendoPeso, setEligiendoPeso] = useState(false);
   const [pesoDe, setPesoDe] = useState<{ id: string; nombre: string } | null>(null);
 
@@ -192,7 +190,13 @@ function AsistenteDelShell({ raiz }: { raiz: boolean }) {
     glifo: a,
     texto: t(`nexo.atajo_${a}` as 'nexo.atajo_peso'),
     onPress: () => {
-      setHoja(false);
+      /* ⚠️ ACÁ VIVÍA UN `setHoja(false)` y se retira porque ya no cierra nada:
+         desde el lote 11 el estado de «abierto» vive DENTRO de `BotonAsistente`
+         y esta pantalla no lo alcanza. 🔴 **Consecuencia medida, y es de la
+         pieza: tocar un atajo navega y deja el abanico ABIERTO** — `a.onPress`
+         se llama crudo (`AbanicoAsistente:178`) mientras `onPreguntar` sí se
+         envuelve con su cierre. Pedido a B en `D-1116`; no se puede curar
+         desde acá. */
       if (a === 'vacuna') { router.push('/carnet'); return; }
       if (a === 'antiparasitario') { router.push('/antiparasitario'); return; }
       if (a === 'foto') { router.push('/recuerdo'); return; }
@@ -204,24 +208,26 @@ function AsistenteDelShell({ raiz }: { raiz: boolean }) {
 
   return (
     <>
+      {/* ☠️ ACÁ SE MONTABA `HojaAsistente`, QUE MURIÓ EN EL LOTE 11 DE B
+          (lápida en `packages/ui/src/components/HojaAsistente.LAPIDA.md`).
+          La reemplaza `AbanicoAsistente`, **y no se monta acá**: lo monta
+          `BotonAsistente` — *si cada pantalla lo montara, abrir el asistente
+          sería un acto distinto en cada una.* Por eso lo que antes eran dos
+          piezas hermanas ahora son props de una.
+
+          🔴 **Y SE PIERDE ALGO, declarado y no escondido: el campo de texto.**
+          La hoja dejaba escribir la pregunta ahí mismo y la llevaba a `/nexo`
+          en `params.q`; el abanico tiene una FILA que navega, sin campo. ⇒ el
+          `onPreguntar` entra a `/nexo` **sin pregunta escrita**. *Es la forma
+          que B firmó al retirar la hoja —el contexto de lo que se va a
+          preguntar es la pantalla, y una hoja modal la tapa—, pero el que
+          pierde un paso es el camino de esta app, así que se dice acá y no
+          sólo en la lápida de la pieza.* Ver `D-1115`. */}
       <BotonAsistente
-        onPress={() => setHoja(true)}
         etiqueta={t('nexo.etiqueta', { nombre: t('coach.nombre') })}
-      />
-      <HojaAsistente
-        visible={hoja}
-        onCerrar={() => setHoja(false)}
-        titulo={t('coach.nombre')}
+        vozPreguntar={t('nexo.preguntar', { nombre: t('coach.nombre') })}
+        onPreguntar={() => router.push('/nexo')}
         atajos={atajos}
-        pregunta={{
-          placeholder: t('nexo.placeholder'),
-          etiquetaEnviar: t('nexo.enviar'),
-          /* La hoja **no pregunta**: entrega el texto y lo lleva a la pantalla
-             que sí sabe preguntar. Es lo que su propia cabecera declara — *una
-             hoja que además consultara sería la IA metida adentro de una pieza
-             de presentación.* */
-          onEnviar: (texto) => { setHoja(false); router.push({ pathname: '/nexo', params: { q: texto } }); },
-        }}
       />
       <ElegirMascotaHoja
         visible={eligiendoPeso}
