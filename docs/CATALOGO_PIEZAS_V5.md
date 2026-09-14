@@ -110,6 +110,10 @@
 - ⚠️ **La etiqueta va a la IZQUIERDA y no debajo:** debajo, cuatro etiquetas empujan la columna a lo alto y el último atajo queda fuera del pulgar. *A la izquierda la columna mide lo mismo con etiqueta que sin ella.*
 - ⚠️ **El velo ocupa la pantalla entera**, porque *«se cierra tocando fuera» sólo se cumple si «fuera» es tocable*. Y **el botón también cierra**: uno que sólo abre deja a quien se arrepintió buscando dónde tocar.
 
+---
+
+## ① EL SHELL — las que nacieron en el lote 2 y monta C
+
 ### `Cabecera`
 La banda ciruela de arriba. **Va en TODAS las pantallas del cliente**, no solo en las del lote 3: es lo primero que se ve y lo que hace que la app parezca una sola.
 - **props:** `variante` (`raiz` | `empujada`) · **`presentacion`** (`tarjeta` | `fondo`) · `antetitulo` · `titulo` · `apoyo` · `accionDerecha` · `pasos` · `onVolver` · `etiquetaVolver`

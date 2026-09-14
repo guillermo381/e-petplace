@@ -2954,7 +2954,7 @@ export const clienteEs = {
     deunaHallazgo: 'No pudimos confirmar tu pago',
     deunaHallazgoCuerpo: 'Ya lo estamos revisando. Escríbenos y lo resolvemos.',
     // ── LA ESPERA. 🔴 Nunca un spinner mudo, nunca «rechazado» por timeout.
-    esperaTitulo: 'Estamos confirmando tu pago',
+    esperaTitulo: 'Procesando tu pago',
     esperaTituloCorto: 'Tu pago',
     esperaCuerpo: 'Puede tardar unos segundos. Puedes cerrar esta pantalla: tu pedido sigue solo.',
     // El tope NO declara desenlace — la compra sigue viva.

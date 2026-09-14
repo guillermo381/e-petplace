@@ -2203,7 +2203,7 @@ export const clienteEn = {
     deunaAprobadaCuerpo: "Done — we've received your payment.",
     deunaHallazgo: "We couldn't confirm your payment",
     deunaHallazgoCuerpo: "We're already looking into it. Message us and we'll sort it out.",
-    esperaTitulo: "We're confirming your payment",
+    esperaTitulo: 'Processing your payment',
     esperaTituloCorto: 'Your payment',
     esperaCuerpo: 'It may take a few seconds. You can close this screen — your order keeps going.',
     esperaSigueAbierta: "It's taking longer than usual. Your order is still going and we'll let you know.",

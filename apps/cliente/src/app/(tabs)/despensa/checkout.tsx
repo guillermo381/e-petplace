@@ -984,13 +984,18 @@ export default function DespensaCheckout() {
             *El freno se disuelve contra el objeto, que es como tiene que
             terminar un freno que resultó innecesario.* */}
       </>
-    ) : fase === 'exito' ? (
-      <Boton
-        etiqueta={t('despensa.verTusPedidos')}
-        bloque
-        onPress={() => router.replace('/pedidos')}
-      />
-    ) : fase === 'confirmando' ? (
+    ) : /* ☠️ **S116-C lote 9 · EL PIE DEL ÉXITO MUERE — y lo encontró PAGAR,
+           no leer.** En la captura del pago de punta a punta, «`Ver tus
+           pedidos`» salía **DOS VECES**: una adentro de `Confirmacion` como
+           su acción primaria, y otra acá abajo, fija. *La pieza trae sus dos
+           acciones desde el lote 7 y este pie quedó vivo* — mi propio
+           comentario de entonces dice «⏪ antes había UNA sola, en el pie» y
+           **nunca la saqué**.
+
+           ⚠️ Y no era sólo repetición: el pie fijo **tapaba la fila «Que
+           llegue solo»**, que es la recurrencia de §6.1 — o sea que la
+           duplicación de un botón estaba escondiendo una decisión. */
+      fase === 'confirmando' ? (
       /* 🔴 La salida existe DESDE EL PRIMER SEGUNDO. *Una espera sin puerta es
          una pantalla que retiene: el pedido avanza igual sin que nadie la
          mire, y decirlo es lo que la vuelve honesta.* */
