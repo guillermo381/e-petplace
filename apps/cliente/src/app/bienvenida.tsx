@@ -38,18 +38,59 @@
  * sobre la ciruela. Memorial N/A (pre-sesión).
  */
 
+import { useEffect } from 'react';
 import { View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Boton, Entrada, LogoV5, Texto, gradients, spacing } from '@epetplace/ui';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
+import { Boton, Entrada, LogoV5, Texto, gradients, motion, spacing } from '@epetplace/ui';
 
 import { useTraduccion } from '@/i18n';
+
+/** Cuánto baja el logo al empezar el viaje — es «el centro de la pantalla»
+ *  aproximado, no una medición: el viaje es continuidad de GESTO, no de
+ *  geometría (ver el comentario del render). */
+const VIAJE_CAIDA = 220;
 
 export default function Bienvenida() {
   const router = useRouter();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
+
+  /* ── EL VIAJE DE LA NARIZ · su motor ─────────────────────────────────────
+     Arranca donde el splash la dejó —grande y bajada al centro— y se asienta.
+     **Los dos números salen del token**: la curva es la de la marca (la misma
+     que respira la nariz en 00) y la duración es la `grande` de la casa, que
+     es la del registro de celebración. *Un viaje con la curva de otra pantalla
+     se lee como dos apps.*
+
+     ⚠️ **`useReducedMotion` apaga el viaje entero, no lo acorta**: quien pidió
+     no ver desplazamiento no quiere uno más rápido, quiere ninguno. Misma ley
+     que `Entrada` y que el splash. */
+  const quieto = useReducedMotion();
+  const viaje = useSharedValue(quieto ? 1 : 0);
+  useEffect(() => {
+    if (quieto) return;
+    viaje.value = withTiming(1, {
+      duration: motion.duration.grande,
+      easing: Easing.bezier(...motion.marca.aperturaBezier),
+    });
+  }, [quieto, viaje]);
+  const estiloViaje = useAnimatedStyle(() => ({
+    /* De 1.9× —cerca del protagonista del splash— a su tamaño de cabecera. */
+    transform: [
+      { scale: 1 + (1 - viaje.value) * 0.9 },
+      /* Y bajada: en el splash estaba al centro de la pantalla. */
+      { translateY: (1 - viaje.value) * VIAJE_CAIDA },
+    ],
+  }));
 
   return (
     <LinearGradient
@@ -67,11 +108,30 @@ export default function Bienvenida() {
       {/* ① LA IDENTIDAD — arriba, chica. Sobre el degradado va la versión
           para fondo oscuro. El logo queda FUERA de la contabilidad de dosis
           (Ley 4): es identidad, no acento. */}
-      <Entrada>
-        <View style={{ alignItems: 'center' }}>
-          <LogoV5 sobre="oscuro" tamano="cabecera" />
-        </View>
-      </Entrada>
+      {/* 🔴 **EL VIAJE DE LA NARIZ — S116-C lote 3e, y se declara CÓMO está
+          hecho porque no es lo que parece.**
+
+          El encargo pide que la nariz *viaje* del splash a 01. La forma
+          canónica sería un ELEMENTO COMPARTIDO entre rutas — **y esta casa lo
+          retiró en S80**, medido: API experimental de Reanimated 4, costo alto
+          contra retorno cero. *No se reabre una decisión medida para un
+          adorno.*
+
+          Lo que hace esto: el logo de 01 **entra grande y centrado —donde
+          estaba la nariz— y se asienta en su lugar**. El viaje es del lado de
+          01, no entre las dos. **Y funciona porque 00 sale EN EL ACTO** (su
+          propia cabecera lo firma: nunca espera a terminar una animación), así
+          que el ojo ve una continuidad: lo último del splash es la marca
+          grande al centro, y lo primero de 01 es la marca grande al centro
+          yéndose a su sitio.
+
+          ⚠️ **No pretende ser el mismo píxel**, y por eso no se le pide
+          exactitud: es continuidad de gesto, no de geometría. *Prometer un
+          elemento compartido y entregar una ilusión sería el verosímil-falso
+          de siempre; entregar la ilusión diciendo que lo es, es honesto.* */}
+      <Animated.View style={[{ alignItems: 'center' }, estiloViaje]}>
+        <LogoV5 sobre="oscuro" tamano="cabecera" />
+      </Animated.View>
 
       {/* ② EL CLAIM — el centro de la pantalla, y lo único que se lee de
           lejos. `titulo` es la variante de display del cliente. */}

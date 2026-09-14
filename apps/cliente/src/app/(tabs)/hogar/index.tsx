@@ -662,6 +662,14 @@ export default function Hogar() {
   const sinAvisos = useSinAvisos();
 
   const [mascotas, setMascotas] = useState<EstadoMascotas>('cargando');
+  /* 🪦 `D-1101` · SIN FAMILIA YA NO SE REBOTA — se DIBUJA.
+     Hasta hoy el hogar hacía `router.replace('/')` cuando no había familia, y
+     el raíz mandaba a `/onboarding`. Con el onboarding enterrado eso sería un
+     BUCLE, así que el estado sin familia pasa a ser una pantalla y no un
+     rebote. **Es la misma pantalla que «sin mascotas»** —la que el encargo
+     llama 06— porque para quien mira son el mismo hecho: *acá todavía no hay
+     nadie*. Lo único que cambia es a qué alta lleva el CTA. */
+  const [tieneFamilia, setTieneFamilia] = useState(true);
   /* La «i» del hogar sin mascotas (N22). Vive acá arriba y no junto a su
      `return`: **es un hook**, y un hook detrás de un return condicional
      rompe el orden de llamada en el render siguiente. */
@@ -843,10 +851,19 @@ export default function Hogar() {
       void (async () => {
         const estado = await getEstadoOnboardingDueno();
         if (!vigente) return;
-        if (!estado.ok || !estado.data.tiene_familia || estado.data.familia_id === null) {
-          router.replace('/');
+        /* Un FALLO de lectura no es «no tiene familia» (Ley 13 / `L-178`):
+           uno se dibuja como error con reintento, el otro como hogar vacío.
+           Confundirlos le diría «todavía no tenés a nadie» a alguien que sí. */
+        if (!estado.ok) {
+          setMascotas('error');
           return;
         }
+        if (!estado.data.tiene_familia || estado.data.familia_id === null) {
+          setTieneFamilia(false);
+          setMascotas([]);
+          return;
+        }
+        setTieneFamilia(true);
         const r = await obtenerMascotasDeFamilia(estado.data.familia_id);
         if (!vigente) return;
         if (!r.ok) {
@@ -1096,6 +1113,13 @@ export default function Hogar() {
        `verify:ref-antes-de-uso` existen para cazar, y que ya costó un crash
        en S112. *Una constante barata local vale más que un orden frágil.* */
     const hoyVacio = new Date();
+    /* 🔴 DOS ALTAS, y elegir mal rompe: la PRIMERA mascota nace por
+       `crear_familia_con_primera_mascota` (ruta `/onboarding/datos`) y la
+       adicional por `agregar_mascota_a_familia`, que **exige una familia que
+       todavía no existe**. Se decide por el DATO, no por la pantalla — y vive
+       en UNA constante porque abajo hay dos CTA que llevan al mismo lado, y
+       *una regla que hay que aplicar dos veces se aplica una sola.* */
+    const rutaAlta = tieneFamilia ? '/hogar/agregar' : '/onboarding/datos';
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
         {/* ⭐ **06 · EL HOGAR SIN MASCOTA — S116-C lote 3.**
@@ -1163,7 +1187,7 @@ export default function Hogar() {
                 variante="primario"
                 bloque
                 etiqueta={t('hogar.vacioCta')}
-                onPress={() => router.push('/hogar/agregar')}
+                onPress={() => router.push(rutaAlta)}
               />
             </View>
           </Tarjeta>
@@ -1202,7 +1226,7 @@ export default function Hogar() {
                   titulo={t('hogar.sinMascotasAgregar')}
                   detalle={t('hogar.sinMascotasDetalle')}
                   chevron={false}
-                  onPress={() => router.push('/hogar/agregar')}
+                  onPress={() => router.push(rutaAlta)}
                 />
               </View>
               {/* La «i» en círculo — el patrón vivo de la casa (`carrito.tsx`,
