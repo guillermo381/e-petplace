@@ -43,7 +43,7 @@ export function AccionCarrito() {
     <Pressable
       onPress={() => router.push('/despensa/carrito')}
       accessibilityRole="button"
-      accessibilityLabel={t('despensa.abrirCarrito', { n: unidades })}
+      accessibilityLabel={t('despensa.abrirCarrito', { count: unidades })}
       hitSlop={8}
     >
       <GlifoConContador nombre="carrito" cuenta={unidades} dentroDeTocable />

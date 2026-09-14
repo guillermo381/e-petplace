@@ -47,11 +47,13 @@ import {
   Celda,
   CeldaNavegacion,
   CitaEnVivo,
+  DiscoVidrio,
   Esqueleto,
   EsqueletoGrupo,
   Cabecera,
   Personaje,
   EstadoVacio,
+  GlifoConContador,
   Hoja,
   Icono,
   HojaScroll,
@@ -98,7 +100,7 @@ import {
   obtenerSolicitudesPendientesDueno,
   listarMisPedidos,
   type PedidoEnLista,
-  hayNovedades,
+  obtenerMisAvisos,
   resolverUrlFoto,
   resolverUrlsFotos,
   type DetalleAtencion,
@@ -615,72 +617,88 @@ function EventoVida({
  */
 function FilaCampanaTecho({
   esMemorial,
-  conNovedades,
+  noLeidos,
   onAvisos,
 }: {
   esMemorial: boolean;
-  /** Semántica S89 (nota de LAMINA_CAMPANA): novedades NO VISTAS —
-   *  la huella se apaga al VISITAR /avisos, no al leer cada aviso. */
-  conNovedades: boolean;
+  /** ⭐ **S116-C lote 10 · CUÁNTOS, NO SI HAY.** Recorrido 4: *«campana con
+   *  el número de no leídos y carrito con el número de ítems, en todas las
+   *  raíces»*.
+   *
+   *  🔴 **ESTO RETIRA UNA LETRA FIRMADA Y LO DIGO ACÁ, NO SÓLO EN EL PARTE.**
+   *  `LAMINA_CAMPANA` (S89) manda la HUELLA y **prohíbe el número** con su
+   *  razón escrita —*«el número invita a vaciarlo»*—, y el wrapper la
+   *  sostiene desde el dato: `hayNovedades()` devuelve un **booleano a
+   *  propósito**, *«la forma del dato hace imposible el defecto del
+   *  contador»*. La orden de hoy pide justo eso. **Manda la firma nueva**, y
+   *  la vieja queda tachada donde vive — *dos letras firmadas que se
+   *  contradicen son peores que una equivocada.*
+   *
+   *  ⚠️ **Y CAMBIA LA SEMÁNTICA, que es la mitad que no se ve:** S89 medía
+   *  **lo NUEVO** (se apaga al VISITAR /avisos); *no leídos* mide **`leida`
+   *  por aviso** (se apaga al LEER cada uno). Son dos hechos distintos, y el
+   *  número que la orden nombra es el segundo. */
+  noLeidos: number;
   onAvisos: () => void;
 }) {
-  const { theme } = useTheme();
   const { t } = useTraduccion();
-  const etiquetaBadge = useEtiquetaBadge();
   const unidades = unidadesEnCarrito(useCarrito());
   return (
+    /* ⚠️ **`spacing[5]` = 20 dp y NO es estética: es el mínimo de la lámina de
+       la esquina** (2 × hitSlop 10). Lo puse en `spacing[3]` al juntar los dos
+       discos y **R32 lo cazó con su número** — medido en el árbol, el hueco
+       quedaba en 32 px ≈ 11 dp: *dos zonas táctiles a menos de eso se pisan, el
+       toque abre lo que no era y la persona cree que se equivocó ella.* */
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[5] }}>
       <View style={{ flex: 1 }}>
         <Isotipo size={28} variant="blanco" />
       </View>
-      {/* ⭐ **S116-C lote 9 · EL CARRITO, AL LADO DE LA CAMPANA.** Firma de
-          la mesa, con su vencimiento escrito adentro: *«hasta que el lote 4
-          cambie ese techo»*.
+      {/* ⭐ **EL CARRITO Y LA CAMPANA, EN EL DISCO DE B — y con su número.**
 
-          🔴 **Y NO monta `AccionCarrito` ni la prop `carrito` de `Cabecera`,
-          por una razón medida y no por gusto:** las dos terminan en un
-          `GlifoConContador`, **que resuelve su tinta del tema y no acepta
-          override** — sobre este degradado el glífo saldría en tinta oscura,
-          invisible. B ya pagó ese problema en `Cabecera` envolviéndolo en un
-          `DiscoVidrio`, **que es privado de ese archivo** y no se exporta.
+          ✅ **Lo que el lote 12 de B destrabó:** `DiscoVidrio` salió como pieza
+          (antes era privado de `Cabecera`), que era la salida que voté en mi
+          buzón del lote 9. Con él el techo del Hogar deja de dibujar su propio
+          círculo y usa el mismo que la banda ciruela. ⇒ **las cinco raíces
+          dicen lo mismo con la misma pieza**: glífo + disco con el número.
 
-          ⇒ acá se compone **exactamente como su vecina**: `Badge` + `Icono`
-          en papel. *Dos hermanos en la misma fila con dos gramáticas distintas
-          es peor que una gramática prestada.* El pedido a B —`tinta`/
-          `superficie` en `GlifoConContador`, o exportar el disco— va al buzón;
-          el día que exista, esto colapsa a una pieza.
+          🔴 **Y LA COMBINACIÓN SE ELIGIÓ MIDIENDO LAS DOS, no razonando.** Monté
+          las dos que la casa permite hoy y capturé el techo con cada una:
 
-          ⚠️ **Va a la IZQUIERDA y la campana NO se mueve**: el pulgar ya sabe
-          dónde está la campana, y correrla para hacerle lugar a algo nuevo le
-          cobra el cambio a quien no pidió nada. */}
-      <Pressable
+          ① `DiscoVidrio` + **`GlifoConContador`** (ésta) — el número sale
+             **blanco sobre magenta, nítido**; el glífo sale en tinta de capa,
+             **apagado sobre el ciruela** (`GlifoConContador:124` dibuja
+             `<Icono>` sin `tinta`, e `Icono` cae a `registro='capa'`).
+          ② `DiscoVidrio` + `Badge forma="contador"` + `Icono tinta` — el glífo
+             sale **blanco y perfecto**, y el número queda **casi ilegible**:
+             `Badge` rinde `Insignia estado="atencion"`, cuyos colores son de
+             `theme.status`, **pensados para lienzo y no para un techo ciruela**.
+
+          ⇒ **gana ①, porque lo que la orden pide es EL NÚMERO** y en ② el
+          número es justo lo que se pierde. *Entre dos defectos se elige el que
+          no rompe lo que se vino a hacer.*
+
+          ⚠️ **La cura de verdad es de `packages/ui` y es una línea:** `tinta` en
+          `GlifoConContador`, que es la mitad (a) de mi buzón del lote 9 — B
+          entregó la (b), el disco, y **el disco arregla el fondo, no el trazo**.
+          Va al buzón con las DOS capturas, para que no se discuta de memoria. */}
+      <DiscoVidrio
         onPress={() => router.push('/despensa/carrito')}
-        hitSlop={10}
-        accessibilityRole="button"
-        accessibilityLabel={t('despensa.abrirCarrito', { n: unidades })}
+        etiqueta={t('despensa.abrirCarrito', { count: unidades })}
       >
-        <Badge n={unidades} forma="contador" superficie={esMemorial ? 'clara' : 'muro'}>
-          <Icono
-            nombre="carrito"
-            tamano={24}
-            tinta={esMemorial ? theme.text.primary : palette.light0}
-          />
-        </Badge>
-      </Pressable>
-      <Pressable
+        <GlifoConContador nombre="carrito" cuenta={unidades} dentroDeTocable />
+      </DiscoVidrio>
+      <DiscoVidrio
         onPress={onAvisos}
-        hitSlop={10}
-        accessibilityRole="button"
-        /* El estado viaja en el label (contrato del Badge): con huella el
-           label dice «sin leer», jamás un número. */
-        accessibilityLabel={etiquetaBadge(t('avisos.titulo'), conNovedades ? 1 : 0, 'huella')}
+        /* Con 0 la voz es sólo «Avisos»: *un «0 sin leer» es ruido con forma
+           de dato* — la misma regla que el disco ya aplica al no dibujarse. */
+        etiqueta={
+          noLeidos > 0
+            ? t('avisos.abrirConNoLeidos', { count: noLeidos })
+            : t('avisos.titulo')
+        }
       >
-        <Badge n={conNovedades ? 1 : 0} forma="huella" superficie={esMemorial ? 'clara' : 'muro'}>
-          {/* Campana EN TRAZO (ley del único relleno: el relleno es de la
-              huella del Badge); papel sobre el gradiente, tinta en memorial. */}
-          <Icono nombre="campana" tamano={24} tinta={esMemorial ? theme.text.primary : palette.light0} />
-        </Badge>
-      </Pressable>
+        <GlifoConContador nombre="campana" cuenta={noLeidos} dentroDeTocable />
+      </DiscoVidrio>
       {/* ☠️ El hueco que le guardaba el lugar al destello murió con él
           (Ley 37): *un espacio reservado para una pieza que ya no existe es
           aire que nadie puede explicar.* */}
@@ -796,7 +814,7 @@ export default function Hogar() {
   // el badge abre la Hoja SIN depender del push).
   const [solicitudesPend, setSolicitudesPend] = useState<SolicitudPendiente[]>([]);
   // S88-D · la campana: presencia por booleano (jamás la lista acá).
-  const [conNovedades, setConNovedades] = useState(false);
+  const [noLeidos, setNoLeidos] = useState(0);
   /**
    * 🔴 S100c-D · LOS PEDIDOS EN VUELO — la fila que faltaba en la posición
    * consolidada (firma del founder: *«los pedidos que estén en vuelo o
@@ -953,12 +971,34 @@ export default function Hogar() {
         void obtenerSolicitudesPendientesDueno().then((s) => {
           if (vigente) setSolicitudesPend(s.ok ? s.data : []);
         });
-        // S88-D · la campana: el BOOLEANO, jamás la lista (lámina). Un
-        // fallo cae a false — la huella ausente es ausencia, no un claim.
-        // S89 · contrato v2: la huella mide NOVEDADES NO VISTAS (posterior
-        // a la última visita de ESTA casa) — cada app pasa SU nombre.
-        void hayNovedades('cliente').then((h) => {
-          if (vigente) setConNovedades(h.ok ? h.data : false);
+        /* ⭐ **S116-C lote 10 · LA CAMPANA CUENTA.** Recorrido 4: *«campana con
+           el número de no leídos»*.
+
+           ⏪ Acá vivía `hayNovedades('cliente')`, **un booleano a propósito**
+           — su propio wrapper lo dice: *«existe para que el techo NO tenga que
+           traer la lista sólo para decidir si dibuja un punto: la forma del
+           dato hace imposible el defecto del contador»*.
+
+           🔴 **Y AHÍ ESTÁ EL COSTO, que declaro en vez de esconder: el motor no
+           tiene un contador.** Censé `packages/api/src/wrappers/campana.ts`
+           entero — hay `hay_novedades` (booleano), `obtener_mis_avisos`
+           (lista) y `marcar_aviso_leido`; **ninguna cuenta**. ⇒ el número sale
+           de contar la lista.
+
+           **Es UN viaje por UN viaje** (L-223: el peaje son ~150 ms por
+           PETICIÓN, no por fila) — el efecto no gana una vuelta. **Lo que sí
+           crece es la carga útil**: antes venía un `boolean`, ahora hasta 100
+           avisos con título y mensaje, en cada foco del Hogar. *No es gratis y
+           no lo pinto como si lo fuera.* Pedido a A en el buzón
+           (`contar_avisos_no_leidos`); el día que exista, esto es una línea.
+
+           **100 y no 50**, porque el disco dice «99+» a partir de ahí: con un
+           techo de 50 el número mentiría **callado** justo cuando más importa.
+
+           Un fallo cae a **0** — *un contador que no se pudo leer no inventa
+           pendientes*, misma regla que el booleano tenía. */
+        void obtenerMisAvisos(100).then((r) => {
+          if (vigente) setNoLeidos(r.ok ? r.data.filter((a) => !a.leida).length : 0);
         });
         /* 🔴 PONTE AL DÍA: LOS PEDIDOS EN VUELO (S100c-D).
          *
@@ -1789,7 +1829,7 @@ export default function Hogar() {
                   antes acá vivía el Isotipo solo, que se mudó adentro). */}
               <FilaCampanaTecho
                 esMemorial={esMemorial}
-                conNovedades={conNovedades}
+                noLeidos={noLeidos}
                 onAvisos={() => router.push('/avisos')}
               />
               {/* r4-3: la fecha en mono SOBRE el saludo (Ley 3, minúsculas) */}
