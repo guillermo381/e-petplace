@@ -97,16 +97,24 @@ export type PersonajeProps = {
    *  magenta directo**» (punto 12). Por eso el fondo es una unión cerrada
    *  de dos y no un color libre. */
   fondo?: 'blanco' | 'rosa'
+  /** 🔴 **S116-B lote 5 · la forma del recorte.** La casa lo monta en chip
+   *  (`radius.chipV5`) en todos lados menos uno: la onda de acceso, que la
+   *  mesa firmó como *«un círculo blanco con la cara de un personaje»*.
+   *  **Entra como prop y no como una segunda pieza** porque lo único que
+   *  cambia es el radio — *un `PersonajeCircular` que copiara el mapa de
+   *  archivos sería una segunda lista de especies que diverge el día que
+   *  entre el cerdo.* Default `'chip'`: ningún consumidor cambia. */
+  forma?: 'chip' | 'circulo'
 }
 
-export function Personaje({ especie, tamano = 'hogar', elegido = false, fondo = 'blanco' }: PersonajeProps) {
+export function Personaje({ especie, tamano = 'hogar', elegido = false, fondo = 'blanco', forma = 'chip' }: PersonajeProps) {
   const { theme } = useTheme()
   const lado = LADO[tamano]
 
   const caja: ViewStyle = {
     width: lado,
     height: lado,
-    borderRadius: radius.chipV5,
+    borderRadius: forma === 'circulo' ? lado / 2 : radius.chipV5,
     backgroundColor: fondo === 'rosa' ? theme.bg.overlay : theme.bg.card,
     alignItems: 'center',
     justifyContent: 'center',

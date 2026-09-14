@@ -118,6 +118,23 @@ export type SlotDeTema =
   | 'accent.control'
   | 'accent.active'
   | 'accent.marcaEleccion'
+  /* ⭐ **S116-B · EL UNDÉCIMO Y EL DUODÉCIMO — el PAR del glifo.**
+   *  Firma de la mesa sobre el sketch: *«el glifo de fila, de campo, de
+   *  acceso y de paso numerado pasa de magenta a ciruela, y su círculo de
+   *  rosa tinte a ciruela-tinte»*.
+   *
+   * 🔴 **Son DOS slots y no uno, porque son un PAR que se mide junto.** El
+   * glifo y su fondo tienen que dar contraste entre sí; separarlos en dos
+   * decisiones independientes permite que alguien mueva uno y deje el otro
+   * — que es exactamente cómo la pata del chip se volvió invisible en el
+   * lote 2 (misma ciruela sobre misma ciruela, tres gates en verde).
+   *
+   * ⚠️ **Y el magenta NO desaparece: se ACOTA.** Queda sólo en lo
+   * accionable —CTA, enlaces, el activo de la barra, el asistente— que es
+   * lo que le devuelve su significado: *si el magenta está en todo, deja
+   * de decir «esto se toca».* */
+  | 'accent.glifo'
+  | 'accent.glifoBg'
   | 'accent.atmosfera'
 export type ThemeMode = 'light' | 'dark' | 'memorial'
 export type ServiceKey = keyof typeof lightTheme.services
@@ -210,7 +227,7 @@ const lightOficio: Theme = {
   // El comentario de arriba ya lo anticipaba sin saberlo: *«`accent.primary`
   // es el MISMO teal en las dos casas y por lo tanto NO las distingue»* —
   // dejó de serlo, y por eso ahora tiene que estar acá.
-  accent: { ...lightTheme.accent, cta: palette.tealDark, ctaTexto: palette.light0, ctaElevado: false, formaV5: false, primary: palette.tealDark, primaryBg: palette.tealAlpha16, primaryBorder: palette.tealBorderL, control: palette.tealDark, hito: palette.tealDark, controlBg: palette.tealAlpha16, active: palette.tealDark, marcaEleccion: palette.tealDark, atmosfera: palette.tealDark, activoLleno: palette.tealDark, sobreActivoLleno: palette.light0 },
+  accent: { ...lightTheme.accent, cta: palette.tealDark, ctaTexto: palette.light0, ctaElevado: false, formaV5: false, primary: palette.tealDark, primaryBg: palette.tealAlpha16, primaryBorder: palette.tealBorderL, control: palette.tealDark, hito: palette.tealDark, controlBg: palette.tealAlpha16, active: palette.tealDark, marcaEleccion: palette.tealDark, atmosfera: palette.tealDark, glifo: palette.tealDark, glifoBg: palette.tealAlpha16, activoLleno: palette.tealDark, sobreActivoLleno: palette.light0 },
 }
 const darkOficio: Theme = {
   ...darkTheme,
@@ -261,7 +278,7 @@ const darkOficio: Theme = {
   // ⇒ sobre superficie oscura manda el hex PURO, con su contenido en
   // tinta. **Medido S83-B31: fill 10.50 · label 11.01.**
   // 🔴 S116-B · EL NOVENO SLOT, su registro oscuro (ver `lightOficio`).
-  accent: { ...darkTheme.accent, cta: palette.teal, ctaTexto: palette.textLight0, ctaElevado: false, formaV5: false, primary: palette.teal, primaryBg: palette.tealAlpha15, primaryBorder: palette.tealBorder, control: palette.teal, hito: palette.teal, controlBg: palette.tealAlpha15, active: palette.teal, marcaEleccion: palette.teal, atmosfera: palette.teal, activoLleno: palette.teal, sobreActivoLleno: palette.textLight0 },
+  accent: { ...darkTheme.accent, cta: palette.teal, ctaTexto: palette.textLight0, ctaElevado: false, formaV5: false, primary: palette.teal, primaryBg: palette.tealAlpha15, primaryBorder: palette.tealBorder, control: palette.teal, hito: palette.teal, controlBg: palette.tealAlpha15, active: palette.teal, marcaEleccion: palette.teal, atmosfera: palette.teal, glifo: palette.teal, glifoBg: palette.tealAlpha15, activoLleno: palette.teal, sobreActivoLleno: palette.textLight0 },
 }
 
 /** El default del producto es CLARO (B1 §7.3). Dark es opt-in. Memorial es automático (M6). */

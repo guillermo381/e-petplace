@@ -79,7 +79,14 @@ export const memorialTheme = {
     /* 🔴 LOS CUATRO QUE MEMORIAL NO TENÍA. Ya no degradan por fallback:
        existen, en tinta y gris, que es lo que §4 pide. */
     active:            palette.tintaV5,
-    controlBg:         palette.grisCalidoMemorial,
+
+    /* S116-B · el PAR del glifo (fila · campo · acceso · paso). Ver
+
+       `SlotDeTema`: van juntos porque se miden juntos. */
+
+    glifo:         palette.tintaV5,
+
+    glifoBg:       palette.grisCalidoMemorial,    controlBg:         palette.grisCalidoMemorial,
     controlLleno:      palette.tintaV5,
     sobreControlLleno: palette.white,
 

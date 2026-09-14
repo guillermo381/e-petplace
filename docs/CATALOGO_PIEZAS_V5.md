@@ -47,6 +47,17 @@
 - ⚠️ **El desplazamiento es `DISCO / 2`, no un número:** por eso sigue siendo media mitad el día que el disco cambie de tamaño. *Una pantalla que escribe `marginTop: -32` no sabe por qué es 32.*
 - ⚠️ **La sombra no es adorno:** un círculo blanco sobre el lienzo casi no tiene contorno y sobre el ciruela lo tiene de sobra. La sombra le da el mismo borde a las dos mitades.
 
+### `OndaAcceso`
+- **props:** `frase` (dos líneas) · `lado` (`izq`|`der`) · `especies?`
+- **tokens:** `palette.magentaAccion` · `motion.v5.personajePrimeraMs` · `motion.v5.personajeCadaMs` · `motion.v5.personajeFundidoMs` · `spacing`
+- **consumidores:** 0 · su lugar es el pie del acceso y del alta
+- **exporta:** `ALTO_ONDA_ACCESO` — quien la monte al pie de una hoja que scrollea **tiene que reservarle el lugar**, igual que con los dos altos de `Cabecera`.
+- 🔴 **La ola es un `Path`, no un `borderRadius`:** un radio da un DOMO —simétrico, una sola inflexión— y *una ola tiene dos*. El `viewBox` de 100 con `preserveAspectRatio="none"` la estira con la pantalla en vez de repetirla.
+- 🔴 **La frase llega YA PARTIDA en dos líneas.** Dónde corta es una decisión de redacción; un `numberOfLines={2}` la tomaría por su cuenta con el ancho de cada teléfono.
+- 🔴 **El teclado: alto CONSTANTE + fundido, y hacen falta las dos mitades.** El alto fijo es lo que impide que se aplaste (una franja que mide un número no se comprime); el fundido es lo que impide que se vea salir. ⚠️ **Lo que la pieza no puede sola:** si la pantalla la mete en un reparto `flex`, el reparto es de la pantalla.
+- ⚠️ **La rueda no sortea:** orden fijo, así no puede repetir dos veces la misma cara — *que se lee como que se colgó*. Con **una sola especie no arranca**: no hay a dónde ir.
+- ⚠️ **Dice «la cara» y monta el personaje ENTERO, declarado:** recortar a ojo seis ilustraciones distintas daría seis encuadres distintos, y el que quede mal no se nota hasta que lo ve el founder. El recorte, si la mesa lo quiere, es del ilustrador.
+
 ---
 
 ## ① EL SHELL — las que nacieron en el lote 2 y monta C
@@ -272,7 +283,8 @@ import { glifoDeOficio, esOficio, type Oficio } from '@epetplace/ui'
 | `medidas` | las 22 medidas por objeto. **Viven aparte de `spacing` porque NO son múltiplos de 4** — 26, 70, 22, 17, 58, 52, 74, 78, 66 |
 | `spacing` | la escala de RITMO, base 4, múltiplos estrictos |
 | `typography` | `escala` trae la v5 (Baloo + PJS); `family` conserva DM Sans **como token del PRESTADOR** |
-| `radius` · `shadows` · `elevacion` | radios, sombras por `elevation` (**nunca CSS**) y `halo.foco` |
+| `radius` · `shadows` · `elevacion` | radios, sombras por `elevation` (**nunca CSS**) y el halo. ⚠️ **`halo.presencia(color)` RECIBE su color** — el token conserva la geometría (4 px) y la dosis (10 %) y nada más: `formaV5` es `true` en el tema claro **y en el oscuro**, y un color horneado miente en una de las dos casas sin fallar |
+| **`accent.glifo` · `accent.glifoBg`** | **el par del glifo, y son DOS slots porque se miden juntos.** Ciruela sobre `ciruelaTinte` en el cliente; el prestador conserva su teal. Se monta con `registro="glifo"` en `Icono` — **nunca pasando el color**, que es lo que deja la decisión sin lista de dónde se escribió. **El foco del campo toma el mismo slot bajo v5**: es la misma decisión (el acento NO accionable), y el acoplamiento está declarado en `caja-de-campo.ts` |
 | **`AIRE_RAIZ`** | **el aire que toda pantalla RAÍZ deja abajo** para que la última fila no quede debajo del asistente ni de la barra. Derivado; se le suma `insets.bottom` |
 | `motion` | 180–240 ms sin rebote para lo que responde al toque; entrada escalonada 45/300 para lo que llega |
 

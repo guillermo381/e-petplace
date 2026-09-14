@@ -92,11 +92,16 @@ function Fila({ item, elegida, onPress }: { item: OpcionItem; elegida: boolean; 
     backgroundColor: theme.bg.card,
     /* La elegida cambia ENTERA: borde magenta + halo. El halo es el mismo
        canal que el foco del campo — «acá estás» — y por eso comparte su
-       geometría, no un valor nuevo. */
+       geometría, no un valor nuevo.
+       ⚠️ **S116-B lote 5: comparte la GEOMETRÍA y ya no el color.** El
+       foco del campo pasó a ciruela y esta opción **se queda en magenta a
+       propósito**: elegir una opción ES accionable, y la orden reserva el
+       magenta justamente para eso. *Por eso el halo recibe su color en vez
+       de traerlo: el mismo canal puede hablar con dos acentos.* */
     borderWidth: elegida ? 1.5 : 1,
     borderColor: elegida ? palette.magentaAccion : theme.border.subtle,
     ...(elegida
-      ? { boxShadow: halo.foco }
+      ? { boxShadow: halo.presencia(palette.magentaAccion) }
       : null),
   }
   return (
