@@ -1501,11 +1501,33 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
     </>
   ),
   // La casita de guardería — la huella espera en el techo.
+  /* ⏪ **LA LUNA ENTRA EN S116-B, y no es decoración: es lo único que lo
+   * separa de `hogar`.** Firma de la mesa (*«guardería = casa con luna»*),
+   * y la medición le dio una razón que la orden no nombraba:
+   *
+   * 🔴 **CON LA HUELLA APAGADA, `guarderia` y `hogar` eran EL MISMO
+   * DIBUJO.** Los dos son una casa; lo único que los distinguía era que
+   * uno llevaba la huella adentro — y la letra §1.1 la sacó del set
+   * entero. *El glifo no se volvió ambiguo por un descuido: lo volvió
+   * ambiguo una decisión correcta tomada en otro lado, y nadie lo iba a
+   * ver hasta montarlos juntos.* Rasterizados lado a lado a 21 px,
+   * indistinguibles.
+   *
+   * ⚠️ **Y conviven en pantalla aunque no compartan fila:** `hogar` vive
+   * en la barra de tabs, que se ve SIEMPRE. La Ley 12 enmendada S71 mide
+   * la colisión dentro de la unidad de barrido, y la barra es la unidad
+   * de todas.
+   *
+   * LA LUNA VA EN EL CIELO, no adentro de la casa: creciente en la esquina
+   * superior derecha, fuera del techo. *Adentro diría «de noche en esta
+   * casa»; al lado dice «esta casa es de noche», que es lo que una
+   * guardería es.* */
   guarderia: ({ tinta, huella }) => (
     <>
-      <Path d="M4.6 19.4v-7.6L12 5.2l7.4 6.6v7.6Z" {...trazo(tinta)} />
-      <Path d="M9.6 19.4v-3.8a2.4 2.4 0 0 1 4.8 0v3.8" {...trazo(tinta)} />
-      <Huella color={huella} x={9.5} y={7.4} escala={0.3} />
+      <Path d="M3.4 19.6v-7.4L10.4 6l7 6.2v7.4Z" {...trazo(tinta)} />
+      <Path d="M8.2 19.6v-3.6a2.2 2.2 0 0 1 4.4 0v3.6" {...trazo(tinta)} />
+      <Path d="M20.6 3.6a3 3 0 1 0 0 5.6 3.4 3.4 0 0 1 0-5.6Z" {...trazo(tinta)} />
+      <Huella color={huella} x={8.2} y={7.6} escala={0.28} />
     </>
   ),
   // ☠️☠️ EL EMBLEMA DE COHORTE MURIÓ COMO GLIFO (gate founder, 3-ago).

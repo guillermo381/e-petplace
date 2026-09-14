@@ -58,11 +58,24 @@ La pantalla de «¡Listo!» a lienzo completo.
 
 ### `Personaje` · `TrioPersonajes`
 Las seis caras del founder. **`TrioPersonajes` es la mitad de `Confirmacion`.**
+- 🔴 **El trío entra en FUNDIDO ESCALONADO (S116-B).** Tenía cero movimiento: el check de `Confirmacion` crecía y *los tres personajes aparecían de golpe debajo*. Es `FadeIn` y no una entrada con desplazamiento —la letra §2 dice **fundido**— y el escalonado usa `stagger.normal`: *tres caras a la vez son una imagen; de a una es que llegaron.*
 - **props:** `especie` (`perro`|`gato`|`conejo`|`ave`|`roedor`|`otro`) · `tamano` (`grande`|`hogar`|`selector`|`fila`) · `elegido` · `fondo` · (trío: `especies` de exactamente 3)
 - **tokens:** `medidas` · `palette` · `radius` · `theme.bg`
 - **consumidores:** 4 · 0
 - 🔴 **El `ave` usa la nariz como cara** hasta que llegue su archivo — el único que entró trae el wordmark encima. Enmienda firmada de la letra §1.10.
 - ⚠️ **Ninguna es vector**; el `roedor` tiene fondo blanco opaco.
+
+### `CampoCodigo`
+Las ocho casillas del código de verificación. **No es un campo de texto con espacios.**
+- **props:** `largo` (**obligatoria, sin default**) · `valor` · `onCambio` · `etiqueta` · `error` · `tono` · `deshabilitado`
+- **tokens:** `estiloDeCaja` (la misma anatomía que `Campo`) · `typography.escala.cifraChica` · `motion`
+- **consumidores:** 3
+- 🔴 **UN input invisible cubre la fila entera; las ocho cajas son PRESENTACIÓN.** *N inputs con foco entre ellos es el camino que parece obvio y es el malo.* Consecuencias que salen gratis: el tap funciona **caiga donde caiga** (no hay «caja equivocada» que tocar), el pegado del código entero anda solo, y **el lector de pantalla ve UN campo, no ocho**.
+- ⚠️ **El área táctil 44 ya está resuelta por diseño**, no con `hitSlop`: el input cubre toda la fila aunque cada casilla mida menos.
+- 🔴 **El dígito va en Baloo cifra (S116-B)** y choca con la Ley 3 en apariencia — la casa ya resolvió este caso (MATIZ S53): *a escala display el dato viste sans; el dato sigue siendo de máquina, el traje cambia con la escala.* **`tabular-nums` se conserva**: ocho casillas de ancho igual necesitan que el 1 ocupe lo mismo que el 8, o la fila late al escribir.
+- 🔴 **Con error, las ocho tiemblan UNA vez, corto y SIN rebote.** Lo del rebote no es un detalle: `easing.spring` es la curva de las confirmaciones táctiles — *un error que rebota celebra el fallo*. Y `withSequence`, no `withRepeat`: *un temblor que se repite pide atención cuando la persona ya está leyendo el mensaje.*
+- ⚠️ **Respeta `useReducedMotion`, y acá importa más que en un botón:** un temblor es exactamente el movimiento que dispara el malestar vestibular. Con la preferencia activa **el error se ve igual** —las cajas cambian de color y el pie dice qué pasó—, sólo no se mueve.
+- ⚠️ **«Pegar» sólo aparece si el nativo de clipboard existe**, y el autocompletado del sistema (SMS/correo) ya entra por `oneTimeCode` + `sms-otp`.
 
 ### `BotonMarcaAjena`
 Entrar con una cuenta que no es nuestra (Google hoy; Apple tiene su lugar y **no se puede montar**).
@@ -109,7 +122,8 @@ La acción de la pantalla. **Una primaria por pantalla** (Ley 5).
 Entrada de texto con su pie.
 - **props:** `label` · `ayuda` · `error` · `tono` (`alarma`|`estado`) · `etiquetaVisible` · `deshabilitado` · **`razonDeshabilitado`** · `sinPie` · `secure` · `multilinea` · `iconoIzq` · `iconoDer`
 - **tokens:** `medidas` · `motion` · `spacing` · `typography` · `theme.status` · `theme.text`
-- **consumidores:** 80 (+ `CampoFecha`, `CampoCodigo`, `CampoClaveAcceso`, `CampoIdentificacion`)
+- **consumidores:** 80
+- ⚠️ **El halo del foco entra en la transición (S116-B).** La lista decía sólo `borderColor` **desde antes de que el halo existiera**, así que el borde llegaba suave y *el halo aparecía de golpe*: dos mitades del mismo estado entrando distinto. **Nadie lo decidió** — la lista se quedó donde estaba cuando la cosa que describe creció.
 - ⚠️ **El error NO pinta la caja de rojo:** lo dice el pie. Y el placeholder va en `secondary` (**5,24:1**), no en `tertiary` — *un placeholder no es decoración: es lo que la persona lee para saber qué escribir.*
 - 🔴 **`razonDeshabilitado` (S116-B):** un campo apagado dice POR QUÉ, igual que `Boton`. Se dibuja en el pie con precedencia **`error` › `razonDeshabilitado` › `ayuda`** — *mientras está apagado, la ayuda de cómo llenarlo no sirve; lo que la persona necesita saber es por qué no puede.*
 
@@ -125,7 +139,8 @@ La superficie que agrupa.
 - **props:** `opciones[]` · `seleccionada`/`seleccionadas` · `onSelect` · `disposicion` (`fila`|`tira`|`grilla`) · `multiple` · `adorno` · `entidad` · `marcaPata` · `cargando` (por chip)
 - **tokens:** `radius` · `spacing` · `motion` · `elevacion` · `theme.accent` · `theme.capa`
 - **consumidores:** 56 · 16
-- 🔴 **La pata que pisa ya está montada desde S91** (`MarcaEleccion`, física S62). En el chip lleno pasa a `rosaSobreCiruela` — *pintada del mismo ciruela que el relleno se volvía invisible, y los tres gates daban verde.*
+- 🔴 **La pata que pisa ya está montada desde S91** (`MarcaEleccion`). En el chip lleno pasa a `rosaSobreCiruela` — *pintada del mismo ciruela que el relleno se volvía invisible, y los tres gates daban verde.*
+- 🔴 **Y desde S116-B PISA de verdad:** tenía cero movimiento — *una pata que aparece de golpe no pisó nada, se materializó encima*. Ahora entra, **se pasa a 1,12 y vuelve**: el excedente es lo que la hace leer como PESO. Va con `easeOut` y **no con `spring`**, aunque spring sea la curva de la confirmación táctil: *algo que se apoya no rebota, se detiene.*
 - ⚠️ **Los chips NO son tabs.** Para vistas exclusivas va `SelectorSegmentado`, salvo que convivan tres ejes hermanos (ahí manda la gramática de la pantalla).
 
 ### `CeldaNavegacion` · `Celda` — *la fila de lista*
@@ -195,6 +210,21 @@ La silueta de la marca para la bandeja de Android.
 - **props:** `tamano` · `color`
 - **consumidores:** 0
 - 🔴 **NO es lo que Android monta** — eso es `assets/marca/nariz-notificacion.svg`, y **comparten el mismo `d`**. Esta pieza existe para poder VERLA y gatearla. *Si alguien toca una y no la otra, el founder firma una silueta y la bandeja muestra otra.*
+
+---
+
+## ②bis EL MAPEO OFICIO → GLIFO
+
+```tsx
+import { glifoDeOficio, esOficio, type Oficio } from '@epetplace/ui'
+<Icono nombre={glifoDeOficio('adiestramiento')} />   // → 'training'
+```
+
+🔴 **Vive en UN solo lugar y por eso existe.** El censo midió que hoy cada superficie escribe el nombre a mano —`explorar/index.tsx` los monta uno por uno, `paseo/index.tsx` repite el suyo **cuatro veces**— y que **`reserva-piezas.tsx:171` monta `<Icono nombre={oficio}>`**, o sea deriva el nombre del glifo del nombre del oficio. *Funciona hoy porque coinciden; el día que un oficio se llame distinto, pinta otro.* Caso vivo que lo prueba: `historico.tsx:599` tiene escrito a mano `o === 'adiestramiento' ? 'training' : o`.
+
+⚠️ **`Oficio` se DERIVA de `FilaCitaOficio`, no se duplica** — ya había **cinco** tipos de oficio conviviendo y el sexto iba a ser éste. Es más ancho a propósito (Explorar muestra servicios que no se agendan) pero nace de él: **agregar un oficio agendable hace que el mapa deje de compilar hasta darle su glifo.** Probado.
+
+⚠️ **La jeringa NO está en el mapa:** `vacuna` es un acto clínico, no un oficio. *Lo que impide que se use de genérica es exactamente su ausencia acá.*
 
 ---
 

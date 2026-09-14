@@ -38,9 +38,18 @@
  * adentro, que es justo lo que Ley 4 le prohíbe a un componente.
  */
 
-import { View } from 'react-native'
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated'
+import { useEffect } from 'react'
 import Svg from 'react-native-svg'
 
+import { motion } from '../tokens/motion'
 import { Huella } from './Huella'
 
 /** El lado del glifo, en px. FIRMADO. */
@@ -55,26 +64,74 @@ export type MarcaEleccionProps = {
 }
 
 export function MarcaEleccion({ color }: MarcaEleccionProps) {
+  /* ══════════════════════════════════════════════════════════════════
+   *  LA PATA PISA — S116-B. **Hasta hoy APARECÍA, que no es lo mismo.**
+   *
+   * 🔴 Medido: esta pieza tenía **cero movimiento**. El encargo del lote 2
+   * pedía *«el Chip con la pata que pisa (receta S62 para la aparición de
+   * la huella)»* y lo que había era un `<View>` que se monta y ya. *Una
+   * pata que aparece de golpe no pisó nada: se materializó encima.*
+   *
+   * LA FÍSICA, y por qué ésta: **entra desde arriba, se pasa, y vuelve.**
+   * Un pie que se apoya llega, carga el peso y asienta — el excedente es
+   * lo que lo hace leer como PESO y no como aparición. Por eso la escala
+   * sobrepasa a `1.12` y vuelve a `1`, y no al revés.
+   *
+   * ⚠️ **Y VA CON `easeOut`, NO con `spring`, aunque spring sea la curva
+   * de la confirmación táctil:** el rebote de la casa (`0.34, 1.56`) hace
+   * que la pata OSCILE, y algo que se apoya no rebota — se detiene. *El
+   * sobrepaso lo da la secuencia, no la curva; ponerlos juntos da dos
+   * rebotes encimados.*
+   *
+   * ⚠️ **`useReducedMotion`: la pata SIGUE APARECIENDO**, sin escala ni
+   * fundido. *La marca de elección es información —dice cuál elegiste— y
+   * un estado que sólo se comunica con movimiento es inaccesible.* Lo que
+   * se apaga es cómo llega, nunca que esté. */
+  const sinMovimiento = useReducedMotion()
+  const escala = useSharedValue(sinMovimiento ? 1 : 0.6)
+  const opacidad = useSharedValue(sinMovimiento ? 1 : 0)
+
+  useEffect(() => {
+    if (sinMovimiento) {
+      escala.value = 1
+      opacidad.value = 1
+      return
+    }
+    const curva = Easing.bezier(...motion.easing.easeOut.bezier)
+    opacidad.value = withTiming(1, { duration: motion.duration.fast, easing: curva })
+    escala.value = withSequence(
+      withTiming(1.12, { duration: motion.duration.fast, easing: curva }),
+      withTiming(1, { duration: motion.duration.fast * 0.6, easing: curva }),
+    )
+  }, [sinMovimiento, escala, opacidad])
+
+  const estiloPisa = useAnimatedStyle(() => ({
+    opacity: opacidad.value,
+    /* La rotación firmada VIAJA ACÁ ADENTRO: si quedara en el `style`
+       estático, el `transform` animado la pisaría y la pata se enderezaría
+       al aparecer — los −14° son parte del dibujo, no del movimiento. */
+    transform: [{ rotate: '-14deg' }, { scale: escala.value }],
+  }))
+
   return (
-    <View
+    <Animated.View
       // decorativa: lo que un lector de pantalla anuncia es el `selected`
       // del control, jamás esta marca. Sin esto, el elegido se leería dos
       // veces y una de ellas sin nombre.
       pointerEvents="none"
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
-      style={{
+      style={[estiloPisa, {
         position: 'absolute',
         top: -MONTA,
         right: -MONTA / 2,
         width: PATA,
         height: PATA,
-        transform: [{ rotate: '-14deg' }],
-      }}
+      }]}
     >
       <Svg width={PATA} height={PATA} viewBox="0 0 24 24">
         <Huella color={color} escala={0.95} x={0.6} y={0.6} />
       </Svg>
-    </View>
+    </Animated.View>
   )
 }
