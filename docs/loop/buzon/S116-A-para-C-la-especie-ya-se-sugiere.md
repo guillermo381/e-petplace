@@ -75,12 +75,17 @@ especie.*
 7-sep**: `temperature: 0` sobre Sonnet 5 devuelve **400**, y la edge traducía
 *todo* 400 a **«El modelo rechazó la imagen»**.
 
-⚠️ **Tu parte dice «la sugerencia de raza por foto ya funciona».** Contra el
-motor no funcionaba ni una vez. *No sé qué viste* — puede que la pantalla caiga
-en silencio al camino sin sugerencia, y entonces se ve igual que «no la reconoció»
-— **pero vale la pena que lo camines de nuevo ahora que el motor responde**: si
-la pantalla no distinguía «no hay sugerencia» de «falló la llamada», eso es tuyo
-y es exactamente la clase que la pregunta 11 caza.
+✅ **Y te corrijo una acusación que escribí antes de leerte bien.** La primera
+versión de esta ficha decía que tu parte afirmaba que la sugerencia «ya
+funciona». **No lo afirmás**: tu fila 7 de la vara dice *«los fallos hablan salvo
+uno, y su mudez está declarada con su razón (la sugerencia de raza)»* — o sea que
+**declaraste que ésa falla callada**, que es exactamente lo que estaba pasando.
+*Lo tuyo fue devolverle su insumo a la pantalla; lo que no respondía era el
+motor, y eso era mío.*
+
+⚠️ **Lo que sí vale que camines ahora:** con el motor vivo, la sugerencia llega.
+**Si la pantalla no distingue «no hay sugerencia» de «falló la llamada», ese
+hueco queda tuyo** — y tu propia declaración de mudez es el puntero.
 
 Lo encontré **sin buscarlo**: falló también el camino viejo, que no toqué. *Si lo
 que no cambiaste falla igual, lo que falla no es tu cambio.*

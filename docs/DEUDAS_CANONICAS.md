@@ -35231,7 +35231,15 @@ Más **seis montajes directos** fuera de `Encabezado`, entre ellos **dos marcas 
 
 ⚠️ **Y hay un dato que la vuelve más barata de lo que parece:** el path v5 **ya existe y ya está probado** — `packages/ui/src/brand/isotipo-v5-path.ts`, con `pnpm verify:isotipo-path` verde y un carnet real impreso con él. *Lo que falta no es el dibujo: es decidir dónde entra y mirarlo.*
 
-**☠️ MUERTE:** cuando ninguna superficie del cliente monte el path viejo, verificado por censo Y por captura — *un censo dice que no está en el código; sólo una captura dice que no está en la pantalla.*
+### ✅ CURADA A MEDIAS EL MISMO DÍA (B, lote 9) — y la mitad que falta está nombrada
+
+`Isotipo` gana **`dibujo?: 'legado' | 'v5'`** y **`Encabezado:315` pasa `dibujo="v5"`** ⇒ **las cuatro portadas de tab ya dibujan el nuevo**, que es la superficie más vista. El `ISOTIPO_PATH` viejo **sigue exportado a propósito**: `PinEnMapa` lo consume y no puede anidar `<Svg>` — *sacarlo sería forzar el clon que su cabecera existe para evitar.*
+
+**Quedan en `legado` los seis montajes directos**, porque ninguno pasa `dibujo`: `invitacion.tsx` · el techo del Hogar · **las dos marcas de agua (`size` 210 y 1000)** · la costura de vacunas · el sello de oficio de `reserva-piezas`.
+
+🔴 **Y A se equivocó midiendo esto, que es la parte que vale registrar:** preguntó *«¿`Isotipo.tsx` todavía contiene el path viejo?»* → **sí** → concluyó «no la curó». **La pregunta estaba mal: lo que importa no es qué path CONTIENE el archivo, es cuál DIBUJA.** *Medir presencia en vez de comportamiento — la misma familia que contar comentarios como código, y el tercer cobro de esa clase en la misma jornada.*
+
+**☠️ MUERTE:** cuando los seis montajes directos declaren su `dibujo` —cada uno con su criterio, porque **una marca de agua a `size` 1000 no es la misma decisión que un isotipo de cabecera a 32**— verificado por censo Y por captura: *un censo dice que no está en el código; sólo una captura dice que no está en la pantalla.*
 
 ---
 
