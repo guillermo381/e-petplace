@@ -14,7 +14,7 @@
 // hace firmar algo que no corre"*. Así que la lámina se monta donde las
 // piezas SÍ se pueden importar: la galería del cliente.
 
-import { useState } from 'react';
+import { Suspense, lazy, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -26,7 +26,7 @@ import {
   radius,
   spacing,
   useTheme,
-  TokenGallery,
+  EsperaLarga,
 } from '@epetplace/ui';
 
 import { GrillaElegir, SelectorDia, type DiaOpcion } from '@/components/reserva-piezas';
@@ -159,15 +159,51 @@ function LaminaSeparacionOscuro() {
   );
 }
 
+/* 🔴 **EL CATÁLOGO ENTRA APARTE, Y ESO DESBLOQUEA LAS CAPTURAS (S116-B lote
+ * 9 · deuda medida por C: **más de 7 s la primera vez en dev, y la pantalla
+ * no dice nada**).
+ *
+ * **La causa es de bundling, no de render:** este módulo importaba
+ * `TokenGallery` de forma estática, así que **Metro tenía que empaquetar el
+ * catálogo entero antes de poder mostrar la ruta**. Durante esos segundos la
+ * navegación ya ocurrió y **no hay nada dibujado**.
+ *
+ * 🔴 **Y probablemente explica los SIETE caminos que declaré fallidos en los
+ * lotes 5b a 8.** Cada vez mandé el deep link, esperé 4-8 s y saqué la
+ * captura: *si la ruta tardaba más que eso en aparecer, lo que fotografié no
+ * fue «no navegó» sino «todavía no dibujó»*. **Declarar un camino muerto por
+ * medir antes de tiempo es peor que no medirlo**: manda a nadie a buscar una
+ * puerta que existe.
+ *
+ * ⇒ `lazy` + `Suspense`: la ruta aparece **al instante** con la espera de la
+ * casa, y el catálogo llega cuando llega. *La espera no acelera nada — hace
+ * que los segundos se vean, que es lo que faltaba.* */
+const TokenGallery = lazy(async () => ({
+  default: (await import('@epetplace/ui')).TokenGallery,
+}));
+
 export default function GalleryRoute() {
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1 }}>
       <ScrollView>
-        {/* La lámina va PRIMERA: es la decisión más grande que queda abierta. */}
+        {/* La lámina va PRIMERA: es la decisión más grande que queda abierta.
+            **Fuera del `Suspense` a propósito**: es liviana y entra con la
+            ruta, así que *la pantalla nunca está en blanco*. */}
         <ThemeProvider defaultMode="dark">
           <LaminaSeparacionOscuro />
         </ThemeProvider>
-        <TokenGallery />
+        <Suspense
+          fallback={
+            <View style={{ height: 420 }}>
+              <EsperaLarga
+                titulo="Armando la galería"
+                apoyo="La primera vez tarda: se está empaquetando el catálogo entero."
+              />
+            </View>
+          }
+        >
+          <TokenGallery />
+        </Suspense>
       </ScrollView>
     </SafeAreaView>
   );

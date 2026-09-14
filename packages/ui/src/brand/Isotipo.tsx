@@ -12,6 +12,7 @@
 
 import Svg, { Defs, LinearGradient, Path, Stop } from 'react-native-svg'
 
+import { ISOTIPO_V5_CAJA, ISOTIPO_V5_PATH } from './isotipo-v5-path'
 import { gradients, palette } from '../tokens/palette'
 
 export const ISOTIPO_VB_W = 471.82
@@ -54,6 +55,7 @@ export function Isotipo({
   size = 32,
   variant = 'tinta',
   color,
+  dibujo = 'legado',
 }: {
   /** Alto en px; el ancho se deriva del aspect ratio del viewBox. */
   size?: number
@@ -66,8 +68,30 @@ export function Isotipo({
    *  esta prop; existía desde S61 y el pedido se contesta con el
    *  literal, cero código nuevo. El gradiente sigue INTOCABLE. */
   color?: string
+  /** 🔴 **CUÁL DE LOS DOS DIBUJOS (S116-B lote 9 · `D-1110`).**
+   *
+   *  `'legado'` (default) es el isotipo de siempre. `'v5'` es el del
+   *  rediseño — **el mismo `d` que ya consumen los ocho papeles**, probado
+   *  por `verify:isotipo-path`.
+   *
+   *  ⚠️ **Entra como PROP con default legado y no al revés, a propósito.**
+   *  Quien llama a esta pieza hoy son **el `Encabezado`** —que sale en
+   *  cuatro de las cinco tabs y lo monta un montón de pantallas— **y las
+   *  DOS marcas de agua (210 y 1000)**. *Cambiar el default habría movido
+   *  las tres de un saque, y la mesa dijo literal que las marcas de agua
+   *  son otra decisión.* El default es lo que protege a los que no se
+   *  nombraron. */
+  dibujo?: 'legado' | 'v5'
 }) {
-  const width = (size * VIEWBOX_W) / VIEWBOX_H
+  const esV5 = dibujo === 'v5'
+  /* El v5 se recorta a la CAJA MEDIDA de su contenido y no al lienzo
+     cuadrado del archivo: *con el cuadrado, un isotipo de 32 px de alto
+     dibujaría 32 px de aire y una marca diminuta adentro.* */
+  const vbX = esV5 ? ISOTIPO_V5_CAJA.x : 0
+  const vbY = esV5 ? ISOTIPO_V5_CAJA.y : 0
+  const vbW = esV5 ? ISOTIPO_V5_CAJA.ancho : VIEWBOX_W
+  const vbH = esV5 ? ISOTIPO_V5_CAJA.alto : VIEWBOX_H
+  const width = (size * vbW) / vbH
   // ⏪ S96-B — los dos literales también salen de `palette`. Y acá había
   // una TRAMPA DE NOMBRE que casi me cuesta un cambio de color: el JSDoc
   // de arriba llama «tinta» a `#1D1A2E`, pero **`palette.tinta` es
@@ -82,7 +106,7 @@ export function Isotipo({
       : (color ?? (variant === 'tinta' ? palette.textLight0 : palette.white))
 
   return (
-    <Svg width={width} height={size} viewBox={`0 0 ${VIEWBOX_W} ${VIEWBOX_H}`}>
+    <Svg width={width} height={size} viewBox={`${vbX} ${vbY} ${vbW} ${vbH}`}>
       {variant === 'gradiente' ? (
         <Defs>
           <LinearGradient id="isoGrad" x1="0.5" y1="0" x2="0.5" y2="1.456">
@@ -92,7 +116,7 @@ export function Isotipo({
           </LinearGradient>
         </Defs>
       ) : null}
-      <Path d={ISOTIPO_PATH} fill={fill} />
+      <Path d={esV5 ? ISOTIPO_V5_PATH : ISOTIPO_PATH} fill={fill} />
     </Svg>
   )
 }
