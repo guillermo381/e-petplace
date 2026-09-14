@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Pressable, View, type ViewStyle } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Animated, {
@@ -9,6 +9,7 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated'
+import { HojaAsistente, type AtajoAsistente, type PreguntaNexo } from './HojaAsistente'
 import { Icono } from './Icono'
 import { motion } from '../tokens/motion'
 import { usePresionado } from './usePresionado'
@@ -78,8 +79,33 @@ import { useTheme } from '../ThemeProvider'
  * pantalla es raíz.
  * ═══════════════════════════════════════════════════════════════════════
  */
-export type BotonAsistenteProps = {
+/* 🔴 **UNIÓN, no props sueltas — dos estados y nada en el medio (lote 8).**
+ * O el botón **abre su hoja** (y entonces necesita SÍ O SÍ el campo de
+ * pregunta y su lista de atajos), o **hace otra cosa** con su `onPress`.
+ * *Un asistente con atajos y sin campo, o con campo y sin atajos, no es una
+ * configuración: es una hoja a medio construir* — y así no compila.
+ *
+ * ⚠️ **Los atajos pueden venir VACÍOS y eso sí es legal:** una pantalla
+ * donde ningún atajo aplica abre la hoja con el campo solo. *Lo que no puede
+ * pasar es que la pantalla se olvide de decidir.* */
+type ConHoja = {
+  onPress?: never
+  /** El título de la hoja: el nombre del asistente, ya redactado. */
+  tituloHoja: string
+  pregunta: PreguntaNexo
+  /** **C decide cuáles monta por pantalla** — la pieza no trae una lista
+   *  adentro. *Un atajo a «peso» en una pantalla de pago no es un atajo: es
+   *  ruido.* */
+  atajos: readonly AtajoAsistente[]
+}
+type SinHoja = {
   onPress: () => void
+  tituloHoja?: never
+  pregunta?: never
+  atajos?: never
+}
+
+export type BotonAsistenteProps = (ConHoja | SinHoja) & {
   /** El consumidor decide: raíz sí, empujada no. Default `true` para que
    *  olvidarlo no lo esconda — un asistente ausente no se reclama. */
   visible?: boolean
@@ -115,7 +141,9 @@ function margenDelHalo(lado: number): number {
   return Math.ceil((lado * (motion.v5.asistenteHaloEscala - 1)) / 2)
 }
 
-export function BotonAsistente({ onPress, visible = true, etiqueta, despertar = 0 }: BotonAsistenteProps) {
+export function BotonAsistente(props: BotonAsistenteProps) {
+  const { visible = true, etiqueta, despertar = 0 } = props
+  const [hojaAbierta, setHojaAbierta] = useState(false)
   const { theme } = useTheme()
   const { handlers, estiloPresionado } = usePresionado(0.97)
   const sinMovimiento = useReducedMotion()
@@ -243,7 +271,7 @@ export function BotonAsistente({ onPress, visible = true, etiqueta, despertar = 
       <Animated.View style={[boton, estiloPresionado]}>
       <Pressable
         {...handlers}
-        onPress={onPress}
+        onPress={props.onPress ?? (() => setHojaAbierta(true))}
         accessibilityRole="button"
         accessibilityLabel={etiqueta}
         /* El área táctil ES el círculo (60 > 44), así que no necesita
@@ -255,6 +283,19 @@ export function BotonAsistente({ onPress, visible = true, etiqueta, despertar = 
         </View>
       </Pressable>
       </Animated.View>
+
+      {/* La hoja vive ACÁ y no en la pantalla: *si cada pantalla la montara,
+          abrir el asistente sería un acto distinto en cada una* — y el estado
+          de «abierta» se olvidaría de cerrarse en alguna. */}
+      {props.onPress === undefined ? (
+        <HojaAsistente
+          visible={hojaAbierta}
+          onCerrar={() => setHojaAbierta(false)}
+          titulo={props.tituloHoja}
+          pregunta={props.pregunta}
+          atajos={props.atajos}
+        />
+      ) : null}
     </View>
   )
 }
