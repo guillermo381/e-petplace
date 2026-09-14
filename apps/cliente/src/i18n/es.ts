@@ -289,6 +289,7 @@ export const clienteEs = {
   registro: {
     titulo: 'Crear cuenta',
     saludo: 'Crea tu cuenta',
+    oRegistrateCon: 'O regístrate con',
     volver: 'Volver',
     /* La línea que baja la ansiedad de un formulario: dice cuánto cuesta
        y que el expediente NO se arma acá. */

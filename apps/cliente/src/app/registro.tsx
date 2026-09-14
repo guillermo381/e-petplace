@@ -35,6 +35,7 @@ import {
 } from '@epetplace/ui';
 import { MIN_LARGO_CONTRASENA, registrarse, type CodigoErrorAuth } from '@epetplace/api';
 
+import { entrarConGoogle } from '@/lib/auth/entrar-con-google';
 import { useTraduccion } from '@/i18n';
 import { causaNoEnvia } from '@/lib/registro-guard';
 import { destinoDeVuelta } from '@/lib/volver-a';
@@ -55,6 +56,7 @@ export default function Registro() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [cargando, setCargando] = useState(false);
+  const [cargandoGoogle, setCargandoGoogle] = useState(false);
   const [errores, setErrores] = useState<{ email?: string; password?: string }>({});
   const [llegando, setLlegando] = useState(false);
 
@@ -66,6 +68,35 @@ export default function Registro() {
       : causa === 'password_corta'
         ? t('registro.razonPasswordCorta', { n: MIN_LARGO_CONTRASENA })
         : undefined;
+
+  /* ⭐ **GOOGLE TAMBIÉN CREA CUENTA — S116-C lote 3b.**
+     Es el MISMO acto que en 03 y por eso llama a la misma lib: *Google no
+     distingue entrar de registrarse*, y el wrapper lo dice en su contrato
+     (*«si es la primera vez, es un alta y el wrapper registra el
+     consentimiento»*). El guard del raíz decide después si va al onboarding
+     o al Hogar.
+     ⚠️ **APPLE NO SE MONTA**, y sigue siendo la decisión correcta: su motor
+     no existe en `packages/api` (medido) — *un botón de marca ajena que no
+     entra a ningún lado es peor que su ausencia*. */
+  async function conGoogle() {
+    if (cargandoGoogle || cargando) return;
+    setCargandoGoogle(true);
+    const r = await entrarConGoogle();
+    if (r.tipo !== 'entro') {
+      setCargandoGoogle(false);
+      if (r.tipo === 'cancelado') return;
+      aviso.mostrar({ variante: 'error', texto: r.mensaje });
+      return;
+    }
+    setLlegando(true);
+    setTimeout(
+      () =>
+        router.replace(
+          volverA === null ? '/onboarding' : { pathname: '/onboarding', params: { volverA } },
+        ),
+      460,
+    );
+  }
 
   async function crearCuenta() {
     if (!puedeEnviar || cargando) return;
@@ -203,6 +234,24 @@ export default function Registro() {
                 }}
                 onPress={() => void crearCuenta()}
               />
+              {/* ⭐ **LA FILA SOCIAL — sólo Google, y en texto.**
+                  El antetítulo lo separa del camino de arriba (son dos
+                  formas de lo mismo, no dos acciones compitiendo).
+                  🔴 **Sin logo**: `apps/cliente/assets/marcas/` tiene los
+                  seis de pago con su `PROCEDENCIA.md` y **ninguno de
+                  Google** — la marca ajena no se redibuja, y el asset es
+                  acto del founder. */}
+              <Texto variante="antetitulo" centrado>
+                {t('registro.oRegistrateCon')}
+              </Texto>
+              <Boton
+                variante="secundario"
+                bloque
+                etiqueta={t('login.conGoogle')}
+                cargando={cargandoGoogle}
+                onPress={() => void conGoogle()}
+              />
+
               {/* La línea de términos — la misma de 01. **Pasa de `Text` con
                   estilo a mano a la pieza `Texto`**: la casa tiene una sola
                   forma de escribir y esta línea se había quedado afuera.

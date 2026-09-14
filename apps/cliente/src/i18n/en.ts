@@ -193,6 +193,7 @@ export const clienteEn = {
   registro: {
     titulo: 'Create account',
     saludo: 'Create your account',
+    oRegistrateCon: 'Or sign up with',
     volver: 'Back',
     apoyo: 'Three details and you’re in. We’ll build your pet’s record together afterwards.',
     nombreLabel: 'Your name',

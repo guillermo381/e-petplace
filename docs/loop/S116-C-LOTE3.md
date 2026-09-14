@@ -11,8 +11,10 @@
 **EL LOTE ESTÁ COMPLETO: las once pantallas y el shell**, con las piezas del buzón de B ya montadas. ⚠️ Lo que NO está completo se dice acá arriba, no enterrado:
 - **El alta nueva corre de punta a punta** y está capturada paso por paso (07 · 08 · 09 · 10), con sus tres barras de progreso.
 - ✅ **Las tres curas que pediste verificar están en pantalla**: el logo sin fondo negro, el «Pez» con su cara, el esqueleto fuera de la confirmación.
-- 🔴 **`D-1098` NO está curada: crear cuenta sigue fallando**, con un error distinto y su causa medida (§⑬). **Es el resultado de la verificación que pediste.**
-- ⚠️ **Dos pantallas sin captura, las dos con su razón medida**: `00` sale en el acto (su ausencia es la prueba) y `06 · hogar SIN mascota` depende de crear una cuenta, que es justo lo que falla.
+- 🔴 **`D-1098`, tercera vuelta: el crash se fue y crear cuenta SIGUE roto** — con el defecto acotado en cuatro mediciones (§⑬). **Es el resultado de la verificación que pediste.**
+- 🔴 **Y apareció un SEGUNDO bloqueo que nadie había medido (`D-1099`): la confirmación de correo está encendida**, así que el camino 05 → 06 se corta aunque `signUp` se cure.
+- ⚠️ **Dos pantallas sin captura, las dos con su razón medida**: `00` sale en el acto (su ausencia es la prueba) y `06 · hogar SIN mascota` está bloqueado por las dos fichas de arriba.
+- ⚠️ **El «tamaño protagonista» y `BotonMarcaAjena` NO están en `main`** — viven en `pista/s116-b-catalogo` @ `be55e5ed`. No mergeo una rama que la mesa no nombró.
 - **La cabecera nueva** entró en ocho pantallas; las ~90 restantes del cliente siguen con la vieja. *Se dice arriba para que nadie lea el resto creyendo que cerró.*
 
 ---
@@ -217,60 +219,68 @@ pnpm verify:voz-sin-hueco               → EXIT 0 · 8 (baseline 8)
 
 ## ⑫ LA HOJA DE CAPTURAS — las once, en orden de flujo
 
-> **Todas sobre `origin/main` @ `29753b2b` + esta rama**, con las piezas del buzón de B ya montadas. Emulador `s114_C` (puerto **5578**, `adb -s` siempre), Metro en **8097** desde este worktree, binario `com.epetplace.cliente` **1.0.7**, `Android Bundled … (3092 modules)`.
-> **El recorrido se hizo por el camino real de la app**, ubicando cada control por su texto (`uiautomator`) en vez de tocar coordenadas a ciegas — *un tap ciego que cae fuera abre los ajustes de Android y la captura sale de otra app*.
+> **Todas sobre `origin/main` @ `2160fc4c` + esta rama.** Emulador `s114_C` (puerto **5578**, `adb -s` siempre), Metro en **8097** desde este worktree, binario **1.0.7**, `Android Bundled … (3093 modules)`.
+> **El recorrido se hace por el camino real**, ubicando cada control por su texto (`uiautomator`) — *un tap ciego que cae fuera abre los ajustes de Android y la captura sale de otra app; me pasó dos veces.*
 
 | # | pantalla | archivo | qué prueba |
 |--:|---|---|---|
-| **00** | splash | — | ⚠️ **sin captura, y su ausencia ES la evidencia** — ver abajo |
-| **01** | propuesta | `01-propuesta.png` | ✅ **logo sin fondo negro** · ✅ **«una vida.» en rosa** (`acentoSobreOscuro`) · secundario blanco sobre ciruela (`superficie="oscura"`) |
+| **00** | splash | — | ⚠️ **sin captura, y su ausencia ES la evidencia** — sale en el acto (§⑫bis) |
+| **01** | propuesta | `01-propuesta.png` | logo **sin fondo negro** · «una vida.» **en rosa** · secundario blanco sobre ciruela |
 | **02** | beneficios · 1ª | `02-beneficios.png` | personaje, Baloo, puntos en ciruela, «Saltar» |
 | **02** | beneficios · 3ª | `02-beneficios-tercera.png` | el CTA aparece **sólo** en la última |
-| **03** | acceso | `03-acceso.png` | cabecera nueva, «Te damos la bienvenida» (neutro), Google sin logo |
-| **04** | recuperar | `04-recuperar.png` | candado, **«QUÉ SIGUE» con sus tres pasos**, vencimiento **sin número inventado** |
-| **05** | crear cuenta | `05-crear-cuenta.png` | tres campos con datos reales cargados |
-| **06** | hogar | `06-shell-hogar.png` | **las cinco tabs con Actividad** · el asistente · «Ponte al día» con el pendiente de la mascota recién creada |
-| **07** | datos básicos | `07-datos-basicos.png` | **barra 1/3** · ✅ **el «Pez» ya tiene cara** (`caraDePersonaje`) · raza con autocompletado · especie elegida con su anillo |
+| **03** | acceso | `03-acceso.png` | cabecera nueva · Google · **y la voz honesta del correo sin confirmar** (`D-1099`) |
+| **04** | recuperar | `04-recuperar.png` | candado, «QUÉ SIGUE» con sus tres pasos, vencimiento **sin número inventado** |
+| **05** | crear cuenta | `05-crear-cuenta.png` | ✅ **la fila social: «O REGÍSTRATE CON» + Google** · Apple fuera · datos reales cargados |
+| **06** | hogar | `06-shell-hogar.png` | **las cinco tabs con Actividad** · el asistente · «Ponte al día» ⚠️ **es el hogar POBLADO** (§⑫ter) |
+| **07** | datos básicos | `07-datos-basicos.png` | **barra 1/3** · el «Pez» con su cara · raza con autocompletado |
 | **08** | foto | `08-foto.png` | **barra 2/3** y cabecera nueva · la escalera de la cara |
 | **09** | carné | `09-carnet.png` | **barra 3/3** · marco, nota, «Omitir» y las dos salidas |
-| **10** | expediente creado | `10-expediente-creado.png` | ✅ **el esqueleto ya NO está** · el apoyo dice la verdad («Guardamos su expediente», sin foto ni carné) |
+| **10** | expediente creado | `10-expediente-creado.png` | el esqueleto **fuera** · el apoyo dice la verdad |
 | — | empujada | `07-empujada-sin-barra.png` | **sin barra de tabs** (firma de la mesa) |
 
-### Las tres verificaciones que pediste
+### ⑫bis · Por qué 00 sigue sin captura — y por qué eso es una medición
 
-1. **✅ El fondo del logo está curado.** En `01` el logo va sobre el degradado **sin la caja negra**. En `00` no se puede ver (no hay captura) y en `06` el logo no se monta — el techo del Hogar usa su propio isotipo, que es **lote 4**.
-2. **✅ `AIRE_RAIZ` aplicado** en las tres raíces que lo necesitaban (`hogar`, `explorar`, `cuenta`). ⚠️ **Y una precisión honesta:** en `06` se ve el asistente sobre una tarjeta intermedia. **Eso no es el defecto que `AIRE_RAIZ` cura**: el token garantiza que **la última fila** sea alcanzable al final del scroll, no que un botón flotante no se superponga a nada en posiciones intermedias — *eso es lo que un flotante es*. Si la mesa quiere que nunca tape contenido, es otra decisión (un botón que se esconde al bajar, por ejemplo) y es de B.
-3. **✅ El «Pez» y el esqueleto de 10, curados y verificados en pantalla.**
+Intentado con **ráfaga de capturas sin pausa**: en la segunda, la app ya estaba en 01. **El splash sale en el acto cuando la sesión resuelve**, que es exactamente lo que el código hace y lo que la pieza declara. *Su ausencia en la hoja no es un hueco de trabajo: es la prueba de que no se queda.*
 
-### 🔴 Por qué 00 no tiene captura, y por qué eso vale como medición
+🔴 **Y el «tamaño protagonista» que pediste montar NO está en `main`** — medido: `TamanoMarca` sigue siendo `'cabecera' | 'splash'` (`packages/ui/src/brand/Marca.tsx`). **Vive en `pista/s116-b-catalogo` @ `be55e5ed`**, junto con `BotonMarcaAjena`, en cuatro commits que `origin/main` no tiene. *No mergeo una rama que la mesa no nombró* (la regla que esta casa escribió después de un arrastre). **En cuanto A la traiga, 00 es una palabra: `tamano="protagonista"`.**
 
-**Intentado tres veces, la última con ráfaga de capturas sin pausa entre una y otra: en la segunda captura la app ya estaba en 01.** El splash sale **en el acto** cuando la sesión resuelve — *hacer esperar a alguien para terminar una animación es cobrarle el adorno*, y es exactamente lo que el código hace.
-⇒ **su ausencia en la hoja no es un hueco de trabajo: es la prueba de que no se queda.** Para fotografiarlo haría falta red lenta o una sesión que tarde; queda para tu recorrido, donde un arranque en frío real dura más que un emulador con todo en caché.
+### ⑫ter · 06 · el hogar SIN mascota tampoco pudo capturarse — y ahora hay DOS causas
 
-### 🔴 06 · el hogar SIN mascota tampoco pudo capturarse — y su causa es `D-1098`
+1. **`D-1098` sigue viva**: no se puede crear una cuenta desde la app.
+2. 🔴 **Y apareció una segunda, que nadie había medido: `D-1099`.** Creé la cuenta **por API** (HTTP 200) para esquivar la primera, y al entrar la app dijo —con su voz correcta— **«Falta confirmar tu email. Revisa tu correo.»** ⇒ **la confirmación de correo está encendida**, así que ni siquiera con la cuenta creada se llega al hogar vacío.
 
-La captura de `06` es el hogar **poblado**. El vacío exige **una cuenta recién creada**, que es justo lo que sigue roto. *No es que no lo haya intentado: es que su precondición no existe hoy.*
+*La captura de `03-acceso.png` es la evidencia de ese segundo bloqueo, y de paso muestra que la voz de la casa lo dice bien.*
+
+### Las tres cosas que pediste verificar
+
+| # | qué | estado |
+|--:|---|---|
+| 1 | cuenta nueva de punta a punta | 🔴 **NO se pudo — y es el hallazgo**: ver §⑬. Se midió el camino entero y se acotó el defecto en cuatro mediciones |
+| 2 | isotipo protagonista en 00 | ⚠️ **el token no está en main** (arriba). Sin él, montarlo sería escribir un tamaño en la pantalla — lo que el catálogo prohíbe y `R4` caza |
+| 3 | Google visible, Apple fuera | ✅ **hecho en las dos**: 03 ya lo tenía, **05 lo gana**. Apple sigue fuera, con su razón medida (su motor no existe). ⚠️ **En texto, no con el asset**: `BotonMarcaAjena` está en la misma rama sin mergear |
 
 ---
 
-## ⑬ 🔴 `D-1098` — LA CURA DE A ENTRÓ Y CREAR CUENTA SIGUE FALLANDO
+## ⑬ 🔴 `D-1098` · TERCERA VUELTA — el crash se fue, crear cuenta sigue roto
 
-**Verificado por el camino real, con una cuenta nueva, sobre `origin/main` @ `29753b2b`.** Es la tarea que pediste y su resultado es rojo.
+**La segunda cura de A mejoró de verdad:** ya no hay `TypeError` ni botón muerto. La app **rebota con voz honesta**:
 
-**El error cambió, el camino sigue roto:**
+> *«No pudimos crear la cuenta. Es un problema nuestro, no tuyo — ya lo estamos viendo.»*
 
-```
-TypeError: Cannot read property 'storage' of undefined
-  auth.ts:593:39   registrarse  →  const { data, error } = await signUp({ ... })
-```
+**Ese mensaje es `motor_de_alta_ausente`** ⇒ `resolverMetodo(clienteAuth, 'signUp')` devuelve **`null`**.
 
-**La causa, medida en el código de la cura** (`auth.ts:575-597`): `signUp` se extrae del cliente con `resolverMetodo(clienteAuth, 'signUp')` y después **se llama suelto**. Un método arrancado de su objeto **pierde su `this`**, y adentro de `supabase-js` usa su propio estado ⇒ `undefined.storage`.
+### Las cuatro mediciones que acotan el defecto — para que A no las repita
 
-🔴 **Y el guard nuevo no puede verlo: `motor_de_alta_ausente` NO se dispara**, porque `resolverMetodo` **encuentra** el método —existe— y da el camino por bueno. *Un guard que verifica presencia no puede ver un problema de invocación, y su verde se lee como «el motor está».*
+| # | medición | resultado |
+|--:|---|---|
+| 1 | `POST /auth/v1/signup` **con la anon key de la app** | **HTTP 200**, usuario creado ⇒ **no es el servidor** |
+| 2 | `signInWithPassword` en el mismo emulador y sesión | **funciona** — y se llama **DIRECTO** (`auth.ts:662`), sin `resolverMetodo` ⇒ **no es el cliente entero** |
+| 3 | `resolverMetodo` probado en Node contra un cliente real | `typeof auth.signUp === 'function'` ⇒ **entraría por su primera rama** ⇒ **no es su lógica** |
+| 4 | `signUp` en `auth-js` **2.110.0** | **existe** en `GoTrueClient.js` |
 
-**La cura es de una línea:** llamarlo con su receptor — `clienteAuth.signUp(...)`, `signUp.call(clienteAuth, ...)` o atarlo al extraerlo. **Dueño: A.** La ficha quedó reabierta con esta medición.
+⇒ **Lo único que queda en pie:** en el runtime de la app, `getClient().auth` no resuelve `signUp` por la vía que `resolverMetodo` usa — y **la única diferencia entre el camino que funciona y el que no es `resolverMetodo` mismo**.
 
-**Cómo se verificó, para que se pueda repetir:** cuenta nueva `c3b…@epetplace.dev`, los tres campos confirmados por `uiautomator` **antes** de tocar el botón (el email completo y la clave con sus 11 puntos), y el `TypeError` en el log de Metro al tocar «Crear mi cuenta».
+**Sugerencia concreta:** llamarlo **directo**, como `signInWithPassword`, y dejar el guard como red. *El guard hay que conservarlo: convirtió un crash en una voz honesta. Lo que no puede es reemplazar a la llamada que funciona.*
 
 ---
 

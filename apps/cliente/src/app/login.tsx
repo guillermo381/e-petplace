@@ -46,7 +46,8 @@ import {
   useAviso,
   useTheme,
 } from '@epetplace/ui';
-import { iniciarSesion, iniciarSesionConGoogle } from '@epetplace/api';
+import { iniciarSesion } from '@epetplace/api';
+import { entrarConGoogle } from '@/lib/auth/entrar-con-google';
 
 import { useTraduccion } from '@/i18n';
 import { ADOPCION_ALCANZABLE } from '@/lib/gate-adopcion';
@@ -98,7 +99,6 @@ WebBrowser.maybeCompleteAuthSession();
 /** Deep link de vuelta del OAuth. `cliente://**` ya está en el uri_allow_list
  *  del proyecto (medido por A). No necesita ruta: `openAuthSessionAsync` lo
  *  intercepta, no navega la app. */
-const REDIRECT_GOOGLE = 'cliente://auth/callback';
 
 export default function Login() {
   const router = useRouter();
@@ -155,28 +155,20 @@ export default function Login() {
     setTimeout(irADestino, 460);
   }
 
-  async function entrarConGoogle() {
+  /* ⭐ **EL ACTO VIVE EN `lib/auth/entrar-con-google`** (S116-C lote 3b) —
+     el mismo para esta puerta y para la de crear cuenta. *Google no
+     distingue entrar de registrarse*, así que copiarlo en la otra pantalla
+     habría creado dos caminos de alta con dos consentimientos que pueden
+     divergir sin que nada falle. */
+  async function conGoogle() {
     if (cargandoGoogle || cargando) return;
     setCargandoGoogle(true);
     setError(undefined);
-    const r = await iniciarSesionConGoogle({
-      redirectTo: REDIRECT_GOOGLE,
-      // El navegador lo abre la app (el wrapper es agnóstico de Expo).
-      abrirNavegador: async (url, redirectTo) => {
-        const res = await WebBrowser.openAuthSessionAsync(url, redirectTo);
-        return res.type === 'success' ? { tipo: 'exito', url: res.url } : { tipo: 'cancelado' };
-      },
-      // Si es la primera vez, es un alta y el wrapper registra el
-      // consentimiento. La URL de cada documento la resuelve `URL_LEGAL` en
-      // packages/api (S104-A) — la pantalla NO la aporta: versión y URL son el
-      // mismo dato y viven juntos, para que no puedan divergir (L-166).
-    });
-
-    if (!r.ok) {
+    const r = await entrarConGoogle();
+    if (r.tipo !== 'entro') {
       setCargandoGoogle(false);
-      // Cancelar NO es un error: es una decisión. Sin alerta roja — se vuelve
-      // al login y ya (el wrapper manda mensaje vacío a propósito).
-      if (r.codigo === 'cancelado_por_usuario') return;
+      /* Cancelar NO es un error: es una decisión, y no lleva alerta roja. */
+      if (r.tipo === 'cancelado') return;
       aviso.mostrar({ variante: 'error', texto: r.mensaje });
       return;
     }
@@ -257,7 +249,7 @@ export default function Login() {
                 etiqueta={t('login.conGoogle')}
                 bloque
                 cargando={cargandoGoogle}
-                onPress={() => void entrarConGoogle()}
+                onPress={() => void conGoogle()}
               />
               <Boton
                 variante="ghost"
