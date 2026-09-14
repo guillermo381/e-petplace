@@ -31,6 +31,7 @@
 import { useState, useCallback } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { correoARuta } from '../lib/auth/correo-en-ruta';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as WebBrowser from 'expo-web-browser';
 import {
@@ -143,7 +144,24 @@ export default function Login() {
 
     if (!r.ok) {
       setCargando(false);
-      if (r.codigo === 'credenciales_invalidas' || r.codigo === 'email_no_confirmado') {
+      /* 🔴 **EL CORREO SIN CONFIRMAR TIENE CAMINO — S116-C lote 3e.**
+         ⏪ Acá se pintaba el mensaje *«Falta confirmar tu email. Revisa tu
+         correo.»* **y nada más**: la persona quedaba en el login, con una
+         instrucción y sin ningún lugar a donde ir. Es la Ley 17.5 al revés —
+         *un estado que dice qué pasa y no ofrece el acto que lo resuelve*.
+
+         La pantalla del código EXISTE y sabe reenviar; lo único que faltaba
+         era llevarla ahí. **Y el correo viaja por la frontera** (`correoARuta`)
+         porque uno con `+` llega roto si se pasa crudo. */
+      if (r.codigo === 'email_no_confirmado') {
+        setCargando(false);
+        router.push({
+          pathname: '/verificar-correo',
+          params: { email: correoARuta(email.trim()) },
+        });
+        return;
+      }
+      if (r.codigo === 'credenciales_invalidas') {
         setError(r.mensaje);
       } else {
         aviso.mostrar({ variante: 'error', texto: r.mensaje });
@@ -236,6 +254,34 @@ export default function Login() {
 
           <Entrada orden={1}>
             <View style={{ gap: spacing[2] }}>
+              {/* 🔴 **EL CTA DE ENTRAR — RESTAURADO. Lo borré yo, y es el peor
+                  defecto de este lote.**
+
+                  Vivía acá desde siempre y **desapareció en `5fc07ee4`** (mi
+                  lote 3), al montar la fila social: saqué el bloque viejo de
+                  botones y traje sólo los de marca ajena. Consecuencia:
+                  **nadie podía entrar con correo y contraseña** — la acción
+                  principal de la pantalla de entrar.
+
+                  ⚠️ **Y sobrevivió TRES lotes con capturas de 03 en la hoja.**
+                  Por qué no se vio: cada verificación en el aparato **creaba
+                  una cuenta nueva**, así que el camino que se recorría era
+                  05 → 05b, jamás 03 → entrar. *La pantalla se fotografió tres
+                  veces y nadie la usó para lo que existe* — el hueco se veía
+                  en la captura como un espacio vacío y se leía como aire.
+
+                  Lo encontró el recorrido de HOY, y sólo porque hizo falta
+                  entrar con una cuenta que ya existía. *Ningún gate lo podía
+                  ver: un botón que falta no rompe el typecheck, no dispara
+                  `verify:diseno`, y deja una pantalla que se ve tranquila.* */}
+              <Boton
+                etiqueta={t('login.entrar')}
+                bloque
+                cargando={cargando}
+                deshabilitado={!puedeEnviar}
+                razonDeshabilitado={t('login.faltanDatos')}
+                onPress={() => void entrar()}
+              />
               {/* ⭐ **`BotonMarcaAjena` — S116-C lote 3d.** El asset oficial de
                   Google trae su tipografía, su caja y su padding: *no hay nada
                   que componer, y componerlo sería redibujar marca ajena*.

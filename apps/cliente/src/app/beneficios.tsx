@@ -39,7 +39,7 @@ import { ScrollView, View, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Boton, Personaje, Texto, radius, spacing, useTheme, type EspeciePersonaje } from '@epetplace/ui';
+import { Boton, Entrada, Personaje, Texto, radius, spacing, type EspeciePersonaje, useTheme } from '@epetplace/ui';
 
 import { useTraduccion } from '@/i18n';
 
@@ -129,11 +129,27 @@ export default function Beneficios() {
               paddingHorizontal: spacing[6],
             }}
           >
-            <Personaje especie={c.especie} tamano="grande" fondo="rosa" />
-            <Texto variante="titulo">{c.titulo}</Texto>
-            <Texto variante="cuerpo" color="secondary">
-              {c.apoyo}
-            </Texto>
+            {/* 🔴 **LA ENTRADA ESCALONADA — S116-C lote 3e.**
+                ⏪ 02 **no tenía ninguna**: las tres piezas de cada tarjeta
+                aparecían juntas y de golpe. El deslizado entre tarjetas sí
+                estaba (lo hace `pagingEnabled`), y por eso el hueco no se
+                notaba: *había movimiento, pero no era el que el encargo pide*.
+
+                El orden es el de lectura —personaje, título, apoyo— y lo trae
+                `Entrada`, la misma pieza que usa 01: así las dos primeras
+                pantallas del recorrido **entran con el mismo tempo**, que es
+                justamente lo que hace que se lean como una sola casa. */}
+            <Entrada orden={0}>
+              <Personaje especie={c.especie} tamano="grande" fondo="rosa" />
+            </Entrada>
+            <Entrada orden={1}>
+              <Texto variante="titulo">{c.titulo}</Texto>
+            </Entrada>
+            <Entrada orden={2}>
+              <Texto variante="cuerpo" color="secondary">
+                {c.apoyo}
+              </Texto>
+            </Entrada>
           </View>
         ))}
       </ScrollView>

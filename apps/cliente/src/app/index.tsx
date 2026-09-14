@@ -2,7 +2,7 @@
  * Entrada del app del dueño (S45-B4 → fix S45-splash) — routing por
  * estado real:
  *   sin sesión → /bienvenida
- *   sesión sin familia → /onboarding
+ *   sesión sin familia → /hogar (vacío) — `D-1101`
  *   sesión con familia → /home
  * URL-reconstruible: esta ruta no guarda nada, decide y redirige.
  * Regla 36: si el estado no llega (red muerta, backend caído), esto
@@ -12,18 +12,7 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { useRouter } from 'expo-router';
-import {
-  Boton,
-  EstadoVacio,
-  IsotipoV5,
-  Personaje,
-  gradients,
-  palette,
-  radius,
-  spacing,
-  useTheme,
-  type EspeciePersonaje,
-} from '@epetplace/ui';
+import { Boton, Entrada, EstadoVacio, IsotipoV5, Personaje, gradients, motion, palette, radius, spacing, type EspeciePersonaje, useTheme } from '@epetplace/ui';
 
 import { getEstadoOnboardingDueno, obtenerPreferencias, obtenerSesion } from '@epetplace/api';
 import { cambiarIdioma, obtenerIdiomaActual } from '@epetplace/i18n';
@@ -78,10 +67,36 @@ import { LinearGradient } from 'expo-linear-gradient'
 /** El orden de las caras. `otro` es la nariz, que cierra la vuelta. */
 const CARAS: readonly EspeciePersonaje[] = ['perro', 'gato', 'conejo', 'ave', 'roedor', 'otro']
 
-/** Cada tres segundos, textual en el encargo. */
+/** Cada tres segundos, textual en el encargo. **No es una duración de
+ *  animación sino una CADENCIA** —cuánto dura una cara en pantalla—, y por eso
+ *  no sale de `motion.duration`: ese vocabulario es de transiciones. */
 const MS_POR_CARA = 3000
-/** «personajes en fundido 500 ms» — letra §2, Movimiento. */
-const MS_FUNDIDO = 500
+
+/* ── 🔴 LOS TIEMPOS SALEN DEL TOKEN, NO DE LA PANTALLA (firma del founder,
+   13-sep-2026) ────────────────────────────────────────────────────────────
+   ⏪ Acá había cinco números tecleados: `420`, `380`, `600`, `500` y el bezier
+   `(0.32, 0.72, 0, 1)` **repetido dos veces**. Ese bezier **ES**
+   `motion.marca.aperturaBezier` — o sea que la pantalla estaba reescribiendo
+   la curva de la marca a mano. *Dos copias de la misma curva no se ven
+   distintas hoy: se ven distintas el día que alguien afine una.* */
+
+/** «personajes en fundido 500 ms» — letra §2. El token de la casa para una
+ *  transición grande es **520** (`grande`), y es el que rige: *la letra dice
+ *  medio segundo, y el vocabulario de la casa ya tiene ese medio segundo con
+ *  nombre.* */
+const MS_FUNDIDO = motion.duration.grande
+/** El respiro de la marca — ida y vuelta con la curva de marca. */
+const MS_RESPIRO = motion.marca.aperturaMs
+/** El halo entra después de la nariz: es luz que aparece, no un gesto.
+ *  🔴 Tenía `legacy_verySlow` (600) y **`R51` lo cazó con razón**: el
+ *  vocabulario del movimiento es CERRADO —150 · 300 · 520— y los legados están
+ *  ahí para morir, no para estrenarse. Va `grande`, que es su registro: la
+ *  aparición de la marca es el gesto más grande de la app. */
+const MS_HALO = motion.duration.grande
+/** «crece apenas y vuelve» — apenas, medido en la lámina: 6 %. */
+const ESCALA_RESPIRO = 1.06
+/** La curva de la marca, UNA vez. */
+const CURVA_MARCA = Easing.bezier(...motion.marca.aperturaBezier)
 
 function SplashMarca() {
   const [indice, setIndice] = useState(0)
@@ -102,10 +117,10 @@ function SplashMarca() {
       return
     }
     escala.value = withSequence(
-      withTiming(1.06, { duration: 420, easing: Easing.bezier(0.32, 0.72, 0, 1) }),
-      withTiming(1, { duration: 380, easing: Easing.bezier(0.32, 0.72, 0, 1) }),
+      withTiming(ESCALA_RESPIRO, { duration: MS_RESPIRO, easing: CURVA_MARCA }),
+      withTiming(1, { duration: MS_RESPIRO, easing: CURVA_MARCA }),
     )
-    halo.value = withTiming(1, { duration: 600, easing: Easing.out(Easing.quad) })
+    halo.value = withTiming(1, { duration: MS_HALO, easing: Easing.out(Easing.quad) })
   }, [quieto, escala, halo])
 
   /* El fundido cruzado de la cara grande. **Se apaga y se prende sobre el
@@ -170,14 +185,28 @@ function SplashMarca() {
           <Personaje especie={CARAS[indice]} tamano="hogar" fondo="blanco" />
         </Animated.View>
         <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+          {/* 🔴 **ENTRAN ESCALONADOS — S116-C lote 3e.**
+              ⏪ La cabecera de esta pieza decía *«abajo entran, escalonados,
+              los seis personajes»* desde el lote 3, **y el render los dibujaba
+              los seis de una**. *Una coreografía escrita en un comentario es
+              una coreografía que nadie ve* — y no fallaba nada, por eso
+              sobrevivió tres lotes.
+
+              Va `Entrada` y no un escalonado propio: es **la** entrada de la
+              casa (45/300, la curva de marca) y **ya trae los dos brazos que
+              esta pantalla necesita** —memorial y `useReducedMotion`— que un
+              stagger local tendría que volver a escribir y alguien olvidaría.
+              *El `orden` es semántico: es el orden de lectura, izquierda a
+              derecha, no una posición física.* */}
           {CARAS.map((especie, i) => (
-            <Personaje
-              key={especie}
-              especie={especie}
-              tamano="fila"
-              fondo="blanco"
-              elegido={i === indice}
-            />
+            <Entrada key={especie} orden={i}>
+              <Personaje
+                especie={especie}
+                tamano="fila"
+                fondo="blanco"
+                elegido={i === indice}
+              />
+            </Entrada>
           ))}
         </View>
       </View>
@@ -199,7 +228,13 @@ function sincronizarIdiomaDesdeDB(): void {
 
 const UMBRAL_COLGADO_MS = 8000;
 
-export default function Entrada() {
+/* ⏪ Se llamaba `Entrada`, y chocaba de frente con `Entrada` de
+   `@epetplace/ui` —la entrada escalonada de la casa— que esta misma pantalla
+   ahora monta. **El nombre del default export de una ruta no lo lee nadie más
+   que quien abre el archivo**, así que el que tenía que ceder era éste: el de
+   la pieza es vocabulario compartido. *Es el caso exacto que los tokens de
+   `motion` describen — un nombre plausible es peor que uno que falta.* */
+export default function Raiz() {
   const router = useRouter();
   const { theme } = useTheme();
   const { t } = useTraduccion();
@@ -229,7 +264,11 @@ export default function Entrada() {
         setColgado(true);
         return;
       }
-      router.replace(estado.data.tiene_familia ? '/hogar' : '/onboarding');
+      /* 🪦 `D-1101` · EL GUARD DEJA DE BIFURCAR. Antes: con familia al hogar,
+         sin familia al onboarding. Hoy **las dos van al hogar** — el hogar
+         sabe dibujar los dos estados, y tener dos destinos para la misma
+         pregunta es cómo nacen dos verdades. */
+      router.replace('/hogar');
     })();
 
     return () => {

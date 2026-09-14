@@ -45,7 +45,7 @@ import { correoARuta, correoDeRuta } from '../lib/auth/correo-en-ruta';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
-  Campo,
+  CampoCodigo,
   Celda,
   Chevron,
   Icono,
@@ -54,11 +54,7 @@ import {
   useAviso,
   useTheme,
 } from '@epetplace/ui';
-import {
-  confirmarAltaConCodigo,
-  getEstadoOnboardingDueno,
-  reenviarCodigoAlta,
-} from '@epetplace/api';
+import { confirmarAltaConCodigo, reenviarCodigoAlta } from '@epetplace/api';
 
 import { destinoDeVuelta } from '@/lib/volver-a';
 import { useTraduccion } from '@/i18n';
@@ -66,6 +62,10 @@ import { useTraduccion } from '@/i18n';
 /** La espera del reenvío. **Un solo lugar**: el correo recién salió del alta,
  *  y ofrecer «reenviar» a los dos segundos invita a llenar la bandeja. */
 const ESPERA_REENVIO = 60;
+
+/** Ocho dígitos — medido del correo real, no supuesto. La pieza lo exige sin
+ *  default: *un largo por default es un largo que alguien no decidió.* */
+const LARGO_CODIGO = 8;
 
 export default function RevisaTuCorreo() {
   const router = useRouter();
@@ -125,12 +125,13 @@ export default function RevisaTuCorreo() {
       setErrorCodigo(r.mensaje);
       return;
     }
-    /* Con sesión, el destino lo decide el estado del onboarding — el mismo
-       criterio que el guard del raíz, para que no haya dos verdades. */
-    const estado = await getEstadoOnboardingDueno();
+    /* 🪦 `D-1101` · UN SOLO DESTINO. Antes se consultaba el estado para
+       decidir entre hogar y onboarding; con el onboarding enterrado esa
+       consulta **no puede cambiar la respuesta**, así que se retira con él:
+       *un viaje de red cuyo resultado ya no decide nada es latencia pura, y
+       además una segunda verdad esperando divergir del guard del raíz.* */
     setMirando(false);
-    const destino = estado.ok && estado.data.tiene_familia ? '/hogar' : '/onboarding';
-    router.replace(volverA !== null && destino === '/hogar' ? volverA : destino);
+    router.replace(volverA ?? '/hogar');
   }
 
   async function reenviar() {
@@ -179,8 +180,20 @@ export default function RevisaTuCorreo() {
           <Texto variante="titulo" centrado>
             {t('revisaCorreo.titulo')}
           </Texto>
+          {/* 🔴 **DOS LÍNEAS, Y NO ES PREFERENCIA: es un defecto medido.**
+              Con la frase entera en un `Texto`, el correo es **una palabra que
+              no parte** —`guillo381+s116c3@gmail.com`— así que el salto caía
+              justo después y **dejaba el punto final huérfano al principio de
+              la línea siguiente**: «…@gmail.com ⏎ . Escríbelo aquí…».
+              *No falla nada; se ve descuidado, que en la pantalla donde la
+              persona verifica su propia dirección es justo lo que no se puede
+              ver.* Separar la instrucción saca el punto del borde y además se
+              lee mejor: primero a dónde fue, después qué hacer. */}
           <Texto variante="cuerpo" color="secondary" centrado>
             {t('revisaCorreo.apoyo', { correo: email })}
+          </Texto>
+          <Texto variante="cuerpo" color="secondary" centrado>
+            {t('revisaCorreo.apoyoInstruccion')}
           </Texto>
         </View>
 
@@ -192,22 +205,29 @@ export default function RevisaTuCorreo() {
           <Celda inicio={<Texto variante="enfasis">3</Texto>} titulo={t('revisaCorreo.paso3')} />
         </View>
 
-        {/* EL CAMPO DEL CÓDIGO — el acto de la pantalla. Teclado numérico y
-            `one-time-code` para que el sistema lo ofrezca solo desde el correo:
-            **el mejor campo de código es el que no hay que tipear.** */}
-        <Campo
-          label={t('revisaCorreo.etiquetaCodigo')}
-          placeholder={t('revisaCorreo.placeholderCodigo')}
-          value={codigo}
-          onChangeText={(v: string) => {
+        {/* ⭐ **`CampoCodigo` — la pieza de la casa, S116-C lote 3e.**
+            ⏪ Acá había un `Campo` genérico con `keyboardType="number-pad"`:
+            la pantalla estaba **componiendo** un campo de código en vez de
+            montar el que ya existe. `CampoCodigo` trae lo que yo iba a tener
+            que escribir —el saneo a dígitos, el corte al largo, las cajas, el
+            pie con `liveRegion`— y además **el tono del pie**, que acá importa:
+            un código vencido no es un tipeo equivocado.
+
+            🔴 **`largo` NO tiene default y es a propósito**: la pieza no sabe
+            cuánto mide un código. **El de esta casa es de OCHO**, medido del
+            correo real del founder (`81250142`, `25746721`). */}
+        <CampoCodigo
+          largo={LARGO_CODIGO}
+          valor={codigo}
+          onCambio={(v) => {
             setCodigo(v);
             if (errorCodigo !== null) setErrorCodigo(null);
           }}
+          etiqueta={t('revisaCorreo.etiquetaCodigo')}
           error={errorCodigo ?? undefined}
-          keyboardType="number-pad"
-          autoCapitalize="none"
-          textContentType="oneTimeCode"
-          autoComplete="one-time-code"
+          /* El código malo y el vencido salen con la MISMA voz del motor, y
+             ninguno de los dos es un error de tipeo: se dicen como estado. */
+          tono="estado"
         />
 
         <Boton
@@ -228,9 +248,12 @@ export default function RevisaTuCorreo() {
             bloque
             etiqueta={espera > 0 ? t('revisaCorreo.reenviarEn', { n: espera }) : t('revisaCorreo.reenviar')}
             deshabilitado={espera > 0}
-            /* La razón ES la cuenta regresiva, que ya está en la etiqueta: se
-               pasa igual para que el lector de pantalla la oiga. */
-            razonDeshabilitado={espera > 0 ? t('revisaCorreo.reenviarEn', { n: espera }) : undefined}
+            /* 🔴 **SIN `razonDeshabilitado`, y es una cura de lo que se vio
+               en el aparato.** Lo pasaba con el MISMO texto que la etiqueta
+               «para que el lector de pantalla lo oiga» — y esa prop **también
+               se dibuja**, así que la cuenta regresiva salía DOS VECES, una
+               debajo de la otra. *La etiqueta ya dice el porqué; repetirlo no
+               es accesibilidad, es ruido — y el lector lee la etiqueta.* */
             cargando={reenviando}
             onPress={() => void reenviar()}
           />

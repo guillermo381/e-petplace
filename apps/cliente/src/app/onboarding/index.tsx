@@ -1,61 +1,44 @@
-/** S91-D · La puerta del onboarding: `/onboarding` entra por el paso 1.
- *  Existe para que los tres llamadores del arranque (`app/index.tsx`,
- *  `registro.tsx` y `verificar-correo.tsx`) no tengan que conocer el nombre
- *  del primer paso.
+/**
+ * 🪦 LÁPIDA — `D-1101` · ACÁ VIVIÓ LA BIFURCACIÓN DE ENTRADA.
  *
- *  ── S112-C · LA BIFURCACIÓN, CONSTRUIDA Y CON SU PUERTA CERRADA ─────────
- *  El founder pidió que acá se vea **una sola pregunta** con dos tarjetas
- *  (`BifurcacionDeEntrada`, con su porqué en la cabecera de la pieza). **La
- *  segunda respuesta exige crear la cuenta SIN mascota**, y ese productor
- *  todavía no existe — pedido a A como `crear_familia_sin_mascota`.
+ * ── QUÉ HABÍA ────────────────────────────────────────────────────────────
+ * `/onboarding` preguntaba **«¿Tienes una mascota o quieres adoptar?»** con dos
+ * tarjetas (`BifurcacionDeEntrada`, S112-C), y era **lo primero que veía toda
+ * cuenta nueva**: el raíz, `registro` y `verificar-correo` mandaban ahí.
  *
- *  ⇒ Mientras la puerta esté cerrada, esta ruta hace **exactamente lo de
- *  siempre**: entra al alta. *Preguntar «¿tenés una mascota o querés adoptar?»
- *  y que la segunda opción no lleve a ningún lado es peor que no preguntar.*
+ * ── POR QUÉ MUERE (firma del founder, 13-sep-2026) ───────────────────────
+ * **La cuenta sin familia ve el HOGAR, no una bifurcación.** Esa pregunta era
+ * una pantalla de más entre confirmar el correo y tener a alguien adentro —y el
+ * hogar vacío ya la hacía mejor: ofrece **primero a los que esperan adopción y
+ * después la invitación a registrar**, con su «i» del porqué. *Dos superficies
+ * para la misma pregunta, y la de abajo era la buena.*
  *
- *  ⚠️ **Y el gate es el MISMO de la vertical** (`ADOPCION_ALCANZABLE`), no uno
- *  propio: *dos interruptores para la misma puerta terminan en distinto
- *  estado, y el día que alguien encienda uno solo, la mitad de la vertical
- *  aparece sin la otra.*
+ * Y el recorrido real la encontró rota además: título contra la barra de
+ * estado, engranaje encima, dos barras blancas vacías, glifos fuera de caja
+ * (captura `docs/loop/capturas-s116-c/06b-onboarding-roto.png`).
+ * *Se entierra la pantalla, no se arregla una que no debía existir.*
+ *
+ * ── LO QUE MURIÓ CON ELLA ────────────────────────────────────────────────
+ * `components/alta/BifurcacionDeEntrada.tsx` — **tenía UN solo consumidor: este
+ * archivo** (medido antes de borrarla), así que no queda huérfana en ningún
+ * otro lado. Con ella se van las siete voces `bifurcacion.*`.
+ *
+ * ── ⚠️ LO QUE **NO** MUERE, y es la mitad que se puede romper por descuido ──
+ * **`/onboarding/[paso]` SIGUE VIVA: es el ALTA de la primera mascota.** Esa
+ * ruta llama a `crear_familia_con_primera_mascota`, mientras `/hogar/agregar`
+ * llama a `agregar_mascota_a_familia`, que **exige una familia que todavía no
+ * existe**. *Quien borre el directorio entero «para limpiar» va a dejar sin
+ * camino a toda cuenta nueva, y el typecheck no lo va a decir.*
+ *
+ * ── POR QUÉ REDIRIGE Y NO SE BORRA EL ARCHIVO ────────────────────────────
+ * Había cuatro navegaciones a `/onboarding` en el árbol —las cuatro migradas a
+ * `/hogar` en este mismo commit— **pero una ruta viva sobrevive en pilas
+ * guardadas, en deep links y en la memoria de quien la escribió.** El redirect
+ * cuesta una línea y convierte un «esta pantalla no existe» en llegar a donde
+ * se quería ir.
  */
-import { router, useLocalSearchParams } from 'expo-router';
+import { Redirect } from 'expo-router';
 
-import { AltaMascota } from '@/components/alta/AltaMascota';
-import { BifurcacionDeEntrada } from '@/components/alta/BifurcacionDeEntrada';
-import { ADOPCION_ALCANZABLE } from '@/lib/gate-adopcion';
-import { destinoDeVuelta } from '@/lib/volver-a';
-import { useTraduccion } from '@/i18n';
-
-export default function OnboardingInicio() {
-  const { t } = useTraduccion();
-  /* 🔴 **A dónde vuelve quien vino de la vidriera.** No es «al home»: §4.1 dice
-     *«vuelvo exactamente a donde estaba (la ficha de Luna, o la lista)»*. El
-     destino cruzó registro y confirmación como dato porque los dos `replace`
-     del camino borran la pila.
-     ⚠️ **Se lee SIEMPRE, antes del gate**, aunque hoy la rama esté cerrada:
-     leerlo dentro de la rama lo ataría al gate, y el día que el gate abra
-     alguien tendría que acordarse de moverlo. */
-  const volverA = destinoDeVuelta(useLocalSearchParams().volverA);
-
-  if (!ADOPCION_ALCANZABLE) return <AltaMascota modo="primera" pasoFijo="datos" />;
-
-  return (
-    <BifurcacionDeEntrada
-      titulo={t('bifurcacion.titulo')}
-      tengoMascota={t('bifurcacion.tengoMascota')}
-      tengoMascotaDetalle={t('bifurcacion.tengoMascotaDetalle')}
-      tengoMascotaAccion={t('bifurcacion.tengoMascotaAccion')}
-      quieroAdoptar={t('bifurcacion.quieroAdoptar')}
-      quieroAdoptarDetalle={t('bifurcacion.quieroAdoptarDetalle')}
-      quieroAdoptarAccion={t('bifurcacion.quieroAdoptarAccion')}
-      onTengoMascota={() => router.push('/onboarding/datos')}
-      /* «Si toco adoptar, no me pidas nada más: me llevás directo a ver los
-         animales» — la cuenta sin mascota la crea el motor de A antes de
-         navegar; hoy esta rama no se alcanza (ver la cabecera). */
-      /* `replace` y no `push`: la pregunta del alta **no es un lugar al que se
-         vuelve**. Y si vino con destino, vuelve ahí — a la lista si entró por
-         la lista, a la ficha cuando la ficha exista. */
-      onQuieroAdoptar={() => router.replace(volverA ?? '/adoptar')}
-    />
-  );
+export default function OnboardingRedirige() {
+  return <Redirect href="/hogar" />;
 }

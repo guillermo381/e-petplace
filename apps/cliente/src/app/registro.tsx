@@ -100,7 +100,10 @@ export default function Registro() {
     setTimeout(
       () =>
         router.replace(
-          volverA === null ? '/onboarding' : { pathname: '/onboarding', params: { volverA } },
+          /* 🪦 `D-1101`: antes iba a `/onboarding`, la bifurcación. Hoy la
+             cuenta sin familia ve el HOGAR, que ya ofrece adopción primero y
+             la invitación a registrar después. */
+          volverA === null ? '/hogar' : { pathname: '/hogar', params: { volverA } },
         ),
       460,
     );
@@ -149,12 +152,15 @@ export default function Registro() {
       });
       return;
     }
-    // §5 · la huella de llegada, y recién ahí el onboarding.
+    // §5 · la huella de llegada, y recién ahí el hogar.
     setLlegando(true);
     setTimeout(
       () =>
         router.replace(
-          volverA === null ? '/onboarding' : { pathname: '/onboarding', params: { volverA } },
+          /* 🪦 `D-1101`: antes iba a `/onboarding`, la bifurcación. Hoy la
+             cuenta sin familia ve el HOGAR, que ya ofrece adopción primero y
+             la invitación a registrar después. */
+          volverA === null ? '/hogar' : { pathname: '/hogar', params: { volverA } },
         ),
       460,
     );

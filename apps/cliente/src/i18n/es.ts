@@ -284,6 +284,7 @@ export const clienteEs = {
     emailPlaceholder: 'ej: ana@correo.com',
     passwordLabel: 'Contraseña',
     entrar: 'Entrar',
+    faltanDatos: 'Escribe tu correo y tu contraseña para entrar.',
     conGoogle: 'Continuar con Google',
     /* La voz del lector para Apple. **Existe aunque el botón todavía no se
        dibuje**: la pieza decide si hay asset, y el día que entre no hay que
@@ -298,7 +299,8 @@ export const clienteEs = {
     titulo: 'Revisa tu correo',
     /* El correo se nombra ENTERO: quien se equivocó al escribirlo lo ve acá
        y tiene su camino para corregirlo abajo. */
-    apoyo: 'Te enviamos un código a {{correo}}. Escríbelo aquí para confirmar tu cuenta.',
+    apoyo: 'Te enviamos un código a {{correo}}',
+    apoyoInstruccion: 'Escríbelo aquí para confirmar tu cuenta.',
     queSigue: 'QUÉ SIGUE',
     paso1: 'Abre el correo que te enviamos',
     paso2: 'Copia el código que trae',
@@ -4484,15 +4486,6 @@ export const clienteEs = {
     reintentar: 'Probar de nuevo',
     entrada: 'Tus conversaciones',
     abrirHilo: 'Abrir la conversación sobre {{nombre}}',
-  },
-  bifurcacion: {
-    titulo: '¿Tienes una mascota o quieres adoptar?',
-    tengoMascota: 'Tengo una mascota',
-    tengoMascotaDetalle: 'Empieza su historia acá.',
-    tengoMascotaAccion: 'Registrar a mi mascota',
-    quieroAdoptar: 'Quiero adoptar',
-    quieroAdoptarDetalle: 'Conoce a los que están esperando una familia.',
-    quieroAdoptarAccion: 'Ver quiénes esperan',
   },
   legales: {
     titulo: 'Documento',

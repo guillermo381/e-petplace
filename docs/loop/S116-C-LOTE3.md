@@ -217,179 +217,219 @@ pnpm verify:voz-sin-hueco               → EXIT 0 · 8 (baseline 8)
 
 ---
 
-## ⑫ LA HOJA DE CAPTURAS — el recorrido ENTERO, en orden de flujo
+## ⑫ LA HOJA DE CAPTURAS — el recorrido entero, en orden de flujo
 
-> **Lote 3d · 13-sep-2026.** Sobre `origin/main` @ `a040375d` + esta rama.
-> Emulador `s114_C` (**5578**, `adb -s` siempre) · Metro **8097** desde este worktree
-> (`Starting project at …/e-petplace-s116-c03/apps/cliente`) · binario **1.0.7** ·
-> **bundle fresco confirmado: `Android Bundled 8147ms … (3097 modules)`**.
+> **Lote 3e · 13-sep-2026.** Emulador `s114_C` (**5578**, `adb -s` siempre) ·
+> Metro **8097** desde este worktree (`Starting project at …/e-petplace-s116-c03/apps/cliente`) ·
+> binario **1.0.7** · bundle fresco confirmado (`Android Bundled … 3097 modules`).
 >
-> 🔴 **Cuenta REAL, creada desde la app y confirmada con el código del correo
-> del founder** (`guillo381+s116c2@gmail.com`). *No es un fixture: el correo
-> salió de verdad y el código volvió de verdad.*
+> 🔴 **Tres cuentas REALES creadas desde la app y confirmadas con el código del
+> correo del founder** (`guillo381+s116c` · `+s116c2` · `+s116c3`). El correo
+> salió de verdad y el código volvió de verdad.
 
 | # | pantalla | archivo | qué prueba |
 |--:|---|---|---|
-| **00** | splash | — | ⚠️ **sigue sin captura, y su ausencia ES la evidencia** (§⑫bis) |
+| **00** | splash | `mov-00-splash-y-viaje-a-01.gif` | la coreografía **y el viaje** — §⑭ |
 | **01** | propuesta | `01-propuesta.png` | logo sin fondo negro · «una vida.» en rosa |
-| **02** | beneficios · 1ª | `02-beneficios.png` | personaje, Baloo, puntos en ciruela, «Saltar» |
-| **02** | beneficios · 3ª | `02-beneficios-tercera.png` | el CTA aparece **sólo** en la última |
-| **03** | acceso | `03-acceso.png` | cabecera nueva · Google |
+| **02** | beneficios · 1ª | `02-beneficios.png` | personaje, Baloo, puntos en ciruela |
+| **02** | beneficios · 3ª | `02-beneficios-tercera.png` | el CTA sólo en la última |
+| **02** | movimiento | `mov-02-entrada-y-deslizado.gif` | entrada escalonada **nueva** + deslizado — §⑭ |
+| **03** | acceso | `03-acceso.png` | 🔴 **con el CTA «Entrar» de vuelta** (§⑬ter) · Google con su asset · Apple sin dibujar |
 | **04** | recuperar | `04-recuperar.png` | candado · «QUÉ SIGUE» · vencimiento sin número inventado |
-| **05** | crear cuenta | `05-crear-cuenta.png` | ✅ **`BotonMarcaAjena` con el logo OFICIAL de Google** · Apple **no dibuja nada** · datos reales |
-| **05b** | revisa tu correo | `05b-revisa-tu-correo.png` | 🆕 lienzo · flecha sola · círculo con glifo de correo · Baloo · «QUÉ SIGUE» · **el campo del código** · reenviar y cambiar correo en tinta apagada |
-| **onb** | ¿mascota o adoptar? | `06b-onboarding-roto.png` | 🔴 **NO es una captura de logro: es un defecto** (§⑫quater) |
+| **05** | crear cuenta | `05-crear-cuenta.png` | `BotonMarcaAjena` con el logo oficial de Google |
+| **05b** | revisa tu correo | `05b-revisa-tu-correo.png` | **`CampoCodigo` de la casa (8 cajas + «Pegar»)** · el correo con `+` íntegro · la frase partida |
+| **06** | **hogar SIN mascota** | `06-hogar-sin-mascota.png` | 🆕 **lo que ve una cuenta sin familia** — adopción primero, después «Agrega tu primera mascota» |
 | **07** | datos básicos | `07-datos-basicos.png` | barra 1/3 · especies con su cara · raza con autocompletado |
-| **08** | foto | `08-foto.png` | barra 2/3 · la escalera de la cara · «Ahora no» |
-| **09** | carné | `09-carnet.png` | barra 3/3 · marco, nota, «Omitir» y las dos salidas |
-| **10** | expediente creado | `10-expediente-creado.png` | ✅ **recapturada sobre este código** · esqueleto fuera · «El expediente de Lolo ya está creado.» |
-| **06** | hogar | `06-shell-hogar.png` | las cinco tabs con **Actividad** · el asistente · «Ponte al día · 2 cosas» |
+| **08** | foto | `08-foto.png` | barra 2/3 · la escalera de la cara |
+| **09** | carné | `09-carnet.png` | barra 3/3 · marco y las dos salidas |
+| **10** | expediente creado | `10-expediente-creado.png` | esqueleto fuera · «El expediente de Lolo ya está creado.» |
+| **06** | hogar poblado | `06-shell-hogar.png` | las cinco tabs con **Actividad** · el asistente · «Ponte al día» |
 | **11** | expediente de la mascota | `11-expediente-mascota.png` | a dónde aterriza «Ver expediente» |
 | — | empujada | `07-empujada-sin-barra.png` | **sin barra de tabs** (firma de la mesa) |
+| 🪦 | onboarding | `06b-onboarding-roto.png` | **la pantalla que se enterró** — se conserva como evidencia de por qué |
 
-### ⑫bis · 00 · por qué sigue sin captura, y el protagonista sí está montado
+### ⑫bis · 00 · el protagonista está montado y no se deja fotografiar quieto
 
-**El tamaño protagonista YA ESTÁ MONTADO** (`<IsotipoV5 sobre="oscuro" tamano="protagonista" />`)
-— llegó con el merge de `a040375d`, medido: `protagonista` ×3 en `Marca.tsx`.
-**Lo que no se pudo es fotografiarlo**: intentado con ráfaga sin pausa, en la
-segunda captura la app ya estaba en 01. *El splash sale en el acto cuando la
-sesión resuelve, que es lo que el código hace y lo que la pieza declara.*
-⇒ **queda como lo único del lote sin evidencia visual, y se dice.**
-
-### ⑫ter · 06 · el hogar **vacío** no existe en el camino real — y eso es un hallazgo, no un hueco
-
-El encargo pide «06 vacío». **No se pudo capturar, y la razón no es un bloqueo:
-es que ese estado no está en el recorrido.** Medido hoy: una cuenta recién
-confirmada **sin familia** la manda el router a **`/onboarding`**, no a `/hogar`
-— y el onboarding sale directo al alta. *El hogar sin mascota sólo sería
-alcanzable si alguien abandonara el alta a mitad.*
-
-⇒ **la hoja entrega `06-shell-hogar.png` con Lolo ya creado**, que es el estado
-real después del alta. **Si la mesa quiere el vacío como pantalla, hay que
-decidir que exista** — hoy el producto no lo ofrece.
-
-### ⑫quater · 🔴 EL DEFECTO QUE ENCONTRÓ ESTE RECORRIDO — la pantalla de onboarding está rota
-
-`06b-onboarding-roto.png`. **Está en el camino de TODA cuenta nueva** — es lo
-primero que ve alguien que acaba de confirmar su correo. Lo que muestra:
-
-- el título **choca contra la barra de estado** (sin aire superior);
-- el **engranaje flotante queda encima del título**;
-- **dos barras blancas vacías** donde debería haber contenido;
-- los glifos (lápiz, corazón) **flotan fuera de su caja**;
-- un **hueco vertical enorme** entre las dos opciones.
-
-**No la toqué**, y digo por qué: **no es de este lote** —el encargo son 00–10 más
-el alta— y curarla a esta altura sería ensanchar el lote sin firma. *Pero está en
-el camino crítico de la primera impresión, así que va con captura y no como nota.*
-**Va al buzón como pedido de lote propio.**
-
-### Las cuatro tareas del lote 3d
-
-| # | qué | estado |
-|--:|---|---|
-| 1 | 00 con el isotipo protagonista | ✅ **montado** (por fracción de ancho, sin número en la pantalla) · ⚠️ **sin captura**, §⑫bis |
-| 2 | `BotonMarcaAjena` en 03 y 05 | ✅ **hecho y visto en el aparato**: Google con su asset oficial, **Apple devuelve `null` y no dibuja** — montado **sin `if`**, como firmó la mesa |
-| 3 | 05b «Revisa tu correo» | ✅ **nace** · 🔴 **y cambió de forma a mitad, por firma tuya**: ver §⑬bis |
-| 4 | cuenta de prueba de punta a punta | ✅ **CORRIDA ENTERA con cuenta real** · ⚠️ con dos asteriscos: **00 sin captura** y **06 vacío no existe** |
+`tamano="protagonista"` está en el código y **se ve en el GIF**. Lo que no hay
+es una captura fija: el splash sale en el acto cuando la sesión resuelve. *Su
+brevedad no es un hueco de trabajo — es lo que §⑭ mide y declara.*
 
 ---
 
 ## ⑬ ✅ `D-1098` — LA CAUSA, MEDIDA. No era el resolvedor, ni el receptor, ni el servidor
 
-Tres vueltas buscaron la causa en el camino de la llamada. **Estaba un piso más
-abajo, en una primitiva del runtime.** Sonda dentro de 05, antes del motor:
+Sonda dentro de 05, antes del motor:
 
 ```
 [D1098] crypto=object  getRandomValues=undefined  subtle=undefined
-        TextEncoder=function  btoa=function
 [D1098] crypto own=randomUUID   randomUUID=function
-[D1098] crypto.getRandomValues(new Uint32Array(4))
-        → TypeError: undefined is not a function
+[D1098] crypto.getRandomValues(new Uint32Array(4))  → TypeError
 ```
 
-⇒ **Hermes define `crypto` con UNA sola propiedad: `randomUUID`.**
+**Hermes define `crypto` con UNA sola propiedad.** `auth-js` guarda con
+`if (typeof crypto === 'undefined')` —pregunta por el OBJETO, no por el
+MÉTODO— así que su fallback nunca entra. Ese camino lo toma `signUp` **sólo
+porque el cliente declara `flowType: 'pkce'`** (puesto para Google);
+`signInWithPassword` no lo toca. *Ésa es toda la diferencia, y explica las tres
+vueltas: cada una miró la mitad que era igual en los dos.*
 
-Y `auth-js` guarda así: `if (typeof crypto === 'undefined') { …fallback… }` y
-después llama `crypto.getRandomValues(...)`. **El guard pregunta por el OBJETO,
-no por el MÉTODO** — y acá el objeto sí está, así que el fallback nunca entra.
+**La medición que NO sirvió, declarada:** `strings` sobre el `.hbc` dio 0 para
+`signUp` — **y también da 0 para `signInWithPassword`, que funciona**. No es una
+ausencia: es un instrumento ciego. No entra como evidencia.
 
-**Ese camino lo toma `signUp` sólo porque el cliente declara `flowType: 'pkce'`**
-(puesto para que funcione Google). **`signInWithPassword` no toca PKCE.**
-*Ésa es toda la diferencia entre el que funciona y el que no* — y explica las
-tres vueltas: cada una miró la mitad que era igual en los dos.
+**El puente** (`lib/crypto-getrandomvalues.ts`) deriva entropía de
+`crypto.randomUUID()`, criptográficamente aleatorio por spec; cero
+`Math.random()`. Va como **import por efecto y arriba de `@/lib/api`** porque
+los imports se izan — *lo escribí mal la primera vez, con un comentario que
+afirmaba lo contrario, y compilaba igual*. Lo definitivo es el polyfill nativo,
+que no viaja por OTA: queda para A en el buzón, con el residuo declarado (el
+desafío PKCE viaja en `plain`, no en `s256`).
 
-### La medición que NO sirvió, declarada en vez de publicada
+## ⑬bis · 05b pasó de enlace a CÓDIGO, por firma del founder
 
-Sondé el `.hbc` con `strings | grep -x signUp` → **0**. **Ese cero no prueba
-nada**: `signInWithPassword`, que demostrablemente funciona, **también da 0**.
-*No es una ausencia: es un instrumento ciego contra bytecode Hermes.*
-**Se declara no concluyente y no entra como evidencia.**
+La mesa la especificó con «Ya lo confirmé» —diseñada para un enlace—. Dos cosas
+la corrigieron el mismo día: **A midió `D-1100`** (el enlace abre el navegador)
+y **la firma:** *«el correo lo validamos con código no con enlace»*.
 
-### Lo que monté, y es un PUENTE
+⇒ «Ya lo confirmé» se retira con su razón: **con código, mirar la sesión no
+puede servir** —la sesión la crea el canje, y el canje ocurre en la pantalla—.
+*Habría dicho «todavía no» para siempre, con cara de funcionar.* Y así esquiva
+`D-1100` entero: con código nunca se sale de la app.
 
-`apps/cliente/src/lib/crypto-getrandomvalues.ts` — polyfill derivado de
-`crypto.randomUUID()`, **criptográficamente aleatorio por spec**; se descartan
-los nibbles fijos y el resto se usa como bytes. **Cero `Math.random()`**.
-Va como **import por efecto y arriba de `@/lib/api`** porque los imports se
-izan: *una llamada escrita entre medio correría después de que `initApi` cree el
-cliente, y no curaría nada.* **Lo escribí mal la primera vez y el comentario
-afirmaba lo contrario; queda dicho porque compilaba igual.**
+**Hoy monta `CampoCodigo`**, la pieza de la casa: ocho cajas, «Pegar», saneo a
+dígitos y el pie con `liveRegion`. Antes componía un `Campo` genérico — *estaba
+fabricando un campo de código al lado del que ya existía.*
 
-⚠️ **Es puente, no destino:** lo correcto es el polyfill nativo, que **no viaja
-por OTA**. Y con el puente `auth-js` avisa que el desafío PKCE viaja en `plain`
-y no en `s256`, porque `crypto.subtle` tampoco existe. **Todo eso es de A**, y
-está en `docs/loop/buzon/S116-C-para-A-D1098-la-causa-medida.md` con su decisión
-a tomar.
+### Dos defectos que destaparon las capturas de 05b
 
----
-
-## ⑬bis · 🔴 05b CAMBIÓ DE FORMA A MITAD DEL LOTE, por firma tuya
-
-La mesa la especificó con **«Ya lo confirmé»**, un botón que vuelve a mirar la
-sesión — o sea, diseñada para un **enlace**. Dos cosas la corrigieron el mismo día:
-
-1. **A midió `D-1100`**: el enlace **abre el navegador**, no la app (sin
-   `intentFilters`, sin `associatedDomains`, sin `emailRedirectTo`).
-2. **Tu firma, verbatim:** *«el correo lo validamos con código no con enlace».*
-
-⇒ **«Ya lo confirmé» se retira con su razón medida:** con código, mirar la
-sesión **no puede servir** — no hay nada que mirar, porque la sesión la crea el
-canje y el canje ocurre en la pantalla. *Habría dicho «todavía no» para siempre,
-con cara de estar funcionando.*
-
-**05b hoy:** el campo del código es el acto de la pantalla, sobre
-`confirmarAltaConCodigo` (que ya existía y además registra el consentimiento,
-porque `verifyOtp` devuelve sesión). **Y esto esquiva `D-1100` entero: con
-código nunca se sale de la app.**
-
-### El defecto que la propia captura destapó — el `+` del correo
-
-05b mostraba `demo-prestador s116c48143@epetplace.dev`: **el `+` se había
-convertido en espacio.** En una query string el `+` **significa** espacio, así
-que el decodificador hizo su trabajo y el dato llegó roto. *No falla, no lanza,
-no rompe el tipo: pinta una dirección verosímil y equivocada, y la persona la lee
-como un hecho.* Curado con una frontera única —`apps/cliente/src/lib/auth/correo-en-ruta.ts`—
-porque **son tres saltos** (05→05b, 05b→05, reenvío) y *una regla que hay que
-acordarse de aplicar en tres lugares es una que alguien va a olvidar en el cuarto.*
+1. **El `+` del correo llegaba como espacio.** En una query string el `+`
+   **significa** espacio: el decodificador hizo su trabajo y el dato llegó roto.
+   *No falla, no lanza — pinta una dirección verosímil y equivocada.* Curado con
+   frontera única (`lib/auth/correo-en-ruta.ts`): son **tres saltos**, y *una
+   regla que hay que aplicar en tres lugares se olvida en el cuarto.*
+2. **El punto final quedaba huérfano al principio de la línea siguiente**,
+   porque el correo es una palabra que no parte. Curado partiendo la frase:
+   primero a dónde fue, después qué hacer.
 
 ---
 
-## ⑭ LA VARA PARA 05b — las diez preguntas
+## ⑬ter · 🔴 EL PEOR DEFECTO DE ESTE LOTE, Y LO CAUSÉ YO: 03 SE QUEDÓ SIN «ENTRAR»
+
+**Nadie podía iniciar sesión con correo y contraseña.** El CTA primario de 03
+**lo borré en `5fc07ee4`** —mi lote 3— al montar la fila social: saqué el bloque
+viejo de botones y traje sólo los de marca ajena.
+
+**Medido contra el objeto:** en `23be4864` (antes de mi lote) el botón vivía en
+`login.tsx:249-253`; desde `5fc07ee4`, `entrar()` quedó **sin un solo
+consumidor**.
+
+### Por qué sobrevivió TRES lotes con capturas de 03 en la hoja
+
+Porque **cada verificación en el aparato creaba una cuenta nueva**. El camino
+que recorrí tres veces fue 05 → 05b; **jamás 03 → entrar**. *La pantalla se
+fotografió tres veces y nadie la usó para lo que existe* — el hueco salía en la
+captura como un espacio vacío y se leía como aire.
+
+**Lo encontró el recorrido de HOY, y sólo porque hizo falta entrar con una
+cuenta que ya existía.** ⚠️ *Ningún gate podía verlo: un botón que falta no
+rompe el typecheck, no dispara `verify:diseno` y deja una pantalla tranquila.*
+
+**La lección, que es de método y no de este botón: una pantalla no está
+verificada porque se la haya fotografiado — está verificada cuando se la usó
+para lo que existe.** Mis once capturas eran ciertas y ninguna probaba que 03
+funcionara.
+
+### Y de paso, el camino que faltaba
+
+Quien entraba con una cuenta sin confirmar recibía *«Falta confirmar tu email»*
+**y ningún lugar a donde ir**. Hoy 03 lo lleva a 05b con su correo. *Es la
+Ley 17.5 al revés: un estado que dice qué pasa y no ofrece el acto que lo
+resuelve.*
+
+---
+
+## ⑭ EL MOVIMIENTO — qué del encargo está construido, medido pieza por pieza
+
+> **Todo lo de esta tabla se midió en la FUENTE y se verificó en el emulador.**
+> Los GIF son del emulador propio, a 15 fps.
+
+| # | lo que pide el encargo | estado | evidencia |
+|--:|---|:-:|---|
+| 1 | 00 · la nariz se asienta | ✅ **ya estaba** | se ve creciendo en `mov-00-…gif` |
+| 2 | 00 · el halo | ✅ **ya estaba** | ⚠️ **casi no se lee**: es `magentaLuz` al 18 % sobre magenta |
+| 3 | 00 · personajes que **entran escalonados** | 🆕 **NO estaba — construido** | la cabecera lo prometía desde el lote 3 **y el render los dibujaba los seis de una** |
+| 4 | 00 · rotan con fundido cada 3 s | ✅ **ya estaba** | ⚠️ **nunca se llega a ver** (abajo) |
+| 5 | 00 → 01 · el viaje de la nariz | 🆕 **NO estaba — construido** | el logo de 01 entra grande y bajo y se asienta |
+| 6 | 01 · entrada escalonada | ✅ **ya estaba** | `Entrada` con `orden={0..3}` |
+| 7 | 02 · entrada escalonada | 🆕 **NO estaba — construido** | las tres piezas aparecían juntas y de golpe |
+| 8 | 02 · deslizado de las tarjetas | ✅ **ya estaba** | `pagingEnabled` — se ve en el GIF |
+
+### Los tiempos, ahora por token
+
+⏪ 00 tenía **cinco números tecleados** (`420`, `380`, `600`, `500`) y el bezier
+`(0.32, 0.72, 0, 1)` **escrito dos veces a mano** — que **es**
+`motion.marca.aperturaBezier`. *Dos copias de la misma curva no se ven distintas
+hoy: se ven distintas el día que alguien afine una.* Hoy: `motion.marca.aperturaMs`,
+`motion.marca.aperturaBezier` y `motion.duration.grande`.
+
+🔴 **Y `R51` me cazó en el camino**: puse `legacy_verySlow` (600) para el halo.
+El vocabulario del movimiento es CERRADO —150 · 300 · 520— y los legados existen
+para morir, no para estrenarse. Va `grande`.
+
+### 🔴 La corrección que hizo falta en el router, y es la que destrabó el viaje
+
+El viaje **estaba construido y no se leía**: el deslizado horizontal del Stack
+se llevaba la marca por la izquierda mientras 01 entraba por la derecha. Medido
+en el emulador, fotograma a fotograma.
+
+⇒ **00 → 01 pasa a FUNDIDO**, declarado **en el router** (la navegación se
+declara una vez). Y además el deslizado ahí **mentía**: decía «avanzaste un
+paso», y 00 no es un paso del que se vuelva.
+
+### ⚠️ LO QUE LA MEDICIÓN DICE Y NO ES CÓMODO: la coreografía del splash casi no se ve
+
+El splash **dura menos de un segundo** en el recorrido real. En ese tiempo:
+entra el primer personaje, la nariz empieza a crecer — **y se acabó**. El halo
+no llega a leerse, los otros cinco personajes no alcanzan a entrar, y la
+rotación de tres segundos **no ocurre nunca**.
+
+**No es un defecto de la construcción: es la consecuencia de una decisión que la
+propia pantalla firma** —*«la salida no espera a la vuelta: hacer esperar a
+alguien para terminar una animación es cobrarle el adorno»*—. La coreografía es
+para el arranque lento, y sólo se ve entera cuando la red tarda.
+
+**Lo digo en vez de entregar un GIF que la muestre completa retrasando el
+arranque a propósito**: eso fotografiaría una pantalla que nadie ve. *Si la mesa
+quiere que se vea, lo que hay que decidir es un piso de permanencia — y eso
+cuesta tiempo de la persona, no código.*
+
+---
+
+## ⑮ LA VARA PARA 05b — las diez preguntas
 
 | # | pregunta | 05b | evidencia |
 |--:|---|:-:|---|
-| 1 | una sola cabecera | **sí** | no lleva cabecera: **flecha sola sobre lienzo**, como firmó la mesa. Y **no es `FlechaVolver`**: esa pieza pinta con `text.onGradient` y sobre lienzo habría salido **invisible sin que nada fallara**. Va `Chevron`, que es lo que el catálogo nombra |
-| 2 | tabs solo en raíz | **sí** | es pantalla empujada: sin barra |
+| 1 | una sola cabecera | **sí** | sin cabecera: **flecha sola sobre lienzo**, firma de la mesa. Y **no es `FlechaVolver`**: esa pieza pinta con `text.onGradient` y sobre lienzo saldría **invisible sin que nada fallara**. Va `Chevron` |
+| 2 | tabs solo en raíz | **sí** | pantalla empujada: sin barra |
 | 3 | un acento | **sí** | una sola primaria («Confirmar»); reenviar y cambiar correo son `ghost` |
-| 4 | Baloo arriba, PJS abajo | **sí** | «Revisa tu correo» en `titulo`, el resto en `cuerpo`/`antetitulo` — resuelto por `ESCALA_V5`, sin una línea de fuente en la pantalla |
-| 5 | nada local | **sí** | `Icono` · `Texto` · `Celda` · `Campo` · `Boton` · `Chevron` · `spacing`. **Cero color, tamaño o tiempo literal** |
-| 6 | plata y fecha por su riel | **n/a** | no muestra ninguna de las dos |
-| 7 | estado con palabra | **sí** | el rebote del código lo dice el motor con **una sola voz** para «malo» y «vencido» — a propósito: distinguirlos le confirma a un extraño que ese correo tiene cuenta |
-| 8 | vacío honesto | **sí** | sin código el CTA está apagado **y dice por qué** (`razonDeshabilitado`); sin correo en la ruta, vuelve a 05 en vez de quedarse muda |
-| 9 | movimiento que dice algo | **sí** | sólo la cuenta regresiva del reenvío, que informa; cero animación decorativa |
-| 10 | voz | **sí** | tuteo neutro, es/en en paridad. **Cero vocabulario de motor**: no dice «sesión», «token» ni «OTP» |
+| 4 | Baloo arriba, PJS abajo | **sí** | resuelto por `ESCALA_V5`, sin una línea de fuente en la pantalla |
+| 5 | nada local | **sí** | `Icono` · `Texto` · `Celda` · **`CampoCodigo`** · `Boton` · `Chevron` · `spacing`. Cero color, tamaño o tiempo literal |
+| 6 | plata y fecha por su riel | **n/a** | no muestra ninguna |
+| 7 | estado con palabra | **sí** | el rebote lo dice el motor con **una sola voz** para «malo» y «vencido» — a propósito: distinguirlos le confirma a un extraño que ese correo tiene cuenta |
+| 8 | vacío honesto | **sí** | sin código el CTA está apagado **y dice por qué**; sin correo en la ruta vuelve a 05 en vez de quedarse muda |
+| 9 | movimiento que dice algo | **sí** | sólo la cuenta regresiva del reenvío, que informa |
+| 10 | voz | **sí** | tuteo neutro, es/en en paridad. Cero vocabulario de motor: no dice «sesión», «token» ni «OTP» |
 
 **Cero «no» ⇒ ninguna ficha.**
 
 ---
+
+## ⑯ LO QUE QUEDA ABIERTO, con dueño
+
+- **Los glifos de oficio de B** — entregados en `pista/s116-b-03` (`e01bb461`),
+  **que no está en `main`**. *No mergeo una rama que la mesa no nombró.* En
+  cuanto entre, se montan donde el censo de B diga y se captura.
+- **La pantalla de onboarding enterrada** — su captura queda como evidencia;
+  el buzón a la mesa explica por qué murió en vez de curarse.
+- **`06-hogar-sin-mascota`**: «Conoce a los que están esper…» **trunca**. Es de
+  la celda, no de este lote; va dicho porque la captura lo muestra.

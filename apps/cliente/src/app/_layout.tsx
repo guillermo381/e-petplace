@@ -210,7 +210,29 @@ export default function RootLayout() {
                   gestureEnabled: true,
                   gestureDirection: 'horizontal',
                 }}
-              />
+              >
+                {/* 🔴 **LA ÚNICA EXCEPCIÓN AL DESLIZADO, declarada acá porque
+                    la navegación se declara UNA vez.**
+
+                    00 → 01 va en FUNDIDO. El deslizado horizontal **tapaba el
+                    viaje de la nariz**: medido en el emulador fotograma a
+                    fotograma —la marca del splash se iba por la izquierda
+                    mientras 01 entraba por la derecha—, así que el gesto de
+                    continuidad *no se podía leer aunque estuviera construido*.
+
+                    Y el deslizado además **mentía**: dice «avanzaste un paso»,
+                    y 00 no es un paso del que se vuelva — es la marca mientras
+                    se resuelve la sesión.
+
+                    ⚠️ **Va en `bienvenida` y no en `index`** porque lo que se
+                    anima es la pantalla que ENTRA.
+
+                    ⚠️ **Y se midió que declarar un hijo acá NO deja fuera al
+                    resto de las rutas** — lo sospeché y lo probé quitándolo:
+                    el síntoma que me hizo dudar era el teclado comiéndose los
+                    toques, no el router. *Casi le echo la culpa a la cura.* */}
+                <Stack.Screen name="bienvenida" options={{ animation: 'fade' }} />
+              </Stack>
             </GateBiometrico>
           </AvisoProvider>
         </EpetThemeProvider>
