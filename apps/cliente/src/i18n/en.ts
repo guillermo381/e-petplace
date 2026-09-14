@@ -3500,6 +3500,8 @@ export const clienteEn = {
 
   facturacionCheckout: {
     facturaA: 'Invoice to',
+    // S116-C lote 6 — the way back from the editor.
+    dejarGuardados: 'Keep the saved details',
   },
 
   correoFactura: {

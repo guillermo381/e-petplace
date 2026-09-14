@@ -58,6 +58,37 @@ const conteo = new Map<string, ConteoTab>()
 const profundidadPrevia = new Map<string, number>()
 const oyentes = new Set<() => void>()
 
+/* 🔴 **S116-C lote 6 · EL AVISO SALE DEL RENDER, y por eso se difiere.**
+ *
+ * ⏪ Era `for (const o of oyentes) o()` **sincrónico**, y el shell llama a
+ * `registrarProfundidad` **dentro del cuerpo del `tabBar`** —o sea, durante un
+ * render—. El oyente es el `setState` del pie de Cuenta ⇒ React tiraba
+ * *«Cannot update a component (`ConteoDeMontajes`) while rendering a different
+ * component»*, un toast rojo sobre TODA captura de la sesión.
+ *
+ * **La cura va acá y no en el llamador, y es una decisión:** la razón de ser de
+ * este módulo es *medir las cinco tabs sin tocar ninguna de las 106 pantallas*.
+ * Un contrato que sólo es seguro si el llamador se acuerda de no invocarlo en
+ * un render **no es seguro: es una convención**, y la próxima superficie que lo
+ * monte no la va a saber. *El que avisa es el que tiene que elegir cuándo.*
+ *
+ * `queueMicrotask` y no `setTimeout(0)`: se ejecuta apenas termina el trabajo
+ * en curso —o sea en el mismo frame— así que el número no se atrasa; lo único
+ * que cambia es que ya no cae **adentro** del render de otro.
+ *
+ * Y se **COALESCE**: el shell registra las cinco tabs en un `for`, así que sin
+ * esto habría cinco avisos por render. *Cinco redibujos para mostrar el mismo
+ * estado final es el ruido que este instrumento vino a medir.* */
+let avisoEnCola = false
+function avisar(): void {
+  if (avisoEnCola) return
+  avisoEnCola = true
+  queueMicrotask(() => {
+    avisoEnCola = false
+    for (const o of oyentes) o()
+  })
+}
+
 function vacio(): ConteoTab {
   return { montajes: 0, desmontajes: 0, vivas: 0, pico: 0 }
 }
@@ -90,7 +121,7 @@ export function registrarProfundidad(tab: string, profundidad: number): void {
         `montajes=${c.montajes} · desmontajes=${c.desmontajes}`,
     )
   }
-  for (const o of oyentes) o()
+  avisar()
 }
 
 /** Los toques de la barra, que son el OTRO número (ver cabecera). */
@@ -100,7 +131,7 @@ export function registrarToqueDeTab(tab: string): void {
   const n = (toques.get(tab) ?? 0) + 1
   toques.set(tab, n)
   if (__DEV__) console.log(`${PREFIJO_MONTAJES} toque · ${tab} · ${n}`)
-  for (const o of oyentes) o()
+  avisar()
 }
 
 export function leerConteos(): { tab: string; conteo: ConteoTab; toques: number }[] {

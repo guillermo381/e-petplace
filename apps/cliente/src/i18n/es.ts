@@ -4826,6 +4826,9 @@ export const clienteEs = {
      de una pieza vive adentro de la pieza (Ley 3). */
   facturacionCheckout: {
     facturaA: 'Factura a',
+    /* S116-C lote 6 — la vuelta desde el editor. Nombra el RESULTADO, no el
+       gesto: «Cancelar» describe el botón; esto describe lo que queda. */
+    dejarGuardados: 'Dejar los datos guardados',
     /* ☠️ **`cambiar` MURIÓ (S116-C lote 6 · punto ⑤).** Era la etiqueta del
        `Boton compacto` al costado de la línea; la línea entera pasó a ser la
        acción (`CeldaNavegacion` con chevrón) y el botón se retiró **en el

@@ -59,6 +59,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import {
+  Boton,
   Campo,
   CeldaNavegacion,
   esCorreoValido,
@@ -194,11 +195,13 @@ export function SeccionFacturacion({
   const [editando, setEditando] = useState(false);
   const [modo, setModo] = useState<ModoFacturacion>(perfil ? 'misDatos' : 'consumidorFinal');
   const [guardar, setGuardar] = useState(true);
-  const [datos, setDatos] = useState<DatosIdentificacion>(
-    /* El perfil precargado, cuando se puede representar. `consumidor_final` vive
-       en `TaxProfile` y NO en `TipoIdentificacion`: ahí significa «no declaró
-       identificación propia» ⇒ el formulario arranca en blanco, que es la
-       verdad. */
+  /* El perfil precargado, cuando se puede representar. `consumidor_final` vive
+     en `TaxProfile` y NO en `TipoIdentificacion`: ahí significa «no declaró
+     identificación propia» ⇒ el formulario arranca en blanco, que es la verdad.
+     🔴 **Sale del `useState` a una constante porque ahora tiene DOS lectores**:
+     el valor de entrada y la vuelta desde el editor. *Dos copias de «el estado
+     inicial» divergen en el primer cambio que toque una sola.* */
+  const datosDelPerfil: DatosIdentificacion =
     perfil && perfil.tipoIdentificacion !== 'consumidor_final'
       ? {
           tipo: perfil.tipoIdentificacion,
@@ -207,8 +210,8 @@ export function SeccionFacturacion({
           direccion: perfil.direccion ?? '',
           email: perfil.email ?? '',
         }
-      : VACIO,
-  );
+      : VACIO;
+  const [datos, setDatos] = useState<DatosIdentificacion>(datosDelPerfil);
 
   /* `tocado` separa «todavía no lo escribió» de «lo escribió mal»: sin él el
      campo nace en rojo al montarse vacío (mismo criterio que la pieza de B). */
@@ -389,6 +392,39 @@ export function SeccionFacturacion({
         acento="control"
       />
     </SelectorFacturacion>
+    {/* 🔴 **S116-C lote 6 · LA VUELTA — firma de la mesa.** `editando` sólo iba
+        a `true`: una vez abierto el editor, **la única salida era abandonar la
+        pantalla**. *Una puerta que se abre y no se cierra no es una puerta: es
+        un cambio de estado que la persona no pidió y no puede deshacer.*
+
+        **Y «volver» tiene que RESTAURAR, no sólo colapsar.** La sección avisa
+        al padre en cada tecla (`avisar`), así que un colapso a secas dejaría la
+        línea compacta mostrando el perfil VIEJO mientras el checkout ya tiene
+        el dato NUEVO a medio escribir. *Ésa es la clase de mentira que no falla
+        y se cobra en la factura.* ⇒ se reponen los tres estados a su valor de
+        entrada **y se avisa con ellos**.
+
+        **Sólo existe con `perfil`**, porque sólo ahí hay una línea compacta a
+        la que volver: en una primera compra el selector ES la pantalla y esto
+        sería una salida a ninguna parte.
+
+        La voz nombra lo que pasa —quedarse con lo guardado—, no el gesto.
+        *«Cancelar» describe el botón; «Dejar los datos guardados» describe el
+        resultado, que es lo que la persona está decidiendo.* */}
+    {perfil ? (
+      <Boton
+        variante="ghost"
+        bloque
+        etiqueta={t('facturacionCheckout.dejarGuardados')}
+        onPress={() => {
+          setModo('misDatos');
+          setGuardar(true);
+          setDatos(datosDelPerfil);
+          setEditando(false);
+          onCambiar({ modo: 'misDatos', datos: datosDelPerfil, guardar: true });
+        }}
+      />
+    ) : null}
     </View>
   );
 }
