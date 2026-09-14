@@ -13,4 +13,6 @@
 9. **Movimiento que dice algo.** ¿Cada animación pasa L-c (si se quita, la pantalla dice menos)? ¿Las transiciones son las del router, no propias?
 10. **Voz.** ¿Tuteo neutro, sin género, sin motivo técnico, con las tres voces de «no cargó» donde corresponde?
 
+11. **Se usó, no se fotografió.** ¿La pantalla se usó para lo que existe —se entró, se pagó, se creó— y no solo se fotografió? — **⊳ firma de la mesa (13-sep-2026).** *Nace de un caso medido: el CTA «Entrar» de la pantalla 03 sobrevivió **tres lotes borrado**, con capturas **verdes** en cada uno. Las capturas mostraban la pantalla; nadie la usó.* **Una pantalla fotografiada no es una pantalla probada**, y la diferencia no se ve en la imagen: se ve al tocarla.
+
 Y una pregunta de cierre por lote, no por pantalla: **¿bajó el conteo de piezas locales de `apps/cliente`?** (`verify:piezas-locales`). Si no bajó, el lote absorbió cero y se dice por qué.

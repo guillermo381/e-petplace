@@ -34877,3 +34877,45 @@ El polyfill **nativo** (`react-native-get-random-values` o `expo-crypto`), que t
 *Por qué redirige y no se borra: una ruta que se borra rompe todo enlace viejo que apunte ahí —un push, un correo, un back del sistema— y esos no se pueden censar.* **Redirigir cuesta una línea y no deja ningún camino muerto.**
 
 **☠️ MUERTE:** `/onboarding` redirige a la pantalla nueva y el archivo viejo se retira con lápida.
+
+---
+
+## `D-1103` 🟠 — LA ESTRUCTURA DE PANTALLA CAMBIA: **FONDO CIRUELA + HOJA CON ESQUINAS SUPERIORES REDONDEADAS**
+
+**Estado:** ABIERTA · **Dueño: B la pieza · C el montaje.**
+**Origen:** firma de la mesa, 13-sep-2026.
+
+La pantalla deja de ser **una superficie plana con una cabecera encima** y pasa a ser **dos planos**: el **fondo ciruela** de la casa, y una **hoja** que se apoya sobre él con **las esquinas superiores redondeadas**. *El contenido deja de empezar en el borde: empieza donde la hoja empieza, y el ciruela que asoma arriba es lo que la sostiene.*
+
+### Por qué es de los dos y en ese orden
+
+**La pieza es de B** —la hoja con su radio, su elevación y su relación con la cabecera es una pieza del catálogo v5, no un `View` con `borderRadius` en cada pantalla— **y el montaje es de C**. *Si esto se resuelve pantalla por pantalla, en tres lotes hay cuatro radios distintos y ninguno igual: es exactamente lo que `verify:piezas-locales` existe para impedir.*
+
+⇒ **B la entrega al catálogo; C la monta.** Y lo que falte se pide por buzón, no se dibuja — `LETRA_REDISENO_S116` §3.
+
+### Lo que esto toca y conviene saber antes de empezar
+
+La **cabecera** (las dos variantes, raíz y empujada), el **fondo de pantalla** de todas las rutas, y **la relación con la barra de tabs** en las raíces. *No es un cambio de color: es un cambio de cómo está construida la pantalla*, y por eso entra como ficha y no como ajuste.
+
+**☠️ MUERTE:** la hoja es una pieza del catálogo v5, montada en las pantallas del lote, y `verify:piezas-locales` no subió por ella.
+
+---
+
+## `D-1104` 🟢 — EL SPLASH GANA UN PISO DE PERMANENCIA DE DOS SEGUNDOS, **SÓLO EN LA PRIMERA APERTURA**
+
+**Estado:** ABIERTA · **Dueño: C.**
+**Origen:** firma de la mesa, 13-sep-2026.
+
+El splash **no se va antes de dos segundos** la primera vez que la app se abre. *Hoy, cuando todo carga rápido, la marca aparece y desaparece antes de que alguien la registre — y esa es justamente la apertura que más importa: la primera.*
+
+### 🔴 SÓLO EN LA PRIMERA APERTURA, y esa es la mitad que hace que la decisión sea buena
+
+*Un piso en cada arranque es una app que se siente lenta a partir del segundo día.* **La primera vez se está presentando; de ahí en más, estorba.**
+
+### ⚠️ EL VALOR VA POR CONFIG, NO LITERAL — y se pide explícitamente
+
+**Los dos segundos son un número de hoy, no una ley.** Va como constante nombrada, en un solo lugar, para que moverlo sea cambiar un valor y no buscar un `2000` entre el código. *Un número mágico escrito en el medio de un efecto es un número que nadie se anima a tocar y que nadie encuentra cuando la mesa lo quiere mover.*
+
+📌 **Y lo que el piso NO puede hacer: tapar un error.** Si la app falla mientras el splash espera, el piso no puede retrasar el aviso — la permanencia es para la marca, no para esconder lo que salió mal.
+
+**☠️ MUERTE:** la primera apertura muestra la marca dos segundos, la segunda no, y el valor vive en una constante.
