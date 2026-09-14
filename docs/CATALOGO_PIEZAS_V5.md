@@ -24,13 +24,26 @@
   fondo={<Cabecera variante="raiz" presentacion="fondo" titulo={…} />}
   costura={<FilaAccionesCostura accesos={[…]} />}
   arranque={150}
+  pie={<Boton … />}            {/* o <OndaAcceso …/> con materialDelPie="sangrado" */}
 >
   {tu contenido}
 </HojaContenido>
 ```
 
+### 🔴 EL PIE FIJO — CUÁL SE USA CUÁNDO (S116-B, y **no son dos alternativas**)
+
+| la pantalla… | monta | por qué |
+|---|---|---|
+| tiene **hoja** (ciruela de fondo, contenido en la hoja) | **`HojaContenido` con `pie`** | el pie va en el slot. **`PantallaConPie` NO se envuelve alrededor**: serían **dos pies y dos reservas**, y la de afuera no sabe del scroll de adentro |
+| **no** tiene hoja (una pantalla de flujo, un formulario, una ficha) | **`PantallaConPie`** | sigue siendo suya; no cambió nada |
+| tiene hoja y el pie es la **onda** | `HojaContenido` con `pie` + **`materialDelPie="sangrado"`** | la onda tiene que llegar al filo: sin fondo de lienzo ni padding, y el inset lo absorbe ella |
+
+**El mecanismo es UNO (`pie-fijo.tsx`) y las dos piezas lo consumen.** Lleva adentro las tres curas que se pagaron con defectos de aparato: la **reserva medida** (el pie tapaba contenido en cinco pantallas), el **inset derivado** (se contaba dos veces adentro de `(tabs)`) y el **`box-none`** (el pie se comía el gesto en el tercio inferior). *Un segundo pie escrito a mano no tendría ninguna de las tres, porque no las pagó.*
+
+⚠️ **Consecuencia para `R53`:** la regla vigila pies fijos escritos a mano y hoy lleva **cuatro declarados**. Con el slot, esas pantallas dejan de necesitar la declaración — **pero la declaración muere cuando migran, no antes**: retirarla hoy pondría a `R53` en rojo sobre pantallas que todavía no cambiaron. *Migración y baja de baseline son el mismo acto.*
+
 ### `HojaContenido`
-- **props:** `fondo` · `costura` · `arranque` · `scroll` · `children`
+- **props:** `fondo` · `costura` · `arranque` · `scroll` · `children` · **`pie`** · **`materialDelPie`**
 - **tokens:** `radius.cabeceraV5` · `theme.bg.base` (el lienzo) · `theme.accent.gradient`
 - **consumidores:** 6
 - 🔴 **EL DEGRADADO LO PINTA ESTA PIEZA, no la `Cabecera`** — y no es un detalle de implementación: al scrollear *«el fondo se queda y su CONTENIDO se desvanece»*. **Si el degradado viniera dentro del nodo que se desvanece, se apagaría con él** y la pantalla quedaría blanca detrás de la hoja.
@@ -54,7 +67,9 @@
 - **exporta:** `ALTO_ONDA_ACCESO` — quien la monte al pie de una hoja que scrollea **tiene que reservarle el lugar**, igual que con los dos altos de `Cabecera`.
 - 🔴 **La ola es un `Path`, no un `borderRadius`:** un radio da un DOMO —simétrico, una sola inflexión— y *una ola tiene dos*. El `viewBox` de 100 con `preserveAspectRatio="none"` la estira con la pantalla en vez de repetirla.
 - 🔴 **La frase llega YA PARTIDA en dos líneas.** Dónde corta es una decisión de redacción; un `numberOfLines={2}` la tomaría por su cuenta con el ancho de cada teléfono.
-- 🔴 **El teclado: alto CONSTANTE + fundido, y hacen falta las dos mitades.** El alto fijo es lo que impide que se aplaste (una franja que mide un número no se comprime); el fundido es lo que impide que se vea salir. ⚠️ **Lo que la pieza no puede sola:** si la pantalla la mete en un reparto `flex`, el reparto es de la pantalla.
+- 🔴 **El teclado: alto constante + fundido + DEJAR DE PINTARSE.** Las dos primeras no alcanzaban — C midió **píxeles magenta a y≈1505-1510 con el teclado arriba**. *Una opacidad que llega a 0 no deja nada visible: o el fundido no corrió, o lo que se ve no es esta pieza.* La tercera cierra las dos puertas: **al terminar el fundido la onda deja de dibujarse**, y lo que no está dibujado no deja píxeles pase lo que pase con el listener. ⚠️ **Conserva su alto siempre, pintada o no:** si además se encogiera, el contenido de arriba saltaría — y *«no salta»* es de la misma orden que *«desaparece»*.
+- ⚠️ **Absorbe `insets.bottom` como padding, no como margen:** el magenta sangra hasta el filo y sólo el contenido se corre (Ley 8, precedente `Hoja`/`PantallaConPie`).
+- **Su lugar es el `pie` de `HojaContenido` con `materialDelPie="sangrado"`** (ver §⓪).
 - ⚠️ **La rueda no sortea:** orden fijo, así no puede repetir dos veces la misma cara — *que se lee como que se colgó*. Con **una sola especie no arranca**: no hay a dónde ir.
 - ⚠️ **Dice «la cara» y monta el personaje ENTERO, declarado:** recortar a ojo seis ilustraciones distintas daría seis encuadres distintos, y el que quede mal no se nota hasta que lo ve el founder. El recorte, si la mesa lo quiere, es del ilustrador.
 

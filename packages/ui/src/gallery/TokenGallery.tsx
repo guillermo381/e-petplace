@@ -3992,6 +3992,13 @@ function GaleriaInterna() {
             <HojaContenido
               fondo={<Cabecera variante="raiz" presentacion="fondo" antetitulo="SÁBADO 13" titulo="Hola, Guillermo" apoyo="Thor está al día." />}
               arranque={150}
+              /* 🔴 EL SLOT DE PIE, con la onda de material `sangrado` — y el
+                 campo de abajo está para LEVANTAR EL TECLADO: es la única
+                 forma de ver, en la galería, que la onda desaparece del
+                 todo y vuelve entera. *Sin un campo, esta sección probaría
+                 la mitad que no estaba rota.* */
+              pie={<OndaAcceso frase={['Mascotas', 'más felices']} lado="der" />}
+              materialDelPie="sangrado"
               costura={
                 <FilaAccionesCostura
                   accesos={[
@@ -4009,6 +4016,9 @@ function GaleriaInterna() {
                     <Texto variante="apoyo">Scrolleá: la hoja sube y el fondo se apaga detrás.</Texto>
                   </Tarjeta>
                 ))}
+                {/* Tocá acá para subir el teclado: la onda tiene que irse
+                    ENTERA (cero píxeles magenta) y volver al bajarlo. */}
+                <Campo label="Tocá para subir el teclado" placeholder="la onda se va entera y vuelve" />
               </View>
             </HojaContenido>
           </View>

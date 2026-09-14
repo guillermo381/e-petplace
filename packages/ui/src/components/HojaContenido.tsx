@@ -53,6 +53,7 @@ import Animated, {
 import { LinearGradient } from 'expo-linear-gradient'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { PieFijo, usePieFijo, type MaterialDelPie } from './pie-fijo'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
 import { useTheme } from '../ThemeProvider'
@@ -82,11 +83,28 @@ export interface HojaContenidoProps {
    *  pieza (ver arriba) y dejarla abierta permitiría el rebote que la
    *  orden prohíbe. */
   scroll?: Omit<ScrollViewProps, 'bounces' | 'overScrollMode' | 'onScroll'>
+  /** 🔴 **EL PIE FIJO (S116-B, firma de la mesa).** Lo que se queda abajo
+   *  mientras la hoja scrollea: el CTA de la pantalla, o la `OndaAcceso`.
+   *
+   *  **Reserva su propio lugar**: el scroll deja abajo el alto MEDIDO del
+   *  pie, no un número tecleado — el mecanismo es el de `pie-fijo.ts(x)` y
+   *  es el mismo que usa `PantallaConPie`, con sus tres curas adentro.
+   *
+   *  ⚠️ **Con este slot, una pantalla de hoja NO envuelve nada en
+   *  `PantallaConPie`**: serían dos pies y dos reservas. Cuál se usa cuándo
+   *  está escrito en el catálogo (§⓪). */
+  pie?: ReactNode
+  /** De qué está hecho el pie. `lienzo` (default) es el pie de controles;
+   *  `sangrado` es una franja que llega al filo de la pantalla — la onda.
+   *  *Cerrado a propósito: con un estilo libre cada pantalla volvería a
+   *  decidir el material.* */
+  materialDelPie?: MaterialDelPie
 }
 
-export function HojaContenido({ fondo, costura, arranque, children, scroll }: HojaContenidoProps) {
+export function HojaContenido({ fondo, costura, arranque, children, scroll, pie, materialDelPie }: HojaContenidoProps) {
   const { theme } = useTheme()
   const insets = useSafeAreaInsets()
+  const { contenedor, medirContenedor, medirPie, altoPie, insetFaltante } = usePieFijo()
   const sinMovimiento = useReducedMotion()
   const y = useSharedValue(0)
 
@@ -103,7 +121,7 @@ export function HojaContenido({ fondo, costura, arranque, children, scroll }: Ho
   }))
 
   return (
-    <View style={{ flex: 1 }}>
+    <View ref={contenedor} onLayout={medirContenedor} style={{ flex: 1 }}>
       {/* ① LA SUPERFICIE. El degradado del tema, a pantalla completa.
           Memorial resuelve plano solo —`gradients.memorialPlano` lleva el
           mismo color en los dos stops— así que acá no hay rama por tema. */}
@@ -140,7 +158,12 @@ export function HojaContenido({ fondo, costura, arranque, children, scroll }: Ho
             backgroundColor: theme.bg.base,
             borderTopLeftRadius: radius.cabeceraV5,
             borderTopRightRadius: radius.cabeceraV5,
-            paddingBottom: insets.bottom + spacing[6],
+            /* 🔴 **LA RESERVA DEL PIE — el alto MEDIDO, no una
+               estimación.** Sin esto, el pie se pinta encima de la última
+               fila y el contenido queda inalcanzable: es el defecto exacto
+               que `PantallaConPie` nació para matar, y acá entraría por la
+               puerta de al lado. */
+            paddingBottom: insets.bottom + spacing[6] + altoPie,
           }}
         >
           {/* ④ LA COSTURA. Los accesos van acá adentro y desplazados
@@ -153,6 +176,14 @@ export function HojaContenido({ fondo, costura, arranque, children, scroll }: Ho
           {children}
         </View>
       </Animated.ScrollView>
+
+      {/* ⑤ EL PIE. Fuera del scroll —se queda— y con `box-none`, así el
+          gesto pasa al scroll por el aire entre sus hijos. */}
+      {pie === undefined ? null : (
+        <PieFijo material={materialDelPie} insetFaltante={insetFaltante} onLayout={medirPie}>
+          {pie}
+        </PieFijo>
+      )}
     </View>
   )
 }
