@@ -117,7 +117,7 @@ export function PasoFoto({
               titulo={t('alta.paso4Titulo', { nombre })}
               onVolver={onAtras}
               etiquetaVolver={t('alta.volver')}
-              pasos={{ total: 3, actual: 2, etiqueta: t('alta.paso', { actual: 2, total: 3 }) }}
+              pasos={{ total: 3, actual: 1, etiqueta: t('alta.paso', { actual: 1, total: 3 }) }}
             />
           </View>
         }
