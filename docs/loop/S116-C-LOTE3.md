@@ -217,70 +217,179 @@ pnpm verify:voz-sin-hueco               → EXIT 0 · 8 (baseline 8)
 
 ---
 
-## ⑫ LA HOJA DE CAPTURAS — las once, en orden de flujo
+## ⑫ LA HOJA DE CAPTURAS — el recorrido ENTERO, en orden de flujo
 
-> **Todas sobre `origin/main` @ `2160fc4c` + esta rama.** Emulador `s114_C` (puerto **5578**, `adb -s` siempre), Metro en **8097** desde este worktree, binario **1.0.7**, `Android Bundled … (3093 modules)`.
-> **El recorrido se hace por el camino real**, ubicando cada control por su texto (`uiautomator`) — *un tap ciego que cae fuera abre los ajustes de Android y la captura sale de otra app; me pasó dos veces.*
+> **Lote 3d · 13-sep-2026.** Sobre `origin/main` @ `a040375d` + esta rama.
+> Emulador `s114_C` (**5578**, `adb -s` siempre) · Metro **8097** desde este worktree
+> (`Starting project at …/e-petplace-s116-c03/apps/cliente`) · binario **1.0.7** ·
+> **bundle fresco confirmado: `Android Bundled 8147ms … (3097 modules)`**.
+>
+> 🔴 **Cuenta REAL, creada desde la app y confirmada con el código del correo
+> del founder** (`guillo381+s116c2@gmail.com`). *No es un fixture: el correo
+> salió de verdad y el código volvió de verdad.*
 
 | # | pantalla | archivo | qué prueba |
 |--:|---|---|---|
-| **00** | splash | — | ⚠️ **sin captura, y su ausencia ES la evidencia** — sale en el acto (§⑫bis) |
-| **01** | propuesta | `01-propuesta.png` | logo **sin fondo negro** · «una vida.» **en rosa** · secundario blanco sobre ciruela |
+| **00** | splash | — | ⚠️ **sigue sin captura, y su ausencia ES la evidencia** (§⑫bis) |
+| **01** | propuesta | `01-propuesta.png` | logo sin fondo negro · «una vida.» en rosa |
 | **02** | beneficios · 1ª | `02-beneficios.png` | personaje, Baloo, puntos en ciruela, «Saltar» |
 | **02** | beneficios · 3ª | `02-beneficios-tercera.png` | el CTA aparece **sólo** en la última |
-| **03** | acceso | `03-acceso.png` | cabecera nueva · Google · **y la voz honesta del correo sin confirmar** (`D-1099`) |
-| **04** | recuperar | `04-recuperar.png` | candado, «QUÉ SIGUE» con sus tres pasos, vencimiento **sin número inventado** |
-| **05** | crear cuenta | `05-crear-cuenta.png` | ✅ **la fila social: «O REGÍSTRATE CON» + Google** · Apple fuera · datos reales cargados |
-| **06** | hogar | `06-shell-hogar.png` | **las cinco tabs con Actividad** · el asistente · «Ponte al día» ⚠️ **es el hogar POBLADO** (§⑫ter) |
-| **07** | datos básicos | `07-datos-basicos.png` | **barra 1/3** · el «Pez» con su cara · raza con autocompletado |
-| **08** | foto | `08-foto.png` | **barra 2/3** y cabecera nueva · la escalera de la cara |
-| **09** | carné | `09-carnet.png` | **barra 3/3** · marco, nota, «Omitir» y las dos salidas |
-| **10** | expediente creado | `10-expediente-creado.png` | el esqueleto **fuera** · el apoyo dice la verdad |
+| **03** | acceso | `03-acceso.png` | cabecera nueva · Google |
+| **04** | recuperar | `04-recuperar.png` | candado · «QUÉ SIGUE» · vencimiento sin número inventado |
+| **05** | crear cuenta | `05-crear-cuenta.png` | ✅ **`BotonMarcaAjena` con el logo OFICIAL de Google** · Apple **no dibuja nada** · datos reales |
+| **05b** | revisa tu correo | `05b-revisa-tu-correo.png` | 🆕 lienzo · flecha sola · círculo con glifo de correo · Baloo · «QUÉ SIGUE» · **el campo del código** · reenviar y cambiar correo en tinta apagada |
+| **onb** | ¿mascota o adoptar? | `06b-onboarding-roto.png` | 🔴 **NO es una captura de logro: es un defecto** (§⑫quater) |
+| **07** | datos básicos | `07-datos-basicos.png` | barra 1/3 · especies con su cara · raza con autocompletado |
+| **08** | foto | `08-foto.png` | barra 2/3 · la escalera de la cara · «Ahora no» |
+| **09** | carné | `09-carnet.png` | barra 3/3 · marco, nota, «Omitir» y las dos salidas |
+| **10** | expediente creado | `10-expediente-creado.png` | ✅ **recapturada sobre este código** · esqueleto fuera · «El expediente de Lolo ya está creado.» |
+| **06** | hogar | `06-shell-hogar.png` | las cinco tabs con **Actividad** · el asistente · «Ponte al día · 2 cosas» |
+| **11** | expediente de la mascota | `11-expediente-mascota.png` | a dónde aterriza «Ver expediente» |
 | — | empujada | `07-empujada-sin-barra.png` | **sin barra de tabs** (firma de la mesa) |
 
-### ⑫bis · Por qué 00 sigue sin captura — y por qué eso es una medición
+### ⑫bis · 00 · por qué sigue sin captura, y el protagonista sí está montado
 
-Intentado con **ráfaga de capturas sin pausa**: en la segunda, la app ya estaba en 01. **El splash sale en el acto cuando la sesión resuelve**, que es exactamente lo que el código hace y lo que la pieza declara. *Su ausencia en la hoja no es un hueco de trabajo: es la prueba de que no se queda.*
+**El tamaño protagonista YA ESTÁ MONTADO** (`<IsotipoV5 sobre="oscuro" tamano="protagonista" />`)
+— llegó con el merge de `a040375d`, medido: `protagonista` ×3 en `Marca.tsx`.
+**Lo que no se pudo es fotografiarlo**: intentado con ráfaga sin pausa, en la
+segunda captura la app ya estaba en 01. *El splash sale en el acto cuando la
+sesión resuelve, que es lo que el código hace y lo que la pieza declara.*
+⇒ **queda como lo único del lote sin evidencia visual, y se dice.**
 
-🔴 **Y el «tamaño protagonista» que pediste montar NO está en `main`** — medido: `TamanoMarca` sigue siendo `'cabecera' | 'splash'` (`packages/ui/src/brand/Marca.tsx`). **Vive en `pista/s116-b-catalogo` @ `be55e5ed`**, junto con `BotonMarcaAjena`, en cuatro commits que `origin/main` no tiene. *No mergeo una rama que la mesa no nombró* (la regla que esta casa escribió después de un arrastre). **En cuanto A la traiga, 00 es una palabra: `tamano="protagonista"`.**
+### ⑫ter · 06 · el hogar **vacío** no existe en el camino real — y eso es un hallazgo, no un hueco
 
-### ⑫ter · 06 · el hogar SIN mascota tampoco pudo capturarse — y ahora hay DOS causas
+El encargo pide «06 vacío». **No se pudo capturar, y la razón no es un bloqueo:
+es que ese estado no está en el recorrido.** Medido hoy: una cuenta recién
+confirmada **sin familia** la manda el router a **`/onboarding`**, no a `/hogar`
+— y el onboarding sale directo al alta. *El hogar sin mascota sólo sería
+alcanzable si alguien abandonara el alta a mitad.*
 
-1. **`D-1098` sigue viva**: no se puede crear una cuenta desde la app.
-2. 🔴 **Y apareció una segunda, que nadie había medido: `D-1099`.** Creé la cuenta **por API** (HTTP 200) para esquivar la primera, y al entrar la app dijo —con su voz correcta— **«Falta confirmar tu email. Revisa tu correo.»** ⇒ **la confirmación de correo está encendida**, así que ni siquiera con la cuenta creada se llega al hogar vacío.
+⇒ **la hoja entrega `06-shell-hogar.png` con Lolo ya creado**, que es el estado
+real después del alta. **Si la mesa quiere el vacío como pantalla, hay que
+decidir que exista** — hoy el producto no lo ofrece.
 
-*La captura de `03-acceso.png` es la evidencia de ese segundo bloqueo, y de paso muestra que la voz de la casa lo dice bien.*
+### ⑫quater · 🔴 EL DEFECTO QUE ENCONTRÓ ESTE RECORRIDO — la pantalla de onboarding está rota
 
-### Las tres cosas que pediste verificar
+`06b-onboarding-roto.png`. **Está en el camino de TODA cuenta nueva** — es lo
+primero que ve alguien que acaba de confirmar su correo. Lo que muestra:
+
+- el título **choca contra la barra de estado** (sin aire superior);
+- el **engranaje flotante queda encima del título**;
+- **dos barras blancas vacías** donde debería haber contenido;
+- los glifos (lápiz, corazón) **flotan fuera de su caja**;
+- un **hueco vertical enorme** entre las dos opciones.
+
+**No la toqué**, y digo por qué: **no es de este lote** —el encargo son 00–10 más
+el alta— y curarla a esta altura sería ensanchar el lote sin firma. *Pero está en
+el camino crítico de la primera impresión, así que va con captura y no como nota.*
+**Va al buzón como pedido de lote propio.**
+
+### Las cuatro tareas del lote 3d
 
 | # | qué | estado |
 |--:|---|---|
-| 1 | cuenta nueva de punta a punta | 🔴 **NO se pudo — y es el hallazgo**: ver §⑬. Se midió el camino entero y se acotó el defecto en cuatro mediciones |
-| 2 | isotipo protagonista en 00 | ⚠️ **el token no está en main** (arriba). Sin él, montarlo sería escribir un tamaño en la pantalla — lo que el catálogo prohíbe y `R4` caza |
-| 3 | Google visible, Apple fuera | ✅ **hecho en las dos**: 03 ya lo tenía, **05 lo gana**. Apple sigue fuera, con su razón medida (su motor no existe). ⚠️ **En texto, no con el asset**: `BotonMarcaAjena` está en la misma rama sin mergear |
+| 1 | 00 con el isotipo protagonista | ✅ **montado** (por fracción de ancho, sin número en la pantalla) · ⚠️ **sin captura**, §⑫bis |
+| 2 | `BotonMarcaAjena` en 03 y 05 | ✅ **hecho y visto en el aparato**: Google con su asset oficial, **Apple devuelve `null` y no dibuja** — montado **sin `if`**, como firmó la mesa |
+| 3 | 05b «Revisa tu correo» | ✅ **nace** · 🔴 **y cambió de forma a mitad, por firma tuya**: ver §⑬bis |
+| 4 | cuenta de prueba de punta a punta | ✅ **CORRIDA ENTERA con cuenta real** · ⚠️ con dos asteriscos: **00 sin captura** y **06 vacío no existe** |
 
 ---
 
-## ⑬ 🔴 `D-1098` · TERCERA VUELTA — el crash se fue, crear cuenta sigue roto
+## ⑬ ✅ `D-1098` — LA CAUSA, MEDIDA. No era el resolvedor, ni el receptor, ni el servidor
 
-**La segunda cura de A mejoró de verdad:** ya no hay `TypeError` ni botón muerto. La app **rebota con voz honesta**:
+Tres vueltas buscaron la causa en el camino de la llamada. **Estaba un piso más
+abajo, en una primitiva del runtime.** Sonda dentro de 05, antes del motor:
 
-> *«No pudimos crear la cuenta. Es un problema nuestro, no tuyo — ya lo estamos viendo.»*
+```
+[D1098] crypto=object  getRandomValues=undefined  subtle=undefined
+        TextEncoder=function  btoa=function
+[D1098] crypto own=randomUUID   randomUUID=function
+[D1098] crypto.getRandomValues(new Uint32Array(4))
+        → TypeError: undefined is not a function
+```
 
-**Ese mensaje es `motor_de_alta_ausente`** ⇒ `resolverMetodo(clienteAuth, 'signUp')` devuelve **`null`**.
+⇒ **Hermes define `crypto` con UNA sola propiedad: `randomUUID`.**
 
-### Las cuatro mediciones que acotan el defecto — para que A no las repita
+Y `auth-js` guarda así: `if (typeof crypto === 'undefined') { …fallback… }` y
+después llama `crypto.getRandomValues(...)`. **El guard pregunta por el OBJETO,
+no por el MÉTODO** — y acá el objeto sí está, así que el fallback nunca entra.
 
-| # | medición | resultado |
-|--:|---|---|
-| 1 | `POST /auth/v1/signup` **con la anon key de la app** | **HTTP 200**, usuario creado ⇒ **no es el servidor** |
-| 2 | `signInWithPassword` en el mismo emulador y sesión | **funciona** — y se llama **DIRECTO** (`auth.ts:662`), sin `resolverMetodo` ⇒ **no es el cliente entero** |
-| 3 | `resolverMetodo` probado en Node contra un cliente real | `typeof auth.signUp === 'function'` ⇒ **entraría por su primera rama** ⇒ **no es su lógica** |
-| 4 | `signUp` en `auth-js` **2.110.0** | **existe** en `GoTrueClient.js` |
+**Ese camino lo toma `signUp` sólo porque el cliente declara `flowType: 'pkce'`**
+(puesto para que funcione Google). **`signInWithPassword` no toca PKCE.**
+*Ésa es toda la diferencia entre el que funciona y el que no* — y explica las
+tres vueltas: cada una miró la mitad que era igual en los dos.
 
-⇒ **Lo único que queda en pie:** en el runtime de la app, `getClient().auth` no resuelve `signUp` por la vía que `resolverMetodo` usa — y **la única diferencia entre el camino que funciona y el que no es `resolverMetodo` mismo**.
+### La medición que NO sirvió, declarada en vez de publicada
 
-**Sugerencia concreta:** llamarlo **directo**, como `signInWithPassword`, y dejar el guard como red. *El guard hay que conservarlo: convirtió un crash en una voz honesta. Lo que no puede es reemplazar a la llamada que funciona.*
+Sondé el `.hbc` con `strings | grep -x signUp` → **0**. **Ese cero no prueba
+nada**: `signInWithPassword`, que demostrablemente funciona, **también da 0**.
+*No es una ausencia: es un instrumento ciego contra bytecode Hermes.*
+**Se declara no concluyente y no entra como evidencia.**
+
+### Lo que monté, y es un PUENTE
+
+`apps/cliente/src/lib/crypto-getrandomvalues.ts` — polyfill derivado de
+`crypto.randomUUID()`, **criptográficamente aleatorio por spec**; se descartan
+los nibbles fijos y el resto se usa como bytes. **Cero `Math.random()`**.
+Va como **import por efecto y arriba de `@/lib/api`** porque los imports se
+izan: *una llamada escrita entre medio correría después de que `initApi` cree el
+cliente, y no curaría nada.* **Lo escribí mal la primera vez y el comentario
+afirmaba lo contrario; queda dicho porque compilaba igual.**
+
+⚠️ **Es puente, no destino:** lo correcto es el polyfill nativo, que **no viaja
+por OTA**. Y con el puente `auth-js` avisa que el desafío PKCE viaja en `plain`
+y no en `s256`, porque `crypto.subtle` tampoco existe. **Todo eso es de A**, y
+está en `docs/loop/buzon/S116-C-para-A-D1098-la-causa-medida.md` con su decisión
+a tomar.
 
 ---
 
+## ⑬bis · 🔴 05b CAMBIÓ DE FORMA A MITAD DEL LOTE, por firma tuya
+
+La mesa la especificó con **«Ya lo confirmé»**, un botón que vuelve a mirar la
+sesión — o sea, diseñada para un **enlace**. Dos cosas la corrigieron el mismo día:
+
+1. **A midió `D-1100`**: el enlace **abre el navegador**, no la app (sin
+   `intentFilters`, sin `associatedDomains`, sin `emailRedirectTo`).
+2. **Tu firma, verbatim:** *«el correo lo validamos con código no con enlace».*
+
+⇒ **«Ya lo confirmé» se retira con su razón medida:** con código, mirar la
+sesión **no puede servir** — no hay nada que mirar, porque la sesión la crea el
+canje y el canje ocurre en la pantalla. *Habría dicho «todavía no» para siempre,
+con cara de estar funcionando.*
+
+**05b hoy:** el campo del código es el acto de la pantalla, sobre
+`confirmarAltaConCodigo` (que ya existía y además registra el consentimiento,
+porque `verifyOtp` devuelve sesión). **Y esto esquiva `D-1100` entero: con
+código nunca se sale de la app.**
+
+### El defecto que la propia captura destapó — el `+` del correo
+
+05b mostraba `demo-prestador s116c48143@epetplace.dev`: **el `+` se había
+convertido en espacio.** En una query string el `+` **significa** espacio, así
+que el decodificador hizo su trabajo y el dato llegó roto. *No falla, no lanza,
+no rompe el tipo: pinta una dirección verosímil y equivocada, y la persona la lee
+como un hecho.* Curado con una frontera única —`apps/cliente/src/lib/auth/correo-en-ruta.ts`—
+porque **son tres saltos** (05→05b, 05b→05, reenvío) y *una regla que hay que
+acordarse de aplicar en tres lugares es una que alguien va a olvidar en el cuarto.*
+
+---
+
+## ⑭ LA VARA PARA 05b — las diez preguntas
+
+| # | pregunta | 05b | evidencia |
+|--:|---|:-:|---|
+| 1 | una sola cabecera | **sí** | no lleva cabecera: **flecha sola sobre lienzo**, como firmó la mesa. Y **no es `FlechaVolver`**: esa pieza pinta con `text.onGradient` y sobre lienzo habría salido **invisible sin que nada fallara**. Va `Chevron`, que es lo que el catálogo nombra |
+| 2 | tabs solo en raíz | **sí** | es pantalla empujada: sin barra |
+| 3 | un acento | **sí** | una sola primaria («Confirmar»); reenviar y cambiar correo son `ghost` |
+| 4 | Baloo arriba, PJS abajo | **sí** | «Revisa tu correo» en `titulo`, el resto en `cuerpo`/`antetitulo` — resuelto por `ESCALA_V5`, sin una línea de fuente en la pantalla |
+| 5 | nada local | **sí** | `Icono` · `Texto` · `Celda` · `Campo` · `Boton` · `Chevron` · `spacing`. **Cero color, tamaño o tiempo literal** |
+| 6 | plata y fecha por su riel | **n/a** | no muestra ninguna de las dos |
+| 7 | estado con palabra | **sí** | el rebote del código lo dice el motor con **una sola voz** para «malo» y «vencido» — a propósito: distinguirlos le confirma a un extraño que ese correo tiene cuenta |
+| 8 | vacío honesto | **sí** | sin código el CTA está apagado **y dice por qué** (`razonDeshabilitado`); sin correo en la ruta, vuelve a 05 en vez de quedarse muda |
+| 9 | movimiento que dice algo | **sí** | sólo la cuenta regresiva del reenvío, que informa; cero animación decorativa |
+| 10 | voz | **sí** | tuteo neutro, es/en en paridad. **Cero vocabulario de motor**: no dice «sesión», «token» ni «OTP» |
+
+**Cero «no» ⇒ ninguna ficha.**
+
+---

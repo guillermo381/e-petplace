@@ -150,7 +150,16 @@ function SplashMarca() {
 
       {/* ① LA NARIZ — la marca, sobre magenta ⇒ la versión para fondo oscuro. */}
       <Animated.View style={estiloNariz}>
-        <IsotipoV5 sobre="oscuro" tamano="splash" />
+        {/* ⭐ **`tamano="protagonista"` — S116-C lote 3d.**
+            ⏪ Estaba en `splash`, que es `avatarHogar` (**78 px**, el tamaño de
+            un avatar de ficha) y en un teléfono de 390 ocupaba el 30 % del
+            ancho: *la marca sola en pantalla entera se veía chica*.
+            **El tamaño es una FRACCIÓN del ancho, no un número** —la pieza lo
+            resuelve con `useWindowDimensions`—, así que acá no se pasa
+            ninguna medida. *«Cerca de la mitad del ancho» no es un tamaño: es
+            una proporción, y un px fijo la cumple en un aparato y la incumple
+            en los demás.* */}
+        <IsotipoV5 sobre="oscuro" tamano="protagonista" />
       </Animated.View>
 
       {/* ③ LA FILA — el indicador. La cara grande al centro se funde; las

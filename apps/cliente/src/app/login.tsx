@@ -36,6 +36,7 @@ import * as WebBrowser from 'expo-web-browser';
 import {
   Boton,
   Separador,
+  BotonMarcaAjena,
   Cabecera,
   Campo,
   Entrada,
@@ -235,20 +236,26 @@ export default function Login() {
 
           <Entrada orden={1}>
             <View style={{ gap: spacing[2] }}>
-              <Boton
-                etiqueta={t('login.entrar')}
-                bloque
-                cargando={cargando}
-                deshabilitado={!puedeEnviar}
-                onPress={() => void entrar()}
-              />
-              {/* Entrar con Google — alternativa de entrada (solo cliente). Puede
-                  ser un ALTA: por eso lleva su línea de términos debajo. */}
-              <Boton
-                variante="secundario"
+              {/* ⭐ **`BotonMarcaAjena` — S116-C lote 3d.** El asset oficial de
+                  Google trae su tipografía, su caja y su padding: *no hay nada
+                  que componer, y componerlo sería redibujar marca ajena*.
+                  ⚠️ **Se escala, no se estira**: el contenedor puede ser de
+                  ancho completo; el botón va centrado adentro con su relación
+                  fija — un `width:'100%'` deformaría la tipografía de Google,
+                  que sus guidelines prohíben.
+                  🔴 **Apple se monta IGUAL y sin `if`** (firma de la mesa):
+                  sin asset la pieza devuelve `null`, así que hoy **no dibuja
+                  nada**. *Un `{appleListo && …}` serían dos pantallas donde
+                  alguien se olvida de sacarlo el día que exista; montándolo,
+                  se enciende solo.* */}
+              <BotonMarcaAjena
+                marca="google"
                 etiqueta={t('login.conGoogle')}
-                bloque
-                cargando={cargandoGoogle}
+                onPress={() => void conGoogle()}
+              />
+              <BotonMarcaAjena
+                marca="apple"
+                etiqueta={t('login.conApple')}
                 onPress={() => void conGoogle()}
               />
               <Boton

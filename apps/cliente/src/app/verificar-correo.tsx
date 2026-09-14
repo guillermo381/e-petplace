@@ -1,129 +1,140 @@
 /**
- * Verificar correo — EL PASO QUE APARECE SOLO SI EL PROYECTO EXIGE CONFIRMAR
- * EL CORREO (S104-C, tanda 2).
+ * 05b · REVISA TU CORREO — entre crear cuenta y el hogar (S116-C lote 3d).
+ * **Firmada por la mesa el 13-sep-2026.**
  *
- * ── DETRÁS DEL FLAG, SIN UN FLAG PROPIO ──────────────────────────────────
- * No hay constante que encienda esta pantalla: la enciende el SERVIDOR.
- * Cuando «Confirm signup» está apagado (hoy), `registrarse()` devuelve
- * `sesion_activa=true` y el registro va derecho al onboarding — esta pantalla
- * nunca se monta. Cuando D lo prenda, `registrarse` devuelve `sesion_activa
- * =false` y el registro navega acá. Se construye AHORA para que el día del
- * flip no falte la mitad de la puerta.
+ * ── POR QUÉ EXISTE, y es una medición antes que una pantalla ─────────────
+ * `D-1099`: **el proyecto tiene la confirmación de correo ENCENDIDA.** Medido
+ * por el camino real — una cuenta creada por API entra y la app dice *«Falta
+ * confirmar tu email»*. ⇒ entre 05 y 06 hay un paso que el mock no dibujaba,
+ * y que el primer día de F&F alguien iba a encontrar sin que nadie lo hubiera
+ * decidido. **Esta pantalla es esa decisión.**
  *
- * ── EL CONSENTIMIENTO SE MUESTRA EN EL FORMULARIO Y SE PERSISTE ACÁ ───────
- * (D-893). Con el correo por confirmar, `signUp` no devuelve sesión ⇒ el
- * consentimiento no se puede escribir en el alta (la policy es `auth.uid()
- * = user_id`). `confirmarAltaConCodigo` lo registra en el MISMO acto que canjea
- * el código, cuando la sesión por fin existe. La URL de cada documento la
- * resuelve `URL_LEGAL` en packages/api (S104-A); la pantalla NO la aporta.
+ * ── ⚠️ ENLACE, NO CÓDIGO — el cambio respecto de lo que había ────────────
+ * ⏪ Acá vivía una pantalla de **código de 8 dígitos** (`confirmarAltaConCodigo`
+ * + su campo). La letra firmada dice **enlace**: *«Te enviamos un enlace…
+ * Ábrelo para confirmar tu cuenta»*, y el botón es «Ya lo confirmé», no
+ * «Confirmar».
  *
- * ── LA DOSIS DEL RITUAL (cliente) ──
- * Ceremonia entera, igual que el registro: tapiz + senda + isotipo recogido +
- * la huella de llegada al confirmar. La confirmación del correo ES entrar.
+ * 🔴 **LO QUE ESTO ASUME Y NO ESTÁ MEDIDO, dicho acá para que se mida:** que
+ * el correo que sale del alta trae un **enlace**. *Lo decide la plantilla del
+ * proyecto, no esta pantalla* — y si trajera un código, esta pantalla le
+ * pediría a la persona algo que su correo no le dio. **El founder lo ve en el
+ * recorrido, abriendo el correo de prueba.** Si es código, volver cuesta una
+ * pantalla: el camino viejo vive en git.
+ * ✅ **Lo que NO se pierde**: el reenvío usa `reenviarCodigoAlta` —el mismo
+ * `auth.resend({type:'signup'})` que ya estaba— porque *reenviar el correo de
+ * alta es el mismo acto, mande lo que mande la plantilla*.
+ *
+ * ── LA FLECHA Y EL FONDO ─────────────────────────────────────────────────
+ * **Sin cabecera ciruela** (firma): fondo lienzo y una flecha sola. *La
+ * cabecera es para pantallas que pertenecen a una sección; ésta es una espera
+ * — pertenece al acto que acaba de ocurrir.*
+ *
+ * ── SI EL ENLACE ABRE LA APP, ESTA PANTALLA NO SE VE ─────────────────────
+ * El deep link entra por `auth/callback`, que deja la sesión puesta, y el
+ * guard del raíz manda al onboarding. **Nadie pasa por acá si el enlace
+ * funciona**, y por eso esta pantalla no intenta «detectar» nada: sólo ofrece
+ * el camino de vuelta para quien confirmó en otro lado (la compu, otro
+ * teléfono) y vuelve a mano.
  */
 
-import { useEffect, useRef, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Pressable, ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { correoARuta, correoDeRuta } from '../lib/auth/correo-en-ruta';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
-  CampoCodigo,
-  Encabezado,
-  Entrada,
-  EvitaTeclado,
-  HuellaDeLlegada,
-  Isotipo,
-  MarcaDeAgua,
-  PaseoDeHuellas,
+  Campo,
+  Celda,
+  Chevron,
+  Icono,
+  Texto,
   spacing,
-  typography,
   useAviso,
   useTheme,
 } from '@epetplace/ui';
-import { confirmarAltaConCodigo, reenviarCodigoAlta } from '@epetplace/api';
+import {
+  confirmarAltaConCodigo,
+  getEstadoOnboardingDueno,
+  reenviarCodigoAlta,
+} from '@epetplace/api';
 
-import { useTraduccion } from '@/i18n';
 import { destinoDeVuelta } from '@/lib/volver-a';
+import { useTraduccion } from '@/i18n';
 
-const LARGO_CODIGO = 8;
-const ESPERA_REENVIO = 60; // s — el correo recién salió del alta
-const ISOTIPO_ESQUINA = 28;
+/** La espera del reenvío. **Un solo lugar**: el correo recién salió del alta,
+ *  y ofrecer «reenviar» a los dos segundos invita a llenar la bandeja. */
+const ESPERA_REENVIO = 60;
 
-export default function VerificarCorreo() {
+export default function RevisaTuCorreo() {
   const router = useRouter();
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
   const aviso = useAviso();
-  const params = useLocalSearchParams<{ email?: string; volverA?: string }>();
-  const email = params.email ?? '';
-  /* El destino cruza también este paso: confirmar el correo es parte del alta,
-     no un desvío. */
+
+  const params = useLocalSearchParams();
+  const email = correoDeRuta(params.email);
   const volverA = destinoDeVuelta(params.volverA);
 
   const [codigo, setCodigo] = useState('');
-  const [cargando, setCargando] = useState(false);
-  const [error, setError] = useState<string | undefined>();
+  const [mirando, setMirando] = useState(false);
   const [reenviando, setReenviando] = useState(false);
-  const [esperaReenvio, setEsperaReenvio] = useState(ESPERA_REENVIO);
-  const [llegando, setLlegando] = useState(false);
+  const [espera, setEspera] = useState(ESPERA_REENVIO);
+  const [errorCodigo, setErrorCodigo] = useState<string | null>(null);
 
-  // Sin email no hay nada que verificar: se vuelve al registro sin adivinar.
+  /* Sin correo no hay nada que mirar: se vuelve a pedirlo. */
   useEffect(() => {
-    if (!email) router.replace('/registro');
+    if (email === '') router.replace('/registro');
   }, [email, router]);
 
-  // La cuenta regresiva del reenvío. Vive en la pantalla; el wrapper solo
-  // dispara. Se limpia al desmontar para no dejar un intervalo colgado.
+  /* La cuenta regresiva del reenvío. */
   useEffect(() => {
-    if (esperaReenvio <= 0) return;
-    const id = setInterval(() => setEsperaReenvio((s) => (s <= 1 ? 0 : s - 1)), 1000);
-    return () => clearInterval(id);
-  }, [esperaReenvio]);
+    if (espera <= 0) return;
+    const id = setTimeout(() => setEspera((n) => n - 1), 1000);
+    return () => clearTimeout(id);
+  }, [espera]);
 
-  const completo = codigo.length === LARGO_CODIGO;
-
+  /**
+   * CONFIRMAR — el acto de la pantalla.
+   *
+   * 🔴 ACÁ VIVIÓ «Ya lo confirmé», que volvía a mirar la sesión. **Se retira
+   * con su razón medida, no por gusto:** el correo de esta casa valida **con
+   * CÓDIGO, no con enlace** (firma del founder, 13-sep-2026), y con código
+   * mirar la sesión no puede servir — *no hay nada que mirar: la sesión la
+   * crea el canje, y el canje ocurre acá*. Un botón que re-consulta un estado
+   * que nadie va a cambiar habría dicho «todavía no» para siempre, con cara
+   * de estar funcionando.
+   *
+   * Y esto ADEMÁS esquiva `D-1100` entero: el enlace abre el navegador y la
+   * app no se entera. Con código no hay vuelta que perder, porque nunca se
+   * sale de la app.
+   */
   async function confirmar() {
-    if (!completo || cargando) return;
-    setCargando(true);
-    setError(undefined);
-
-    // `confirmarAltaConCodigo` registra terminos + privacidad; la URL de cada
-    // uno la resuelve `URL_LEGAL` en packages/api — la pantalla NO la aporta.
-    const r = await confirmarAltaConCodigo({
-      /* S104-A · contexto OBLIGATORIO: sin él, el prestador quedaba registrado
-         con el T&C del CLIENTE. El valor lo sabe el binario, no se infiere. */
-      contexto: 'registro',
-      email,
-      codigo,
-    });
-
+    if (mirando || codigo.trim() === '') return;
+    setMirando(true);
+    setErrorCodigo(null);
+    const r = await confirmarAltaConCodigo({ email, codigo, contexto: 'registro' });
     if (!r.ok) {
-      setCargando(false);
-      if (r.codigo === 'codigo_invalido') {
-        setError(r.mensaje);
-        setCodigo('');
-      } else {
-        aviso.mostrar({ variante: 'error', texto: r.mensaje });
-      }
+      setMirando(false);
+      /* El motor ya da UNA sola voz para «malo» y «vencido» a propósito —
+         distinguirlos le confirma a un extraño que ese correo tiene cuenta.
+         La pantalla la repite tal cual: no inventa un matiz que el motor
+         eligió no dar. */
+      setErrorCodigo(r.mensaje);
       return;
     }
-
-    // Igual que el registro con sesión viva: la huella de llegada y recién ahí
-    // el onboarding. Confirmar el correo ES entrar.
-    setLlegando(true);
-    setTimeout(
-      () =>
-        router.replace(
-          volverA === null ? '/onboarding' : { pathname: '/onboarding', params: { volverA } },
-        ),
-      460,
-    );
+    /* Con sesión, el destino lo decide el estado del onboarding — el mismo
+       criterio que el guard del raíz, para que no haya dos verdades. */
+    const estado = await getEstadoOnboardingDueno();
+    setMirando(false);
+    const destino = estado.ok && estado.data.tiene_familia ? '/hogar' : '/onboarding';
+    router.replace(volverA !== null && destino === '/hogar' ? volverA : destino);
   }
 
   async function reenviar() {
-    if (esperaReenvio > 0 || reenviando) return;
+    if (espera > 0 || reenviando) return;
     setReenviando(true);
     const r = await reenviarCodigoAlta(email);
     setReenviando(false);
@@ -131,108 +142,108 @@ export default function VerificarCorreo() {
       aviso.mostrar({ variante: 'error', texto: r.mensaje });
       return;
     }
-    setEsperaReenvio(ESPERA_REENVIO);
-    aviso.mostrar({ variante: 'neutro', texto: t('verificarCorreo.reenviado') });
+    setEspera(ESPERA_REENVIO);
+    setCodigo('');
+    setErrorCodigo(null);
+    aviso.mostrar({ variante: 'exito', texto: t('revisaCorreo.reenviado') });
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <MarcaDeAgua />
-      <PaseoDeHuellas />
+    <View style={{ flex: 1, backgroundColor: theme.bg.base, paddingTop: insets.top }}>
+      {/* La flecha sola — sin cabecera ciruela (firma de la mesa).
+          🔴 **NO se usa `FlechaVolver`, y es una medición:** esa pieza pinta
+          con `text.onGradient` —*«lo que se lee sobre la marca»*— y **esta
+          pantalla es lienzo**, así que la flecha habría salido blanca sobre
+          claro: invisible, sin que nada fallara. Va `Chevron`, que resuelve
+          por tema y es la pieza que el catálogo nombra para esto
+          (*«Volver/Avanzar/Flecha no son del registry: son `Chevron`»*). */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('revisaCorreo.volver')}
+        onPress={() => router.back()}
+        hitSlop={12}
+        style={{ padding: spacing[3], alignSelf: 'flex-start' }}
+      >
+        <Chevron direccion="izquierda" />
+      </Pressable>
 
-      <Encabezado variante="navegacion" titulo={t('verificarCorreo.titulo')} atras onAtras={() => router.back()} />
-      <View pointerEvents="none" style={{ position: 'absolute', top: insets.top + spacing[2], right: spacing[5] }}>
-        <Isotipo size={ISOTIPO_ESQUINA} variant="gradiente" />
-      </View>
-
-      <EvitaTeclado>
-        <ScrollView
-          style={{ backgroundColor: 'transparent' }}
-          contentContainerStyle={{
-            flexGrow: 1,
-            padding: spacing[5],
-            paddingBottom: insets.bottom + spacing[6],
-            gap: spacing[6],
-          }}
-          keyboardShouldPersistTaps="handled"
-        >
-          <Entrada>
-            <Text
-              style={{
-                fontFamily: typography.family.sans.regular,
-                fontSize: typography.size.base,
-                lineHeight: Math.round(typography.size.base * typography.leading.relaxed),
-                color: theme.text.secondary,
-              }}
-            >
-              {t('verificarCorreo.intro', { email })}
-            </Text>
-
-            <View style={{ marginTop: spacing[6] }}>
-              <CampoCodigo
-                largo={LARGO_CODIGO}
-                valor={codigo}
-                onCambio={(v) => {
-                  setCodigo(v);
-                  if (error) setError(undefined);
-                }}
-                etiqueta={t('verificarCorreo.codigoLabel')}
-                ayuda={t('verificarCorreo.codigoAyuda')}
-                error={error}
-                deshabilitado={cargando}
-              />
-            </View>
-          </Entrada>
-
-          {/* El espaciador empuja las acciones al pie cuando el contenido es
-              corto; con el teclado numérico arriba, las acciones viven DENTRO
-              del scroll y suben con él (keyboardShouldPersistTaps) — un pie
-              fijo afuera de EvitaTeclado quedaría tapado por el teclado. */}
-          <View style={{ flex: 1 }} />
-
-          <View style={{ gap: spacing[3] }}>
-            <Boton
-              etiqueta={t('verificarCorreo.confirmar')}
-              bloque
-              onPress={() => void confirmar()}
-              cargando={cargando}
-              deshabilitado={!completo}
-            />
-            <Boton
-              variante="ghost"
-              etiqueta={
-                esperaReenvio > 0
-                  ? t('verificarCorreo.reenviarEn', { n: esperaReenvio })
-                  : t('verificarCorreo.reenviar')
-              }
-              bloque
-              onPress={() => void reenviar()}
-              cargando={reenviando}
-              deshabilitado={esperaReenvio > 0}
-            />
-          </View>
-        </ScrollView>
-      </EvitaTeclado>
-
-      {/* R53-DECLARADO: NO es un pie fijo — es el overlay de LLEGADA a pantalla
-          completa (top:0 Y bottom:0); cubre todo durante la celebración y la
-          pantalla se desmonta al navegar. Nada debajo que reservar. */}
-      {llegando && (
-        <View
-          style={{
-            position: 'absolute',
-            top: 0,
-            bottom: 0,
-            left: 0,
-            right: 0,
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: theme.bg.base,
-          }}
-        >
-          <HuellaDeLlegada tamano={64} />
+      <ScrollView
+        contentContainerStyle={{
+          padding: spacing[6],
+          paddingBottom: insets.bottom + spacing[8],
+          gap: spacing[5],
+        }}
+      >
+        <View style={{ alignItems: 'center', gap: spacing[4] }}>
+          <Icono nombre="correo" tamano={40} registro="capa" />
+          <Texto variante="titulo" centrado>
+            {t('revisaCorreo.titulo')}
+          </Texto>
+          <Texto variante="cuerpo" color="secondary" centrado>
+            {t('revisaCorreo.apoyo', { correo: email })}
+          </Texto>
         </View>
-      )}
+
+        {/* «QUÉ SIGUE» — el mismo patrón de 04: tres pasos numerados. */}
+        <View style={{ gap: spacing[2] }}>
+          <Texto variante="antetitulo">{t('revisaCorreo.queSigue')}</Texto>
+          <Celda inicio={<Texto variante="enfasis">1</Texto>} titulo={t('revisaCorreo.paso1')} />
+          <Celda inicio={<Texto variante="enfasis">2</Texto>} titulo={t('revisaCorreo.paso2')} />
+          <Celda inicio={<Texto variante="enfasis">3</Texto>} titulo={t('revisaCorreo.paso3')} />
+        </View>
+
+        {/* EL CAMPO DEL CÓDIGO — el acto de la pantalla. Teclado numérico y
+            `one-time-code` para que el sistema lo ofrezca solo desde el correo:
+            **el mejor campo de código es el que no hay que tipear.** */}
+        <Campo
+          label={t('revisaCorreo.etiquetaCodigo')}
+          placeholder={t('revisaCorreo.placeholderCodigo')}
+          value={codigo}
+          onChangeText={(v: string) => {
+            setCodigo(v);
+            if (errorCodigo !== null) setErrorCodigo(null);
+          }}
+          error={errorCodigo ?? undefined}
+          keyboardType="number-pad"
+          autoCapitalize="none"
+          textContentType="oneTimeCode"
+          autoComplete="one-time-code"
+        />
+
+        <Boton
+          variante="primario"
+          bloque
+          etiqueta={t('revisaCorreo.confirmar')}
+          cargando={mirando}
+          deshabilitado={codigo.trim() === ''}
+          razonDeshabilitado={t('revisaCorreo.faltaCodigo')}
+          onPress={() => void confirmar()}
+        />
+
+        {/* Los dos caminos de abajo, en tinta apagada: son salidas, no la
+            acción de la pantalla (Ley 5 — una sola primaria). */}
+        <View style={{ gap: spacing[2] }}>
+          <Boton
+            variante="ghost"
+            bloque
+            etiqueta={espera > 0 ? t('revisaCorreo.reenviarEn', { n: espera }) : t('revisaCorreo.reenviar')}
+            deshabilitado={espera > 0}
+            /* La razón ES la cuenta regresiva, que ya está en la etiqueta: se
+               pasa igual para que el lector de pantalla la oiga. */
+            razonDeshabilitado={espera > 0 ? t('revisaCorreo.reenviarEn', { n: espera }) : undefined}
+            cargando={reenviando}
+            onPress={() => void reenviar()}
+          />
+          <Boton
+            variante="ghost"
+            bloque
+            etiqueta={t('revisaCorreo.cambiarCorreo')}
+            /* Vuelve a 05 **con el correo puesto**, para corregir una letra en
+               vez de escribirlo entero de nuevo. */
+            onPress={() => router.replace({ pathname: '/registro', params: { email: correoARuta(email) } })}
+          />
+        </View>
+      </ScrollView>
     </View>
   );
 }

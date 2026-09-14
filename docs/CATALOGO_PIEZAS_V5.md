@@ -68,7 +68,7 @@ Las seis caras del founder. **`TrioPersonajes` es la mitad de `Confirmacion`.**
 Entrar con una cuenta que no es nuestra (Google hoy; Apple tiene su lugar y **no se puede montar**).
 - **props:** `marca` (`google` | `apple`) · `onPress` · `etiqueta` · `alto`
 - **tokens:** `medidas.secundarioAlto`
-- **consumidores:** 0
+- **consumidores:** 2
 - 🔴 **El botón lo entrega su DUEÑO entero** — tipografía, caja y padding incluidos — y la casa sólo le da lugar. *La marca ajena no se redibuja, no se re-colorea y no se estira.* El asset es el oficial de Google, bajado de su página de branding; su procedencia y su licencia están en `assets/marcas-ajenas/PROCEDENCIA.md`.
 - ⚠️ **SE ESCALA, NO SE ESTIRA.** El asset es 180×40 con relación fija; `alto` lo agranda por igual en los dos ejes (52 ⇒ 234×52). **Un `width:'100%'` deformaría la tipografía de otro**, que es lo que sus guidelines prohíben. *Si tu fila es de ancho completo, el que se estira es el contenedor y este botón va centrado adentro.*
 - ⚠️ **Por qué el botón entero y no sólo el logo:** poner su logo en un botón nuestro **también está permitido, pero exige Google Sans Medium 14/20**, que la casa no tiene. *Un botón «casi» conforme a las guidelines de otro no es un atajo: es un incumplimiento con mejor aspecto.*
@@ -109,7 +109,7 @@ La acción de la pantalla. **Una primaria por pantalla** (Ley 5).
 Entrada de texto con su pie.
 - **props:** `label` · `ayuda` · `error` · `tono` (`alarma`|`estado`) · `etiquetaVisible` · `deshabilitado` · **`razonDeshabilitado`** · `sinPie` · `secure` · `multilinea` · `iconoIzq` · `iconoDer`
 - **tokens:** `medidas` · `motion` · `spacing` · `typography` · `theme.status` · `theme.text`
-- **consumidores:** 79 (+ `CampoFecha`, `CampoCodigo`, `CampoClaveAcceso`, `CampoIdentificacion`)
+- **consumidores:** 80 (+ `CampoFecha`, `CampoCodigo`, `CampoClaveAcceso`, `CampoIdentificacion`)
 - ⚠️ **El error NO pinta la caja de rojo:** lo dice el pie. Y el placeholder va en `secondary` (**5,24:1**), no en `tertiary` — *un placeholder no es decoración: es lo que la persona lee para saber qué escribir.*
 - 🔴 **`razonDeshabilitado` (S116-B):** un campo apagado dice POR QUÉ, igual que `Boton`. Se dibuja en el pie con precedencia **`error` › `razonDeshabilitado` › `ayuda`** — *mientras está apagado, la ayuda de cómo llenarlo no sirve; lo que la persona necesita saber es por qué no puede.*
 
@@ -132,7 +132,7 @@ La superficie que agrupa.
 `CeldaNavegacion` entra a una sección (glifo + título + chevrón); `Celda` muestra un dato.
 - **props:** `icono` · `titulo` · `detalle` · `onPress` · `registro` · `chevron` — `subtitulo` · `inicio` · `densidad` · `tituloEntero` · `elegida`
 - **tokens:** `radius` · `spacing` · `motion` · `typography` · `theme.accent` · `theme.bg`
-- **consumidores:** 49 · 89
+- **consumidores:** 49 · 90
 - ⚠️ **El contorno transparente murió como acción de fila.** Información despliega; acción lleva. El glifo va en círculo rosa tinte.
 
 ### `Insignia` — *el estado*
@@ -154,7 +154,7 @@ Sumar y restar unidades.
 El set b′. **Nombre tipado: cero strings mágicos.**
 - **props:** `nombre` (canónico **o** nombre del mock) · `tamano` · `registro` (`capa`|`aa`|`tinta`) · `tinta` · `huella` · `activa` · `montaje`
 - **tokens:** `medidas` · `palette` · `theme.capa` · `theme.status` · `theme.accent`
-- **consumidores:** 59
+- **consumidores:** 60
 - 🔴 **En la casa v5 NINGÚN glifo lleva huella** (letra §1.1). Lo decide `resolverHuella`, no la pantalla — y lo vigila `verify:huella-por-casa`.
 - ⚠️ **C puede montar los nombres del mock** (`buscar`, `agenda`, `chat`, `camara`…): 14 alias resuelven al canónico, y un alias mal escrito **rompe el compilador**.
 - ⚠️ `Volver`/`Avanzar`/`Flecha` **no son del registry**: son `Chevron`, otra pieza.

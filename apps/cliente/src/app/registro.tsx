@@ -20,9 +20,11 @@
 import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { correoARuta, correoDeRuta } from '../lib/auth/correo-en-ruta';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
+  BotonMarcaAjena,
   Cabecera,
   Campo,
   Entrada,
@@ -46,14 +48,20 @@ export default function Registro() {
   /* §4.1 — «si toco adoptar, no me pidas nada más: vuelvo exactamente a donde
      estaba». La intención se declaró ANTES de la cuenta, y `replace` borra la
      pila: viaja como dato o se pierde. `null` = el camino de siempre. */
-  const volverA = destinoDeVuelta(useLocalSearchParams().volverA);
+  const params = useLocalSearchParams();
+  const volverA = destinoDeVuelta(params.volverA);
+  /* ⭐ **EL CORREO VUELVE PUESTO desde 05b** (`¿Correo equivocado?`): quien se
+     equivocó en una letra la corrige, en vez de escribirlo entero de nuevo.
+     *Mandar a alguien de vuelta a un formulario vacío es cobrarle su propio
+     error dos veces.* */
+  const emailDeVuelta = correoDeRuta(params.email);
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
   const aviso = useAviso();
 
   const [nombre, setNombre] = useState('');
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(emailDeVuelta);
   const [password, setPassword] = useState('');
   const [cargando, setCargando] = useState(false);
   const [cargandoGoogle, setCargandoGoogle] = useState(false);
@@ -137,7 +145,7 @@ export default function Registro() {
         pathname: '/verificar-correo',
         /* El destino VIAJA con el correo: la confirmación es un paso más del
            mismo camino, y perder la intención ahí sería perderla igual. */
-        params: { email: email.trim(), ...(volverA === null ? {} : { volverA }) },
+        params: { email: correoARuta(email.trim()), ...(volverA === null ? {} : { volverA }) },
       });
       return;
     }
@@ -237,18 +245,22 @@ export default function Registro() {
               {/* ⭐ **LA FILA SOCIAL — sólo Google, y en texto.**
                   El antetítulo lo separa del camino de arriba (son dos
                   formas de lo mismo, no dos acciones compitiendo).
-                  🔴 **Sin logo**: `apps/cliente/assets/marcas/` tiene los
-                  seis de pago con su `PROCEDENCIA.md` y **ninguno de
-                  Google** — la marca ajena no se redibuja, y el asset es
-                  acto del founder. */}
+                  ✅ **Con el asset oficial** (`BotonMarcaAjena`): Google
+                  entrega el botón entero —tipografía, caja y padding—, así
+                  que no hay nada que componer. Apple se monta igual y **no
+                  dibuja nada** hasta que exista su asset. */}
               <Texto variante="antetitulo" centrado>
                 {t('registro.oRegistrateCon')}
               </Texto>
-              <Boton
-                variante="secundario"
-                bloque
+              <BotonMarcaAjena
+                marca="google"
                 etiqueta={t('login.conGoogle')}
-                cargando={cargandoGoogle}
+                onPress={() => void conGoogle()}
+              />
+              {/* Apple se monta igual: sin asset la pieza devuelve `null`. */}
+              <BotonMarcaAjena
+                marca="apple"
+                etiqueta={t('login.conApple')}
                 onPress={() => void conGoogle()}
               />
 
