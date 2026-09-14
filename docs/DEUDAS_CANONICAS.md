@@ -35200,3 +35200,63 @@ El HTML fuerza **32** ⇒ **3,1 % de estiramiento vertical** sobre el asset nuev
 ⚠️ **Y la razón por la que no se despliega sola:** `despachar-correo` **manda correos a personas reales**. Un deploy suyo se hace cuando hay algo que justifique tocarlo, no para corregir un píxel. *La autorización de la mesa fue para los seis papeles; ensancharla por conveniencia es exactamente lo que la disciplina de alcance evita.*
 
 **☠️ MUERTE:** cuando `despachar-correo` se despliegue con el `31` adentro, verificado leyendo su versión del objeto.
+
+---
+
+## `D-1110` 🟠 — EL ISOTIPO VIEJO SIGUE VIVO **DENTRO DE LA APP**: es `Isotipo.tsx`, y sale por el default de `Encabezado`
+
+**Estado:** ABIERTA · **Dueño: B** (`packages/ui/src/brand/Isotipo.tsx` es su territorio) · **lo midió C** (lote 6, buzón `S116-C-para-B-el-isotipo-viejo-vive-en-Encabezado.md`) · **A lo deposita** para que no viva sólo en un archivo de pista.
+**Origen:** el censo de C, verificado por A antes de ficharlo (14-sep-2026).
+
+> **`D-1107` curó lo que la app EXPORTA. Esto es lo que la app MUESTRA, y es el mismo path.** *Cerrar una mitad y dejar la otra sin ficha es cómo una deuda se convierte en dos, con meses de distancia.*
+
+### Lo medido, y A lo re-midió antes de escribirlo
+
+**`packages/ui/src/brand/Isotipo.tsx` guarda `ISOTIPO_PATH` de 2.433 caracteres — BYTE A BYTE el mismo que A acaba de sacar de `papel.ts`.** *O sea que la pieza vector de la casa y el papel no divergieron nunca: los dos estaban viejos, y `D-1107` sólo curó uno.*
+
+**El sujeto NO es la Despensa, y esa corrección es de C:** el encargo decía *«la Despensa monta el isotipo viejo»*, y quien dibuja es la pieza — `Encabezado.tsx:306` monta `<Isotipo variant={varianteIsotipo} />` con **`isotipo = 'gradiente'` por DEFAULT** (`:270`). ⇒ **no hace falta pasarlo para heredarlo.**
+
+| | cómo llega |
+|---|---|
+| Despensa | explícito `isotipo="gradiente"` |
+| Explorar · Actividad · Cuenta | **por default** |
+
+**Cuatro de las cinco tabs** (Hogar tiene techo propio). Y **79 archivos del cliente montan `Encabezado`** — medido por A; cuántos de esos heredan el default es el censo que falta.
+
+Más **seis montajes directos** fuera de `Encabezado`, entre ellos **dos marcas de agua a `size` 210 y 1000** (Hogar y la ficha de mascota), que **no son la misma decisión que un isotipo de cabecera** y por eso van con su propio criterio.
+
+### Por qué esto no se cura con un `sed`
+
+**`Isotipo.tsx` exporta su `ISOTIPO_PATH` a propósito** — su cabecera lo dice: es *«lo único que evita el clon, y un clon de la MARCA es el peor de todos»*, con un consumidor externo (`PinEnMapa`, que no puede anidar `<Svg>`). ⇒ **cambiar el path cambia la marca en todo lo que cuelga de esa pieza a la vez**, incluido el pin del mapa y las dos marcas de agua de la app. *Eso es una pasada con ojo, no un reemplazo.*
+
+⚠️ **Y hay un dato que la vuelve más barata de lo que parece:** el path v5 **ya existe y ya está probado** — `packages/ui/src/brand/isotipo-v5-path.ts`, con `pnpm verify:isotipo-path` verde y un carnet real impreso con él. *Lo que falta no es el dibujo: es decidir dónde entra y mirarlo.*
+
+**☠️ MUERTE:** cuando ninguna superficie del cliente monte el path viejo, verificado por censo Y por captura — *un censo dice que no está en el código; sólo una captura dice que no está en la pantalla.*
+
+---
+
+## `D-1111` 🟢 — DOS `useRuedaDeCaras` CON EL MISMO NOMBRE, UNO POR TERRITORIO — hoy ninguna pantalla monta las dos
+
+**Estado:** ABIERTA · **Dueño: la mesa** (la consolidación cruza territorios: `packages/ui` es de B, `apps/cliente` de C) · **sin daño hoy, medido.**
+**Origen:** A, al mergear el lote 8 de B y el lote 5-6 de C en la misma tanda (14-sep-2026).
+
+### Los dos, medidos
+
+| | líneas | exporta | consumidores |
+|---|--:|---|---|
+| `packages/ui/src/lib/rueda-de-caras.ts` (B) | 107 | `useRuedaDeCaras` · `LAS_SEIS` · `RuedaDeCaras` | `OndaAcceso` · `EsperaLarga` |
+| `apps/cliente/src/lib/rueda-de-caras.ts` (C) | 81 | `useRuedaDeCaras` · sus `MS_*` | pantalla **00** · pantalla **02** |
+
+**Son implementaciones independientes**: la de C importa de `@epetplace/ui` sólo `motion` y **arma su propio `setInterval`**; la de B tiene su propio `useEffect`. ⇒ **dos relojes, mismo nombre.**
+
+### 🔴 Y la medición que da vuelta la primera lectura
+
+**A leyó primero que la pantalla 00 montaba las dos.** Es **falso**: el `grep` de `OndaAcceso` en `index.tsx` matcheaba **una mención dentro de un comentario de C**. **Ninguna pantalla monta las dos ruedas hoy** ⇒ *no hay desincronía, no hay defecto vivo.*
+
+*Es `L-170` cobrada por segunda vez en la misma jornada, por la misma persona y sobre el mismo tipo de censo: un `grep` lee los comentarios como código.* **Y acá el costo habría sido al revés que en `D-1107`: reportar un defecto que no existe y mandar a dos pistas a curarlo.**
+
+### Lo que hizo bien cada una, para que la consolidación no borre criterio
+
+**C consolidó lo suyo y lo declaró en una lápida**, con la razón escrita: *«02 nació con la misma rotación y la `OndaAcceso` de B ya tenía una tercera. Tres relojes iguales son tres que se desincronizan, y peor: tres lugares donde alguien tiene que acordarse de `useReducedMotion`»*. **C sabía de la de B y no podía tocarla: `packages/ui` no es su territorio.** *Hizo exactamente lo que la regla de territorios pide — y por eso la deuda es de la mesa, no suya.*
+
+**☠️ MUERTE:** cuando exista UN solo `useRuedaDeCaras` y las cuatro superficies lo consuman. **Disparo real, no calendario: la primera pantalla que monte una pieza de B con rueda Y una rueda de C** — *ahí deja de ser duplicación y pasa a ser dos relojes visibles a la vez.*
