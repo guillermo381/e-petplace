@@ -174,13 +174,27 @@ export function Cabecera({
      el slot y el tema contesta. */
   const grad = theme.accent.gradient
 
-  return (
-    <LinearGradient
-      colors={grad.colors as unknown as readonly [string, string, ...string[]]}
-      locations={grad.locations as unknown as readonly [number, number, ...number[]]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 0.2, y: 1 }}
-      style={{
+  /* 🔴 **COMO FONDO NO PINTA NADA, Y ES LA CURA DE LA COSTURA (lote 6).**
+     El founder vio *«dos tonos de ciruela con una costura horizontal justo
+     debajo del logo»*. **Medido, y la causa es aritmética:** esta pieza y
+     `HojaContenido` pintan **el mismo degradado** con el mismo `start`/`end`
+     — pero `end={{ y: 1 }}` significa *el fondo de MI caja*. La cabecera
+     completa la rampa entera en sus ~300 px; el fondo la estira sobre los
+     ~2400 de la pantalla. ⇒ **al pie de la cabecera se tocan dos colores
+     distintos del mismo degradado.** No es que «no empaten»: es que son dos
+     superficies, y dos superficies siempre van a tener un borde.
+
+     ⚠️ **El síntoma lo prueba solo: no se ven DOS tonos si no hay DOS
+     superficies.** Igualar los números habría sido perseguir el empate en
+     cada alto de cabecera y en cada teléfono; **con una sola superficie el
+     borde es inexpresable.**
+
+     Y es lo que su propio contrato ya decía —`HojaContenido`: *«el degradado
+     lo pinta ESTA pieza, no la Cabecera»*—; lo que faltaba era que la
+     cabecera dejara de pintarlo. ⇒ como `fondo` es un `View` transparente.
+     *Quien la monte como fondo tiene que darle una superficie debajo; hoy
+     el único que lo hace es `HojaContenido`, que es para lo que nació.* */
+  const estiloSuperficie = {
         paddingTop: insets.top + (esRaiz ? spacing[3] : spacing[2]),
         paddingHorizontal: m.lados,
         paddingBottom: m.bottom,
@@ -192,8 +206,10 @@ export function Cabecera({
         gap: spacing[3],
         /* Apenas perceptible: despega, no levanta. */
         boxShadow: esFondo ? undefined : theme.elevacion.reposo,
-      }}
-    >
+  }
+
+  const contenido = (
+    <>
       <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing[3] }}>
         {!esRaiz && onVolver !== undefined ? (
           <DiscoVidrio onPress={onVolver} etiqueta={etiquetaVolver}>
@@ -225,6 +241,22 @@ export function Cabecera({
       </View>
 
       {pasos !== undefined ? <BarraPasos {...pasos} /> : null}
+    </>
+  )
+
+  /* Las dos ramas, explícitas: un componente elegido por variable no se
+     puede tipar sin ensanchar las props de las dos (el gate lo frenó). */
+  return esFondo ? (
+    <View style={estiloSuperficie}>{contenido}</View>
+  ) : (
+    <LinearGradient
+      colors={grad.colors as unknown as readonly [string, string, ...string[]]}
+      locations={grad.locations as unknown as readonly [number, number, ...number[]]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 0.2, y: 1 }}
+      style={estiloSuperficie}
+    >
+      {contenido}
     </LinearGradient>
   )
 }

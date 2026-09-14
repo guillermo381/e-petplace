@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { Keyboard, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Animated, {
   Easing,
   runOnJS,
@@ -13,6 +12,7 @@ import Svg, { Path } from 'react-native-svg'
 import { motion } from '../tokens/motion'
 import { palette } from '../tokens/palette'
 import { spacing } from '../tokens/spacing'
+import { useInsetQueFalta } from './pie-fijo'
 import { Personaje, type EspeciePersonaje } from './Personaje'
 import { Texto } from './Texto'
 
@@ -110,7 +110,18 @@ export interface OndaAccesoProps {
 
 export function OndaAcceso({ frase, lado, especies = LAS_SEIS }: OndaAccesoProps) {
   const sinMovimiento = useReducedMotion()
-  const insets = useSafeAreaInsets()
+  /* 🔴 **EL INSET SE MIDE, NO SE PIDE (lote 6, corrección del aparato).**
+     El founder vio en un Samsung con tres teclas *«el texto cortado por la
+     barra»*. La pieza ya sumaba `insets.bottom` — y `insets.bottom` dice
+     **cuánto mide la barra**, no **cuánto de ella queda debajo de esta
+     franja**: adentro de `(tabs)` el navegador ya la reservó y el valor
+     sobra; montada al filo, falta entero. *El mismo par descoordinado que
+     `PantallaConPie` mató, cobrado acá por segunda vez.*
+     ⚠️ **Adenda del founder:** *«la franja magenta se queda como está,
+     llegando hasta el borde. Lo único que sube es el CONTENIDO.»* Es lo que
+     hace el `paddingBottom` de abajo: el color sangra, el contenido se
+     corre. Lo que cambia en este lote es **con qué número**. */
+  const [refOnda, medirOnda, insetInferior] = useInsetQueFalta()
   const [indice, setIndice] = useState(0)
   const opacidad = useSharedValue(1)
   /* El índice se lee de un ref adentro del intervalo y no de la clausura:
@@ -227,12 +238,14 @@ export function OndaAcceso({ frase, lado, especies = LAS_SEIS }: OndaAccesoProps
      se suma acá y no adentro de la banda: el magenta tiene que llegar al
      filo de la pantalla, y lo que no puede quedar debajo de la barra del
      sistema es el CONTENIDO. */
-  const alto = ALTO_ONDA_ACCESO + insets.bottom
+  const alto = ALTO_ONDA_ACCESO + insetInferior
 
-  if (!pintada) return <View style={{ height: alto }} />
+  if (!pintada) return <View ref={refOnda} onLayout={medirOnda} style={{ height: alto }} />
 
   return (
     <Animated.View
+      ref={refOnda}
+      onLayout={medirOnda}
       style={[{ height: alto }, estiloOnda]}
       /* La onda no es un control: no recibe toques ni los roba a lo que
          tenga debajo mientras está desvanecida. */
@@ -247,12 +260,12 @@ export function OndaAcceso({ frase, lado, especies = LAS_SEIS }: OndaAccesoProps
       </Svg>
       <View
         style={{
-          height: ALTO_BANDA + insets.bottom,
+          height: ALTO_BANDA + insetInferior,
           /* Ley 8: el inset lo pone la pieza, no el consumidor — mismo
              precedente que `Hoja` (S65) y que `PantallaConPie`. Va como
              padding y no como margen para que **el color siga sangrando
              hasta el borde** y sólo el contenido se corra. */
-          paddingBottom: insets.bottom,
+          paddingBottom: insetInferior,
           backgroundColor: palette.magentaAccion,
           flexDirection: lado === 'der' ? 'row' : 'row-reverse',
           alignItems: 'center',

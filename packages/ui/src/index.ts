@@ -50,6 +50,19 @@ export { OndaAcceso, type OndaAccesoProps, ALTO_ONDA_ACCESO } from './components
    hook — quien necesite un pie monta una de las dos piezas, no arma el suyo. */
 export { type MaterialDelPie } from './components/pie-fijo'
 
+/* 🔴 **EL ISOTIPO v5 COMO PATH — para los papeles que se IMPRIMEN** (`D-1107`).
+   Se exporta el `d` y su viewBox, no una pieza: **el consumidor es una edge
+   de Deno que dibuja un PDF**, no React. *Un componente no le sirve a quien
+   no monta nada.* Su cabecera trae la medición que corrige el encargo: el
+   path que el papel tenía y el de `brand/Isotipo.tsx` eran IDÉNTICOS — la
+   pieza vector de esta casa también era la vieja. */
+export {
+  ISOTIPO_V5_PATH,
+  ISOTIPO_V5_VB_W,
+  ISOTIPO_V5_VB_H,
+  ISOTIPO_V5_CAJA,
+} from './brand/isotipo-v5-path'
+
 export { Cabecera, type CabeceraProps , ALTO_CABECERA_RAIZ_FIJO, ALTO_CABECERA_EMPUJADA_FIJO } from './components/Cabecera'
 export { Opcion, type OpcionProps, type OpcionItem } from './components/Opcion'
 export { IsotipoV5, LogoV5, type SobreFondo, type TamanoMarca } from './brand/Marca'

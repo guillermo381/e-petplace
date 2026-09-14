@@ -51,6 +51,40 @@ import { useTheme } from '../ThemeProvider'
  */
 export type MaterialDelPie = 'lienzo' | 'sangrado'
 
+/**
+ * 🔴 **EL INSET QUE FALTA DE VERDAD (S116-B lote 6).**
+ *
+ * `useSafeAreaInsets().bottom` dice cuánto mide la barra del sistema, **no
+ * cuánto de ella queda debajo de VOS**. Adentro de `(tabs)` el navegador ya
+ * la reservó ⇒ sumarla la cuenta dos veces; en una pantalla suelta hay que
+ * sumarla entera. *Es el mismo par descoordinado que `PantallaConPie` mató:
+ * dos números que deben coincidir saliendo de dos cuentas distintas.*
+ *
+ * ⇒ **se MIDE contra la base de la pantalla.** Lo usa el pie fijo y lo usa
+ * `OndaAcceso`, que tiene el mismo problema en su borde inferior: el
+ * founder vio *«el texto cortado por las tres teclas»* en un Samsung.
+ *
+ * Devuelve `[ref, alMedir, faltante]` — el ref va en el contenedor cuyo
+ * borde inferior importa.
+ */
+export function useInsetQueFalta(): [React.RefObject<View | null>, () => void, number] {
+  const insets = useSafeAreaInsets()
+  /* Arranca en `insets.bottom`, el valor CONSERVADOR: si la medición nunca
+     llegara, sobra aire — jamás falta. *De los dos errores posibles se elige
+     el que no tapa nada.* */
+  const [falta, setFalta] = useState(insets.bottom)
+  const ref = useRef<View>(null)
+  const alMedir = () => {
+    ref.current?.measureInWindow((_x, y, _w, alto) => {
+      const baseDePantalla = Dimensions.get('screen').height
+      const yaReservado = Math.max(0, baseDePantalla - (y + alto))
+      const v = Math.max(0, insets.bottom - yaReservado)
+      setFalta((previo) => (Math.abs(previo - v) < 0.5 ? previo : v))
+    })
+  }
+  return [ref, alMedir, falta]
+}
+
 export function usePieFijo() {
   const insets = useSafeAreaInsets()
   /** Cuánto mide el pie. Arranca en 0: **antes de la primera medición no

@@ -63,7 +63,13 @@ export const medidas = {
   barraActivoOffset: -14,
 
   /** El asistente (NEXO) que flota en toda raíz (§1.5). */
-  asistenteDiametro: 60,
+  /* ⏪ **ERA 60 (S116-B lote 6).** Firma del founder sobre el aparato:
+     *«que sea un poco más chico»*. **52 y no 48**: el área táctil mínima de
+     la casa son 44 y el halo respira por fuera — bajar a 48 dejaría el
+     disco a 4 px del piso táctil y cualquier ajuste futuro lo cruzaría sin
+     que nada avise. *Un poco más chico es 52; más chico que eso es otra
+     decisión.* */
+  asistenteDiametro: 52,
 
   /* ══════════════════════════════════════════════════════════════════
    *  LA MARCA CUANDO ES LA PROTAGONISTA (00 · splash, 01 · propuesta)

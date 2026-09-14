@@ -318,6 +318,23 @@ export type IconoNombre =
   //    es lo que lo distingue de `documento` (que es UNA cédula con
   //    retrato). Gate por ícono a 21px PENDIENTE (§2.9).
   | 'documentos' | 'pasaporte' | 'papel' | 'lupa'
+  /* ── S116-B lote 6 · `identidad` — LA CÉDULA DE LA MASCOTA ───────────
+     Firma del founder sobre el aparato: *«Identidad = documento con cara»*.
+
+     🔴 **NACE AUNQUE `documento` YA DIBUJE UNA CÉDULA CON RETRATO, y la
+     razón la tenía escrita el propio registry:** `documento` hace **TRIPLE
+     TURNO** —historia clínica · ficha de identidad · la entrada a
+     Documentos— y *«tres iguales en una sección abierta es la clase
+     D-546»*. **El founder está viendo exactamente eso.** Darle dibujo
+     propio a la identidad es lo que descarga el turno, no una cuarta copia.
+
+     **CÓMO SE DISTINGUE DE `documento`, que es la pregunta que importa:**
+     `documento` es **apaisado** con el retrato chico a la izquierda y dos
+     renglones al lado — se lee «un papel». `identidad` es **vertical** con
+     el retrato **dominante** arriba y dos renglones cortos debajo — se lee
+     «una cédula». *A 21 px lo que discrimina es la orientación y el peso
+     del retrato, no el detalle.* */
+  | 'identidad'
   // ── S91-B · `correo` — NACIÓ COMO CANDIDATO B DE «Documentos» Y PERDIÓ
   //    SU GATE, y NO muere: el founder lo pasó a RESERVA DECLARADA.
   //    Su riesgo era que a 21px se lee «correo» antes que «documentos» —
@@ -2084,17 +2101,50 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
    * sus números queda en `docs/loop/capturas-s113-b-2.2.4/`** — *el papel se
    * conserva; el andamio no.*
    */
+  /* ── S116-B lote 6 · `pasaporte` SE REDIBUJA, y el dibujo viejo NO era
+     un pasaporte ──────────────────────────────────────────────────────
+     ⏪ **Dibujaba un CÓDIGO QR** —tres esquinas, la tercera hecha con la
+     pata—. Era un buen dibujo y nombraba **otra cosa**: un QR es *cómo se
+     lee* un documento, no el documento. *Un nombre que contradice a su
+     dibujo es la clase que esta casa caza* — la misma disciplina con la
+     que `documentosSobre` pasó a `correo`.
+     Firma del founder: *«Pasaporte = libreta con sello»*.
+
+     **La libreta se lee por el LOMO** —la línea vertical pegada al borde
+     izquierdo—, que es lo único que separa una libreta de una tarjeta a
+     21 px. **El sello es un círculo mordido por el borde**, como caen los
+     sellos de verdad: centrado sería un logo, no un sello. */
   pasaporte: ({ tinta, huella }) => (
     <>
-      {/* Las dos esquinas de arriba: s = 5.2, interior 2,89 px a 21.
-          Centros en (6.2, 6.2) y (17.8, 6.2). */}
-      <Path d="M3.6 3.6h5.2v5.2h-5.2Z" {...trazo(tinta)} />
-      <Path d="M15.2 3.6h5.2v5.2h-5.2Z" {...trazo(tinta)} />
-      {/* 🔴 LA TERCERA ESQUINA ES LA PATA, y para que se LEA así tiene que
-          caer donde caería el cuadrado: centro en (6.2, 17.0), o sea en la
-          misma columna que la de arriba. *Un QR tiene TRES esquinas y ninguna
-          más — la cuarta vacía es parte de la forma.* */}
-      <Huella color={huella} x={2.6} y={13.4} escala={0.3} />
+      {/* La tapa, vertical. */}
+      <Path
+        d="M6.4 3.2h11a1.4 1.4 0 0 1 1.4 1.4v14.8a1.4 1.4 0 0 1-1.4 1.4h-11Z"
+        {...trazo(tinta)}
+      />
+      {/* EL LOMO: pegado al borde, de arriba a abajo. Sin esto es una tarjeta. */}
+      <Path d="M6.4 3.2v17.6" {...trazo(tinta)} />
+      <Path d="M4.6 4.8v13.4" {...trazo(tinta)} />
+      {/* EL SELLO, mordido por el canto derecho. */}
+      <Circle cx={14.6} cy={9.4} r={2.6} {...trazo(tinta)} />
+      {/* Dos renglones cortos: lo que un pasaporte tiene escrito debajo. */}
+      <Path d="M9.4 15.4h6.4M9.4 17.8h4" {...trazo(tinta)} />
+      <Huella color={huella} x={10.2} y={5.6} escala={0.24} />
+    </>
+  ),
+  identidad: ({ tinta, huella }) => (
+    <>
+      {/* La cédula, VERTICAL — es lo que la separa de `documento`. */}
+      <Path
+        d="M6.2 2.9h11.6a1.5 1.5 0 0 1 1.5 1.5v15.2a1.5 1.5 0 0 1-1.5 1.5H6.2a1.5 1.5 0 0 1-1.5-1.5V4.4a1.5 1.5 0 0 1 1.5-1.5Z"
+        {...trazo(tinta)}
+      />
+      {/* EL RETRATO, dominante: cabeza + hombros. A 21 px esto es lo único
+          que se lee, y tiene que ser lo que se lea. */}
+      <Circle cx={12} cy={8.6} r={2.5} {...trazo(tinta)} />
+      <Path d="M8.4 14.2a3.7 3.7 0 0 1 7.2 0" {...trazo(tinta)} />
+      {/* Dos renglones cortos debajo: los datos. */}
+      <Path d="M8.2 17.4h7.6M9.6 19.4h4.8" {...trazo(tinta)} />
+      <Huella color={huella} x={14.6} y={16.2} escala={0.22} />
     </>
   ),
 
@@ -2997,6 +3047,8 @@ export function Icono({
     hogar: comunidad, familia: comunidad, equipo: comunidad,
     explorar: comunidadAmplia,
     cuenta: identidad, carnet: identidad, pasaporte: identidad, papel: identidad, lupa: cuidado, seguros: identidad, telemedicina: identidad,
+    /* La cédula es IDENTIDAD por definición: es la capa que la nombra. */
+    identidad: identidad,
     hoy: cuidado, preferencias: cuidado, ayuda: cuidado, ubicacion: cuidado,
     // INFO comparte capa con `ayuda` PROVISIONALMENTE: los dos explican.
     // ⚠️ Si el gate de S79 firma la categoría «glifo de control», este

@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Pressable, View, type ViewStyle } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -118,6 +119,7 @@ export function BotonAsistente({ onPress, visible = true, etiqueta, despertar = 
   const { theme } = useTheme()
   const { handlers, estiloPresionado } = usePresionado(0.97)
   const sinMovimiento = useReducedMotion()
+  const insets = useSafeAreaInsets()
 
   /* ── LA RESPIRACIÓN ────────────────────────────────────────────────
      Un solo valor de 0 a 1 que va y vuelve para siempre; la escala y la
@@ -192,8 +194,18 @@ export function BotonAsistente({ onPress, visible = true, etiqueta, despertar = 
      * `AIRE_RAIZ` la usa para calcular cuánto aire deja toda pantalla raíz
      * abajo, y si acá se escribiera el número suelto **los dos podrían
      * divergir sin que nada falle** — el botón se movería y el aire
-     * quedaría corto, que es el defecto que este token vino a curar. */
-    bottom: medidas.barraAlto + SEPARACION_ASISTENTE - margen,
+     * quedaría corto, que es el defecto que este token vino a curar.
+     *
+     * 🔴 **Y SE APOYA SOBRE LA BARRA, no al lado (lote 6).** El founder lo
+     * vio tapado por la barra de tabs en un Samsung con tres teclas. La
+     * cuenta era `barraAlto + separación` **y le faltaba la barra del
+     * sistema**: donde el navegador no reserva el inset, los 92 de la barra
+     * empiezan más arriba de lo que este `bottom` supone y el disco queda
+     * por debajo. ⇒ se suma **el inset que falta de verdad, medido** — no
+     * `insets.bottom` crudo, que adentro de `(tabs)` lo contaría dos veces
+     * y lo dejaría flotando. *Es el mismo par descoordinado de la onda, en
+     * el otro extremo de la misma pantalla.* */
+    bottom: insets.bottom + medidas.barraAlto + SEPARACION_ASISTENTE - margen,
     width: lado + margen * 2,
     height: lado + margen * 2,
     alignItems: 'center',
