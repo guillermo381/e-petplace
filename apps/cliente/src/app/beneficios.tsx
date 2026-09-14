@@ -1,5 +1,18 @@
 /**
- * 02 · BENEFICIOS — tres tarjetas, UNA sola vez (S116-C lote 3, letra §1.6).
+ * 02 · BENEFICIOS — UNA pantalla, UNA sola vez (S116-C lote 5, firma de mesa).
+ *
+ * ── ☠️ MUEREN LAS TRES TARJETAS DESLIZABLES, Y CON ELLAS SU MAQUINARIA ────
+ * ⏪ Hasta hoy 02 eran **tres tarjetas con `pagingEnabled`**, sus puntos de
+ * paginación y el CTA que aparecía sólo en la última. **Firma del founder
+ * (14-sep): vuelve a ser UNA pantalla, como el sketch.** Se van el
+ * `ScrollView` horizontal, el estado `actual`, el `useWindowDimensions`, la
+ * fila de puntos y la condición del CTA — *Ley 37: se retira entero, no se
+ * comenta.*
+ *
+ * **Lo que se conserva y por qué**: la marca de «ya la vio» y el
+ * `CONTEO_PENDIENTE` de los dos toques. *El cambio es de forma, no de
+ * contabilidad: cuántos saltan y cuántos completan se sigue queriendo saber
+ * el día que exista la puerta.*
  *
  * ── CUÁNDO SE VE, Y DÓNDE VIVE ESA MARCA ─────────────────────────────────
  * Sólo la primera vez que alguien toca «Crear cuenta» **en este aparato**;
@@ -27,19 +40,32 @@
  * *La letra §1.6 dice «en octubre se decide con dato». Este comentario existe
  * para que ese día se sepa que el dato no se está juntando.*
  *
- * ── LA TERCERA TARJETA ES LA ÚNICA CON ACCIÓN ────────────────────────────
- * «Comenzar» aparece sólo en la última: una acción por vista (Ley 5), y poner
- * el CTA en las tres invitaría a saltear el contenido que la pantalla existe
- * para mostrar. **«Saltar» está siempre**, arriba — *una presentación de la
- * que no se puede salir deja de ser una presentación.*
+ * ── «SALTAR» SIGUE ARRIBA, Y «COMENZAR» ES LA ÚNICA PRIMARIA ────────────
+ * Una acción por vista (Ley 5). **«Saltar» está siempre**, arriba y en tinta
+ * apagada — *una presentación de la que no se puede salir deja de ser una
+ * presentación.*
  */
 
-import { useRef, useState } from 'react';
-import { ScrollView, View, useWindowDimensions } from 'react-native';
+import { View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Boton, Entrada, Personaje, Texto, radius, spacing, type EspeciePersonaje, useTheme } from '@epetplace/ui';
+import Animated, { useAnimatedStyle } from 'react-native-reanimated';
+import {
+  Boton,
+  Celda,
+  Entrada,
+  Icono,
+  Personaje,
+  Tarjeta,
+  Texto,
+  spacing,
+  useTheme,
+  type EspeciePersonaje,
+  type IconoNombre,
+} from '@epetplace/ui';
+
+import { useRuedaDeCaras } from '@/lib/rueda-de-caras';
 
 import { useTraduccion } from '@/i18n';
 
@@ -65,22 +91,36 @@ function CONTEO_PENDIENTE(_cual: 'salto' | 'completo'): void {
   /* sin puerta de eventos en la casa — medido, S116-C lote 3 */
 }
 
-type Tarjeta = { especie: EspeciePersonaje; titulo: string; apoyo: string };
+/** Las seis caras de la rueda. Orden fijo y no sorteado: *una rueda que
+ *  sortea puede repetir dos veces seguidas la misma cara, y eso se lee como
+ *  que se colgó.* `otro` es la nariz, que cierra la vuelta. */
+const CARAS: readonly EspeciePersonaje[] = ['perro', 'gato', 'conejo', 'ave', 'roedor', 'otro'];
+
+/** Las cuatro filas. **Van en un arreglo y no escritas a mano** para que el
+ *  escalonado salga del índice: cuatro `Entrada orden={i}` copiadas divergen
+ *  la primera vez que alguien reordena. */
+const FILAS: readonly { glifo: IconoNombre; clave: 'buscar' | 'verificado' | 'agenda' | 'documento' }[] = [
+  { glifo: 'lupa', clave: 'buscar' },
+  /* 🔴 **`checkEnCirculo` y NO `certificaciones`, y es una decisión con razón:**
+     `certificaciones` es *«papel + huella como SELLO»* — el DOCUMENTO. Esta
+     fila no dice «hay certificados»: dice que los profesionales **están
+     verificados**, que es un estado. *Montar el papel donde va el estado es el
+     préstamo entre significados distintos que la casa prohíbe.* */
+  { glifo: 'checkEnCirculo', clave: 'verificado' },
+  { glifo: 'hoy', clave: 'agenda' },
+  { glifo: 'documento', clave: 'documento' },
+];
 
 export default function Beneficios() {
   const router = useRouter();
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
-  const { width } = useWindowDimensions();
-  const [actual, setActual] = useState(0);
-  const scroll = useRef<ScrollView>(null);
 
-  const tarjetas: Tarjeta[] = [
-    { especie: 'perro', titulo: t('beneficios.unoTitulo'), apoyo: t('beneficios.unoApoyo') },
-    { especie: 'gato', titulo: t('beneficios.dosTitulo'), apoyo: t('beneficios.dosApoyo') },
-    { especie: 'conejo', titulo: t('beneficios.tresTitulo'), apoyo: t('beneficios.tresApoyo') },
-  ];
+  /* La rueda vive en un hook compartido con 00: el reloj se escribe UNA vez.
+     Ver su cabecera — la casa ya midió que dos ruedas se desincronizan. */
+  const rueda = useRuedaDeCaras(CARAS);
+  const estiloCara = useAnimatedStyle(() => ({ opacity: rueda.opacidad.value }));
 
   /** Marca y sigue. La marca no bloquea el camino: si falla, se pasa igual. */
   const seguir = async (cual: 'salto' | 'completo') => {
@@ -95,7 +135,7 @@ export default function Beneficios() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base, paddingTop: insets.top }}>
-      {/* «Saltar», arriba y siempre. */}
+      {/* «Saltar», arriba a la derecha y siempre, en tinta apagada. */}
       <View style={{ alignItems: 'flex-end', paddingHorizontal: spacing[4], paddingTop: spacing[2] }}>
         <Boton
           variante="ghost"
@@ -105,88 +145,56 @@ export default function Beneficios() {
         />
       </View>
 
-      {/* Las tres, con el dedo. El paginado lo hace el ScrollView; acá sólo se
-          lee en cuál quedó — *el índice se DERIVA del scroll y no se guarda en
-          paralelo: dos fuentes para la misma posición divergen.* */}
-      <ScrollView
-        ref={scroll}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={(e) =>
-          setActual(Math.round(e.nativeEvent.contentOffset.x / Math.max(1, width)))
-        }
-        style={{ flex: 1 }}
-      >
-        {tarjetas.map((c) => (
-          <View
-            key={c.titulo}
-            style={{
-              width,
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: spacing[5],
-              paddingHorizontal: spacing[6],
-            }}
-          >
-            {/* 🔴 **LA ENTRADA ESCALONADA — S116-C lote 3e.**
-                ⏪ 02 **no tenía ninguna**: las tres piezas de cada tarjeta
-                aparecían juntas y de golpe. El deslizado entre tarjetas sí
-                estaba (lo hace `pagingEnabled`), y por eso el hueco no se
-                notaba: *había movimiento, pero no era el que el encargo pide*.
-
-                El orden es el de lectura —personaje, título, apoyo— y lo trae
-                `Entrada`, la misma pieza que usa 01: así las dos primeras
-                pantallas del recorrido **entran con el mismo tempo**, que es
-                justamente lo que hace que se lean como una sola casa. */}
-            <Entrada orden={0}>
-              <Personaje especie={c.especie} tamano="grande" fondo="rosa" />
-            </Entrada>
-            <Entrada orden={1}>
-              <Texto variante="titulo">{c.titulo}</Texto>
-            </Entrada>
-            <Entrada orden={2}>
-              <Texto variante="cuerpo" color="secondary">
-                {c.apoyo}
-              </Texto>
-            </Entrada>
+      <View style={{ flex: 1, paddingHorizontal: spacing[5], gap: spacing[6] }}>
+        {/* ① LA CARA Y EL TÍTULO, en fila. El círculo grande a la izquierda,
+            el título al lado — **no centrado arriba**: el sketch los pone
+            juntos, y así el título arranca a la altura de la mirada del
+            personaje en vez de flotar encima. */}
+        <Entrada>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4] }}>
+            <Animated.View style={estiloCara}>
+              {/* `forma="circulo"` y `fondo="blanco"`: el círculo blanco grande
+                  del sketch. `grande` es el doble del avatar del hogar — la
+                  pieza lo resuelve, acá no hay número. */}
+              <Personaje especie={rueda.actual} tamano="grande" fondo="blanco" forma="circulo" />
+            </Animated.View>
+            <View style={{ flex: 1 }}>
+              <Texto variante="titulo">{t('beneficios.titulo')}</Texto>
+            </View>
           </View>
-        ))}
-      </ScrollView>
+        </Entrada>
 
-      {/* Los puntos + la acción. El CTA sólo en la última (ver cabecera). */}
-      <View style={{ paddingHorizontal: spacing[6], paddingBottom: insets.bottom + spacing[6], gap: spacing[5] }}>
-        <View
-          accessibilityRole="progressbar"
-          accessibilityLabel={t('beneficios.paso', { actual: actual + 1, total: tarjetas.length })}
-          style={{ flexDirection: 'row', justifyContent: 'center', gap: spacing[2] }}
-        >
-          {/* 🔴 **EL PUNTO ACTIVO VA EN `accent.control`, NO EN `accent.cta`** —
-              y `verify:diseno` me lo cazó con razón (Ley 21: *el CTA lo
-              resuelve `Boton` por el slot*). Además es lo correcto por la
-              letra §1.3: **magenta acciona, ciruela selecciona**. *Un punto de
-              paginación no acciona nada: dice dónde estás.* */}
-          {tarjetas.map((c, i) => (
-            <View
-              key={c.titulo}
-              style={{
-                width: i === actual ? spacing[5] : spacing[2],
-                height: spacing[2],
-                borderRadius: radius.full,
-                backgroundColor: i === actual ? theme.accent.control : theme.border.subtle,
-              }}
-            />
+        {/* ② LAS CUATRO FILAS, en UNA sola tarjeta blanca. Entran escalonadas:
+            `orden` es semántico —el orden de lectura— y lo trae `Entrada`, que
+            además resuelve `useReducedMotion` y memorial adentro. */}
+        <Tarjeta>
+          {FILAS.map((f, i) => (
+            <Entrada key={f.clave} orden={i}>
+              <Celda
+                inicio={<Icono nombre={f.glifo} tamano={24} registro="capa" />}
+                titulo={t(`beneficios.${f.clave}Titulo` as 'beneficios.buscarTitulo')}
+                subtitulo={t(`beneficios.${f.clave}Apoyo` as 'beneficios.buscarApoyo')}
+              />
+            </Entrada>
           ))}
-        </View>
+        </Tarjeta>
+      </View>
 
-        {actual === tarjetas.length - 1 ? (
-          <Boton
-            variante="primario"
-            etiqueta={t('beneficios.comenzar')}
-            bloque
-            onPress={() => void seguir('completo')}
-          />
-        ) : null}
+      {/* ③ LA ÚNICA PRIMARIA. Ahora está SIEMPRE: con una sola pantalla no hay
+          «última» en la que aparecer. */}
+      <View
+        style={{
+          paddingHorizontal: spacing[5],
+          paddingBottom: insets.bottom + spacing[6],
+          paddingTop: spacing[4],
+        }}
+      >
+        <Boton
+          variante="primario"
+          bloque
+          etiqueta={t('beneficios.comenzar')}
+          onPress={() => void seguir('completo')}
+        />
       </View>
     </View>
   );

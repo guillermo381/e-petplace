@@ -236,7 +236,7 @@ La superficie que agrupa.
 `CeldaNavegacion` entra a una sección (glifo + título + chevrón); `Celda` muestra un dato.
 - **props:** `icono` · `titulo` · `detalle` · `onPress` · `registro` · `chevron` — `subtitulo` · `inicio` · `densidad` · `tituloEntero` · `elegida`
 - **tokens:** `radius` · `spacing` · `motion` · `typography` · `theme.accent` · `theme.bg`
-- **consumidores:** 49 · 90
+- **consumidores:** 49 · 91
 - ⚠️ **El contorno transparente murió como acción de fila.** Información despliega; acción lleva. El glifo va en círculo rosa tinte.
 
 ### `Insignia` — *el estado*
@@ -258,7 +258,7 @@ Sumar y restar unidades.
 El set b′. **Nombre tipado: cero strings mágicos.**
 - **props:** `nombre` (canónico **o** nombre del mock) · `tamano` · `registro` (`capa`|`aa`|`tinta`) · `tinta` · `huella` · `activa` · `montaje`
 - **tokens:** `medidas` · `palette` · `theme.capa` · `theme.status` · `theme.accent`
-- **consumidores:** 59
+- **consumidores:** 60
 - 🔴 **En la casa v5 NINGÚN glifo lleva huella** (letra §1.1). Lo decide `resolverHuella`, no la pantalla — y lo vigila `verify:huella-por-casa`.
 - ⚠️ **C puede montar los nombres del mock** (`buscar`, `agenda`, `chat`, `camara`…): 14 alias resuelven al canónico, y un alias mal escrito **rompe el compilador**.
 - ⚠️ `Volver`/`Avanzar`/`Flecha` **no son del registry**: son `Chevron`, otra pieza.

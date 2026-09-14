@@ -240,6 +240,17 @@ export default function Cuenta() {
             icono: 'lapiz' as const,
             detalle: 'herramienta de sesión — no es pantalla de producto',
           },
+          /* ⭐ **S116-C lote 6 · LA GALERÍA RECUPERA SU PUERTA** (ver la nota
+             larga al pie, donde está la lápida de S107-C que esto enmienda).
+             **Mismo glifo que la lámina a propósito** (`D-877`): las dos son
+             herramientas de sesión y *que se vean iguales entre sí y distintas
+             del resto es exactamente lo que hay que comunicar*. */
+          {
+            etiqueta: t('cuenta.galeriaPiezas'),
+            ruta: '/gallery' as const,
+            icono: 'lapiz' as const,
+            detalle: 'herramienta de sesión — no es pantalla de producto',
+          },
         ]
       : []),
   ];
@@ -438,7 +449,33 @@ export default function Cuenta() {
               `R18` quedó ANGOSTADA a la casa del prestador en el mismo acto
               (pedido `docs/loop/S107-C-PEDIDO-A-B-R18.md`): la regla no se
               borró porque **sigue teniendo objeto** — el que importaba
-              siempre fue el camino del prestador. ── */}
+              siempre fue el camino del prestador. ──
+
+              ⏪ **S116-C lote 6 · LA PUERTA VUELVE, Y SÓLO EN DEV** (firma de
+              la mesa, 14-sep-2026). La lápida de arriba se conserva entera
+              porque su razón sigue siendo cierta —*una sala retirada no debe
+              tener puerta en producto*— y porque lo que cambió no es el
+              criterio: es el HECHO que la sostenía. **Medido por B: la galería
+              no se puede abrir en el binario por ninguno de los siete
+              caminos**, y `R17` obliga a que cada pieza nueva entre ahí ⇒ *el
+              retiro dejó de proteger al producto y pasó a bloquear el gate*,
+              tres lotes seguidos.
+
+              **Bajo `__DEV__`, que es la diferencia con la fila de S107:**
+              aquella vivía en la superficie real (era justamente el reproche
+              de `D-878`). Ésta no existe en el bundle de producción, así que
+              la lápida sigue cumpliéndose donde importa.
+
+              🔴 **Y VIVE ARRIBA, EN `lugares`, NO ACÁ AL PIE — medido, no
+              elegido.** La primera vuelta la montó como `Boton variante=ghost`
+              justo debajo del sello del update, que es donde el encargo la
+              pedía. **Se dibujó, y el toque inyectado no la abrió**; la fila
+              vecina (la lámina S74, `CeldaNavegacion`) sí abre con el mismo
+              gesto. *No se insiste con una pieza que no responde para
+              respetar un lugar: la puerta existe para abrirse.* Y de paso es
+              lo que la casa ya decía — `19.7`: **lo que NAVEGA es una fila con
+              chevron, jamás un botón sin caja.** El sello del update queda
+              debajo, a dos dedos, que es la vecindad que la firma pedía. ── */}
         </View>
       </ScrollView>
 

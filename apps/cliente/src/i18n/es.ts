@@ -33,14 +33,18 @@ export const clienteEs = {
      que la app HACE, no lo que promete sentir.* */
   beneficios: {
     saltar: 'Saltar',
-    unoTitulo: 'Su expediente vive contigo',
-    unoApoyo: 'Carné, vacunas y documentos, siempre a mano',
-    dosTitulo: 'Cuidado cerca de ti',
-    dosApoyo: 'Veterinaria, paseo, estética y guardería',
-    tresTitulo: 'Todo en un lugar',
-    tresApoyo: 'Agendas, compras y pagas una sola vez',
+    /* ⭐ El título de la pantalla, firma del founder (14-sep). Reemplaza a los
+       tres de las tarjetas: **una pantalla, una promesa**. */
+    titulo: 'Todo para su bienestar, en un solo lugar',
+    buscarTitulo: 'Encuentra servicios cerca de ti',
+    buscarApoyo: 'Veterinaria, paseo, estética y guardería',
+    verificadoTitulo: 'Profesionales verificados',
+    verificadoApoyo: 'Revisamos quién atiende a tu mascota',
+    agendaTitulo: 'Agenda en minutos',
+    agendaApoyo: 'Eliges el día y la hora, y listo',
+    documentoTitulo: 'Historial de salud siempre disponible',
+    documentoApoyo: 'Carné, vacunas y documentos, a un toque',
     comenzar: 'Comenzar',
-    paso: 'Tarjeta {{actual}} de {{total}}',
   },
   bienvenida: {
     titular: 'Tu mascota no tiene un expediente. Tiene',
@@ -2480,6 +2484,14 @@ export const clienteEs = {
        decisión del riel, no de esta pantalla.** */
     mediosOcultas: 'No mostramos las tarjetas que tu banco ya no tiene activas. Puedes volver a agregarlas cuando quieras.',
     titulo: 'Tu cuenta',
+    /* ⭐ **S116-C lote 6 · LA GALERÍA VUELVE A TENER PUERTA, SÓLO EN DEV.**
+       Firma de la mesa (14-sep-2026): *«la galería no se puede abrir en el
+       binario — B midió siete caminos, todos fallan, y R17 obliga a que cada
+       pieza nueva entre ahí, así que lleva tres lotes bloqueando sus
+       capturas»*. **No es una fila de producto: es el único camino del
+       founder a lo que `R17` le obliga a firmar.** Por eso lleva `detalle`,
+       igual que la lámina — la marca de la CLASE «herramienta de sesión». */
+    galeriaPiezas: 'Galería de piezas',
     // S74 — entrada TEMPORAL del gate de la fusión (muere con la firma, Ley 37)
     laminaFusion: 'Lámina S74 · la fusión del avatar',
     // S101-B — ANDAMIO DE GATE, no superficie definitiva (Ley 37: muere con el

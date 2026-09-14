@@ -47,10 +47,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  AIRE_RAIZ,
   Boton,
   Campo,
-  COLA_PRESENCIA_COACH,
   Encabezado,
   Entrada,
   Esqueleto,
@@ -151,6 +152,7 @@ const LUGAR_CONTROL_FILTRO = spacing[12];
 
 export default function DespensaDescubrir() {
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
   const carrito = useCarrito();
@@ -953,15 +955,36 @@ export default function DespensaDescubrir() {
           // *Yo lo había defendido como «aire de cola» y C tenía razón: era
           // una línea vieja, no una posición.* Se unifica en las tres
           // pantallas — dos reglas para lo mismo divergen.
-          // 🔴 S100d-bis · **+ la cola del disco flotante.** Ya no hay pie
-          // que se mida solo: el overlay se apoya sobre el scroll y sin
-          // esta reserva **se sienta encima de la última tarjeta** — el
-          // mismo defecto que la banda del pie causaba, entrando por la
-          // otra puerta. La constante la exporta la pieza, derivada de su
-          // propio tamaño: *un número tecleado que tenga que coincidir con
-          // el diámetro de un disco de otro paquete son dos cuentas que
-          // tienen que dar igual.*
-          paddingBottom: spacing[8] + COLA_PRESENCIA_COACH,
+          /* 🔴 **S116-C lote 6 · punto ③ — LA RESERVA ERA DE UNA PIEZA QUE
+             YA NO SE MONTA, y ésa es la causa medida de los «Agregar»
+             cortados.**
+
+             Gate del founder: *«los botones de agregar de la Despensa salen
+             CORTADOS abajo»*. Medido antes de tocar:
+
+               · lo que reservaba  = `spacing[8]` 32 + `COLA_PRESENCIA_COACH` 84
+                                   = **116 dp** (y `COLA_…` = orbe 48 + 20 + 16)
+               · lo que hay debajo = barra 92 + separación 8 + asistente 60
+                                   + respiro 8 = **`AIRE_RAIZ` 168**, más el
+                                   inset del aparato
+
+             ⇒ **faltaban 52 dp más el inset: casi exactamente el alto de la
+             barra.** La última fila quedaba debajo.
+
+             🔴 **Y el porqué es de clase, no de número: `PresenciaCoach` NO SE
+             MONTA en ninguna pantalla del cliente** (censado: la única mención
+             viva fuera de esta reserva es un comentario en `lib/nexo/estado.ts`).
+             El orbe se fue y **su aire se quedó** — *la pantalla seguía
+             reservando para un disco que ya no existe y no reservaba para la
+             barra y el botón que sí están*. **Un aire que sobrevive a su pieza
+             no es aire de más: es aire puesto en el lugar equivocado.**
+
+             ⇒ se adopta `AIRE_RAIZ + insets.bottom`, **la misma cuenta que Hogar
+             y Cuenta** (`hogar/index.tsx:1704`). *Tres pantallas raíz con tres
+             reservas distintas es la divergencia que `AIRE_RAIZ` nació para
+             matar.* El inset se suma acá porque `AIRE_RAIZ` declara ser sólo la
+             parte FIJA — lo dice su propia cabecera. */
+          paddingBottom: AIRE_RAIZ + insets.bottom,
           gap: spacing[5],
         }}
       >
