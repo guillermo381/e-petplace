@@ -73,7 +73,17 @@ import type { AvatarMascotaEspecie } from '@epetplace/ui';
  * (`docs/loop/buzon/S116-C-para-A-la-especie-tambien-desde-la-foto.md`).
  * *Se entrega la mitad que puedo y se nombra la que no, en vez de dejar la
  * pantalla prometiendo algo que el motor no hace.* */
-export const PASOS = ['foto', 'datos', 'carnet', 'cierre'] as const;
+/** ⭐ **S116-C lote 10 · `raza` ENTRA ENTRE LA FOTO Y EL FORMULARIO.**
+ *  Recorrido 4: *«nace la pantalla intermedia de raza, saltable»*.
+ *
+ *  ⚠️ **Es un PASO del recorrido y NO un paso CONTADO**, y la distinción es
+ *  la que sostiene todo lo demás: vive acá para que `siguiente()` la
+ *  encadene sola — *un orden que se escribe en dos lados diverge al primer
+ *  cambio, y esta lista ya lo pagó con `PRIMER_PASO`* — pero **no lleva
+ *  barra**: la pantalla se salta sola casi siempre, y un «3 de 4» para quien
+ *  hizo tres pantallas es un contador que miente. El porqué largo vive en la
+ *  cabecera de `PasoRazaFicha`. */
+export const PASOS = ['foto', 'raza', 'datos', 'carnet', 'cierre'] as const;
 export type Paso = (typeof PASOS)[number];
 
 /** 🔴 **EL PRIMER PASO SE DERIVA, NO SE ESCRIBE.** Estaba tecleado en las dos
