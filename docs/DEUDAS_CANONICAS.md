@@ -1,3 +1,47 @@
+### ② CURADO — el correo ya muestra la marca nueva (14-sep-2026)
+
+**El objeto se reemplazó y se verificó contra el objeto, no contra el «ok» de la subida.**
+
+| | antes | ahora |
+|---|---|---|
+| bytes | 4.828 | **23.056** |
+| píxeles | 128×88 | **240×162** |
+| `etag` | `42519a30…` | **`65880bba…`** |
+| `sha256` (primeros 32) | `480355ede5012e37fd0e4f1138af2845` | **`2bf307622c18601367816daf60cd4e83`** |
+
+**El sha del objeto hosteado coincide con `packages/ui/assets/marca/isotipo@2x.png` del árbol** — es el asset de B, byte a byte.
+
+**Nada se perdió:** el PNG viejo era **byte-idéntico** a `packages/ui/assets/brand/isotipo-correo@2x.png`, que sigue versionado. *El «antes» de una cura retroactiva tiene que existir en algún lado, y en este caso ya existía sin que nadie lo hubiera planeado.*
+
+⚠️ **DOS COSAS QUE LA MEDICIÓN DEJÓ, y ninguna es un defecto:**
+
+**① El CDN sirvió el viejo después de la subida.** La primera lectura de la URL pública volvió con `cf-cache-status: HIT`, **4.828 bytes y el etag viejo**, con el origen ya teniendo el nuevo. *Es `cache-control: public, max-age=3600`.* ⇒ **una subida a Storage no se verifica contra la URL pública: se verifica contra el ORIGEN** (`/storage/v1/object/…` con credencial) **o con un cache-buster** — si no, se concluye que la subida falló cuando lo único que pasó es que el borde todavía no expiró. Minutos después la URL pública ya servía el nuevo, verificado por etag. **Y su consecuencia operativa: el cambio no es instantáneo para todo el mundo** — hay hasta una hora de borde, más lo que cachee por su cuenta el proxy de imágenes de cada cliente de correo.
+
+**② La pantalla lo agradece más de lo que la ficha esperaba.** El correo lo pinta a **46×32 px** (`despachar-correo:351`). A ese tamaño **el gradiente viejo se lava** — los dos lazos finos en magenta→teal→amarillo se vuelven un gris sucio— y **la nariz nueva, sólida y con contorno, se lee entera**. *La cura del correo no era sólo de coherencia de marca: el logo viejo a ese tamaño casi no existía.* **Residuo declarado, sin curar:** el `height="32"` del `<img>` fue calculado para la proporción vieja (128×88 = 1,45) y la nueva es 1,48 ⇒ **la imagen se aplasta ~3 % en vertical**. Es invisible a ojo y **tocarlo exige desplegar la edge function**, que es otro acto: queda anotado, no hecho.
+
+### ① FRENADO — y el freno NO es que el dibujo nuevo no rinda a A4
+
+**Se intentó, se miró, y se paró.** El orden fue el que la mesa pidió: reemplazar, generar, mirar a tamaño A4 antes de dar nada por bueno.
+
+**Lo primero que la medición dio vuelta, y corrige a esta misma ficha:** *«el asset nuevo es un PNG, no un path»* era **incompleto**. B también entregó `packages/ui/assets/marca/isotipo.svg` — un vector. **Y renderizado entero a 380 pt sobre A4 el dibujo nuevo RINDE: no pixela, se lee limpio.** *Si el freno se contara como «el logo nuevo no funciona impreso» sería falso, y alguien lo usaría mañana para decidir mal.*
+
+**El freno es del MECANISMO, y es de forma:** `papel.ts` dibuja la marca de agua con **`page.drawSvgPath(ISOTIPO_PATH_D, …)`** — **pdf-lib recibe UN path, con UN color y UNA opacidad.** El asset nuevo no es un path: es **una vectorización de un mapa de bits**, medida:
+
+| | path viejo | asset nuevo |
+|---|---|---|
+| `<path>` | **1** | **268** |
+| dentro de su propio `<clipPath>` | 0 | **229** |
+| trazos (`fill="none"`) con `transform` propio | 0 | **38** |
+| caracteres del `d` | **2.433** | **51.119** (21×, concatenando) |
+
+**El control que lo cierra:** se aplanaron los 230 paths de relleno en un solo `d` — lo único que `drawSvgPath` podría recibir— y se dibujó a 380 pt en tinta al 6 %. **Sale una pila de rectángulos grises con `nonzero`, y rectángulos con fantasmas con `evenodd`.** *El dibujo no vive en los paths: vive en los 229 clips, y un `d` no se los lleva.* **No es una cura que salga mal: es una que no existe.**
+
+**Y la salida fácil también está medida y tampoco sirve:** embeber el PNG con `embedPng` en vez del path da, a 380 pt de ancho, **68 dpi** con el `@3x` de 360 px — *el mismo pixelado que el comentario de `papel.ts` ya declaraba en 2026 y por el que el path existe*.
+
+⇒ **LO QUE DESTRABA ① ES UNA ENTREGA, NO UN COMMIT: B tiene que dar el isotipo nuevo como PATH LIMPIO** — un `d` único, de una sola silueta, dibujado como vector y no trazado desde un PNG. **El propio parte de B ya lo había medido y dicho** (`docs/loop/S116-B-ASSETS.md`): *«son vectores, pero no son vectores limpios»*, mil colores es lo que produce vectorizar un mapa de bits. **Esta ficha no descubrió eso: lo confirmó del lado del consumidor, que es donde se paga.**
+
+**Evidencia, depositada:** `docs/loop/capturas-s116-a/d1107-marca-de-agua-a4.jpg` — las tres a escala real sobre A4: el path viejo, el dibujo nuevo entero, y el dibujo nuevo aplanado a un path. Y `docs/loop/capturas-s116-a/d1107-isotipo-en-el-correo.jpg` — viejo y nuevo al tamaño exacto del correo (46×32) sobre su papel.
+
 # Deudas canónicas — e-PetPlace Portal Prestadores
 
 > Inventario completo D-001 a D-259. Extraído de CLAUDE.md en S29 (21 May 2026), mantenido por sesión.
@@ -34970,7 +35014,7 @@ Pedir la recuperación con una cuenta real, recibir el correo, **volver por el e
 
 ## `D-1107` 🟠 — TODO LO QUE LA APP **EXPORTA** LLEVA EL LOGO VIEJO — ocho artefactos, por **dos caminos distintos**
 
-**Estado:** ABIERTA · **Dueño: A** (vive entero en `supabase/functions/` y en Storage) · **el asset nuevo lo produce B**, que ya lo entregó.
+**Estado:** **PARCIAL** — **② el correo: CURADO y verificado contra el objeto (14-sep-2026)** · **① los ocho documentos: FRENADO, y el freno está medido** · **Dueño: A** (vive entero en `supabase/functions/` y en Storage) · **el asset nuevo lo produce B** — y lo que entregó **no sirve para ①**: ver abajo.
 **Origen:** la mesa, 14-sep-2026. **Medido sin curar.**
 
 > El rediseño llegó a la app. **No llegó a nada de lo que la app le da a la familia para guardar o mostrarle a otro** — que es justamente donde la marca vive más tiempo: un PDF en el teléfono, un correo en la bandeja, un pasaporte que se enseña en un mostrador.
@@ -35007,7 +35051,7 @@ Pedir la recuperación con una cuenta real, recibir el correo, **volver por el e
 
 **Si el logo nuevo *puede* ir a un A4.** `papel.ts` ya declara una razón para no usar el del correo — *«el isotipo EN GRADIENTE a 128×88 px en color contradice la firma y a ese tamaño pixela sobre un A4»* — y **el asset nuevo es un PNG del ilustrador, no un path vectorial**. *Poner un PNG en un documento impreso puede verse peor que el path viejo, y eso se mira antes de reemplazar, no después.* ⇒ **puede hacer falta que B entregue el isotipo nuevo como PATH**, y entonces la ficha se reparte.
 
-**☠️ MUERTE:** los ocho artefactos salen con la marca nueva, verificado abriendo un PDF y un correo reales.
+**☠️ MUERTE:** los ocho artefactos salen con la marca nueva, verificado abriendo un PDF real. **② ya murió** (14-sep-2026, verificado contra el objeto). **① muere cuando llegue el path limpio de B y un A4 generado lo confirme.**
 
 ---
 
