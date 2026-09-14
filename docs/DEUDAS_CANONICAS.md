@@ -35447,3 +35447,38 @@ Se toca «vacuna» → navega a `/carnet` **con el abanico abierto detrás**; al
 **Verificado del objeto** (`AbanicoAsistente:192` y la nota de `BotonAsistente:299`), **no del parte de B.**
 
 **☠️ MUERTE — MUERTA en código.** Queda un gate en aparato que no es de esta ficha: *el volcado no dice que el abanico cerró; lo dice volver y ver la pantalla limpia.*
+
+---
+
+## `D-1117` 🟠 — `R32` DA ROJO SOBRE CÓDIGO CORRECTO: la ventana de ±25 líneas se quedó corta por **3**
+
+**Estado:** ABIERTA · **Dueño: B** (`R32` nació en S89-B) · **NO se curó desde el consumidor, a propósito.**
+**Origen:** A, al mergear el lote 9 de C (14-sep-2026).
+
+> **La fila SÍ declara su gap.** `R32` no lo ve porque C metió el carrito entre el `<View>` de la fila y la campana, y el declarante quedó **a 28 líneas de una ventana de 25**.
+
+### Medido con el propio `sinComentarios` del gate, no con una reimplementación
+
+| | línea (sin comentarios) |
+|---|--:|
+| `gap: spacing[5]` de la fila que porta las dos zonas táctiles | **534** |
+| el montaje de la campana | **562** |
+| **distancia** | **28** — *tres más que la ventana* |
+
+**El valor es el que la regla pide** (`spacing[5]`, y su mensaje dice «`spacing[5]+`»). **La estructura es la que la lámina manda**: inline, la campana sin moverse, el carrito a su izquierda. *Lo único que cambió es que ahora hay una pieza más entre el declarante y el declarado.*
+
+### 🔴 Por qué NO se curó, que es la parte que importa
+
+**La única forma de ponerlo verde desde el consumidor es duplicar un `gap: spacing[5]` más cerca** — un token que no cambia el layout, escrito para que un instrumento lo alcance. **Eso es exactamente lo que esta casa prohíbe**, y el propio `verify:diseno` lo tiene escrito: *«un rojo por la razón equivocada está tan roto como un verde por la razón equivocada»*.
+
+*Un número agregado para satisfacer a un gate deja de describir el diseño y pasa a describir al gate — y el que lo lea en seis meses no va a poder distinguirlos.*
+
+### La cura, y ya existe en la misma regla
+
+**`R32` resuelve los `hitSlop` de vecinos EXTRAÍDOS por ÁRBOL DE MONTAJE** (`arbolR32()`, S89-B) precisamente porque la ventana no los alcanzaba. **El `gap` tiene el mismo problema y todavía se mide por ventana.** ⇒ la salida no es agrandar el ±25 —que se vuelve a quedar corto con la próxima pieza— **sino resolver el gap por el mismo árbol que ya resuelve el hitSlop**.
+
+⚠️ **Y la ventana ancha tiene su propio costo, por eso no alcanza con subirla:** cuanto más grande, más probable es que capture el `gap` de OTRA fila y dé verde sobre una campana que de verdad no lo declara. *Una ventana que acierta por tamaño no está midiendo la fila: está midiendo el archivo.*
+
+**Mientras tanto se declara con `SALTAR_GATE` y su medición**, en cada commit que lo arrastre.
+
+**☠️ MUERTE:** cuando `R32` resuelva el `gap` por árbol de montaje y este archivo dé verde **sin que nadie le haya agregado un token**.
