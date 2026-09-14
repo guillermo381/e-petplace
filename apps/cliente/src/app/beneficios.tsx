@@ -53,8 +53,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import {
   Boton,
-  Celda,
   Entrada,
+  FilaBeneficio,
   Icono,
   Personaje,
   Tarjeta,
@@ -164,20 +164,34 @@ export default function Beneficios() {
           </View>
         </Entrada>
 
-        {/* ② LAS CUATRO FILAS, en UNA sola tarjeta blanca. Entran escalonadas:
-            `orden` es semántico —el orden de lectura— y lo trae `Entrada`, que
-            además resuelve `useReducedMotion` y memorial adentro. */}
-        <Tarjeta>
-          {FILAS.map((f, i) => (
-            <Entrada key={f.clave} orden={i}>
-              <Celda
-                inicio={<Icono nombre={f.glifo} tamano={24} registro="capa" />}
-                titulo={t(`beneficios.${f.clave}Titulo` as 'beneficios.buscarTitulo')}
-                subtitulo={t(`beneficios.${f.clave}Apoyo` as 'beneficios.buscarApoyo')}
-              />
-            </Entrada>
-          ))}
-        </Tarjeta>
+        {/* ② LAS CUATRO FILAS — **UNA TARJETA BLANCA POR BENEFICIO** (S116-C
+            lote 7 · punto ⑦, firma del founder: *«FilaBeneficio de B ya está en
+            main: montala CUATRO veces, una tarjeta blanca por beneficio como el
+            sketch»*).
+
+            ⏪ **Era UNA `Tarjeta` con cuatro `Celda` adentro**, y la pieza que
+            lo corrige explica por qué importa: *«una lista dice "estos ítems van
+            juntos"; cuatro tarjetas dicen "cada uno vale por sí mismo", que es
+            lo que una pantalla de propuesta necesita»*.
+
+            🔴 **Y `FilaBeneficio` NO es `Celda` sin `onPress`** —también lo dice
+            su cabecera, y es lo que impide montar el atajo fácil—: una celda
+            **anuncia toque** con el rol de botón y el hundido, y sin `onPress`
+            queda *«una puerta que no abre»*. Acá no hay control que anunciar:
+            hay una frase sobre lo que la app hace. **Ni `accessibilityRole`, ni
+            `Pressable`, ni chevrón.**
+
+            La tarjeta la trae la pieza adentro; acá sólo va el escalonado, que
+            sigue saliendo del ÍNDICE y no de cuatro `Entrada` copiadas. */}
+        {FILAS.map((f, i) => (
+          <Entrada key={f.clave} orden={i}>
+            <FilaBeneficio
+              glifo={f.glifo}
+              titulo={t(`beneficios.${f.clave}Titulo` as 'beneficios.buscarTitulo')}
+              apoyo={t(`beneficios.${f.clave}Apoyo` as 'beneficios.buscarApoyo')}
+            />
+          </Entrada>
+        ))}
       </View>
 
       {/* ③ LA ÚNICA PRIMARIA. Ahora está SIEMPRE: con una sola pantalla no hay

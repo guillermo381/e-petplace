@@ -39,7 +39,7 @@ import {
   Boton,
   Celda,
   Encabezado,
-  EsperaDeTrabajo,
+  EsperaLarga,
   EstadoVacio,
   Icono,
   Insignia,
@@ -302,12 +302,15 @@ export function CheckoutReserva({
               onSoporte={irASoporte}
             />
           ) : (
-            <>
-              <Texto variante="titulo">{t('pago.esperaTitulo')}</Texto>
-              <Texto variante="cuerpo">{t('pago.esperaCuerpoCita')}</Texto>
-              {/* ⑦ La rampa que trabaja — la MISMA que la despensa. */}
-              <EsperaDeTrabajo />
-            </>
+              <>
+              {/* ⭐ **S116-C lote 7 · `EsperaLarga` — LA ESPERA LARGA DE LA CASA.**
+                  ☠️ Mueren el par `Texto titulo`/`Texto cuerpo` y **la línea de
+                  progreso** (`EsperaDeTrabajo`, la rampa con degradado): el
+                  founder la nombró y la pieza nueva lo dice en su cabecera —
+                  *no sabe cuánto falta y no lo finge*. La voz **no se pierde**:
+                  la misma que estaba pasa a `titulo` y `apoyo`. */}
+              <EsperaLarga titulo={t('pago.esperaTitulo')} apoyo={t('pago.esperaCuerpoCita')} />
+              </>
           )}
           {/* 🔴 El tope habla y **NO declara desenlace**: la reserva sigue en
               pie y el barrido la resuelve. *Un tope que se dibuja como

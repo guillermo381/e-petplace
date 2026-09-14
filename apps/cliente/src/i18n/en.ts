@@ -55,6 +55,12 @@ export const clienteEn = {
     enMemorial: "There's nothing to ask here.",
     titulo: 'Nexo',
     autor: 'Nexo',
+    // S116-C lote 7 — the four fingers of the assistant sheet.
+    atajo_peso: 'Log its weight',
+    atajo_vacuna: 'Upload its card',
+    atajo_antiparasitario: 'Log a dewormer',
+    atajo_foto: 'Save a memory',
+    placeholder: 'Ask Nexo',
     enviar: 'Send',
     caja: 'Type your question',
     cajaPlaceholder: 'Ask or search for something…',
@@ -275,6 +281,9 @@ export const clienteEn = {
     guardarYCrear: 'Save and create record',
     // S116-C lote 6 — the breed is proposed from the photo; the family confirms.
     razaSugeridaPorFoto: 'We recognized it in the photo. Confirm it or change it.',
+    // S116-C lote 7 — the identification wait.
+    mirandoTitulo: 'Looking at the photo',
+    mirandoApoyo: "We'll recognize its species and breed. You can change them later.",
     razonEspecie: 'Pick a species to continue.',
     razonNombre: 'Their name is missing.',
     razonAgua: 'Pick the water type.',
@@ -883,6 +892,7 @@ export const clienteEn = {
     capturaTitulo: "Take a photo of {{nombre}}'s vaccine card — we read the vaccines",
     capturaDetalle: "Good light and the card laid flat work best. You'll be able to review and correct everything before saving.",
     multiPagina: 'Does the card have several pages? Scan them one at a time — each batch adds to their story.',
+    esperaTitulo: 'Reading the vaccination card',
     espera: 'We are reading the card. This can take a minute — every vaccine we find adds to their story.',
     esperaLarga: 'Still reading. Handwritten records take a little longer.',
     permisoCamara: 'We need permission to use the camera. You can enable it in your phone settings, or pick a photo from the gallery.',
@@ -1968,6 +1978,9 @@ export const clienteEn = {
     // The ③ case: coming back without finishing leaves the request OPEN.
     altaPendiente: "The request is still open — it hasn't expired yet.",
     altaAbandonada: 'The request expired without being completed.',
+    // S116-C lote 7 — loading the provider page is a long wait.
+    altaCargandoTitulo: 'Opening secure payment',
+    altaCargandoApoyo: 'Your bank is loading the screen to verify the card.',
     altaNoAbrio: "We couldn't open the form. Try again.",
     idioma: 'Language',
     idiomaEs: 'Español',
@@ -2532,6 +2545,10 @@ export const clienteEn = {
     pagoSimuladoRecordatorio: 'This order has a SIMULATED payment: nothing was charged.',
     exitoTitulo: 'Done',
     exitoPagoTitulo: 'Your payment went through',
+    // S116-C lote 7 — what the house Confirmacion needs.
+    exitoExclamacion: 'Done!',
+    exitoFactura: 'The invoice arrives separately by email.',
+    exitoSeguirComprando: 'Keep shopping',
     /* 🔴 S101-D · ⑤ — espejo de la cura de `es.ts`. Decía «We'll let you know
        when the seller confirms it»: la voz anterior al motor de pagos.
        «Your orders» es el nombre de la tab, y se conserva idéntico (Ley 17.3:
@@ -3273,6 +3290,8 @@ export const clienteEn = {
     entradaDetalle: 'Their tag and the page whoever finds them will see',
     vozQr: 'Code for {{nombre}}',
     verPasaporte: 'See the passport',
+    generandoTitulo: 'Building its passport',
+    generandoApoyo: "We're preparing its code. It takes a few seconds.",
     ampliarQr: 'Enlarge the code',
     qrGrandeAyuda: "Hold it up to the other phone's camera. Tap to close.",
     cerrar: 'Close',

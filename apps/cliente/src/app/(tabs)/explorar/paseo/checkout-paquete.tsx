@@ -19,7 +19,7 @@ import { View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  Boton, Celda, Encabezado, EsperaDeTrabajo, EstadoVacio, Icono,
+  Boton, Celda, Encabezado, EsperaLarga, EstadoVacio, Icono,
   PantallaConPie, Separador, Tarjeta, Texto, spacing, useAviso, useTheme,
 } from '@epetplace/ui';
 import { comprarPaqueteSalidas, PRESETS_PAQUETE, type PresetPaquete } from '@epetplace/api';
@@ -171,9 +171,13 @@ export default function CheckoutPaquetePaseo() {
             />
           ) : (
             <>
-              <Texto variante="titulo">{t('pago.esperaTitulo')}</Texto>
-              <Texto variante="cuerpo">{t('paquete.esperaCuerpo')}</Texto>
-              <EsperaDeTrabajo />
+              {/* ⭐ **S116-C lote 7 · `EsperaLarga` — LA ESPERA LARGA DE LA CASA.**
+                  ☠️ Mueren el par `Texto titulo`/`Texto cuerpo` y **la línea de
+                  progreso** (`EsperaDeTrabajo`, la rampa con degradado): el
+                  founder la nombró y la pieza nueva lo dice en su cabecera —
+                  *no sabe cuánto falta y no lo finge*. La voz **no se pierde**:
+                  la misma que estaba pasa a `titulo` y `apoyo`. */}
+              <EsperaLarga titulo={t('pago.esperaTitulo')} apoyo={t('paquete.esperaCuerpo')} />
             </>
           )}
           {/* 🔴 La vuelta al resumen existe **sólo en DeUna y sólo mientras

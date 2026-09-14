@@ -43,6 +43,18 @@ export interface SugerenciaDeRaza {
    *  diagnóstico —la pantalla no tiene por qué mostrarlo— pero viaja para que
    *  se pueda medir cuánto se está descartando. */
   descartadas: { valor: string; motivo: string }[];
+  /** ⭐ **LA ESPECIE PROPUESTA (S116-A, edge v12).** `null` **es una respuesta,
+   *  no un fallo** — viene así en cuatro casos, y ninguno rebota: no se declaró
+   *  y el modelo no la supo · dijo una fuera del catálogo · no mandó confianza
+   *  usable · **o la especie venía declarada** (no se propone lo que ya se
+   *  sabe).
+   *
+   *  🔴 **La confianza es SUYA, separada de la de las razas**, y ésa fue la
+   *  condición de C al pedirla: *podés estar segurísimo de que es un gato y no
+   *  tener idea de qué raza es*. A lo probó sobre el caso que las separa —una
+   *  foto de mestizo: especie `alta`, razas `media`/`baja`—. *Una confianza
+   *  compartida habría hecho decidir con el número equivocado.* */
+  especie_sugerida: { codigo: string; confianza: ConfianzaRaza } | null;
 }
 
 export interface InputSugerirRaza {
@@ -51,8 +63,18 @@ export interface InputSugerirRaza {
    *  grafías un tiempo y avisa por log; este wrapper manda ya la vigente. */
   imageBase64: string;
   /** La especie que la persona DECLARÓ. La edge lee de `cat_razas` las razas
-   *  activas de esa especie y el modelo elige sólo de ahí. */
-  especie: string;
+   *  activas de esa especie y el modelo elige sólo de ahí.
+   *
+   *  ⭐ **OPCIONAL desde la edge v12 (S116-A).** Ausente ⇒ la edge la PROPONE y
+   *  la devuelve en `especie_sugerida`. Presente ⇒ **exactamente el camino de
+   *  siempre**, sin tocar nada.
+   *
+   *  ⚠️ **`''` NO es «no la sé»** — la edge lo rebota con `cuerpo_invalido`, y
+   *  es a propósito: *tratar una cadena vacía como ausencia convierte el error
+   *  de un llamador en un camino silencioso.* Por eso acá el tipo es
+   *  `string | undefined` y **la clave no viaja cuando es `undefined`**, en vez
+   *  de mandar `''`. */
+  especie?: string;
   mediaType?: 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif';
 }
 
@@ -88,14 +110,28 @@ function esCandidata(v: unknown): v is CandidataRaza {
   );
 }
 
-/** Propone razas del catálogo a partir de una foto. **La persona confirma.** */
+/** Propone razas del catálogo a partir de una foto. **La persona confirma.**
+ *
+ * ⚠️ **CRUCE DE TERRITORIO DECLARADO (S116-C lote 7):** `packages/api` es de A.
+ * A desplegó la edge v12 con `especie` opcional y `especie_sugerida` en la
+ * salida (`docs/loop/buzon/S116-A-para-C-la-especie-ya-se-sugiere.md`) y **el
+ * wrapper se quedó en el contrato viejo** — o sea que la mitad nueva no tenía
+ * puerta y desde el cliente era inalcanzable (`L-318` en su forma chica).
+ * **Se ensancha, no se reescribe:** el camino con especie declarada queda
+ * byte-idéntico y todo lo agregado es aditivo, así que descartarlo es un
+ * revert de este bloque. Pedido a A en
+ * `docs/loop/buzon/S116-C-para-A-el-wrapper-de-sugerir-raza.md`. */
 export async function sugerirRaza(
   input: InputSugerirRaza,
 ): Promise<ResultadoWrapper<SugerenciaDeRaza, CodigoErrorRaza>> {
   const { data, error } = await getClient().functions.invoke('sugerir-raza', {
     body: {
       imageBase64: input.imageBase64,
-      especie: input.especie,
+      /* La clave **no viaja** cuando no hay especie: ver la nota de
+         `InputSugerirRaza.especie`. Un `especie: undefined` se serializa
+         fuera del JSON igual, pero se escribe explícito para que el día que
+         alguien pase `''` el tipo ya lo haya frenado. */
+      ...(input.especie === undefined ? {} : { especie: input.especie }),
       mediaType: input.mediaType,
     },
   });
@@ -120,6 +156,20 @@ export async function sugerirRaza(
       typeof data.mestizo !== 'boolean' || typeof data.sin_animal !== 'boolean') {
     return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES.datos_inconsistentes };
   }
+  /* La especie propuesta se valida con la MISMA severidad que las candidatas:
+     o es `null`, o es un objeto con código no vacío y una confianza del
+     vocabulario. **Una forma inesperada tumba la respuesta entera** — no se
+     degrada a `null`, porque *«no la supo» y «vino rota» son dos hechos, y
+     colapsarlos esconde un contrato roto en una respuesta plausible.* */
+  let especieSugerida: SugerenciaDeRaza['especie_sugerida'] = null;
+  if (data.especie_sugerida !== null && data.especie_sugerida !== undefined) {
+    const e = data.especie_sugerida;
+    if (!esObj(e) || typeof e.codigo !== 'string' || e.codigo.trim().length === 0 ||
+        typeof e.confianza !== 'string' || !CONFIANZAS.includes(e.confianza)) {
+      return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES.datos_inconsistentes };
+    }
+    especieSugerida = { codigo: e.codigo, confianza: e.confianza as ConfianzaRaza };
+  }
   const candidatas: CandidataRaza[] = [];
   for (const c of data.candidatas) {
     if (!esCandidata(c)) {
@@ -134,6 +184,7 @@ export async function sugerirRaza(
       mestizo: data.mestizo,
       sin_animal: data.sin_animal,
       descartadas: data.descartadas as SugerenciaDeRaza['descartadas'],
+      especie_sugerida: especieSugerida,
     },
   };
 }
