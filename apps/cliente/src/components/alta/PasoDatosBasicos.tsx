@@ -184,6 +184,7 @@ export function PasoDatosBasicos({
       return
     }
     let vigente = true
+    if (__DEV__) console.warn(`[sugerir-raza] mirando la foto · especie=${especie}`)
     setSugerida('mirando')
     void (async () => {
       try {
@@ -193,12 +194,32 @@ export function PasoDatosBasicos({
         /* `mestizo` y `sin_animal` son respuestas legítimas y ninguna es una
            raza del catálogo ⇒ no pre-seleccionan. */
         if (!r.ok || r.data.mestizo || r.data.sin_animal) {
+          /* 🔴 **MUDO EN PANTALLA, NO EN EL LOG.** La mudez que la cabecera
+             declara es de la SUPERFICIE —no molestar a la familia con algo que
+             no pidió— y eso no incluye al que está midiendo. *Un instrumento
+             que calla también para quien lo depura no es discreto: es ciego* —
+             me costó una corrida no poder distinguir «falló» de «no disparó».
+             Sólo `__DEV__`: en producto no hay nadie leyendo esto. */
+          if (__DEV__) {
+            console.warn(
+              `[sugerir-raza] sin pre-selección · ok=${r.ok} · ` +
+                (r.ok
+                  ? `mestizo=${r.data.mestizo} · sin_animal=${r.data.sin_animal} · candidatas=${r.data.candidatas.length}`
+                  : `codigo=${r.codigo}`),
+            )
+          }
           setSugerida(null)
           return
         }
         /* **Sólo `alta`.** Ver la cabecera: corregir cuesta más que elegir. */
         const mejor = r.data.candidatas.find((c) => c.confianza === 'alta')
         if (mejor === undefined) {
+          if (__DEV__) {
+            console.warn(
+              `[sugerir-raza] ninguna con confianza alta · ` +
+                r.data.candidatas.map((c) => `${c.raza_codigo}:${c.confianza}`).join(', '),
+            )
+          }
           setSugerida(null)
           return
         }
@@ -213,14 +234,23 @@ export function PasoDatosBasicos({
            no por el nombre.* */
         const fila = cat.ok ? cat.data.find((x) => x.slug === mejor.raza_codigo) : undefined
         if (fila === undefined) {
+          if (__DEV__) {
+            console.warn(
+              `[sugerir-raza] el código no está en el catálogo de ${especie}: ${mejor.raza_codigo} · catálogo ok=${cat.ok}`,
+            )
+          }
           setSugerida(null)
           return
         }
         setSugerida({ raza: fila.nombre, slug: fila.slug })
-      } catch {
-        /* Mudo A PROPÓSITO — el selector con autocompletado sigue entero.
-           Es la única mudez legítima de esta pantalla, y su razón está en la
-           cabecera para que nadie la lea como un `catch` vacío de descuido. */
+      } catch (e) {
+        /* Mudo EN PANTALLA a propósito — el selector con autocompletado sigue
+           entero. Es la única mudez legítima de esta pantalla, y su razón está
+           en la cabecera para que nadie la lea como un `catch` vacío de
+           descuido. **En el log habla**, ver arriba. */
+        if (__DEV__) {
+          console.warn(`[sugerir-raza] excepción · ${e instanceof Error ? `${e.name}: ${e.message}` : String(e)}`)
+        }
         if (vigente) setSugerida(null)
       }
     })()

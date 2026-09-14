@@ -30,10 +30,13 @@ import {
   AvatarMascota,
   Boton,
   Cabecera,
+  caraDePersonaje,
   HojaContenido,
+  Personaje,
   Texto,
   spacing,
   useTheme,
+  type AvatarMascotaEspecie,
   type FotoCapturada,
 } from '@epetplace/ui';
 
@@ -144,11 +147,48 @@ export function PasoFoto({
            */
           <>
             <View style={{ alignItems: 'center', gap: spacing[4], paddingTop: spacing[6] }}>
-              <AvatarMascota
-                nombre={nombre}
-                fotoUrl={caraDeMascota({ especie: borrador.especie, razaSlug: borrador.razaSlug })}
-                tamano="lg"
-              />
+              {/* 🔴 **S116-C lote 6 · NUNCA UNA INICIAL INVENTADA.** Firma del
+                  founder: *«con la foto primero todavía no hay nombre, así que
+                  no hay inicial que dibujar. Poné el personaje de la especie si
+                  ya se sabe, y si no, la nariz»*.
+
+                  ⏪ **Lo que hacía, y lo produjo mi propia inversión:** montaba
+                  `AvatarMascota` con `nombre = borrador.nombre ?? 'tu mascota'`
+                  y **sin pasarle `especie`**. Con el orden viejo el nombre ya
+                  existía en este paso, así que el monograma decía algo cierto
+                  —la inicial de la mascota—. Con la foto primero **el monograma
+                  pasó a ser la «T» de la palabra «tu»**: una letra que no es de
+                  nadie. *El fallback no se rompió: se le fue el dato que lo
+                  hacía verdadero.*
+
+                  **Las dos mitades de la cura:**
+                   ① `especie` **se pasa** — sin ella el peldaño de `Personaje`
+                      de `AvatarMascota` no puede dispararse aunque la especie
+                      se sepa (se sabe al volver desde 2/3). *Estaba ahí y
+                      llegaba vacío.*
+                   ② sin nada que mostrar, **la nariz** — que en el catálogo es
+                      `Personaje especie="otro"`, la misma que la grilla de
+                      especies ya usa para el pez.
+
+                  ⚠️ **Y NO se toca la doctrina de `AvatarMascota`**, que manda
+                  al monograma a las especies sin cara propia con esta razón:
+                  *«el monograma dice algo verdadero —esto es Luna— sin afirmar
+                  una identidad animal que no tiene con qué sostener»*. **Ahí
+                  hay nombre; acá no**, así que no hay nada verdadero que decir
+                  y la regla no aplica. La propia nota de B deja la salida
+                  escrita: *«la pantalla que de verdad necesite una escribe su
+                  fallback a la vista»*. Ésta es esa pantalla, y éste es su
+                  fallback, a la vista. */}
+              {caraGaleria === undefined && caraDePersonaje(borrador.especie) === undefined ? (
+                <Personaje especie="otro" tamano="hogar" />
+              ) : (
+                <AvatarMascota
+                  nombre={nombre}
+                  especie={borrador.especie as AvatarMascotaEspecie | undefined}
+                  fotoUrl={caraGaleria}
+                  tamano="lg"
+                />
+              )}
               <Texto variante="apoyo" centrado>
                 {t('fotoEncuadre.elegirDetalle')}
               </Texto>
