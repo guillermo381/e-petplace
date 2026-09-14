@@ -273,6 +273,8 @@ export const clienteEn = {
     agua_marino: 'Saltwater',
     datosNota: 'With these details we create their record. You can add vaccines and documents whenever you like.',
     guardarYCrear: 'Save and create record',
+    // S116-C lote 6 — the breed is proposed from the photo; the family confirms.
+    razaSugeridaPorFoto: 'We recognized it in the photo. Confirm it or change it.',
     razonEspecie: 'Pick a species to continue.',
     razonNombre: 'Their name is missing.',
     razonAgua: 'Pick the water type.',
@@ -3498,7 +3500,6 @@ export const clienteEn = {
 
   facturacionCheckout: {
     facturaA: 'Invoice to',
-    cambiar: 'Change',
   },
 
   correoFactura: {

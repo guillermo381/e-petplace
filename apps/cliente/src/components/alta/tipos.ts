@@ -50,15 +50,38 @@ import type { AvatarMascotaEspecie } from '@epetplace/ui';
  * pantalla: es dejar de guardar dos datos que hoy se guardan. *Si la mesa los
  * quiere afuera, es una línea — pero es decisión de producto, no de piel.*
  *
- * ⚠️ **LA FOTO SIGUE ANTES QUE LA RAZA**, que era la razón del orden viejo
- * (S113-C: *«sin foto no hay nada que mirar»*, la sugerencia de raza mira la
- * foto)… **y ahora NO puede cumplirse**, porque la raza vive en 07 y la foto
- * en 08. **Se declara como lo que es: una consecuencia del orden que el
- * encargo firma.** La sugerencia por foto queda sin su insumo en el alta; el
- * selector con autocompletado —que siempre fue el camino principal— no cambia.
- * *Un orden firmado que rompe una optimización previa se dice, no se esconde.* */
-export const PASOS = ['datos', 'foto', 'carnet', 'cierre'] as const;
+ * ⭐ **S116-C lote 6 · EL ALTA SE INVIERTE: FOTO → DATOS → CARNÉ → ¡LISTO!**
+ * Firma del founder: *«el alta se invierte: foto (1/3) → datos (2/3) con
+ * especie y raza SUGERIDAS por identificación de la foto, preseleccionadas y
+ * confirmables → carné (3/3) → ¡Listo!»*.
+ *
+ * 🔴 **Y esto RESUCITA la sugerencia que mi propio lote 3 mató.** Acá vivía
+ * escrita su lápida: *«la foto sigue antes que la raza… y ahora NO puede
+ * cumplirse, porque la raza vive en 07 y la foto en 08»*. Era cierto y era el
+ * costo del orden anterior. **Con la foto primero, el insumo vuelve a existir**
+ * y la sugerencia se reconecta en `PasoDatosBasicos` — no se reescribe: se
+ * vuelve a enchufar donde siempre estuvo previsto.
+ *
+ * ⚠️ **LO QUE EL ORDEN NUEVO NO ALCANZA, MEDIDO Y DECLARADO: la ESPECIE no se
+ * puede sugerir hoy.** `sugerir-raza` **exige la especie declarada** — la lee
+ * del cuerpo, filtra `cat_razas` por ella y su propio prompt le dice al modelo
+ * *«la especie está DECLARADA por la persona»* y le pide que verifique si el
+ * animal la contradice (`supabase/functions/sugerir-raza/index.ts:111-135`).
+ * ⇒ **sabe decir «eso no es un perro», pero no sabe decir qué es.** Sugerir la
+ * especie es cambiar esa edge, y `supabase/` no es territorio de C: va pedido
+ * a A/D con la forma exacta que necesito
+ * (`docs/loop/buzon/S116-C-para-A-la-especie-tambien-desde-la-foto.md`).
+ * *Se entrega la mitad que puedo y se nombra la que no, en vez de dejar la
+ * pantalla prometiendo algo que el motor no hace.* */
+export const PASOS = ['foto', 'datos', 'carnet', 'cierre'] as const;
 export type Paso = (typeof PASOS)[number];
+
+/** 🔴 **EL PRIMER PASO SE DERIVA, NO SE ESCRIBE.** Estaba tecleado en las dos
+ *  entradas (`pasoFijo="datos"` y el literal `/onboarding/datos`) ⇒ **al
+ *  invertir el orden, `PASOS` decía «foto» y las dos puertas seguían abriendo
+ *  en «datos»** — el flujo arrancaba en el paso 2 con su barra marcando 2 de 3.
+ *  *Dos listas de lo mismo divergen, y ésta divergió en el primer cambio.* */
+export const PRIMER_PASO: Paso = PASOS[0];
 
 export function esPaso(v: unknown): v is Paso {
   return typeof v === 'string' && (PASOS as readonly string[]).includes(v);
@@ -169,6 +192,14 @@ export function leerBorrador(params: Record<string, string | string[] | undefine
     origen: uno('origen'),
     peso: uno('peso'),
     fotoUri: uno('fotoUri'),
+    /* 🔴 **FALTABA, y su ausencia apagaba el guard que la propia interfaz
+       declara.** `conFoto` existe para que «declaré foto y no llegó» tenga
+       nombre en vez de ser silencio (ver su cabecera arriba) — pero
+       `leerBorrador` no lo leía, así que **volvía `undefined` en cada paso** y
+       el discriminador nunca podía dispararse. *Un guard que no recibe su dato
+       no falla: aprueba.* Medido al invertir el orden, que es cuando la foto
+       pasó a viajar por TODOS los pasos siguientes. */
+    conFoto: uno('conFoto'),
     cx: uno('cx'),
     cy: uno('cy'),
     z: uno('z'),

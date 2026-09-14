@@ -59,8 +59,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import {
-  Boton,
   Campo,
+  CeldaNavegacion,
   esCorreoValido,
   esIdentificacionValida,
   useAviso,
@@ -294,19 +294,46 @@ export function SeccionFacturacion({
         {campoCorreo}
         <Texto variante="apoyo">{t('identidadFactura.editable')}</Texto>
       </View>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-        <View style={{ flex: 1 }}>
-          <Texto variante="apoyo">{t('facturacionCheckout.facturaA')}</Texto>
-          <Texto variante="cuerpo">
-            {nombre === null ? perfil.identificacion : `${nombre} · ${perfil.identificacion}`}
-          </Texto>
-        </View>
-        <Boton
-          variante="compacto"
-          etiqueta={t('facturacionCheckout.cambiar')}
-          onPress={() => setEditando(true)}
-        />
-      </View>
+      {/* 🔴 **S116-C lote 6 · punto ⑤ — «Cambiar» DEJA DE SER UN BOTÓN AL
+          COSTADO Y LA LÍNEA ENTERA SE VUELVE LA ACCIÓN.** Encargo del lote:
+          *«en el pago, "Cambiar" el documento de facturación se convierte en
+          una fila accionable "Factura a: {nombre} · {RUC}" con chevrón, con
+          toda la fila tocable»*.
+
+          ⏪ **Lo que había era la clase que la casa ya prohíbe**: un dato a la
+          izquierda y un `Boton variante="compacto"` a la derecha. **Ley 19.7**:
+          *lo que NAVEGA es una fila con chevrón, jamás un botón sin caja al
+          costado* — y acá además el área tocable era el botón, o sea que
+          tocar el nombre propio no hacía nada. *Un dato que se puede corregir
+          y no responde al toque enseña que no se puede.*
+
+          **La pieza es `CeldaNavegacion`**, que el catálogo v5 nombra
+          literalmente *«la fila de lista»* (§ `CeldaNavegacion · Celda`). No
+          existe ninguna `FilaLista` en `packages/ui` — censado — así que lo
+          que el encargo nombra por su ROL se monta con la pieza que cumple ese
+          rol, en vez de pedir una pieza nueva para algo que ya existe.
+
+          🔴 **Y EL REPARTO DE LAS DOS RANURAS NO ES PROLIJIDAD: `titulo` es
+          UNA sola línea con corte al final (`numberOfLines={1}`,
+          `ellipsizeMode="tail"`).** Con el literal entero ahí dentro
+          —«Factura a: Razón Social Larga S.A. · 1712345678001»— **lo que se
+          corta es la COLA, o sea el RUC**, que es justo el dato que identifica.
+          *Un truncado que se come el número deja una fila que parece decir algo
+          y no dice nada.* ⇒ la etiqueta va en `titulo` y la identidad en
+          `detalle`, que envuelve a dos líneas. **La fila muestra exactamente el
+          contenido que el encargo pide; lo que se decide acá es cuál de las dos
+          mitades puede cortarse, y la respuesta es ninguna.**
+
+          Sin glifo a propósito: bajo v5 `CeldaNavegacion` le pone al glifo su
+          círculo rosa, y ese círculo existe para **hacer columna en una lista
+          de hermanas**. Acá la fila está sola dentro de una sección de
+          checkout — un círculo suelto sería la marca de una columna que no
+          hay. */}
+      <CeldaNavegacion
+        titulo={t('facturacionCheckout.facturaA')}
+        detalle={nombre === null ? perfil.identificacion : `${nombre} · ${perfil.identificacion}`}
+        onPress={() => setEditando(true)}
+      />
       </View>
     );
   }

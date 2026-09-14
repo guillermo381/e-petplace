@@ -409,6 +409,12 @@ export const clienteEs = {
     agua_marino: 'Marino',
     datosNota: 'Con estos datos creamos su expediente. Vacunas y documentos los agregas cuando quieras.',
     guardarYCrear: 'Guardar y crear expediente',
+    /* ⭐ **S116-C lote 6 · LA SUGERENCIA SE DICE.** El alta se invirtió y la
+       raza vuelve a proponerse mirando la foto. **La voz nombra el ACTO
+       —confirmar— y no el mecanismo**: a la familia no le importa que haya un
+       modelo; le importa que ese dato no lo escribió ella y puede cambiarlo.
+       *Y no se disculpa: proponer bien no es pedir permiso.* */
+    razaSugeridaPorFoto: 'La reconocimos en la foto. Confírmala o cámbiala.',
     razonEspecie: 'Elige la especie para seguir.',
     razonNombre: 'Falta su nombre.',
     razonAgua: 'Elige el tipo de agua.',
@@ -4820,7 +4826,10 @@ export const clienteEs = {
      de una pieza vive adentro de la pieza (Ley 3). */
   facturacionCheckout: {
     facturaA: 'Factura a',
-    cambiar: 'Cambiar',
+    /* ☠️ **`cambiar` MURIÓ (S116-C lote 6 · punto ⑤).** Era la etiqueta del
+       `Boton compacto` al costado de la línea; la línea entera pasó a ser la
+       acción (`CeldaNavegacion` con chevrón) y el botón se retiró **en el
+       mismo acto** (Ley 37). Censado: cero consumidores. */
   },
 
   /* S115-C · EL CORREO DE LA FACTURA. Su voz NO es la de un campo de formulario:

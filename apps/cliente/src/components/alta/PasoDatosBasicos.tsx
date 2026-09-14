@@ -17,15 +17,18 @@ import {
   type CampoFechaValor,
   type EspeciePersonaje,
 } from '@epetplace/ui'
-import { obtenerEspeciesActivas } from '@epetplace/api'
+import { obtenerEspeciesActivas, obtenerRazasDeEspecie, sugerirRaza } from '@epetplace/api'
 
+import { leerBase64 } from '@/lib/subir-avatar'
 import { useAltoDeCabecera } from '@/lib/alto-de-cabecera'
 import { useTraduccion } from '@/i18n'
 import { CODIGO_NO_SE, SelectorDeRaza, type RazaElegida } from '@/components/selector-de-raza'
 import { esAcuario, esOrigen, TIPOS_DE_AGUA, type BorradorAlta, type ModoAlta } from './tipos'
 
 /**
- * 07 · DATOS BÁSICOS — paso 1 de 3 (S116-C lote 3).
+ * 07 · DATOS BÁSICOS — **paso 2 de 3** (S116-C lote 6: el alta se invirtió;
+ *      antes era el 1). La foto ya está tomada cuando esta pantalla se monta,
+ *      y eso es lo que le devuelve el insumo a la sugerencia de raza.
  *
  * ☠️ **ABSORBE `PasoEspecie`, `PasoRaza` y `PasoHistoria`**, que mueren con
  * lápida. *Los tres preguntaban lo mismo —quién es este animal— repartido en
@@ -41,12 +44,44 @@ import { esAcuario, esOrigen, TIPOS_DE_AGUA, type BorradorAlta, type ModoAlta } 
  *   · **la fecha con PRECISIÓN** (día · mes/año · sólo año) y **`sexo` y
  *     `origen`**, que la RPC recibe (`p_sexo`/`p_origen`, medido).
  *
- * ── 🔴 LO QUE SE PIERDE, DICHO ───────────────────────────────────────────
- * **La sugerencia de raza por foto.** Su condición era el orden viejo
- * (*«sin foto no hay nada que mirar»*, S113-C): la foto iba antes que la raza.
- * El encargo firma raza en 07 y foto en 08 ⇒ **en el alta, esa sugerencia se
- * queda sin insumo.** El selector con autocompletado —que siempre fue el
- * camino principal— no cambia. *Se declara en vez de dejar el hueco.*
+ * ── ⭐ S116-C lote 6 · LA SUGERENCIA DE RAZA VUELVE ──────────────────────
+ * ⏪ **Acá vivía su lápida**, escrita por mí en el lote 3: *«su condición era
+ * el orden viejo —sin foto no hay nada que mirar—; el encargo firma raza en 07
+ * y foto en 08 ⇒ esa sugerencia se queda sin insumo»*. Era cierto, y era el
+ * costo del orden anterior.
+ *
+ * **El alta se invirtió** (foto 1/3 → datos 2/3) ⇒ **cuando esta pantalla se
+ * monta, la foto YA existe**. La sugerencia no se reescribe: se vuelve a
+ * enchufar. *La lápida se conserva convertida en su propia resurrección, para
+ * que se lea por qué murió y por qué volvió.*
+ *
+ * ── CÓMO SE COMPORTA, y cada regla es una decisión ──────────────────────
+ *   · **Dispara al ELEGIR LA ESPECIE, no al montar.** El motor la EXIGE
+ *     (`sugerirRaza` la manda en el cuerpo y la edge filtra `cat_razas` con
+ *     ella): sin especie no hay nada que preguntar.
+ *   · **PRE-SELECCIONA, jamás decide.** Escribe la candidata en el mismo
+ *     estado que el selector — o sea que se ve exactamente igual que si la
+ *     hubiera elegido la persona, y se cambia igual. *Una sugerencia que no
+ *     se puede tocar es una imposición con buenos modales.*
+ *   · **No pisa lo que la persona ya eligió**: si vuelve atrás y cambia de
+ *     especie, la anterior sugerencia se limpia; si YA escribió una raza, la
+ *     sugerencia no la toca.
+ *   · **Sólo con confianza `alta`.** El motor devuelve candidatas con su
+ *     confianza; pre-seleccionar una `baja` es poner en el formulario un dato
+ *     que probablemente hay que corregir, y **corregir cuesta más que
+ *     elegir**. Con `media`/`baja` no se pre-selecciona nada.
+ *   · **`mestizo` y `sin_animal` NO pre-seleccionan.** Son respuestas
+ *     legítimas del motor y ninguna de las dos es una raza del catálogo.
+ *   · **El fallo es MUDO a propósito, y es la única mudez legítima de esta
+ *     pantalla.** El camino principal —el selector con autocompletado— sigue
+ *     entero; un aviso de que «no pudimos mirar la foto» le pediría a la
+ *     familia que se haga cargo de algo que no pidió. *Distinto del catálogo
+ *     de especies, que sí habla al caer: ahí sin el dato no hay pantalla.*
+ *
+ * ⚠️ **LA ESPECIE NO SE SUGIERE, y no es un olvido:** la edge la EXIGE como
+ * entrada (su prompt dice *«la especie está DECLARADA por la persona»*), así
+ * que sabe decir «eso no es un perro» pero no qué es. Pedido a A/D en
+ * `docs/loop/buzon/S116-C-para-A-la-especie-tambien-desde-la-foto.md`.
  *
  * ── LA LEY DEL FOUNDER SOBRE LO QUE NO SE SABE, en esta pantalla ─────────
  * El nacimiento acepta **día, mes/año o sólo año** y la fila dice lo que
@@ -130,6 +165,80 @@ export function PasoDatosBasicos({
     }
   }, [])
 
+  /* ⭐ **LA SUGERENCIA DE RAZA POR FOTO** (ver la cabecera). `undefined` = no
+     se preguntó; `'mirando'` = está en vuelo; `null` = se preguntó y no hubo
+     candidata utilizable. **Son tres estados y no dos**: «todavía no» y «no
+     hay» se dibujan distinto, y colapsarlos pondría la línea de la sugerencia
+     sobre una foto que nadie miró (`L-178` en su forma chica). */
+  const [sugerida, setSugerida] = useState<'mirando' | { raza: string; slug: string } | null | undefined>(
+    undefined,
+  )
+
+  useEffect(() => {
+    /* Las tres condiciones son de DATO, no de piel:
+         · la especie la exige el motor;
+         · sin foto no hay nada que mirar (la razón original, S113-C);
+         · el acuario no tiene raza — su campo dos es el tipo de agua. */
+    if (especie === undefined || borrador.fotoUri === undefined || esAcuario(especie)) {
+      setSugerida(undefined)
+      return
+    }
+    let vigente = true
+    setSugerida('mirando')
+    void (async () => {
+      try {
+        const base64 = await leerBase64(borrador.fotoUri as string)
+        const r = await sugerirRaza({ imageBase64: base64, especie })
+        if (!vigente) return
+        /* `mestizo` y `sin_animal` son respuestas legítimas y ninguna es una
+           raza del catálogo ⇒ no pre-seleccionan. */
+        if (!r.ok || r.data.mestizo || r.data.sin_animal) {
+          setSugerida(null)
+          return
+        }
+        /* **Sólo `alta`.** Ver la cabecera: corregir cuesta más que elegir. */
+        const mejor = r.data.candidatas.find((c) => c.confianza === 'alta')
+        if (mejor === undefined) {
+          setSugerida(null)
+          return
+        }
+        /* El NOMBRE sale del catálogo de la especie, no de un diccionario
+           paralelo: el motor devuelve un CÓDIGO y la voz es de la DB. */
+        const cat = await obtenerRazasDeEspecie(especie)
+        if (!vigente) return
+        /* ⚠️ `raza_codigo` de la edge **ES el slug del catálogo** — medido en
+           `sugerir-raza/index.ts:235` (`select('slug, nombre')`) y en el
+           prompt, que le muestra al modelo los slugs. *El nombre del campo
+           dice «codigo» y la columna se llama `slug`: se cruza por el valor,
+           no por el nombre.* */
+        const fila = cat.ok ? cat.data.find((x) => x.slug === mejor.raza_codigo) : undefined
+        if (fila === undefined) {
+          setSugerida(null)
+          return
+        }
+        setSugerida({ raza: fila.nombre, slug: fila.slug })
+      } catch {
+        /* Mudo A PROPÓSITO — el selector con autocompletado sigue entero.
+           Es la única mudez legítima de esta pantalla, y su razón está en la
+           cabecera para que nadie la lea como un `catch` vacío de descuido. */
+        if (vigente) setSugerida(null)
+      }
+    })()
+    return () => {
+      vigente = false
+    }
+  }, [especie, borrador.fotoUri])
+
+  /* **La sugerencia PRE-SELECCIONA; no decide.** Escribe en el MISMO estado
+     que el selector ⇒ se ve y se cambia exactamente igual que una elección
+     propia. Y **no pisa lo que la persona ya puso**: si ya hay raza, se
+     respeta. */
+  useEffect(() => {
+    if (sugerida === undefined || sugerida === null || sugerida === 'mirando') return
+    if (raza.raza !== undefined) return
+    setRaza({ raza: sugerida.raza, slug: sugerida.slug, elegido: sugerida.slug })
+  }, [sugerida, raza.raza])
+
   const acuario = esAcuario(especie)
 
   /** El campo dos: raza para todos, tipo de agua para el acuario. */
@@ -161,7 +270,7 @@ export function PasoDatosBasicos({
                 onVolver={onAtras}
                 etiquetaVolver={t('alta.volver')}
                 /* La barra de pasos la dibuja la propia `Cabecera`. 1-based. */
-                pasos={{ total: 3, actual: 1, etiqueta: t('alta.paso', { actual: 1, total: 3 }) }}
+                pasos={{ total: 3, actual: 2, etiqueta: t('alta.paso', { actual: 2, total: 3 }) }}
               />
             </View>
           }
@@ -223,7 +332,21 @@ export function PasoDatosBasicos({
                 />
               </View>
             ) : especie !== undefined ? (
-              <SelectorDeRaza especie={especie} valor={raza} onCambio={setRaza} />
+              <View style={{ gap: spacing[2] }}>
+                <SelectorDeRaza especie={especie} valor={raza} onCambio={setRaza} />
+                {/* ⭐ **LA SUGERENCIA SE DICE, y por eso se puede confirmar.**
+                    Una raza que aparece sola en el campo sin decir de dónde
+                    salió no es una sugerencia: es un dato que la app se
+                    inventó. **La línea existe para que el acto de dejarla sea
+                    una CONFIRMACIÓN y no una distracción.**
+
+                    Se dibuja sólo mientras la raza elegida SIGA SIENDO la
+                    sugerida: en cuanto la persona la cambia, la línea se va —
+                    ya no describe lo que hay en el campo. */}
+                {typeof sugerida === 'object' && sugerida !== null && raza.slug === sugerida.slug ? (
+                  <Texto variante="apoyo">{t('alta.razaSugeridaPorFoto')}</Texto>
+                ) : null}
+              </View>
             ) : null}
 
             {/* La fecha con su precisión — la pieza ya resuelve los tres
