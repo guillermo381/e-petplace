@@ -122,6 +122,7 @@ import { BotonAsistente } from '../components/BotonAsistente'
 import { BadgeFecha } from '../components/BadgeFecha'
 import { BarraPasos } from '../components/BarraPasos'
 import { Cabecera } from '../components/Cabecera'
+import { DiscoVidrio } from '../components/DiscoVidrio'
 import { Opcion } from '../components/Opcion'
 import { IsotipoV5, LogoV5 } from '../brand/Marca'
 import { Confirmacion } from '../components/Confirmacion'
@@ -4075,6 +4076,34 @@ function GaleriaInterna({ encabezado }: { encabezado?: ReactNode }) {
               onVolver={() => {}}
               carrito={{ cantidad: 3, onPress: () => {}, etiqueta: 'Carrito, 3 productos' }}
             />
+
+            {/* 🔴 `DiscoVidrio` SUELTO — y va SOBRE CIRUELA porque su material
+                lo exige: es blanco al 16 %, así que sobre lienzo no se ve.
+                *Montarlo en un fondo claro no lo muestra mal: lo muestra
+                ausente*, que es peor. Nace como pieza (lote 12) porque estar
+                expuesto como `Cabecera.Disco` no alcanzó — C lo copió igual
+                para el carrito de la Despensa. */}
+            <View
+              style={{
+                backgroundColor: palette.ciruela,
+                borderRadius: radius.lg,
+                padding: spacing[5],
+                flexDirection: 'row',
+                gap: spacing[4],
+                alignItems: 'center',
+              }}
+            >
+              <DiscoVidrio onPress={() => {}} etiqueta="Volver">
+                <Chevron direccion="izquierda" color="#FFFFFF" />
+              </DiscoVidrio>
+              <DiscoVidrio onPress={() => {}} etiqueta="Carrito, 3 productos">
+                <GlifoConContador nombre="carrito" cuenta={3} dentroDeTocable />
+              </DiscoVidrio>
+              {/* Sin `onPress` es contenedor: no anuncia toque ni toma rol. */}
+              <DiscoVidrio>
+                <GlifoConContador nombre="carrito" cuenta={0} dentroDeTocable />
+              </DiscoVidrio>
+            </View>
           </View>
         </Seccion>
 

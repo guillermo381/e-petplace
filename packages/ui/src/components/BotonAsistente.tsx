@@ -296,10 +296,12 @@ export function BotonAsistente(props: BotonAsistenteProps) {
         <AbanicoAsistente
           atajos={props.atajos}
           vozPreguntar={props.vozPreguntar}
-          onPreguntar={() => {
-            setAbanicoAbierto(false)
-            props.onPreguntar()
-          }}
+          /* ⚠️ **Va CRUDO a propósito (`D-1116`):** el cierre lo hace el abanico
+             para las CINCO filas. Envolverlo también acá cerraría dos veces y
+             —peor— dejaría creer que el padre es el responsable, que es
+             exactamente el reparto que dejó las cuatro filas de atajos sin
+             cerrar. */
+          onPreguntar={props.onPreguntar}
           onCerrar={() => setAbanicoAbierto(false)}
         />
       ) : null}

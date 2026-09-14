@@ -95,6 +95,13 @@ export {
 } from './brand/isotipo-v5-path'
 
 export { Cabecera, type CabeceraProps , ALTO_CABECERA_RAIZ_FIJO, ALTO_CABECERA_EMPUJADA_FIJO } from './components/Cabecera'
+
+// DiscoVidrio — el círculo translúcido de las acciones sobre la banda ciruela.
+// 🔴 Sale del índice porque vivir adentro de `Cabecera` y estar expuesto como
+// `Cabecera.Disco` NO alcanzó: C lo copió igual para el carrito de la Despensa.
+// *Exponer no es publicar* — sin fila en el índice, en el catálogo y en la
+// galería, una pieza es indistinguible de una privada.
+export { DiscoVidrio } from './components/DiscoVidrio'
 export { Opcion, type OpcionProps, type OpcionItem } from './components/Opcion'
 export { IsotipoV5, LogoV5, type SobreFondo, type TamanoMarca } from './brand/Marca'
 export { Confirmacion, type ConfirmacionProps } from './components/Confirmacion'
