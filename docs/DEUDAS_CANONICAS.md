@@ -35079,13 +35079,48 @@ Pedir la recuperación con una cuenta real, recibir el correo, **volver por el e
 
 ⇒ **`pnpm verify:isotipo-path` gana dos brazos** (A, sobre el gate de B): que la copia del papel sea **idéntica** a la fuente única, y que el papel **encuadre por la caja** y no queden residuos de `ISO_VW`/`ISO_VH`. **Los dos probados EN ROJO** antes de confiar en su verde (`L-459`): un carácter cambiado en la copia → rojo; un `ISO_VW` reintroducido → rojo.
 
-### ⚠️ Lo que el cableado NO prueba
+### ✅ DESPLEGADO Y VERIFICADO CONTRA UN DOCUMENTO REAL (14-sep-2026)
 
-**Ningún documento se generó contra la base real.** El carnet se dibujó con el `Papel` verdadero pero **datos de fixture**: lo que se miró es LA CARA — marca de agua, banda, filete, pie —, que es lo único que esta tanda cambió. **Y nada está desplegado: las edge functions viajan por deploy, no por OTA.** *El path está en `main`; los ocho papeles siguen imprimiendo el viejo hasta que alguien despliegue.*
+**Las seis edge functions desplegadas**, verificadas **del objeto** (versión Y `ezbr_sha256`, no del texto del deploy):
+
+| función | antes | ahora |
+|---|---|---|
+| `documento-carnet` | v52 | **v53** |
+| `documento-certificado` | v45 | **v46** |
+| `documento-historia-clinica` | v49 | **v50** |
+| `documento-ficha-identidad` | v50 | **v51** |
+| `documento-receta` | v47 | **v48** |
+| `fiscal-ride` | v9 | **v10** |
+
+Las seis `ACTIVE`, las seis con `sha` distinto. **Y su control negativo: `despachar-correo` quedó en v57 con el `sha` idéntico** — *lo que prueba que el deploy alcanzó lo que se autorizó y nada más.*
+
+**Lo único que viajó fue el isotipo, y eso también se midió:** el último deploy de esos seis fue el **10-sep 19:22**, y desde entonces el único commit que tocó sus directorios o `_shared/papel.ts` es el de esta cura. *Un deploy sube el árbol entero, no el cambio — así que «sólo viaja el isotipo» es una medición, no una suposición.*
+
+#### El documento real, por el camino de la app
+
+**El carnet de Thor** (`d2e31d70…`, la mascota real de la familia del founder, **8 vacunas de verdad**): sesión real → **`emitir_token_documento`, la misma RPC que llama `packages/api/src/wrappers/documentos.ts`** → GET a la edge desplegada con ese token → **PDF de 204.855 bytes, folio `F-2026-000072`**. *Ninguna credencial se imprimió; la clave salió del llavero al momento de usarla.*
+
+**Y el freno del catálogo funcionó en vivo:** pedir `p_tipo: 'carnet'` **rebotó `tipo_documento_invalido`** — el código es **`carnet_vacunas`**, y lo dice `cat_documentos_mascota`. *Adiviné un código y el motor me corrigió, que es exactamente para lo que el catálogo existe desde S90.*
+
+#### La confirmación del OBJETO, no del ojo
+
+Se descomprimió el content stream del PDF real y se comparó su firma de dibujo contra **dos referencias generadas localmente** con el mismo `marcaDeAgua`, una con cada path:
+
+| | primeros movetos | curvas |
+|---|---|---|
+| referencia **vieja** | `213.1,303.0` · `158.4,36.3` | 73 |
+| referencia **nueva** | `384.9,645.5` · `771.5,417.6` | **74** |
+| **el PDF real** | **`384.9,645.5` · `771.5,417.6`** | **74** |
+
+⇒ **coincide con el nuevo, no coincide con el viejo.** *El ojo también lo confirma, pero el ojo no es lo que cierra esto: lo cierra que dos paths distintos no pueden compartir sus dos primeros movetos y su conteo de curvas.*
+
+### ⚠️ Lo que sigue sin probarse
+
+**Los otros cinco papeles no se generaron.** Comparten `marcaDeAgua` por construcción — el censo de importadores está arriba — **pero compartir una función no es haber corrido su camino**, y el del certificado la monta en su propio punto de montaje. *Se declara en vez de darlos por verdes.*
 
 **`deno check` sobre los seis consumidores: sin errores nuevos.** Dos (`documento-receta`, `documento-historia-clinica`) fallan por inferencia de tipos de Supabase — **verificado contra el `papel.ts` viejo: fallaban igual antes**.
 
-**☠️ MUERTE — MUERTA.** ② el correo, verificado contra el objeto. ① los seis papeles, cableados y mirados en A4. **Queda UNA cosa viva y no es de esta ficha: el DEPLOY de las seis edge functions** — hasta entonces el path nuevo está en `main` y no en la impresora.
+**☠️ MUERTE — MUERTA, y su prueba es un documento real.** ② el correo, verificado contra el objeto. ① los seis papeles, cableados, desplegados, y **el carnet de Thor bajado de la edge viva con el path nuevo confirmado del content stream**. *Queda `D-1109`, que es del correo y de otro deploy.*
 
 ---
 
@@ -35137,3 +35172,31 @@ La canasta vuelve al techo con `GlifoConContador` y `dentroDeTocable` (la voz la
 **El memorial.** El orbe tenía ahí una razón propia —*«el carrito y los mensajes conservan su única puerta también acá»*— y **este retiro no la reemplaza**. Queda como pregunta abierta de C, no como algo resuelto de callado.
 
 **☠️ MUERTE:** ya está muerta — nace cerrada. Vive como registro de la derogación y de la cadena, para que nadie reabra `N28` sobre el carrito creyendo que sigue rigiendo.
+
+---
+
+## `D-1109` 🟢 — EL `height="32"` DEL CORREO QUEDÓ CALCULADO PARA EL ISOTIPO VIEJO — y el deploy de los papeles **no lo cubre**
+
+**Estado:** ABIERTA · **Dueño: A** · **disparo: el próximo deploy de `despachar-correo` por cualquier motivo.**
+**Origen:** medido al cerrar `D-1107` (14-sep-2026).
+
+> **La pregunta de la mesa era si el mismo deploy lo cubría. NO lo cubre, y eso está medido:** desplegar los seis papeles dejó `despachar-correo` en **v57, con su `ezbr_sha256` idéntico** (`14db5c8175…` antes y después). *Son funciones distintas: compartir el motivo no las hace compartir el deploy.* ⇒ ficha, no cura de paso.
+
+### El número
+
+`despachar-correo/index.ts:351` pinta el isotipo con `width="46" height="32"`, y esos dos números **se eligieron para el PNG viejo**:
+
+| | tamaño | aspecto | el `height` que le toca a `width="46"` |
+|---|---|---|---|
+| viejo | 128×88 | 1,4545 | **31,62** |
+| nuevo | 240×162 | 1,4815 | **31,05** |
+
+El HTML fuerza **32** ⇒ **3,1 % de estiramiento vertical** sobre el asset nuevo (contra 1,2 % sobre el viejo). **Es invisible a ojo** a 46 px de ancho — se deposita porque *un número que dejó de corresponder a su imagen no avisa: sigue renderizando algo perfectamente creíble.*
+
+### La cura, escrita para que sea un solo toque
+
+`height="32"` → `height="31"`. **Un carácter.** *No se aplica sin desplegar, porque dejar el repo adelantado de la función desplegada es el estado que nadie audita — y acá el costo de esperar es 3 % en una imagen de 46 px.*
+
+⚠️ **Y la razón por la que no se despliega sola:** `despachar-correo` **manda correos a personas reales**. Un deploy suyo se hace cuando hay algo que justifique tocarlo, no para corregir un píxel. *La autorización de la mesa fue para los seis papeles; ensancharla por conveniencia es exactamente lo que la disciplina de alcance evita.*
+
+**☠️ MUERTE:** cuando `despachar-correo` se despliegue con el `31` adentro, verificado leyendo su versión del objeto.
