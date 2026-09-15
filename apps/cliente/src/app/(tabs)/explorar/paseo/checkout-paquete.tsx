@@ -266,7 +266,7 @@ export default function CheckoutPaquetePaseo() {
           paga la hoja (`R53`). */}
       <HojaContenido
         arranque={cabecera.arranque}
-        scroll={{ contentContainerStyle: { padding: spacing[4], gap: spacing[4], } }}
+
         fondo={
           <View onLayout={cabecera.alMedir}>
             <Cabecera
@@ -286,35 +286,45 @@ export default function CheckoutPaquetePaseo() {
           />
         }
       >
-        <Texto variante="seccion">{t('checkout.resumen')}</Texto>
-        <Tarjeta relleno="ninguno">
-          <Celda
-            titulo={t('paquete.checkoutServicio', { n: preset ?? 0 })}
-            subtitulo={t('checkout.conPrestador', { prestador: texto('prestadorNombre') })}
-            metadataMono={`${texto('duracion')} min`}
-          />
-          <Separador />
-          <Celda titulo={t('checkout.total')} metadataMono={formatearPrecio(total)} />
-        </Tarjeta>
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[4], gap: spacing[4] }}>
+          <Texto variante="seccion">{t('checkout.resumen')}</Texto>
+          <Tarjeta relleno="ninguno">
+            <Celda
+              titulo={t('paquete.checkoutServicio', { n: preset ?? 0 })}
+              subtitulo={t('checkout.conPrestador', { prestador: texto('prestadorNombre') })}
+              metadataMono={`${texto('duracion')} min`}
+            />
+            <Separador />
+            <Celda titulo={t('checkout.total')} metadataMono={formatearPrecio(total)} />
+          </Tarjeta>
 
-        {/* Compra suelta ⇒ **sin `recurrente`**: DeUna se puede elegir. */}
-        {facturacion.props === null ? (
-            facturacion.noCargo || facturacion.reintentando ? (
-              <AvisoNoCargo
-                onReintentar={facturacion.reintentar}
-                reintentando={facturacion.reintentando}
-                motivo={facturacion.motivo}
-              />
-            ) : null
-          ) : (
-          <SeccionFacturacion {...facturacion.props} total={total} />
-        )}
+          {/* Compra suelta ⇒ **sin `recurrente`**: DeUna se puede elegir. */}
+          {facturacion.props === null ? (
+              facturacion.noCargo || facturacion.reintentando ? (
+                <AvisoNoCargo
+                  onReintentar={facturacion.reintentar}
+                  reintentando={facturacion.reintentando}
+                  motivo={facturacion.motivo}
+                />
+              ) : null
+            ) : (
+            <SeccionFacturacion {...facturacion.props} total={total} />
+          )}
 
-        <SeccionMedioDePago medio={medio} />
+          <SeccionMedioDePago medio={medio} />
 
-        <Texto variante="apoyo">{t('paquete.vigenciaVoz')}</Texto>
+          <Texto variante="apoyo">{t('paquete.vigenciaVoz')}</Texto>
 
-        {rebote !== null ? <Texto variante="cuerpo">{rebote}</Texto> : null}
+          {rebote !== null ? <Texto variante="cuerpo">{rebote}</Texto> : null}
+        </View>
       </HojaContenido>
     </SafeAreaView>
   );

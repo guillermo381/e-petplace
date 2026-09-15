@@ -50,6 +50,8 @@ import { ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   SelectorDia,
@@ -77,7 +79,8 @@ import {
 import { formatearPrecio, obtenerIdiomaActual } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
-import { CabezalOficio, PieReserva } from '@/components/reserva-piezas';
+import { PieReserva } from '@/components/reserva-piezas';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 import {
   MODALIDADES_ABIERTAS,
   TAMANOS_PAQUETE,
@@ -141,6 +144,7 @@ type Resumen =
   | { fase: 'listo'; cuantos: number; precioDesde: number | null; causa: CausaSinGuarderias | null };
 
 export default function ElegirGuarderia() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
@@ -455,215 +459,244 @@ export default function ElegirGuarderia() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <CabezalOficio
-        oficio="guarderia"
-        capa="cuidado"
-        titulo={t('hubGuarderia.titulo')}
-        detalle={params.mascotaNombre ?? t('hubGuarderia.cabezalDetalle')}
-        onAtras={() => router.back()}
-        insetTop={insets.top}
-      />
+      {/* 🔴 **ACÁ VIVÍA `CabezalOficio`, UN TECHO LOCAL QUE NINGÚN GATE VEÍA.**
+          El censo del lote 3b contó esta pantalla como «sin cabecera» porque no
+          montaba `Encabezado` ni `Cabecera` — y sí tenía techo: una pieza LOCAL
+          (`components/reserva-piezas.tsx`) que pinta `bg.base` plano.
+          `verify:techos-locales` tampoco lo veía, y **lo dice en su propia
+          cabecera**: busca el degradado por su nombre de componente, así que
+          *«un techo hecho con un `backgroundColor` plano no lo ve»*. Dos
+          instrumentos con el mismo punto ciego, y el hueco justo en el medio.
 
-      <ScrollView contentContainerStyle={{ padding: spacing[5], gap: spacing[5], paddingBottom: insets.bottom + spacing[8] }}>
-        {/* ── ① LA MODALIDAD. Con una sola abierta no se dibuja (N=1 colapsa).
-               🔴 Y con un BONO tampoco: la modalidad ya la decidió la compra.
-               *Ofrecerle cambiarla sería ofrecerle gastar plata que ya gastó.* ── */}
-        {MODALIDADES_ABIERTAS.length > 1 && bonoId === null ? (
-          <SelectorSegmentado
-            proposito="eleccion"
-            etiqueta={t('modalidadGuarderia.etiqueta')}
-            segmentos={MODALIDADES_ABIERTAS.map((m) => ({
-              codigo: m,
-              etiqueta: t(m === 'dia' ? 'modalidadGuarderia.dia' : m === 'paquete' ? 'modalidadGuarderia.paquete' : 'modalidadGuarderia.mensual'),
-            }))}
-            activo={modalidad ?? ''}
-            onCambio={(c) => { setModalidad(c as ModalidadGuarderia); setFecha(null); setTamano(null); }}
-          />
-        ) : null}
+          ⚠️ **Y ESTE COMENTARIO NO PUEDE NOMBRAR ESE COMPONENTE.** La primera
+          redacción lo citaba literal y **encendió el gate sobre las cinco
+          pantallas curadas**: un censo por patrón no distingue una CITA de un
+          montaje. *Segunda vez en la sesión —la anterior fue `verify:moneda`—,
+          así que la regla es de clase: describir el marcador, jamás escribirlo.*
 
-        {/* ── ③ EL DÍA, con el rótulo de SU modalidad ── */}
-        {listoParaDia ? (
-          <View style={{ gap: spacing[3] }}>
-            <Texto variante="seccion">
-              {modalidad === 'paquete' ? t('elegirGuarderia.primeraEstadia')
-                : modalidad === 'mensual' ? t('elegirGuarderia.primerDia')
-                : t('hubGuarderia.queDia')}
-            </Texto>
-            <SelectorDia
-              dias={dias}
-              elegido={fecha ?? ''}
-              cerrados={cerrados}
-              etiquetaCerrado={etiquetaCerrado}
-              onElegir={setFecha}
-            />
-          </View>
-        ) : null}
-
-        {/* ── ③bis LA LETRA DE LA MENSUALIDAD ────────────────────────────
-               🔴 **Es lo que la familia está firmando, y no se decía.**
-               *Una recurrencia que no se declara antes de contratar es la
-               clase de cosa que se descubre en el segundo cobro.*
-
-               ⏪ **Colgaba de `fecha !== null`**, porque el día elegido era el
-               que fijaba la recurrencia. Con el día derogado (S108-C · T2) el
-               ancla es la fecha en que se contrata, así que **la letra ya no
-               espera a que se toque un día**: se lee desde que se elige la
-               modalidad, que es cuando la decisión se está tomando. ── */}
-        {modalidad === 'mensual' ? (
-          <Texto variante="apoyo">{t('elegirGuarderia.mensualLetra')}</Texto>
-        ) : null}
-
-        {/* ── ③ EL TAMAÑO, **DESPUÉS del día** — ver la enmienda arriba.
-               Con la fecha puesta, cada chip ya puede decir su precio. ── */}
-        {/* Con bono NO hay tamaño que elegir: ya está comprado. */}
-        {modalidad === 'paquete' && fecha !== null && bonoId === null ? (
-          <SelectorOpcion
-            acento="control"
-            disposicion="tira"
-            etiqueta={t('hubGuarderia.cuantasEstadias')}
-            /* Cada chip con SU precio. Sin precio todavía, sólo el tamaño:
-               **la etiqueta no espera al número**, y un chip sin precio es
-               honesto mientras un chip con el precio de otro no lo era. */
-            /* ⏪ **SÓLO LOS TAMAÑOS QUE ALGUIEN VENDE.** `TAMANOS_PAQUETE` es
-               el vocabulario del producto (5·10·15), **no la oferta**: medido
-               contra la base, el lugar vende 5 y 10 — y el chip de 15 se
-               ofrecía igual. *La familia lo elegía, recorría los seis pasos
-               que siguen, y el motor la rebotaba `paquete_no_disponible` al
-               final.* **Ley 23: la puerta no ofrece lo que va a rechazar**, y
-               menos seis pasos antes del rechazo.
-
-               ⚠️ El filtro corre **sólo con precios ya resueltos**: mientras
-               no llegaron, `precioPorTamano` está vacío y filtrar dejaría la
-               lista en cero — *que se leería como «no hay paquetes», y es
-               «todavía no sé»*. Sin precios se muestran todos, sin número,
-               que es lo que la etiqueta ya hacía. */
-            opciones={TAMANOS_PAQUETE
-              .filter((n) => Object.keys(precioPorTamano).length === 0 || precioPorTamano[n] !== undefined)
-              .map((n) => ({
-                codigo: String(n),
-                /* 🔴 SÓLO EL TAMAÑO. El precio vive al pie, junto al botón —
-                   firma del founder. `precioPorTamano` sigue usándose acá
-                   arriba **para filtrar** (un tamaño sin precio es un tamaño
-                   que el lugar no vende), pero no se pinta. */
-                etiqueta: t('hubGuarderia.tamanoEstadias', { n }),
-              }))}
-            seleccionada={tamano === null ? '' : String(tamano)}
-            /* 🔴 **ACÁ VIVÍA `setFecha(null)`, Y HACÍA IMPOSIBLE COMPRAR UN
-               PAQUETE.** Los chips y el pie están montados bajo
-               `fecha !== null`, así que elegir un tamaño **borraba el día y
-               con él los propios chips y el botón**: la pantalla volvía a
-               «elegí un día» vacía, y no había forma de llegar a pagar.
-
-               Es un resto de cuando el tamaño iba ANTES de la fecha — ahí
-               limpiar el día al cambiar de tamaño era correcto, porque el
-               precio dependía del tamaño elegido. **El founder firmó invertir
-               el orden el 29-ago y esta línea sobrevivió a su razón.**
-
-               *No lo vio ningún typecheck ni ningún lint: los dos estados son
-               válidos por separado, y la pantalla no falla — se vacía.* Lo
-               encontró recorrer el camino por donde entra el dedo. */
-            onSelect={(c) => setTamano(Number(c) as TamanoPaqueteGuarderia)}
-          />
-        ) : null}
-
-        {/* ── ⑤ LOS REQUISITOS — **DESPUÉS de elegir el día**, en los tres
-               caminos, e INFORMATIVOS.
-
-               ⏪ Aparecían apenas se abría la pantalla: con una sola modalidad,
-               `listoParaDia` es verdadero desde el arranque. **Firma de la mesa
-               (29-ago): van después del día, con el ritmo estricto.**
-
-               🔴 **Y la firma gana contra un argumento correcto**, que por eso
-               se deja escrito: los requisitos son de la MASCOTA, no del día, y
-               verlos temprano dejaría arreglar el carnet mientras se elige.
-               *Pero el ritmo es lo que le dice a la familia que la pantalla va
-               paso a paso — y una excepción bien razonada en el medio de una
-               secuencia la vuelve una pantalla que a veces se adelanta.* */}
-        {fecha !== null && requisitos !== null ? (
-          <View style={{ gap: spacing[3] }}>
-            <Texto variante="titulo">{t('lugarGuarderia.requisitosTitulo')}</Texto>
-            {/* ⭐ LA SUPERFICIE BLANCA LA PONE EL CONSUMIDOR — firma del
-                founder: *«fondo blanco y un chevron a la derecha, o sea la
-                anatomía de una FILA»*. **El chevron ya lo dibuja la pieza** (el
-                defecto era que su path salía como texto, curado por B); lo que
-                faltaba era el fondo, y `SemaforoSanitario` **no expone
-                superficie** — como `FichaFranja`, la decide quien la monta.
-                *Sin ella las filas flotan sobre el papel y se leen como texto
-                suelto, que es exactamente lo que el founder reportó.*
-
-                ⏪ **`relleno="ninguno"` Y NO EL DEFAULT — el founder lo vio
-                «muy ancho, la caja mal dimensionada», y estaba MEDIDO:**
-
-                  | | acá con `<Tarjeta>` | la fila equivalente de la casa |
-                  |---|---|---|
-                  | relleno de la carta | 12 | **0** (`ninguno`) |
-                  | alto con detalle | 12+68+12 = **~92** | **~60** |
-
-                *53 % más alta que `CeldaNavegacion` dentro de su carta, para
-                la misma información.* **El criterio ya estaba escrito en la
-                casa** (`pedidos/pedido/[pedidoId]`): *«`relleno="ninguno"`
-                porque adentro van `Celda` a sangre con sus `Separador`»* — y
-                acá adentro van filas, que es el mismo caso. El canon es
-                `parte/[eventoId]`: carta sin relleno con UNA fila adentro.
-
-                ⏪ **ANDAMIO YA RETIRADO — ver la lápida de abajo.** Decía: la
-                `Fila` de `SemaforoSanitario` nace con `paddingVertical` y
-                **sin horizontal**, así que a sangre el texto tocaría el borde.
-                Se lo pongo yo para no dejar la cura a medias — pero el número
-                es de la PIEZA (`CeldaNavegacion` lo lleva adentro), y va en
-                pedido a B. **B lo movió y el `View` se retiró.** */}
-            <Tarjeta relleno="ninguno">
-            {/* ☠️ ACÁ VIVÍA UN `View` con `paddingHorizontal: spacing[3]` — el
-                ANDAMIO que C declaró mientras la `Fila` de `SemaforoSanitario`
-                nacía sin padding horizontal. **B movió el número a la pieza
-                (S107-B), así que el andamio se retira en la misma tanda**
-                (Ley 37, y era la condición que este comentario tenía escrita).
-                🔴 **Y se retira ACÁ y no después a propósito:** con el padding
-                puesto en los dos lados la fila quedaría con 24 — *un andamio
-                que sobrevive un rato a su obra no es neutro: dobla el número
-                que vino a arreglar.* */}
-              <SemaforoSanitario
-                requisitos={requisitos.faltantes.length === 0
-                  ? [{ clave: 'todo', etiqueta: t('lugarGuarderia.requisitosAlDia'), estado: 'al_dia' }]
-                  : requisitos.faltantes.map((f): RequisitoSanitario => ({
-                      clave: f.codigo,
-                      etiqueta: f.nombre,
-                      estado: 'falta',
-                      detalle: t(`lugarGuarderia.estado_${f.estado}` as 'lugarGuarderia.estado_sin_carnet'),
-                      onResolver: () => router.push('/carnet'),
-                      etiquetaResolver: t('lugarGuarderia.cargarCarnet'),
-                    }))}
+          ⇒ estructura firmada: fondo ciruela + hoja.
+          ⚠️ **Lo que se pierde, dicho: el GLIFO DEL OFICIO.** El cabezal ponía
+          el glifo a la izquierda del título y `Cabecera` no tiene ese slot. El
+          nombre de la mascota sobrevive en `apoyo`. *No lo dibujo local —sería
+          volver a empezar—: va pedido a B.* */}
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada"
+                titulo={t('hubGuarderia.titulo')}
+                      apoyo={params.mascotaNombre ?? t('hubGuarderia.cabezalDetalle') ?? undefined}
+                onVolver={() => router.back()}
+                etiquetaVolver={t('comun.volver')}
+                presentacion="fondo"
               />
-            </Tarjeta>
-            {/* 🔴 LO DICE, para que nadie lea el semáforo como una puerta: hoy
-                informa y no frena (`bloquea === false`). */}
-            {!requisitos.bloquea ? (
-              <Texto variante="apoyo">{t('elegirGuarderia.requisitosInforman')}</Texto>
-            ) : null}
-          </View>
-        ) : null}
+            </View>
+          }
+        >
+          {/* El relleno va ADENTRO de la hoja: en `scroll` envolvería a la hoja
+              y dejaría ciruela a los lados (recorrido 6). */}
+          <View style={{ padding: spacing[5], gap: spacing[5], }}>
+          {/* ── ① LA MODALIDAD. Con una sola abierta no se dibuja (N=1 colapsa).
+                 🔴 Y con un BONO tampoco: la modalidad ya la decidió la compra.
+                 *Ofrecerle cambiarla sería ofrecerle gastar plata que ya gastó.* ── */}
+          {MODALIDADES_ABIERTAS.length > 1 && bonoId === null ? (
+            <SelectorSegmentado
+              proposito="eleccion"
+              etiqueta={t('modalidadGuarderia.etiqueta')}
+              segmentos={MODALIDADES_ABIERTAS.map((m) => ({
+                codigo: m,
+                etiqueta: t(m === 'dia' ? 'modalidadGuarderia.dia' : m === 'paquete' ? 'modalidadGuarderia.paquete' : 'modalidadGuarderia.mensual'),
+              }))}
+              activo={modalidad ?? ''}
+              onCambio={(c) => { setModalidad(c as ModalidadGuarderia); setFecha(null); setTamano(null); }}
+            />
+          ) : null}
 
-        {/* ── ⑦ LA CAUSA, VISIBLE SIN TOCAR EL BOTÓN (Ley 23) ── */}
-        {resumen.fase === 'cargando' ? (
-          <EsqueletoGrupo><Esqueleto alto={44} /></EsqueletoGrupo>
-        ) : resumen.fase === 'vispera' ? (
-          /* ③ NO dice «prueba con otro día»: explica LA REGLA, que es lo que
-             la familia no sabía. */
-          <Texto variante="apoyo">{t('elegirGuarderia.vispera')}</Texto>
-        ) : resumen.fase === 'causaDelMotor' ? (
-          /* La voz del motor, tal cual: **ya está en tuteo y ya dice el hecho.**
-             *Envolverla en «no pudimos preguntar» la convertiría en mentira.* */
-          <Texto variante="apoyo">{resumen.mensaje}</Texto>
-        ) : resumen.fase === 'noPudimos' ? (
-          <Texto variante="apoyo">{t('hubGuarderia.listaNoCargoDetalle')}</Texto>
-        ) : resumen.fase === 'listo' && resumen.causa !== null ? (
-          <Texto variante="apoyo">{vozCausa(resumen.causa)}</Texto>
-        ) : null}
+          {/* ── ③ EL DÍA, con el rótulo de SU modalidad ── */}
+          {listoParaDia ? (
+            <View style={{ gap: spacing[3] }}>
+              <Texto variante="seccion">
+                {modalidad === 'paquete' ? t('elegirGuarderia.primeraEstadia')
+                  : modalidad === 'mensual' ? t('elegirGuarderia.primerDia')
+                  : t('hubGuarderia.queDia')}
+              </Texto>
+              <SelectorDia
+                dias={dias}
+                elegido={fecha ?? ''}
+                cerrados={cerrados}
+                etiquetaCerrado={etiquetaCerrado}
+                onElegir={setFecha}
+              />
+            </View>
+          ) : null}
 
-        {/* El rebote del camino corto vive ENCIMA del pie: el pie es fijo y
-            debajo no hay dónde vivir. */}
-        {reboteSaldo !== null ? <Texto variante="cuerpo">{reboteSaldo}</Texto> : null}
-      </ScrollView>
+          {/* ── ③bis LA LETRA DE LA MENSUALIDAD ────────────────────────────
+                 🔴 **Es lo que la familia está firmando, y no se decía.**
+                 *Una recurrencia que no se declara antes de contratar es la
+                 clase de cosa que se descubre en el segundo cobro.*
+
+                 ⏪ **Colgaba de `fecha !== null`**, porque el día elegido era el
+                 que fijaba la recurrencia. Con el día derogado (S108-C · T2) el
+                 ancla es la fecha en que se contrata, así que **la letra ya no
+                 espera a que se toque un día**: se lee desde que se elige la
+                 modalidad, que es cuando la decisión se está tomando. ── */}
+          {modalidad === 'mensual' ? (
+            <Texto variante="apoyo">{t('elegirGuarderia.mensualLetra')}</Texto>
+          ) : null}
+
+          {/* ── ③ EL TAMAÑO, **DESPUÉS del día** — ver la enmienda arriba.
+                 Con la fecha puesta, cada chip ya puede decir su precio. ── */}
+          {/* Con bono NO hay tamaño que elegir: ya está comprado. */}
+          {modalidad === 'paquete' && fecha !== null && bonoId === null ? (
+            <SelectorOpcion
+              acento="control"
+              disposicion="tira"
+              etiqueta={t('hubGuarderia.cuantasEstadias')}
+              /* Cada chip con SU precio. Sin precio todavía, sólo el tamaño:
+                 **la etiqueta no espera al número**, y un chip sin precio es
+                 honesto mientras un chip con el precio de otro no lo era. */
+              /* ⏪ **SÓLO LOS TAMAÑOS QUE ALGUIEN VENDE.** `TAMANOS_PAQUETE` es
+                 el vocabulario del producto (5·10·15), **no la oferta**: medido
+                 contra la base, el lugar vende 5 y 10 — y el chip de 15 se
+                 ofrecía igual. *La familia lo elegía, recorría los seis pasos
+                 que siguen, y el motor la rebotaba `paquete_no_disponible` al
+                 final.* **Ley 23: la puerta no ofrece lo que va a rechazar**, y
+                 menos seis pasos antes del rechazo.
+
+                 ⚠️ El filtro corre **sólo con precios ya resueltos**: mientras
+                 no llegaron, `precioPorTamano` está vacío y filtrar dejaría la
+                 lista en cero — *que se leería como «no hay paquetes», y es
+                 «todavía no sé»*. Sin precios se muestran todos, sin número,
+                 que es lo que la etiqueta ya hacía. */
+              opciones={TAMANOS_PAQUETE
+                .filter((n) => Object.keys(precioPorTamano).length === 0 || precioPorTamano[n] !== undefined)
+                .map((n) => ({
+                  codigo: String(n),
+                  /* 🔴 SÓLO EL TAMAÑO. El precio vive al pie, junto al botón —
+                     firma del founder. `precioPorTamano` sigue usándose acá
+                     arriba **para filtrar** (un tamaño sin precio es un tamaño
+                     que el lugar no vende), pero no se pinta. */
+                  etiqueta: t('hubGuarderia.tamanoEstadias', { n }),
+                }))}
+              seleccionada={tamano === null ? '' : String(tamano)}
+              /* 🔴 **ACÁ VIVÍA `setFecha(null)`, Y HACÍA IMPOSIBLE COMPRAR UN
+                 PAQUETE.** Los chips y el pie están montados bajo
+                 `fecha !== null`, así que elegir un tamaño **borraba el día y
+                 con él los propios chips y el botón**: la pantalla volvía a
+                 «elegí un día» vacía, y no había forma de llegar a pagar.
+
+                 Es un resto de cuando el tamaño iba ANTES de la fecha — ahí
+                 limpiar el día al cambiar de tamaño era correcto, porque el
+                 precio dependía del tamaño elegido. **El founder firmó invertir
+                 el orden el 29-ago y esta línea sobrevivió a su razón.**
+
+                 *No lo vio ningún typecheck ni ningún lint: los dos estados son
+                 válidos por separado, y la pantalla no falla — se vacía.* Lo
+                 encontró recorrer el camino por donde entra el dedo. */
+              onSelect={(c) => setTamano(Number(c) as TamanoPaqueteGuarderia)}
+            />
+          ) : null}
+
+          {/* ── ⑤ LOS REQUISITOS — **DESPUÉS de elegir el día**, en los tres
+                 caminos, e INFORMATIVOS.
+
+                 ⏪ Aparecían apenas se abría la pantalla: con una sola modalidad,
+                 `listoParaDia` es verdadero desde el arranque. **Firma de la mesa
+                 (29-ago): van después del día, con el ritmo estricto.**
+
+                 🔴 **Y la firma gana contra un argumento correcto**, que por eso
+                 se deja escrito: los requisitos son de la MASCOTA, no del día, y
+                 verlos temprano dejaría arreglar el carnet mientras se elige.
+                 *Pero el ritmo es lo que le dice a la familia que la pantalla va
+                 paso a paso — y una excepción bien razonada en el medio de una
+                 secuencia la vuelve una pantalla que a veces se adelanta.* */}
+          {fecha !== null && requisitos !== null ? (
+            <View style={{ gap: spacing[3] }}>
+              <Texto variante="titulo">{t('lugarGuarderia.requisitosTitulo')}</Texto>
+              {/* ⭐ LA SUPERFICIE BLANCA LA PONE EL CONSUMIDOR — firma del
+                  founder: *«fondo blanco y un chevron a la derecha, o sea la
+                  anatomía de una FILA»*. **El chevron ya lo dibuja la pieza** (el
+                  defecto era que su path salía como texto, curado por B); lo que
+                  faltaba era el fondo, y `SemaforoSanitario` **no expone
+                  superficie** — como `FichaFranja`, la decide quien la monta.
+                  *Sin ella las filas flotan sobre el papel y se leen como texto
+                  suelto, que es exactamente lo que el founder reportó.*
+
+                  ⏪ **`relleno="ninguno"` Y NO EL DEFAULT — el founder lo vio
+                  «muy ancho, la caja mal dimensionada», y estaba MEDIDO:**
+
+                    | | acá con `<Tarjeta>` | la fila equivalente de la casa |
+                    |---|---|---|
+                    | relleno de la carta | 12 | **0** (`ninguno`) |
+                    | alto con detalle | 12+68+12 = **~92** | **~60** |
+
+                  *53 % más alta que `CeldaNavegacion` dentro de su carta, para
+                  la misma información.* **El criterio ya estaba escrito en la
+                  casa** (`pedidos/pedido/[pedidoId]`): *«`relleno="ninguno"`
+                  porque adentro van `Celda` a sangre con sus `Separador`»* — y
+                  acá adentro van filas, que es el mismo caso. El canon es
+                  `parte/[eventoId]`: carta sin relleno con UNA fila adentro.
+
+                  ⏪ **ANDAMIO YA RETIRADO — ver la lápida de abajo.** Decía: la
+                  `Fila` de `SemaforoSanitario` nace con `paddingVertical` y
+                  **sin horizontal**, así que a sangre el texto tocaría el borde.
+                  Se lo pongo yo para no dejar la cura a medias — pero el número
+                  es de la PIEZA (`CeldaNavegacion` lo lleva adentro), y va en
+                  pedido a B. **B lo movió y el `View` se retiró.** */}
+              <Tarjeta relleno="ninguno">
+              {/* ☠️ ACÁ VIVÍA UN `View` con `paddingHorizontal: spacing[3]` — el
+                  ANDAMIO que C declaró mientras la `Fila` de `SemaforoSanitario`
+                  nacía sin padding horizontal. **B movió el número a la pieza
+                  (S107-B), así que el andamio se retira en la misma tanda**
+                  (Ley 37, y era la condición que este comentario tenía escrita).
+                  🔴 **Y se retira ACÁ y no después a propósito:** con el padding
+                  puesto en los dos lados la fila quedaría con 24 — *un andamio
+                  que sobrevive un rato a su obra no es neutro: dobla el número
+                  que vino a arreglar.* */}
+                <SemaforoSanitario
+                  requisitos={requisitos.faltantes.length === 0
+                    ? [{ clave: 'todo', etiqueta: t('lugarGuarderia.requisitosAlDia'), estado: 'al_dia' }]
+                    : requisitos.faltantes.map((f): RequisitoSanitario => ({
+                        clave: f.codigo,
+                        etiqueta: f.nombre,
+                        estado: 'falta',
+                        detalle: t(`lugarGuarderia.estado_${f.estado}` as 'lugarGuarderia.estado_sin_carnet'),
+                        onResolver: () => router.push('/carnet'),
+                        etiquetaResolver: t('lugarGuarderia.cargarCarnet'),
+                      }))}
+                />
+              </Tarjeta>
+              {/* 🔴 LO DICE, para que nadie lea el semáforo como una puerta: hoy
+                  informa y no frena (`bloquea === false`). */}
+              {!requisitos.bloquea ? (
+                <Texto variante="apoyo">{t('elegirGuarderia.requisitosInforman')}</Texto>
+              ) : null}
+            </View>
+          ) : null}
+
+          {/* ── ⑦ LA CAUSA, VISIBLE SIN TOCAR EL BOTÓN (Ley 23) ── */}
+          {resumen.fase === 'cargando' ? (
+            <EsqueletoGrupo><Esqueleto alto={44} /></EsqueletoGrupo>
+          ) : resumen.fase === 'vispera' ? (
+            /* ③ NO dice «prueba con otro día»: explica LA REGLA, que es lo que
+               la familia no sabía. */
+            <Texto variante="apoyo">{t('elegirGuarderia.vispera')}</Texto>
+          ) : resumen.fase === 'causaDelMotor' ? (
+            /* La voz del motor, tal cual: **ya está en tuteo y ya dice el hecho.**
+               *Envolverla en «no pudimos preguntar» la convertiría en mentira.* */
+            <Texto variante="apoyo">{resumen.mensaje}</Texto>
+          ) : resumen.fase === 'noPudimos' ? (
+            <Texto variante="apoyo">{t('hubGuarderia.listaNoCargoDetalle')}</Texto>
+          ) : resumen.fase === 'listo' && resumen.causa !== null ? (
+            <Texto variante="apoyo">{vozCausa(resumen.causa)}</Texto>
+          ) : null}
+
+          {/* El rebote del camino corto vive ENCIMA del pie: el pie es fijo y
+              debajo no hay dónde vivir. */}
+          {reboteSaldo !== null ? <Texto variante="cuerpo">{reboteSaldo}</Texto> : null}
+        </View>
+      </HojaContenido>
 
       {/* ── ④+⑤ EL VALOR Y EL BOTÓN. «Ver quién puede» es UN BOTÓN, no una lista. ── */}
       {listoParaDia && fecha !== null ? (

@@ -121,34 +121,41 @@ export default function SerieDePedidos() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: {
-          padding: spacing[5],
-          gap: spacing[4],
-        } }}
+
       >
-        {cargando ? (
-          /* N16: `Esqueleto` en toda lectura — el spinner está muerto. */
-          <EsqueletoGrupo>
-            <Esqueleto forma="bloque" alto={96} />
-            <Esqueleto forma="bloque" alto={128} />
-          </EsqueletoGrupo>
-        ) : serie === null ? (
-          /* 🔴 El vacío **no se dibuja como «no tienes envíos automáticos»**:
-             eso sería una afirmación sobre los datos, y lo que pasa es que
-             todavía no sabemos leerlos. *Un «no tenés nada» falso es peor que
-             un vacío: cierra la pregunta con la respuesta equivocada.* */
-          <EstadoVacio
-            registro="pantalla"
-            titulo={t('serie.sinLectorTitulo')}
-            descripcion={t('serie.sinLectorCuerpo')}
-          />
-        ) : (
-          <SerieRecurrenteVista
-            serie={serie}
-            onCancelar={() => void cancelar()}
-            cancelando={cancelando}
-          />
-        )}
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[5], gap: spacing[4] }}>
+          {cargando ? (
+            /* N16: `Esqueleto` en toda lectura — el spinner está muerto. */
+            <EsqueletoGrupo>
+              <Esqueleto forma="bloque" alto={96} />
+              <Esqueleto forma="bloque" alto={128} />
+            </EsqueletoGrupo>
+          ) : serie === null ? (
+            /* 🔴 El vacío **no se dibuja como «no tienes envíos automáticos»**:
+               eso sería una afirmación sobre los datos, y lo que pasa es que
+               todavía no sabemos leerlos. *Un «no tenés nada» falso es peor que
+               un vacío: cierra la pregunta con la respuesta equivocada.* */
+            <EstadoVacio
+              registro="pantalla"
+              titulo={t('serie.sinLectorTitulo')}
+              descripcion={t('serie.sinLectorCuerpo')}
+            />
+          ) : (
+            <SerieRecurrenteVista
+              serie={serie}
+              onCancelar={() => void cancelar()}
+              cancelando={cancelando}
+            />
+          )}
+        </View>
       </HojaContenido>
     </View>
   );

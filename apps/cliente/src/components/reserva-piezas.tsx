@@ -66,136 +66,17 @@ import {
 
 // ═══════════════ ① EL CABEZAL — LA BANDA DE COLOR MURIÓ ═══════════════
 
-/** EL CABEZAL DEL OFICIO (r14-6 — decisión del founder MIRANDO, sobre
- *  su propia firma de r12: el techo claro por servicio ganó el gate y
- *  DOS RONDAS DESPUÉS la banda entera muere. Se registra así, no como
- *  si la banda nunca hubiera existido: el gate de r12 eligió entre dos
- *  bandas; r14 saca la banda de la mesa).
+/* ☠️ **`CabezalOficio` MURIÓ (S116-C tanda 06 · punto 2).** Era el techo de las
+ * cinco pantallas de oficio, y **ningún instrumento lo veía**: el censo del lote
+ * 3b las contó como «sin cabecera» —no montaban `Encabezado` ni `Cabecera`— y
+ * `verify:techos-locales` tampoco, porque su marcador es `LinearGradient` y esta
+ * pieza pintaba `bg.base` PLANO. *El gate declara ese punto ciego en su propia
+ * cabecera; lo que faltaba era alguien parado justo ahí.*
  *
- *  Lo que queda en su lugar: EL GLIFO DEL OFICIO ADELANTE + EL ISOTIPO
- *  TEÑIDO DEL COLOR DEL OFICIO + el label. Sin banda, sin curva, sin
- *  luz de esquina — no hay techo que adornar.
- *
- *  ⚠️ DESVÍO DECLARADO — LEY 4: *"el isotipo es IDENTIDAD: va en
- *  gradiente oficial por default"*. Teñirlo del color del oficio se
- *  desvía de ese default y por eso se declara aunque sea chico contra
- *  una banda entera. DOS COSAS QUE LO ATENÚAN, medidas y no supuestas:
- *   ① el MECANISMO ya existe y está firmado — la prop `color` de
- *     `Isotipo` nació en S61-B8 por letra del founder ("isotipo en
- *     tealDark", bienvenida del prestador): teñir el isotipo con el
- *     color de un oficio YA tiene precedente firmado en la casa.
- *   ② el default habría sido el CHOQUE: el gradiente oficial es de
- *     CONTEXTO CERRADO (Ley 4 dosis) y esta es pantalla interna. Poner
- *     el isotipo en gradiente acá rompía la dosis; teñirlo la respeta.
- *  Igual es DESVÍO y lo firma el founder, no esta pantalla.
- *
- *  ⚠️ EL PRECIO NO VIAJA ACÁ, y es RETIRO, no olvido: la banda mostraba
- *  el MISMO número que el pie ("$ X · desde"). Dos veces el mismo dato
- *  es la regla Chanel directa. Queda SOLO en el pie — y el caso del día
- *  sin horarios queda honesto por consecuencia: si no hay nada que
- *  reservar, no hay precio que decir (el pie tampoco se monta). */
-export function CabezalOficio({
-  oficio,
-  capa,
-  titulo,
-  detalle,
-  onAtras,
-  insetTop,
-}: {
-  oficio: IconoNombre;
-  /** ⚠️ r30 · LA CATEGORÍA, DECLARADA POR LA PANTALLA — y OBLIGATORIA a
-   *  propósito. Hasta hoy el tinte estaba fijo en `capa.cuidado`, que es
-   *  correcto para paseo y MENTIRA para veterinaria; el riesgo real no
-   *  era el color de hoy sino que se clonara así a tres oficios más
-   *  (orden del founder: resolverlo ANTES de que se clone). Sin default:
-   *  el tsc obliga a cada clon a DECIRLO, que es la única forma de que
-   *  una taxonomía no se herede por copiar-pegar.
-   *  Ley 10: paseo · grooming · adiestramiento = CUIDADO ·
-   *  veterinaria = SALUD.
-   *
-   *  ⚠️ Y EL NOMBRE DEL TOKEN NO COINCIDE CON LA LEY, medido: NO EXISTE
-   *  `capa.salud`. Las cuatro claves del tema son identidad · cuidado ·
-   *  comunidad · comunidadAmplia, y lo que la Ley 10 llama SALUD vive
-   *  bajo `identidad` (verdeVitalDark, "Capa 1 · vida" en el comentario
-   *  del tema) — el token es más viejo que la taxonomía. La pantalla
-   *  habla la LEY y la pieza traduce al token que existe, en UN solo
-   *  lugar. Si algún día nace `capa.salud`, se cambia acá y nada más. */
-  capa: 'cuidado' | 'salud';
-  titulo: string;
-  /** El sujeto de la reserva (la mascota). En SANS: es un NOMBRE, no
-   *  metadata de máquina — la Ley 3 reserva el mono para lo segundo, y
-   *  la banda vieja lo pintaba en mono (defecto hallado al reescribir). */
-  detalle: string | null;
-  onAtras: () => void;
-  insetTop: number;
-}) {
-  const { theme } = useTheme();
-  // el color del OFICIO — el mismo tinte de capa que pintaba la banda,
-  // ahora en su registro pleno: de fondo pasa a TINTA del isotipo.
-  // ⚠️ NOTA DE LÁMINA (advertencia del founder): en CLARO `capa.cuidado`
-  // YA NO es el teal vivo — es tealDark. El vivo daba 1.46 sobre papel
-  // algodón (medido: 1.46 sobre light0, 1.40 sobre el tapiz) y B lo bajó
-  // en su r5. Cualquier canto copiado de una lámina vieja trae el vivo:
-  // acá el color sale del TEMA, jamás de una lámina.
-  const colorOficio = capa === 'salud' ? theme.capa.identidad : theme.capa.cuidado;
-
-  return (
-    <View
-      style={{
-        backgroundColor: theme.bg.base,
-        paddingTop: insetTop + spacing[3],
-        paddingHorizontal: spacing[5],
-        paddingBottom: spacing[3],
-      }}
-    >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-        <Pressable
-          accessibilityRole="button"
-          onPress={onAtras}
-          hitSlop={8}
-          style={{ width: 38, height: 38, alignItems: 'center', justifyContent: 'center', marginLeft: -spacing[2] }}
-        >
-          <Svg width={22} height={22} viewBox="0 0 24 24">
-            <Path
-              d="m14 5-7 7 7 7"
-              stroke={theme.text.primary}
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="none"
-            />
-          </Svg>
-        </Pressable>
-        {/* ☠️ **LA MARCA SE FUE Y QUEDA EL GLIFO DEL OFICIO (firma del
-            founder, lote 3e).** ⏪ Acá vivían LOS DOS: el glifo adelante y el
-            isotipo viejo teñido detrás, a 20 px.
-
-            🔴 **Este lugar pedía un glifo del oficio, no la marca** — y el
-            glifo **ya estaba puesto**: la cura es sacar lo que sobraba, no
-            agregar nada. *El isotipo teñido era un adorno detrás de la pieza
-            que de verdad informaba.*
-
-            ⚠️ **En el color de siempre:** `registro="capa"` tiñe el glifo con
-            el color de su capa, que es el que la fila usa desde que existe —
-            **no se toca**. */}
-        <Icono nombre={oficio} tamano={24} registro="capa" />
-        <View style={{ flex: 1, minWidth: 0 }}>
-          <Text
-            numberOfLines={1}
-            style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: theme.text.primary }}
-          >
-            {titulo}
-          </Text>
-        </View>
-      </View>
-      {detalle !== null ? (
-        <View style={{ marginTop: spacing[1], marginLeft: 38 + spacing[3] }}>
-          <Texto variante="apoyo">{detalle}</Texto>
-        </View>
-      ) : null}
-    </View>
-  );
-}
+ * Las cinco pasaron a `Cabecera variante="empujada"` + `HojaContenido`: el
+ * título del oficio queda, el nombre de la mascota pasa a `apoyo`, y **el glifo
+ * del oficio se pierde** — `Cabecera` no tiene ese slot y no se dibuja local.
+ * Pedido a B, en el buzón. */
 
 // ═══════════════ ② EL DÍA — LA RUEDA D3 ═══════════════
 //

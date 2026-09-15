@@ -72,34 +72,41 @@ export default function ExportarDatos() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: {
-          padding: spacing[5],
-          gap: spacing[4],
-        } }}
+
       >
-        <Texto variante="cuerpo" color="secondary">
-          {t('exportarDatos.intro')}
-        </Texto>
-        <Texto variante="apoyo">{t('exportarDatos.detalle')}</Texto>
-
-        {estado.fase === 'enviado' && (
-          <Texto variante="cuerpo" color="success">
-            {t(estado.yaEstaba ? 'exportarDatos.yaEnCamino' : 'exportarDatos.enviado', { correo: estado.correo })}
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[5], gap: spacing[4] }}>
+          <Texto variante="cuerpo" color="secondary">
+            {t('exportarDatos.intro')}
           </Texto>
-        )}
-        {estado.fase === 'error' && (
-          <Texto variante="apoyo" color="danger">
-            {t('exportarDatos.error')}
-          </Texto>
-        )}
+          <Texto variante="apoyo">{t('exportarDatos.detalle')}</Texto>
 
-        <View style={{ paddingTop: spacing[2] }}>
-          <Boton
-            etiqueta={estado.fase === 'enviado' ? t('exportarDatos.pedirDeNuevo') : t('exportarDatos.cta')}
-            bloque
-            cargando={estado.fase === 'pidiendo'}
-            onPress={() => void pedirCopia()}
-          />
+          {estado.fase === 'enviado' && (
+            <Texto variante="cuerpo" color="success">
+              {t(estado.yaEstaba ? 'exportarDatos.yaEnCamino' : 'exportarDatos.enviado', { correo: estado.correo })}
+            </Texto>
+          )}
+          {estado.fase === 'error' && (
+            <Texto variante="apoyo" color="danger">
+              {t('exportarDatos.error')}
+            </Texto>
+          )}
+
+          <View style={{ paddingTop: spacing[2] }}>
+            <Boton
+              etiqueta={estado.fase === 'enviado' ? t('exportarDatos.pedirDeNuevo') : t('exportarDatos.cta')}
+              bloque
+              cargando={estado.fase === 'pidiendo'}
+              onPress={() => void pedirCopia()}
+            />
+          </View>
         </View>
       </HojaContenido>
     </View>

@@ -195,45 +195,52 @@ export default function DatosFacturacionScreen() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: {
-          padding: spacing[5],
-          gap: spacing[5],
-        } }}
+
       >
-        {carga === 'cargando' ? (
-          <EsqueletoGrupo>
-            <View style={{ gap: spacing[3] }}>
-              <Esqueleto forma="bloque" ancho="100%" alto={72} />
-              <Esqueleto forma="bloque" ancho="100%" alto={72} />
-            </View>
-          </EsqueletoGrupo>
-        ) : carga === 'error' ? (
-          <EstadoVacio
-            titulo={t('datosFacturacion.errorTitulo')}
-            accion={
-              <Boton
-                variante="secundario"
-                etiqueta={t('datosFacturacion.reintentar')}
-                onPress={() => {
-                  setCarga('cargando');
-                  setIntento((n) => n + 1);
-                }}
-              />
-            }
-          />
-        ) : (
-          <>
-            <Texto variante="apoyo">{t('datosFacturacion.intro')}</Texto>
-            <CampoIdentificacion valor={datos} onCambiar={setDatos} acento="control" />
-            <Boton
-              variante="primario"
-              etiqueta={t('datosFacturacion.guardar')}
-              bloque
-              cargando={guardando}
-              onPress={guardar}
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[5], gap: spacing[5] }}>
+          {carga === 'cargando' ? (
+            <EsqueletoGrupo>
+              <View style={{ gap: spacing[3] }}>
+                <Esqueleto forma="bloque" ancho="100%" alto={72} />
+                <Esqueleto forma="bloque" ancho="100%" alto={72} />
+              </View>
+            </EsqueletoGrupo>
+          ) : carga === 'error' ? (
+            <EstadoVacio
+              titulo={t('datosFacturacion.errorTitulo')}
+              accion={
+                <Boton
+                  variante="secundario"
+                  etiqueta={t('datosFacturacion.reintentar')}
+                  onPress={() => {
+                    setCarga('cargando');
+                    setIntento((n) => n + 1);
+                  }}
+                />
+              }
             />
-          </>
-        )}
+          ) : (
+            <>
+              <Texto variante="apoyo">{t('datosFacturacion.intro')}</Texto>
+              <CampoIdentificacion valor={datos} onCambiar={setDatos} acento="control" />
+              <Boton
+                variante="primario"
+                etiqueta={t('datosFacturacion.guardar')}
+                bloque
+                cargando={guardando}
+                onPress={guardar}
+              />
+            </>
+          )}
+        </View>
       </HojaContenido>
     </View>
   );

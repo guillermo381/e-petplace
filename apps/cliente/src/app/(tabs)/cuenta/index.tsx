@@ -283,7 +283,7 @@ export default function Cuenta() {
           (`R53`). */}
         <HojaContenido
           arranque={cabecera.arranque}
-          scroll={{ contentContainerStyle: { paddingBottom: AIRE_RAIZ } }}
+
           fondo={
             <View onLayout={cabecera.alMedir}>
               <Cabecera
@@ -295,224 +295,234 @@ export default function Cuenta() {
             </View>
           }
         >
+          {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+            `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+            hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+            no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+            a cada lado, el de arriba pegaba el contenido al borde redondeado
+            —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+            *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+            ciruela por lado, que es `spacing[4]` exacto.* */}
+          <View style={{ paddingBottom: AIRE_RAIZ }}>
 
-        <View style={{ paddingHorizontal: spacing[4], gap: spacing[6], marginTop: spacing[2] }}>
-          <Tarjeta relleno="ninguno">
-            {lugares.map((lugar, i) => (
-              <View key={lugar.ruta}>
-                {i > 0 ? <Separador /> : null}
-                <CeldaNavegacion
-                  icono={lugar.icono}
-                  titulo={lugar.etiqueta}
-                  /* `D-878`: solo las herramientas de sesión traen `detalle`,
-                     y por eso se pregunta por presencia en vez de agregarle
-                     `undefined` a las nueve filas de producto. */
-                  detalle={'detalle' in lugar ? lugar.detalle : undefined}
-                  onPress={() => router.push(lugar.ruta)}
-                />
-              </View>
-            ))}
-          </Tarjeta>
+          <View style={{ paddingHorizontal: spacing[4], gap: spacing[6], marginTop: spacing[2] }}>
+            <Tarjeta relleno="ninguno">
+              {lugares.map((lugar, i) => (
+                <View key={lugar.ruta}>
+                  {i > 0 ? <Separador /> : null}
+                  <CeldaNavegacion
+                    icono={lugar.icono}
+                    titulo={lugar.etiqueta}
+                    /* `D-878`: solo las herramientas de sesión traen `detalle`,
+                       y por eso se pregunta por presencia en vez de agregarle
+                       `undefined` a las nueve filas de producto. */
+                    detalle={'detalle' in lugar ? lugar.detalle : undefined}
+                    onPress={() => router.push(lugar.ruta)}
+                  />
+                </View>
+              ))}
+            </Tarjeta>
 
-          {/* ☠️ S101-B · FASE 5 — LA CELDA DEL GATE MURIÓ ACÁ (Ley 37).
-              Existió para que el founder pudiera ejercitar el mecanismo del
-              alta antes de que hubiera pantalla, y **nació declarando que
-              moría con el gate**. El gate pasó y la pantalla real existe:
-              «Medios de pago» vive en el grupo de arriba, con su lista, su
-              alta al tocar y su borrado con doble confirmación.
-              *Un andamio que sobrevive a su obra deja de ser andamio y pasa a
-              ser una segunda puerta que nadie mantiene.* ── */}
+            {/* ☠️ S101-B · FASE 5 — LA CELDA DEL GATE MURIÓ ACÁ (Ley 37).
+                Existió para que el founder pudiera ejercitar el mecanismo del
+                alta antes de que hubiera pantalla, y **nació declarando que
+                moría con el gate**. El gate pasó y la pantalla real existe:
+                «Medios de pago» vive en el grupo de arriba, con su lista, su
+                alta al tocar y su borrado con doble confirmación.
+                *Un andamio que sobrevive a su obra deja de ser andamio y pasa a
+                ser una segunda puerta que nadie mantiene.* ── */}
 
-          {/* ── Sesión y cuenta ── */}
-          <View style={{ gap: spacing[3] }}>
-            <TituloBloque texto={t('cuenta.sesion')} />
-            {/* 🔴 `D-879` · **19.7 APLICADA: por superficie UNA caja, el resto
-                baja a label.** Acá había dos botones apilados y el de abajo
-                era `compacto` — **borde + fondo transparente**, que es
-                literalmente *la caja vacía del medio* que la 19.7 mató.
+            {/* ── Sesión y cuenta ── */}
+            <View style={{ gap: spacing[3] }}>
+              <TituloBloque texto={t('cuenta.sesion')} />
+              {/* 🔴 `D-879` · **19.7 APLICADA: por superficie UNA caja, el resto
+                  baja a label.** Acá había dos botones apilados y el de abajo
+                  era `compacto` — **borde + fondo transparente**, que es
+                  literalmente *la caja vacía del medio* que la 19.7 mató.
 
-                **Cerrar sesión conserva la caja** porque es la acción real de
-                esta zona. **Eliminar cuenta baja a label** — y no es solo
-                obediencia a la ley: *es una acción destructiva e
-                irreversible, y darle el mismo peso visual que a cerrar sesión
-                la invitaba.* **Sin chevron, porque EJECUTA y no navega.**
+                  **Cerrar sesión conserva la caja** porque es la acción real de
+                  esta zona. **Eliminar cuenta baja a label** — y no es solo
+                  obediencia a la ley: *es una acción destructiva e
+                  irreversible, y darle el mismo peso visual que a cerrar sesión
+                  la invitaba.* **Sin chevron, porque EJECUTA y no navega.**
 
-                ✅ **De paso muere un uso de la variante jubilada `compacto`**
-                ⇒ `R47` baja de 38 a 37. *La regla es solo-baja y muere en 0.* */}
-            <Boton variante="secundario" etiqueta={t('ajustes.cerrarSesion')} bloque onPress={() => setSalirAbierta(true)} />
-            {/* S104-C · TANDA 3: dejó de ser voz sin motor. Navega a la
-                pantalla de doble paso que dice qué se va y qué queda, y cierra
-                de verdad (motor de A). */}
-            <Boton variante="ghost" etiqueta={t('cuenta.eliminarCuenta')} bloque onPress={() => router.push('/cuenta/cerrar')} />
+                  ✅ **De paso muere un uso de la variante jubilada `compacto`**
+                  ⇒ `R47` baja de 38 a 37. *La regla es solo-baja y muere en 0.* */}
+              <Boton variante="secundario" etiqueta={t('ajustes.cerrarSesion')} bloque onPress={() => setSalirAbierta(true)} />
+              {/* S104-C · TANDA 3: dejó de ser voz sin motor. Navega a la
+                  pantalla de doble paso que dice qué se va y qué queda, y cierra
+                  de verdad (motor de A). */}
+              <Boton variante="ghost" etiqueta={t('cuenta.eliminarCuenta')} bloque onPress={() => router.push('/cuenta/cerrar')} />
+            </View>
+
+            {/* ── S74-A · EL MARCADOR RENDERIZADO (L-160 enmendada / L-161):
+                el [update] era SOLO console.log — logcat-only, inalcanzable
+                para el founder sin cable. La identidad del build gana
+                PANTALLA (receta de B, 0225701 — las dos apps no divergen).
+                Voz de máquina (Ley 3); id corto = primeros 8 del updateId
+                (único por publicación); embebido/dev se dice honesto.
+                Camino literal: tab Cuenta → el pie. ── */}
+            {/* S81-B2 (pedido a A, espejo del prestador): el lanzamiento
+                EMBEBIDO de un release tiene updateId NO-nulo (el id de
+                assets/app.manifest — acá sería "update 05fe7534"). El
+                discriminador es isEmbeddedLaunch, no la nulidad (L-160). */}
+              {/* 🔴 S111-A (firma founder) · DICE **`updateId`** Y NO `update`, y la
+                  palabra es toda la cura. El 1-sep el founder leyó `01a05e9d` y lo
+                  reportó como **group id**; era el `updateId` del group anterior.
+                  *Dos identificadores parecidos donde uno se lee como el otro
+                  costó una vuelta entera del gate* — `D-785` otra vez.
+
+                  ⚠️ **EL GROUP NO SE PUEDE MOSTRAR, y se declara para que nadie
+                  lo vuelva a intentar:** medido contra `expo-updates` — expone
+                  `updateId · channel · runtimeVersion · createdAt ·
+                  isEmbeddedLaunch · manifest` y **NADA MÁS**. El group id vive en
+                  EAS y **no viaja al cliente**. Nombrar bien el que sí está es lo
+                  único construible, y resuelve el caso real: quien lea esto ya no
+                  puede confundirlo con un group. ── */}
+            <Texto variante="dato">
+              {/* S89 orden 7: EL SELLO — id corto + canal + FECHA del update.
+                  Verificar un bundle = leer este código; ningún diagnóstico de
+                  OTA vuelve a empezar por «¿qué bundle corre?». */}
+              {/* 🔴 S113-A — EL SELLO MUESTRA EL **GROUP** Y LA FECHA EN **UTC**,
+                  y las dos cosas se cambiaron por una medición, no por gusto
+                  (firma del founder, 5-sep-2026).
+
+                  ⏪ Antes decía `updateId {8 chars} · canal · DD/MM HH:MM` con la
+                  fecha en hora LOCAL, y **no podía distinguir dos updates
+                  seguidos** — que es exactamente para lo que se lo mira:
+
+                    0.4    updateId 01a06e7b · preview · 04/09 17:13
+                    1.0.1  updateId 01a06f95 · preview · 04/09 22:21
+
+                  **Los dos dicen «04/09».** Un update publicado de madrugada UTC
+                  siempre se dibuja el día ANTERIOR en Guayaquil (−05), así que la
+                  fecha del pie no separa un update nuevo de uno viejo. *El founder
+                  leyó «04/09», dio el 1.0.1 por no recibido, y el aparato lo tenía
+                  puesto* — el diagnóstico entero salió de un indicador que decía
+                  la verdad de una forma que no se podía leer.
+
+                  Y el id de 8 caracteres tampoco alcanza: son **UUIDv7 y comparten
+                  prefijo POR DISEÑO** (`D-785`, S96). El **group** no: `2f236dd3`
+                  contra `c4cd1963`.
+
+                  ⇒ Ahora dice `2f236dd3 · preview · 04/09 22:13 UTC`. **UTC y no
+                  el offset local** a propósito: es lo que imprime `update:list`, y
+                  el pie existe para compararse contra eso. */}
+              {!Updates.isEmbeddedLaunch && Updates.updateId !== null
+                ? `${grupoDelUpdate() ?? `id ${Updates.updateId.slice(0, 8)}`} · ${
+                    Updates.channel ?? 'sin canal'
+                  }${
+                    Updates.createdAt
+                      ? ` · ${String(Updates.createdAt.getUTCDate()).padStart(2, '0')}/${String(
+                          Updates.createdAt.getUTCMonth() + 1,
+                        ).padStart(2, '0')} ${String(Updates.createdAt.getUTCHours()).padStart(2, '0')}:${String(
+                          Updates.createdAt.getUTCMinutes(),
+                        ).padStart(2, '0')} UTC`
+                      : ''
+                  }`
+                /* 🔴 S103-C · LOS DOS CASOS SE SEPARAN — antes decían lo mismo.
+                 *
+                 * ⏪ Este fallback era **`'bundle embebido / dev'` para los dos**:
+                 * el bundle horneado en la APK **y** Metro sirviendo una rama
+                 * cualquiera. *El discriminador ya existía en la línea de arriba
+                 * (`isEmbeddedLaunch`) y el pie lo tiraba a la basura.*
+                 *
+                 * **Y costó casi un veredicto falso, medido hoy:** la pista A
+                 * tomó el aparato mientras C tenía Metro corriendo desde su
+                 * worktree, leyó `bundle embebido / dev` e **iba a reportar que
+                 * su gate corría sobre el bundle de la APK. Era el de C.**
+                 *
+                 * *`L-336`: un objeto verosímil del origen equivocado no se caza
+                 * leyendo mejor — A leyó bien, y el pie contestó bien una
+                 * pregunta más angosta que la que el gate necesita.* **El
+                 * marcador nació (L-160) para decir QUÉ corre sin cable, y en el
+                 * único caso peligroso decía lo mismo que en el inocente.** */
+                : Updates.isEmbeddedLaunch
+                  ? 'bundle embebido'
+                  : 'metro · dev'}
+            </Texto>
+
+            {/* ⭐ **EL CONTEO DE MONTAJES POR TAB — S116-C lote 3, encargo del
+                lote:** *«el conteo por tab se ve en el pie de Cuenta debajo del
+                id del update, en modo dev solamente»*.
+
+                **Va debajo del sello y no en otro lado** porque es el mismo
+                acto: quien mira el pie ya está preguntando «qué corre acá». El
+                sello dice QUÉ bundle; esto dice CUÁNTO se navegó sobre él.
+
+                ⚠️ **`__DEV__` y no una preferencia**: es un instrumento, no una
+                función. *Un número de diagnóstico en producción es ruido que la
+                familia no puede interpretar* — y su lugar real es el logcat, que
+                es donde E lo busca por `[montajes]`.
+
+                **Son DOS números y se dicen separados** (`v` = vivas ahora,
+                `pico` = la profundidad más alta, `↑`/`↓` = montajes y
+                desmontajes, `T` = toques de la barra). *El pico es el que
+                importa para `D-1090`: el promedio esconde el momento malo.* */}
+            {__DEV__ ? <ConteoDeMontajes /> : null}
+
+            {/* 🔴 S106-A · LA MARCA DE LA BUILD DE PRUEBA (`D-944`), colgada de
+                `MAPA_NATIVO_DISPONIBLE` **a propósito**.
+                *Atarla a `isEmbeddedLaunch` la habría hecho desaparecer con el
+                primer OTA* — seguiría al ARRANQUE y no al HECHO. Este flag sigue
+                al hecho: es `false` exactamente cuando el APK salió sin la key, y
+                sobrevive a cualquier update.
+                ☠️ Muere sola: una build de la nube trae las dos cosas, el flag
+                vuelve a `true` y esto deja de dibujarse. */}
+            {!MAPA_NATIVO_DISPONIBLE ? (
+              <Texto variante="dato">BUILD DE PRUEBA · sin mapas · sin push</Texto>
+            ) : null}
+
+            {/* ── ☠️ S107-C · LA ENTRADA A LA GALERÍA SE RETIRÓ (28-ago-2026) ──
+
+                Firma de la mesa: se retira **SOLO la del cliente**; la del
+                prestador («Láminas de gate») SE CONSERVA hasta el gate de
+                producción — es el camino del founder a lo que tiene que
+                firmar, y B acaba de publicar diez piezas que esperan ese ojo.
+
+                🔴 Esta era la HERRAMIENTA DE SESIÓN («Galería de tokens»), y
+                su sala salió de revisión por firma del founder en S106.
+                *Mientras la entrada existiera, la sala retirada seguía
+                teniendo puerta* — no es limpieza: es que el founder podía
+                volver a juzgar donde ya se decidió que no se juzga.
+
+                ⚠️ **La galería NO murió y sigue siendo obligatoria (`R17`):**
+                lo que se retira es el camino del founder hacia ella desde
+                ESTA casa. La ruta `/gallery` sigue viva y se alcanza por deep
+                link con cable, como antes de que existiera esta fila.
+
+                `R18` quedó ANGOSTADA a la casa del prestador en el mismo acto
+                (pedido `docs/loop/S107-C-PEDIDO-A-B-R18.md`): la regla no se
+                borró porque **sigue teniendo objeto** — el que importaba
+                siempre fue el camino del prestador. ──
+
+                ⏪ **S116-C lote 6 · LA PUERTA VUELVE, Y SÓLO EN DEV** (firma de
+                la mesa, 14-sep-2026). La lápida de arriba se conserva entera
+                porque su razón sigue siendo cierta —*una sala retirada no debe
+                tener puerta en producto*— y porque lo que cambió no es el
+                criterio: es el HECHO que la sostenía. **Medido por B: la galería
+                no se puede abrir en el binario por ninguno de los siete
+                caminos**, y `R17` obliga a que cada pieza nueva entre ahí ⇒ *el
+                retiro dejó de proteger al producto y pasó a bloquear el gate*,
+                tres lotes seguidos.
+
+                **Bajo `__DEV__`, que es la diferencia con la fila de S107:**
+                aquella vivía en la superficie real (era justamente el reproche
+                de `D-878`). Ésta no existe en el bundle de producción, así que
+                la lápida sigue cumpliéndose donde importa.
+
+                🔴 **Y VIVE ARRIBA, EN `lugares`, NO ACÁ AL PIE — medido, no
+                elegido.** La primera vuelta la montó como `Boton variante=ghost`
+                justo debajo del sello del update, que es donde el encargo la
+                pedía. **Se dibujó, y el toque inyectado no la abrió**; la fila
+                vecina (la lámina S74, `CeldaNavegacion`) sí abre con el mismo
+                gesto. *No se insiste con una pieza que no responde para
+                respetar un lugar: la puerta existe para abrirse.* Y de paso es
+                lo que la casa ya decía — `19.7`: **lo que NAVEGA es una fila con
+                chevron, jamás un botón sin caja.** El sello del update queda
+                debajo, a dos dedos, que es la vecindad que la firma pedía. ── */}
           </View>
-
-          {/* ── S74-A · EL MARCADOR RENDERIZADO (L-160 enmendada / L-161):
-              el [update] era SOLO console.log — logcat-only, inalcanzable
-              para el founder sin cable. La identidad del build gana
-              PANTALLA (receta de B, 0225701 — las dos apps no divergen).
-              Voz de máquina (Ley 3); id corto = primeros 8 del updateId
-              (único por publicación); embebido/dev se dice honesto.
-              Camino literal: tab Cuenta → el pie. ── */}
-          {/* S81-B2 (pedido a A, espejo del prestador): el lanzamiento
-              EMBEBIDO de un release tiene updateId NO-nulo (el id de
-              assets/app.manifest — acá sería "update 05fe7534"). El
-              discriminador es isEmbeddedLaunch, no la nulidad (L-160). */}
-            {/* 🔴 S111-A (firma founder) · DICE **`updateId`** Y NO `update`, y la
-                palabra es toda la cura. El 1-sep el founder leyó `01a05e9d` y lo
-                reportó como **group id**; era el `updateId` del group anterior.
-                *Dos identificadores parecidos donde uno se lee como el otro
-                costó una vuelta entera del gate* — `D-785` otra vez.
-
-                ⚠️ **EL GROUP NO SE PUEDE MOSTRAR, y se declara para que nadie
-                lo vuelva a intentar:** medido contra `expo-updates` — expone
-                `updateId · channel · runtimeVersion · createdAt ·
-                isEmbeddedLaunch · manifest` y **NADA MÁS**. El group id vive en
-                EAS y **no viaja al cliente**. Nombrar bien el que sí está es lo
-                único construible, y resuelve el caso real: quien lea esto ya no
-                puede confundirlo con un group. ── */}
-          <Texto variante="dato">
-            {/* S89 orden 7: EL SELLO — id corto + canal + FECHA del update.
-                Verificar un bundle = leer este código; ningún diagnóstico de
-                OTA vuelve a empezar por «¿qué bundle corre?». */}
-            {/* 🔴 S113-A — EL SELLO MUESTRA EL **GROUP** Y LA FECHA EN **UTC**,
-                y las dos cosas se cambiaron por una medición, no por gusto
-                (firma del founder, 5-sep-2026).
-
-                ⏪ Antes decía `updateId {8 chars} · canal · DD/MM HH:MM` con la
-                fecha en hora LOCAL, y **no podía distinguir dos updates
-                seguidos** — que es exactamente para lo que se lo mira:
-
-                  0.4    updateId 01a06e7b · preview · 04/09 17:13
-                  1.0.1  updateId 01a06f95 · preview · 04/09 22:21
-
-                **Los dos dicen «04/09».** Un update publicado de madrugada UTC
-                siempre se dibuja el día ANTERIOR en Guayaquil (−05), así que la
-                fecha del pie no separa un update nuevo de uno viejo. *El founder
-                leyó «04/09», dio el 1.0.1 por no recibido, y el aparato lo tenía
-                puesto* — el diagnóstico entero salió de un indicador que decía
-                la verdad de una forma que no se podía leer.
-
-                Y el id de 8 caracteres tampoco alcanza: son **UUIDv7 y comparten
-                prefijo POR DISEÑO** (`D-785`, S96). El **group** no: `2f236dd3`
-                contra `c4cd1963`.
-
-                ⇒ Ahora dice `2f236dd3 · preview · 04/09 22:13 UTC`. **UTC y no
-                el offset local** a propósito: es lo que imprime `update:list`, y
-                el pie existe para compararse contra eso. */}
-            {!Updates.isEmbeddedLaunch && Updates.updateId !== null
-              ? `${grupoDelUpdate() ?? `id ${Updates.updateId.slice(0, 8)}`} · ${
-                  Updates.channel ?? 'sin canal'
-                }${
-                  Updates.createdAt
-                    ? ` · ${String(Updates.createdAt.getUTCDate()).padStart(2, '0')}/${String(
-                        Updates.createdAt.getUTCMonth() + 1,
-                      ).padStart(2, '0')} ${String(Updates.createdAt.getUTCHours()).padStart(2, '0')}:${String(
-                        Updates.createdAt.getUTCMinutes(),
-                      ).padStart(2, '0')} UTC`
-                    : ''
-                }`
-              /* 🔴 S103-C · LOS DOS CASOS SE SEPARAN — antes decían lo mismo.
-               *
-               * ⏪ Este fallback era **`'bundle embebido / dev'` para los dos**:
-               * el bundle horneado en la APK **y** Metro sirviendo una rama
-               * cualquiera. *El discriminador ya existía en la línea de arriba
-               * (`isEmbeddedLaunch`) y el pie lo tiraba a la basura.*
-               *
-               * **Y costó casi un veredicto falso, medido hoy:** la pista A
-               * tomó el aparato mientras C tenía Metro corriendo desde su
-               * worktree, leyó `bundle embebido / dev` e **iba a reportar que
-               * su gate corría sobre el bundle de la APK. Era el de C.**
-               *
-               * *`L-336`: un objeto verosímil del origen equivocado no se caza
-               * leyendo mejor — A leyó bien, y el pie contestó bien una
-               * pregunta más angosta que la que el gate necesita.* **El
-               * marcador nació (L-160) para decir QUÉ corre sin cable, y en el
-               * único caso peligroso decía lo mismo que en el inocente.** */
-              : Updates.isEmbeddedLaunch
-                ? 'bundle embebido'
-                : 'metro · dev'}
-          </Texto>
-
-          {/* ⭐ **EL CONTEO DE MONTAJES POR TAB — S116-C lote 3, encargo del
-              lote:** *«el conteo por tab se ve en el pie de Cuenta debajo del
-              id del update, en modo dev solamente»*.
-
-              **Va debajo del sello y no en otro lado** porque es el mismo
-              acto: quien mira el pie ya está preguntando «qué corre acá». El
-              sello dice QUÉ bundle; esto dice CUÁNTO se navegó sobre él.
-
-              ⚠️ **`__DEV__` y no una preferencia**: es un instrumento, no una
-              función. *Un número de diagnóstico en producción es ruido que la
-              familia no puede interpretar* — y su lugar real es el logcat, que
-              es donde E lo busca por `[montajes]`.
-
-              **Son DOS números y se dicen separados** (`v` = vivas ahora,
-              `pico` = la profundidad más alta, `↑`/`↓` = montajes y
-              desmontajes, `T` = toques de la barra). *El pico es el que
-              importa para `D-1090`: el promedio esconde el momento malo.* */}
-          {__DEV__ ? <ConteoDeMontajes /> : null}
-
-          {/* 🔴 S106-A · LA MARCA DE LA BUILD DE PRUEBA (`D-944`), colgada de
-              `MAPA_NATIVO_DISPONIBLE` **a propósito**.
-              *Atarla a `isEmbeddedLaunch` la habría hecho desaparecer con el
-              primer OTA* — seguiría al ARRANQUE y no al HECHO. Este flag sigue
-              al hecho: es `false` exactamente cuando el APK salió sin la key, y
-              sobrevive a cualquier update.
-              ☠️ Muere sola: una build de la nube trae las dos cosas, el flag
-              vuelve a `true` y esto deja de dibujarse. */}
-          {!MAPA_NATIVO_DISPONIBLE ? (
-            <Texto variante="dato">BUILD DE PRUEBA · sin mapas · sin push</Texto>
-          ) : null}
-
-          {/* ── ☠️ S107-C · LA ENTRADA A LA GALERÍA SE RETIRÓ (28-ago-2026) ──
-
-              Firma de la mesa: se retira **SOLO la del cliente**; la del
-              prestador («Láminas de gate») SE CONSERVA hasta el gate de
-              producción — es el camino del founder a lo que tiene que
-              firmar, y B acaba de publicar diez piezas que esperan ese ojo.
-
-              🔴 Esta era la HERRAMIENTA DE SESIÓN («Galería de tokens»), y
-              su sala salió de revisión por firma del founder en S106.
-              *Mientras la entrada existiera, la sala retirada seguía
-              teniendo puerta* — no es limpieza: es que el founder podía
-              volver a juzgar donde ya se decidió que no se juzga.
-
-              ⚠️ **La galería NO murió y sigue siendo obligatoria (`R17`):**
-              lo que se retira es el camino del founder hacia ella desde
-              ESTA casa. La ruta `/gallery` sigue viva y se alcanza por deep
-              link con cable, como antes de que existiera esta fila.
-
-              `R18` quedó ANGOSTADA a la casa del prestador en el mismo acto
-              (pedido `docs/loop/S107-C-PEDIDO-A-B-R18.md`): la regla no se
-              borró porque **sigue teniendo objeto** — el que importaba
-              siempre fue el camino del prestador. ──
-
-              ⏪ **S116-C lote 6 · LA PUERTA VUELVE, Y SÓLO EN DEV** (firma de
-              la mesa, 14-sep-2026). La lápida de arriba se conserva entera
-              porque su razón sigue siendo cierta —*una sala retirada no debe
-              tener puerta en producto*— y porque lo que cambió no es el
-              criterio: es el HECHO que la sostenía. **Medido por B: la galería
-              no se puede abrir en el binario por ninguno de los siete
-              caminos**, y `R17` obliga a que cada pieza nueva entre ahí ⇒ *el
-              retiro dejó de proteger al producto y pasó a bloquear el gate*,
-              tres lotes seguidos.
-
-              **Bajo `__DEV__`, que es la diferencia con la fila de S107:**
-              aquella vivía en la superficie real (era justamente el reproche
-              de `D-878`). Ésta no existe en el bundle de producción, así que
-              la lápida sigue cumpliéndose donde importa.
-
-              🔴 **Y VIVE ARRIBA, EN `lugares`, NO ACÁ AL PIE — medido, no
-              elegido.** La primera vuelta la montó como `Boton variante=ghost`
-              justo debajo del sello del update, que es donde el encargo la
-              pedía. **Se dibujó, y el toque inyectado no la abrió**; la fila
-              vecina (la lámina S74, `CeldaNavegacion`) sí abre con el mismo
-              gesto. *No se insiste con una pieza que no responde para
-              respetar un lugar: la puerta existe para abrirse.* Y de paso es
-              lo que la casa ya decía — `19.7`: **lo que NAVEGA es una fila con
-              chevron, jamás un botón sin caja.** El sello del update queda
-              debajo, a dos dedos, que es la vecindad que la firma pedía. ── */}
-        </View>
+          </View>
         </HojaContenido>
 
       <Hoja visible={salirAbierta} onCerrar={() => setSalirAbierta(false)} titulo={t('ajustes.titulo')}>

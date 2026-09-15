@@ -110,7 +110,7 @@ import {
 } from '@epetplace/api';
 import { calcularVozHogar, type VozEstadoHogar } from '@epetplace/domain';
 
-import { fechaCortaHumana, fechaYHoraHumana, formatearPrecio, diaSemanaCorto, fechaCortaMono, fechaLargaHumana } from '@epetplace/i18n';
+import { fechaCortaHumana, fechaYHoraHumana, formatearPrecio, diaSemanaCorto, fechaConDiaHumana, fechaCortaMono, fechaLargaHumana } from '@epetplace/i18n';
 
 import { InvitacionAvisos } from '@/components/invitacion-avisos';
 import { ventanaVencida } from '@/lib/despensa/ventana';
@@ -150,20 +150,15 @@ type TraductorHogar = ReturnType<typeof useTraduccion>['t'];
    en `verify-diseno.mjs`. Las menciones `⏪` que quedan abajo son
    historia: explican por qué la tarjeta bajó con su aire. */
 
-/** r4-defecto 3: la fecha del techo — "jueves 23 de julio", mono
- *  minúsculas (Ley 3). Candidata al RIEL (fechaConDiaMono) declarada:
- *  el formateo por idioma es del riel; nace acá porque el riel no
- *  tiene la forma con día de semana y packages no es territorio de
- *  esta ronda. */
-function fechaConDiaMono(d: Date, idioma: 'es' | 'en'): string {
-  return new Intl.DateTimeFormat(idioma === 'en' ? 'en-US' : 'es-EC', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  })
-    .format(d)
-    .toLowerCase();
-}
+/* ☠️ **`fechaConDiaMono` MURIÓ ACÁ Y VIVE EN EL RIEL** como
+   `fechaConDiaHumana` (S116-C lote 6, `@epetplace/i18n`).
+
+   **La subió su SEGUNDO consumidor, y ella misma lo había pedido:** su nota
+   decía *«Candidata al RIEL declarada: el formateo por idioma es del riel;
+   nace acá porque el riel no tiene la forma con día de semana y packages no
+   es territorio de esta ronda»*. Actividad necesita el mismo antetítulo del
+   día ⇒ **se subió ANTES de copiarla**. *Una candidata declarada que igual se
+   clona es una nota que no sirvió para nada.* */
 
 // Saludo por franja horaria (S52-P2a, voz del lote): la app saluda
 // como una persona — mañana/tarde/noche del reloj del dispositivo.
@@ -1149,129 +1144,136 @@ export default function Hogar() {
             </View>
           }
         >
-        <View style={{
-            flexGrow: 1,
-            justifyContent: 'center',
-            padding: spacing[5],
-            gap: spacing[4],
-          }}>
-          {/* ── ① LOS QUE ESPERAN — PRESIDE ─────────────────────────────
-              🔴 **Sin contador, igual que en Explorar:** §4 prohíbe convertir
-              la lista en inventario. *Se presentan vidas, no stock.*
+          {/* 🔴 **`AIRE_RAIZ` ADENTRO DE LA HOJA, NO EN EL SCROLL.** Puesto en
+              `contentContainerStyle` reservaba el aire **debajo** de la hoja, así
+              que la hoja terminaba ~140 dp antes del piso y ahí asomaba el
+              ciruela. Adentro, la hoja llega abajo y el aire lo deja su
+              contenido — que es lo que la barra y el asistente necesitan. */}
+          <View style={{ paddingBottom: AIRE_RAIZ }}>
+          <View style={{
+              flexGrow: 1,
+              justifyContent: 'center',
+              padding: spacing[5],
+              gap: spacing[4],
+            }}>
+            {/* ── ① LOS QUE ESPERAN — PRESIDE ─────────────────────────────
+                🔴 **Sin contador, igual que en Explorar:** §4 prohíbe convertir
+                la lista en inventario. *Se presentan vidas, no stock.*
 
-              ⏸️ **APAGADA hasta el lote de adopción** (`ADOPCION_ALCANZABLE`):
-              construida y verificada, fuera del lote de guardería que el
-              founder recorre. Con el gate apagado esta pantalla queda como
-              estaba — la invitación a registrar, sola. */}
-          {ADOPCION_ALCANZABLE ? (
-          <Tarjeta>
-            <CeldaNavegacion
-              icono="refugio"
-              titulo={t('hogar.sinMascotasAdopcion')}
-              detalle={t('hogar.sinMascotasAdopcionDetalle')}
-              onPress={() => router.push('/adoptar')}
-            />
-          </Tarjeta>
-          ) : null}
-
-          {/* ── ② LA INVITACIÓN, CON SU «i» (N22) ───────────────────────
-              **Por qué la «i» y no un párrafo suelto:** N22 corta por FUNCIÓN,
-              no por longitud — *lo que se necesita para DECIDIR queda a la
-              vista; lo que se necesita para ENTENDER va detrás de una «i»*. El
-              control se ve y decide; **por qué conviene registrarla** es
-              explicación, y se pliega.
-
-              `chevron={false}`: la celda ABRE el alta, no entra a una sección
-              (S58, patrón Hogar v2). */}
-          {/* ── ②bis **LA INVITACIÓN, RECOMPUESTA (06)** ─────────────────
-              El personaje, el título, la línea y el CTA. **El borde punteado
-              lo da `Tarjeta tinte="plana"` con el hairline de la casa** — no
-              se pinta un borde a mano: eso sería un valor en la pantalla y lo
-              caza `R4`. *Si la mesa quiere el punteado rosa exacto del mock,
-              es una prop de `Tarjeta` y se pide.* */}
-          <Tarjeta tinte="plana">
-            <View style={{ alignItems: 'center', gap: spacing[3], paddingVertical: spacing[4] }}>
-              <Personaje especie="perro" tamano="grande" fondo="rosa" />
-              <Texto variante="seccion">{t('hogar.vacioTitulo')}</Texto>
-              <Texto variante="cuerpo" color="secondary" centrado>
-                {t('hogar.vacioDetalle')}
-              </Texto>
-              <Boton
-                variante="primario"
-                bloque
-                etiqueta={t('hogar.vacioCta')}
-                onPress={() => router.push(rutaAlta)}
-              />
-            </View>
-          </Tarjeta>
-
-          {/* ── ③ **MIENTRAS TANTO** — dos caminos que SÍ llevan a algo.
-              *No es relleno: sin mascota el Hogar no tiene estado que contar,
-              y dejar la pantalla con una sola tarjeta sería correcto pero
-              mudo. Estas dos filas existen porque las dos secciones ya
-              funcionan sin mascota.* */}
-          <View style={{ gap: spacing[2] }}>
-            <Texto variante="antetitulo">{t('hogar.mientrasTanto')}</Texto>
+                ⏸️ **APAGADA hasta el lote de adopción** (`ADOPCION_ALCANZABLE`):
+                construida y verificada, fuera del lote de guardería que el
+                founder recorre. Con el gate apagado esta pantalla queda como
+                estaba — la invitación a registrar, sola. */}
+            {ADOPCION_ALCANZABLE ? (
             <Tarjeta>
               <CeldaNavegacion
-                icono="explorar"
-                titulo={t('hogar.vacioExplorar')}
-                detalle={t('hogar.vacioExplorarDetalle')}
-                onPress={() => router.push('/explorar')}
-              />
-              <Separador />
-              <CeldaNavegacion
-                icono="despensa"
-                titulo={t('hogar.vacioTienda')}
-                detalle={t('hogar.vacioTiendaDetalle')}
-                onPress={() => router.push('/despensa')}
+                icono="refugio"
+                titulo={t('hogar.sinMascotasAdopcion')}
+                detalle={t('hogar.sinMascotasAdopcionDetalle')}
+                onPress={() => router.push('/adoptar')}
               />
             </Tarjeta>
-          </View>
+            ) : null}
 
-          {/* La «i» del porqué se conserva — N22: lo que se necesita para
-              ENTENDER se pliega, y su Hoja sigue viva más abajo. */}
-          <Tarjeta>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
-              <View style={{ flex: 1 }}>
-                <CeldaNavegacion
-                  icono="carnet"
-                  titulo={t('hogar.sinMascotasAgregar')}
-                  detalle={t('hogar.sinMascotasDetalle')}
-                  chevron={false}
+            {/* ── ② LA INVITACIÓN, CON SU «i» (N22) ───────────────────────
+                **Por qué la «i» y no un párrafo suelto:** N22 corta por FUNCIÓN,
+                no por longitud — *lo que se necesita para DECIDIR queda a la
+                vista; lo que se necesita para ENTENDER va detrás de una «i»*. El
+                control se ve y decide; **por qué conviene registrarla** es
+                explicación, y se pliega.
+
+                `chevron={false}`: la celda ABRE el alta, no entra a una sección
+                (S58, patrón Hogar v2). */}
+            {/* ── ②bis **LA INVITACIÓN, RECOMPUESTA (06)** ─────────────────
+                El personaje, el título, la línea y el CTA. **El borde punteado
+                lo da `Tarjeta tinte="plana"` con el hairline de la casa** — no
+                se pinta un borde a mano: eso sería un valor en la pantalla y lo
+                caza `R4`. *Si la mesa quiere el punteado rosa exacto del mock,
+                es una prop de `Tarjeta` y se pide.* */}
+            <Tarjeta tinte="plana">
+              <View style={{ alignItems: 'center', gap: spacing[3], paddingVertical: spacing[4] }}>
+                <Personaje especie="perro" tamano="grande" fondo="rosa" />
+                <Texto variante="seccion">{t('hogar.vacioTitulo')}</Texto>
+                <Texto variante="cuerpo" color="secondary" centrado>
+                  {t('hogar.vacioDetalle')}
+                </Texto>
+                <Boton
+                  variante="primario"
+                  bloque
+                  etiqueta={t('hogar.vacioCta')}
                   onPress={() => router.push(rutaAlta)}
                 />
               </View>
-              {/* La «i» en círculo — el patrón vivo de la casa (`carrito.tsx`,
-                  S100b): `Pressable` + glifo `info` + Hoja. **Su etiqueta
-                  accesible es el texto que abre**, no la palabra «info»: quien
-                  navega con lector oye QUÉ va a leer, no el nombre del control. */}
-              <Pressable
-                onPress={() => setHojaPorQueRegistrar(true)}
-                accessibilityRole="button"
-                accessibilityLabel={t('hogar.sinMascotasPorQueTitulo')}
-                hitSlop={12}
-              >
-                <Icono nombre="info" tamano={20} registro="aa" />
-              </Pressable>
-            </View>
-          </Tarjeta>
-        </View>
+            </Tarjeta>
 
-        <Hoja
-          visible={hojaPorQueRegistrar}
-          onCerrar={() => setHojaPorQueRegistrar(false)}
-          titulo={t('hogar.sinMascotasPorQueTitulo')}
-        >
-          <View style={{ gap: spacing[3] }}>
-            <Texto variante="cuerpo">{t('hogar.sinMascotasPorQueCuerpo')}</Texto>
-            <Boton
-              etiqueta={t('hogar.sinMascotasPorQueCierre')}
-              bloque
-              onPress={() => setHojaPorQueRegistrar(false)}
-            />
+            {/* ── ③ **MIENTRAS TANTO** — dos caminos que SÍ llevan a algo.
+                *No es relleno: sin mascota el Hogar no tiene estado que contar,
+                y dejar la pantalla con una sola tarjeta sería correcto pero
+                mudo. Estas dos filas existen porque las dos secciones ya
+                funcionan sin mascota.* */}
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="antetitulo">{t('hogar.mientrasTanto')}</Texto>
+              <Tarjeta>
+                <CeldaNavegacion
+                  icono="explorar"
+                  titulo={t('hogar.vacioExplorar')}
+                  detalle={t('hogar.vacioExplorarDetalle')}
+                  onPress={() => router.push('/explorar')}
+                />
+                <Separador />
+                <CeldaNavegacion
+                  icono="despensa"
+                  titulo={t('hogar.vacioTienda')}
+                  detalle={t('hogar.vacioTiendaDetalle')}
+                  onPress={() => router.push('/despensa')}
+                />
+              </Tarjeta>
+            </View>
+
+            {/* La «i» del porqué se conserva — N22: lo que se necesita para
+                ENTENDER se pliega, y su Hoja sigue viva más abajo. */}
+            <Tarjeta>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+                <View style={{ flex: 1 }}>
+                  <CeldaNavegacion
+                    icono="carnet"
+                    titulo={t('hogar.sinMascotasAgregar')}
+                    detalle={t('hogar.sinMascotasDetalle')}
+                    chevron={false}
+                    onPress={() => router.push(rutaAlta)}
+                  />
+                </View>
+                {/* La «i» en círculo — el patrón vivo de la casa (`carrito.tsx`,
+                    S100b): `Pressable` + glifo `info` + Hoja. **Su etiqueta
+                    accesible es el texto que abre**, no la palabra «info»: quien
+                    navega con lector oye QUÉ va a leer, no el nombre del control. */}
+                <Pressable
+                  onPress={() => setHojaPorQueRegistrar(true)}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('hogar.sinMascotasPorQueTitulo')}
+                  hitSlop={12}
+                >
+                  <Icono nombre="info" tamano={20} registro="aa" />
+                </Pressable>
+              </View>
+            </Tarjeta>
           </View>
-        </Hoja>
+
+          <Hoja
+            visible={hojaPorQueRegistrar}
+            onCerrar={() => setHojaPorQueRegistrar(false)}
+            titulo={t('hogar.sinMascotasPorQueTitulo')}
+          >
+            <View style={{ gap: spacing[3] }}>
+              <Texto variante="cuerpo">{t('hogar.sinMascotasPorQueCuerpo')}</Texto>
+              <Boton
+                etiqueta={t('hogar.sinMascotasPorQueCierre')}
+                bloque
+                onPress={() => setHojaPorQueRegistrar(false)}
+              />
+            </View>
+          </Hoja>
+          </View>
         </HojaContenido>
       </View>
     );
@@ -1766,7 +1768,6 @@ export default function Hogar() {
           pagaría dos veces. */}
       <HojaContenido
         arranque={cabecera.arranque}
-        scroll={{ contentContainerStyle: { paddingBottom: AIRE_RAIZ } }}
         fondo={
           <View onLayout={cabecera.alMedir}>
             <Cabecera
@@ -1780,7 +1781,7 @@ export default function Hogar() {
               // que apareció después fue un segundo uso que no existía cuando se
               // escribió.* Vuelve la Ley 3 y vuelve la lámina: la fecha en mono,
               // en minúsculas, SOBRE el saludo.
-              antetitulo={fechaConDiaMono(hoy, idioma)}
+              antetitulo={fechaConDiaHumana(hoy, idioma)}
               antetituloVoz="dato"
               titulo={`${saludoPorFranja(hoy.getHours(), t)}${nombrePerfil ? `, ${nombrePerfil.trim().split(' ')[0]}` : ''}`}
               carrito={{

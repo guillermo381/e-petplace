@@ -189,101 +189,111 @@ export default function AdiestramientoDisponibles() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: { padding: spacing[4], gap: spacing[3] } }}
+
       >
-        {/* la ventana elegida, en voz de máquina */}
-        <Celda
-          titulo={mascotaNombre.length > 0 ? t('adiestramiento.ventanaPara', { nombre: mascotaNombre }) : t('adiestramiento.titulo')}
-          metadataMono={`${fecha} · ${hora}`}
-        />
-        <Separador />
-
-        {disponibles === 'cargando' ? (
-          <EsqueletoGrupo>
-            <View style={{ gap: spacing[3] }}>
-              <Esqueleto forma="bloque" ancho="100%" alto={64} />
-              <Esqueleto forma="bloque" ancho="100%" alto={64} />
-            </View>
-          </EsqueletoGrupo>
-        ) : disponibles === 'error' ? (
-          <EstadoVacio
-            titulo={t('adiestramiento.errorTitulo')}
-            descripcion={t('hogar.errorHistoriaDetalle')}
-            accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={cargar} />}
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[4], gap: spacing[3] }}>
+          {/* la ventana elegida, en voz de máquina */}
+          <Celda
+            titulo={mascotaNombre.length > 0 ? t('adiestramiento.ventanaPara', { nombre: mascotaNombre }) : t('adiestramiento.titulo')}
+            metadataMono={`${fecha} · ${hora}`}
           />
-        ) : disponibles.length === 0 ? (
-          // Peldaño 0 — nadie puede: vuelta barata al CUÁNDO.
-          <EstadoVacio
-            icono={<Icono nombre="training" tamano={48} />}
-            titulo={t('explorar.nadiePuede')}
-            descripcion={t('explorar.nadiePuedeDetalle')}
-            accion={<Boton variante="primario" etiqueta={t('explorar.probarOtroHorario')} onPress={() => router.back()} />}
-          />
-        ) : (
-          <Tarjeta relleno="ninguno">
-            {porAdiestrador.map((ofertas, i) => {
-              /* Todas las filas del grupo comparten prestador y oferta: la
-                 primera alcanza para lo que la tarjeta necesita. */
-              const cabeza = ofertas[0];
-              return (
-                <View key={cabeza.prestador_id}>
-                  {i > 0 ? <Separador /> : null}
-                  {/* ☠️ **ACÁ VIVÍA EL TERNARIO `comprable === 'sesion' ? … : …`**
-                      que mandaba las sesiones a la vitrina y los programas
-                      directo a `confirmar-programa`. **Murió entero**: hay un
-                      solo camino y es el de los otros cuatro oficios.
-                      *Un oficio con dos caminos según qué fila se toque no es
-                      una variante: es una pantalla que la familia no puede
-                      aprender.* */}
-                  <PreviewPrestador
-                    prestadorId={cabeza.prestador_id}
-                    ofertaId={cabeza.prestador_servicio_id}
-                    nombre={cabeza.prestador_nombre}
-                    oficio={t('hogar.railAdiestramiento')}
-                    contexto={cabeza.direccion !== null
-                      ? [cabeza.direccion, cabeza.ciudad].filter(Boolean).join(' · ')
-                      : t('adiestramiento.lugarPorConfirmar')}
-                    /* ⭐ **TODO LO QUE OFRECE, BAJO SU NOMBRE.** Se compone con
-                       la MISMA función que la Hoja de la vitrina
-                       (`lib/adiestramiento-voz`): *dos pantallas que arman la
-                       frase por su cuenta divergen en la primera enmienda que
-                       sólo una recibe, y la familia elegiría allá algo que acá
-                       se llamaba distinto.* */
-                    precio={ofertas
-                      .map((o) => `${vozOfertaAdiestramiento(o, t)} ${formatearPrecio(o.precio)}`)
-                      .join(' · ')}
-                    perfil={perfiles[cabeza.prestador_id]}
-                    /* ⚡ D-730 · la ventana viaja con el tap: sin esto la ficha
-                       no puede reservar, porque no sabe CUÁNDO ni PARA QUIÉN.
-                       🔴 **Y `comprable` YA NO VIAJA, a propósito**: la vitrina
-                       ofrece las tres cosas y la familia elige ahí. *Mandarlo
-                       sería volver a decidir por ella en la lista, que es
-                       exactamente lo que esta cura vino a sacar.* */
-                    contextoReserva={{ oficio: 'adiestramiento', fecha, hora, mascotaId, mascotaNombre }}
-                  />
-                </View>
-              );
-            })}
-          </Tarjeta>
-        )}
+          <Separador />
 
-        {/* 🔴 **LA NOTA DEL PROGRAMA SE CONDICIONA A QUE HAYA PROGRAMAS, no a la
-            respuesta del QUÉ.** *Antes se dibujaba cuando el paso anterior decía
-            «programa»; con la lista agrupada esa respuesta ya no describe lo que
-            se está mirando — un adiestrador puede tener programas aunque se
-            haya pedido sesión.* Se mide sobre lo que está en pantalla. */}
-        {Array.isArray(disponibles) && disponibles.some((o) => o.comprable === 'programa') ? (
-          <Text
-            style={{
-              fontFamily: typography.family.sans.regular,
-              fontSize: typography.size.sm,
-              lineHeight: Math.round(typography.size.sm * 1.4),
-              color: theme.text.secondary,
-            }}
-          >
-            {t('adiestramiento.comprableProgramaVoz')}
-          </Text>
-        ) : null}
+          {disponibles === 'cargando' ? (
+            <EsqueletoGrupo>
+              <View style={{ gap: spacing[3] }}>
+                <Esqueleto forma="bloque" ancho="100%" alto={64} />
+                <Esqueleto forma="bloque" ancho="100%" alto={64} />
+              </View>
+            </EsqueletoGrupo>
+          ) : disponibles === 'error' ? (
+            <EstadoVacio
+              titulo={t('adiestramiento.errorTitulo')}
+              descripcion={t('hogar.errorHistoriaDetalle')}
+              accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={cargar} />}
+            />
+          ) : disponibles.length === 0 ? (
+            // Peldaño 0 — nadie puede: vuelta barata al CUÁNDO.
+            <EstadoVacio
+              icono={<Icono nombre="training" tamano={48} />}
+              titulo={t('explorar.nadiePuede')}
+              descripcion={t('explorar.nadiePuedeDetalle')}
+              accion={<Boton variante="primario" etiqueta={t('explorar.probarOtroHorario')} onPress={() => router.back()} />}
+            />
+          ) : (
+            <Tarjeta relleno="ninguno">
+              {porAdiestrador.map((ofertas, i) => {
+                /* Todas las filas del grupo comparten prestador y oferta: la
+                   primera alcanza para lo que la tarjeta necesita. */
+                const cabeza = ofertas[0];
+                return (
+                  <View key={cabeza.prestador_id}>
+                    {i > 0 ? <Separador /> : null}
+                    {/* ☠️ **ACÁ VIVÍA EL TERNARIO `comprable === 'sesion' ? … : …`**
+                        que mandaba las sesiones a la vitrina y los programas
+                        directo a `confirmar-programa`. **Murió entero**: hay un
+                        solo camino y es el de los otros cuatro oficios.
+                        *Un oficio con dos caminos según qué fila se toque no es
+                        una variante: es una pantalla que la familia no puede
+                        aprender.* */}
+                    <PreviewPrestador
+                      prestadorId={cabeza.prestador_id}
+                      ofertaId={cabeza.prestador_servicio_id}
+                      nombre={cabeza.prestador_nombre}
+                      oficio={t('hogar.railAdiestramiento')}
+                      contexto={cabeza.direccion !== null
+                        ? [cabeza.direccion, cabeza.ciudad].filter(Boolean).join(' · ')
+                        : t('adiestramiento.lugarPorConfirmar')}
+                      /* ⭐ **TODO LO QUE OFRECE, BAJO SU NOMBRE.** Se compone con
+                         la MISMA función que la Hoja de la vitrina
+                         (`lib/adiestramiento-voz`): *dos pantallas que arman la
+                         frase por su cuenta divergen en la primera enmienda que
+                         sólo una recibe, y la familia elegiría allá algo que acá
+                         se llamaba distinto.* */
+                      precio={ofertas
+                        .map((o) => `${vozOfertaAdiestramiento(o, t)} ${formatearPrecio(o.precio)}`)
+                        .join(' · ')}
+                      perfil={perfiles[cabeza.prestador_id]}
+                      /* ⚡ D-730 · la ventana viaja con el tap: sin esto la ficha
+                         no puede reservar, porque no sabe CUÁNDO ni PARA QUIÉN.
+                         🔴 **Y `comprable` YA NO VIAJA, a propósito**: la vitrina
+                         ofrece las tres cosas y la familia elige ahí. *Mandarlo
+                         sería volver a decidir por ella en la lista, que es
+                         exactamente lo que esta cura vino a sacar.* */
+                      contextoReserva={{ oficio: 'adiestramiento', fecha, hora, mascotaId, mascotaNombre }}
+                    />
+                  </View>
+                );
+              })}
+            </Tarjeta>
+          )}
+
+          {/* 🔴 **LA NOTA DEL PROGRAMA SE CONDICIONA A QUE HAYA PROGRAMAS, no a la
+              respuesta del QUÉ.** *Antes se dibujaba cuando el paso anterior decía
+              «programa»; con la lista agrupada esa respuesta ya no describe lo que
+              se está mirando — un adiestrador puede tener programas aunque se
+              haya pedido sesión.* Se mide sobre lo que está en pantalla. */}
+          {Array.isArray(disponibles) && disponibles.some((o) => o.comprable === 'programa') ? (
+            <Text
+              style={{
+                fontFamily: typography.family.sans.regular,
+                fontSize: typography.size.sm,
+                lineHeight: Math.round(typography.size.sm * 1.4),
+                color: theme.text.secondary,
+              }}
+            >
+              {t('adiestramiento.comprableProgramaVoz')}
+            </Text>
+          ) : null}
+        </View>
       </HojaContenido>
     </SafeAreaView>
   );

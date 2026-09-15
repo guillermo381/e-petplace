@@ -1,111 +1,185 @@
 /**
- * TUS PEDIDOS — del más reciente al más viejo, con el seguimiento adentro
- * (S96-D · D-B4 · `LETRA_RECORRIDO_DESPENSA_S96` §8.1).
+ * ⭐ **ACTIVIDAD — la pantalla propia de la cuarta tab (S116-C · lote 6).**
  *
- * TESIS (Ley 14): *dónde está y cuánto falta, sin abrir nada.*
+ * Letra §1.5 y firma **5(b)** del plan del rediseño: *«Actividad = citas +
+ * pedidos + postventa, en curso / historial»*. Hasta hoy esta tab se llamaba
+ * Actividad en la barra **y abría una lista de pedidos** — el hueco que el
+ * lote 5 declaró literal (*«su pantalla propia llega en el lote 6»*).
  *
- * FIRMA (Ley 15): `TarjetaPedido` de B con su `EscaleraEstados` compacta —
- * la fila YA dice el estado del recorrido; abrir es para el detalle, no
- * para enterarse.
+ * TESIS (Ley 14): **el estado en curso del hogar, en una sola lista.** *Una
+ * familia no piensa «pedidos» y «citas» por separado: piensa qué está pasando
+ * y qué ya pasó.* Por eso los dos se mezclan por fecha y el corte es temporal,
+ * no de categoría.
  *
- * CHANEL (Ley 16): la fila no dice el número de orden (dato de máquina —
- * vive en el detalle, donde se copia); no dice narrativa como texto suelto
- * (la escalera la DIBUJA); cero acciones en la fila (cancelar y "tengo un
- * problema" son del detalle, con su contexto).
+ * FIRMA (Ley 15): la **pastilla de estado con la palabra** en cada fila, y la
+ * **pastilla ciruela de fecha** a la izquierda de las citas (`BadgeFecha` de
+ * B, pieza nacida en el lote 2 para exactamente esto).
  *
- * Las SIETE narrativas y solo las siete (el mapeo interno→familia es DATO
- * del catálogo; `revision_riesgo` se ve "Pagando" porque decirle a alguien
- * que está bajo sospecha de fraude es maltrato — `_despensa-comun.ts`).
+ * CHANEL (Ley 16): sin número de orden (dato de máquina — vive en el detalle)
+ * · sin acciones en la fila salvo la palanca de repetir compra · **sin relleno
+ * en el vacío**: el vacío dice que no hay nada y ofrece el único camino real.
  *
- * ESCALERA (§4b): peldaño 0 = sin pedidos, con camino a la despensa y al
- * reclamo del local · peldaño 1 = pedidos vivos con su escalera · peldaño
- * 2 = el desvío dicho (no llegó / cancelado) sin drama ni error falso.
+ * ── 🔴 LO QUE ESTA PANTALLA PIERDE, Y NO SE PIERDE EN SILENCIO ─────────────
+ * **La escalera compacta de la fila** (`TarjetaPedido` con `pasos`), firmada
+ * en S100c con su tesis: *«dónde está y cuánto falta, sin abrir nada»*. El
+ * encargo del founder para esta pantalla dice **pastilla** —*«cada una con una
+ * pastilla de estado (En camino · Agendado · Entregado · Cancelado, con la
+ * palabra)»*— y la pieza declara en su propio contrato que los dos juntos
+ * *«dibujan dos veces lo mismo»*.
+ *
+ * **Por qué la pastilla gana acá y no es sólo que la firma sea más nueva:**
+ * la escalera nació para una lista de **pedidos solos**, donde las cuatro
+ * filas comparten el mismo recorrido. En una lista **mezclada**, una cita no
+ * tiene escalera de cuatro nodos, así que la mitad de las filas tendría figura
+ * y la otra mitad no — *el mismo «contraste de forma» que B midió cuando un
+ * pedido sin recorrido convivía con uno que sí lo tenía, y que se leía como
+ * «le falta algo» en vez de «está en otro estado»*.
+ *
+ * ⚠️ **La escalera NO muere: vive entera en el detalle** (`/pedidos/pedido/…`,
+ * intacto). Lo que cambia es que ahora hay que abrir para verla. *Se declara
+ * para que, si el recorrido dice que se extraña, volver sea una línea.*
+ *
+ * ── LOS TOPES, declarados (regla del 6-sep) ───────────────────────────────
+ * Pedidos: **30** (el default del lector). Citas en curso: sin tope — el lector
+ * hogar-wide trae lo vivo, que es acotado por naturaleza. Citas de historial:
+ * **20 por mascota**, la primera página del lector con cursor; *no se pagina
+ * todavía y se dice acá, porque un «ver más» que no existe es distinto de un
+ * tope que nadie declaró.*
+ *
+ * ESCALERA (§4b): peldaño 0 = vacío honesto con el personaje · peldaño 1 = las
+ * filas con su pastilla · peldaño 2 = el desvío dicho (sin cerrar, cancelada,
+ * no llegó) sin drama ni error falso.
  */
 
-import { useCallback, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { useCallback, useRef, useState } from 'react';
+import { View } from 'react-native';
 import { Image } from 'expo-image';
 import { router, useFocusEffect } from 'expo-router';
-import { GLIFO_NODO } from '@/lib/despensa/escalera';
 import {
   HojaContenido,
   Cabecera,
+  BadgeFecha,
   Boton,
   CeldaNavegacion,
   FiltroPills,
-  Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
-  PieRevelar,
+  Personaje,
   Separador,
   TarjetaPedido,
   radius,
   Texto,
   spacing,
   useTheme,
-  conIconos,
 } from '@epetplace/ui';
 import {
   listarMisPedidos,
   resumenDeItemsDePedidos,
+  getEstadoOnboardingDueno,
+  obtenerMascotasDeFamilia,
+  obtenerCitasActivasHogar,
+  obtenerHistorialCitasMascota,
   type PedidoEnLista,
   type ResumenItemsPedido,
+  type CitaActivaHogar,
+  type CitaHistorialMascota,
 } from '@epetplace/api';
-import { formatearPrecio, fechaLargaHumana } from '@epetplace/i18n';
 import {
-  escaleraDePedido,
-  portadorDeEstado,
-  type PortadorDeEstado,
-  type VocesEscalera,
-} from '@/lib/despensa/escalera';
+  formatearPrecio,
+  fechaLargaHumana,
+  fechaYHoraHumana,
+  fechaConDiaHumana,
+  mesYDiaHumanos,
+} from '@epetplace/i18n';
 import { ventanaVencida } from '@/lib/despensa/ventana';
 import { unidadesEnCarrito, useCarrito } from '@/lib/despensa/carrito';
+import { vozServicio } from '@/lib/voz-servicio';
 import { useTraduccion } from '@/i18n';
 import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 type Fase<T> = T | 'cargando' | 'error';
 
-/** Cuántos pedidos en vuelo se muestran sin pedirlo. **Dos**, y sale de la
- *  firma: *«uno normalmente; dos si hay dos; más de dos, un "ver más"»*. */
-const TOPE_VIVOS = 2;
+/** Citas de historial: la primera página por mascota. Ver el tope declarado
+ *  en la cabecera. */
+const TOPE_HISTORIAL_POR_MASCOTA = 20;
 
-export default function DespensaPedidos() {
+/** Una cita del historial sabiendo de quién es — el lector es POR MASCOTA y
+ *  su shape no trae `mascota_id`, así que se lo pone quien la pidió. */
+type CitaHistorialConMascota = CitaHistorialMascota & { mascota_id: string };
+
+/** Lo que la lista dibuja, venga de donde venga. **La mezcla se hace sobre
+ *  ESTE tipo y no sobre los dos originales**: *si cada rama ordenara con su
+ *  propio campo, «el más próximo arriba» querría decir dos cosas.* */
+type Fila = {
+  clave: string;
+  /** Milisegundos, o `null` cuando la fila NO TIENE fecha todavía (la cita
+   *  por coordinar). El nulo **no se rellena con `Date.now()`**: se ordena
+   *  aparte, ver `ordenar`. */
+  instante: number | null;
+  nodo: React.ReactElement;
+};
+
+export default function Actividad() {
   const cabecera = useAltoDeCabecera('raiz');
   const { theme } = useTheme();
   const unidadesCarrito = unidadesEnCarrito(useCarrito());
   const { t, idioma } = useTraduccion();
 
+  /* ⭐ EL CORTE ES TEMPORAL Y NO DE CATEGORÍA — los dos chips del encargo.
+     `FiltroPills` **sin `onLimpiar`**, que es lo que lo convierte de filtro en
+     interruptor: su contrato dice que sin esa prop *«un eje donde algo SIEMPRE
+     está activo no debe poder quedarse sin nada»*. *Acá no hay estado «ninguno
+     de los dos»: la pantalla siempre está mostrando algo.* */
+  const [vista, setVista] = useState<'curso' | 'historial'>('curso');
+
   const [pedidos, setPedidos] = useState<Fase<PedidoEnLista[]>>('cargando');
-  /**
-   * 🔴 S100c-D · QUÉ TRAE CADA PEDIDO — el dato que faltaba para que la lista
-   * DISTINGA (D-03, firma del founder: *«dice pedido 17 de agosto, pedido 17
-   * de agosto»*).
-   *
-   * **Medido en la cuenta del gate:** 23 pedidos en 5 días locales, **nueve
-   * el 17-ago y nueve el 12-ago** ⇒ nueve tarjetas con el mismo título, dos
-   * veces. Con solo el día, **1 de esas 9 es distinta**; con el nombre del
-   * producto, 4.
-   *
-   * Va en una **segunda ola y no encadenada**: los ids salen de la primera,
-   * así que no hay forma de pedirlo antes — pero el mapa se pinta igual si
-   * esto falla o tarda (`{}` vacío ⇒ la tarjeta cae a su título de fecha).
-   * *Una lista que no se dibuja hasta saber qué trae es peor que una que no
-   * lo dice.*
-   */
+  /** Qué trae cada pedido (segunda ola, no encadenada — S100c-D). */
   const [resumen, setResumen] = useState<Record<string, ResumenItemsPedido>>({});
+  const [mascotas, setMascotas] = useState<{ id: string; nombre: string }[]>([]);
+  const [citas, setCitas] = useState<Fase<CitaActivaHogar[]>>('cargando');
+  /**
+   * 🔴 EL HISTORIAL DE CITAS SE PIDE TARDE Y A PROPÓSITO — `'sinPedir'` es un
+   * estado de verdad, no un `null` cómodo.
+   *
+   * **El lector unificado NO EXISTE** (pedido a A por buzón): hay
+   * `obtenerCitasActivasHogar(ids)` —UNA query hogar-wide— y
+   * `obtenerHistorialCitasMascota(id)` **por mascota**. ⇒ el historial cuesta
+   * **N viajes**, uno por animal. *Pagarlos al montar castigaría a toda
+   * familia que entra a ver lo que está en curso, que es el caso normal.*
+   *
+   * ⚠️ **Y su primer consumidor es éste**: medido, `estado_historial` tenía
+   * **cero menciones** en la app — el lector que A construyó en S114 a pedido
+   * de C llevaba dos sesiones sin puerta (`L-318`).
+   */
+  const [historialCitas, setHistorialCitas] = useState<Fase<CitaHistorialConMascota[]> | 'sinPedir'>(
+    'sinPedir',
+  );
+  /** 🔴 **SI YA SE PIDIÓ, Y EN UNA REF — NO EN EL ESTADO.**
+   *
+   * La primera versión tenía `historialCitas` en las dependencias del efecto
+   * que lo trae, y **se cancelaba a sí mismo**: el efecto ponía `'cargando'`,
+   * eso cambiaba una dependencia, el cleanup corría, `vigente` pasaba a falso
+   * y la respuesta se descartaba ⇒ **la pantalla quedaba en «Buscando las
+   * citas anteriores…» para siempre.**
+   *
+   * ⚠️ *No fallaba: cargaba.* Ningún typecheck ni gate lo ve — **lo encontró
+   * la captura en el aparato**, que es exactamente para lo que la captura es
+   * obligatoria. */
+  const historialPedido = useRef(false);
   const [reintento, setReintento] = useState(0);
-  /** El chip de estado del HISTÓRICO. `null` = todos. */
-  const [filtro, setFiltro] = useState<'entregado' | 'cancelado' | null>(null);
-  /** El "ver más" de la zona viva. Arranca plegada: *dos pedidos en vuelo es
-   *  lo que cabe sin que la zona deje de ser un vistazo.* */
-  const [vivosRevelados, setVivosRevelados] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
       setPedidos('cargando');
+      setCitas('cargando');
       setResumen({});
+      /* El historial vuelve a `sinPedir` y NO se re-pide solo: si la familia
+         estaba mirándolo, el efecto de abajo lo trae de nuevo al entrar. */
+      historialPedido.current = false;
+      setHistorialCitas('sinPedir');
+
       void listarMisPedidos().then((r) => {
         if (!vigente) return;
         setPedidos(r.ok ? r.data : 'error');
@@ -117,95 +191,146 @@ export default function DespensaPedidos() {
           setResumen(mapa);
         });
       });
+
+      void getEstadoOnboardingDueno().then(async (e) => {
+        if (!vigente) return;
+        /* 🔴 Un FALLO de lectura NO es «no tiene familia» (`L-178`): uno se
+           dibuja como error, el otro como hogar que todavía no empezó.
+           Confundirlos le diría «no tenés nada» a alguien que sí. */
+        if (!e.ok) {
+          setMascotas([]);
+          setCitas('error');
+          return;
+        }
+        const familiaId = e.data.tiene_familia ? e.data.familia_id : null;
+        if (familiaId === null) {
+          setMascotas([]);
+          setCitas([]);
+          return;
+        }
+        const m = await obtenerMascotasDeFamilia(familiaId);
+        if (!vigente) return;
+        if (!m.ok) {
+          setMascotas([]);
+          setCitas('error');
+          return;
+        }
+        const lista = m.data.map((x) => ({ id: x.id, nombre: x.nombre }));
+        setMascotas(lista);
+        if (lista.length === 0) {
+          setCitas([]);
+          return;
+        }
+        const c = await obtenerCitasActivasHogar(lista.map((x) => x.id));
+        if (!vigente) return;
+        setCitas(c.ok ? c.data : 'error');
+      });
+
       return () => {
         vigente = false;
       };
     }, [reintento]),
   );
 
-  const voces: VocesEscalera = {
-    confirmado: t('despensa.pasoConfirmado'),
-    preparando: t('despensa.pasoPreparando'),
-    enCamino: t('despensa.pasoEnCamino'),
-    entregado: t('despensa.pasoEntregado'),
-    noLlego: t('despensa.desvioNoLlego'),
-    noLlegoDetalle: t('despensa.desvioNoLlegoDetalle'),
-    cancelado: t('despensa.desvioCancelado'),
+  /* El historial de citas: N viajes, uno por mascota, **sólo cuando la vista
+     lo pide**. `Promise.all` y no en serie — son independientes.
+     🔴 **Un fallo NO tumba la lista**: los pedidos del historial se dibujan
+     igual y la pantalla DICE que las citas no llegaron (Ley 13: el fallo se
+     dice, jamás se disfraza de «no hay»). */
+  useFocusEffect(
+    useCallback(() => {
+      if (vista !== 'historial' || historialPedido.current || mascotas.length === 0) return;
+      historialPedido.current = true;
+      let vigente = true;
+      setHistorialCitas('cargando');
+      void Promise.all(
+        mascotas.map((m) =>
+          obtenerHistorialCitasMascota(m.id, { limite: TOPE_HISTORIAL_POR_MASCOTA }).then((r) =>
+            r.ok ? r.data.citas.map((c) => ({ ...c, mascota_id: m.id })) : null,
+          ),
+        ),
+      ).then((partes) => {
+        if (!vigente) return;
+        /* Si ALGUNA mascota falló, la lista sería incompleta sin decirlo —
+           y una lista incompleta que parece completa es peor que un error
+           (`L-139`). Se declara el fallo entero. */
+        if (partes.some((p) => p === null)) {
+          setHistorialCitas('error');
+          return;
+        }
+        setHistorialCitas(partes.flat() as CitaHistorialConMascota[]);
+      });
+      return () => {
+        vigente = false;
+      };
+    }, [vista, mascotas]),
+  );
+
+  const nombreDe = (mascotaId: string): string =>
+    mascotas.find((m) => m.id === mascotaId)?.nombre ?? '';
+
+  // ── LAS VOCES ────────────────────────────────────────────────────────────
+
+  /** La pastilla del pedido. **Sale de las MISMAS voces de la escalera** —son
+   *  las siete narrativas del catálogo, ya escritas— así que la palabra que
+   *  esta fila muestra es literalmente la que el detalle dibuja en su nodo.
+   *  *Un segundo diccionario para el mismo estado diverge el día que alguien
+   *  cambie uno.* */
+  const pastillaDePedido = (
+    p: PedidoEnLista,
+  ): { etiqueta: string; tono: 'info' | 'proximo' | 'atencion' } => {
+    switch (p.narrativa) {
+      /* `pagando` es la ÚNICA de las siete donde la persona tiene algo que
+         hacer ⇒ `atencion`; las otras informan (S105-C). */
+      case 'pagando':
+        return { etiqueta: t('despensa.estadoPendientePago'), tono: 'atencion' };
+      case 'confirmado':
+        return { etiqueta: t('despensa.pasoConfirmado'), tono: 'info' };
+      case 'preparando':
+        return { etiqueta: t('despensa.pasoPreparando'), tono: 'info' };
+      case 'en_camino':
+        return { etiqueta: t('despensa.pasoEnCamino'), tono: 'proximo' };
+      case 'entregado':
+        return { etiqueta: t('despensa.pasoEntregado'), tono: 'info' };
+      case 'no_llego':
+        return { etiqueta: t('despensa.desvioNoLlego'), tono: 'atencion' };
+      case 'cancelado':
+        return { etiqueta: t('despensa.desvioCancelado'), tono: 'info' };
+    }
   };
 
-  /**
-   * UNA TARJETA DE PEDIDO — extraída porque ahora tiene DOS consumidores:
-   * la zona viva de arriba y el histórico de abajo. *Copiarla en los dos
-   * lugares es cómo dos listas de la misma casa empiezan a divergir* — y la
-   * de arriba y la de abajo tienen que ser reconocibles como lo mismo.
-   */
-  const tarjetaDe = (p: PedidoEnLista) => {
-    const escalera = escaleraDePedido(p.narrativa, voces);
-    const { pasos, desvio } = escalera;
-    const portador = portadorDeEstado({
-      narrativa: p.narrativa,
-      metodoEntrega: p.metodo_entrega,
-      tienePromesa: p.promesa_desde !== null && p.promesa_hasta !== null,
-    });
-    /* 🔴 EL TÍTULO PASA A SER **QUÉ TRAE**, Y LA FECHA BAJA A LA
-       LÍNEA DE APOYO. Es el pedido literal del founder —*«necesita
-       miniatura del primer producto y qué trae»*— y lo que la
-       medición dice que hace falta: **la fecha no nombra nada
-       cuando hay nueve el mismo día.**
+  /** El nombre visible de la cita — la voz del comprable manda; si el código
+   *  no está en el mapa cae a la descripción del presupuesto, y sin ninguna
+   *  de las dos **se omite** (jamás se pinta el vocabulario del motor: el
+   *  fallback del dueño difiere del vet a propósito, D-474). */
+  const nombreDeCita = (c: { tipo_servicio: string | null; descripcion_presupuesto: unknown }): string | null => {
+    const voz = vozServicio(t, c.tipo_servicio);
+    if (voz !== null) return voz;
+    const d = c.descripcion_presupuesto as { primera: string | null; extras: number } | null;
+    if (d === null || d.primera === null) return null;
+    return d.extras > 0
+      ? t('citasMascota.procedimientoConExtras', { primera: d.primera, n: d.extras })
+      : d.primera;
+  };
 
-       ⚠️ **Y ES REVERSIBLE EN UNA LÍNEA, declarado:** S100-D había
-       decidido que *«el pedido se nombra por su FECHA, que es como
-       lo nombra quien lo hizo»*. **Esa decisión seguía siendo
-       buena contra el `numero_orden`** —dato de máquina, y la ley
-       Chanel de la cabecera de esta pantalla lo sigue excluyendo,
-       intacta— **pero no contra el producto**, que es humano y es
-       lo que la familia recuerda de su compra. *Lo que cambió no
-       es el criterio: es que ahora hay nueve pedidos donde antes
-       la mesa imaginaba uno.*
+  // ── LAS FILAS ────────────────────────────────────────────────────────────
 
-       **La fecha NO se pierde**: viaja en la línea de apoyo junto
-       a la promesa. Y si el resumen no llegó —falla o todavía
-       carga— la tarjeta **cae a su título de fecha** y no queda
-       nunca sin nombre. */
+  const filaDePedido = (p: PedidoEnLista): Fila => {
     const res = resumen[p.pedido_id];
     const queTrae =
       res === undefined || res.primer_item === null
         ? null
         : res.cuantos_items > 1
-          ? t('despensa.pedidoTraeVarios', {
-              producto: res.primer_item,
-              n: res.cuantos_items - 1,
-            })
+          ? t('despensa.pedidoTraeVarios', { producto: res.primer_item, n: res.cuantos_items - 1 })
           : res.primer_item;
-    return (
+    const pastilla = pastillaDePedido(p);
+    const nodo = (
       <TarjetaPedido
         key={p.pedido_id}
-        /* 🔴 LA MINIATURA — el pedido literal del founder, y **el
-           dato que de verdad separa una tarjeta de su vecina**: con
-           nueve títulos iguales el mismo día, la foto es lo primero
-           que el ojo distingue.
-
-           **Se monta con `Image` y NO con `LienzoProducto`, y es
-           decisión medida:** esa pieza pinta su fondo **también
-           detrás de la foto** —el «marco lila» que el founder
-           reportó en el carrito (H-115, cura de A)—, y acá habría
-           **muchas más miniaturas juntas que en el carrito**, así
-           que se vería peor. *Evitar la pieza que tiene el defecto
-           es más barato que depender de que su cura viaje.*
-
-           **`contain` y no `cover`**, copiado del criterio ya
-           firmado en la vitrina: *un envase alto y una bolsa ancha
-           entran enteros; `cover` recortaría justo la etiqueta, que
-           es lo único que la familia usa para reconocer el
-           producto.* Y `transition={0}` — Ley 13: nada se anima al
-           llegar el dato.
-
-           🔴 **SIN FOTO NO SE DIBUJA NADA**, y eso es contrato de la
-           pieza: *«ausente NO reserva lugar — el hueco honesto es
-           que no esté»*. Medido: **5 de 23 pedidos del gate no
-           tienen foto** (161 de 470 en el catálogo) ⇒ **un cuadrado
-           vacío en 1 de cada 5 filas se lee como caja rota**, y una
-           caja rota es peor que no tener miniatura. */
+        /* La miniatura del primer producto — con nueve pedidos del mismo día
+           es lo primero que el ojo distingue (S100c-B). **Sin foto no se
+           dibuja nada**: un cuadrado vacío en 1 de cada 5 filas se lee como
+           caja rota, y el hueco honesto es que no esté. */
         miniatura={
           res?.portada == null ? undefined : (
             <View
@@ -227,385 +352,375 @@ export default function DespensaPedidos() {
             </View>
           )
         }
-        titulo={queTrae ?? t('despensa.pedidoDel', { dia: diaHumano(p.creado_en) })}
+        titulo={queTrae ?? t('despensa.pedidoDel', { dia: fechaLargaHumana(p.creado_en, idioma) })}
         detalle={
-          /* Con el producto arriba, la fecha vuelve como apoyo — y si además
-             hay algo que decir del estado, van separadas por el punto medio
-             de la casa.
-             🔴 S100d · **LA VENTANA QUE YA PASÓ** (firma del founder): la
-             ventana **se conserva y se le AGREGA la voz** —es el dato contra
-             el que se mide el atraso— y la voz **no atribuye culpa**: la app
-             sabe que la hora pasó, no sabe por qué. */
           [
-            queTrae === null ? undefined : t('despensa.pedidoDel', { dia: diaHumano(p.creado_en) }),
-            detalleDe(p, portador),
+            queTrae === null
+              ? undefined
+              : t('despensa.pedidoDel', { dia: fechaLargaHumana(p.creado_en, idioma) }),
             ventanaVencida(p.promesa_hasta, p.narrativa) ? t('despensa.ventanaTardando') : undefined,
           ]
             .filter((x): x is string => x !== undefined)
             .join(' · ') || undefined
         }
-        /* 🔴 LA INSIGNIA — el pedido sin recorrido gana FIGURA.
-           Diagnóstico de B con aparato: esas tarjetas eran «título
-           + fecha + precio y nada más» al lado de vecinas con una
-           escalera de cuatro nodos, y **un `apoyo` gris no alcanza
-           ahí — no por tipografía, por CONTRASTE DE FORMA**: la
-           vecina tiene una figura y ésta no, así que se lee como
-           «le falta algo» en vez de «está en otro estado».
-           *Un pedido sin recorrido no tiene una escalera vacía:
-           tiene un estado.*
-           El invariante que B pide —«si hay `pasos`, no pases
-           `estado`»— se cumple **por construcción**: `portador`
-           vale `'estado'` exactamente cuando la escalera no
-           dibuja, y eso lo vigila el guard. */
-        /* 🔴 S105-C · `pagando` GANA VOZ PROPIA, Y SU AUSENCIA ERA EL DEFECTO.
-           ⏪ Acá iba `p.narrativa_nombre` a secas para todo portador de
-           estado. **Medido: `pagando` era la ÚNICA de las siete narrativas sin
-           voz de pantalla** —las otras seis ya viven en `voces`, arriba— así
-           que caía a la palabra del MOTOR: «Pagando».
-
-           **Y el catálogo dice de sí mismo que eso está mal:** su `COMMENT`
-           declara que el `nombre` es *«descripción de referencia, no el copy
-           final»* y que *«la voz definitiva la escribe la pantalla»* (Ley 3
-           extendida). *Estábamos mostrando el vocabulario del motor justo en
-           la única fila donde la persona tiene algo que hacer.*
-
-           🔴 **Por qué importa la palabra:** «Pagando» es presente progresivo
-           —dice que algo está pasando ahora—. Sobre un intento que falló hace
-           días **no está pasando nada**, y la fila quedaba **indistinguible de
-           un pedido comprado**. *Es la misma familia que la cita cancelada que
-           parecía cumplida: una fila que se lee como algo que sí ocurrió.*
-
-           **`atencion` y no `info`**, y es lo único que separa esta fila de
-           las otras seis: las demás informan; **ésta pide algo.** *El default
-           `info` de la pieza existe porque «todavía no pasó nada» no es una
-           alerta — cierto para un pago en vuelo de tres segundos, falso para
-           uno que quedó sin completar.*
-
-           ⚠️ **Sin botón para completar, y NO es olvido** — ver el reporte:
-           medido, **no existe camino** (el checkout no acepta una compra por
-           parámetro y el detalle no ofrece pagar) **y `D-913` lo rebotaría**
-           igual. *Ofrecerlo sería la Ley 23 con dos causas a la vez.* */
-        estado={
-          portador === 'estado'
-            ? p.narrativa === 'pagando'
-              ? { etiqueta: t('despensa.estadoPendientePago'), tono: 'atencion' as const }
-              : { etiqueta: p.narrativa_nombre, tono: 'info' as const }
-            : undefined
-        }
+        estado={pastilla}
         monto={formatearPrecio(p.total)}
-        pasos={conIconos(pasos, GLIFO_NODO)}
-        desvio={desvio}
         acento="control"
         etiqueta={t('despensa.verPedido')}
         onPress={() =>
+          router.push({ pathname: '/pedidos/pedido/[pedidoId]', params: { pedidoId: p.pedido_id } })
+        }
+      />
+    );
+    /* EN CURSO se ordena por CUÁNDO LLEGA (la promesa); el historial, por
+       cuándo se movió por última vez. *Ordenar un pedido entregado por su
+       promesa lo pondría en el lugar equivocado el día que la promesa no se
+       haya cumplido.* */
+    const ancla = p.es_terminal ? p.actualizado_en : (p.promesa_desde ?? p.creado_en);
+    const ms = Date.parse(ancla);
+    return { clave: p.pedido_id, instante: Number.isNaN(ms) ? null : ms, nodo };
+  };
+
+  const filaDeCitaActiva = (c: CitaActivaHogar): Fila => {
+    const mascota = nombreDe(c.mascota_id);
+    const nombre = nombreDeCita(c);
+    const cuando = c.fecha === null ? null : fechaYHoraHumana(c.fecha, c.hora, idioma);
+    const pastilla: { etiqueta: string; tono: 'info' | 'proximo' | 'atencion' } =
+      c.estado === 'en_vivo'
+        ? /* 🔴 **NO SE INVENTA UNA SEGUNDA VOZ PARA «En vivo».** §7.1 dice que
+             esa voz es ÚNICA y vive en el pill de `CitaEnVivo` (namespace de
+             la pieza). Escribir el literal acá sería un segundo lugar donde
+             decir lo mismo, que es exactamente lo que §7.1 prohíbe. ⇒ la
+             pastilla lleva **la invitación que la casa ya tiene** —«Ver cómo
+             va»— y el tono de algo que pide el pulgar. *Dice la verdad sin
+             duplicar la palabra.* */
+          { etiqueta: t('hogar.verEnVivo'), tono: 'atencion' }
+        : c.estado === 'por_coordinar'
+          ? { etiqueta: t('actividad.estadoPorCoordinar'), tono: 'atencion' }
+          : c.estado === 'hold'
+            ? { etiqueta: t('actividad.estadoReservando'), tono: 'proximo' }
+            : { etiqueta: t('actividad.estadoAgendado'), tono: 'proximo' };
+    const nodo = (
+      <TarjetaPedido
+        key={c.cita_id}
+        /* ⭐ LA PASTILLA CIRUELA DE FECHA — `BadgeFecha` de B, que nació en el
+           lote 2 para esto (*«vive a la izquierda de una cita»*). **Sin fecha
+           no se dibuja**: una cita por coordinar no tiene día, y un badge con
+           el mes vacío sería dibujar un dato que no existe. El slot de la
+           tarjeta admite el hueco por contrato. */
+        miniatura={
+          c.fecha === null ? undefined : (() => {
+            const { mes, dia } = mesYDiaHumanos(c.fecha, idioma);
+            return <BadgeFecha mes={mes} dia={dia} />;
+          })()
+        }
+        titulo={nombre ?? t('actividad.titulo')}
+        detalle={
+          cuando === null
+            ? [mascota, c.negocio_nombre].filter((x): x is string => !!x).join(' · ') || undefined
+            : t('actividad.filaCita', { mascota, cuando })
+        }
+        estado={pastilla}
+        acento="control"
+        etiqueta={t('actividad.verCita', { mascota })}
+        onPress={() =>
           router.push({
-            pathname: '/pedidos/pedido/[pedidoId]',
-            params: { pedidoId: p.pedido_id },
+            pathname: '/citas/[mascotaId]',
+            params: { mascotaId: c.mascota_id, nombre: mascota, citaId: c.cita_id },
           })
         }
       />
     );
+    const ms = c.fecha === null ? null : Date.parse(`${c.fecha}T${(c.hora ?? '12:00').slice(0, 5)}`);
+    return { clave: c.cita_id, instante: ms === null || Number.isNaN(ms) ? null : ms, nodo };
   };
 
+  const filaDeCitaPasada = (c: CitaHistorialConMascota): Fila => {
+    const mascota = nombreDe(c.mascota_id);
+    const nombre = nombreDeCita(c);
+    const cuando = c.fecha === null ? null : fechaYHoraHumana(c.fecha, c.hora, idioma);
+    const pastilla: { etiqueta: string; tono: 'info' | 'proximo' | 'atencion' } =
+      c.estado_historial === 'completada'
+        ? { etiqueta: t('actividad.estadoAtendida'), tono: 'info' }
+        : c.estado_historial === 'cancelada'
+          ? { etiqueta: t('actividad.estadoCancelada'), tono: 'info' }
+          : c.estado_historial === 'no_show'
+            ? { etiqueta: t('actividad.estadoNoSeRealizo'), tono: 'info' }
+            : c.estado_historial === 'pendiente'
+              ? { etiqueta: t('actividad.estadoSinConfirmar'), tono: 'info' }
+              : /* `confirmada` y pasada: la app **no sabe** si ocurrió. Ver la
+                   nota del diccionario — es la fila más común del historial. */
+                { etiqueta: t('actividad.estadoSinCerrar'), tono: 'atencion' };
+    const nodo = (
+      <TarjetaPedido
+        key={c.cita_id}
+        miniatura={
+          c.fecha === null ? undefined : (() => {
+            const { mes, dia } = mesYDiaHumanos(c.fecha, idioma);
+            return <BadgeFecha mes={mes} dia={dia} />;
+          })()
+        }
+        titulo={nombre ?? t('actividad.titulo')}
+        detalle={cuando === null ? (mascota || undefined) : t('actividad.filaCita', { mascota, cuando })}
+        estado={pastilla}
+        acento="control"
+        etiqueta={t('actividad.verCita', { mascota })}
+        onPress={() =>
+          router.push({
+            pathname: '/citas/[mascotaId]',
+            params: { mascotaId: c.mascota_id, nombre: mascota, citaId: c.cita_id },
+          })
+        }
+      />
+    );
+    /* `cerrada_en` es el instante REAL de fin (motor-consistente); la fecha
+       suelta es el respaldo cuando la cita no llegó a tener atención. */
+    const ancla = c.cerrada_en ?? (c.fecha === null ? null : `${c.fecha}T12:00`);
+    const ms = ancla === null ? null : Date.parse(ancla);
+    return { clave: c.cita_id, instante: ms === null || Number.isNaN(ms) ? null : ms, nodo };
+  };
 
-  // Las fechas hablan el idioma de la APP (vara de C ⑥): el día por el
-  // riel; la hora con locale explícito — el mismo par de fechas.ts.
-  const diaHumano = (iso: string) => fechaLargaHumana(iso, idioma);
-  const horaLocal = (iso: string) =>
-    new Date(iso).toLocaleTimeString(idioma === 'en' ? 'en-US' : 'es-EC', {
-      hour: '2-digit',
-      minute: '2-digit',
+  /**
+   * 🔴 EL ORDEN, y las dos vistas ordenan al revés a propósito.
+   *
+   * **En curso: lo más próximo arriba** (ascendente) — es lo que el founder
+   * pidió y es lo que una familia busca: *qué es lo siguiente.*
+   * **Historial: lo más reciente arriba** (descendente) — *«el más próximo»*
+   * mirando hacia atrás es lo último que pasó.
+   *
+   * **Las filas SIN fecha presiden y no se hunden al final**, y eso NO es una
+   * excepción nueva: es `§10ter.1` firmada para «Ponte al día» — *las por
+   * coordinar no tienen tiempo, presiden y no colapsan, porque colapsar
+   * acciones esconde trabajo pendiente.* Rellenar su nulo con `Date.now()`
+   * las habría mezclado entre las fechadas, que es la forma silenciosa del
+   * mismo error.
+   */
+  const ordenar = (filas: Fila[], sentido: 'asc' | 'desc'): Fila[] =>
+    [...filas].sort((a, b) => {
+      if (a.instante === null && b.instante === null) return 0;
+      if (a.instante === null) return -1;
+      if (b.instante === null) return 1;
+      return sentido === 'asc' ? a.instante - b.instante : b.instante - a.instante;
     });
 
-  /** La línea de apoyo de la fila. **La DECISIÓN no vive acá: vive en
-   *  `portadorDeEstado`** — esta función solo le pone voz a lo que aquélla
-   *  eligió (Ley 3: el riel habla, la lib decide).
+  // ── EL CUERPO ────────────────────────────────────────────────────────────
+
+  const cargando = pedidos === 'cargando' || citas === 'cargando';
+  /**
+   * 🔴 **LOS DOS GRADOS DE FALLO, Y EL HUECO QUE HABÍA ENTRE ELLOS.**
    *
-   *  🔴 **S100b-D · POR QUÉ SE MUDÓ, y es el hallazgo del gate.** El founder
-   *  vio *«cuatro de seis pedidos no dicen en qué estado están»*. Acá vivían
-   *  cuatro `if` en un orden, y **el orden era el defecto**: el brazo que
-   *  cubría al pedido sin escalera estaba ÚLTIMO, detrás del de la promesa —
-   *  y la promesa **nace con el pedido, antes del pago** (censo: 4 de 4
-   *  `pagando` la tienen). ⇒ el pedido no solo quedaba mudo: **prometía una
-   *  entrega sin tener el pago confirmado.**
+   * La primera versión sólo tenía `todoFallo` y dibujaba el vacío en cuanto
+   * quedaban cero filas ⇒ **con los pedidos en cero y las citas caídas, la
+   * pantalla decía «Todavía no tienes nada en curso»** — una afirmación sobre
+   * algo que no pudo leer. *«No hay» y «no pude ver» son dos hechos distintos,
+   * y el que se dibuja es el que la familia cree.*
    *
-   *  Es la MISMA clase que S100 ya curó para el desvío —*prometer una entrega
-   *  que ya no va a pasar*— y que llegó por el otro lado: *prometer una que
-   *  todavía no está comprada.* Curar una y dejar viva la otra es lo que pasa
-   *  cuando la regla es un orden de `if` y no un objeto que se pueda medir.
-   *  **Por eso ahora se puede medir: `verify-s100b-d-el-estado-se-dice.ts`
-   *  corre la función real y su discriminador reproduce este orden viejo y
-   *  exige que falle.** */
-  function detalleDe(p: PedidoEnLista, portador: PortadorDeEstado): string | undefined {
-    const desde = p.promesa_desde;
-    const hasta = p.promesa_hasta;
-    switch (portador) {
-      case 'nada':
-        return undefined;
-      // 🔴 EL ESTADO YA NO VIAJA POR ACÁ — lo lleva la INSIGNIA de la
-      // tarjeta (ver abajo). Esta línea devuelve vacío para no decir dos
-      // veces lo mismo (Chanel).
-      case 'estado':
-        return undefined;
-      case 'retiro':
-        return t('despensa.metodoRetiro');
-      case 'promesa':
-        // Se re-pregunta por los nulos en vez de castear: la implicación
-        // «portador = promesa ⇒ las dos existen» vive en la lib y el
-        // compilador no la ve. Es un ESTRECHAMIENTO, jamás un segundo
-        // criterio — un `as string` acá compilaría y pintaría
-        // «Invalid Date» el día que la implicación deje de valer.
-        return desde === null || hasta === null
-          ? undefined
-          : t('despensa.promesaCorta', {
-              dia: diaHumano(desde),
-              desde: horaLocal(desde),
-              hasta: horaLocal(hasta),
-            });
+   * ⚠️ **Lo destapó la captura, no un gate**: el emulador se quedó sin DNS a
+   * mitad de la sesión y la pantalla salió perfecta y mintiendo. Ningún
+   * typecheck ve esto — el estado `'error'` existía y se estaba ignorando.
+   */
+  const todoFallo = pedidos === 'error' && citas === 'error';
+  const algoFallo = pedidos === 'error' || citas === 'error';
+
+  const listaPedidos = Array.isArray(pedidos) ? pedidos : [];
+  const listaCitas = Array.isArray(citas) ? citas : [];
+
+  const filasCurso = ordenar(
+    [
+      ...listaPedidos.filter((p) => !p.es_terminal).map(filaDePedido),
+      ...listaCitas.map(filaDeCitaActiva),
+    ],
+    'asc',
+  );
+
+  const pedidosTerminales = listaPedidos.filter((p) => p.es_terminal);
+  const citasPasadas = Array.isArray(historialCitas) ? historialCitas : [];
+  const filasHistorial = ordenar(
+    [...pedidosTerminales.map(filaDePedido), ...citasPasadas.map(filaDeCitaPasada)],
+    'desc',
+  );
+
+  const filas = vista === 'curso' ? filasCurso : filasHistorial;
+
+  const cuerpo = () => {
+    if (cargando) {
+      return (
+        <EsqueletoGrupo>
+          <View style={{ gap: spacing[3], paddingHorizontal: spacing[5] }}>
+            <Esqueleto forma="bloque" ancho="100%" alto={96} />
+            <Esqueleto forma="bloque" ancho="100%" alto={96} />
+          </View>
+        </EsqueletoGrupo>
+      );
     }
-  }
+    /* Con algo caído y nada que mostrar, **manda el fallo**: es lo único
+       cierto que se puede decir. */
+    if (todoFallo || (algoFallo && filas.length === 0)) {
+      return (
+        <EstadoVacio
+          titulo={t('actividad.errorTitulo')}
+          descripcion={t('actividad.errorDetalle')}
+          accion={
+            <Boton
+              variante="secundario"
+              etiqueta={t('hogar.reintentar')}
+              onPress={() => setReintento((n) => n + 1)}
+            />
+          }
+        />
+      );
+    }
+    /* 🔴 **EL VACÍO NO SE DIBUJA MIENTRAS FALTA UNA FUENTE.** Sin esto, el
+       historial decía «Todavía no hay nada para mirar atrás» **al lado de**
+       «Buscando las citas anteriores…»: una afirmación y su desmentido en la
+       misma pantalla. *«No hay» y «todavía no sé» son dos cosas distintas, y
+       la que se dibuja primero es la que la familia cree.* */
+    if (vista === 'historial' && historialCitas === 'cargando' && filas.length === 0) {
+      return null;
+    }
+    if (filas.length === 0) {
+      /* ⭐ EL VACÍO HONESTO CON EL PERSONAJE — encargo del founder, *«sin
+         relleno»*: dice qué no hay, y ofrece UN camino, el que existe.
+         ⚠️ **La especie es fija y no la de la mascota, y es un préstamo
+         declarado**: la tabla que traduce las ONCE especies del catálogo a
+         las SEIS del personaje vive dentro de `AvatarMascota` (`CARA_LOCAL`)
+         y **no está exportada** — pedido a B ya en el buzón del lote 8.
+         *Escribirla acá sería la TERCERA copia, y tres tablas de lo mismo
+         divergen.* Mismo criterio que el vacío del Hogar. */
+      return (
+        <EstadoVacio
+          icono={<Personaje especie="perro" tamano="grande" fondo="rosa" />}
+          titulo={
+            vista === 'curso' ? t('actividad.vacioCursoTitulo') : t('actividad.vacioHistorialTitulo')
+          }
+          descripcion={
+            vista === 'curso'
+              ? t('actividad.vacioCursoDetalle')
+              : t('actividad.vacioHistorialDetalle')
+          }
+          accion={
+            vista === 'curso' ? (
+              <Boton
+                variante="secundario"
+                etiqueta={t('explorar.titulo')}
+                onPress={() => router.push('/explorar')}
+              />
+            ) : undefined
+          }
+        />
+      );
+    }
+    return (
+      <View style={{ paddingHorizontal: spacing[5], gap: spacing[4] }}>
+        {filas.map((f) => (
+          <View key={f.clave} style={{ gap: spacing[2] }}>
+            {f.nodo}
+            {/* 🔴 PEDIR DE NUEVO — la palanca comercial de esta casa, firmada
+                por el founder (S100d): *en comida de mascota la compra es
+                CÍCLICA*. **Sólo en entregados** —ofrecer repetir un pedido
+                cancelado sería ofrecer repetir algo que no pasó— y **sólo con
+                `producto_id`**: su `null` significa que el producto ya no está
+                publicado, y una puerta que rebota es peor que ninguna
+                (Ley 23). */}
+            {(() => {
+              const p = pedidosTerminales.find((x) => x.pedido_id === f.clave);
+              const pid = p === undefined ? null : (resumen[p.pedido_id]?.producto_id ?? null);
+              return p !== undefined && p.narrativa === 'entregado' && pid !== null ? (
+                <Boton
+                  variante="secundario"
+                  etiqueta={t('despensa.pedirDeNuevo')}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/despensa/producto/[productoId]',
+                      params: { productoId: pid },
+                    })
+                  }
+                />
+              ) : null;
+            })()}
+          </View>
+        ))}
+      </View>
+    );
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      {/* 🔴 PORTADA, NO NAVEGACIÓN — Pedidos es una CASA desde S100c, y una
-          casa no tiene flecha de atrás. *Un «atrás» en la raíz de un tab
-          ofrece un camino que no existe* (Ley 23), y encima `router.back()`
-          desde acá saltaría a cualquier pantalla anterior. */}
-      {/* ⭐ **S116-C lote 3b · LA PORTADA PASA A `Cabecera variante="raiz"`.**
-          `saludo` → `titulo` y **el carrito deja de ser un `ReactNode` en
-          `accionDer` y pasa a la prop `carrito`**, que la pieza ya trae. ☠️ Con
-          eso muere el montaje de `AccionCarrito` acá: *un `ReactNode` suelto
-          deja que cada pantalla arme su disco, y ahí vuelve la copia que
-          `DiscoVidrio` acaba de terminar* (la razón es de B, en el catálogo). */}
-      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
-          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
-          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
-          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
-          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
-          esquinas de abajo redondeadas muere en el cliente.
-          ⚠️ El `paddingBottom` con `insets.bottom` que había acá SE RETIRA: lo
-          paga la hoja en su propio render, y sumarlo sería pagarlo dos veces
-          (`R53`). */}
+      {/* LA ESTRUCTURA FIRMADA: fondo ciruela (`presentacion="fondo"`, sin
+          radio inferior ni sombra) + `HojaContenido` encima con las esquinas
+          de ARRIBA redondeadas, que desliza sobre el fondo al scrollear. */}
       <HojaContenido
         arranque={cabecera.arranque}
         fondo={
           <View onLayout={cabecera.alMedir}>
             <Cabecera
               variante="raiz"
-              titulo={t('despensa.tusPedidos')}
-              carrito={{ cantidad: unidadesCarrito, onPress: () => router.push('/despensa/carrito'), etiqueta: t('despensa.abrirCarrito', { count: unidadesCarrito }) }}
+              /* El antetítulo del día, la misma voz del Hogar — y desde este
+                 lote la misma FUNCIÓN, que subió al riel en vez de clonarse. */
+              antetitulo={fechaConDiaHumana(new Date(), idioma)}
+              antetituloVoz="dato"
+              titulo={t('actividad.titulo')}
+              /* El carrito SE CONSERVA: firma S100d-bis —*«mientras tenga
+                 productos debe estar visible en TODA la app»*—. La tab dejó de
+                 llamarse Pedidos; esa firma no cambió. */
+              carrito={{
+                cantidad: unidadesCarrito,
+                onPress: () => router.push('/despensa/carrito'),
+                etiqueta: t('despensa.abrirCarrito', { count: unidadesCarrito }),
+              }}
               presentacion="fondo"
             />
           </View>
         }
-        scroll={{ contentContainerStyle: {
-          paddingTop: spacing[4],
-          // 🔴 SIN `insets.bottom`, y es CONCESIÓN MEDIDA, no gusto.
-          // B midió que **el navegador ya acota**: el `ScrollView` de una
-          // pantalla de tab termina en `y = 699.0 dp`, el filo exacto de la
-          // barra —que a su vez ya pintó el inset del sistema—. Sumarlo acá
-          // lo cuenta DOS VECES. `spacing[8]` es el aire de cola; el inset
-          // era la cara «sobra» del malentendido de los 53 dp.
-          // *Yo lo había defendido como «aire de cola» y C tenía razón: era
-          // una línea vieja, no una posición.* Se unifica en las tres
-          // pantallas — dos reglas para lo mismo divergen.
-          paddingBottom: spacing[8],
-          gap: spacing[4],
-        } }}
       >
-        {pedidos === 'cargando' ? (
-          <EsqueletoGrupo>
-            <View style={{ gap: spacing[3], paddingHorizontal: spacing[5] }}>
-              <Esqueleto forma="bloque" ancho="100%" alto={120} />
-              <Esqueleto forma="bloque" ancho="100%" alto={120} />
-            </View>
-          </EsqueletoGrupo>
-        ) : pedidos === 'error' ? (
-          <EstadoVacio
-            titulo={t('despensa.errorPedidosTitulo')}
-            descripcion={t('despensa.errorVitrinaDetalle')}
-            accion={
-              <Boton
-                variante="secundario"
-                etiqueta={t('hogar.reintentar')}
-                onPress={() => setReintento((n) => n + 1)}
-              />
-            }
+        {/* El relleno va ADENTRO de la hoja: en `HojaContenido` el estilo del
+            contenedor envuelve A LA HOJA, no a su contenido. */}
+        <View style={{ paddingTop: spacing[2], paddingBottom: spacing[8], gap: spacing[4] }}>
+          <FiltroPills
+            opciones={[
+              { codigo: 'curso' as const, etiqueta: t('actividad.chipEnCurso'), icono: null },
+              { codigo: 'historial' as const, etiqueta: t('actividad.chipHistorial'), icono: null },
+            ]}
+            activo={vista}
+            onCambio={(c: 'curso' | 'historial') => setVista(c)}
+            disposicion="envuelve"
           />
-        ) : pedidos.length === 0 ? (
-          <>
-            <EstadoVacio
-              titulo={t('despensa.sinPedidosTitulo')}
-              descripcion={t('despensa.sinPedidosDetalle')}
-              accion={
-                <Boton
-                  variante="secundario"
-                  etiqueta={t('despensa.carritoVacioIr')}
-                  onPress={() => router.push('/despensa')}
-                />
-              }
-            />
+
+          {/* El historial de citas tarda o falla sin tumbar la lista — y lo
+              DICE (Ley 13). */}
+          {vista === 'historial' && historialCitas === 'cargando' ? (
+            <View style={{ paddingHorizontal: spacing[5] }}>
+              <Texto variante="apoyo">{t('actividad.historialCitasCargando')}</Texto>
+            </View>
+          ) : null}
+          {/* Fallo PARCIAL con filas dibujadas: se muestran las que llegaron
+              y se dice que falta el resto. */}
+          {algoFallo && filas.length > 0 ? (
+            <View style={{ paddingHorizontal: spacing[5] }}>
+              <Texto variante="apoyo">{t('actividad.parcialFallo')}</Texto>
+            </View>
+          ) : null}
+          {vista === 'historial' && historialCitas === 'error' ? (
+            <View style={{ paddingHorizontal: spacing[5] }}>
+              <Texto variante="apoyo">{t('actividad.historialCitasFallo')}</Texto>
+            </View>
+          ) : null}
+
+          {cuerpo()}
+
+          {/* EL ACCESO DEL LOCAL — el founder lo pidió adentro de esta casa, y
+              vive acá y no sólo en el vacío: *una entrada que existe sólo
+              cuando no tenés nada es una entrada que nadie encuentra el día
+              que la necesita.* */}
+          <View style={{ paddingTop: spacing[2] }}>
             <Separador />
             <CeldaNavegacion
               titulo={t('despensa.reclamoEntrada')}
               detalle={t('despensa.reclamoEntradaDetalle')}
               onPress={() => router.push('/despensa/reclamo')}
             />
-          </>
-        ) : (
-          /* 🔴 LA CASA: EN CURSO ARRIBA, HISTORIAL ABAJO (firma del founder,
-             S100c). *Lo que todavía puede pasar algo preside; lo que ya
-             terminó se consulta.* El corte es `es_terminal`, que lo dice el
-             CATÁLOGO —dato del motor, no un `switch` acá—, así que el día
-             que nazca una narrativa nueva cae del lado correcto sola.
-
-             **Los dos rótulos aparecen SOLO si existen las dos secciones**:
-             con una sola, rotular anuncia una división que no está (Chanel). */
-          <>
-            {(() => {
-              /* 🔴 S100d · LA CASA SE REESTRUCTURA (firma del founder).
-                 **Arriba el SEGUIMIENTO VIVO; abajo el histórico con sus
-                 chips.** Y la regla que ordena el resto: *lo vivo desaparece
-                 cuando no existe* — la zona de arriba **no deja hueco ni
-                 estado vacío**, igual que «Ponte al día» en el Hogar.
-
-                 **Sin duplicación, por firma:** el pedido en curso vive
-                 arriba **y no se repite abajo** ⇒ los chips son
-                 «Entregados · Cancelados», no «En curso». *Un pedido que
-                 aparece dos veces en la misma pantalla le pide al dueño que
-                 descubra que son el mismo.*
-
-                 **El corte sigue siendo `es_terminal`** —dato del catálogo,
-                 no un `switch` acá—, así que una narrativa nueva cae del
-                 lado correcto sola. */
-              const vivos = pedidos.filter((p) => !p.es_terminal);
-              const historial = pedidos.filter((p) => p.es_terminal);
-              const visiblesVivos = vivosRevelados ? vivos : vivos.slice(0, TOPE_VIVOS);
-              /* Los chips salen de lo que EXISTE, jamás de un catálogo fijo:
-                 *un filtro que no filtra nada es un filtro inalcanzable con
-                 otro nombre* — y encima enseña que los controles de esta
-                 pantalla no hacen nada (19.9, el nulo no se pinta). */
-              const chips = (
-                [
-                  { codigo: 'entregado' as const, etiqueta: t('despensa.chipEntregados'), icono: null },
-                  { codigo: 'cancelado' as const, etiqueta: t('despensa.chipCancelados'), icono: null },
-                ]
-              ).filter((c) => historial.some((p) => p.narrativa === c.codigo));
-              const historialVisible =
-                filtro === null ? historial : historial.filter((p) => p.narrativa === filtro);
-              return (
-                <>
-                  {vivos.length === 0 ? null : (
-                    <View style={{ paddingHorizontal: spacing[5], gap: spacing[4] }}>
-                      {visiblesVivos.map((p) => tarjetaDe(p))}
-                      {vivos.length > TOPE_VIVOS && !vivosRevelados ? (
-                        <PieRevelar
-                          n={vivos.length - TOPE_VIVOS}
-                          onPress={() => setVivosRevelados(true)}
-                        />
-                      ) : null}
-                    </View>
-                  )}
-
-                  {historial.length === 0 ? null : (
-                    <View style={{ gap: spacing[4] }}>
-                      <View style={{ paddingHorizontal: spacing[5] }}>
-                        <Texto variante="seccion">{t('despensa.pedidosHistorial')}</Texto>
-                      </View>
-                      {chips.length === 0 ? null : (
-                        /* 🔴 `envuelve` Y NO `tira`, con el número de C al
-                           lado. En su tira horizontal midió **5 opciones y 4
-                           alcanzables**, y una que salía con **ancho CERO**:
-                           *un filtro inalcanzable es peor que uno ausente —
-                           ocupa lugar y promete.* Con dos chips **no hay nada
-                           que scrollear**, así que ese modo de falla queda
-                           **inexpresable**, no evitado. *Elegir la
-                           disposición que no puede fallar es más barato que
-                           depender de que la cura del arrastre viaje.* */
-                        <FiltroPills
-                          opciones={chips}
-                          activo={filtro}
-                          onCambio={(c: 'entregado' | 'cancelado') => setFiltro(c === filtro ? null : c)}
-                          disposicion="envuelve"
-                        />
-                      )}
-                      <View style={{ paddingHorizontal: spacing[5], gap: spacing[4] }}>
-                        {historialVisible.map((p) => (
-                          <View key={p.pedido_id} style={{ gap: spacing[2] }}>
-                            {tarjetaDe(p)}
-                            {/* 🔴 S100d · PEDIR DE NUEVO — **la palanca
-                                comercial de esta pantalla**, firmada por el
-                                founder: *en comida de mascota la compra es
-                                CÍCLICA — la bolsa se acaba cada 30-45 días.*
-                                Solo en ENTREGADOS: *ofrecer repetir un pedido
-                                cancelado sería ofrecer repetir algo que no
-                                pasó.*
-
-                                ⚠️ **HOY LLEVA A LA DESPENSA, NO AL PRODUCTO, y
-                                se declara en vez de disimularse.** Para
-                                re-armar el pedido haría falta resolver la
-                                OFERTA VIGENTE de cada ítem —precio y stock de
-                                HOY, no los de la compra vieja— y el lector de
-                                esta lista **no trae `producto_id`**: devuelve
-                                nombre, conteo y portada. *Mandar al carrito
-                                con el precio de un pedido viejo sería prometer
-                                una plata que el motor va a desmentir en el
-                                checkout.*
-                                ⇒ pedido a A: **`producto_id` en el resumen**
-                                —un campo en un lector suyo que ya existe— y
-                                esto pasa a llevar a la ficha en una línea. */}
-                            {/* ✅ S100d · YA LLEVA A LA FICHA. A ensanchó su
-                                lector con `producto_id` —**de la MISMA fila**
-                                que el nombre y la portada, cero viajes
-                                nuevos— y esto pasó de media palanca a
-                                entera: se vuelve a comprar **al precio y con
-                                el stock de HOY**.
-
-                                🔴 **SIN `producto_id` NO SE OFRECE EL CAMINO,
-                                y es contrato de A**: `null` significa que el
-                                producto **ya no está publicado** ⇒ el botón
-                                llevaría a una ficha que no existe. *Una
-                                puerta que rebota es peor que ninguna puerta*
-                                (Ley 23) — y acá rebotaría justo cuando la
-                                familia quiso repetir su compra.
-
-                                **Solo en ENTREGADOS**: ofrecer repetir un
-                                pedido cancelado sería ofrecer repetir algo
-                                que no pasó. */}
-                            {p.narrativa === 'entregado' && resumen[p.pedido_id]?.producto_id ? (
-                              <Boton
-                                variante="secundario"
-                                etiqueta={t('despensa.pedirDeNuevo')}
-                                onPress={() =>
-                                  router.push({
-                                    pathname: '/despensa/producto/[productoId]',
-                                    params: { productoId: resumen[p.pedido_id]!.producto_id! },
-                                  })
-                                }
-                              />
-                            ) : null}
-                          </View>
-                        ))}
-                      </View>
-                    </View>
-                  )}
-                </>
-              );
-            })()}
-            {/* EL ACCESO DEL LOCAL — el founder lo pidió adentro de esta casa,
-                y hasta hoy vivía SOLO en el estado vacío. *Una entrada que
-                existe solo cuando no tenés nada es una entrada que nadie
-                encuentra el día que la necesita.* */}
-            <View style={{ paddingTop: spacing[2] }}>
-              <Separador />
-              <CeldaNavegacion
-                titulo={t('despensa.reclamoEntrada')}
-                detalle={t('despensa.reclamoEntradaDetalle')}
-                onPress={() => router.push('/despensa/reclamo')}
-              />
-            </View>
-          </>
-        )}
+          </View>
+        </View>
       </HojaContenido>
     </View>
   );

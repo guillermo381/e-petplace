@@ -207,99 +207,109 @@ export default function DocumentosGuarderia() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: { padding: spacing[5], gap: spacing[4], } }}
+
       >
-        {carga.fase === 'cargando' ? (
-          <EsqueletoGrupo><Esqueleto alto={120} /><Esqueleto alto={120} /></EsqueletoGrupo>
-        ) : carga.fase === 'noPudimos' ? (
-          <EstadoVacio
-            registro="seccion"
-            titulo={t('documentosGuarderia.noCargoTitulo')}
-            descripcion={t('documentosGuarderia.noCargoDetalle')}
-            accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setIntento((n) => n + 1)} />}
-          />
-        ) : carga.estado === 'documentos_no_disponibles' || carga.docs.length === 0 ? (
-          /* 🔴 EL PROBLEMA ES NUESTRO Y SE DICE ASÍ. **Sin «prueba de nuevo»**:
-             no hay nada que la familia pueda reintentar. */
-          <EstadoVacio
-            registro="seccion"
-            titulo={t('documentosGuarderia.sinDocsTitulo')}
-            descripcion={t('documentosGuarderia.sinDocsDetalle')}
-          />
-        ) : (
-          <>
-            {/* ── LA ACEPTACIÓN · UNA CASILLA ────────────────────────────
-                `AceptacionDeDocumentos` con **un solo obligatorio**. El enlace
-                abre los seis textos completos **sin marcar la casilla** — es
-                el responder más interno. *Si abrirlos marcara, la prueba diría
-                que alguien aceptó cuando lo único que hizo fue leer.*
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[5], gap: spacing[4] }}>
+          {carga.fase === 'cargando' ? (
+            <EsqueletoGrupo><Esqueleto alto={120} /><Esqueleto alto={120} /></EsqueletoGrupo>
+          ) : carga.fase === 'noPudimos' ? (
+            <EstadoVacio
+              registro="seccion"
+              titulo={t('documentosGuarderia.noCargoTitulo')}
+              descripcion={t('documentosGuarderia.noCargoDetalle')}
+              accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setIntento((n) => n + 1)} />}
+            />
+          ) : carga.estado === 'documentos_no_disponibles' || carga.docs.length === 0 ? (
+            /* 🔴 EL PROBLEMA ES NUESTRO Y SE DICE ASÍ. **Sin «prueba de nuevo»**:
+               no hay nada que la familia pueda reintentar. */
+            <EstadoVacio
+              registro="seccion"
+              titulo={t('documentosGuarderia.sinDocsTitulo')}
+              descripcion={t('documentosGuarderia.sinDocsDetalle')}
+            />
+          ) : (
+            <>
+              {/* ── LA ACEPTACIÓN · UNA CASILLA ────────────────────────────
+                  `AceptacionDeDocumentos` con **un solo obligatorio**. El enlace
+                  abre los seis textos completos **sin marcar la casilla** — es
+                  el responder más interno. *Si abrirlos marcara, la prueba diría
+                  que alguien aceptó cuando lo único que hizo fue leer.*
 
-                ⚠️ El texto de la casilla es de la app; **el contenido legal
-                sale del server**. El perímetro sigue entero. */}
-            <Tarjeta>
-              <View style={{ gap: spacing[3] }}>
-                <AceptacionDeDocumentos
-                  marcadas={acepto ? [CLAVE_TERMINOS] : []}
-                  onCambiar={(_, m) => setAcepto(m)}
-                  documentos={[{
-                    clave: CLAVE_TERMINOS,
-                    texto: t('documentosGuarderia.leiYAcepto'),
-                    etiquetaEnlace: t('documentosGuarderia.terminosDelServicio'),
-                    onAbrir: () => setLeyendo(true),
-                  }]}
-                  /* ☠️ **ACÁ VIVÍA UNA SEGUNDA CASILLA —la de publicar
-                     fotos— Y SE RETIRA POR FIRMA:** *«la pantalla de términos
-                     pide dos checks y debe ser uno solo»*.
+                  ⚠️ El texto de la casilla es de la app; **el contenido legal
+                  sale del server**. El perímetro sigue entero. */}
+              <Tarjeta>
+                <View style={{ gap: spacing[3] }}>
+                  <AceptacionDeDocumentos
+                    marcadas={acepto ? [CLAVE_TERMINOS] : []}
+                    onCambiar={(_, m) => setAcepto(m)}
+                    documentos={[{
+                      clave: CLAVE_TERMINOS,
+                      texto: t('documentosGuarderia.leiYAcepto'),
+                      etiquetaEnlace: t('documentosGuarderia.terminosDelServicio'),
+                      onAbrir: () => setLeyendo(true),
+                    }]}
+                    /* ☠️ **ACÁ VIVÍA UNA SEGUNDA CASILLA —la de publicar
+                       fotos— Y SE RETIRA POR FIRMA:** *«la pantalla de términos
+                       pide dos checks y debe ser uno solo»*.
 
-                     Medido antes de tocar: **la segunda no era una segunda
-                     aceptación** —era la autorización OPCIONAL de imagen, que
-                     la pieza aloja aparte y rotula «Opcional»—. Aun así son
-                     dos casillas en pantalla, y la firma cuenta casillas.
+                       Medido antes de tocar: **la segunda no era una segunda
+                       aceptación** —era la autorización OPCIONAL de imagen, que
+                       la pieza aloja aparte y rotula «Opcional»—. Aun así son
+                       dos casillas en pantalla, y la firma cuenta casillas.
 
-                     🔴 **Y su consecuencia se declara en vez de esconderse:
-                     la autorización de imagen se queda SIN NINGUNA
-                     SUPERFICIE.** `p_redes_autorizadas` es fail-closed, así
-                     que nadie va a publicar una foto por accidente —pero
-                     tampoco hay dónde permitirlo—. *No es uno de los seis
-                     documentos: es una preferencia, y su casa natural es
-                     Cuenta → Preferencias.* **No la construyo sin firma.** */
+                       🔴 **Y su consecuencia se declara en vez de esconderse:
+                       la autorización de imagen se queda SIN NINGUNA
+                       SUPERFICIE.** `p_redes_autorizadas` es fail-closed, así
+                       que nadie va a publicar una foto por accidente —pero
+                       tampoco hay dónde permitirlo—. *No es uno de los seis
+                       documentos: es una preferencia, y su casa natural es
+                       Cuenta → Preferencias.* **No la construyo sin firma.** */
+                  />
+                </View>
+              </Tarjeta>
+
+              {/* ── EL CONTACTO DE EMERGENCIA · **OPCIONAL, EN ACORDEÓN** ──
+                  Firma del founder: un acordeón «Agregar contacto de
+                  emergencia» antes de pagar. **Sigue sin gobernar el botón** —
+                  se puede aceptar y seguir sin llenarlo.
+
+                  🔴 `SeccionPlegable`, la pieza de la casa. *Iba a montar un
+                  plegable propio y el censo lo frenó: existe y la usa el taller
+                  del prestador.*
+
+                  ⚠️ **La firma dice «visible cuando NO hay ninguno cargado» y
+                  eso HOY NO SE PUEDE SABER:** los contactos viven en
+                  `guarderia_autorizaciones_familia.contactos` y **no hay
+                  lector** (el único que se llama «contacto» es
+                  `obtener_contacto_reserva_cita`, que es del prestador).
+                  ⇒ se muestra SIEMPRE, cerrado. *Un acordeón cerrado no estorba
+                  a quien ya tiene uno, y no invento un «no tiene» que no puedo
+                  medir.* Pedido a A. */}
+              <SeccionPlegable
+                titulo={t('documentosGuarderia.contactoTitulo')}
+                abierta={contactoAbierto}
+                onCambiar={setContactoAbierto}
+              >
+                <Texto variante="apoyo">{t('documentosGuarderia.contactoOpcional')}</Texto>
+                <Campo label={t('documentosGuarderia.contactoNombre')} value={contactoNombre} onChangeText={setContactoNombre} />
+                <Campo
+                  label={t('documentosGuarderia.contactoTelefono')}
+                  value={contactoTel}
+                  onChangeText={setContactoTel}
+                  keyboardType="phone-pad"
                 />
-              </View>
-            </Tarjeta>
-
-            {/* ── EL CONTACTO DE EMERGENCIA · **OPCIONAL, EN ACORDEÓN** ──
-                Firma del founder: un acordeón «Agregar contacto de
-                emergencia» antes de pagar. **Sigue sin gobernar el botón** —
-                se puede aceptar y seguir sin llenarlo.
-
-                🔴 `SeccionPlegable`, la pieza de la casa. *Iba a montar un
-                plegable propio y el censo lo frenó: existe y la usa el taller
-                del prestador.*
-
-                ⚠️ **La firma dice «visible cuando NO hay ninguno cargado» y
-                eso HOY NO SE PUEDE SABER:** los contactos viven en
-                `guarderia_autorizaciones_familia.contactos` y **no hay
-                lector** (el único que se llama «contacto» es
-                `obtener_contacto_reserva_cita`, que es del prestador).
-                ⇒ se muestra SIEMPRE, cerrado. *Un acordeón cerrado no estorba
-                a quien ya tiene uno, y no invento un «no tiene» que no puedo
-                medir.* Pedido a A. */}
-            <SeccionPlegable
-              titulo={t('documentosGuarderia.contactoTitulo')}
-              abierta={contactoAbierto}
-              onCambiar={setContactoAbierto}
-            >
-              <Texto variante="apoyo">{t('documentosGuarderia.contactoOpcional')}</Texto>
-              <Campo label={t('documentosGuarderia.contactoNombre')} value={contactoNombre} onChangeText={setContactoNombre} />
-              <Campo
-                label={t('documentosGuarderia.contactoTelefono')}
-                value={contactoTel}
-                onChangeText={setContactoTel}
-                keyboardType="phone-pad"
-              />
-            </SeccionPlegable>
-          </>
-        )}
+              </SeccionPlegable>
+            </>
+          )}
+        </View>
       </HojaContenido>
 
       {carga.fase === 'listo' && carga.estado !== 'documentos_no_disponibles' && carga.docs.length > 0 ? (

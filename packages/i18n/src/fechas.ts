@@ -215,3 +215,55 @@ export function etiquetaDeDiaDeMensaje(
     ...(mismoAnio ? {} : { year: 'numeric' }),
   });
 }
+
+/**
+ * 🔴 **«jueves 23 de julio» — LA FECHA DEL ANTETÍTULO (S116-C · lote 6).**
+ *
+ * **Sube al riel porque ganó un SEGUNDO consumidor, y ella misma lo pedía.**
+ * Nació local en `hogar/index.tsx` con esta nota escrita al lado: *«Candidata
+ * al RIEL (`fechaConDiaMono`) declarada: el formateo por idioma es del riel;
+ * nace acá porque el riel no tiene la forma con día de semana»*. Hoy Actividad
+ * necesita el mismo antetítulo ⇒ **el momento de subirla es antes de copiarla,
+ * no después**: *dos pantallas con la misma función pegada son dos lugares
+ * donde el día que la mesa cambie el formato sólo cambia uno.*
+ *
+ * ⚠️ **Recibe un `Date` y no un ISO, a diferencia de sus vecinas**, y es a
+ * propósito: sus vecinas formatean una fecha-sola guardada (`D-312`: por
+ * partes literales, jamás `new Date(iso)`); ésta formatea **el día de hoy del
+ * aparato**, que ya es un `Date` y no pasó por ninguna columna.
+ *
+ * Minúsculas por Ley 3 — el antetítulo de la casa es voz de dato, no un rótulo.
+ */
+export function fechaConDiaHumana(d: Date, idioma: IdiomaSoportado): string {
+  return new Intl.DateTimeFormat(idioma === 'en' ? 'en-US' : 'es-EC', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  })
+    .format(d)
+    .toLowerCase();
+}
+
+/**
+ * 🔴 **EL MES Y EL DÍA POR SEPARADO — lo que `BadgeFecha` pide (S116-C · lote 6).**
+ *
+ * La pieza de B **recibe el mes ya escrito y lo declara en su contrato**:
+ * *«la pieza no formatea: el formateo de fechas vive en el riel… si aceptara
+ * un `Date` tendría que elegir idioma, y una pieza que elige idioma es una
+ * pieza que va a decir “SEP” en una app en inglés»*. Esta función es la otra
+ * mitad de ese contrato: **el riel le entrega las dos piezas ya en su idioma.**
+ *
+ * Fecha-sola **por partes literales** (`D-312`), igual que `fechaCortaHumana`,
+ * y **degrada a lo que entró, jamás a una fecha inventada** (`L-197`): un ISO
+ * ilegible devuelve el mes vacío y el día crudo — *el badge se ve pobre y dice
+ * la verdad, que es mejor que verse bien diciendo un mes que no es.*
+ */
+export function mesYDiaHumanos(iso: string, idioma: IdiomaSoportado): { mes: string; dia: string } {
+  const [a, m, d] = iso.slice(0, 10).split('-').map(Number);
+  if (!a || !m || m < 1 || m > 12 || !d) return { mes: '', dia: iso.slice(8, 10) };
+  const locale = idioma === 'en' ? 'en-US' : 'es-EC';
+  const mes = new Intl.DateTimeFormat(locale, { month: 'short' })
+    .format(new Date(a, m - 1, d))
+    .replace(/\./g, '');
+  return { mes, dia: String(d) };
+}

@@ -1657,6 +1657,7 @@ export const clienteEn = {
     puntoAyuda: "Adjust the map until the pin sits on your door. It's what the courier will look for.",
     ponerPunto: 'Place the point on the map',
     faltaPunto: "The map point is missing: it's what finds your home when the address isn't enough.",
+    puntoAMano: "Can't find your address? Type it anyway and drop the pin on the map.",
     // S100d·bis · las dos puertas explícitas: sin ellas, llegar a los botones
     // obligaba a arrastrar sobre el mapa, y eso movía el punto.
     cambiarDireccion: 'Change the address',
@@ -3600,6 +3601,32 @@ export const clienteEn = {
     sinSesionTitulo: 'You need to sign in again',
     sinSesionDetalle: 'Your session is no longer active.',
     entrar: 'Sign in',
+  },
+
+  /* S116-C lote 6 · ACTIVIDAD — el espejo. */
+  actividad: {
+    titulo: 'Activity',
+    chipEnCurso: 'In progress',
+    chipHistorial: 'History',
+    vacioCursoTitulo: "You don't have anything in progress yet",
+    vacioCursoDetalle: 'Appointments and orders will show up here while they happen.',
+    vacioHistorialTitulo: 'Nothing to look back on yet',
+    vacioHistorialDetalle: 'Whatever has finished is kept here.',
+    errorTitulo: "We couldn't load your activity",
+    errorDetalle: 'It may be the connection. Try again in a moment.',
+    parcialFallo: "Something is missing: we couldn't bring all of it.",
+    estadoAgendado: 'Scheduled',
+    estadoPorCoordinar: 'Date pending',
+    estadoReservando: 'Holding',
+    estadoAtendida: 'Seen',
+    estadoSinCerrar: 'Not closed',
+    estadoNoSeRealizo: "Didn't happen",
+    estadoSinConfirmar: 'Not confirmed',
+    estadoCancelada: 'Cancelled',
+    filaCita: '{{mascota}} · {{cuando}}',
+    verCita: "See {{mascota}}'s appointment",
+    historialCitasCargando: 'Looking for past appointments…',
+    historialCitasFallo: "We couldn't bring the past appointments. Your orders are here.",
   },
 
 } as const satisfies Espejo<typeof clienteEs>;

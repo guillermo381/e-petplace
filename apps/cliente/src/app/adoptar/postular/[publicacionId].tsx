@@ -232,7 +232,8 @@ export default function Postular() {
           real —enviada NO tiene vuelta atrás— y la razón vive arriba. */}
       <HojaContenido
         arranque={cabecera.arranque}
-        scroll={{ keyboardShouldPersistTaps: 'handled', contentContainerStyle: { padding: spacing[5], gap: spacing[5] } }}
+        scroll={{ keyboardShouldPersistTaps: 'handled' }}
+
         fondo={
           <View onLayout={cabecera.alMedir}>
             {estado.fase === 'enviada' ? (
@@ -253,90 +254,100 @@ export default function Postular() {
           </View>
         }
       >
-          {estado.fase === 'cargando' ? (
-            <EsqueletoGrupo>
-              <Esqueleto alto={80} />
-              <Esqueleto alto={80} />
-              <Esqueleto alto={160} />
-            </EsqueletoGrupo>
-          ) : estado.fase === 'error' ? (
-            <EstadoVacio
-              registro="seccion"
-              titulo={t('postular.errorTitulo')}
-              descripcion={t('postular.errorDetalle')}
-              accion={
-                <Boton
-                  variante="secundario"
-                  etiqueta={t('postular.reintentar')}
-                  onPress={() => setIntento((n) => n + 1)}
-                />
-              }
-            />
-          ) : estado.fase === 'enviada' ? (
-            <View style={{ gap: spacing[4] }}>
-              <Texto variante="titulo">{t('postular.enviadaTitulo')}</Texto>
-              {/* LA PROMESA DEL RELOJ. Se escribe porque el job EXISTE. */}
-              <Texto variante="cuerpo">{t('postular.enviadaPromesa')}</Texto>
-              <Boton
-                variante="primario"
-                bloque
-                etiqueta={t('postular.verConversacion')}
-                onPress={() => router.replace('/adoptar/solicitudes')}
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[5], gap: spacing[5] }}>
+            {estado.fase === 'cargando' ? (
+              <EsqueletoGrupo>
+                <Esqueleto alto={80} />
+                <Esqueleto alto={80} />
+                <Esqueleto alto={160} />
+              </EsqueletoGrupo>
+            ) : estado.fase === 'error' ? (
+              <EstadoVacio
+                registro="seccion"
+                titulo={t('postular.errorTitulo')}
+                descripcion={t('postular.errorDetalle')}
+                accion={
+                  <Boton
+                    variante="secundario"
+                    etiqueta={t('postular.reintentar')}
+                    onPress={() => setIntento((n) => n + 1)}
+                  />
+                }
               />
-            </View>
-          ) : (
-            <FormularioPostulacion
-              respuestas={respuestas}
-              onCambio={setRespuestas}
-              opcionesVivienda={VIVIENDAS.map((c) => ({
-                codigo: c,
-                etiqueta: t(`postular.vivienda_${c}` as 'postular.vivienda_otro'),
-              }))}
-              consentimiento={{
-                texto: estado.doc.contenido,
-                marcado,
-                onCambio: setMarcado,
-              }}
-              /* 🔴 `envio` es unión discriminada: **apagado sin razón NO
-                 COMPILA**. La razón la pone esta pantalla porque es la única que
-                 sabe qué falta (doctrina D-999). */
-              envio={
-                falta === null
-                  ? {
-                      etiqueta: t('postular.enviar'),
-                      onEnviar: () => void enviar(),
-                      cargando: enviando,
-                    }
-                  : { etiqueta: t('postular.enviar'), razon: falta }
-              }
-              voces={{
-                hogar: {
-                  rotulo: t('postular.hogarRotulo'),
-                  adultos: t('postular.hogarAdultos'),
-                  menores_0_5: t('postular.hogarMenores05'),
-                  menores_6_12: t('postular.hogarMenores612'),
-                  menores_13_17: t('postular.hogarMenores1317'),
-                },
-                vivienda: t('postular.viviendaRotulo'),
-                otrosAnimales: {
-                  rotulo: t('postular.otrosAnimalesRotulo'),
-                  ayuda: t('postular.otrosAnimalesAyuda'),
-                },
-                horasSolo: {
-                  rotulo: t('postular.horasSoloRotulo'),
-                  ayuda: t('postular.horasSoloAyuda'),
-                },
-                experiencia: {
-                  rotulo: t('postular.experienciaRotulo'),
-                  ayuda: t('postular.experienciaAyuda'),
-                },
-                motivo: {
-                  rotulo: t('postular.motivoRotulo'),
-                  ayuda: t('postular.motivoAyuda'),
-                },
-              }}
-            />
-          )}
+            ) : estado.fase === 'enviada' ? (
+              <View style={{ gap: spacing[4] }}>
+                <Texto variante="titulo">{t('postular.enviadaTitulo')}</Texto>
+                {/* LA PROMESA DEL RELOJ. Se escribe porque el job EXISTE. */}
+                <Texto variante="cuerpo">{t('postular.enviadaPromesa')}</Texto>
+                <Boton
+                  variante="primario"
+                  bloque
+                  etiqueta={t('postular.verConversacion')}
+                  onPress={() => router.replace('/adoptar/solicitudes')}
+                />
+              </View>
+            ) : (
+              <FormularioPostulacion
+                respuestas={respuestas}
+                onCambio={setRespuestas}
+                opcionesVivienda={VIVIENDAS.map((c) => ({
+                  codigo: c,
+                  etiqueta: t(`postular.vivienda_${c}` as 'postular.vivienda_otro'),
+                }))}
+                consentimiento={{
+                  texto: estado.doc.contenido,
+                  marcado,
+                  onCambio: setMarcado,
+                }}
+                /* 🔴 `envio` es unión discriminada: **apagado sin razón NO
+                   COMPILA**. La razón la pone esta pantalla porque es la única que
+                   sabe qué falta (doctrina D-999). */
+                envio={
+                  falta === null
+                    ? {
+                        etiqueta: t('postular.enviar'),
+                        onEnviar: () => void enviar(),
+                        cargando: enviando,
+                      }
+                    : { etiqueta: t('postular.enviar'), razon: falta }
+                }
+                voces={{
+                  hogar: {
+                    rotulo: t('postular.hogarRotulo'),
+                    adultos: t('postular.hogarAdultos'),
+                    menores_0_5: t('postular.hogarMenores05'),
+                    menores_6_12: t('postular.hogarMenores612'),
+                    menores_13_17: t('postular.hogarMenores1317'),
+                  },
+                  vivienda: t('postular.viviendaRotulo'),
+                  otrosAnimales: {
+                    rotulo: t('postular.otrosAnimalesRotulo'),
+                    ayuda: t('postular.otrosAnimalesAyuda'),
+                  },
+                  horasSolo: {
+                    rotulo: t('postular.horasSoloRotulo'),
+                    ayuda: t('postular.horasSoloAyuda'),
+                  },
+                  experiencia: {
+                    rotulo: t('postular.experienciaRotulo'),
+                    ayuda: t('postular.experienciaAyuda'),
+                  },
+                  motivo: {
+                    rotulo: t('postular.motivoRotulo'),
+                    ayuda: t('postular.motivoAyuda'),
+                  },
+                }}
+              />
+            )}
+        </View>
       </HojaContenido>
     </SafeAreaView>
   );

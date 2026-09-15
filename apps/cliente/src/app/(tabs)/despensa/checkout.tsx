@@ -1019,7 +1019,8 @@ export default function DespensaCheckout() {
           puerta a pagar dos veces— y esa distinción es de contenido. */}
       <HojaContenido
         arranque={cabecera.arranque}
-        scroll={{ keyboardShouldPersistTaps: 'handled', contentContainerStyle: { paddingTop: spacing[4], gap: spacing[5] } }}
+        scroll={{ keyboardShouldPersistTaps: 'handled' }}
+
         fondo={
           <View onLayout={cabecera.alMedir}>
         {fase === 'exito' || fase === 'confirmando' ? (
@@ -1057,699 +1058,709 @@ export default function DespensaCheckout() {
         }
         pie={pieDelCta}
       >
-        {fase === 'armado' ? (
-          items.length === 0 ? (
-            <EstadoVacio
-              titulo={t('despensa.carritoVacioTitulo')}
-              descripcion={t('despensa.carritoVacioDetalle')}
-              accion={
-                <Boton
-                  variante="secundario"
-                  etiqueta={t('despensa.carritoVacioIr')}
-                  onPress={() => router.back()}
-                />
-              }
-            />
-          ) : (
-            <>
-              {/* 1 · CÓMO TE LLEGA */}
-              <View style={{ paddingHorizontal: spacing[5] }}>
-                <SelectorOpcion
-                  etiqueta={t('despensa.metodoEntrega')}
-                  opciones={[
-                    { codigo: 'despacho', etiqueta: t('despensa.metodoDespacho') },
-                    { codigo: 'retiro', etiqueta: t('despensa.metodoRetiro') },
-                  ]}
-                  seleccionada={metodo}
-                  onSelect={(c) => setMetodo(c as 'despacho' | 'retiro')}
-                  acento="control"
-                />
-              </View>
-
-              {metodo === 'retiro' ? (
-                <View style={{ paddingHorizontal: spacing[5] }}>
-                  <Texto variante="apoyo">{t('despensa.retiroDetalle')}</Texto>
-                </View>
-              ) : (
-                <View style={{ paddingHorizontal: spacing[5] }}>
-                {/* 🔴 PUNTO 17 (S100d) · LA FICHA DE ENTREGA.
-                    ═══════════════════════════════════════════════════════════
-                    Founder, verbatim: *«Falta el glifo de ubicación —sin huella
-                    dentro— y el label necesita soporte: crear una FICHA DE
-                    ENTREGA. Lo demás está bien»*.
-
-                    N21 lo autoriza y además nombra estas secciones con todas
-                    las letras: *«si el bloque tiene un rótulo que lo nombra
-                    («A dónde te lo llevamos», «Quién recibe») ese rótulo está
-                    declarando un grupo ⇒ el grupo va en carta. Un rótulo sin
-                    superficie es un grupo que se anunció y no se dibujó»*.
-                    Acá había CUATRO rótulos y CERO superficies.
-
-                    ⚠️ POR QUÉ **UNA** CARTA Y NO CUATRO, que es la decisión:
-                    los puntos 18 («quién recibe») y 19 («cuándo se entrega»)
-                    están ✅ APROBADOS por el founder. Cuatro cartas los
-                    reestructura; UNA los deja intactos y solo pone el piso que
-                    faltaba. *Y son una sola cosa —la entrega—, que es lo que el
-                    founder nombró en singular.*
-
-                    ⚠️ `relleno="ninguno"` NO ES DECORACIÓN — es lo que conserva
-                    la anatomía de adentro: con relleno normal, la carta metería
-                    su propio padding y `CeldaNavegacion` dejaría de salir a
-                    sangre, que es el patrón que E14 fijó para la dirección.
-                    Con `ninguno`, «a sangre» pasa a significar «al borde de la
-                    carta» en vez de «al borde de la pantalla», y la celda sigue
-                    siendo el control de ancho completo que era.
-
-                    LA ARITMÉTICA, declarada porque NO SE VIO EN APARATO: los
-                    cinco `paddingHorizontal` de adentro bajan de `spacing[5]`
-                    (20) a `spacing[3]` (12) — el relleno normal de la casa
-                    dentro de una carta. La carta se separa 20 de la pantalla.
-                    ⇒ el rótulo queda a **32** del borde de la pantalla contra
-                    los 20 de antes, y la celda a **20** contra 0.
-                    *Introducir una carta MUEVE cosas: no hay forma de que no lo
-                    haga. Los números van escritos para que el ojo del gate
-                    juzgue un corrimiento declarado y no una sorpresa.* */}
-                <Tarjeta relleno="ninguno">
-                <View style={{ gap: spacing[4], paddingVertical: spacing[4] }}>
-                  {/* 2 · A DÓNDE (§7) */}
-                  <View style={{ gap: spacing[2] }}>
-                    {/* 🔴 S100d·bis · LA GOTA JUNTO A LA DIRECCIÓN.
-                        Founder: *«la gota con borde grueso ocre fuera del mapa,
-                        junto a la dirección»*. Es la otra mitad del punto 17 —
-                        *«el label necesita soporte»*: el rótulo deja de ser una
-                        línea de texto suelta y pasa a tener una marca que dice
-                        de qué habla.
-
-                        ⚠️ NO reemplaza el glifo de la `CeldaNavegacion` de
-                        abajo, y es decisión de la pieza (B): son dos trabajos
-                        distintos —éste rotula la sección, aquél marca la fila—
-                        y por eso `CeldaNavegacion` NO cambió de contrato.
-
-                        ⚠️ Y EL OCRE NO ES UNA EXCEPCIÓN A N26: la ley se
-                        ENSANCHÓ. Su primera redacción decía «ocre = acción de
-                        compra» y dos pistas llegaron al mismo borde el mismo
-                        día (esta gota y la flecha del acordeón de C), ninguna
-                        de las dos compra. N26 v2: **«¿ACCIONA o SELECCIONA?»**
-                        — comprar era un caso de accionar, no la categoría.
-                        *Frené el montaje hasta que la ley lo dijera, en vez de
-                        montar un ocre que la contradijera.* */}
-                    <View
-                      style={{
-                        paddingHorizontal: spacing[3],
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        gap: spacing[2],
-                      }}
-                    >
-                      <GotaUbicacion />
-                      <Texto variante="seccion">{t('despensa.aDonde')}</Texto>
-                    </View>
-                    {direccion === 'cargando' ? null : direccion === null ? (
-                      <View style={{ paddingHorizontal: spacing[3], gap: spacing[2] }}>
-                        <Texto variante="apoyo">{t('despensa.sinDireccion')}</Texto>
-                        <Boton
-                          variante="secundario"
-                          etiqueta={t('despensa.agregarDireccion')}
-                          onPress={() => setHojaDireccion(true)}
-                        />
-                      </View>
-                    ) : (
-                      /* 🔴 G-11 · LA DIRECCIÓN ES UNA LÍNEA CON CHEVRON, no un
-                         botón. Acá vivía un `Boton secundario` de ancho casi
-                         completo debajo de la dirección — dos bloques para una
-                         cosa. La industria (referencia-laika-direccion) usa la
-                         propia línea como el control, y la casa ya tiene esa
-                         anatomía: `CeldaNavegacion`.
-                         E14 lo autoriza con chevron a la derecha: no navega a
-                         otra pantalla, pero **abre el formulario que la
-                         resuelve**, que es el mismo criterio. */
-                      <CeldaNavegacion
-                        /* A-06 (S100c) · el pin, pedido por el founder: *«ahí
-                           le falta el pin o el glifo de ubicación»*.
-                           ⚠️ Mi arranque decía que el glifo era de B y había que
-                           pedírselo. **Falso, medido:** `ubicacion` ya existe en
-                           el registry (`Icono.tsx:800`, capa `cuidado`) desde el
-                           lote b′. *Pedir una pieza construida cuesta una vuelta
-                           de canal y la respuesta es un grep.* */
-                        icono="ubicacion"
-                        titulo={direccion.direccion}
-                        detalle={[direccion.ciudad, direccion.referencias]
-                          .filter((x): x is string => x !== null && x !== '')
-                          .join(' · ')}
-                        /* Con UNA sola dirección la libreta no tiene nada que
-                           elegir: el toque va derecho a editarla. Con dos o
-                           más, abre la libreta. *Un selector de un elemento es
-                           un paso que no decide nada.* */
-                        onPress={() =>
-                          direcciones.length > 1 ? setHojaLibreta(true) : setHojaDireccion(true)
-                        }
-                      />
-                    )}
-                  </View>
-
-                  {/* 4 · LA INSTRUCCIÓN QUE DECIDE (§9.3) — EL ÚNICO CAMPO de
-                      la pantalla, tal como pidió el gate. Y es justo el que
-                      quedaba tapado por el CTA (medición de B, solape ③). */}
-                  <View style={{ paddingHorizontal: spacing[3], gap: spacing[2] }}>
-                    <Campo
-                      label={t('despensa.instruccionesLabel')}
-                      value={instrucciones}
-                      onChangeText={(v) => setInstrucciones(v.slice(0, 200))}
-                      ayuda={t('despensa.instruccionesAyuda')}
-                      autoCapitalize="sentences"
-                    />
-                  </View>
-
-                  {/* 4 · CUÁNDO — la ventana que el cupo respalda (§6.2/§7.2) */}
-                  <View style={{ paddingHorizontal: spacing[3], gap: spacing[2] }}>
-                    <Texto variante="seccion">{t('despensa.cuandoLlega')}</Texto>
-                    {cuentaComercialId === null ? (
-                      /* Hueco declarado #1 — el estado honesto, jamás una
-                         ventana inventada (L-139). */
-                      <Texto variante="apoyo">{t('despensa.sinVendedorDetalle')}</Texto>
-                    ) : promesa === 'cargando' || promesa === null ? (
-                      <Texto variante="apoyo">{t('despensa.promesaCargando')}</Texto>
-                    ) : 'fallo' in promesa ? (
-                      <Texto variante="apoyo" color="warning">
-                        {promesa.fallo === 'sin_cupo_ese_dia'
-                          ? t('despensa.sinCupoEseDia')
-                          : promesa.fallo === 'sin_turnos_de_entrega' || promesa.fallo === 'sin_capacidad_de_reparto'
-                            ? t('despensa.vendedorSinReparto')
-                            : t('despensa.promesaFallo')}
-                      </Texto>
-                    ) : (
-                      <>
-                        <Texto variante="cuerpo">
-                          {t('despensa.promesaVentana', {
-                            dia: diaLocal(promesa.fecha),
-                            desde: horaLocal(promesa.desde),
-                            hasta: horaLocal(promesa.hasta),
-                          })}
-                        </Texto>
-                        {promesa.saltos_por_cupo > 0 ? (
-                          /* La promesa corrió — SE DICE (§7.3: el excedente no
-                             rompe, se corre).
-
-                             🔴 S103-C · LO QUE SE CURÓ ACÁ, Y NO ES ESTILO:
-                             esta línea decía `saltoPorCupo` —*«El día más
-                             cercano estaba COMPLETO»*— **con `saltos > 0` a
-                             secas**. Es el rojo del 18-ago que la cabecera de
-                             `PromesaDeVendedor` documenta: **el número dice que
-                             la ventana se corrió, NO por qué.** Un domingo la
-                             causa es que el vendedor no reparte, y la frase
-                             afirmaba una escasez que no existe — *hacer perder
-                             una venta por un inventario imaginario*.
-
-                             ⚠️ **Por qué la voz genérica y no la precisa:**
-                             `calcularPromesaDespensa` —el lector de ESTA
-                             pantalla— **no expone `motivoCorrimiento`**
-                             (medido: el campo vive solo en
-                             `promesaPorVendedor`). Sin la causa, la única voz
-                             verdadera es la que **no afirma ninguna**.
-                             *Perder precisión es barato; afirmar falso no.*
-
-                             📮 **La precisión vuelve sola** el día que A
-                             exponga el campo en este lector: ahí esta línea
-                             recupera `saltoPorCupo` para `cupo_lleno` y gana
-                             `saltoPorSinOperacion`, igual que la ficha. **Se
-                             pidió; no se escribe desde acá (motor es de A).** */
-                          <Texto variante="apoyo">{t('despensa.saltoSinCausa')}</Texto>
-                        ) : null}
-                      </>
-                    )}
-                    {/* Las opciones — el día lleno se DIBUJA con su porqué.
-                        ☠️ S100b · G-16: NO lleva `onProgramarOtra`. Ver abajo. */}
-                    {ventanas === 'cargando' ? null : ventanas !== null && ventanas.length > 0 ? (
-                      <SelectorVentana
-                        /* 🔴 A-05 (S100c) · LA TIRA. El founder: «cuándo se
-                           entrega» es invisible sin deslizar.
-                           **B lo midió y es peor que eso:** la sección arranca
-                           en **y = 595,9 dp** y el pie fijo empieza en ~**593**
-                           ⇒ no es que haya que deslizar, es que **nace debajo
-                           del pie**. Cuatro opciones apiladas de hasta tres
-                           líneas, después de dirección y quién recibe.
-                           El eje no se inventó: `SelectorOpcion` tiene
-                           `disposicion` fila/tira/grilla desde S55-B4, y la
-                           tira nació justo para esto (el CUÁNDO tipo Teams).
-                           ⚠️ LA LEY 23 SIGUE EN PIE Y ES FÁCIL DE ROMPER ACÁ:
-                           en `tira` el día lleno **recibe el toque** —hace
-                           falta para contar SU motivo cuando hay más de uno—
-                           pero **jamás llama a `onElegir`**. El servidor sigue
-                           sin poder recibir un día sin cupo. *Si alguien
-                           cablea `onElegir` en esa rama, rompe la ley* (aviso
-                           de B, dueña de la pieza). */
-                        disposicion="tira"
-                        opciones={ventanas}
-                        elegida={fechaElegida?.fecha ?? 'proxima'}
-                        onElegir={(clave) => {
-                          if (clave === 'proxima') {
-                            setFechaElegida(undefined);
-                          } else {
-                            setFechaElegida({ fecha: clave, precision: 'exacta' });
-                          }
-                        }}
-                      />
-                    ) : null}
-                    {/* ═══════════════════════════════════════════════════════
-                        ☠️ ACÁ VIVÍA «PROGRAMAR OTRA FECHA» — DEROGADO POR FIRMA
-                        DEL FOUNDER (17-ago-2026, gate de S100 · G-16).
-                        Murieron: el `onProgramarOtra` del SelectorVentana, el
-                        `CampoFecha` que abría, el estado `mostrarCalendario` y
-                        las voces `programarFecha` / `programarPlaceholder` /
-                        `programarAyuda` / `quitarFecha`.
-
-                        POR QUÉ ESTA LÁPIDA Y NO UN BORRADO LIMPIO: el founder
-                        lo pidió quitar REPETIDAMENTE y volvía en cada ronda.
-                        No fue desobediencia — la letra decía «Entra» y la letra
-                        gana. Hoy `LETRA_RECORRIDO_DESPENSA_S96` §6.2 está
-                        tachada con su razón, y `verify:diseno` R52 lo vigila.
-
-                        QUÉ **NO** MURIÓ, para que nadie lo barra de más: el
-                        CUPO por día futuro sigue vigente y es lo que respalda
-                        la promesa, y `calcular_promesa_despensa` conserva su
-                        `p_fecha_programada` — eso es MOTOR. Se quitó la puerta,
-                        no el motor: el día que vuelva por decisión, vuelve sin
-                        reconstruirse. `SelectorVentana` conserva su prop
-                        opcional intacta por el mismo motivo.
-
-                        Y volver a la más próxima NO se perdió: la opción
-                        `proxima` del propio selector la devuelve (por eso el
-                        botón «quitarFecha» se fue con el bloque y no dejó
-                        callejón).
-                        ═══════════════════════════════════════════════════════ */}
-                  </View>
-                </View>
-                </Tarjeta>
-                </View>
-              )}
-              {/* ═══ 🔴 QUIÉN RECIBE VALE PARA LOS DOS MÉTODOS ═════════════
-                  **Medido caminando: con «Retiro en tienda» este bloque no se
-                  dibujaba** —vivía dentro de la rama de despacho— **y el CTA
-                  igual exigía receptor y teléfono** (`falta`, rama `else`).
-                  ⇒ la pantalla pedía dos datos y **no daba por dónde ponerlos**:
-                  el retiro era un callejón, y la única salida era cambiar a
-                  domicilio, cargarlos ahí y volver.
-
-                  *Y tiene sentido que los pida en los dos:* quien retira en el
-                  mostrador también es alguien con un nombre, y el vendedor
-                  necesita un teléfono para avisarle que ya está listo.
-                  ⇒ el bloque sale de la rama y queda **común a los dos**, que
-                  es donde la condición del CTA siempre lo dio por hecho. */}
-                {/* 3 · QUIÉN RECIBE — SE MUESTRA, NO SE EDITA ACÁ (G-11).
-                    ═══════════════════════════════════════════════════════
-                    Eran DOS campos de edición abiertos en la pantalla donde
-                    la familia REVISA antes de pagar. El gate pidió que se
-                    muestren fijos: *editar es otro momento.* Un campo abierto
-                    invita a escribir; acá el trabajo es leer y confirmar.
-
-                    LO QUE NO SE PIERDE: se sigue pudiendo cambiar —el dato
-                    del perfil no siempre es quien recibe— pero por un toque
-                    explícito, no por tener el cursor a mano.
-
-                    Y CUANDO FALTA EL DATO, la línea lo DICE y el toque lo
-                    resuelve: mostrar fijo un vacío sería un callejón, que es
-                    peor que el campo que se sacó. */}
-                {/* El aire lateral lo paga el bloque: **adentro de la Tarjeta
-                    de despacho lo ponía el contenedor**, y al salir de ahí el
-                    rótulo quedaba pegado al borde. `spacing[5]` es el mismo
-                    margen que usa el explicativo de arriba — *lo que cambió de
-                    lugar tiene que seguir alineado con sus vecinos.* */}
-                <View style={{ gap: spacing[2], paddingHorizontal: spacing[5] }}>
-                  <View style={{ paddingHorizontal: spacing[3] }}>
-                    <Texto variante="seccion">{t('despensa.quienRecibe')}</Texto>
-                  </View>
-                  <CeldaNavegacion
-                    titulo={receptor.trim() === '' ? t('despensa.faltaReceptor') : receptor}
-                    detalle={
-                      telefono.trim() === '' ? t('despensa.faltaTelefono') : telefono
-                    }
-                    onPress={() => setHojaReceptor(true)}
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ paddingTop: spacing[4], gap: spacing[5] }}>
+          {fase === 'armado' ? (
+            items.length === 0 ? (
+              <EstadoVacio
+                titulo={t('despensa.carritoVacioTitulo')}
+                descripcion={t('despensa.carritoVacioDetalle')}
+                accion={
+                  <Boton
+                    variante="secundario"
+                    etiqueta={t('despensa.carritoVacioIr')}
+                    onPress={() => router.back()}
                   />
-                </View>
-
-            </>
-          )
-        ) : fase === 'resumen' && pedidos.length > 0 ? (
-          <>
-            {/* 🔴 LA DIVISIÓN SE DECLARA ANTES DE PAGAR (F5 + receta ③ de B).
-                N pedidos = N BLOQUES, cada uno con lo suyo. La confirmación
-                posterior explica que son independientes.
-                *Un total único sobre dos entregas distintas es una promesa
-                que la pantalla no puede cumplir.* */}
-            {pedidos.length > 1 ? (
-              <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
-                <Texto variante="seccion">
-                  {t('despensa.divisionTitulo', { n: pedidos.length })}
-                </Texto>
-                <Texto variante="apoyo">{t('despensa.divisionDetalle')}</Texto>
-              </View>
-            ) : null}
-
-            {/* 🔴 G-12 · CADA ENTREGA ES UNA CARTA, no un bloque apoyado sobre
-                el fondo pelado. Sin superficie, N entregas se leen como una
-                lista larga y no como N cosas separadas — que es justo lo que
-                la división tiene que comunicar. La carta es el borde que dice
-                dónde termina una entrega y empieza la otra. */}
-            {pedidos.map((p, i) => (
-              <View key={p.pedido_id} style={{ paddingHorizontal: spacing[5] }}>
-                <Tarjeta>
-                  <View style={{ gap: spacing[2] }}>
-                {pedidos.length > 1 ? (
-                  <Texto variante="seccion">
-                    {t('despensa.bloqueEntrega', { i: i + 1, n: pedidos.length })}
-                  </Texto>
-                ) : (
-                  <Texto variante="seccion">{t('despensa.resumen')}</Texto>
-                )}
-                {/* F6 · QUIÉN LO PREPARA. Es lo que explica POR QUÉ la compra
-                    llegó partida: la razón de la división es que son dos
-                    tiendas. Si el nombre no se pudo leer, la línea no se
-                    dibuja — jamás «Lo prepara: —». */}
-                {tiendas[p.pedido_id] !== undefined ? (
-                  <Texto variante="apoyo">
-                    {t('despensa.preparaTienda', { tienda: tiendas[p.pedido_id] })}
-                  </Texto>
-                ) : null}
-                {/* QUÉ llega en esta entrega. Va con `Texto` y no con
-                    `FilaMonto`: esa pieza NO se dibuja cuando el monto es
-                    null —a propósito, para no inventar un "$ 0,00"—, así que
-                    usarla acá habría hecho desaparecer los ítems en silencio. */}
-                {grupos[i]?.items.map((it) => (
-                  <Texto key={it.oferta_id} variante="apoyo">
-                    {`${it.cantidad} × ${it.nombre}`}
-                  </Texto>
-                ))}
-                {p.subtotal !== null ? (
-                  <FilaMonto etiqueta={t('despensa.subtotal')} monto={dinero(p.subtotal)} />
-                ) : null}
-                {p.impuesto !== null ? (
-                  <FilaMonto etiqueta={t('despensa.impuesto')} monto={dinero(p.impuesto)} />
-                ) : null}
-                {p.envio !== null ? (
-                  <FilaMonto
-                    etiqueta={metodo === 'retiro' ? t('despensa.envioRetiro') : t('despensa.envio')}
-                    monto={dinero(p.envio)}
-                  />
-                ) : null}
-                  </View>
-                </Tarjeta>
-              </View>
-            ))}
-
-            {/* 🔴 A-02 (S100c) · CÓMO Y CUÁNDO LLEGA, A LA VISTA AL PAGAR.
-                Literal del founder: *«lo único que le faltaría al checkout es
-                la confirmación de la modalidad de entrega y la fecha probable
-                de entrega, para que la persona lo pueda observar desde ahí»*.
-
-                Medido antes de construir: el resumen tenía «Envío $2.50» —que
-                dice cuánto CUESTA, no que va a tu casa— y la promesa vivía
-                dentro de `fase === 'armado'`, o sea **en la pantalla anterior**:
-                se elegía y no se podía releer con el dedo sobre «Pagar».
-                La dirección entra en el mismo bloque aunque no estaba en el
-                pedido: es la misma pregunta —«¿esto llega bien?»— y omitirla
-                dejaba media respuesta.
-
-                ── 🔴 POR QUÉ VA UNA VEZ Y NO ADENTRO DE CADA CARTA ──────────
-                El método y la dirección son **de la compra**: hay UN `metodo` y
-                UNA dirección para todo. Repetirlos en N cartas sería decir N
-                veces lo mismo.
-                Y la FECHA no se puede repetir por otra razón, que es de dato:
-                `cuentaComercialId` sale de **`grupos[0]`** (:177) ⇒ la promesa
-                que hay en pantalla es la del PRIMER vendedor. Pintarla dentro
-                de la segunda carta sería **afirmar sobre la entrega del otro
-                vendedor un dato que nadie calculó** — la misma frase que ya
-                está escrita 60 líneas más arriba: *una promesa que la pantalla
-                no puede cumplir*. Con N entregas se dice lo único que sí es
-                cierto: que cada una va por su cuenta. */}
-            <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
-              <Texto variante="seccion">{t('despensa.resumenComoLlega')}</Texto>
-              <Texto variante="cuerpo">
-                {metodo === 'retiro' ? t('despensa.metodoRetiro') : t('despensa.metodoDespacho')}
-              </Texto>
-
-              {/* La dirección solo con despacho: en retiro no hay dirección de
-                  la familia que mostrar, y la de la tienda no se captura. */}
-              {metodo === 'despacho' && direccion !== 'cargando' && direccion !== null ? (
-                <Texto variante="apoyo">
-                  {[direccion.direccion, direccion.ciudad].filter((x) => x !== '').join(' · ')}
-                </Texto>
-              ) : null}
-
-              {/* La fecha: con UNA entrega es la promesa que se eligió; con
-                  varias, el hecho que sí se puede afirmar. Y si la promesa
-                  falló o no llegó, **no se inventa una fecha**: no se dibuja
-                  nada (L-139 — el nulo honesto). */}
-              {pedidos.length > 1 ? (
-                <Texto variante="apoyo">{t('despensa.resumenFechaPorEntrega')}</Texto>
-              ) : metodo === 'despacho' &&
-                promesa !== null &&
-                promesa !== 'cargando' &&
-                !('fallo' in promesa) ? (
-                <Texto variante="cuerpo">
-                  {t('despensa.promesaVentana', {
-                    dia: diaLocal(promesa.fecha),
-                    desde: horaLocal(promesa.desde),
-                    hasta: horaLocal(promesa.hasta),
-                  })}
-                </Texto>
-              ) : null}
-            </View>
-
-            {/* EL TOTAL ES EL DE LA COMPRA, dicho por el motor — esta
-                pantalla no suma los bloques. UN SOLO COBRO para la familia. */}
-            <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
-              <Separador />
-              {compraTotal !== null ? (
-                <FilaMonto etiqueta={t('despensa.total')} monto={dinero(compraTotal)} destacada />
-              ) : (
-                <Texto variante="apoyo">{t('despensa.totalNoLlego')}</Texto>
-              )}
-            </View>
-
-            {/* ②③④⑤ LA SECCIÓN DE PAGO — **la misma pieza que monta el
-                checkout de los cuatro oficios** (orden del founder ⑤).
-                ☠️ Acá vivía su copia: mismo texto, misma hoja, misma regla de
-                preselección. *Ya no es «igual a»: es LA MISMA, y por eso no hay
-                de dónde sacar una versión propia.* */}
-            <View style={{ paddingHorizontal: spacing[5] }}>
-              {facturacion.props === null || compraTotal === null ? (
-                facturacion.noCargo || facturacion.reintentando ? (
-              <AvisoNoCargo
-                onReintentar={facturacion.reintentar}
-                reintentando={facturacion.reintentando}
-                motivo={facturacion.motivo}
-              />
-            ) : null
-              ) : (
-                <SeccionFacturacion {...facturacion.props} total={compraTotal} />
-              )}
-
-              <SeccionMedioDePago medio={medio} />
-            </View>
-
-            {/* ☠️ S101-B · LA BANDA DE «PAGO SIMULADO» MUERE (Ley 37).
-                §6.5 la puso cuando el cobro ERA simulado, y decía la verdad.
-                **Con el enchufe de Fase 3 el cobro es real**, así que la banda
-                pasó de honesta a falsa de un día para el otro.
-                *Una advertencia que dejó de ser cierta no es inofensiva: le
-                enseña a la familia a no creerle a las advertencias.* */}
-          </>
-        ) : fase === 'confirmando' ? (
-          /* 🔴 LA PANTALLA NO PUEDE ESTAR VACÍA JUSTO ACÁ. Medido en el
-             aparato: título truncado, un botón, y nada más — en el segundo
-             exacto en que la familia acabó de entregar su tarjeta.
-             *El silencio, en ese momento, se lee como que algo salió mal.* */
-          <View style={{ paddingHorizontal: spacing[5], gap: spacing[3] }}>
-            {/* ══ 🔴 LA MISMA FASE, DOS CUERPOS (S105-C) ═══════════════════
-                `LETRA_DEUNA` §6, firma ② del founder: *«funciona exactamente
-                igual que si fuera tarjeta»* — **misma pantalla, misma salida,
-                misma transición sola a pagada. Lo único que cambia es el
-                cuerpo.**
-
-                🔴 **La asimetría que sí existe: en tarjeta la familia ESPERA;
-                en DeUna la familia TRABAJA.** Por eso `EsperaDeTrabajo` no se
-                monta en este riel (N15): *una rampa que dice «estamos
-                trabajando» mientras la persona teclea afirma algo falso — la
-                que trabaja es ella.* Su lugar lo ocupa la cuenta regresiva del
-                código, que es información y no adorno. */}
-            {riel === 'deuna' ? (
-              <EsperaDeUna
-                estado={deuna.estado}
-                onGenerarNuevo={deuna.regenerar}
-                onSoporte={irASoporte}
+                }
               />
             ) : (
               <>
-              {/* ⭐ **S116-C lote 7 · `EsperaLarga` — LA ESPERA LARGA DE LA CASA.**
-                  ☠️ Mueren el par `Texto titulo`/`Texto cuerpo` y **la línea de
-                  progreso** (`EsperaDeTrabajo`, la rampa con degradado): el
-                  founder la nombró y la pieza nueva lo dice en su cabecera —
-                  *no sabe cuánto falta y no lo finge*. La voz **no se pierde**:
-                  la misma que estaba pasa a `titulo` y `apoyo`. */}
-              <EsperaLarga titulo={t('pago.esperaTitulo')} apoyo={t('pago.esperaCuerpo')} />
-              </>
-            )}
-            {/* El tope habla y **no declara desenlace**: la compra sigue viva
-                y el barrido la resuelve. **Vale para los dos rieles** — en
-                DeUna llega más tarde porque el tope se corre con el código, no
-                porque se haya apagado.
-                ⚠️ **La cadencia del barrido NO se afirma acá.** Para tarjeta
-                está medida (mismo día); **para DeUna no la medí** y su
-                aplicador sigue abierto (`D-887`). *Extender «mismo día» al
-                riel nuevo porque suena parejo sería inventar una promesa
-                sobre un reloj ajeno.* */}
-            {espera.fase === 'sigue_abierta' ? (
-              <Texto variante="apoyo">{t('pago.esperaSigueAbierta')}</Texto>
-            ) : null}
-          </View>
-        ) : fase === 'exito' ? (
-          <>
-            {/* 🔴 S105-C · EL ÉXITO EMPIEZA POR EL PAGO — hallazgo del founder
-                en el aparato: *«no hay pantalla de pago exitoso decente»*.
-                Medido, la pantalla EXISTÍA; lo que estaba mal era **la
-                jerarquía**: lo más grande decía «Tu pedido quedó creado» y la
-                confirmación del pago aparecía **en la tercera línea**.
-                *«Creado» es lo que la persona ya sabía —lo armó ella—; lo que
-                fue a averiguar es si la plata pasó.* Y debajo arrancaba la
-                recurrencia, así que la pantalla **pivotaba a ofrecer algo antes
-                de terminar de contestar**.
-
-                ⇒ **La misma anatomía que la OTRA puerta ya usa** en su éxito
-                (`checkout-reserva`: glifo 48 + título + descripción, centrado
-                y con aire). *No se inventa una forma nueva para la segunda
-                puerta: se copia la del vecino, que es lo que vuelve a las dos
-                reconocibles como la misma casa.*
-
-                El glifo es **`nodoConfirmado`**, el que la casa ya usa para el
-                escalón «Confirmado» del pedido: *el mismo hecho, el mismo
-                signo.*
-
-                **La recurrencia NO se movió ni se achicó** —§6.1 está firmada—
-                pero ahora va **después de una respuesta completa**, separada
-                por su `Separador`. */}
-            {/* ⭐ **S116-C lote 7 · `Confirmacion` DE LA CASA** (punto ③ del
-                encargo: *«check, destellos, trío, dato del pedido, "La factura
-                te llega aparte por correo", dos acciones»*).
-
-                ☠️ Muere la composición local —glifo 48 + dos `Texto`— que este
-                mismo archivo había copiado del vecino. *Copiar al vecino era lo
-                correcto mientras no existía la pieza; con la pieza, seguir
-                copiando es fabricar la tercera versión de lo mismo.*
-
-                **El `dato` es el TOTAL, no el número de pedido**, y es una
-                decisión: lo que la familia fue a verificar en esta pantalla es
-                que la plata pasó y por cuánto. *El id del pedido es lo que
-                necesita el soporte, no ella, y vive a un toque en Tus pedidos.*
-
-                **La línea fiscal va en `lineaExtra`**, que es el slot que la
-                pieza creó para eso. `metodo === 'retiro'` **conserva su frase**
-                —el código del mostrador— porque no es adorno: es cómo se
-                retira. Va en `apoyo`, junto a la de siempre.
-
-                **Dos acciones**: ver el pedido (primaria) y volver a la
-                Despensa (secundaria). ⏪ *Antes había UNA sola, en el pie; la
-                pieza pide las dos y la segunda faltaba —salir del éxito sin ir
-                a Pedidos exigía la barra de tabs.* */}
-            <Confirmacion
-              exclamacion={t('despensa.exitoExclamacion')}
-              titulo={t('despensa.exitoPagoTitulo')}
-              apoyo={
-                metodo === 'retiro'
-                  ? `${t('despensa.exitoDetalle')} ${t('despensa.exitoRetiro')}`
-                  : t('despensa.exitoDetalle')
-              }
-              dato={(() => {
-                /* `dinero` puede devolver `null` cuando no hay moneda resuelta
-                   —lo dice su tipo— y **un total a medias no se dibuja**: el
-                   dato de esta pantalla es exactamente la plata, y mostrarlo
-                   vacío sería peor que no mostrarlo. */
-                const v = compraTotal === null ? null : dinero(compraTotal);
-                return v === null ? undefined : { etiqueta: t('despensa.total'), valor: v };
-              })()}
-              lineaExtra={t('despensa.exitoFactura')}
-              primario={{ texto: t('despensa.verTusPedidos'), onPress: () => router.replace('/pedidos') }}
-              secundario={{ texto: t('despensa.exitoSeguirComprando'), onPress: () => router.replace('/despensa') }}
-            />
-
-            {/* §6.1 — LA RECURRENCIA, con el mensaje honesto VERBATIM. */}
-            <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
-              <Separador />
-              {/* 🔴 G-13 · EL TÍTULO, LA «i» Y EL INTERRUPTOR — nada más.
-                  Acá vivían DOS párrafos explicativos SIEMPRE visibles (60.8 +
-                  40.5 dp medidos por B) sobre una pantalla cuyo trabajo es
-                  decir «quedó creado». La letra §6.1 exige que el mensaje sea
-                  VERBATIM, y lo sigue siendo — cambia DÓNDE se lee, no qué
-                  dice: *una condición que hay que leer sí o sí no se borra;
-                  se pone donde no le gane a lo que la persona vino a hacer.* */}
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <View
-                  style={{
-                    flex: 1,
-                    paddingRight: spacing[3],
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: spacing[2],
-                  }}
-                >
-                  <Texto variante="seccion">{t('despensa.recurrenciaTitulo')}</Texto>
-                  <Pressable
-                    onPress={() => setHojaRecurrencia(true)}
-                    hitSlop={12}
-                    accessibilityRole="button"
-                    accessibilityLabel={t('despensa.recurrenciaQueEs')}
-                  >
-                    <Icono nombre="info" tamano={20} registro="capa" />
-                  </Pressable>
+                {/* 1 · CÓMO TE LLEGA */}
+                <View style={{ paddingHorizontal: spacing[5] }}>
+                  <SelectorOpcion
+                    etiqueta={t('despensa.metodoEntrega')}
+                    opciones={[
+                      { codigo: 'despacho', etiqueta: t('despensa.metodoDespacho') },
+                      { codigo: 'retiro', etiqueta: t('despensa.metodoRetiro') },
+                    ]}
+                    seleccionada={metodo}
+                    onSelect={(c) => setMetodo(c as 'despacho' | 'retiro')}
+                    acento="control"
+                  />
                 </View>
-                <Interruptor
-                  encendido={quiereRecurrencia}
-                  onCambio={(v) => void alternarRec(v)}
-                  etiqueta={t('despensa.recurrenciaTitulo')}
-                />
-              </View>
-              {/* LAS FRECUENCIAS NO EXISTEN HASTA QUE EL INTERRUPTOR ESTÁ
-                  ENCENDIDO (G-13). Y el interruptor expresa la INTENCIÓN: lo
-                  que cierra el trato es elegir cada cuánto.
-                  POR QUÉ ASÍ Y NO «prender y listo con 30 por defecto»: el
-                  motor NO es idempotente —`configurar_recurrencia` no toma
-                  clave de idempotencia—, así que prender con un default y
-                  dejar cambiarlo después crearía DOS recurrencias, o exigiría
-                  apagar y volver a crear dejando una fila muerta. *Comprometer
-                  al motor con un número que la familia todavía no eligió es
-                  inventarle una decisión.* Con este orden se crea UNA, con la
-                  cadencia que ella dijo. */}
-              {quiereRecurrencia ? (
-                recurrenciaId === null ? (
-                  <>
-                    <SelectorOpcion
-                      etiqueta={t('despensa.recurrenciaCada')}
-                      opciones={CADENCIAS.map((d) => ({
-                        codigo: String(d),
-                        etiqueta: t('despensa.recurrenciaDias', { n: d }),
-                      }))}
-                      seleccionada={cadencia === null ? '' : String(cadencia)}
-                      onSelect={(c) => {
-                        setCadencia(Number(c));
-                        void activarRecurrenciaCon(Number(c));
-                      }}
-                      acento="control"
-                    />
-                    {/* El apagado dice qué falta — regla de la casa. */}
-                    <Texto variante="apoyo">{t('despensa.recurrenciaElegiCada')}</Texto>
-                  </>
+
+                {metodo === 'retiro' ? (
+                  <View style={{ paddingHorizontal: spacing[5] }}>
+                    <Texto variante="apoyo">{t('despensa.retiroDetalle')}</Texto>
+                  </View>
                 ) : (
-                  <Texto variante="apoyo">{t('despensa.recurrenciaLista')}</Texto>
-                )
+                  <View style={{ paddingHorizontal: spacing[5] }}>
+                  {/* 🔴 PUNTO 17 (S100d) · LA FICHA DE ENTREGA.
+                      ═══════════════════════════════════════════════════════════
+                      Founder, verbatim: *«Falta el glifo de ubicación —sin huella
+                      dentro— y el label necesita soporte: crear una FICHA DE
+                      ENTREGA. Lo demás está bien»*.
+
+                      N21 lo autoriza y además nombra estas secciones con todas
+                      las letras: *«si el bloque tiene un rótulo que lo nombra
+                      («A dónde te lo llevamos», «Quién recibe») ese rótulo está
+                      declarando un grupo ⇒ el grupo va en carta. Un rótulo sin
+                      superficie es un grupo que se anunció y no se dibujó»*.
+                      Acá había CUATRO rótulos y CERO superficies.
+
+                      ⚠️ POR QUÉ **UNA** CARTA Y NO CUATRO, que es la decisión:
+                      los puntos 18 («quién recibe») y 19 («cuándo se entrega»)
+                      están ✅ APROBADOS por el founder. Cuatro cartas los
+                      reestructura; UNA los deja intactos y solo pone el piso que
+                      faltaba. *Y son una sola cosa —la entrega—, que es lo que el
+                      founder nombró en singular.*
+
+                      ⚠️ `relleno="ninguno"` NO ES DECORACIÓN — es lo que conserva
+                      la anatomía de adentro: con relleno normal, la carta metería
+                      su propio padding y `CeldaNavegacion` dejaría de salir a
+                      sangre, que es el patrón que E14 fijó para la dirección.
+                      Con `ninguno`, «a sangre» pasa a significar «al borde de la
+                      carta» en vez de «al borde de la pantalla», y la celda sigue
+                      siendo el control de ancho completo que era.
+
+                      LA ARITMÉTICA, declarada porque NO SE VIO EN APARATO: los
+                      cinco `paddingHorizontal` de adentro bajan de `spacing[5]`
+                      (20) a `spacing[3]` (12) — el relleno normal de la casa
+                      dentro de una carta. La carta se separa 20 de la pantalla.
+                      ⇒ el rótulo queda a **32** del borde de la pantalla contra
+                      los 20 de antes, y la celda a **20** contra 0.
+                      *Introducir una carta MUEVE cosas: no hay forma de que no lo
+                      haga. Los números van escritos para que el ojo del gate
+                      juzgue un corrimiento declarado y no una sorpresa.* */}
+                  <Tarjeta relleno="ninguno">
+                  <View style={{ gap: spacing[4], paddingVertical: spacing[4] }}>
+                    {/* 2 · A DÓNDE (§7) */}
+                    <View style={{ gap: spacing[2] }}>
+                      {/* 🔴 S100d·bis · LA GOTA JUNTO A LA DIRECCIÓN.
+                          Founder: *«la gota con borde grueso ocre fuera del mapa,
+                          junto a la dirección»*. Es la otra mitad del punto 17 —
+                          *«el label necesita soporte»*: el rótulo deja de ser una
+                          línea de texto suelta y pasa a tener una marca que dice
+                          de qué habla.
+
+                          ⚠️ NO reemplaza el glifo de la `CeldaNavegacion` de
+                          abajo, y es decisión de la pieza (B): son dos trabajos
+                          distintos —éste rotula la sección, aquél marca la fila—
+                          y por eso `CeldaNavegacion` NO cambió de contrato.
+
+                          ⚠️ Y EL OCRE NO ES UNA EXCEPCIÓN A N26: la ley se
+                          ENSANCHÓ. Su primera redacción decía «ocre = acción de
+                          compra» y dos pistas llegaron al mismo borde el mismo
+                          día (esta gota y la flecha del acordeón de C), ninguna
+                          de las dos compra. N26 v2: **«¿ACCIONA o SELECCIONA?»**
+                          — comprar era un caso de accionar, no la categoría.
+                          *Frené el montaje hasta que la ley lo dijera, en vez de
+                          montar un ocre que la contradijera.* */}
+                      <View
+                        style={{
+                          paddingHorizontal: spacing[3],
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: spacing[2],
+                        }}
+                      >
+                        <GotaUbicacion />
+                        <Texto variante="seccion">{t('despensa.aDonde')}</Texto>
+                      </View>
+                      {direccion === 'cargando' ? null : direccion === null ? (
+                        <View style={{ paddingHorizontal: spacing[3], gap: spacing[2] }}>
+                          <Texto variante="apoyo">{t('despensa.sinDireccion')}</Texto>
+                          <Boton
+                            variante="secundario"
+                            etiqueta={t('despensa.agregarDireccion')}
+                            onPress={() => setHojaDireccion(true)}
+                          />
+                        </View>
+                      ) : (
+                        /* 🔴 G-11 · LA DIRECCIÓN ES UNA LÍNEA CON CHEVRON, no un
+                           botón. Acá vivía un `Boton secundario` de ancho casi
+                           completo debajo de la dirección — dos bloques para una
+                           cosa. La industria (referencia-laika-direccion) usa la
+                           propia línea como el control, y la casa ya tiene esa
+                           anatomía: `CeldaNavegacion`.
+                           E14 lo autoriza con chevron a la derecha: no navega a
+                           otra pantalla, pero **abre el formulario que la
+                           resuelve**, que es el mismo criterio. */
+                        <CeldaNavegacion
+                          /* A-06 (S100c) · el pin, pedido por el founder: *«ahí
+                             le falta el pin o el glifo de ubicación»*.
+                             ⚠️ Mi arranque decía que el glifo era de B y había que
+                             pedírselo. **Falso, medido:** `ubicacion` ya existe en
+                             el registry (`Icono.tsx:800`, capa `cuidado`) desde el
+                             lote b′. *Pedir una pieza construida cuesta una vuelta
+                             de canal y la respuesta es un grep.* */
+                          icono="ubicacion"
+                          titulo={direccion.direccion}
+                          detalle={[direccion.ciudad, direccion.referencias]
+                            .filter((x): x is string => x !== null && x !== '')
+                            .join(' · ')}
+                          /* Con UNA sola dirección la libreta no tiene nada que
+                             elegir: el toque va derecho a editarla. Con dos o
+                             más, abre la libreta. *Un selector de un elemento es
+                             un paso que no decide nada.* */
+                          onPress={() =>
+                            direcciones.length > 1 ? setHojaLibreta(true) : setHojaDireccion(true)
+                          }
+                        />
+                      )}
+                    </View>
+
+                    {/* 4 · LA INSTRUCCIÓN QUE DECIDE (§9.3) — EL ÚNICO CAMPO de
+                        la pantalla, tal como pidió el gate. Y es justo el que
+                        quedaba tapado por el CTA (medición de B, solape ③). */}
+                    <View style={{ paddingHorizontal: spacing[3], gap: spacing[2] }}>
+                      <Campo
+                        label={t('despensa.instruccionesLabel')}
+                        value={instrucciones}
+                        onChangeText={(v) => setInstrucciones(v.slice(0, 200))}
+                        ayuda={t('despensa.instruccionesAyuda')}
+                        autoCapitalize="sentences"
+                      />
+                    </View>
+
+                    {/* 4 · CUÁNDO — la ventana que el cupo respalda (§6.2/§7.2) */}
+                    <View style={{ paddingHorizontal: spacing[3], gap: spacing[2] }}>
+                      <Texto variante="seccion">{t('despensa.cuandoLlega')}</Texto>
+                      {cuentaComercialId === null ? (
+                        /* Hueco declarado #1 — el estado honesto, jamás una
+                           ventana inventada (L-139). */
+                        <Texto variante="apoyo">{t('despensa.sinVendedorDetalle')}</Texto>
+                      ) : promesa === 'cargando' || promesa === null ? (
+                        <Texto variante="apoyo">{t('despensa.promesaCargando')}</Texto>
+                      ) : 'fallo' in promesa ? (
+                        <Texto variante="apoyo" color="warning">
+                          {promesa.fallo === 'sin_cupo_ese_dia'
+                            ? t('despensa.sinCupoEseDia')
+                            : promesa.fallo === 'sin_turnos_de_entrega' || promesa.fallo === 'sin_capacidad_de_reparto'
+                              ? t('despensa.vendedorSinReparto')
+                              : t('despensa.promesaFallo')}
+                        </Texto>
+                      ) : (
+                        <>
+                          <Texto variante="cuerpo">
+                            {t('despensa.promesaVentana', {
+                              dia: diaLocal(promesa.fecha),
+                              desde: horaLocal(promesa.desde),
+                              hasta: horaLocal(promesa.hasta),
+                            })}
+                          </Texto>
+                          {promesa.saltos_por_cupo > 0 ? (
+                            /* La promesa corrió — SE DICE (§7.3: el excedente no
+                               rompe, se corre).
+
+                               🔴 S103-C · LO QUE SE CURÓ ACÁ, Y NO ES ESTILO:
+                               esta línea decía `saltoPorCupo` —*«El día más
+                               cercano estaba COMPLETO»*— **con `saltos > 0` a
+                               secas**. Es el rojo del 18-ago que la cabecera de
+                               `PromesaDeVendedor` documenta: **el número dice que
+                               la ventana se corrió, NO por qué.** Un domingo la
+                               causa es que el vendedor no reparte, y la frase
+                               afirmaba una escasez que no existe — *hacer perder
+                               una venta por un inventario imaginario*.
+
+                               ⚠️ **Por qué la voz genérica y no la precisa:**
+                               `calcularPromesaDespensa` —el lector de ESTA
+                               pantalla— **no expone `motivoCorrimiento`**
+                               (medido: el campo vive solo en
+                               `promesaPorVendedor`). Sin la causa, la única voz
+                               verdadera es la que **no afirma ninguna**.
+                               *Perder precisión es barato; afirmar falso no.*
+
+                               📮 **La precisión vuelve sola** el día que A
+                               exponga el campo en este lector: ahí esta línea
+                               recupera `saltoPorCupo` para `cupo_lleno` y gana
+                               `saltoPorSinOperacion`, igual que la ficha. **Se
+                               pidió; no se escribe desde acá (motor es de A).** */
+                            <Texto variante="apoyo">{t('despensa.saltoSinCausa')}</Texto>
+                          ) : null}
+                        </>
+                      )}
+                      {/* Las opciones — el día lleno se DIBUJA con su porqué.
+                          ☠️ S100b · G-16: NO lleva `onProgramarOtra`. Ver abajo. */}
+                      {ventanas === 'cargando' ? null : ventanas !== null && ventanas.length > 0 ? (
+                        <SelectorVentana
+                          /* 🔴 A-05 (S100c) · LA TIRA. El founder: «cuándo se
+                             entrega» es invisible sin deslizar.
+                             **B lo midió y es peor que eso:** la sección arranca
+                             en **y = 595,9 dp** y el pie fijo empieza en ~**593**
+                             ⇒ no es que haya que deslizar, es que **nace debajo
+                             del pie**. Cuatro opciones apiladas de hasta tres
+                             líneas, después de dirección y quién recibe.
+                             El eje no se inventó: `SelectorOpcion` tiene
+                             `disposicion` fila/tira/grilla desde S55-B4, y la
+                             tira nació justo para esto (el CUÁNDO tipo Teams).
+                             ⚠️ LA LEY 23 SIGUE EN PIE Y ES FÁCIL DE ROMPER ACÁ:
+                             en `tira` el día lleno **recibe el toque** —hace
+                             falta para contar SU motivo cuando hay más de uno—
+                             pero **jamás llama a `onElegir`**. El servidor sigue
+                             sin poder recibir un día sin cupo. *Si alguien
+                             cablea `onElegir` en esa rama, rompe la ley* (aviso
+                             de B, dueña de la pieza). */
+                          disposicion="tira"
+                          opciones={ventanas}
+                          elegida={fechaElegida?.fecha ?? 'proxima'}
+                          onElegir={(clave) => {
+                            if (clave === 'proxima') {
+                              setFechaElegida(undefined);
+                            } else {
+                              setFechaElegida({ fecha: clave, precision: 'exacta' });
+                            }
+                          }}
+                        />
+                      ) : null}
+                      {/* ═══════════════════════════════════════════════════════
+                          ☠️ ACÁ VIVÍA «PROGRAMAR OTRA FECHA» — DEROGADO POR FIRMA
+                          DEL FOUNDER (17-ago-2026, gate de S100 · G-16).
+                          Murieron: el `onProgramarOtra` del SelectorVentana, el
+                          `CampoFecha` que abría, el estado `mostrarCalendario` y
+                          las voces `programarFecha` / `programarPlaceholder` /
+                          `programarAyuda` / `quitarFecha`.
+
+                          POR QUÉ ESTA LÁPIDA Y NO UN BORRADO LIMPIO: el founder
+                          lo pidió quitar REPETIDAMENTE y volvía en cada ronda.
+                          No fue desobediencia — la letra decía «Entra» y la letra
+                          gana. Hoy `LETRA_RECORRIDO_DESPENSA_S96` §6.2 está
+                          tachada con su razón, y `verify:diseno` R52 lo vigila.
+
+                          QUÉ **NO** MURIÓ, para que nadie lo barra de más: el
+                          CUPO por día futuro sigue vigente y es lo que respalda
+                          la promesa, y `calcular_promesa_despensa` conserva su
+                          `p_fecha_programada` — eso es MOTOR. Se quitó la puerta,
+                          no el motor: el día que vuelva por decisión, vuelve sin
+                          reconstruirse. `SelectorVentana` conserva su prop
+                          opcional intacta por el mismo motivo.
+
+                          Y volver a la más próxima NO se perdió: la opción
+                          `proxima` del propio selector la devuelve (por eso el
+                          botón «quitarFecha» se fue con el bloque y no dejó
+                          callejón).
+                          ═══════════════════════════════════════════════════════ */}
+                    </View>
+                  </View>
+                  </Tarjeta>
+                  </View>
+                )}
+                {/* ═══ 🔴 QUIÉN RECIBE VALE PARA LOS DOS MÉTODOS ═════════════
+                    **Medido caminando: con «Retiro en tienda» este bloque no se
+                    dibujaba** —vivía dentro de la rama de despacho— **y el CTA
+                    igual exigía receptor y teléfono** (`falta`, rama `else`).
+                    ⇒ la pantalla pedía dos datos y **no daba por dónde ponerlos**:
+                    el retiro era un callejón, y la única salida era cambiar a
+                    domicilio, cargarlos ahí y volver.
+
+                    *Y tiene sentido que los pida en los dos:* quien retira en el
+                    mostrador también es alguien con un nombre, y el vendedor
+                    necesita un teléfono para avisarle que ya está listo.
+                    ⇒ el bloque sale de la rama y queda **común a los dos**, que
+                    es donde la condición del CTA siempre lo dio por hecho. */}
+                  {/* 3 · QUIÉN RECIBE — SE MUESTRA, NO SE EDITA ACÁ (G-11).
+                      ═══════════════════════════════════════════════════════
+                      Eran DOS campos de edición abiertos en la pantalla donde
+                      la familia REVISA antes de pagar. El gate pidió que se
+                      muestren fijos: *editar es otro momento.* Un campo abierto
+                      invita a escribir; acá el trabajo es leer y confirmar.
+
+                      LO QUE NO SE PIERDE: se sigue pudiendo cambiar —el dato
+                      del perfil no siempre es quien recibe— pero por un toque
+                      explícito, no por tener el cursor a mano.
+
+                      Y CUANDO FALTA EL DATO, la línea lo DICE y el toque lo
+                      resuelve: mostrar fijo un vacío sería un callejón, que es
+                      peor que el campo que se sacó. */}
+                  {/* El aire lateral lo paga el bloque: **adentro de la Tarjeta
+                      de despacho lo ponía el contenedor**, y al salir de ahí el
+                      rótulo quedaba pegado al borde. `spacing[5]` es el mismo
+                      margen que usa el explicativo de arriba — *lo que cambió de
+                      lugar tiene que seguir alineado con sus vecinos.* */}
+                  <View style={{ gap: spacing[2], paddingHorizontal: spacing[5] }}>
+                    <View style={{ paddingHorizontal: spacing[3] }}>
+                      <Texto variante="seccion">{t('despensa.quienRecibe')}</Texto>
+                    </View>
+                    <CeldaNavegacion
+                      titulo={receptor.trim() === '' ? t('despensa.faltaReceptor') : receptor}
+                      detalle={
+                        telefono.trim() === '' ? t('despensa.faltaTelefono') : telefono
+                      }
+                      onPress={() => setHojaReceptor(true)}
+                    />
+                  </View>
+
+              </>
+            )
+          ) : fase === 'resumen' && pedidos.length > 0 ? (
+            <>
+              {/* 🔴 LA DIVISIÓN SE DECLARA ANTES DE PAGAR (F5 + receta ③ de B).
+                  N pedidos = N BLOQUES, cada uno con lo suyo. La confirmación
+                  posterior explica que son independientes.
+                  *Un total único sobre dos entregas distintas es una promesa
+                  que la pantalla no puede cumplir.* */}
+              {pedidos.length > 1 ? (
+                <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
+                  <Texto variante="seccion">
+                    {t('despensa.divisionTitulo', { n: pedidos.length })}
+                  </Texto>
+                  <Texto variante="apoyo">{t('despensa.divisionDetalle')}</Texto>
+                </View>
+              ) : null}
+
+              {/* 🔴 G-12 · CADA ENTREGA ES UNA CARTA, no un bloque apoyado sobre
+                  el fondo pelado. Sin superficie, N entregas se leen como una
+                  lista larga y no como N cosas separadas — que es justo lo que
+                  la división tiene que comunicar. La carta es el borde que dice
+                  dónde termina una entrega y empieza la otra. */}
+              {pedidos.map((p, i) => (
+                <View key={p.pedido_id} style={{ paddingHorizontal: spacing[5] }}>
+                  <Tarjeta>
+                    <View style={{ gap: spacing[2] }}>
+                  {pedidos.length > 1 ? (
+                    <Texto variante="seccion">
+                      {t('despensa.bloqueEntrega', { i: i + 1, n: pedidos.length })}
+                    </Texto>
+                  ) : (
+                    <Texto variante="seccion">{t('despensa.resumen')}</Texto>
+                  )}
+                  {/* F6 · QUIÉN LO PREPARA. Es lo que explica POR QUÉ la compra
+                      llegó partida: la razón de la división es que son dos
+                      tiendas. Si el nombre no se pudo leer, la línea no se
+                      dibuja — jamás «Lo prepara: —». */}
+                  {tiendas[p.pedido_id] !== undefined ? (
+                    <Texto variante="apoyo">
+                      {t('despensa.preparaTienda', { tienda: tiendas[p.pedido_id] })}
+                    </Texto>
+                  ) : null}
+                  {/* QUÉ llega en esta entrega. Va con `Texto` y no con
+                      `FilaMonto`: esa pieza NO se dibuja cuando el monto es
+                      null —a propósito, para no inventar un "$ 0,00"—, así que
+                      usarla acá habría hecho desaparecer los ítems en silencio. */}
+                  {grupos[i]?.items.map((it) => (
+                    <Texto key={it.oferta_id} variante="apoyo">
+                      {`${it.cantidad} × ${it.nombre}`}
+                    </Texto>
+                  ))}
+                  {p.subtotal !== null ? (
+                    <FilaMonto etiqueta={t('despensa.subtotal')} monto={dinero(p.subtotal)} />
+                  ) : null}
+                  {p.impuesto !== null ? (
+                    <FilaMonto etiqueta={t('despensa.impuesto')} monto={dinero(p.impuesto)} />
+                  ) : null}
+                  {p.envio !== null ? (
+                    <FilaMonto
+                      etiqueta={metodo === 'retiro' ? t('despensa.envioRetiro') : t('despensa.envio')}
+                      monto={dinero(p.envio)}
+                    />
+                  ) : null}
+                    </View>
+                  </Tarjeta>
+                </View>
+              ))}
+
+              {/* 🔴 A-02 (S100c) · CÓMO Y CUÁNDO LLEGA, A LA VISTA AL PAGAR.
+                  Literal del founder: *«lo único que le faltaría al checkout es
+                  la confirmación de la modalidad de entrega y la fecha probable
+                  de entrega, para que la persona lo pueda observar desde ahí»*.
+
+                  Medido antes de construir: el resumen tenía «Envío $2.50» —que
+                  dice cuánto CUESTA, no que va a tu casa— y la promesa vivía
+                  dentro de `fase === 'armado'`, o sea **en la pantalla anterior**:
+                  se elegía y no se podía releer con el dedo sobre «Pagar».
+                  La dirección entra en el mismo bloque aunque no estaba en el
+                  pedido: es la misma pregunta —«¿esto llega bien?»— y omitirla
+                  dejaba media respuesta.
+
+                  ── 🔴 POR QUÉ VA UNA VEZ Y NO ADENTRO DE CADA CARTA ──────────
+                  El método y la dirección son **de la compra**: hay UN `metodo` y
+                  UNA dirección para todo. Repetirlos en N cartas sería decir N
+                  veces lo mismo.
+                  Y la FECHA no se puede repetir por otra razón, que es de dato:
+                  `cuentaComercialId` sale de **`grupos[0]`** (:177) ⇒ la promesa
+                  que hay en pantalla es la del PRIMER vendedor. Pintarla dentro
+                  de la segunda carta sería **afirmar sobre la entrega del otro
+                  vendedor un dato que nadie calculó** — la misma frase que ya
+                  está escrita 60 líneas más arriba: *una promesa que la pantalla
+                  no puede cumplir*. Con N entregas se dice lo único que sí es
+                  cierto: que cada una va por su cuenta. */}
+              <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
+                <Texto variante="seccion">{t('despensa.resumenComoLlega')}</Texto>
+                <Texto variante="cuerpo">
+                  {metodo === 'retiro' ? t('despensa.metodoRetiro') : t('despensa.metodoDespacho')}
+                </Texto>
+
+                {/* La dirección solo con despacho: en retiro no hay dirección de
+                    la familia que mostrar, y la de la tienda no se captura. */}
+                {metodo === 'despacho' && direccion !== 'cargando' && direccion !== null ? (
+                  <Texto variante="apoyo">
+                    {[direccion.direccion, direccion.ciudad].filter((x) => x !== '').join(' · ')}
+                  </Texto>
+                ) : null}
+
+                {/* La fecha: con UNA entrega es la promesa que se eligió; con
+                    varias, el hecho que sí se puede afirmar. Y si la promesa
+                    falló o no llegó, **no se inventa una fecha**: no se dibuja
+                    nada (L-139 — el nulo honesto). */}
+                {pedidos.length > 1 ? (
+                  <Texto variante="apoyo">{t('despensa.resumenFechaPorEntrega')}</Texto>
+                ) : metodo === 'despacho' &&
+                  promesa !== null &&
+                  promesa !== 'cargando' &&
+                  !('fallo' in promesa) ? (
+                  <Texto variante="cuerpo">
+                    {t('despensa.promesaVentana', {
+                      dia: diaLocal(promesa.fecha),
+                      desde: horaLocal(promesa.desde),
+                      hasta: horaLocal(promesa.hasta),
+                    })}
+                  </Texto>
+                ) : null}
+              </View>
+
+              {/* EL TOTAL ES EL DE LA COMPRA, dicho por el motor — esta
+                  pantalla no suma los bloques. UN SOLO COBRO para la familia. */}
+              <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
+                <Separador />
+                {compraTotal !== null ? (
+                  <FilaMonto etiqueta={t('despensa.total')} monto={dinero(compraTotal)} destacada />
+                ) : (
+                  <Texto variante="apoyo">{t('despensa.totalNoLlego')}</Texto>
+                )}
+              </View>
+
+              {/* ②③④⑤ LA SECCIÓN DE PAGO — **la misma pieza que monta el
+                  checkout de los cuatro oficios** (orden del founder ⑤).
+                  ☠️ Acá vivía su copia: mismo texto, misma hoja, misma regla de
+                  preselección. *Ya no es «igual a»: es LA MISMA, y por eso no hay
+                  de dónde sacar una versión propia.* */}
+              <View style={{ paddingHorizontal: spacing[5] }}>
+                {facturacion.props === null || compraTotal === null ? (
+                  facturacion.noCargo || facturacion.reintentando ? (
+                <AvisoNoCargo
+                  onReintentar={facturacion.reintentar}
+                  reintentando={facturacion.reintentando}
+                  motivo={facturacion.motivo}
+                />
+              ) : null
+                ) : (
+                  <SeccionFacturacion {...facturacion.props} total={compraTotal} />
+                )}
+
+                <SeccionMedioDePago medio={medio} />
+              </View>
+
+              {/* ☠️ S101-B · LA BANDA DE «PAGO SIMULADO» MUERE (Ley 37).
+                  §6.5 la puso cuando el cobro ERA simulado, y decía la verdad.
+                  **Con el enchufe de Fase 3 el cobro es real**, así que la banda
+                  pasó de honesta a falsa de un día para el otro.
+                  *Una advertencia que dejó de ser cierta no es inofensiva: le
+                  enseña a la familia a no creerle a las advertencias.* */}
+            </>
+          ) : fase === 'confirmando' ? (
+            /* 🔴 LA PANTALLA NO PUEDE ESTAR VACÍA JUSTO ACÁ. Medido en el
+               aparato: título truncado, un botón, y nada más — en el segundo
+               exacto en que la familia acabó de entregar su tarjeta.
+               *El silencio, en ese momento, se lee como que algo salió mal.* */
+            <View style={{ paddingHorizontal: spacing[5], gap: spacing[3] }}>
+              {/* ══ 🔴 LA MISMA FASE, DOS CUERPOS (S105-C) ═══════════════════
+                  `LETRA_DEUNA` §6, firma ② del founder: *«funciona exactamente
+                  igual que si fuera tarjeta»* — **misma pantalla, misma salida,
+                  misma transición sola a pagada. Lo único que cambia es el
+                  cuerpo.**
+
+                  🔴 **La asimetría que sí existe: en tarjeta la familia ESPERA;
+                  en DeUna la familia TRABAJA.** Por eso `EsperaDeTrabajo` no se
+                  monta en este riel (N15): *una rampa que dice «estamos
+                  trabajando» mientras la persona teclea afirma algo falso — la
+                  que trabaja es ella.* Su lugar lo ocupa la cuenta regresiva del
+                  código, que es información y no adorno. */}
+              {riel === 'deuna' ? (
+                <EsperaDeUna
+                  estado={deuna.estado}
+                  onGenerarNuevo={deuna.regenerar}
+                  onSoporte={irASoporte}
+                />
+              ) : (
+                <>
+                {/* ⭐ **S116-C lote 7 · `EsperaLarga` — LA ESPERA LARGA DE LA CASA.**
+                    ☠️ Mueren el par `Texto titulo`/`Texto cuerpo` y **la línea de
+                    progreso** (`EsperaDeTrabajo`, la rampa con degradado): el
+                    founder la nombró y la pieza nueva lo dice en su cabecera —
+                    *no sabe cuánto falta y no lo finge*. La voz **no se pierde**:
+                    la misma que estaba pasa a `titulo` y `apoyo`. */}
+                <EsperaLarga titulo={t('pago.esperaTitulo')} apoyo={t('pago.esperaCuerpo')} />
+                </>
+              )}
+              {/* El tope habla y **no declara desenlace**: la compra sigue viva
+                  y el barrido la resuelve. **Vale para los dos rieles** — en
+                  DeUna llega más tarde porque el tope se corre con el código, no
+                  porque se haya apagado.
+                  ⚠️ **La cadencia del barrido NO se afirma acá.** Para tarjeta
+                  está medida (mismo día); **para DeUna no la medí** y su
+                  aplicador sigue abierto (`D-887`). *Extender «mismo día» al
+                  riel nuevo porque suena parejo sería inventar una promesa
+                  sobre un reloj ajeno.* */}
+              {espera.fase === 'sigue_abierta' ? (
+                <Texto variante="apoyo">{t('pago.esperaSigueAbierta')}</Texto>
               ) : null}
             </View>
-          </>
-        ) : null}
+          ) : fase === 'exito' ? (
+            <>
+              {/* 🔴 S105-C · EL ÉXITO EMPIEZA POR EL PAGO — hallazgo del founder
+                  en el aparato: *«no hay pantalla de pago exitoso decente»*.
+                  Medido, la pantalla EXISTÍA; lo que estaba mal era **la
+                  jerarquía**: lo más grande decía «Tu pedido quedó creado» y la
+                  confirmación del pago aparecía **en la tercera línea**.
+                  *«Creado» es lo que la persona ya sabía —lo armó ella—; lo que
+                  fue a averiguar es si la plata pasó.* Y debajo arrancaba la
+                  recurrencia, así que la pantalla **pivotaba a ofrecer algo antes
+                  de terminar de contestar**.
+
+                  ⇒ **La misma anatomía que la OTRA puerta ya usa** en su éxito
+                  (`checkout-reserva`: glifo 48 + título + descripción, centrado
+                  y con aire). *No se inventa una forma nueva para la segunda
+                  puerta: se copia la del vecino, que es lo que vuelve a las dos
+                  reconocibles como la misma casa.*
+
+                  El glifo es **`nodoConfirmado`**, el que la casa ya usa para el
+                  escalón «Confirmado» del pedido: *el mismo hecho, el mismo
+                  signo.*
+
+                  **La recurrencia NO se movió ni se achicó** —§6.1 está firmada—
+                  pero ahora va **después de una respuesta completa**, separada
+                  por su `Separador`. */}
+              {/* ⭐ **S116-C lote 7 · `Confirmacion` DE LA CASA** (punto ③ del
+                  encargo: *«check, destellos, trío, dato del pedido, "La factura
+                  te llega aparte por correo", dos acciones»*).
+
+                  ☠️ Muere la composición local —glifo 48 + dos `Texto`— que este
+                  mismo archivo había copiado del vecino. *Copiar al vecino era lo
+                  correcto mientras no existía la pieza; con la pieza, seguir
+                  copiando es fabricar la tercera versión de lo mismo.*
+
+                  **El `dato` es el TOTAL, no el número de pedido**, y es una
+                  decisión: lo que la familia fue a verificar en esta pantalla es
+                  que la plata pasó y por cuánto. *El id del pedido es lo que
+                  necesita el soporte, no ella, y vive a un toque en Tus pedidos.*
+
+                  **La línea fiscal va en `lineaExtra`**, que es el slot que la
+                  pieza creó para eso. `metodo === 'retiro'` **conserva su frase**
+                  —el código del mostrador— porque no es adorno: es cómo se
+                  retira. Va en `apoyo`, junto a la de siempre.
+
+                  **Dos acciones**: ver el pedido (primaria) y volver a la
+                  Despensa (secundaria). ⏪ *Antes había UNA sola, en el pie; la
+                  pieza pide las dos y la segunda faltaba —salir del éxito sin ir
+                  a Pedidos exigía la barra de tabs.* */}
+              <Confirmacion
+                exclamacion={t('despensa.exitoExclamacion')}
+                titulo={t('despensa.exitoPagoTitulo')}
+                apoyo={
+                  metodo === 'retiro'
+                    ? `${t('despensa.exitoDetalle')} ${t('despensa.exitoRetiro')}`
+                    : t('despensa.exitoDetalle')
+                }
+                dato={(() => {
+                  /* `dinero` puede devolver `null` cuando no hay moneda resuelta
+                     —lo dice su tipo— y **un total a medias no se dibuja**: el
+                     dato de esta pantalla es exactamente la plata, y mostrarlo
+                     vacío sería peor que no mostrarlo. */
+                  const v = compraTotal === null ? null : dinero(compraTotal);
+                  return v === null ? undefined : { etiqueta: t('despensa.total'), valor: v };
+                })()}
+                lineaExtra={t('despensa.exitoFactura')}
+                primario={{ texto: t('despensa.verTusPedidos'), onPress: () => router.replace('/pedidos') }}
+                secundario={{ texto: t('despensa.exitoSeguirComprando'), onPress: () => router.replace('/despensa') }}
+              />
+
+              {/* §6.1 — LA RECURRENCIA, con el mensaje honesto VERBATIM. */}
+              <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
+                <Separador />
+                {/* 🔴 G-13 · EL TÍTULO, LA «i» Y EL INTERRUPTOR — nada más.
+                    Acá vivían DOS párrafos explicativos SIEMPRE visibles (60.8 +
+                    40.5 dp medidos por B) sobre una pantalla cuyo trabajo es
+                    decir «quedó creado». La letra §6.1 exige que el mensaje sea
+                    VERBATIM, y lo sigue siendo — cambia DÓNDE se lee, no qué
+                    dice: *una condición que hay que leer sí o sí no se borra;
+                    se pone donde no le gane a lo que la persona vino a hacer.* */}
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <View
+                    style={{
+                      flex: 1,
+                      paddingRight: spacing[3],
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: spacing[2],
+                    }}
+                  >
+                    <Texto variante="seccion">{t('despensa.recurrenciaTitulo')}</Texto>
+                    <Pressable
+                      onPress={() => setHojaRecurrencia(true)}
+                      hitSlop={12}
+                      accessibilityRole="button"
+                      accessibilityLabel={t('despensa.recurrenciaQueEs')}
+                    >
+                      <Icono nombre="info" tamano={20} registro="capa" />
+                    </Pressable>
+                  </View>
+                  <Interruptor
+                    encendido={quiereRecurrencia}
+                    onCambio={(v) => void alternarRec(v)}
+                    etiqueta={t('despensa.recurrenciaTitulo')}
+                  />
+                </View>
+                {/* LAS FRECUENCIAS NO EXISTEN HASTA QUE EL INTERRUPTOR ESTÁ
+                    ENCENDIDO (G-13). Y el interruptor expresa la INTENCIÓN: lo
+                    que cierra el trato es elegir cada cuánto.
+                    POR QUÉ ASÍ Y NO «prender y listo con 30 por defecto»: el
+                    motor NO es idempotente —`configurar_recurrencia` no toma
+                    clave de idempotencia—, así que prender con un default y
+                    dejar cambiarlo después crearía DOS recurrencias, o exigiría
+                    apagar y volver a crear dejando una fila muerta. *Comprometer
+                    al motor con un número que la familia todavía no eligió es
+                    inventarle una decisión.* Con este orden se crea UNA, con la
+                    cadencia que ella dijo. */}
+                {quiereRecurrencia ? (
+                  recurrenciaId === null ? (
+                    <>
+                      <SelectorOpcion
+                        etiqueta={t('despensa.recurrenciaCada')}
+                        opciones={CADENCIAS.map((d) => ({
+                          codigo: String(d),
+                          etiqueta: t('despensa.recurrenciaDias', { n: d }),
+                        }))}
+                        seleccionada={cadencia === null ? '' : String(cadencia)}
+                        onSelect={(c) => {
+                          setCadencia(Number(c));
+                          void activarRecurrenciaCon(Number(c));
+                        }}
+                        acento="control"
+                      />
+                      {/* El apagado dice qué falta — regla de la casa. */}
+                      <Texto variante="apoyo">{t('despensa.recurrenciaElegiCada')}</Texto>
+                    </>
+                  ) : (
+                    <Texto variante="apoyo">{t('despensa.recurrenciaLista')}</Texto>
+                  )
+                ) : null}
+              </View>
+            </>
+          ) : null}
+        </View>
       </HojaContenido>
 
       {/* ☠️ LA HOJA DE ELECCIÓN SALIÓ DE ACÁ: vive dentro de

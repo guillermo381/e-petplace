@@ -22,9 +22,9 @@
  * que la ley S79 cerraba (coordenada invisible y vieja) no existe más,
  * porque la coordenada dejó de ser invisible.
  *
- * `exigirPunto` (checkout de la despensa): sin punto no se guarda, y el
- * porqué SE DICE. En Cuenta sigue opcional — exigirlo ahí cambiaría un
- * flujo ya gateado, y esa decisión es del founder, no de esta tanda.
+ * `exigirPunto`: sin punto no se guarda, y el porqué SE DICE. **Desde
+ * S116-C lote 6 su default es `true`, y no es una preferencia: es lo que la
+ * TABLA exige.** Ver la nota de la prop.
  *
  * Si Places no está configurado o la red falla mientras se tipea, el
  * formulario degrada EN SILENCIO a captura manual (Ley 23) — con el
@@ -65,15 +65,44 @@ const SEMILLA_QUITO = { lat: -0.1807, lon: -78.4678 };
 export function DireccionHogarForm({
   inicial,
   onGuardada,
-  exigirPunto = false,
+  exigirPunto = true,
   conAlias = false,
   aliasInicial = '',
   direccionId = null,
 }: {
   inicial: DireccionHogar | null;
   onGuardada: (direccion: DireccionHogar) => void;
-  /** §7 de la letra S96: en el checkout de la despensa el punto es
-   *  OBLIGATORIO. Default false: Cuenta no cambia sin su propio gate. */
+  /**
+   * 🔴 **EL DEFAULT PASA DE `false` A `true` — S116-C lote 6.**
+   *
+   * ── MEDIDO CONTRA EL MOTOR, no razonado ─────────────────────────────────
+   * ```
+   * guardar_direccion_hogar  sin p_lat/p_lon → 23514 chk_direccion_con_punto
+   *                          con el punto    → ok:true
+   * ```
+   * **`direcciones_guardadas` EXIGE lat/lon, sin condición.** ⇒ un default
+   * `false` no hacía el flujo «más flexible»: lo hacía **más permisivo que su
+   * propia tabla**, que es `L-528` en su forma cara — *una pantalla más
+   * estricta que su motor es un defecto; una más PERMISIVA también, y su modo
+   * de falla es el silencio.*
+   *
+   * ── EL COSTO, VISTO EN EL APARATO ───────────────────────────────────────
+   * **4 de 6 consumidores no la pasaban** (Cuenta·Tu dirección y los checkouts
+   * de paseo, grooming y veterinaria). En Cuenta, con la dirección escrita y el
+   * botón habilitado, tocar Guardar devolvía **«Ocurrió un error inesperado.
+   * Prueba de nuevo.»** — el rechazo de un CHECK saliendo como error genérico
+   * sobre algo que la app **sí podía explicar**. Y en los checkouts era peor:
+   * sin dirección guardada **no se puede pagar.**
+   *
+   * ⏪ La nota vieja decía: *«En Cuenta sigue opcional — exigirlo ahí cambiaría
+   * un flujo ya gateado, y esa decisión es del founder»*. **Era razonable y era
+   * falsa**: el flujo de Cuenta ya estaba roto, sólo que su rotura se leía como
+   * un error del servidor. *Preservar un flujo que no funciona no es prudencia.*
+   *
+   * Se deja como prop —y no se cablea a `true`— porque el día que exista una
+   * dirección sin punto legítima (un país sin mapa, una dirección postal) la
+   * excepción va a tener que declararse acá, y con su nombre.
+   */
   exigirPunto?: boolean;
   /**
    * 🔴 S100c · MODO LIBRETA — «Oficina», «Casa de mamá», además del hogar.
@@ -426,6 +455,53 @@ export function DireccionHogarForm({
 
   const faltaPunto = exigirPunto && punto === null;
 
+  /**
+   * 🔴 **LA PUERTA AL PUNTO A MANO — S116-C lote 6, hallazgo del recorrido.**
+   *
+   * ── EL HUECO, MEDIDO ─────────────────────────────────────────────────────
+   * Este botón vivía **sólo en el modo lectura** (`!editandoTexto`), o sea sólo
+   * cuando YA había una dirección guardada. En el ALTA —una familia que todavía
+   * no tiene ninguna— el único camino al punto era que **Places resolviera**:
+   * `elegirPrediccion` es quien siembra `punto`.
+   *
+   * ⇒ **Con Places caído no hay punto, sin punto no hay mapa, y `faltaPunto`
+   * bloquea Guardar.** La familia escribe su dirección, no pasa nada, y no
+   * puede pagar. *Medido hoy contra el objeto: la edge `lugares` responde
+   * `google_rechazo · Places respondió 403` — el motor de la app está entero y
+   * quien dice que no es Google.*
+   *
+   * ── Y LA APP YA PROMETÍA ESTA SALIDA ─────────────────────────────────────
+   * `direccion.sinResultados` dice, literal: *«No encontramos esa dirección.
+   * Escríbela igual y pon el punto a mano en el mapa»* — y en el alta **ese
+   * mapa no existía**. Es la Ley 23 al revés: no es una puerta que rechaza, es
+   * una salida que se ofrece y no está. *Una promesa escrita en el diccionario
+   * es tan exigible como un botón.*
+   *
+   * ⚠️ **Esto NO es algo que la migración se llevó** —el censo dio cero, y el
+   * gate `!editandoTexto` viene de S100d·bis, no de S116—: es un hueco que
+   * vivía tapado porque Places contestaba.
+   */
+  const accionDelPunto = (
+    <Boton
+      variante="secundario"
+      bloque
+      etiqueta={mapaDesbloqueado ? t('direccion.confirmarPunto') : t('direccion.ajustarPunto')}
+      onPress={() => {
+        if (mapaDesbloqueado) {
+          /* ④ CONFIRMAR: el mapa se vuelve a bloquear y recién ahí aparecen
+             las opciones de guardar. */
+          setMapaDesbloqueado(false);
+          setHayQueGuardar(true);
+          return;
+        }
+        /* ③ AJUSTAR: se desbloquea, y si todavía no hay punto se siembra para
+           que haya algo que mover. */
+        if (punto === null) setPunto(SEMILLA_QUITO);
+        setMapaDesbloqueado(true);
+      }}
+    />
+  );
+
   return (
     <View style={{ gap: spacing[2] }}>
       {/* El nombre va PRIMERO en modo libreta: es la llave con la que la
@@ -497,30 +573,7 @@ export function DireccionHogarForm({
                 }}
               />
             </View>
-            <View style={{ flex: 1 }}>
-              <Boton
-                variante="secundario"
-                bloque
-                etiqueta={
-                  mapaDesbloqueado
-                    ? t('direccion.confirmarPunto')
-                    : t('direccion.ajustarPunto')
-                }
-                onPress={() => {
-                  if (mapaDesbloqueado) {
-                    /* ④ CONFIRMAR: el mapa se vuelve a bloquear y recién ahí
-                       aparecen las opciones de guardar. */
-                    setMapaDesbloqueado(false);
-                    setHayQueGuardar(true);
-                    return;
-                  }
-                  /* ③ AJUSTAR: se desbloquea, y si todavía no hay punto se
-                     siembra para que haya algo que mover. */
-                  if (punto === null) setPunto(SEMILLA_QUITO);
-                  setMapaDesbloqueado(true);
-                }}
-              />
-            </View>
+            <View style={{ flex: 1 }}>{accionDelPunto}</View>
           </View>
         </View>
       ) : null}
@@ -543,6 +596,29 @@ export function DireccionHogarForm({
         sinResultados={busquedaVacia ? t('direccion.sinResultados') : undefined}
       />
       ) : null}
+
+      {/* ⭐ **LA MISMA PUERTA, TAMBIÉN EN EL ALTA** — ver la nota de
+          `accionDelPunto`. Aparece **sólo cuando hace falta**: hay algo escrito
+          (si no, no hay dirección que ubicar) y todavía no hay punto. *Con el
+          punto ya sembrado por Places, este botón no tiene nada que ofrecer que
+          el bloque de abajo no ofrezca mejor — y un botón que no hace falta es
+          ruido justo donde la persona está decidiendo.*
+
+          ⚠️ Va **DEBAJO del buscador y ARRIBA del mapa**, que es el orden que
+          el founder firmó en S100d·bis: *«los botones de acción no pueden
+          quedar detrás del mapa»*. */}
+      {editandoTexto && exigirPunto && punto === null && direccion.trim().length >= 3 ? (
+        <View style={{ gap: spacing[1] }}>
+          <Texto variante="apoyo">{t('direccion.puntoAMano')}</Texto>
+          {accionDelPunto}
+        </View>
+      ) : null}
+
+      {/* Y cuando el punto YA existe pero el mapa está bloqueado, el alta
+          también necesita poder abrirlo y confirmarlo: sin esto, una dirección
+          nueva nacida a mano quedaba con el punto de la semilla y sin forma de
+          moverlo. */}
+      {editandoTexto && punto !== null ? <View>{accionDelPunto}</View> : null}
 
       {/* A-03 · el buscador apagado lo DICE, y dice qué hacer.
           ⚠️ La voz se duplica acá en vez de reusar la del wrapper
@@ -579,6 +655,90 @@ export function DireccionHogarForm({
           hay gesto que interceptar, y por eso el defecto no puede volver por
           otra puerta. *Reordenar sin esto dejaría el mapa comiéndose el scroll
           apenas alguien agregue un campo debajo.* */}
+      {/* ⭐ **EL BLOQUE DE GUARDAR SUBE POR ENCIMA DEL MAPA — S116-C lote 6.**
+          Es **la misma firma de S100d·bis que ya movió la acción del punto**:
+          *«los botones de acción no pueden quedar detrás del mapa»*. Aquella
+          vez se aplicó a «Ajustar el punto» y **a `Guardar` no**, así que el
+          defecto sobrevivió en el botón que más importa.
+
+          **Medido en el aparato, con el mapa montado:** «Guardar dirección»
+          caía en `y = 2338` de una pantalla de **2400** —detrás de la barra del
+          sistema— y **la hoja no llega hasta él**: el mapa mide ~578 px y su
+          capa de bloqueo *«no deja pasar NINGÚN gesto»* (su propio comentario),
+          así que **un swipe sobre el mapa tampoco scrollea.** ⇒ el botón existe,
+          se lee en el árbol de accesibilidad, y **no se puede tocar.**
+
+          *Un botón inalcanzable es peor que uno ausente: el que falta se nota,
+          el que no se puede tocar parece que no funciona.* */}
+      {/* 🔴 **`editandoTexto` ENTRA A LA CONDICIÓN, Y ES LA CURA DEL DEFECTO
+          QUE BLOQUEABA PAGAR.**
+
+          ── MEDIDO EN EL APARATO, camino real ───────────────────────────────
+          `hayQueGuardar` **sólo lo prenden los dos botones que viven en el modo
+          LECTURA** (`!editandoTexto`) — o sea, sólo cuando ya hay una dirección
+          guardada. Una familia que **no tiene ninguna** entra directo a
+          `editandoTexto`, escribe su dirección… **y el botón de Guardar nunca
+          se dibuja.** Sin dirección guardada, `puedePagar` es falso ⇒ **no se
+          puede pagar el paseo.**
+
+          *No falla: simplemente no aparece nada, y la persona no tiene forma de
+          saber que le falta apretar algo que no existe.*
+
+          ── POR QUÉ LA CONDICIÓN ES ÉSTA Y NO UN `true` ─────────────────────
+          `hayQueGuardar` significa *«hay algo nuevo que guardar»*, y **escribir
+          una dirección nueva ES eso** — la condición no se ensancha: se le
+          agrega el caso que le faltaba. El modo lectura sigue exigiendo el paso
+          por «Cambiar» o «Ajustar el punto», que es lo que S100d·bis firmó para
+          que nadie desacomode sin pedirlo.
+
+          ⚠️ **El freno del punto NO se afloja**: donde `exigirPunto` rige
+          (despensa, guardería) `faltaPunto` sigue deshabilitando el botón. *Lo
+          que se cura es que el botón EXISTA, no que deje de frenar.* */}
+      {hayQueGuardar || conAlias || editandoTexto ? (
+        <View style={{ gap: spacing[2] }}>
+          <Boton
+            etiqueta={t('direccion.guardar')}
+            bloque
+            cargando={guardando}
+            deshabilitado={
+              direccion.trim() === '' ||
+              ciudad.trim() === '' ||
+              faltaPunto ||
+              (conAlias && alias.trim() === '')
+            }
+            onPress={() => void guardar()}
+          />
+
+          {/* La alterna solo cuando NO estamos ya creando una con alias: en ese
+              caso el formulario entero YA es «otra dirección» y ofrecerlo de
+              nuevo sería ofrecer lo que se está haciendo. */}
+          {!conAlias ? (
+            <View style={{ gap: spacing[2] }}>
+              <Campo
+                label={t('direccion.aliasLabel')}
+                value={aliasNuevo}
+                onChangeText={setAliasNuevo}
+                ayuda={t('direccion.guardarComoOtraAyuda')}
+                autoCapitalize="words"
+              />
+              <Boton
+                variante="secundario"
+                bloque
+                etiqueta={t('direccion.guardarComoOtra')}
+                cargando={guardando}
+                deshabilitado={
+                  direccion.trim() === '' ||
+                  ciudad.trim() === '' ||
+                  faltaPunto ||
+                  aliasNuevo.trim() === ''
+                }
+                onPress={() => void guardarComoOtra()}
+              />
+            </View>
+          ) : null}
+        </View>
+      ) : null}
+
       {faltaPunto ? <Texto variante="apoyo">{t('direccion.faltaPunto')}</Texto> : null}
 
       {/* ══ EL MAPA — SIEMPRE A LA VISTA, BLOQUEADO SALVO QUE SE LO PIDA ══
@@ -635,50 +795,6 @@ export function DireccionHogarForm({
           variantes de la misma: una corrige, la otra agrega. Un solo botón con
           un interruptor al lado haría que la corrección y el alta se parezcan,
           y la que se elige por error es siempre la que pisa lo que ya estaba.* */}
-      {hayQueGuardar || conAlias ? (
-        <View style={{ gap: spacing[2] }}>
-          <Boton
-            etiqueta={t('direccion.guardar')}
-            bloque
-            cargando={guardando}
-            deshabilitado={
-              direccion.trim() === '' ||
-              ciudad.trim() === '' ||
-              faltaPunto ||
-              (conAlias && alias.trim() === '')
-            }
-            onPress={() => void guardar()}
-          />
-
-          {/* La alterna solo cuando NO estamos ya creando una con alias: en ese
-              caso el formulario entero YA es «otra dirección» y ofrecerlo de
-              nuevo sería ofrecer lo que se está haciendo. */}
-          {!conAlias ? (
-            <View style={{ gap: spacing[2] }}>
-              <Campo
-                label={t('direccion.aliasLabel')}
-                value={aliasNuevo}
-                onChangeText={setAliasNuevo}
-                ayuda={t('direccion.guardarComoOtraAyuda')}
-                autoCapitalize="words"
-              />
-              <Boton
-                variante="secundario"
-                bloque
-                etiqueta={t('direccion.guardarComoOtra')}
-                cargando={guardando}
-                deshabilitado={
-                  direccion.trim() === '' ||
-                  ciudad.trim() === '' ||
-                  faltaPunto ||
-                  aliasNuevo.trim() === ''
-                }
-                onPress={() => void guardarComoOtra()}
-              />
-            </View>
-          ) : null}
-        </View>
-      ) : null}
     </View>
   );
 }

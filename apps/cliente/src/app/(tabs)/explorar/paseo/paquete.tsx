@@ -101,45 +101,55 @@ export default function PaqueteComprar() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: { padding: spacing[4], gap: spacing[3] } }}
+
       >
-        {lista === 'cargando' ? (
-          <EsqueletoGrupo>
-            <View style={{ gap: spacing[3] }}>
-              <Esqueleto forma="bloque" ancho="100%" alto={64} />
-              <Esqueleto forma="bloque" ancho="100%" alto={64} />
-            </View>
-          </EsqueletoGrupo>
-        ) : lista === 'error' ? (
-          <EstadoVacio
-            titulo={t('explorar.paseadoresError')}
-            accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={cargar} />}
-          />
-        ) : lista.length === 0 ? (
-          // Peldaño 0 (§6ter): jamás final mudo — vuelta al CUÁNDO.
-          <EstadoVacio
-            icono={<Icono nombre="paseo" tamano={48} />}
-            titulo={t('paquete.nadieOfrece')}
-            descripcion={t('paquete.nadieOfreceDetalle')}
-            accion={<Boton variante="primario" etiqueta={t('explorar.probarOtroHorario')} onPress={() => router.back()} />}
-          />
-        ) : (
-          <Tarjeta relleno="ninguno">
-            {lista.map((p, i) => (
-              <View key={p.prestador_servicio_id}>
-                {i > 0 ? <Separador /> : null}
-                <Celda
-                  titulo={p.prestador_nombre}
-                  subtitulo={p.servicio_nombre}
-                  metadataMono={`${formatearPrecio(p.precio_paquete)} · ${p.duracion_minutos} min`}
-                  interactiva
-                  accessibilityRole="button"
-                  onPress={() => setElegido(p)}
-                />
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[4], gap: spacing[3] }}>
+          {lista === 'cargando' ? (
+            <EsqueletoGrupo>
+              <View style={{ gap: spacing[3] }}>
+                <Esqueleto forma="bloque" ancho="100%" alto={64} />
+                <Esqueleto forma="bloque" ancho="100%" alto={64} />
               </View>
-            ))}
-          </Tarjeta>
-        )}
+            </EsqueletoGrupo>
+          ) : lista === 'error' ? (
+            <EstadoVacio
+              titulo={t('explorar.paseadoresError')}
+              accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={cargar} />}
+            />
+          ) : lista.length === 0 ? (
+            // Peldaño 0 (§6ter): jamás final mudo — vuelta al CUÁNDO.
+            <EstadoVacio
+              icono={<Icono nombre="paseo" tamano={48} />}
+              titulo={t('paquete.nadieOfrece')}
+              descripcion={t('paquete.nadieOfreceDetalle')}
+              accion={<Boton variante="primario" etiqueta={t('explorar.probarOtroHorario')} onPress={() => router.back()} />}
+            />
+          ) : (
+            <Tarjeta relleno="ninguno">
+              {lista.map((p, i) => (
+                <View key={p.prestador_servicio_id}>
+                  {i > 0 ? <Separador /> : null}
+                  <Celda
+                    titulo={p.prestador_nombre}
+                    subtitulo={p.servicio_nombre}
+                    metadataMono={`${formatearPrecio(p.precio_paquete)} · ${p.duracion_minutos} min`}
+                    interactiva
+                    accessibilityRole="button"
+                    onPress={() => setElegido(p)}
+                  />
+                </View>
+              ))}
+            </Tarjeta>
+          )}
+        </View>
       </HojaContenido>
 
       {/* La compra — anclada al paseador ELEGIDO, sin mascota ni fecha */}

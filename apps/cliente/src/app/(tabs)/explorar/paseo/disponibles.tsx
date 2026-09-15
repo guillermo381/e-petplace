@@ -136,125 +136,135 @@ export default function PaseoDisponibles() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: { padding: spacing[4], gap: spacing[3] } }}
+
       >
-        {/* la ventana elegida, en voz de máquina — con el PARA QUIÉN
-            visible (S61-A3, rasgo 1).
-            ⚠️ D-727 — ACÁ SE REUSABA `grooming.ventanaPara`, y el reuso estaba
-            DECLARADO a propósito («la misma voz del QUIÉN del grooming, Ley
-            17.3»). **La decisión era sana; el literal no**: decía «Grooming
-            para {nombre}» y esta pantalla es de PASEO — el founder lo leyó en
-            su aparato. *Lo compartible era la FORMA («X para {nombre}»), no el
-            texto, porque el texto nombra el oficio.* Ahora cada oficio tiene su
-            key y comparten la forma. */}
-        {(() => {
-          // S73 (letra de elegibilidad, N=1 "no se pregunta pero SE DICE"):
-          // sin param y con UNA sola elegible, la auto-elegida del tap
-          // (:alElegirMascota) se DICE acá — avatar y nombre visibles ANTES
-          // de tocar nada. Auto-seleccionar en silencio era magia (cura b).
-          const paraQuien =
-            elegibles.find((m) => m.id === mascotaIdParam) ??
-            (elegibles.length === 1 ? elegibles[0] : null);
-          return (
-            <Celda
-              inicio={
-                paraQuien !== null ? (
-                  // xs, no sm: la columna del metadataMono es intocable y con
-                  // sm el titulo colapsaba a cero en 420 (hallazgo M3 S73).
-                  <AvatarMascota nombre={paraQuien.nombre} fotoUrl={caraDeMascotaPorRuta({ especie: paraQuien.especie, rutaImagen: paraQuien.raza_ruta_imagen, fotoUri: fotos[paraQuien.id] })} tamano="xs" />
-                ) : undefined
-              }
-              titulo={
-                paraQuien !== null
-                  ? t('paquete.ventanaPara', { nombre: paraQuien.nombre })
-                  : t('explorar.paseoTitulo')
-              }
-              // La ventana APILADA en la zona fin (S44-B4.1): en una sola
-              // línea el mono de 26 caracteres exprimía el título a cero
-              // con el avatar presente (hallazgo M3 S73).
-              // 🔴 `D-1096` · ACÁ SE LEÍA «2026-09-15 · 02:30», el ejemplo
-              // literal de lo que la firma prohíbe — y era el más crudo de
-              // todos: el ISO viajaba del parámetro de URL a la pantalla sin
-              // tocar nada. Lo encontré CAMINANDO la reserva para capturar el
-              // pago, no censando: ningún gate mira un `metadataMono={fecha}`,
-              // porque ni formatea ni concatena. Los minutos se quedan con la
-              // fila — «30 min» SÍ es voz de máquina (Ley 3).
-              fin={<Texto variante="apoyo">{`${fechaYHoraHumana(fecha, hora, idioma)} · ${duracion} min`}</Texto>}
-            />
-          );
-        })()}
-        {/* P19: la norma DECLARADA en el flujo de reserva — serena, no
-            letra chica (la misma voz vive en la pregunta única) */}
-        <Text
-          style={{
-            fontFamily: typography.family.sans.regular,
-            fontSize: typography.size.sm,
-            lineHeight: Math.round(typography.size.sm * typography.leading.normal),
-            color: theme.text.secondary,
-          }}
-        >
-          {t('paseoSocial.declaracion')}
-        </Text>
-        <Separador />
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[4], gap: spacing[3] }}>
+          {/* la ventana elegida, en voz de máquina — con el PARA QUIÉN
+              visible (S61-A3, rasgo 1).
+              ⚠️ D-727 — ACÁ SE REUSABA `grooming.ventanaPara`, y el reuso estaba
+              DECLARADO a propósito («la misma voz del QUIÉN del grooming, Ley
+              17.3»). **La decisión era sana; el literal no**: decía «Grooming
+              para {nombre}» y esta pantalla es de PASEO — el founder lo leyó en
+              su aparato. *Lo compartible era la FORMA («X para {nombre}»), no el
+              texto, porque el texto nombra el oficio.* Ahora cada oficio tiene su
+              key y comparten la forma. */}
+          {(() => {
+            // S73 (letra de elegibilidad, N=1 "no se pregunta pero SE DICE"):
+            // sin param y con UNA sola elegible, la auto-elegida del tap
+            // (:alElegirMascota) se DICE acá — avatar y nombre visibles ANTES
+            // de tocar nada. Auto-seleccionar en silencio era magia (cura b).
+            const paraQuien =
+              elegibles.find((m) => m.id === mascotaIdParam) ??
+              (elegibles.length === 1 ? elegibles[0] : null);
+            return (
+              <Celda
+                inicio={
+                  paraQuien !== null ? (
+                    // xs, no sm: la columna del metadataMono es intocable y con
+                    // sm el titulo colapsaba a cero en 420 (hallazgo M3 S73).
+                    <AvatarMascota nombre={paraQuien.nombre} fotoUrl={caraDeMascotaPorRuta({ especie: paraQuien.especie, rutaImagen: paraQuien.raza_ruta_imagen, fotoUri: fotos[paraQuien.id] })} tamano="xs" />
+                  ) : undefined
+                }
+                titulo={
+                  paraQuien !== null
+                    ? t('paquete.ventanaPara', { nombre: paraQuien.nombre })
+                    : t('explorar.paseoTitulo')
+                }
+                // La ventana APILADA en la zona fin (S44-B4.1): en una sola
+                // línea el mono de 26 caracteres exprimía el título a cero
+                // con el avatar presente (hallazgo M3 S73).
+                // 🔴 `D-1096` · ACÁ SE LEÍA «2026-09-15 · 02:30», el ejemplo
+                // literal de lo que la firma prohíbe — y era el más crudo de
+                // todos: el ISO viajaba del parámetro de URL a la pantalla sin
+                // tocar nada. Lo encontré CAMINANDO la reserva para capturar el
+                // pago, no censando: ningún gate mira un `metadataMono={fecha}`,
+                // porque ni formatea ni concatena. Los minutos se quedan con la
+                // fila — «30 min» SÍ es voz de máquina (Ley 3).
+                fin={<Texto variante="apoyo">{`${fechaYHoraHumana(fecha, hora, idioma)} · ${duracion} min`}</Texto>}
+              />
+            );
+          })()}
+          {/* P19: la norma DECLARADA en el flujo de reserva — serena, no
+              letra chica (la misma voz vive en la pregunta única) */}
+          <Text
+            style={{
+              fontFamily: typography.family.sans.regular,
+              fontSize: typography.size.sm,
+              lineHeight: Math.round(typography.size.sm * typography.leading.normal),
+              color: theme.text.secondary,
+            }}
+          >
+            {t('paseoSocial.declaracion')}
+          </Text>
+          <Separador />
 
-        {disponibles === 'cargando' ? (
-          <EsqueletoGrupo>
-            <View style={{ gap: spacing[3] }}>
-              <Esqueleto forma="bloque" ancho="100%" alto={64} />
-              <Esqueleto forma="bloque" ancho="100%" alto={64} />
-            </View>
-          </EsqueletoGrupo>
-        ) : disponibles === 'error' ? (
-          <EstadoVacio
-            titulo={t('explorar.paseadoresError')}
-            descripcion={t('hogar.errorHistoriaDetalle')}
-            accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={cargar} />}
-          />
-        ) : disponibles.length === 0 ? (
-          // Peldaño 0 — nadie puede: vuelta barata al CUÁNDO.
-          <EstadoVacio
-            icono={<Icono nombre="paseo" tamano={48} />}
-            titulo={t('explorar.nadiePuede')}
-            descripcion={t('explorar.nadiePuedeDetalle')}
-            accion={<Boton variante="primario" etiqueta={t('explorar.probarOtroHorario')} onPress={() => router.back()} />}
-          />
-        ) : (
-          <Tarjeta relleno="ninguno">
-            {disponibles.map((p, i) => (
-              <View key={p.prestador_servicio_id}>
-                {i > 0 ? <Separador /> : null}
-                <PreviewPrestador
-                  prestadorId={p.prestador_id}
-                  ofertaId={p.prestador_servicio_id}
-                  nombre={p.prestador_nombre}
-                  oficio={t('hogar.railPaseos')}
-                  contexto={p.servicio_nombre}
-                  precio={`${formatearPrecio(p.precio)} · ${p.duracion_minutos} min`}
-                  perfil={perfiles[p.prestador_id]}
-                  /* ⚡ D-730 · la ventana viaja con el tap: la ficha la necesita
-                     entera para reservar, y estos valores ya venían por la URL
-                     de esta pantalla. `mascotaId` puede faltar y está bien —
-                     el paseo es el único oficio donde la mascota se elige en el
-                     último paso, y el flujo lo sabe. */
-                  contextoReserva={{
-                    oficio: 'paseo',
-                    fecha,
-                    hora,
-                    duracion: String(duracion),
-                    ...(modoPlan ? { plan: '1' } : {}),
-                    ...(mascotaIdParam !== null ? { mascotaId: mascotaIdParam } : {}),
-                  }}
-                />
+          {disponibles === 'cargando' ? (
+            <EsqueletoGrupo>
+              <View style={{ gap: spacing[3] }}>
+                <Esqueleto forma="bloque" ancho="100%" alto={64} />
+                <Esqueleto forma="bloque" ancho="100%" alto={64} />
               </View>
-            ))}
-          </Tarjeta>
-        )}
+            </EsqueletoGrupo>
+          ) : disponibles === 'error' ? (
+            <EstadoVacio
+              titulo={t('explorar.paseadoresError')}
+              descripcion={t('hogar.errorHistoriaDetalle')}
+              accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={cargar} />}
+            />
+          ) : disponibles.length === 0 ? (
+            // Peldaño 0 — nadie puede: vuelta barata al CUÁNDO.
+            <EstadoVacio
+              icono={<Icono nombre="paseo" tamano={48} />}
+              titulo={t('explorar.nadiePuede')}
+              descripcion={t('explorar.nadiePuedeDetalle')}
+              accion={<Boton variante="primario" etiqueta={t('explorar.probarOtroHorario')} onPress={() => router.back()} />}
+            />
+          ) : (
+            <Tarjeta relleno="ninguno">
+              {disponibles.map((p, i) => (
+                <View key={p.prestador_servicio_id}>
+                  {i > 0 ? <Separador /> : null}
+                  <PreviewPrestador
+                    prestadorId={p.prestador_id}
+                    ofertaId={p.prestador_servicio_id}
+                    nombre={p.prestador_nombre}
+                    oficio={t('hogar.railPaseos')}
+                    contexto={p.servicio_nombre}
+                    precio={`${formatearPrecio(p.precio)} · ${p.duracion_minutos} min`}
+                    perfil={perfiles[p.prestador_id]}
+                    /* ⚡ D-730 · la ventana viaja con el tap: la ficha la necesita
+                       entera para reservar, y estos valores ya venían por la URL
+                       de esta pantalla. `mascotaId` puede faltar y está bien —
+                       el paseo es el único oficio donde la mascota se elige en el
+                       último paso, y el flujo lo sabe. */
+                    contextoReserva={{
+                      oficio: 'paseo',
+                      fecha,
+                      hora,
+                      duracion: String(duracion),
+                      ...(modoPlan ? { plan: '1' } : {}),
+                      ...(mascotaIdParam !== null ? { mascotaId: mascotaIdParam } : {}),
+                    }}
+                  />
+                </View>
+              ))}
+            </Tarjeta>
+          )}
 
-        {/* 🔴 LA TRAZA, TAMBIÉN EN LA PANTALLA (P0-C 2º síntoma, D-726).
-            Estaba solo dentro de los modales, y **el síntoma nuevo no abre
-            ningún modal: te saca de la pantalla**. Un instrumento que solo se
-            ve cuando sale un cartel no puede medir un rebote silencioso —
-            L-221 en chiquito, otra vez. */}
+          {/* 🔴 LA TRAZA, TAMBIÉN EN LA PANTALLA (P0-C 2º síntoma, D-726).
+              Estaba solo dentro de los modales, y **el síntoma nuevo no abre
+              ningún modal: te saca de la pantalla**. Un instrumento que solo se
+              ve cuando sale un cartel no puede medir un rebote silencioso —
+              L-221 en chiquito, otra vez. */}
+        </View>
       </HojaContenido>
 
     </SafeAreaView>

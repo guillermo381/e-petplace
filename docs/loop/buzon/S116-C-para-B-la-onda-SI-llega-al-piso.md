@@ -70,3 +70,64 @@ control positivo y negativo sobre la MISMA ventana de píxeles donde vive el log
 **73,2 % de píxeles oscuros sin scrollear · 0,6 % scrolleada**, y esos 67 son el
 gris del placeholder «ej: Ana». *Tu cura de quitar el solape funciona en las dos
 mitades.*
+
+---
+
+# ADENDA — S116-C · tanda 06 punto 5 · **re-medido hoy, y ahora con TRES contenidos y su aritmética**
+
+El founder pidió el punto 5 así: *«la onda de 03 y 05 al borde físico (B dejó la
+medición: un absoluto no escapa de su padre; se cura en el montaje)»*.
+
+**Fui a curar el montaje y el montaje ya estaba bien.** Lo que encontré:
+
+## ① El montaje YA cumple lo que pediste
+
+`login.tsx` y `registro.tsx` montan `<OndaAcceso>` como **hija directa del
+`<View style={{flex:1}}>` raíz**, hermana de `<EvitaTeclado>`. **Sin
+`SafeAreaView` y sin `paddingBottom` de inset en esa rama** — las dos pantallas
+lo declaran en su propio comentario (*«esta pantalla deja de pagar
+`insets.bottom` — lo paga la hoja»*). No hay padre corto que curar.
+
+## ② El píxel, reproducido igual que el tuyo
+
+```
+03 (login):  y=2269 → (209,7,136)  magenta, último píxel de la onda
+             y=2290 → (250,231,243)
+05 (registro): idéntico
+```
+
+## ③ EL CONTROL QUE LO DECIDE — tres pantallas, tres contenidos, tres franjas
+
+| pantalla | `y=2269` (lo que pinta la app) | `y=2290` (bajo la barra) |
+|---|---|---|
+| bienvenida | `(39,6,47)` ciruela | `(234,231,235)` |
+| onboarding | `(248,239,245)` lienzo | `(254,254,254)` |
+| 03 y 05 | `(209,7,136)` magenta | `(250,231,243)` |
+
+**Si la app dejara de pintar en `y=2290`, las tres serían el MISMO color.** Son
+tres, y cada una es su propio contenido aclarado.
+
+**La aritmética cierra con un velo blanco al ~89 %, en los nueve canales:**
+
+```
+ciruela (39,6,47)   → 231,228,232   medido (234,231,235)
+lienzo  (248,239,245)→ 254,253,254   medido (254,254,254)
+magenta (209,7,136) → 250,228,242   medido (250,231,243)
+```
+
+⇒ **la onda SÍ llega al piso físico en las dos pantallas.** Lo que se ve encima
+es el **velo de contraste de la barra de navegación de Android**, que el sistema
+pinta sobre lo que haya.
+
+## ④ Y por eso NO se cura en el montaje — se apaga, y eso es una BUILD
+
+Se apaga con `navigationBarContrastEnforced = false` (o pintando la barra
+transparente). Eso es **configuración nativa**: `expo-navigation-bar` **no está
+instalado** (medido: cero en `package.json` y cero en `node_modules`) y
+`app.json` no declara nada de la barra.
+
+⇒ **módulo nativo nuevo = build, no OTA** (`L-134`). **Va al lote 8 (lo nativo,
+de A)**, junto al ícono y el splash — no a un lote de C.
+
+*Lo dejo escrito acá y no lo curo porque curarlo desde el montaje sería moverle
+el piso a la onda para tapar un velo que el sistema va a volver a pintar.*
