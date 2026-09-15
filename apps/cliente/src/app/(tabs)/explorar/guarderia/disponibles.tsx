@@ -74,7 +74,6 @@ import {
 import { formatearPrecio, fechaCortaMono, obtenerIdiomaActual } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
-import { CabezalOficio } from '@/components/reserva-piezas';
 import { PreviewPrestador } from '@/components/preview-prestador';
 import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 

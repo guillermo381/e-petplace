@@ -27,6 +27,8 @@ import { ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
+  HojaContenido,
+  Cabecera,
   AvatarMascota,
   Boton,
   Esqueleto,
@@ -60,15 +62,17 @@ import { useTraduccion } from '@/i18n';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
 import { FiltroMascotas } from '@/components/filtro-pills';
-import { CabezalOficio, GrillaElegir, PieReserva, SelectorDia, SinQuienReservar } from '@/components/reserva-piezas';
+import { GrillaElegir, PieReserva, SelectorDia, SinQuienReservar } from '@/components/reserva-piezas';
 import { vozServicio } from '@/lib/voz-servicio';
 import { formatearPrecio } from '@epetplace/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 function fechaLocalISO(d: Date): string {
   return new Intl.DateTimeFormat('en-CA').format(d);
 }
 
 export default function GroomingCuando() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const insets = useSafeAreaInsets();
@@ -266,335 +270,359 @@ export default function GroomingCuando() {
           acá nace ya sin ella. `capa` es OBLIGATORIA: grooming es CUIDADO
           (Ley 10) y el tsc obliga a declararlo, que es lo que impide que
           la taxonomía se herede por copiar-pegar. */}
-      <CabezalOficio
-        oficio="grooming"
-        capa="cuidado"
-        titulo={t('grooming.titulo')}
-        detalle={mascota !== null ? mascota.nombre : null}
-        onAtras={() => router.back()}
-        insetTop={insets.top}
-      />
-      <ScrollView contentContainerStyle={{ paddingTop: spacing[5], paddingBottom: spacing[8], gap: spacing[5] }}>
-        {mascotas === 'cargando' ? (
-          <EsqueletoGrupo>
-            <View style={{ gap: spacing[3] }}>
-              <Esqueleto forma="bloque" ancho="100%" alto={56} />
-              <Esqueleto forma="bloque" ancho="100%" alto={56} />
-              <Esqueleto forma="bloque" ancho="100%" alto={120} />
-            </View>
-          </EsqueletoGrupo>
-        ) : mascotas === 'error' ? (
-          <EstadoVacio
-            titulo={t('grooming.errorTitulo')}
-            descripcion={t('hogar.errorHistoriaDetalle')}
-            accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setMascotas('cargando')} />}
-          />
-        ) : faseEspecies.fase === 'error' ? (
-          // Ley 13 · el catálogo no llegó y se DICE. Degradar acá a
-          // «todas» sería re-abrir el agujero que esta tanda cierra.
-          <View style={{ paddingHorizontal: spacing[4] }}>
-            <EstadoVacio
-              registro="seccion"
-              titulo={t('explorar.catalogoErrorTitulo')}
-              descripcion={t('explorar.catalogoErrorDetalle')}
-            />
-          </View>
-        ) : faseEspecies.fase === 'listo' && elegibles.length === 0 ? (
-          /* 🔴 **DOS HECHOS, DOS VOCES (S112-C).** `elegibles.length === 0` es
-             verdadero con el hogar VACÍO y con un hogar que tiene mascotas que
-             no aplican, y hasta hoy los dos recibían la misma frase — la del
-             otro caso la mitad de las veces. El discriminador es `mascotas`,
-             que esta pantalla ya tenía en la mano. Ver `SinQuienReservar`. */
-          <SinQuienReservar
-            icono={<Icono nombre="grooming" tamano={48} />}
-            hayMascotas={Array.isArray(mascotas) && mascotas.length > 0}
-            tituloSinNadie={t('explorar.sinNadieTitulo')}
-            detalleSinNadie={t('explorar.sinNadieDetalle')}
-            tituloEspecie={t('grooming.sinElegiblesTitulo')}
-            detalleEspecie={t('grooming.sinElegiblesDetalle')}
-            etiquetaSinNadie={t('explorar.sinNadieAccion')}
-            etiquetaEspecie={t('paquete.sinPerrosAccion')}
-            onAccion={() => {
-              if (router.canDismiss()) router.dismissAll();
-              router.navigate('/hogar/agregar');
-            }}
-          />
-        ) : (
-          <>
-            {/* 0 · LA MASCOTA — el precio es SUYO (con una sola, elegida).
-                S61-A3 (rasgo 1 de la gramática canónica): el selector se
-                pinta SIEMPRE — la mascota elegida queda presente en
-                pantalla, no es un paso que se olvida. */}
-            {/* ⚠️ r39 · LA HILERA SE OCULTA CUANDO LA MASCOTA YA VIAJÓ.
-                NO era doble render (lo medí): grooming la pintaba SIEMPRE,
-                por la letra de S61-A3 —"el para-quién VISIBLE, la mascota
-                elegida presente en pantalla"—. Esa letra sigue siendo
-                buena y HOY LA CUMPLE OTRO: el CABEZAL muestra el nombre
-                de la mascota como su detalle. La presencia está; lo que
-                sobraba era el CONTROL, que además la volvía re-editable
-                en una pantalla donde ya está decidida (Ley 23).
-                Sobrevive para el deep-link sin param y el log vacío —
-                ahí sí es el eje ⓪ y la precondición de talla lo exige. */}
-            {mascota === null ? (
-              <View style={{ marginHorizontal: -spacing[4] }}>
-                <FiltroMascotas
-                  mascotas={elegibles.map((m) => ({
-                    id: m.id,
-                    nombre: m.nombre,
-                    // S91-C · LA ESCALERA DE LA CARA, reusada del Hogar: foto
-                    // propia → imagen de su RAZA → genérico de su especie. El
-                    // chip salía pelado porque se quedaba en el primer escalón,
-                    // y `raza_ruta_imagen` (A6) tenía UN solo consumidor.
-                    fotoUrl: caraDeMascotaPorRuta({
-                      especie: m.especie,
-                      rutaImagen: m.raza_ruta_imagen,
-                      fotoUri: fotos[m.id],
-                    }),
-                  }))}
-                  elegida={mascotaId}
-                  onElegir={setMascotaId}
-                />
-              </View>
-            ) : null}
+      {/* 🔴 **ACÁ VIVÍA `CabezalOficio`, UN TECHO LOCAL QUE NINGÚN GATE VEÍA.**
+          El censo del lote 3b contó esta pantalla como «sin cabecera» porque no
+          montaba `Encabezado` ni `Cabecera` — y sí tenía techo: una pieza LOCAL
+          (`components/reserva-piezas.tsx`) que pinta `bg.base` plano.
+          `verify:techos-locales` tampoco lo veía, y **lo dice en su propia
+          cabecera**: su marcador es `LinearGradient`, así que *«un techo hecho
+          con un `backgroundColor` plano no lo ve»*. Dos instrumentos con el
+          mismo punto ciego, y el hueco justo en el medio.
 
-            {mascota === null ? (
-              // S61-A5 cura 3 (letra founder): SIN mascota, la oferta se
-              // VE igual — comprables con su "desde" real (peldaño 0 de
-              // la misma verdad: la tesis "el precio de SU talla" no se
-              // contradice, se escalona) + la tira de días; los horarios
-              // dicen su porqué CON CAMINO (tap → el paso 0, arriba).
-              <>
-                {ofertaPublica === 'cargando' ? (
-                  <EsqueletoGrupo>
+          ⇒ estructura firmada: fondo ciruela + hoja.
+          ⚠️ **Lo que se pierde, dicho: el GLIFO DEL OFICIO.** El cabezal ponía
+          el glifo a la izquierda del título y `Cabecera` no tiene ese slot. El
+          nombre de la mascota sobrevive en `apoyo`. *No lo dibujo local —sería
+          volver a empezar—: va pedido a B.* */}
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada"
+                titulo={t('grooming.titulo')}
+                      apoyo={mascota !== null ? mascota.nombre : undefined}
+                onVolver={() => router.back()}
+                etiquetaVolver={t('comun.volver')}
+                presentacion="fondo"
+              />
+            </View>
+          }
+        >
+          {/* El relleno va ADENTRO de la hoja: en `scroll` envolvería a la hoja
+              y dejaría ciruela a los lados (recorrido 6). */}
+          <View style={{ paddingTop: spacing[5], paddingBottom: spacing[8], gap: spacing[5] }}>
+          {mascotas === 'cargando' ? (
+            <EsqueletoGrupo>
+              <View style={{ gap: spacing[3] }}>
+                <Esqueleto forma="bloque" ancho="100%" alto={56} />
+                <Esqueleto forma="bloque" ancho="100%" alto={56} />
+                <Esqueleto forma="bloque" ancho="100%" alto={120} />
+              </View>
+            </EsqueletoGrupo>
+          ) : mascotas === 'error' ? (
+            <EstadoVacio
+              titulo={t('grooming.errorTitulo')}
+              descripcion={t('hogar.errorHistoriaDetalle')}
+              accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setMascotas('cargando')} />}
+            />
+          ) : faseEspecies.fase === 'error' ? (
+            // Ley 13 · el catálogo no llegó y se DICE. Degradar acá a
+            // «todas» sería re-abrir el agujero que esta tanda cierra.
+            <View style={{ paddingHorizontal: spacing[4] }}>
+              <EstadoVacio
+                registro="seccion"
+                titulo={t('explorar.catalogoErrorTitulo')}
+                descripcion={t('explorar.catalogoErrorDetalle')}
+              />
+            </View>
+          ) : faseEspecies.fase === 'listo' && elegibles.length === 0 ? (
+            /* 🔴 **DOS HECHOS, DOS VOCES (S112-C).** `elegibles.length === 0` es
+               verdadero con el hogar VACÍO y con un hogar que tiene mascotas que
+               no aplican, y hasta hoy los dos recibían la misma frase — la del
+               otro caso la mitad de las veces. El discriminador es `mascotas`,
+               que esta pantalla ya tenía en la mano. Ver `SinQuienReservar`. */
+            <SinQuienReservar
+              icono={<Icono nombre="grooming" tamano={48} />}
+              hayMascotas={Array.isArray(mascotas) && mascotas.length > 0}
+              tituloSinNadie={t('explorar.sinNadieTitulo')}
+              detalleSinNadie={t('explorar.sinNadieDetalle')}
+              tituloEspecie={t('grooming.sinElegiblesTitulo')}
+              detalleEspecie={t('grooming.sinElegiblesDetalle')}
+              etiquetaSinNadie={t('explorar.sinNadieAccion')}
+              etiquetaEspecie={t('paquete.sinPerrosAccion')}
+              onAccion={() => {
+                if (router.canDismiss()) router.dismissAll();
+                router.navigate('/hogar/agregar');
+              }}
+            />
+          ) : (
+            <>
+              {/* 0 · LA MASCOTA — el precio es SUYO (con una sola, elegida).
+                  S61-A3 (rasgo 1 de la gramática canónica): el selector se
+                  pinta SIEMPRE — la mascota elegida queda presente en
+                  pantalla, no es un paso que se olvida. */}
+              {/* ⚠️ r39 · LA HILERA SE OCULTA CUANDO LA MASCOTA YA VIAJÓ.
+                  NO era doble render (lo medí): grooming la pintaba SIEMPRE,
+                  por la letra de S61-A3 —"el para-quién VISIBLE, la mascota
+                  elegida presente en pantalla"—. Esa letra sigue siendo
+                  buena y HOY LA CUMPLE OTRO: el CABEZAL muestra el nombre
+                  de la mascota como su detalle. La presencia está; lo que
+                  sobraba era el CONTROL, que además la volvía re-editable
+                  en una pantalla donde ya está decidida (Ley 23).
+                  Sobrevive para el deep-link sin param y el log vacío —
+                  ahí sí es el eje ⓪ y la precondición de talla lo exige. */}
+              {mascota === null ? (
+                <View style={{ marginHorizontal: -spacing[4] }}>
+                  <FiltroMascotas
+                    mascotas={elegibles.map((m) => ({
+                      id: m.id,
+                      nombre: m.nombre,
+                      // S91-C · LA ESCALERA DE LA CARA, reusada del Hogar: foto
+                      // propia → imagen de su RAZA → genérico de su especie. El
+                      // chip salía pelado porque se quedaba en el primer escalón,
+                      // y `raza_ruta_imagen` (A6) tenía UN solo consumidor.
+                      fotoUrl: caraDeMascotaPorRuta({
+                        especie: m.especie,
+                        rutaImagen: m.raza_ruta_imagen,
+                        fotoUri: fotos[m.id],
+                      }),
+                    }))}
+                    elegida={mascotaId}
+                    onElegir={setMascotaId}
+                  />
+                </View>
+              ) : null}
+
+              {mascota === null ? (
+                // S61-A5 cura 3 (letra founder): SIN mascota, la oferta se
+                // VE igual — comprables con su "desde" real (peldaño 0 de
+                // la misma verdad: la tesis "el precio de SU talla" no se
+                // contradice, se escalona) + la tira de días; los horarios
+                // dicen su porqué CON CAMINO (tap → el paso 0, arriba).
+                <>
+                  {ofertaPublica === 'cargando' ? (
+                    <EsqueletoGrupo>
+                      <Esqueleto forma="bloque" ancho="100%" alto={56} />
+                    </EsqueletoGrupo>
+                  ) : Array.isArray(ofertaPublica) && ofertaPublica.length > 0 ? (
+                    <View style={{ gap: spacing[2], paddingHorizontal: spacing[5] }}>
+                      <SelectorSegmentado
+                        // r38-bis · `proposito="eleccion"`: B terminó la
+                        // pieza (r37) y acá se consume en su modo correcto.
+                        // Sin esto el control queda en 'vista', que es el
+                        // default para los consumidores viejos — y este eje
+                        // NO cambia de vista: ELIGE PRODUCTO. El modo trae
+                        // la pata y el magenta; el rol deja de mentir.
+                        proposito="eleccion"
+                        etiqueta={t('grooming.servicioEtiqueta')}
+                        segmentos={ofertaPublica.map((o) => ({
+                          codigo: o.tipo_servicio,
+                          etiqueta: vozServicio(t, o.tipo_servicio) ?? o.tipo_servicio,
+                        }))}
+                        activo={tipoServicio ?? ''}
+                        onCambio={setTipoServicio}
+                      />
+                      {(() => {
+                        const elegida = ofertaPublica.find((o) => o.tipo_servicio === tipoServicio) ?? null;
+                        return elegida !== null ? (
+                          <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+                            {t('grooming.precioDesdePublico', { precio: formatearPrecio(elegida.desde_precio) })}
+                          </Text>
+                        ) : null;
+                      })()}
+                    </View>
+                  ) : null}
+
+                  <View style={{ gap: spacing[2] }}>
+                    <View style={{ paddingHorizontal: spacing[5] }}>
+                      <Texto variante="apoyo">{t('explorar.cuandoDia')}</Texto>
+                    </View>
+                    {/* 🔴 DÍAS CERRADOS: NO VIAJAN A GROOMING, y no es olvido.
+                        `obtenerDiasCerrados` es POR PRESTADOR y la oferta de
+                        grooming llega AGREGADA (desde_precio/varia) — no
+                        nombra a los prestadores, así que la intersección que
+                        paseo hace no se puede computar acá. Se declara y no
+                        se inventa: la prop queda lista para cuando exista el
+                        lector. Pedido a A, secuenciado. */}
+                    <SelectorDia
+                      dias={dias.map((d) => ({ iso: d.iso, dia: d.diaCorto, numero: d.iso.slice(8, 10) }))}
+                      elegido={dia}
+                      cerrados={cerradosISO}
+                      etiquetaCerrado={t('explorar.cuandoDiaCerrado')}
+                      onElegir={setDia}
+                    />
+                  </View>
+
+                  {/* S73 hallazgo founder: el botón-scroll MURIÓ (control
+                      muerto — el selector queda en pantalla en los
+                      viewports reales, ~3 bloques arriba; la voz del
+                      detalle ya apunta a él: "Elígela arriba…"). */}
+                  <EstadoVacio
+                    registro="seccion"
+                    titulo={t('grooming.horariosSinMascotaTitulo')}
+                    descripcion={t('grooming.horariosSinMascotaDetalle')}
+                  />
+                </>
+              ) : !perfilCompleto ? (
+                // la Hoja está abierta; si la cerró sin declarar, la
+                // invitación honesta queda con su camino (jamás precio
+                // adivinado, jamás final mudo)
+                <EstadoVacio
+                  registro="seccion"
+                  titulo={t('grooming.tallaFaltaTitulo')}
+                  descripcion={t('grooming.tallaFaltaDetalle', { nombre: mascota.nombre })}
+                  accion={<Boton variante="primario" etiqueta={t('grooming.tallaDeclarar')} onPress={() => setTallaHoja(true)} />}
+                />
+              ) : oferta === 'cargando' || oferta === null ? (
+                <EsqueletoGrupo>
+                  <View style={{ gap: spacing[3] }}>
                     <Esqueleto forma="bloque" ancho="100%" alto={56} />
-                  </EsqueletoGrupo>
-                ) : Array.isArray(ofertaPublica) && ofertaPublica.length > 0 ? (
+                    <Esqueleto forma="bloque" ancho="100%" alto={100} />
+                  </View>
+                </EsqueletoGrupo>
+              ) : oferta === 'error' ? (
+                <EstadoVacio
+                  registro="seccion"
+                  titulo={t('grooming.errorTitulo')}
+                  accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setReintento((n) => n + 1)} />}
+                />
+              ) : oferta.length === 0 ? (
+                // Peldaño 0 — sin groomers cobrables con oferta activa.
+                <EstadoVacio
+                  icono={<Icono nombre="grooming" tamano={48} />}
+                  titulo={t('grooming.vacioTitulo')}
+                  descripcion={t('grooming.vacioDetalle')}
+                />
+              ) : (
+                <>
+                  {/* 1 · EL SERVICIO — los dos comprables del menú (§1),
+                      con el "desde" YA resuelto por la talla del perfil */}
                   <View style={{ gap: spacing[2], paddingHorizontal: spacing[5] }}>
                     <SelectorSegmentado
-                      // r38-bis · `proposito="eleccion"`: B terminó la
-                      // pieza (r37) y acá se consume en su modo correcto.
-                      // Sin esto el control queda en 'vista', que es el
-                      // default para los consumidores viejos — y este eje
-                      // NO cambia de vista: ELIGE PRODUCTO. El modo trae
-                      // la pata y el magenta; el rol deja de mentir.
-                      proposito="eleccion"
+                        // r38-bis · `proposito="eleccion"`: B terminó la
+                        // pieza (r37) y acá se consume en su modo correcto.
+                        // Sin esto el control queda en 'vista', que es el
+                        // default para los consumidores viejos — y este eje
+                        // NO cambia de vista: ELIGE PRODUCTO. El modo trae
+                        // la pata y el magenta; el rol deja de mentir.
+                        proposito="eleccion"
                       etiqueta={t('grooming.servicioEtiqueta')}
-                      segmentos={ofertaPublica.map((o) => ({
+                      segmentos={oferta.map((o) => ({
                         codigo: o.tipo_servicio,
                         etiqueta: vozServicio(t, o.tipo_servicio) ?? o.tipo_servicio,
                       }))}
                       activo={tipoServicio ?? ''}
                       onCambio={setTipoServicio}
                     />
-                    {(() => {
-                      const elegida = ofertaPublica.find((o) => o.tipo_servicio === tipoServicio) ?? null;
-                      return elegida !== null ? (
-                        <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
-                          {t('grooming.precioDesdePublico', { precio: formatearPrecio(elegida.desde_precio) })}
-                        </Text>
-                      ) : null;
-                    })()}
+                    {servicioElegido !== null ? (
+                      <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+                        {servicioElegido.varia
+                          ? t('grooming.precioDesde', { nombre: mascota.nombre, precio: formatearPrecio(servicioElegido.desde_precio) })
+                          : t('grooming.precioExacto', { nombre: mascota.nombre, precio: formatearPrecio(servicioElegido.desde_precio) })}
+                      </Text>
+                    ) : null}
                   </View>
-                ) : null}
 
-                <View style={{ gap: spacing[2] }}>
-                  <View style={{ paddingHorizontal: spacing[5] }}>
-                    <Texto variante="apoyo">{t('explorar.cuandoDia')}</Texto>
-                  </View>
-                  {/* 🔴 DÍAS CERRADOS: NO VIAJAN A GROOMING, y no es olvido.
-                      `obtenerDiasCerrados` es POR PRESTADOR y la oferta de
-                      grooming llega AGREGADA (desde_precio/varia) — no
-                      nombra a los prestadores, así que la intersección que
-                      paseo hace no se puede computar acá. Se declara y no
-                      se inventa: la prop queda lista para cuando exista el
-                      lector. Pedido a A, secuenciado. */}
-                  <SelectorDia
-                    dias={dias.map((d) => ({ iso: d.iso, dia: d.diaCorto, numero: d.iso.slice(8, 10) }))}
-                    elegido={dia}
-                    cerrados={cerradosISO}
-                    etiquetaCerrado={t('explorar.cuandoDiaCerrado')}
-                    onElegir={setDia}
-                  />
-                </View>
-
-                {/* S73 hallazgo founder: el botón-scroll MURIÓ (control
-                    muerto — el selector queda en pantalla en los
-                    viewports reales, ~3 bloques arriba; la voz del
-                    detalle ya apunta a él: "Elígela arriba…"). */}
-                <EstadoVacio
-                  registro="seccion"
-                  titulo={t('grooming.horariosSinMascotaTitulo')}
-                  descripcion={t('grooming.horariosSinMascotaDetalle')}
-                />
-              </>
-            ) : !perfilCompleto ? (
-              // la Hoja está abierta; si la cerró sin declarar, la
-              // invitación honesta queda con su camino (jamás precio
-              // adivinado, jamás final mudo)
-              <EstadoVacio
-                registro="seccion"
-                titulo={t('grooming.tallaFaltaTitulo')}
-                descripcion={t('grooming.tallaFaltaDetalle', { nombre: mascota.nombre })}
-                accion={<Boton variante="primario" etiqueta={t('grooming.tallaDeclarar')} onPress={() => setTallaHoja(true)} />}
-              />
-            ) : oferta === 'cargando' || oferta === null ? (
-              <EsqueletoGrupo>
-                <View style={{ gap: spacing[3] }}>
-                  <Esqueleto forma="bloque" ancho="100%" alto={56} />
-                  <Esqueleto forma="bloque" ancho="100%" alto={100} />
-                </View>
-              </EsqueletoGrupo>
-            ) : oferta === 'error' ? (
-              <EstadoVacio
-                registro="seccion"
-                titulo={t('grooming.errorTitulo')}
-                accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setReintento((n) => n + 1)} />}
-              />
-            ) : oferta.length === 0 ? (
-              // Peldaño 0 — sin groomers cobrables con oferta activa.
-              <EstadoVacio
-                icono={<Icono nombre="grooming" tamano={48} />}
-                titulo={t('grooming.vacioTitulo')}
-                descripcion={t('grooming.vacioDetalle')}
-              />
-            ) : (
-              <>
-                {/* 1 · EL SERVICIO — los dos comprables del menú (§1),
-                    con el "desde" YA resuelto por la talla del perfil */}
-                <View style={{ gap: spacing[2], paddingHorizontal: spacing[5] }}>
-                  <SelectorSegmentado
-                      // r38-bis · `proposito="eleccion"`: B terminó la
-                      // pieza (r37) y acá se consume en su modo correcto.
-                      // Sin esto el control queda en 'vista', que es el
-                      // default para los consumidores viejos — y este eje
-                      // NO cambia de vista: ELIGE PRODUCTO. El modo trae
-                      // la pata y el magenta; el rol deja de mentir.
-                      proposito="eleccion"
-                    etiqueta={t('grooming.servicioEtiqueta')}
-                    segmentos={oferta.map((o) => ({
-                      codigo: o.tipo_servicio,
-                      etiqueta: vozServicio(t, o.tipo_servicio) ?? o.tipo_servicio,
-                    }))}
-                    activo={tipoServicio ?? ''}
-                    onCambio={setTipoServicio}
-                  />
-                  {servicioElegido !== null ? (
-                    <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
-                      {servicioElegido.varia
-                        ? t('grooming.precioDesde', { nombre: mascota.nombre, precio: formatearPrecio(servicioElegido.desde_precio) })
-                        : t('grooming.precioExacto', { nombre: mascota.nombre, precio: formatearPrecio(servicioElegido.desde_precio) })}
-                    </Text>
+                  {/* 1b · EL DÓNDE (S61-A6, D-392): la modalidad se elige
+                      junto al servicio — SOLO si la oferta agregada tiene
+                      AMBAS (groomer con una sola = no se pregunta y la
+                      cita la porta igual). El recargo se DECLARA en el
+                      chip (el mínimo real entre groomers con domicilio). */}
+                  {oferta.some((o) => o.atiende_domicilio) && oferta.some((o) => o.atiende_local) ? (
+                    /* ⚠️ r34 · INTERRUPTOR REAL, no dos opciones. El par
+                       local/domicilio NO son dos alternativas simétricas:
+                       LOCAL es el default del oficio y domicilio es un
+                       AGREGADO que se PRENDE y que cuesta más. Dos chips
+                       mienten sobre eso — presentan como equivalentes lo
+                       que no lo es, y obligan a elegir algo que ya está
+                       elegido. El interruptor dice la verdad de la
+                       estructura: hay un estado normal y uno que sumás.
+                       El recargo se DECLARA en el detalle, con su "desde"
+                       cuando varía (S61-A13: cero número exacto sobre un
+                       agregado que miente). */
+                    <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
+                      <Interruptor
+                        etiqueta={t('grooming.modalidadDomicilio')}
+                        encendido={modalidad === 'domicilio'}
+                        onCambio={(v) => setModalidad(v ? 'domicilio' : 'local')}
+                      />
+                      {/* el recargo va AL LADO y no adentro: `Interruptor` no
+                          tiene slot de detalle (medido, no supuesto) y no se
+                          le inventa uno desde una pantalla. */}
+                      {(() => {
+                        const o = servicioElegido ?? oferta[0];
+                        const recargo = o?.recargo_domicilio_desde ?? null;
+                        if (recargo === null || recargo <= 0) return null;
+                        return (
+                          <Texto variante="apoyo">
+                            {o?.recargo_domicilio_varia
+                              ? t('grooming.modalidadDomicilioRecargoDesde', { recargo: formatearPrecio(recargo) })
+                              : t('grooming.modalidadDomicilioRecargo', { recargo: formatearPrecio(recargo) })}
+                          </Texto>
+                        );
+                      })()}
+                    </View>
                   ) : null}
-                </View>
 
-                {/* 1b · EL DÓNDE (S61-A6, D-392): la modalidad se elige
-                    junto al servicio — SOLO si la oferta agregada tiene
-                    AMBAS (groomer con una sola = no se pregunta y la
-                    cita la porta igual). El recargo se DECLARA en el
-                    chip (el mínimo real entre groomers con domicilio). */}
-                {oferta.some((o) => o.atiende_domicilio) && oferta.some((o) => o.atiende_local) ? (
-                  /* ⚠️ r34 · INTERRUPTOR REAL, no dos opciones. El par
-                     local/domicilio NO son dos alternativas simétricas:
-                     LOCAL es el default del oficio y domicilio es un
-                     AGREGADO que se PRENDE y que cuesta más. Dos chips
-                     mienten sobre eso — presentan como equivalentes lo
-                     que no lo es, y obligan a elegir algo que ya está
-                     elegido. El interruptor dice la verdad de la
-                     estructura: hay un estado normal y uno que sumás.
-                     El recargo se DECLARA en el detalle, con su "desde"
-                     cuando varía (S61-A13: cero número exacto sobre un
-                     agregado que miente). */
-                  <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
-                    <Interruptor
-                      etiqueta={t('grooming.modalidadDomicilio')}
-                      encendido={modalidad === 'domicilio'}
-                      onCambio={(v) => setModalidad(v ? 'domicilio' : 'local')}
-                    />
-                    {/* el recargo va AL LADO y no adentro: `Interruptor` no
-                        tiene slot de detalle (medido, no supuesto) y no se
-                        le inventa uno desde una pantalla. */}
-                    {(() => {
-                      const o = servicioElegido ?? oferta[0];
-                      const recargo = o?.recargo_domicilio_desde ?? null;
-                      if (recargo === null || recargo <= 0) return null;
-                      return (
-                        <Texto variante="apoyo">
-                          {o?.recargo_domicilio_varia
-                            ? t('grooming.modalidadDomicilioRecargoDesde', { recargo: formatearPrecio(recargo) })
-                            : t('grooming.modalidadDomicilioRecargo', { recargo: formatearPrecio(recargo) })}
-                        </Texto>
-                      );
-                    })()}
-                  </View>
-                ) : null}
-
-                {/* 2 · DÍA — la tira horizontal (hoy+13) */}
-                <View style={{ gap: spacing[2] }}>
-                  <View style={{ paddingHorizontal: spacing[5] }}>
-                    <Texto variante="apoyo">{t('explorar.cuandoDia')}</Texto>
-                  </View>
-                  {/* 🔴 DÍAS CERRADOS: NO VIAJAN A GROOMING, y no es olvido.
-                      `obtenerDiasCerrados` es POR PRESTADOR y la oferta de
-                      grooming llega AGREGADA (desde_precio/varia) — no
-                      nombra a los prestadores, así que la intersección que
-                      paseo hace no se puede computar acá. Se declara y no
-                      se inventa: la prop queda lista para cuando exista el
-                      lector. Pedido a A, secuenciado. */}
-                  <SelectorDia
-                    dias={dias.map((d) => ({ iso: d.iso, dia: d.diaCorto, numero: d.iso.slice(8, 10) }))}
-                    elegido={dia}
-                    cerrados={cerradosISO}
-                    etiquetaCerrado={t('explorar.cuandoDiaCerrado')}
-                    onElegir={setDia}
-                  />
-                </View>
-
-                {/* 2b · GRILLA de inicios reales — la duración la puso
-                    cada groomer (servicio × talla), jamás el dueño */}
-                {inicios === 'cargando' ? (
-                  <EsqueletoGrupo>
-                    <Esqueleto forma="bloque" ancho="100%" alto={100} />
-                  </EsqueletoGrupo>
-                ) : inicios === 'error' ? (
-                  <EstadoVacio
-                    registro="seccion"
-                    titulo={t('grooming.errorTitulo')}
-                    accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setReintento((n) => n + 1)} />}
-                  />
-                ) : inicios.length === 0 ? (
-                  // §6ter (S61-A5 cura 1): camino tocable — espejo del paseo.
-                  <EstadoVacio
-                    registro="seccion"
-                    titulo={diaElegidoCerrado ? t('explorar.cuandoDiaCerrado') : t('grooming.sinInicios')}
-                    descripcion={diaElegidoCerrado ? t('explorar.cuandoDiaCerradoPorque') : undefined}
-                    accion={
-                      diaSiguiente !== null ? (
-                        <Boton
-                          variante="compacto"
-                          etiqueta={t('explorar.sinIniciosProbarDia', { dia: diaSiguiente.corta })}
-                          onPress={() => setDia(diaSiguiente.iso)}
-                        />
-                      ) : undefined
-                    }
-                  />
-                ) : (
+                  {/* 2 · DÍA — la tira horizontal (hoy+13) */}
                   <View style={{ gap: spacing[2] }}>
                     <View style={{ paddingHorizontal: spacing[5] }}>
-                      <Texto variante="apoyo">{t('explorar.cuandoHora')}</Texto>
+                      <Texto variante="apoyo">{t('explorar.cuandoDia')}</Texto>
                     </View>
-                    <GrillaElegir
-                      opciones={inicios.map((h) => ({ codigo: h, etiqueta: h }))}
-                      elegida={hora}
-                      onElegir={setHora}
+                    {/* 🔴 DÍAS CERRADOS: NO VIAJAN A GROOMING, y no es olvido.
+                        `obtenerDiasCerrados` es POR PRESTADOR y la oferta de
+                        grooming llega AGREGADA (desde_precio/varia) — no
+                        nombra a los prestadores, así que la intersección que
+                        paseo hace no se puede computar acá. Se declara y no
+                        se inventa: la prop queda lista para cuando exista el
+                        lector. Pedido a A, secuenciado. */}
+                    <SelectorDia
+                      dias={dias.map((d) => ({ iso: d.iso, dia: d.diaCorto, numero: d.iso.slice(8, 10) }))}
+                      elegido={dia}
+                      cerrados={cerradosISO}
+                      etiquetaCerrado={t('explorar.cuandoDiaCerrado')}
+                      onElegir={setDia}
                     />
                   </View>
-                )}
 
-              </>
-            )}
-          </>
-        )}
-      </ScrollView>
+                  {/* 2b · GRILLA de inicios reales — la duración la puso
+                      cada groomer (servicio × talla), jamás el dueño */}
+                  {inicios === 'cargando' ? (
+                    <EsqueletoGrupo>
+                      <Esqueleto forma="bloque" ancho="100%" alto={100} />
+                    </EsqueletoGrupo>
+                  ) : inicios === 'error' ? (
+                    <EstadoVacio
+                      registro="seccion"
+                      titulo={t('grooming.errorTitulo')}
+                      accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setReintento((n) => n + 1)} />}
+                    />
+                  ) : inicios.length === 0 ? (
+                    // §6ter (S61-A5 cura 1): camino tocable — espejo del paseo.
+                    <EstadoVacio
+                      registro="seccion"
+                      titulo={diaElegidoCerrado ? t('explorar.cuandoDiaCerrado') : t('grooming.sinInicios')}
+                      descripcion={diaElegidoCerrado ? t('explorar.cuandoDiaCerradoPorque') : undefined}
+                      accion={
+                        diaSiguiente !== null ? (
+                          <Boton
+                            variante="compacto"
+                            etiqueta={t('explorar.sinIniciosProbarDia', { dia: diaSiguiente.corta })}
+                            onPress={() => setDia(diaSiguiente.iso)}
+                          />
+                        ) : undefined
+                      }
+                    />
+                  ) : (
+                    <View style={{ gap: spacing[2] }}>
+                      <View style={{ paddingHorizontal: spacing[5] }}>
+                        <Texto variante="apoyo">{t('explorar.cuandoHora')}</Texto>
+                      </View>
+                      <GrillaElegir
+                        opciones={inicios.map((h) => ({ codigo: h, etiqueta: h }))}
+                        elegida={hora}
+                        onElegir={setHora}
+                      />
+                    </View>
+                  )}
+
+                </>
+              )}
+            </>
+          )}
+        </View>
+      </HojaContenido>
 
       {/* r34 · EL PIE, COMO PASEO: precio a la izquierda con su "desde",
           CTA a la derecha, fijo. La escalera del precio (S61-A13) manda:

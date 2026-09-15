@@ -39,6 +39,8 @@ import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
+  HojaContenido,
+  Cabecera,
   AvatarMascota,
   Boton,
   Encabezado,
@@ -67,15 +69,17 @@ import { useTraduccion } from '@/i18n';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
 import { FiltroMascotas } from '@/components/filtro-pills';
-import { CabezalOficio, GrillaElegir, PieReserva, SelectorDia, SinQuienReservar } from '@/components/reserva-piezas';
+import { GrillaElegir, PieReserva, SelectorDia, SinQuienReservar } from '@/components/reserva-piezas';
 import { vozServicio } from '@/lib/voz-servicio';
 import { formatearPrecio } from '@epetplace/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 function fechaLocalISO(d: Date): string {
   return new Intl.DateTimeFormat('en-CA').format(d);
 }
 
 export default function VeterinariaCuando() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const insets = useSafeAreaInsets();
@@ -305,231 +309,255 @@ export default function VeterinariaCuando() {
        oficios que no es CUIDADO (Ley 10), o sea la primera consumidora
        real de la prop obligatoria que nació en r30 justamente para esto. */
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <CabezalOficio
-        oficio="veterinaria"
-        capa="salud"
-        titulo={t('veterinaria.titulo')}
-        detalle={mascota !== null ? mascota.nombre : null}
-        onAtras={() => router.back()}
-        insetTop={insets.top}
-      />
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[5] }}>
-        {mascotas === 'cargando' ? (
-          <EsqueletoGrupo>
-            <View style={{ gap: spacing[3] }}>
-              <Esqueleto forma="bloque" ancho="100%" alto={56} />
-              <Esqueleto forma="bloque" ancho="100%" alto={56} />
-              <Esqueleto forma="bloque" ancho="100%" alto={120} />
-            </View>
-          </EsqueletoGrupo>
-        ) : mascotas === 'error' ? (
-          <EstadoVacio
-            titulo={t('veterinaria.errorTitulo')}
-            descripcion={t('hogar.errorHistoriaDetalle')}
-            accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setMascotas('cargando')} />}
-          />
-        ) : faseEspecies.fase === 'error' ? (
-          // Ley 13 · el catálogo no llegó y se DICE. Degradar acá a
-          // «todas» sería re-abrir el agujero que esta tanda cierra.
-          <View style={{ paddingHorizontal: spacing[4] }}>
-            <EstadoVacio
-              registro="seccion"
-              titulo={t('explorar.catalogoErrorTitulo')}
-              descripcion={t('explorar.catalogoErrorDetalle')}
-            />
-          </View>
-        ) : faseEspecies.fase === 'listo' && elegibles.length === 0 ? (
-          /* 🔴 **DOS HECHOS, DOS VOCES (S112-C).** `elegibles.length === 0` es
-             verdadero con el hogar VACÍO y con un hogar que tiene mascotas que
-             no aplican, y hasta hoy los dos recibían la misma frase — la del
-             otro caso la mitad de las veces. El discriminador es `mascotas`,
-             que esta pantalla ya tenía en la mano. Ver `SinQuienReservar`. */
-          <SinQuienReservar
-            icono={<Icono nombre="veterinaria" tamano={48} />}
-            hayMascotas={Array.isArray(mascotas) && mascotas.length > 0}
-            tituloSinNadie={t('explorar.sinNadieTitulo')}
-            detalleSinNadie={t('explorar.sinNadieDetalle')}
-            tituloEspecie={t('veterinaria.sinMascotasTitulo')}
-            detalleEspecie={t('veterinaria.sinMascotasDetalle')}
-            etiquetaSinNadie={t('explorar.sinNadieAccion')}
-            etiquetaEspecie={t('paquete.sinPerrosAccion')}
-            onAccion={() => {
-              if (router.canDismiss()) router.dismissAll();
-              router.navigate('/hogar/agregar');
-            }}
-          />
-        ) : (
-          <>
-            {/* ⚠️ r33 · EL PASO DE ELEGIR MASCOTA YA NO PRESIDE: la
-                mascota VIAJA DESDE EL LOG y un dato elegido no se vuelve a
-                preguntar (Ley 23). Sobrevive para DOS casos reales, no uno:
-                ① el deep-link sin param · ② el log VACÍO, cuyo CTA entra
-                acá sin mascota — y ahí preguntar es lo correcto, porque es
-                lo que la puerta NO sabe.
-                ⚠️ r34 · Y SUS CHIPS SON LOS NUEVOS. Conservaba los
-                viejos justamente porque este camino no se recorre: un
-                resto no sobrevive por difícil, sobrevive por INVISIBLE.
-                (Censo del founder confirmado y era UNIFORME: los CUATRO
-                oficios lo tenían, no solo veterinaria.) */}
-            {mascota === null ? (
-              <View style={{ marginHorizontal: -spacing[4] }}>
-                <FiltroMascotas
-                  mascotas={elegibles.map((m) => ({
-                    id: m.id,
-                    nombre: m.nombre,
-                    // S91-C · LA ESCALERA DE LA CARA, reusada del Hogar: foto
-                    // propia → imagen de su RAZA → genérico de su especie. El
-                    // chip salía pelado porque se quedaba en el primer escalón,
-                    // y `raza_ruta_imagen` (A6) tenía UN solo consumidor.
-                    fotoUrl: caraDeMascotaPorRuta({
-                      especie: m.especie,
-                      rutaImagen: m.raza_ruta_imagen,
-                      fotoUri: fotos[m.id],
-                    }),
-                  }))}
-                  elegida={mascotaId}
-                  onElegir={setMascotaId}
-                />
-              </View>
-            ) : null}
+      {/* 🔴 **ACÁ VIVÍA `CabezalOficio`, UN TECHO LOCAL QUE NINGÚN GATE VEÍA.**
+          El censo del lote 3b contó esta pantalla como «sin cabecera» porque no
+          montaba `Encabezado` ni `Cabecera` — y sí tenía techo: una pieza LOCAL
+          (`components/reserva-piezas.tsx`) que pinta `bg.base` plano.
+          `verify:techos-locales` tampoco lo veía, y **lo dice en su propia
+          cabecera**: su marcador es `LinearGradient`, así que *«un techo hecho
+          con un `backgroundColor` plano no lo ve»*. Dos instrumentos con el
+          mismo punto ciego, y el hueco justo en el medio.
 
-            {mascota === null ? (
-              // S73 hallazgo founder: el botón que scrolleaba MURIÓ — el
-              // selector vive INMEDIATAMENTE arriba (cero bloques entre
-              // medio): un botón que duplica un control visible es
-              // decoración (Chanel), y su scroll era acción invisible =
-              // control muerto. 17.5 se cumple: el camino ES el control
-              // visible, y la voz apunta a él.
-              <EstadoVacio registro="seccion" titulo={t('veterinaria.eligeMascota')} />
-            ) : oferta === 'cargando' || oferta === null ? (
-              <EsqueletoGrupo>
-                <View style={{ gap: spacing[3] }}>
-                  <Esqueleto forma="bloque" ancho="100%" alto={56} />
-                  <Esqueleto forma="bloque" ancho="100%" alto={100} />
-                </View>
-              </EsqueletoGrupo>
-            ) : oferta === 'error' ? (
+          ⇒ estructura firmada: fondo ciruela + hoja.
+          ⚠️ **Lo que se pierde, dicho: el GLIFO DEL OFICIO.** El cabezal ponía
+          el glifo a la izquierda del título y `Cabecera` no tiene ese slot. El
+          nombre de la mascota sobrevive en `apoyo`. *No lo dibujo local —sería
+          volver a empezar—: va pedido a B.* */}
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada"
+                titulo={t('veterinaria.titulo')}
+                      apoyo={mascota !== null ? mascota.nombre : undefined}
+                onVolver={() => router.back()}
+                etiquetaVolver={t('comun.volver')}
+                presentacion="fondo"
+              />
+            </View>
+          }
+        >
+          {/* El relleno va ADENTRO de la hoja: en `scroll` envolvería a la hoja
+              y dejaría ciruela a los lados (recorrido 6). */}
+          <View style={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[5] }}>
+          {mascotas === 'cargando' ? (
+            <EsqueletoGrupo>
+              <View style={{ gap: spacing[3] }}>
+                <Esqueleto forma="bloque" ancho="100%" alto={56} />
+                <Esqueleto forma="bloque" ancho="100%" alto={56} />
+                <Esqueleto forma="bloque" ancho="100%" alto={120} />
+              </View>
+            </EsqueletoGrupo>
+          ) : mascotas === 'error' ? (
+            <EstadoVacio
+              titulo={t('veterinaria.errorTitulo')}
+              descripcion={t('hogar.errorHistoriaDetalle')}
+              accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setMascotas('cargando')} />}
+            />
+          ) : faseEspecies.fase === 'error' ? (
+            // Ley 13 · el catálogo no llegó y se DICE. Degradar acá a
+            // «todas» sería re-abrir el agujero que esta tanda cierra.
+            <View style={{ paddingHorizontal: spacing[4] }}>
               <EstadoVacio
                 registro="seccion"
-                titulo={t('veterinaria.errorTitulo')}
-                accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setReintento((n) => n + 1)} />}
+                titulo={t('explorar.catalogoErrorTitulo')}
+                descripcion={t('explorar.catalogoErrorDetalle')}
               />
-            ) : oferta.length === 0 ? (
-              // Peldaño 0 — sin vets cobrables con oferta reservable.
-              <EstadoVacio
-                icono={<Icono nombre="veterinaria" tamano={48} />}
-                titulo={t('veterinaria.vacioTitulo')}
-                descripcion={t('veterinaria.vacioDetalle')}
-              />
-            ) : (
-              <>
-                {/* 1 · EL QUÉ — los tipos reservables del mundo vet, con
-                    el "desde" agregado server-side */}
-                <View style={{ gap: spacing[2] }}>
-                  {/* S73 ítem 12 (founder): sin disposicion caía en 'fila'
-                      (2-4 chips que LLENAN el ancho) y la oferta vet trae
-                      hasta 5 con etiquetas largas — no se veían todos.
-                      Grilla por precedente del menú de bloques: conjunto
-                      CERRADO de comprables se envuelve, no se esconde
-                      tras scroll (la tira es de secuencias — los días). */}
-                  <SelectorOpcion
-                    acento="control"
-                    // S73 gate founder (hallazgo 2): variante B firmada —
-                    // dos columnas MISMO tamaño, la larga envuelve.
-                    disposicion="columnas"
-                    etiqueta={t('veterinaria.servicioEtiqueta')}
-                    opciones={oferta.map((o) => ({
-                      codigo: o.tipo_servicio,
-                      etiqueta: vozServicio(t, o.tipo_servicio, o.servicio_nombre) ?? o.servicio_nombre,
+            </View>
+          ) : faseEspecies.fase === 'listo' && elegibles.length === 0 ? (
+            /* 🔴 **DOS HECHOS, DOS VOCES (S112-C).** `elegibles.length === 0` es
+               verdadero con el hogar VACÍO y con un hogar que tiene mascotas que
+               no aplican, y hasta hoy los dos recibían la misma frase — la del
+               otro caso la mitad de las veces. El discriminador es `mascotas`,
+               que esta pantalla ya tenía en la mano. Ver `SinQuienReservar`. */
+            <SinQuienReservar
+              icono={<Icono nombre="veterinaria" tamano={48} />}
+              hayMascotas={Array.isArray(mascotas) && mascotas.length > 0}
+              tituloSinNadie={t('explorar.sinNadieTitulo')}
+              detalleSinNadie={t('explorar.sinNadieDetalle')}
+              tituloEspecie={t('veterinaria.sinMascotasTitulo')}
+              detalleEspecie={t('veterinaria.sinMascotasDetalle')}
+              etiquetaSinNadie={t('explorar.sinNadieAccion')}
+              etiquetaEspecie={t('paquete.sinPerrosAccion')}
+              onAccion={() => {
+                if (router.canDismiss()) router.dismissAll();
+                router.navigate('/hogar/agregar');
+              }}
+            />
+          ) : (
+            <>
+              {/* ⚠️ r33 · EL PASO DE ELEGIR MASCOTA YA NO PRESIDE: la
+                  mascota VIAJA DESDE EL LOG y un dato elegido no se vuelve a
+                  preguntar (Ley 23). Sobrevive para DOS casos reales, no uno:
+                  ① el deep-link sin param · ② el log VACÍO, cuyo CTA entra
+                  acá sin mascota — y ahí preguntar es lo correcto, porque es
+                  lo que la puerta NO sabe.
+                  ⚠️ r34 · Y SUS CHIPS SON LOS NUEVOS. Conservaba los
+                  viejos justamente porque este camino no se recorre: un
+                  resto no sobrevive por difícil, sobrevive por INVISIBLE.
+                  (Censo del founder confirmado y era UNIFORME: los CUATRO
+                  oficios lo tenían, no solo veterinaria.) */}
+              {mascota === null ? (
+                <View style={{ marginHorizontal: -spacing[4] }}>
+                  <FiltroMascotas
+                    mascotas={elegibles.map((m) => ({
+                      id: m.id,
+                      nombre: m.nombre,
+                      // S91-C · LA ESCALERA DE LA CARA, reusada del Hogar: foto
+                      // propia → imagen de su RAZA → genérico de su especie. El
+                      // chip salía pelado porque se quedaba en el primer escalón,
+                      // y `raza_ruta_imagen` (A6) tenía UN solo consumidor.
+                      fotoUrl: caraDeMascotaPorRuta({
+                        especie: m.especie,
+                        rutaImagen: m.raza_ruta_imagen,
+                        fotoUri: fotos[m.id],
+                      }),
                     }))}
-                    seleccionada={tipoServicio ?? undefined}
-                    onSelect={setTipoServicio}
+                    elegida={mascotaId}
+                    onElegir={setMascotaId}
                   />
-                  {servicioElegido !== null ? (
-                    <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
-                      {servicioElegido.varia
-                        ? t('veterinaria.precioDesde', { nombre: mascota.nombre, precio: formatearPrecio(servicioElegido.desde_precio) })
-                        : t('veterinaria.precioExacto', { nombre: mascota.nombre, precio: formatearPrecio(servicioElegido.desde_precio) })}
+                </View>
+              ) : null}
+
+              {mascota === null ? (
+                // S73 hallazgo founder: el botón que scrolleaba MURIÓ — el
+                // selector vive INMEDIATAMENTE arriba (cero bloques entre
+                // medio): un botón que duplica un control visible es
+                // decoración (Chanel), y su scroll era acción invisible =
+                // control muerto. 17.5 se cumple: el camino ES el control
+                // visible, y la voz apunta a él.
+                <EstadoVacio registro="seccion" titulo={t('veterinaria.eligeMascota')} />
+              ) : oferta === 'cargando' || oferta === null ? (
+                <EsqueletoGrupo>
+                  <View style={{ gap: spacing[3] }}>
+                    <Esqueleto forma="bloque" ancho="100%" alto={56} />
+                    <Esqueleto forma="bloque" ancho="100%" alto={100} />
+                  </View>
+                </EsqueletoGrupo>
+              ) : oferta === 'error' ? (
+                <EstadoVacio
+                  registro="seccion"
+                  titulo={t('veterinaria.errorTitulo')}
+                  accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setReintento((n) => n + 1)} />}
+                />
+              ) : oferta.length === 0 ? (
+                // Peldaño 0 — sin vets cobrables con oferta reservable.
+                <EstadoVacio
+                  icono={<Icono nombre="veterinaria" tamano={48} />}
+                  titulo={t('veterinaria.vacioTitulo')}
+                  descripcion={t('veterinaria.vacioDetalle')}
+                />
+              ) : (
+                <>
+                  {/* 1 · EL QUÉ — los tipos reservables del mundo vet, con
+                      el "desde" agregado server-side */}
+                  <View style={{ gap: spacing[2] }}>
+                    {/* S73 ítem 12 (founder): sin disposicion caía en 'fila'
+                        (2-4 chips que LLENAN el ancho) y la oferta vet trae
+                        hasta 5 con etiquetas largas — no se veían todos.
+                        Grilla por precedente del menú de bloques: conjunto
+                        CERRADO de comprables se envuelve, no se esconde
+                        tras scroll (la tira es de secuencias — los días). */}
+                    <SelectorOpcion
+                      acento="control"
+                      // S73 gate founder (hallazgo 2): variante B firmada —
+                      // dos columnas MISMO tamaño, la larga envuelve.
+                      disposicion="columnas"
+                      etiqueta={t('veterinaria.servicioEtiqueta')}
+                      opciones={oferta.map((o) => ({
+                        codigo: o.tipo_servicio,
+                        etiqueta: vozServicio(t, o.tipo_servicio, o.servicio_nombre) ?? o.servicio_nombre,
+                      }))}
+                      seleccionada={tipoServicio ?? undefined}
+                      onSelect={setTipoServicio}
+                    />
+                    {servicioElegido !== null ? (
+                      <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+                        {servicioElegido.varia
+                          ? t('veterinaria.precioDesde', { nombre: mascota.nombre, precio: formatearPrecio(servicioElegido.desde_precio) })
+                          : t('veterinaria.precioExacto', { nombre: mascota.nombre, precio: formatearPrecio(servicioElegido.desde_precio) })}
+                      </Text>
+                    ) : (
+                      /* 🔴 SIN SERVICIO ELEGIDO, LA PANTALLA LO PIDE. Retirar el
+                         default sin decir nada dejaría un hueco silencioso donde
+                         antes había un precio: *el usuario vería que algo falta
+                         y no qué.* Ocupa el mismo renglón que el precio — así el
+                         paso no se mueve al elegir. */
+                      <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+                        {t('veterinaria.elegiQueNecesita', { nombre: mascota.nombre })}
+                      </Text>
+                    )}
+                  </View>
+
+                  {/* 2 · DÍA — urgencia es para HOY: el día no se elige, se
+                      dice (la firma); el resto lleva la tira canónica */}
+                  {esSoloHoy ? (
+                    <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: Math.round(typography.size.sm * 1.4), color: theme.text.secondary }}>
+                      {t('veterinaria.urgenciaSoloHoy')}
                     </Text>
                   ) : (
-                    /* 🔴 SIN SERVICIO ELEGIDO, LA PANTALLA LO PIDE. Retirar el
-                       default sin decir nada dejaría un hueco silencioso donde
-                       antes había un precio: *el usuario vería que algo falta
-                       y no qué.* Ocupa el mismo renglón que el precio — así el
-                       paso no se mueve al elegir. */
-                    <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
-                      {t('veterinaria.elegiQueNecesita', { nombre: mascota.nombre })}
-                    </Text>
+                    <View style={{ gap: spacing[2] }}>
+                      <View style={{ paddingHorizontal: spacing[5] }}>
+                        <Texto variante="apoyo">{t('explorar.cuandoDia')}</Texto>
+                      </View>
+                      <SelectorDia
+                        dias={dias.map((d) => ({ iso: d.iso, dia: d.diaCorto, numero: d.iso.slice(8, 10) }))}
+                        elegido={dia}
+                        cerrados={cerradosISO}
+                        etiquetaCerrado={t('explorar.cuandoDiaCerrado')}
+                        onElegir={setDia}
+                      />
+                    </View>
                   )}
-                </View>
 
-                {/* 2 · DÍA — urgencia es para HOY: el día no se elige, se
-                    dice (la firma); el resto lleva la tira canónica */}
-                {esSoloHoy ? (
-                  <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: Math.round(typography.size.sm * 1.4), color: theme.text.secondary }}>
-                    {t('veterinaria.urgenciaSoloHoy')}
-                  </Text>
-                ) : (
-                  <View style={{ gap: spacing[2] }}>
-                    <View style={{ paddingHorizontal: spacing[5] }}>
-                      <Texto variante="apoyo">{t('explorar.cuandoDia')}</Texto>
-                    </View>
-                    <SelectorDia
-                      dias={dias.map((d) => ({ iso: d.iso, dia: d.diaCorto, numero: d.iso.slice(8, 10) }))}
-                      elegido={dia}
-                      cerrados={cerradosISO}
-                      etiquetaCerrado={t('explorar.cuandoDiaCerrado')}
-                      onElegir={setDia}
+                  {/* 2b · GRILLA de inicios reales — la duración la puso
+                      cada vet en su oferta, jamás el dueño */}
+                  {inicios === 'cargando' ? (
+                    <EsqueletoGrupo>
+                      <Esqueleto forma="bloque" ancho="100%" alto={100} />
+                    </EsqueletoGrupo>
+                  ) : inicios === 'error' ? (
+                    <EstadoVacio
+                      registro="seccion"
+                      titulo={t('veterinaria.errorTitulo')}
+                      accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setReintento((n) => n + 1)} />}
                     />
-                  </View>
-                )}
-
-                {/* 2b · GRILLA de inicios reales — la duración la puso
-                    cada vet en su oferta, jamás el dueño */}
-                {inicios === 'cargando' ? (
-                  <EsqueletoGrupo>
-                    <Esqueleto forma="bloque" ancho="100%" alto={100} />
-                  </EsqueletoGrupo>
-                ) : inicios === 'error' ? (
-                  <EstadoVacio
-                    registro="seccion"
-                    titulo={t('veterinaria.errorTitulo')}
-                    accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setReintento((n) => n + 1)} />}
-                  />
-                ) : inicios.length === 0 ? (
-                  // §6ter: camino tocable — espejo del paseo/grooming; la
-                  // urgencia sin lugar HOY no ofrece "probar mañana"
-                  // (mañana ya no es urgencia): dice su verdad serena.
-                  <EstadoVacio
-                    registro="seccion"
-                    titulo={esSoloHoy ? t('veterinaria.urgenciaSinLugarHoy') : t('veterinaria.sinInicios')}
-                    accion={
-                      !esSoloHoy && diaSiguiente !== null ? (
-                        <Boton
-                          variante="compacto"
-                          etiqueta={t('explorar.sinIniciosProbarDia', { dia: diaSiguiente.corta })}
-                          onPress={() => setDia(diaSiguiente.iso)}
-                        />
-                      ) : undefined
-                    }
-                  />
-                ) : (
-                  <View style={{ gap: spacing[2] }}>
-                    <View style={{ paddingHorizontal: spacing[5] }}>
-                      <Texto variante="apoyo">{t('explorar.cuandoHora')}</Texto>
-                    </View>
-                    <GrillaElegir
-                      opciones={inicios.map((h) => ({ codigo: h, etiqueta: h }))}
-                      elegida={hora}
-                      onElegir={setHora}
+                  ) : inicios.length === 0 ? (
+                    // §6ter: camino tocable — espejo del paseo/grooming; la
+                    // urgencia sin lugar HOY no ofrece "probar mañana"
+                    // (mañana ya no es urgencia): dice su verdad serena.
+                    <EstadoVacio
+                      registro="seccion"
+                      titulo={esSoloHoy ? t('veterinaria.urgenciaSinLugarHoy') : t('veterinaria.sinInicios')}
+                      accion={
+                        !esSoloHoy && diaSiguiente !== null ? (
+                          <Boton
+                            variante="compacto"
+                            etiqueta={t('explorar.sinIniciosProbarDia', { dia: diaSiguiente.corta })}
+                            onPress={() => setDia(diaSiguiente.iso)}
+                          />
+                        ) : undefined
+                      }
                     />
-                  </View>
-                )}
-              </>
-            )}
-          </>
-        )}
-      </ScrollView>
+                  ) : (
+                    <View style={{ gap: spacing[2] }}>
+                      <View style={{ paddingHorizontal: spacing[5] }}>
+                        <Texto variante="apoyo">{t('explorar.cuandoHora')}</Texto>
+                      </View>
+                      <GrillaElegir
+                        opciones={inicios.map((h) => ({ codigo: h, etiqueta: h }))}
+                        elegida={hora}
+                        onElegir={setHora}
+                      />
+                    </View>
+                  )}
+                </>
+              )}
+            </>
+          )}
+        </View>
+      </HojaContenido>
 
       {/* r33 · EL PIE, COMO PASEO: el precio a la izquierda con su
           "desde" y el CTA a la derecha. La escalera del precio (S61-A13,

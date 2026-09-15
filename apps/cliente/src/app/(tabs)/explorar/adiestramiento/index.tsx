@@ -25,6 +25,8 @@ import { ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
+  HojaContenido,
+  Cabecera,
   AvatarMascota,
   Boton,
   Esqueleto,
@@ -52,14 +54,16 @@ import { useTraduccion } from '@/i18n';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
 import { FiltroMascotas } from '@/components/filtro-pills';
-import { CabezalOficio, GrillaElegir, PieReserva, SelectorDia, SinQuienReservar } from '@/components/reserva-piezas';
+import { GrillaElegir, PieReserva, SelectorDia, SinQuienReservar } from '@/components/reserva-piezas';
 import { formatearPrecio } from '@epetplace/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 function fechaLocalISO(d: Date): string {
   return new Intl.DateTimeFormat('en-CA').format(d);
 }
 
 export default function AdiestramientoCuando() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const insets = useSafeAreaInsets();
@@ -249,195 +253,219 @@ export default function AdiestramientoCuando() {
        (insetTop) y dejar los dos duplicaba el aire de arriba — el mismo
        cambio que en paseo y grooming. */
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <CabezalOficio
-        oficio="training"
-        capa="cuidado"
-        titulo={t('adiestramiento.titulo')}
-        detalle={mascota !== null ? mascota.nombre : null}
-        onAtras={() => router.back()}
-        insetTop={insets.top}
-      />
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[5] }}>
-        {mascotas === 'cargando' ? (
-          <EsqueletoGrupo>
-            <View style={{ gap: spacing[3] }}>
-              <Esqueleto forma="bloque" ancho="100%" alto={56} />
-              <Esqueleto forma="bloque" ancho="100%" alto={56} />
-              <Esqueleto forma="bloque" ancho="100%" alto={120} />
-            </View>
-          </EsqueletoGrupo>
-        ) : mascotas === 'error' ? (
-          <EstadoVacio
-            titulo={t('adiestramiento.errorTitulo')}
-            descripcion={t('hogar.errorHistoriaDetalle')}
-            accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setMascotas('cargando')} />}
-          />
-        ) : faseEspecies.fase === 'error' ? (
-          // Ley 13 · el catálogo no llegó y se DICE. Degradar acá a
-          // «todas» sería re-abrir el agujero que esta tanda cierra.
-          <View style={{ paddingHorizontal: spacing[4] }}>
-            <EstadoVacio
-              registro="seccion"
-              titulo={t('explorar.catalogoErrorTitulo')}
-              descripcion={t('explorar.catalogoErrorDetalle')}
-            />
-          </View>
-        ) : faseEspecies.fase === 'listo' && elegibles.length === 0 ? (
-          /* 🔴 **DOS HECHOS, DOS VOCES (S112-C).** `elegibles.length === 0` es
-             verdadero con el hogar VACÍO y con un hogar que tiene mascotas que
-             no aplican, y hasta hoy los dos recibían la misma frase — la del
-             otro caso la mitad de las veces. El discriminador es `mascotas`,
-             que esta pantalla ya tenía en la mano. Ver `SinQuienReservar`. */
-          <SinQuienReservar
-            icono={<Icono nombre="training" tamano={48} />}
-            hayMascotas={Array.isArray(mascotas) && mascotas.length > 0}
-            tituloSinNadie={t('explorar.sinNadieTitulo')}
-            detalleSinNadie={t('explorar.sinNadieDetalle')}
-            tituloEspecie={t('adiestramiento.sinElegiblesTitulo')}
-            detalleEspecie={t('adiestramiento.sinElegiblesDetalle')}
-            etiquetaSinNadie={t('explorar.sinNadieAccion')}
-            etiquetaEspecie={t('paquete.sinPerrosAccion')}
-            onAccion={() => {
-              if (router.canDismiss()) router.dismissAll();
-              router.navigate('/hogar/agregar');
-            }}
-          />
-        ) : (
-          <>
-            {/* 0 · LA MASCOTA — presente en pantalla siempre (rasgo 1
-                de la gramática canónica) */}
-            {/* ⚠️ r35 · EL SALVAVIDAS DESAPARECE AL ELEGIR — la decisión del
-                founder sobre cuál de los dos comportamientos es el correcto,
-                resuelta por SIGNIFICADO y no por mayoría: en el LOG los chips
-                FILTRAN, y un filtro se queda porque se puede cambiar; en el
-                SALVAVIDAS IDENTIFICAN, y una identificación se cierra cuando
-                se dio (Ley 23: la puerta no pregunta lo que ya sabe). Paseo,
-                grooming y veterinaria ya lo hacían; adiestramiento era el que
-                estaba mal.
-                Y sus chips son los NUEVOS desde r34 — este camino conservaba
-                los viejos porque nadie lo recorre: un resto no sobrevive por
-                difícil, sobrevive por INVISIBLE. */}
-            {mascota === null ? (
-              <View style={{ marginHorizontal: -spacing[4] }}>
-              <FiltroMascotas
-                mascotas={elegibles.map((m) => ({
-                    id: m.id,
-                    nombre: m.nombre,
-                    // S91-C · LA ESCALERA DE LA CARA, reusada del Hogar: foto
-                    // propia → imagen de su RAZA → genérico de su especie. El
-                    // chip salía pelado porque se quedaba en el primer escalón,
-                    // y `raza_ruta_imagen` (A6) tenía UN solo consumidor.
-                    fotoUrl: caraDeMascotaPorRuta({
-                      especie: m.especie,
-                      rutaImagen: m.raza_ruta_imagen,
-                      fotoUri: fotos[m.id],
-                    }),
-                  }))}
-                elegida={mascotaId}
-                onElegir={setMascotaId}
+      {/* 🔴 **ACÁ VIVÍA `CabezalOficio`, UN TECHO LOCAL QUE NINGÚN GATE VEÍA.**
+          El censo del lote 3b contó esta pantalla como «sin cabecera» porque no
+          montaba `Encabezado` ni `Cabecera` — y sí tenía techo: una pieza LOCAL
+          (`components/reserva-piezas.tsx`) que pinta `bg.base` plano.
+          `verify:techos-locales` tampoco lo veía, y **lo dice en su propia
+          cabecera**: su marcador es `LinearGradient`, así que *«un techo hecho
+          con un `backgroundColor` plano no lo ve»*. Dos instrumentos con el
+          mismo punto ciego, y el hueco justo en el medio.
+
+          ⇒ estructura firmada: fondo ciruela + hoja.
+          ⚠️ **Lo que se pierde, dicho: el GLIFO DEL OFICIO.** El cabezal ponía
+          el glifo a la izquierda del título y `Cabecera` no tiene ese slot. El
+          nombre de la mascota sobrevive en `apoyo`. *No lo dibujo local —sería
+          volver a empezar—: va pedido a B.* */}
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada"
+                titulo={t('adiestramiento.titulo')}
+                      apoyo={mascota !== null ? mascota.nombre : undefined}
+                onVolver={() => router.back()}
+                etiquetaVolver={t('comun.volver')}
+                presentacion="fondo"
               />
             </View>
-            ) : null}
-
-            {/* ☠️ **S109-C · ACÁ VIVÍA EL QUÉ — sesión-o-programa. MUERTO POR
-                FIRMA DEL FOUNDER.**
-
-                🔴 *Preguntar sesión-o-programa ANTES de ver quién puede es un
-                filtro que ya no filtra nada, y contradice la regla que ordena el
-                oficio: primero el quién.* Desde que la lista agrupa por
-                adiestrador, **un adiestrador con las dos cosas es un prestador
-                con tres ofertas** — y esta pregunta le pedía a la familia
-                decidir algo que todavía no puede saber.
-
-                ⭐ Lo que reemplaza al selector no es otro control: **es la
-                vitrina**, que muestra lo que ese adiestrador ofrece y deja
-                elegir ahí. *Un paso que se quita porque el siguiente lo hace
-                mejor no deja hueco.*
-
-                ☠️ Con él murieron `comprable`, su estado, su voz de programa y
-                el `SelectorSegmentado` de esta pantalla. */}
-
-            {/* 2 · DÍA — la rueda (programa: desde mañana, §12.2).
-                🔴 Y ACÁ VIVE EL DEFECTO MÁS CARO POSIBLE DE ESTA PANTALLA,
-                cortado en su raíz: **con programa, el día no es cuándo ES
-                — es cuándo EMPIEZA**. Alguien que elige jueves 6 creyendo
-                que reserva una clase y compra OCHO es exactamente el daño
-                que no se puede permitir.
-                La voz honesta ya lo dice arriba, en el QUÉ ("eliges la
-                fecha y hora de la primera y las demás se agendan solas") —
-                pero decirlo ANTES no alcanza si en el momento de elegir el
-                rótulo dice "Día" como en cualquier reserva puntual. EL
-                RÓTULO CAMBIA CON EL COMPRABLE: el significado se dice
-                DONDE se decide, no solo donde se explica. */}
-            <View style={{ gap: spacing[2] }}>
-              <View style={{ paddingHorizontal: spacing[5] }}>
-                <Texto variante="apoyo">
-                  {/* La voz genérica: sin el QUÉ no se sabe si es la fecha de
-                      una sesión o el arranque de un programa. *Decir «cuándo
-                      empieza» sobre algo que puede ser una sesión suelta sería
-                      afirmar un compromiso que la familia no tomó.* */}
-                  {t('explorar.cuandoDia')}
-                </Texto>
+          }
+        >
+          {/* El relleno va ADENTRO de la hoja: en `scroll` envolvería a la hoja
+              y dejaría ciruela a los lados (recorrido 6). */}
+          <View style={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[5] }}>
+          {mascotas === 'cargando' ? (
+            <EsqueletoGrupo>
+              <View style={{ gap: spacing[3] }}>
+                <Esqueleto forma="bloque" ancho="100%" alto={56} />
+                <Esqueleto forma="bloque" ancho="100%" alto={56} />
+                <Esqueleto forma="bloque" ancho="100%" alto={120} />
               </View>
-              {/* 🔴 DÍAS CERRADOS: NO VIAJAN — mismo bloqueo que grooming,
-                  medido: `obtenerDiasCerrados` es POR PRESTADOR y acá los
-                  inicios llegan AGREGADOS (`obtenerIniciosAdiestramiento`
-                  no nombra prestadores; cero prestador_id en la pantalla).
-                  La intersección de paseo no se puede computar. Se declara
-                  y no se inventa; la prop queda lista. */}
-              <SelectorDia
-                dias={dias.map((d) => ({ iso: d.iso, dia: d.diaCorto, numero: d.iso.slice(8, 10) }))}
-                elegido={dia}
-                cerrados={cerradosISO}
-                etiquetaCerrado={t('explorar.cuandoDiaCerrado')}
-                onElegir={setDia}
+            </EsqueletoGrupo>
+          ) : mascotas === 'error' ? (
+            <EstadoVacio
+              titulo={t('adiestramiento.errorTitulo')}
+              descripcion={t('hogar.errorHistoriaDetalle')}
+              accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setMascotas('cargando')} />}
+            />
+          ) : faseEspecies.fase === 'error' ? (
+            // Ley 13 · el catálogo no llegó y se DICE. Degradar acá a
+            // «todas» sería re-abrir el agujero que esta tanda cierra.
+            <View style={{ paddingHorizontal: spacing[4] }}>
+              <EstadoVacio
+                registro="seccion"
+                titulo={t('explorar.catalogoErrorTitulo')}
+                descripcion={t('explorar.catalogoErrorDetalle')}
               />
             </View>
+          ) : faseEspecies.fase === 'listo' && elegibles.length === 0 ? (
+            /* 🔴 **DOS HECHOS, DOS VOCES (S112-C).** `elegibles.length === 0` es
+               verdadero con el hogar VACÍO y con un hogar que tiene mascotas que
+               no aplican, y hasta hoy los dos recibían la misma frase — la del
+               otro caso la mitad de las veces. El discriminador es `mascotas`,
+               que esta pantalla ya tenía en la mano. Ver `SinQuienReservar`. */
+            <SinQuienReservar
+              icono={<Icono nombre="training" tamano={48} />}
+              hayMascotas={Array.isArray(mascotas) && mascotas.length > 0}
+              tituloSinNadie={t('explorar.sinNadieTitulo')}
+              detalleSinNadie={t('explorar.sinNadieDetalle')}
+              tituloEspecie={t('adiestramiento.sinElegiblesTitulo')}
+              detalleEspecie={t('adiestramiento.sinElegiblesDetalle')}
+              etiquetaSinNadie={t('explorar.sinNadieAccion')}
+              etiquetaEspecie={t('paquete.sinPerrosAccion')}
+              onAccion={() => {
+                if (router.canDismiss()) router.dismissAll();
+                router.navigate('/hogar/agregar');
+              }}
+            />
+          ) : (
+            <>
+              {/* 0 · LA MASCOTA — presente en pantalla siempre (rasgo 1
+                  de la gramática canónica) */}
+              {/* ⚠️ r35 · EL SALVAVIDAS DESAPARECE AL ELEGIR — la decisión del
+                  founder sobre cuál de los dos comportamientos es el correcto,
+                  resuelta por SIGNIFICADO y no por mayoría: en el LOG los chips
+                  FILTRAN, y un filtro se queda porque se puede cambiar; en el
+                  SALVAVIDAS IDENTIFICAN, y una identificación se cierra cuando
+                  se dio (Ley 23: la puerta no pregunta lo que ya sabe). Paseo,
+                  grooming y veterinaria ya lo hacían; adiestramiento era el que
+                  estaba mal.
+                  Y sus chips son los NUEVOS desde r34 — este camino conservaba
+                  los viejos porque nadie lo recorre: un resto no sobrevive por
+                  difícil, sobrevive por INVISIBLE. */}
+              {mascota === null ? (
+                <View style={{ marginHorizontal: -spacing[4] }}>
+                <FiltroMascotas
+                  mascotas={elegibles.map((m) => ({
+                      id: m.id,
+                      nombre: m.nombre,
+                      // S91-C · LA ESCALERA DE LA CARA, reusada del Hogar: foto
+                      // propia → imagen de su RAZA → genérico de su especie. El
+                      // chip salía pelado porque se quedaba en el primer escalón,
+                      // y `raza_ruta_imagen` (A6) tenía UN solo consumidor.
+                      fotoUrl: caraDeMascotaPorRuta({
+                        especie: m.especie,
+                        rutaImagen: m.raza_ruta_imagen,
+                        fotoUri: fotos[m.id],
+                      }),
+                    }))}
+                  elegida={mascotaId}
+                  onElegir={setMascotaId}
+                />
+              </View>
+              ) : null}
 
-            {/* 2b · GRILLA de inicios reales del comprable */}
-            {mascota === null ? null : inicios === 'cargando' ? (
-              <EsqueletoGrupo>
-                <Esqueleto forma="bloque" ancho="100%" alto={100} />
-              </EsqueletoGrupo>
-            ) : inicios === 'error' ? (
-              <EstadoVacio
-                registro="seccion"
-                titulo={t('adiestramiento.errorTitulo')}
-                accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setReintento((n) => n + 1)} />}
-              />
-            ) : inicios.length === 0 ? (
-              // §6ter heredado: camino tocable, jamás final mudo
-              <EstadoVacio
-                registro="seccion"
-                titulo={diaElegidoCerrado ? t('explorar.cuandoDiaCerrado') : t('adiestramiento.sinInicios')}
-                descripcion={diaElegidoCerrado ? t('explorar.cuandoDiaCerradoPorque') : undefined}
-                accion={
-                  diaSiguiente !== null ? (
-                    <Boton
-                      variante="compacto"
-                      etiqueta={t('explorar.sinIniciosProbarDia', { dia: diaSiguiente.corta })}
-                      onPress={() => setDia(diaSiguiente.iso)}
-                    />
-                  ) : undefined
-                }
-              />
-            ) : (
+              {/* ☠️ **S109-C · ACÁ VIVÍA EL QUÉ — sesión-o-programa. MUERTO POR
+                  FIRMA DEL FOUNDER.**
+
+                  🔴 *Preguntar sesión-o-programa ANTES de ver quién puede es un
+                  filtro que ya no filtra nada, y contradice la regla que ordena el
+                  oficio: primero el quién.* Desde que la lista agrupa por
+                  adiestrador, **un adiestrador con las dos cosas es un prestador
+                  con tres ofertas** — y esta pregunta le pedía a la familia
+                  decidir algo que todavía no puede saber.
+
+                  ⭐ Lo que reemplaza al selector no es otro control: **es la
+                  vitrina**, que muestra lo que ese adiestrador ofrece y deja
+                  elegir ahí. *Un paso que se quita porque el siguiente lo hace
+                  mejor no deja hueco.*
+
+                  ☠️ Con él murieron `comprable`, su estado, su voz de programa y
+                  el `SelectorSegmentado` de esta pantalla. */}
+
+              {/* 2 · DÍA — la rueda (programa: desde mañana, §12.2).
+                  🔴 Y ACÁ VIVE EL DEFECTO MÁS CARO POSIBLE DE ESTA PANTALLA,
+                  cortado en su raíz: **con programa, el día no es cuándo ES
+                  — es cuándo EMPIEZA**. Alguien que elige jueves 6 creyendo
+                  que reserva una clase y compra OCHO es exactamente el daño
+                  que no se puede permitir.
+                  La voz honesta ya lo dice arriba, en el QUÉ ("eliges la
+                  fecha y hora de la primera y las demás se agendan solas") —
+                  pero decirlo ANTES no alcanza si en el momento de elegir el
+                  rótulo dice "Día" como en cualquier reserva puntual. EL
+                  RÓTULO CAMBIA CON EL COMPRABLE: el significado se dice
+                  DONDE se decide, no solo donde se explica. */}
               <View style={{ gap: spacing[2] }}>
                 <View style={{ paddingHorizontal: spacing[5] }}>
                   <Texto variante="apoyo">
-                    {t('explorar.cuandoHora')}
+                    {/* La voz genérica: sin el QUÉ no se sabe si es la fecha de
+                        una sesión o el arranque de un programa. *Decir «cuándo
+                        empieza» sobre algo que puede ser una sesión suelta sería
+                        afirmar un compromiso que la familia no tomó.* */}
+                    {t('explorar.cuandoDia')}
                   </Texto>
                 </View>
-                <GrillaElegir
-                  opciones={inicios.map((h) => ({ codigo: h, etiqueta: h }))}
-                  elegida={hora}
-                  onElegir={setHora}
+                {/* 🔴 DÍAS CERRADOS: NO VIAJAN — mismo bloqueo que grooming,
+                    medido: `obtenerDiasCerrados` es POR PRESTADOR y acá los
+                    inicios llegan AGREGADOS (`obtenerIniciosAdiestramiento`
+                    no nombra prestadores; cero prestador_id en la pantalla).
+                    La intersección de paseo no se puede computar. Se declara
+                    y no se inventa; la prop queda lista. */}
+                <SelectorDia
+                  dias={dias.map((d) => ({ iso: d.iso, dia: d.diaCorto, numero: d.iso.slice(8, 10) }))}
+                  elegido={dia}
+                  cerrados={cerradosISO}
+                  etiquetaCerrado={t('explorar.cuandoDiaCerrado')}
+                  onElegir={setDia}
                 />
               </View>
-            )}
-          </>
-        )}
-      </ScrollView>
+
+              {/* 2b · GRILLA de inicios reales del comprable */}
+              {mascota === null ? null : inicios === 'cargando' ? (
+                <EsqueletoGrupo>
+                  <Esqueleto forma="bloque" ancho="100%" alto={100} />
+                </EsqueletoGrupo>
+              ) : inicios === 'error' ? (
+                <EstadoVacio
+                  registro="seccion"
+                  titulo={t('adiestramiento.errorTitulo')}
+                  accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setReintento((n) => n + 1)} />}
+                />
+              ) : inicios.length === 0 ? (
+                // §6ter heredado: camino tocable, jamás final mudo
+                <EstadoVacio
+                  registro="seccion"
+                  titulo={diaElegidoCerrado ? t('explorar.cuandoDiaCerrado') : t('adiestramiento.sinInicios')}
+                  descripcion={diaElegidoCerrado ? t('explorar.cuandoDiaCerradoPorque') : undefined}
+                  accion={
+                    diaSiguiente !== null ? (
+                      <Boton
+                        variante="compacto"
+                        etiqueta={t('explorar.sinIniciosProbarDia', { dia: diaSiguiente.corta })}
+                        onPress={() => setDia(diaSiguiente.iso)}
+                      />
+                    ) : undefined
+                  }
+                />
+              ) : (
+                <View style={{ gap: spacing[2] }}>
+                  <View style={{ paddingHorizontal: spacing[5] }}>
+                    <Texto variante="apoyo">
+                      {t('explorar.cuandoHora')}
+                    </Texto>
+                  </View>
+                  <GrillaElegir
+                    opciones={inicios.map((h) => ({ codigo: h, etiqueta: h }))}
+                    elegida={hora}
+                    onElegir={setHora}
+                  />
+                </View>
+              )}
+            </>
+          )}
+        </View>
+      </HojaContenido>
 
       {/* rasgo 2 de la gramática: CTA abajo, FIJO, una sola primaria */}
       {/* ✅ r44 · EL PIE CON SU PRECIO — las dos líneas que el pedido
