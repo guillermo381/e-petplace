@@ -4,11 +4,45 @@
  * VUELTA DE ESTA LEY.
  *
  * ═══════════════════════════════════════════════════════════════════════
- * N11 (S99-B) la puso adentro · N11′ (S100-B, firma del founder) la sacó
- * afuera · N11″ (S116-B lote 6, firma del founder) la volvió a meter,
- * flotando. **Tres vueltas en tres sesiones, y ninguna dejó instrumento.**
- * *Una ley que se reabre cada vez que alguien la mira de nuevo no está
- * firmada: está en discusión permanente.* Esto es lo que la cierra.
+ * 📜 **LA FUENTE ES LA LETRA, NO UN PARTE:** `docs/DIRECCION_DISENO_S99.md`
+ * **§N11″** — *«en todos los formularios de la casa, el nombre del campo va
+ * DENTRO del campo, flotando… el placeholder de ejemplo muere»* (firma del
+ * founder, 15-sep-2026; depositada por A).
+ *
+ * ⏪ **Este gate nació citando el lote 6 porque la letra todavía no estaba
+ * depositada** —medido ese día en el worktree, en `origin/main` y en la
+ * punta de A: los tres decían N11′—. **Hoy se refunda en la letra**, que es
+ * de donde tiene que colgar: *un gate fundado en un parte hereda el defecto
+ * que el propio N11′ nombró — «una firma que vive en un parte no está
+ * firmada».*
+ *
+ * N11 (S99) la puso adentro **quieta** · N11′ (S100) la sacó afuera ·
+ * N11″ (S116) la volvió a meter **flotando**. **Tres vueltas en tres
+ * sesiones, y ninguna dejó instrumento** — la propia letra lo dice: *«no
+ * hay gate que lo vigile todavía: su verde no existe, así que nadie puede
+ * confundir "no lo mide nadie" con "está cumplido"»*. Esto es ese verde.
+ *
+ * 🔴 **Y N11″ NO es volver a N11**, que es lo que el gate tiene que dejar
+ * claro para que la cuarta vuelta no empiece por ahí: N11 tenía la etiqueta
+ * **quieta, compartiendo renglón con el valor** —el defecto que N11′ midió
+ * bien—. **N11″ no lo niega: lo disuelve**, subiéndola al borde.
+ *
+ * ⚠️ **ALCANCE: EL CLIENTE.** La letra es explícita — *«el prestador sigue
+ * con su dosis, la etiqueta afuera de N11′, hasta que se rediseñe»*, y
+ * *«N11 prohíbe que dos estilos convivan EN LA MISMA REGIÓN DE UNA
+ * PANTALLA — no prohíbe que dos apps vayan a distinta velocidad»*. Por eso
+ * este gate mira **sólo `apps/cliente`**, y por eso las piezas guardan su
+ * etiqueta por casa en vez de mudarla.
+ *
+ * 🔴 **UN CHOQUE ABIERTO CON LA LETRA, declarado y no resuelto acá:**
+ * N11″ hereda de N11′ la cláusula ***«≥24 px entre un campo y el
+ * siguiente»***… **y la orden del lote 6 fue bajar ese aire a 10-12**, que
+ * es lo que B construyó y midió (12 exactos). *La cláusula conserva el
+ * número pero perdió su razón*: existía para que la etiqueta de AFUERA no
+ * se leyera como el pie del campo de arriba, y ya no hay etiqueta afuera.
+ * **Rige lo ordenado y medido; la letra necesita la enmienda.** Al buzón de
+ * A. *Dos letras firmadas que se contradicen son peores que una
+ * equivocada.*
  *
  * ⚠️ **LO QUE ESTE GATE NO PUEDE HACER, dicho primero:** no sostiene la
  * ley — la sostiene la PIEZA, que dibuja la etiqueta adentro para toda la
@@ -67,12 +101,29 @@
  * lote**. *Se instrumenta para que no crezca mientras espera, que es lo
  * único honesto que se puede hacer con una deuda que uno mismo abrió.*
  *
- * ⚠️ **`CampoCodigo` es un caso aparte y se cuenta igual:** su etiqueta
- * afuera es la **exención vieja declarada** (*«una caja de UN dígito no
- * tiene lugar para un rótulo»*), que N11′ celebró como *«la excepción de
- * ayer es la norma de hoy»*. **Hoy la norma volvió a cambiar y esa
- * exención queda descolgada** — entra al conteo para que la mesa la vea,
- * no para acusarla.
+ * 🔴 **LA LISTA DE PIEZAS «CON LA ETIQUETA AFUERA» SE DERIVA DE LA FUENTE,
+ * NO SE ESCRIBE.** ⏪ Nació como una lista de NOMBRES (`CampoFecha`,
+ * `CampoCodigo`) y **eso medía la convención, no el hecho**: al curar
+ * `CampoFecha` el gate siguió contándola en 6 porque **seguía
+ * llamándose igual**. *Una regla atada a un nombre da un número que dejó
+ * de significar lo que dice* — es `L-459` en su forma chica, y la cacé
+ * porque el founder había predicho el número («la regla ④ baja a 0») y no
+ * bajó.
+ * ⇒ Una pieza tiene la etiqueta afuera en la casa v5 **si su línea de
+ * `<EtiquetaDeCampo` NO lleva el guard de casa (`v5`)**. ⚠️ **Y ese
+ * discriminador también se corrigió midiendo:** primero fue *«renderiza
+ * `<EtiquetaDeCampo`»* y marcó a las DOS piezas curadas —porque las dos
+ * la siguen renderizando **para el prestador**, que conserva N11′—;
+ * después fue *«el archivo menciona `formaV5`»* y tampoco, porque
+ * `CampoCodigo` lo menciona **para otra cosa** (radio y color). *Lo que
+ * decide no es que el archivo hable de la casa: es que ESA LÍNEA esté
+ * guardada.* Así el gate baja solo cuando alguien cura de verdad, y **una
+ * pieza nueva con la etiqueta suelta aparece sin que nadie la liste.**
+ *
+ * ⚠️ **`CampoCodigo` es EXCEPCIÓN DECLARADA por firma de la mesa**
+ * (15-sep-2026): *ocho casillas de un dígito no tienen dónde poner una
+ * etiqueta flotante; su rótulo vive arriba del grupo.* Vive abajo, por
+ * nombre — **no se cuenta, y se ve que no se cuenta.**
  *
  * ── LA EXCEPCIÓN POR NOMBRE, declarada VACÍA ──────────────────────────
  * ⚠️ **N11′ dejó vivo un costo que N11″ NO contesta:** *«en español el
@@ -94,13 +145,29 @@ import { execSync } from 'node:child_process'
 const BASELINE = {
   rotuloPropio: 0,
   etiquetaApagada: 6,
-  placeholder: 26,
-  dosEstilos: 6,
+  placeholder: 16,
+  dosEstilos: 0,
 }
 
 /** La excepción por nombre — ver la cabecera. **VACÍA a propósito.**
- *  Forma de una entrada: `'ruta/archivo.tsx:NNN': 'por qué'`. */
+ *  Forma de una entrada: `'ruta/archivo.tsx:NNN': 'por qué'`.
+ *
+ *  ⚠️ **Y la letra pide MÁS que esto:** N11″ dice que la excepción del
+ *  rótulo largo *«es una EXCEPCIÓN DECLARADA EN LA PANTALLA — escrita ahí,
+ *  con el rótulo que la motiva y su medida… JAMÁS POR OMISIÓN»*. **Esta
+ *  lista es la mitad mecánica; el comentario en la pantalla es la otra, y
+ *  es la que la letra llama «la regla».** *Sin él no se distingue una
+ *  excepción de un incumplimiento.* */
 const EXCEPCION_ROTULO_LARGO = {}
+
+/** ⭐ **EXCEPCIÓN DECLARADA — firma de la mesa, 15-sep-2026.**
+ *  `CampoCodigo`: **ocho casillas de un dígito no tienen dónde poner una
+ *  etiqueta flotante; su rótulo vive arriba del grupo.** *Es la exención
+ *  que S99 ya había escrito («una caja de UN dígito no tiene lugar para un
+ *  rótulo») y que N11′ celebró como «la excepción de ayer es la norma de
+ *  hoy» — con N11″ la norma volvió a cambiar y la excepción vuelve a serlo,
+ *  ahora firmada en vez de heredada.* */
+const PIEZAS_EXENTAS = new Set(['CampoCodigo'])
 
 const norm = (s) => s.trim()
 const esComentario = (s) =>
@@ -166,17 +233,36 @@ for (const f of archivos) {
   }
 }
 
-/* ④ — una pantalla cuenta UNA vez, aunque tenga tres campos de cada tipo:
-   lo que la ley prohíbe es la CONVIVENCIA, no cada aparición. */
-for (const f of archivos) {
-  const L = readFileSync(f, 'utf8').split('\n')
-  const adentro = L.some((l) => /<Campo(\s|>|$)/.test(l))
-  const afuera = L.map((l, i) => [i + 1, (l.match(/<(CampoFecha|CampoCodigo)\b/) || [])[1]])
-    .filter(([, p]) => p !== undefined)
-  if (adentro && afuera.length > 0) {
-    hallazgos.dosEstilos.push(
-      `${f}  ← ${afuera.map(([n, p]) => `${p}:${n}`).join(' · ')}`,
-    )
+/* ④ — LA LISTA SE DERIVA DE LA FUENTE (ver la cabecera). Una pieza tiene
+   la etiqueta AFUERA si renderiza `<EtiquetaDeCampo`. */
+const piezasAfuera = execSync("git ls-files 'packages/ui/src/components/Campo*.tsx'", {
+  encoding: 'utf8',
+})
+  .trim().split('\n').filter(Boolean)
+  .filter((f) =>
+    readFileSync(f, 'utf8')
+      .split('\n')
+      .some((l) => /<EtiquetaDeCampo\b/.test(l) && !/\bv5\b/.test(l)),
+  )
+  .map((f) => f.split('/').pop().replace('.tsx', ''))
+  .filter((n) => !PIEZAS_EXENTAS.has(n))
+
+console.log(
+  `   piezas con la etiqueta AFUERA (derivado): ${piezasAfuera.length > 0 ? piezasAfuera.join(', ') : '—'}` +
+    `   · exentas por firma: ${[...PIEZAS_EXENTAS].join(', ')}`,
+)
+
+if (piezasAfuera.length > 0) {
+  const re = new RegExp(`<(${piezasAfuera.join('|')})\\b`)
+  /* Una pantalla cuenta UNA vez, aunque tenga tres campos de cada tipo: lo
+     que la ley prohíbe es la CONVIVENCIA, no cada aparición. */
+  for (const f of archivos) {
+    const L = readFileSync(f, 'utf8').split('\n')
+    const adentro = L.some((l) => /<Campo(\s|>|$)/.test(l))
+    const afuera = L.map((l, i) => [i + 1, (l.match(re) || [])[1]]).filter(([, p]) => p !== undefined)
+    if (adentro && afuera.length > 0) {
+      hallazgos.dosEstilos.push(`${f}  ← ${afuera.map(([n, p]) => `${p}:${n}`).join(' · ')}`)
+    }
   }
 }
 

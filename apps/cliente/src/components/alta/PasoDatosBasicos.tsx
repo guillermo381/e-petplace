@@ -249,7 +249,6 @@ export function PasoDatosBasicos({
 
             <Campo
               label={acuario ? t('alta.nombreAcuarioLabel') : t('alta.nombreLabel')}
-              placeholder={t('alta.nombrePlaceholder')}
               value={nombre}
               onChangeText={setNombre}
               autoCapitalize="words"
@@ -298,7 +297,6 @@ export function PasoDatosBasicos({
             <Campo
               label={t('alta.pesoLabel')}
               ayuda={t('alta.pesoAyuda')}
-              placeholder={t('alta.pesoPlaceholder')}
               value={peso}
               onChangeText={setPeso}
               keyboardType="decimal-pad"

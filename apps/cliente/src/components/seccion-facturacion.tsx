@@ -246,7 +246,6 @@ export function SeccionFacturacion({
   const campoNombre = (
     <Campo
       label={t('identidadFactura.nombre')}
-      placeholder={t('identidadFactura.nombreFormato')}
       value={nombre}
       onChangeText={onNombre}
       onBlur={() => setNombreTocado(true)}
@@ -260,7 +259,6 @@ export function SeccionFacturacion({
       <Texto variante="seccion">{t('correoFactura.pregunta')}</Texto>
       <Campo
         label={t('correoFactura.etiqueta')}
-        placeholder={t('correoFactura.formato')}
         value={correo}
         /* Saneo A LA VISTA: los espacios no entran, y la persona lo ve
            mientras escribe. Es lo que la letra de B pide de quien tolere el

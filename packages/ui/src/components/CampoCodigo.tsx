@@ -256,7 +256,36 @@ export function CampoCodigo({
           argumento general.
 
           Único cambio real: el aire pasa de 6 a **8** (`GAP_ETIQUETA`),
-          por N2 — múltiplo de 8, sin tallar excepción. */}
+          por N2 — múltiplo de 8, sin tallar excepción.
+
+          ═══════════════════════════════════════════════════════════════
+          ⭐ **N11″ (15-sep-2026) — ESTA PIEZA QUEDA COMO EXCEPCIÓN
+             DECLARADA, POR FIRMA DE LA MESA.**
+          ═══════════════════════════════════════════════════════════════
+          La ley volvió a cambiar: en `DIRECCION_DISENO_S99` §N11″ la
+          etiqueta vuelve ADENTRO, flotando, y `Campo` y `CampoFecha` ya la
+          llevan así. **Acá no, y la razón es geométrica, no de gusto:**
+
+          > **Ocho casillas de un dígito no tienen dónde poner una etiqueta
+          > flotante. Su rótulo vive arriba del grupo.**
+
+          🔴 **Y una etiqueta flotante acá no sería «más chica»: sería
+          IMPOSIBLE.** Flotar significa subir al borde superior *de la
+          caja*, y en esta pieza hay OCHO cajas —¿en cuál flota?—. El
+          rótulo no es de una caja: es del GRUPO. *La ley se escribió para
+          un control con un cuerpo; éste tiene ocho.*
+
+          ⏪ **Lo irónico, y vale dejarlo escrito porque es la tercera
+          vuelta:** el comentario de arriba celebra que *«la casa le dio la
+          razón a la forma que esta pieza ya tenía»* — y **dos vueltas
+          después la casa se la volvió a quitar.** La forma no cambió; lo
+          que cambió tres veces es si era la norma o la excepción. *Por eso
+          esta vez está FIRMADA y no heredada: una excepción que sobrevive
+          por inercia es indistinguible de un olvido.*
+
+          ⚠️ **Lo vigila `verify:etiqueta-dentro`**, que la lleva por nombre
+          en `PIEZAS_EXENTAS` — **no se cuenta, y se ve que no se cuenta**:
+          su salida imprime las exentas en cada corrida. */}
       <EtiquetaDeCampo>{etiqueta}</EtiquetaDeCampo>
 
       {/* La fila de cajas + el input invisible ENCIMA. El input cubre la

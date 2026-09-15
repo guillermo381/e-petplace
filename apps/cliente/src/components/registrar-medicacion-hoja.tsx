@@ -79,13 +79,11 @@ export function RegistrarMedicacionHoja({
           label={t('medicacion.cual')}
           value={medicamento}
           onChangeText={setMedicamento}
-          placeholder={t('medicacion.cualPlaceholder')}
         />
         <Campo
           label={t('medicacion.dosis')}
           value={dosis}
           onChangeText={setDosis}
-          placeholder={t('medicacion.dosisPlaceholder')}
         />
         <Boton
           variante="primario"

@@ -81,7 +81,6 @@ export function RegistrarPesoHoja({
 
         <Campo
           label={t('perfil.pesoHojaLabel')}
-          placeholder={t('perfil.pesoHojaPlaceholder')}
           value={texto}
           onChangeText={(v) => {
             setTexto(v);

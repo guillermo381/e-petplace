@@ -291,6 +291,80 @@ function glifoDelCampo(
   return secure ? 'contrasena' : undefined
 }
 
+
+/**
+ * EtiquetaFlotante — N11″, **escrita UNA vez para las dos piezas de campo.**
+ *
+ * 🔴 **Nace al aparecer el segundo consumidor, no antes.** El lote 6 la
+ * escribió inline en `Campo` porque era el único caso; hoy `CampoFecha`
+ * necesita exactamente lo mismo, y *dos inline que coinciden hoy coinciden
+ * por copia — la forma más frágil de coincidir.* Es la misma disciplina con
+ * la que nacieron `EtiquetaDeCampo` y `PieDeCampo`, que esta pieza reemplaza
+ * y acompaña.
+ *
+ * ⚠️ **Lo que NO resuelve, a propósito: el CUERPO.** Uno es un `TextInput` y
+ * el otro un `<Text>` que muestra una fecha; el que los envuelva decide qué
+ * va debajo. *Una pieza que además dibujara el cuerpo tendría dos anatomías
+ * y volveríamos al defecto que esto viene a cerrar.*
+ *
+ * ── LOS DOS ESTADOS ───────────────────────────────────────────────────
+ * · **flotando**: rótulo chico arriba (11 px), el cuerpo debajo.
+ * · **en reposo**: rótulo a tamaño base, ABSOLUTO y centrado sobre el
+ *   cuerpo vacío — así el cuerpo nunca se desmonta ni cambia de alto.
+ *
+ * ⚠️ **Fuera del árbol de accesibilidad, las tres props juntas.** El
+ * control ya dice su nombre por `accessibilityLabel`; esto es el MISMO
+ * nombre dibujado. *Medido: con las props sólo en el `View` que envuelve,
+ * el nodo seguía en el volcado de `uiautomator`.*
+ */
+export function EtiquetaFlotante({ label, flotando }: { label: string; flotando: boolean }) {
+  const { theme } = useTheme()
+  const invisibleAlLector = {
+    accessible: false,
+    accessibilityElementsHidden: true,
+    importantForAccessibility: 'no' as const,
+  }
+  if (flotando) {
+    return (
+      <Text
+        numberOfLines={1}
+        {...invisibleAlLector}
+        style={{
+          fontFamily: typography.family.sans.regular,
+          fontSize: TAMANO_ETIQUETA_FLOTANTE,
+          lineHeight: ALTO_ETIQUETA_FLOTANTE,
+          /* 🔴 `secondary` = `tintaTexto65`, el 65 % que la orden fija como
+             piso. `tertiary` da 2,18 en claro y sería exactamente el rótulo
+             ilegible que N11′ temía. Medido contra el interior del campo:
+             5,26 claro · 7,86 oscuro · 5,26 memorial. */
+          color: theme.text.secondary,
+        }}
+      >
+        {label}
+      </Text>
+    )
+  }
+  return (
+    <View
+      pointerEvents="none"
+      {...invisibleAlLector}
+      style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center' }}
+    >
+      <Text
+        numberOfLines={1}
+        {...invisibleAlLector}
+        style={{
+          fontFamily: typography.family.sans.regular,
+          fontSize: typography.size.base,
+          color: theme.text.secondary,
+        }}
+      >
+        {label}
+      </Text>
+    </View>
+  )
+}
+
 export interface CampoProps
   extends Omit<
     TextInputProps,
@@ -492,36 +566,28 @@ export function Campo({
             input vacío y centrado en los mismos 38. *El input nunca se
             desmonta ni cambia de alto: si lo hiciera, el foco se perdería
             al primer carácter y la caja saltaría.* */}
-        <View style={{ flex: 1, justifyContent: 'center' }}>
-        {flotando ? (
-          <Text
-            numberOfLines={1}
-            /* 🔴 **EL RÓTULO VISUAL NO SE ANUNCIA — y las TRES props van
-               juntas porque dos no alcanzaron.** El `accessibilityLabel` del
-               input ya dice el nombre del campo; el `<Text>` de al lado es el
-               MISMO nombre dibujado, y anunciarlo otra vez es el doble
-               anuncio que `FiltroPills` curó en su promoción.
-               ⚠️ **Medido con `uiautomator dump`: con las props sólo en el
-               `View` que lo envuelve, el nodo SEGUÍA en el árbol con su
-               texto.** *Un `no-hide-descendants` en el padre se lee como
-               suficiente y no lo fue; lo dijo el volcado, no la
-               documentación.* `accessible={false}` va en el nodo. */
-            accessible={false}
-            accessibilityElementsHidden
-            importantForAccessibility="no"
-            style={{
-              fontFamily: typography.family.sans.regular,
-              fontSize: TAMANO_ETIQUETA_FLOTANTE,
-              lineHeight: ALTO_ETIQUETA_FLOTANTE,
-              /* 🔴 **`secondary` = `tintaTexto65`**, el 65 % que la orden
-                 pide como piso. `tertiary` da 2,18 en claro y sería
-                 exactamente el rótulo ilegible que N11′ temía. */
-              color: theme.text.secondary,
-            }}
-          >
-            {label}
-          </Text>
-        ) : null}
+        {/* 🔴 **`minHeight` NO ES DEFENSIVO: SIN ÉL LA COLUMNA COLAPSA A
+            CERO Y EL INPUT NO SE DIBUJA.** Medido en `antiparasitario`: la
+            caja salía **vacía —sin rótulo y sin campo—** y el defecto
+            aparecía **sólo cuando el campo NO tiene glifo**, o sea cuando no
+            declara `autoComplete` ni es `secure`. *Con el disco de 32 a la
+            izquierda la fila tenía un hijo con alto propio y la columna se
+            estiraba con él; sin el disco no hay de dónde sacarlo, y un
+            `flex: 1` con `justifyContent: 'center'` se centra sobre cero.*
+
+            ⚠️ **Aislado con dos corridas, y la primera hipótesis era la
+            equivocada:** con `minWidth: 0` solo, el input seguía sin
+            dibujarse. *El `minWidth` es el reflejo de flexbox que uno
+            escribe de memoria; acá lo que faltaba era el alto.*
+
+            ⏪ **Y el defecto no existía antes de N11″**: la columna nació en
+            el lote 6 para alojar etiqueta y valor. *Lo destapó el primer
+            campo sin glifo que alguien miró.*
+
+            `minWidth: 0` se queda igual, con su propio trabajo: sin él un
+            rótulo largo empuja al ojo fuera de la caja en vez de truncarse. */}
+        <View style={{ flex: 1, minWidth: 0, minHeight: ALTO_LINEA, justifyContent: 'center' }}>
+        {flotando ? <EtiquetaFlotante label={label} flotando /> : null}
 
         <TextInput
           {...inputProps}
@@ -578,38 +644,7 @@ export function Campo({
           }}
         />
 
-        {/* EL RÓTULO EN REPOSO — absoluto sobre el input vacío, centrado en
-            el interior. `pointerEvents` none: tocar el rótulo es tocar el
-            campo. Y fuera del árbol de a11y por lo mismo que el flotado. */}
-        {v5 && etiquetaVisible && !flotando ? (
-          <View
-            pointerEvents="none"
-            accessibilityElementsHidden
-            importantForAccessibility="no-hide-descendants"
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              justifyContent: 'center',
-            }}
-          >
-            <Text
-              numberOfLines={1}
-              accessible={false}
-              accessibilityElementsHidden
-              importantForAccessibility="no"
-              style={{
-                fontFamily: typography.family.sans.regular,
-                fontSize: typography.size.base,
-                color: theme.text.secondary,
-              }}
-            >
-              {label}
-            </Text>
-          </View>
-        ) : null}
+        {v5 && etiquetaVisible && !flotando ? <EtiquetaFlotante label={label} flotando={false} /> : null}
         </View>
 
         {secure ? (
