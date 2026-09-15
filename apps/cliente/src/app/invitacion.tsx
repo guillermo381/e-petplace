@@ -24,7 +24,7 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Boton, Entrada, Isotipo, Texto, spacing, useAviso, useTheme } from '@epetplace/ui';
+import { Boton, Entrada, IsotipoV5, Texto, spacing, useAviso, useTheme } from '@epetplace/ui';
 import { aceptarInvitacionFamilia, cerrarSesion, obtenerSesion } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
@@ -122,7 +122,10 @@ export default function InvitacionFamilia() {
       }}
     >
       <View style={{ alignItems: 'center', marginBottom: spacing[6] }}>
-        <Isotipo size={64} variant="gradiente" />
+        {/* ☠️ `Isotipo` → `IsotipoV5` (lote 3d). Eran 64 px contra el mínimo
+            de 120: **es el que mejor lo tolera** —está centrado y solo—, pero
+            el salto se mide igual en el parte. */}
+        <IsotipoV5 sobre="claro" tamano="cabecera" />
       </View>
       <View style={{ flex: 1, justifyContent: 'center' }}>{contenido}</View>
     </View>

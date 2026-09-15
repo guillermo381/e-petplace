@@ -82,7 +82,7 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   FilaDato,
-  Isotipo,
+  IsotipoV5,
   PieRevelar,
   Texto,
   radius,
@@ -295,7 +295,12 @@ export default function PlanDeVacunas() {
               paddingTop: spacing[2],
             }}
           >
-            <Isotipo size={32} variant={esMemorial ? 'blanco' : 'gradiente'} />
+            {/* ☠️ `Isotipo` → `IsotipoV5` (lote 3d). 🔴 **Dos cosas quedan
+                raras y van al parte, no resueltas acá:** eran **32 px** contra
+                el mínimo de **120**, y la rama `esMemorial ? 'blanco'` **no
+                tiene equivalente**: `sobre` declara el FONDO donde se para, y
+                el de esta pantalla es claro en los tres temas. */}
+            <IsotipoV5 sobre="claro" tamano="cabecera" />
             <View style={{ flex: 1, gap: spacing[1] }}>
               <Texto variante="titulo">{t('planVacunas.titulo', { nombre })}</Texto>
               {identidad.length > 0 ? <Texto variante="dato">{identidad.join(' · ')}</Texto> : null}

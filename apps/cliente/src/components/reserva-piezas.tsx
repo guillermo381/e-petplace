@@ -56,7 +56,7 @@ import {
   Boton,
   EstadoVacio,
   Icono,
-  Isotipo,
+  IsotipoV5,
   Texto,
   radius,
   spacing,
@@ -169,7 +169,12 @@ export function CabezalOficio({
         </Pressable>
         {/* el glifo del oficio ADELANTE; el isotipo TEÑIDO detrás de él */}
         <Icono nombre={oficio} tamano={24} registro="capa" />
-        <Isotipo size={20} color={colorOficio} />
+        {/* ☠️ `Isotipo` → `IsotipoV5` (lote 3d).
+            🔴 **ES EL CASO QUE NO TIENE TRADUCCIÓN, y por eso va entero al
+            parte:** eran **20 px TEÑIDOS al color del oficio**, y la marca del
+            ilustrador **es un PNG — no se puede teñir**. *No hay prop que
+            pedirle: el `color` no existe porque el dibujo trae sus colores.* */}
+        <IsotipoV5 sobre="claro" tamano="cabecera" />
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text
             numberOfLines={1}

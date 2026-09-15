@@ -64,7 +64,7 @@ import {
   Separador,
   Tarjeta,
   Huella,
-  Isotipo,
+  IsotipoV5,
   Texto,
   VisorFoto,
   motion,
@@ -651,7 +651,12 @@ function FilaCampanaTecho({
        toque abre lo que no era y la persona cree que se equivocó ella.* */
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[5] }}>
       <View style={{ flex: 1 }}>
-        <Isotipo size={28} variant="blanco" />
+        {/* ☠️ `Isotipo` → `IsotipoV5` (firma del founder, lote 3d: *«en ningún
+            lado»* incluye los cuatro montajes a la vista).
+            🔴 **QUEDA RARO Y NO LO RESUELVO POR MI CUENTA:** acá había **28 px**
+            y el tamaño más chico de la marca del ilustrador es **`cabecera` =
+            120**. Ver la medición y la captura en el parte del lote 3d. */}
+        <IsotipoV5 sobre="oscuro" tamano="cabecera" />
       </View>
       {/* ⭐ **EL CARRITO Y LA CAMPANA, EN EL DISCO DE B — y con su número.**
 
