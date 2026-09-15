@@ -50,7 +50,7 @@
 - **props:** `fondo` · `costura` · `arranque` · `scroll` · `children` · **`pie`** · **`materialDelPie`**
 - 🔴 **La hoja CRECE HASTA EL PIE siempre** (`flexGrow` en la hoja **y** en el `contentContainer`). ⏪ Con `minHeight: 400` sin `flexGrow`, el contenido corto dejaba asomar el ciruela entre la hoja y el pie: *un mínimo garantiza que no sea más chica, no que llegue abajo*. **El defecto sólo existe cuando sobra pantalla — justo la pantalla con la que nadie prueba.**
 - **tokens:** `radius.cabeceraV5` · `theme.bg.base` (el lienzo) · `theme.accent.gradient`
-- **consumidores:** 6
+- **consumidores:** 7
 - 🔴 **LA HOJA ES OPACA, COLOR LIENZO, SIEMPRE (lote 13).** El founder vio *el wordmark del fondo a través de la hoja, bajo «Email»*. ⚠️ **El color nunca fue el problema y por eso no alcanzaba mirarlo:** los tres temas traen `bg.base` sin alfa. **Lo que dejaba pasar el fondo era el ORDEN DE PINTADO en Android** — una `elevation` de cualquier cosa montada en el fondo sube su capa por encima de sus hermanos. *Un fondo opaco tapado por un hermano que se pinta después sigue siendo opaco y se ve transparente igual.* ⇒ la cura son **dos `zIndex` explícitos** (fondo `0`, hoja `1`), no un color.
 - 🔴 **EL DEGRADADO LO PINTA ESTA PIEZA, no la `Cabecera`** — y no es un detalle de implementación: al scrollear *«el fondo se queda y su CONTENIDO se desvanece»*. **Si el degradado viniera dentro del nodo que se desvanece, se apagaría con él** y la pantalla quedaría blanca detrás de la hoja.
 - ⚠️ **El desvanecido se acopla al SCROLL, no a un `withTiming`:** la opacidad es una función de **dónde está la hoja**. *Una transición temporal se desincroniza del dedo en cuanto alguien scrollea rápido, y el fondo se apaga cuando ya no lo tapa nada.*
@@ -128,7 +128,7 @@ La banda ciruela de arriba. **Va en TODAS las pantallas del cliente**, no solo e
 - 🔴 **`presentacion="fondo"` (S116-B)**: sin radio inferior ni sombra, porque **deja de ser una tarjeta apoyada** — *una sombra sobre el fondo no despega nada: no hay nada debajo.* **Es prop y no un tercer valor de `variante`** porque `raíz`/`empujada` siguen vivas: una dice QUÉ ES, la otra CÓMO SE PINTA (mismo criterio que `Boton.superficie`). **Default `tarjeta`: los consumidores no cambian nada** — se la pasa `HojaContenido`.
 - ⚠️ **No tiene un alto fijo y no se puede exportar uno:** mide `inset + padding + CONTENIDO + padding`, y el contenido es variable por diseño. Se exportan `ALTO_CABECERA_RAIZ_FIJO` / `ALTO_CABECERA_EMPUJADA_FIJO` (**sólo el padding**) como piso de arranque para medir con `onLayout`. *Un alto único sería correcto para una combinación y falso para las otras siete.*
 - **tokens:** `gradients` · `medidas` · `palette` · `radius` · `spacing` · `elevacion` · `theme.accent`
-- **consumidores:** 7
+- **consumidores:** 8
 - **captura:** `docs/loop/capturas-s116-b-lote2/piezas-v5-montadas.png`
 - ⚠️ **El degradado lo resuelve el TEMA, no un `if memorial`** — memorial cae a ciruela noche plana solo.
 
@@ -136,7 +136,7 @@ La banda ciruela de arriba. **Va en TODAS las pantallas del cliente**, no solo e
 El círculo translúcido de las acciones **sobre la banda ciruela** (la flecha de volver, el carrito).
 - **props:** `children` · `onPress?` · `etiqueta?`
 - **tokens:** `medidas.cabeceraEmpujada.flecha` · `radius.chipV5` · blanco al 16 %
-- **consumidores:** 0
+- **consumidores:** 1
 - ⚠️ **Y EL CERO ES EL DATO, no un olvido:** `Cabecera` la monta *dentro de `packages/ui`*, que no cuenta como consumidor. **Deja de ser cero el día que el carrito de la Despensa migre de su copia a esta pieza** — que es exactamente lo que esta entrada existe para habilitar.
 - 🔴 **NACE COMO PIEZA (lote 12) PORQUE ESTAR EXPUESTO NO ALCANZÓ.** Vivía dentro de `Cabecera.tsx` y desde el lote 2 estaba disponible como `Cabecera.Disco`, **con un comentario que pedía literalmente lo que después pasó** —*«que quien monte la acción derecha use EL de la cabecera y no dibuje otro»*—. **C lo copió igual** para el carrito de la Despensa.
 
@@ -182,7 +182,7 @@ Las seis caras del founder. **`TrioPersonajes` es la mitad de `Confirmacion`.**
 - 🔴 **El trío entra en FUNDIDO ESCALONADO (S116-B).** Tenía cero movimiento: el check de `Confirmacion` crecía y *los tres personajes aparecían de golpe debajo*. Es `FadeIn` y no una entrada con desplazamiento —la letra §2 dice **fundido**— y el escalonado usa `stagger.normal`: *tres caras a la vez son una imagen; de a una es que llegaron.*
 - **props:** `especie` (`perro`|`gato`|`conejo`|`ave`|`roedor`|`otro`) · `tamano` (`grande`|`hogar`|`selector`|`fila`) · `elegido` · `fondo` · (trío: `especies` de exactamente 3)
 - **tokens:** `medidas` · `palette` · `radius` · `theme.bg`
-- **consumidores:** 5 · 0
+- **consumidores:** 6 · 0
 - 🔴 **El `ave` usa la nariz como cara** hasta que llegue su archivo — el único que entró trae el wordmark encima. Enmienda firmada de la letra §1.10.
 - ⚠️ **Ninguna es vector**; el `roedor` tiene fondo blanco opaco.
 
@@ -234,7 +234,7 @@ La marca v5 por imagen. **Las dos se dimensionan por ANCHO** — el logo lleva w
 La acción de la pantalla. **Una primaria por pantalla** (Ley 5).
 - **props:** `etiqueta` (**no children**) · `onPress` · `variante` · `superficie` (`clara`|`muro`|**`oscura`**) · `tamano` (`sm`|`md`|`lg`) · `bloque` · `cargando` · `deshabilitado` · `iconoIzq` · `chevron` · `razonDeshabilitado`
 - **tokens:** `medidas` · `radius` · `shadows` · `elevacion` · `motion` · `typography` · `theme.accent`
-- **consumidores:** 232
+- **consumidores:** 233
 - 🔴 **`razonDeshabilitado` no es opcional en la práctica:** `verify:razon-muda` cuenta los botones apagados sin razón. *Un botón que se apaga sin decir por qué manda a la persona a adivinar.*
 - ⚠️ En la casa v5 la etiqueta es **PJS 700 16** (`escala.cta`); el `ghost` conserva su peso — sin superficie que las distinga, **el peso ES la jerarquía**.
 - 🔴 **`superficie="oscura"` (S116-B)** para el degradado de entrada y la cabecera ciruela: el primario conserva su magenta y **todo lo demás pasa a blanco**. *Va como superficie y no como variante porque la superficie es ORTOGONAL a la variante — lo dice la propia pieza.* Memorial queda afuera: su acción es tinta (Ley 21).
@@ -313,7 +313,7 @@ El set b′. **Nombre tipado: cero strings mágicos.**
 Toda la tipografía.
 - **props:** `variante` (`titulo`|`seccion`|`cuerpo`|`apoyo`|`enfasis`|`antetitulo`|`dato`|`datoMd`|`voz`) · `color` (+ **`acentoSobreOscuro`**) · `numberOfLines` · `centrado` · `tabular`
 - **tokens:** `typography` · `theme.text` · `theme.status`
-- **consumidores:** 230
+- **consumidores:** 231
 - 🔴 **En la casa v5, `titulo` y `seccion` son Baloo 2 800** (28/31 y 22/26); `cuerpo`/`apoyo`/`enfasis` son Plus Jakarta Sans. **No hay que pasar nada: la pieza resuelve por casa.**
 - ⚠️ **`dato` y `datoMd` siguen en JetBrains Mono** (Ley 3: metadata de máquina) y **`voz` sigue en DM Sans 300** — la letra no nombra una variante de voz, y cambiarla sería decidir algo que nadie firmó.
 - 🔴 **`acentoSobreOscuro` (S116-B)** = el rosa sobre ciruela, para el acento de un claim sobre el degradado. **Resuelve a la paleta, no al tema**, igual que `sobreVideo`: la superficie ciruela es oscura aunque el tema sea claro. En memorial cae a `inverso` — *un acento rosa es fiesta, y §4 dice «la misma estructura sin la fiesta»*.
@@ -337,7 +337,7 @@ Las cinco tabs. **El activo es el círculo elevado.**
 ### `EsperaDeMarca`
 La espera de la casa: la nariz respirando. **Única animación de espera legal**, y siempre con voz honesta debajo.
 - **tokens:** `motion` · `theme.accent` · `theme.capa`
-- **consumidores:** 6
+- **consumidores:** 10
 - ⚠️ En memorial **queda quieta**.
 
 ### `NarizNotificacion`

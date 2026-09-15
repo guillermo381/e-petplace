@@ -35481,7 +35481,15 @@ Se toca «vacuna» → navega a `/carnet` **con el abanico abierto detrás**; al
 
 **Mientras tanto se declara con `SALTAR_GATE` y su medición**, en cada commit que lo arrastre.
 
-**☠️ MUERTE:** cuando `R32` resuelva el `gap` por árbol de montaje y este archivo dé verde **sin que nadie le haya agregado un token**.
+### ⏪ SE PUSO VERDE SOLO EN EL MERGE SIGUIENTE — y eso CONFIRMA la ficha, no la cierra
+
+**Medido con el mismo instrumento, un merge después:** la campana pasó a la línea **555** y el `gap` de su fila a la **535** ⇒ **20 líneas, de vuelta adentro de la ventana.** El lote 10 de C acortó el bloque y el rojo desapareció **sin que nadie tocara un token**.
+
+🔴 **Es exactamente lo que la ficha decía, y es peor que un rojo:** *el veredicto no depende del diseño — depende de cuántas líneas haya en el medio.* **Hoy dio verde por la misma razón por la que ayer dio rojo**, y ninguna de las dos veces midió si la fila declara su separación.
+
+*Un gate que cambia de veredicto porque alguien acortó un bloque no está midiendo la fila: está midiendo la distancia.* **Y el modo de falla que queda vivo es el silencioso**: mañana vuelve a pasar de largo y da **verde sobre una campana que de verdad no declara su gap**.
+
+**☠️ MUERTE:** cuando `R32` resuelva el `gap` por árbol de montaje —como ya resuelve el `hitSlop` de vecinos— y su veredicto **deje de moverse con el largo del archivo**.
 
 ---
 
