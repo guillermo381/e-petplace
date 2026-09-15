@@ -36,6 +36,11 @@
  * `Math.random()` en ningún caso — *eso sí sería debilitar el verificador
  * PKCE, y sería una decisión de seguridad que esta pista no toma.*
  *
+ * 📌 **SU SUCESOR YA ESTÁ ESCRITO** (S116-A lote 8, `D-1101`):
+ * `docs/loop/S116-LOTE8-PKCE-S256.md` trae el archivo entero y los cinco pasos.
+ * *No se aplicó porque `expo-crypto` está anotada y sin instalar, y un `.ts` que
+ * importa un módulo ausente no compila.*
+ *
  * ⚠️ **ES UN PUENTE, NO EL DESTINO, y lo declara para que nadie lo olvide:**
  * lo correcto es el polyfill nativo (`react-native-get-random-values` o
  * `expo-crypto`), que **no viaja por OTA** —es dependencia nativa y necesita
