@@ -98,13 +98,19 @@ export const clienteEs = {
     enMemorial: 'Acá no hay nada que preguntar.',
     titulo: 'Nexo',
     autor: 'Nexo',
-    /* ⭐ **S116-C lote 7 · LOS CUATRO DEDOS DE LA HOJA DEL ASISTENTE.**
-       Voz de ACTO, no de sustantivo: la familia no va a «peso», va a *anotar*
-       su peso. Y el orden es el de `ORDEN_DE_PATA`, que vive en el objeto. */
-    atajo_peso: 'Anotar su peso',
-    atajo_vacuna: 'Cargar su carné',
-    atajo_antiparasitario: 'Anotar un antiparasitario',
-    atajo_foto: 'Guardar un recuerdo',
+    /* ⭐ **LOS CUATRO DEDOS DEL ABANICO DEL ASISTENTE.**
+       ⏪ **Eran voz de ACTO** —«Anotar su peso», «Cargar su carné»— con este
+       argumento: *la familia no va a «peso», va a anotar su peso*. **El
+       aparato lo derogó:** en el teléfono del founder las frases no entraban
+       en la pastilla y salían cortadas («Anotar s…», «Cargar s…»), y *un atajo
+       cortado no se lee mal — se lee OTRA COSA*.
+       ⇒ **UNA palabra cada uno** (firma del founder, recorrido 5). El acto lo
+       dice el glifo que va al lado; la palabra sólo tiene que nombrar la cosa.
+       El orden sigue siendo el de `ORDEN_DE_PATA`, que vive en el objeto. */
+    atajo_peso: 'Peso',
+    atajo_vacuna: 'Vacuna',
+    atajo_antiparasitario: 'Antiparasitario',
+    atajo_foto: 'Recuerdo',
     placeholder: 'Pregúntale a Nexo',
     /* La fila de arriba del abanico. **Es voz propia y no reusa
        `placeholder`**: ese nombre describe un campo de texto que murió con

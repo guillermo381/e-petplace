@@ -158,7 +158,13 @@ const NUMERO_MENUDO = 18
    con la que nacieron el compacto y el menudo, que acá es legítima porque el
    control tiene la caja entera y sus tres celdas quedan a 46 dp de distancia
    entre centros: **los blancos no se pisan.** */
-const BOTON_ANCHO = 34
+/* 🔴 **30, no 34 (lote 15).** El founder: *«el botón Agregar es un CTA de alto
+   completo dentro de una celda de rejilla y se come la tarjeta»*. **Baja la
+   CAJA, no sólo el botón** — `Mutacion` la comparte entre el «Agregar» y el
+   stepper, y *dos formas que se turnan en la misma caja tienen que medir lo
+   mismo o la tarjeta salta al tocar* (L-284). El blanco táctil sigue en 44 por
+   `hitSlop`: se achica el píxel, no el target. */
+const BOTON_ANCHO = 30
 const HOLGURA_ANCHA = (BOTON - BOTON_ANCHO) / 2 // 5 ⇒ 34 + 5·2 = 44
 
 /** EL ALTO DEL STEPPER COMPACTO — exportado para que quien RESERVE su lugar

@@ -135,10 +135,17 @@ export type BotonVariante =
    *  congelado por `R48` (solo-baja) y muere en 0. */
   | 'sinCaja'
   | 'acento'
-export type BotonTamaño = 'sm' | 'md' | 'lg'
+export type BotonTamaño = 'xs' | 'sm' | 'md' | 'lg'
 
 // md 48 = default: target táctil. sm 36 compensa con hitSlop (target efectivo 44).
 const TAMAÑOS: Record<BotonTamaño, { alto: number; padX: number; fontSize: number }> = {
+  /* 🔴 **`xs` (lote 15) — LA PÍLDORA DE LA REJILLA.** Nació de un caso, no de
+     completar la escala: en una celda de dos columnas el `sm` se lee como un
+     CTA de pantalla y **se come la tarjeta**. Alto 30 (= `ALTO_STEPPER_ANCHO`,
+     derivado y no tecleado) y **un escalón menos de letra**.
+     ⚠️ Su target táctil sigue siendo 44 por `hitSlop`, igual que `sm`: *se
+     achica el píxel, nunca el blanco del dedo.* */
+  xs: { alto: 30, padX: spacing[3], fontSize: typography.size.xs },
   sm: { alto: 36, padX: spacing[4], fontSize: typography.size.sm },
   md: { alto: 48, padX: spacing[5], fontSize: typography.size.base },
   lg: { alto: 56, padX: spacing[6], fontSize: typography.size.md },

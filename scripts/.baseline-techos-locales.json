@@ -1,0 +1,8 @@
+{
+  "baseline": 2,
+  "techos": [
+    "(tabs)/hogar/index.tsx",
+    "(tabs)/hogar/mascota/[mascotaId].tsx"
+  ],
+  "sembrado": "2026-09-15T03:04:52.288Z"
+}

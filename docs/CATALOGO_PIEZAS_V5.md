@@ -118,7 +118,9 @@
 
 ### `Cabecera`
 La banda ciruela de arriba. **Va en TODAS las pantallas del cliente**, no solo en las del lote 3: es lo primero que se ve y lo que hace que la app parezca una sola.
-- **props:** `variante` (`raiz` | `empujada`) · **`presentacion`** (`tarjeta` | `fondo`) · `antetitulo` · `titulo` · `apoyo` · `accionDerecha` · `pasos` · `onVolver` · `etiquetaVolver`
+- **props:** `variante` (`raiz` | `empujada`) · **`presentacion`** (`tarjeta` | `fondo`) · `antetitulo` · `titulo` · `apoyo` · `accionDerecha` · **`carrito`** · **`avisos`** · **`contenido`** · `pasos` · `onVolver` · `etiquetaVolver`
+- 🔴 **`contenido` (lote 3b, `D-1106`) — contenido propio DENTRO de la banda.** Lo pidieron **los dos techos locales que quedaban vivos**, medidos: el **Hogar** (fecha en mono + saludo + **la fila de mascotas adentro del degradado**) y el **Expediente** (el hero, con su flecha de volver dibujada con un `Path` a mano). *El propio código del Hogar lo declaraba: «HeroMarca no tiene slots para fecha-antes-del-saludo ni para la fila de mascotas: se compone local COPIANDO NIVEL de la primitiva».* ⚠️ **Es un slot, no una pieza:** el contenido lo arma la pantalla porque es suyo; **lo que deja de ser suyo es el techo**.
+- 🔴 **`avisos` (lote 3b) — la campana con su contador**, hermana de `carrito` y en el mismo slot derecho. **El censo encontró DOS acciones-con-contador en raíz** y hasta hoy cabía una: la campana vivía dibujada a mano en el techo del Hogar. ⚠️ **En `empujada` no se dibuja ninguno de los dos.**
 - 🔴 **`presentacion="fondo"` (S116-B)**: sin radio inferior ni sombra, porque **deja de ser una tarjeta apoyada** — *una sombra sobre el fondo no despega nada: no hay nada debajo.* **Es prop y no un tercer valor de `variante`** porque `raíz`/`empujada` siguen vivas: una dice QUÉ ES, la otra CÓMO SE PINTA (mismo criterio que `Boton.superficie`). **Default `tarjeta`: los consumidores no cambian nada** — se la pasa `HojaContenido`.
 - ⚠️ **No tiene un alto fijo y no se puede exportar uno:** mide `inset + padding + CONTENIDO + padding`, y el contenido es variable por diseño. Se exportan `ALTO_CABECERA_RAIZ_FIJO` / `ALTO_CABECERA_EMPUJADA_FIJO` (**sólo el padding**) como piso de arranque para medir con `onLayout`. *Un alto único sería correcto para una combinación y falso para las otras siete.*
 - **tokens:** `gradients` · `medidas` · `palette` · `radius` · `spacing` · `elevacion` · `theme.accent`
@@ -249,6 +251,21 @@ La superficie que agrupa.
 - **props:** `icono` · `titulo` · `detalle` · `onPress` · `registro` · `chevron` — `subtitulo` · `inicio` · `densidad` · `tituloEntero` · `elegida`
 - **tokens:** `radius` · `spacing` · `motion` · `typography` · `theme.accent` · `theme.bg`
 - ⚠️ **El contorno transparente murió como acción de fila.** Información despliega; acción lleva. El glifo va en círculo rosa tinte.
+
+### EL OSCURO — `'inverso'` NO significa «sobre fondo oscuro»
+🔴 **Lote 15, medido en el aparato con el teléfono en oscuro.** `text.inverse` es **blanco en claro y TINTA en oscuro**: *significa «al revés del tema», no «sobre fondo oscuro»*. Sobre una superficie que es **la misma en los dos temas** —la franja magenta de `OndaAcceso`, la banda ciruela de `Cabecera`— acierta en claro **por casualidad** y en oscuro deja la letra ilegible (**3,29**).
+- **La regla:** *si la superficie no cambia con el tema, el color de su letra tampoco puede cambiar.* Para magenta: **`Texto color="sobreMagenta"`** (blanco fijo, **5,13**, en el gate).
+- ⚠️ **Es la misma ley que `sobreCta` vista del otro lado:** aquélla resuelve **por casa** porque el CTA cambia de color; ésta es **fija** porque la franja no.
+- **`Personaje`**: su fondo `'blanco'` leía `theme.bg.card` y en oscuro era ciruela. *Un valor cuyo nombre dice «blanco» y en un tema no lo es no es una decisión de tema: es un nombre que miente.* **Y tenía una segunda razón**, escrita en su propia cabecera: el blanco tapa el fondo blanco opaco del asset del roedor.
+- 🔴 **Sin curar y censado** (lote 15, §③): `Cabecera:209·213·217` y `bienvenida.tsx:155·165` — **la cabecera va en toda pantalla del cliente**.
+
+### EL BOTÓN DE LA REJILLA — `Boton tamaño="xs"`
+Alto **30**, letra un escalón menos. *Un CTA de alto de pantalla dentro de una celda de dos columnas compite con el producto que la celda existe para mostrar.*
+- ⚠️ **Bajó la CAJA, no sólo el botón:** `ALTO_STEPPER_ANCHO` 34 → 30, porque `Mutacion` la comparte con el stepper — *dos formas que se turnan en la misma caja tienen que medir lo mismo o la tarjeta salta al tocar* (L-284).
+- **El blanco táctil sigue en 44 por `hitSlop`:** se achica el píxel, nunca el blanco del dedo.
+
+### LA GALERÍA SALTA A UNA SECCIÓN — `?solo=`
+`cliente:///gallery?solo=abanico` monta sólo las secciones cuyo título contenga ese texto. **Nació de un costo medido:** dos lotes cerraron sin su captura porque llegar a una pieza era barrer ~9.800 líneas con swipes. ⚠️ **Filtra, no reordena**: sin parámetro la galería es la de antes — *un instrumento que cambia lo que mide cuando no se lo usa no sirve para medir.*
 
 ### EL CONTADOR — *un disco, dos portadores* (`disco-contador`)
 🔴 **Lote 13, orden del founder:** *«el contador es un círculo magenta con el número adentro en blanco, PJS 700, pegado arriba a la derecha del glifo; **la pata muere ahí**. Con cero, no se dibuja. **Misma pieza para campana y carrito**.»*

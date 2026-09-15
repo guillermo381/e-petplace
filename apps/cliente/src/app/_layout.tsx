@@ -73,31 +73,26 @@ console.log(
 );
 
 export default function RootLayout() {
-  /* ⏪ D-305 (S48): el tema lo decide el SISTEMA — el app lo resolvía acá y lo
-     pasaba controlado al provider (`packages/ui` no importa `Appearance`).
-     `useColorScheme` re-renderiza al cambiar el tema con la app abierta. El
-     override memorial queda ENCIMA (subtree `<ThemeProvider memorial>`).
+  /* 🔴 **RESOLUCIÓN DEL MERGE (S116-C lote 3b): UNA SOLA LLAVE, Y ES LA DE
+     ABAJO.** `D-1123` llegó escrita DOS VECES — A la puso acá arriba con un
+     `FORZAR_CLARO` que alimentá al provider, y B la puso en el provider con
+     `mode="light"` fijo. **Las dos son correctas por separado; juntas dejan un
+     interruptor muerto**: el `FORZAR_CLARO` de A calcularía un valor que el
+     provider ya no lee. *Un control que no controla nada es peor que ninguno:
+     el próximo que lo vea va a moverlo y no va a pasar nada.*
 
-     🔴 **FORZADO A CLARO POR FIRMA DE LA MESA (S116, `D-1123`) — recorrido 5.**
-     El founder tiene el teléfono en oscuro y el Hogar se ve mal: barra blanca,
-     acento rosa pálido, tarjeta ciruela sobre ciruela.
-
-     **La causa NO es que falte el tema oscuro: es que el rediseño se calibró
-     sobre el claro.** El oscuro sigue existiendo, isomorfo y completo —lo dice
-     la letra— *pero sin calibrar, y un tema isomorfo sin calibrar no está roto:
-     está sin terminar, que se ve peor porque parece que debería andar.*
-
-     ⚠️ **SE FUERZA ACÁ, EN EL ÚNICO LUGAR DONDE EL TEMA SE RESUELVE**, y con la
-     lectura del sistema INTACTA al lado. *El día que se calibre, esto vuelve
-     quitando una línea — no hay que reconstruir la resolución del tema, que es
-     exactamente lo que un forzado esparcido por las pantallas haría imposible.*
-
-     📅 **REVISIÓN: después de Friends & Family.** El trabajo del día que se
-     calibre es la lista de `D-1123`: los valores del cliente que están fijos al
-     claro en vez de leer el tema. */
-  const colorSchemeDelSistema = useColorScheme();
-  const FORZAR_CLARO = true; // ← se quita esta línea y su uso, y el oscuro vuelve
-  const colorScheme = FORZAR_CLARO ? 'light' : colorSchemeDelSistema;
+     Gana la de B porque es la que el merge ya dejó viva en el provider, y
+     porque su lápida dice **la línea exacta** que hay que restaurar. */
+  // D-305 (S48): el tema lo decide el SISTEMA — el app lo resuelve acá
+  // y lo pasa controlado al provider (packages/ui no importa Appearance).
+  // useColorScheme re-renderiza al cambiar el tema con la app abierta.
+  // El override memorial queda ENCIMA (subtree <ThemeProvider memorial>).
+  /* ⚠️ **QUEDA DECLARADO A PROPÓSITO aunque hoy nadie lo lea** (ver la lápida
+     del provider, más abajo): es **la mitad que hay que volver a enchufar**
+     cuando el oscuro se calibre. *Borrarlo convertiría el regreso de una línea
+     en dos, y la segunda es la que alguien va a olvidar.* */
+  const colorScheme = useColorScheme();
+  void colorScheme;
 
   // Infraestructura S43-B2: DM Sans + JetBrains Mono cargadas antes de
   // renderizar (los nombres coinciden con typography.family de @epetplace/ui)
@@ -182,7 +177,36 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ProveedorI18n recursos={recursos}>
-        <EpetThemeProvider mode={colorScheme === 'dark' ? 'dark' : 'light'}>
+        {/* ═══════════════════════════════════════════════════════════════
+            ☠️ **EL CLIENTE VA EN CLARO SIEMPRE — LÁPIDA CON FECHA.**
+            **Firma del founder, 14-sep-2026 · REVISAR DESPUÉS DE F&F.**
+
+            ⏪ La línea era:
+                `mode={colorScheme === 'dark' ? 'dark' : 'light'}`
+            y leía el tema del sistema desde S48 (`D-305`).
+
+            **Por qué se apaga, con su medición:** el recorrido 5 del founder
+            fue con el teléfono en oscuro y el censo del lote 15 encontró que
+            **el oscuro del cliente nunca se calibró** — el titular de la
+            bienvenida y el de la cabecera salían ilegibles, y el acento
+            resuelve a `magentaLuz` (rosa pálido) en superficies pensadas para
+            magenta. *No es una lista de bugs: es que nadie recorrió esas
+            pantallas en oscuro.*
+
+            🔴 **EL TEMA OSCURO SIGUE EXISTIENDO Y SIGUE SIENDO ISOMORFO.** Lo
+            que se apaga es **quién lo elige**, no el tema: los tres temas
+            siguen portando los mismos slots, la galería lo sigue montando con
+            su selector, y `verify:contrast` sigue midiendo los tres. *Apagar
+            un tema borrándolo sería perder el trabajo; apagar su elección es
+            una línea.*
+
+            ⇒ **PARA VOLVER ATRÁS ALCANZA CON RESTAURAR LA LÍNEA DE ARRIBA.**
+            Eso es todo lo que hay que deshacer, y por eso vive acá —donde el
+            tema se resuelve— y no repartido por las pantallas: *un forzado
+            hecho pantalla por pantalla no se puede quitar, se tiene que
+            cazar.*
+            ═══════════════════════════════════════════════════════════════ */}
+        <EpetThemeProvider mode="light">
           {/* S83-B34 — LA ATMOSFERA DEL CLIENTE (firma founder: el glow es
               de las DOS casas). Va en el RAÍZ, misma casa que en el
               prestador y el mismo lugar que el AmbientGlow del portal
