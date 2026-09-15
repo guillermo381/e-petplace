@@ -29,7 +29,6 @@
  */
 
 import { useEffect, type ReactNode } from 'react'
-import Svg from 'react-native-svg'
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -39,7 +38,6 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated'
 
-import { Huella } from './Huella'
 import { motion } from '../tokens/motion'
 import { useTheme } from '../ThemeProvider'
 
@@ -112,90 +110,38 @@ export function RespiroDeMarca({
  *    celebración.
  * ═══════════════════════════════════════════════════════════════════ */
 
-/** 🔴 LA ORDEN PIDIÓ «~400 ms» Y ACÁ VALE **300** — y el que decidió no
- *  fui yo: fue `R51`.
+/* ☠️ `LLEGADA` murió con `HuellaDeLlegada` (Ley 37): era su única lectora, y
+   con ella se va el arbitraje pendiente sobre el tercer valor de N10 — *un
+   número en discusión para una pieza que ya no existe no es una decisión
+   abierta: es basura que alguien va a creer viva.* */
+
+
+
+/**
+ * ☠️ **`HuellaDeLlegada` — MUERTA (`D-1121`, S116-B lote 14).**
  *
- *  Escribí `legacy_slow` (que vale exactamente 400) y lo declaré como
- *  excepción razonada en este mismo comentario. **`verify:diseno` lo
- *  rechazó en la primera corrida**: el vocabulario del movimiento es
- *  CERRADO por N10 —150 `fast` · 300 `estandar` · 520 `grande`— y los
- *  `legacy_` no pertenecen. *Una excepción fundada en prosa no le gana a
- *  una regla mecanizada, y está bien que no le gane: para eso se
- *  mecanizó.*
+ * **Era** el motivo de `EsperaDeMarca` usado UNA vez, como celebración de
+ * llegada: la huella aparecía con un `withTiming` de 300 y se quedaba.
  *
- *  ⇒ El **`~`** de la orden es lo que lo vuelve compatible: ~400 pedía un
- *  registro, no un número, y el registro es el ESTÁNDAR. `estandar` (300)
- *  es además el que usan las entradas de toda la casa, que es exactamente
- *  lo que este gesto es: algo que llega.
+ * **Murió porque se quedó sin nadie que entre.** C reemplazó la pata por la
+ * nariz en las tres pantallas de acceso (03 · 04 · 05) y la dejó **con cero
+ * consumidores**; no la borró porque `packages/ui` no es su territorio, y lo
+ * declaró en el código y en su parte. *Hizo lo correcto.*
  *
- *  ⚠️ **Si el founder mira el gate y le resulta corto, la salida NO es
- *  volver a `legacy_slow`: es que la mesa suba el gesto a `grande` (520) o
- *  enmiende N10.** Queda escrito para que nadie lo "arregle" tecleando 400.
+ * > **Es `L-318` con el signo dado vuelta: no es un motor sin puerta — es una
+ * > puerta sin nadie que entre.** Una pieza viva sin consumidores no falla:
+ * > se queda ahí, **entra a los censos, suma a los contadores y alguien la
+ * > lee como parte del sistema**.
  *
- *  🔴 **Y LA LETRA LLEGÓ DESPUÉS Y DICE ~400 — el choque se declara acá y
- *  NO se resuelve solo.** `RITUAL_DE_ENTRADA` §5 pide *«~400ms»*, y su §7
- *  afirma que *«no inventa física nueva: cada número de este documento ya
- *  estaba firmado en el canon»*. **Esa afirmación es falsa para este
- *  número: 400 NO pertenece al vocabulario cerrado de N10** (150 · 300 ·
- *  520) — es un `legacy_` que R51 congeló.
+ * 🔴 **LO QUE MUERE ES ESTE USO, NO EL MOTIVO — y hay que leerlo antes de
+ * concluir que la huella se retiró.** El gesto sigue **vivo y en uso** en
+ * `EsperaDeMarca`, que es la espera corta de la casa. *Una lápida que no
+ * distingue las dos cosas hace que el próximo no reuse el motivo por creerlo
+ * enterrado* — y acá el motivo no sólo está permitido: está montado.
  *
- *  ⇒ **Se conserva 300 y se reporta**, porque bajar un juez mecanizado
- *  para acomodar un número que la propia letra cree canónico y no lo es
- *  sería exactamente al revés: *el instrumento está bien y la letra tiene
- *  un dato que nadie verificó.* **Lo arbitra la mesa: o N10 se enmienda
- *  con su cuarto valor, o §5 baja a 300 (o sube a 520).** */
-const LLEGADA = motion.duration.estandar
+ * **Si vuelve a hacer falta una celebración de llegada**, se decide de nuevo
+ * con su caso: hoy esa celebración la hace `Confeti` en «¡Listo!», que nació
+ * después y con otra letra.
+ */
 
-export function HuellaDeLlegada({
-  tamano = 48,
-  retraso = 0,
-}: {
-  tamano?: number
-  retraso?: number
-}) {
-  const { theme } = useTheme()
-  const reduceMotion = useReducedMotion()
-  const alfa = useSharedValue(0)
-  const escala = useSharedValue(0.92)
-
-  const esMemorial = theme.mode === 'memorial'
-  const quieta = reduceMotion || esMemorial
-
-  useEffect(() => {
-    if (quieta) {
-      alfa.value = 1
-      escala.value = 1
-      return
-    }
-    const curva = Easing.bezier(...motion.easing.easeOut.bezier)
-    const correr = () => {
-      alfa.value = withTiming(1, { duration: LLEGADA, easing: curva })
-      escala.value = withTiming(1, { duration: LLEGADA, easing: curva })
-    }
-    if (retraso <= 0) {
-      correr()
-      return
-    }
-    const id = setTimeout(correr, retraso)
-    return () => clearTimeout(id)
-  }, [quieta, retraso, alfa, escala])
-
-  const estilo = useAnimatedStyle(() => ({
-    opacity: alfa.value,
-    transform: [{ scale: escala.value }],
-  }))
-
-  /* EL COLOR: magenta de marca — el MISMO que `EsperaDeMarca`
-   * (`capa.comunidad`), porque es literalmente su motivo reusado. En
-   * memorial baja a tinta secundaria, igual que su hermana (§2.8):
-   * **el motivo sobrevive, la celebración no.** */
-  const color = esMemorial ? theme.text.secondary : theme.capa.comunidad
-
-  return (
-    <Animated.View style={[{ width: tamano, height: tamano }, estilo]}>
-      <Svg width={tamano} height={tamano} viewBox="0 0 24 24">
-        <Huella color={color} escala={1} />
-      </Svg>
-    </Animated.View>
-  )
-}
+// (el cuerpo de HuellaDeLlegada vivía acá)
