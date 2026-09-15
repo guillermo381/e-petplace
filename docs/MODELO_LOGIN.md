@@ -136,9 +136,22 @@ Tres leyes de la puerta:
 
 Lo que se hereda de la referencia del founder (traducido a React Native):
 
-- ~~Campos con label flotante~~ **NO entra**: choca con N11′ (etiqueta afuera,
-  jamás cambia por foco; firmada 17-ago y sostenida en re-litigio). El campo
-  «respira» por foco de borde y color, no moviendo la etiqueta.
+- 🔴 **ESTA LÍNEA ESTÁ INVERTIDA — se conserva y no se borra.**
+  ⏪ *Decía, y ya NO rige:* «~~Campos con label flotante~~ **NO entra**: choca
+  con N11′ (etiqueta afuera, jamás cambia por foco; firmada 17-ago y sostenida
+  en re-litigio). El campo «respira» por foco de borde y color, no moviendo la
+  etiqueta.»
+  ⇒ **INVERTIDA POR FIRMA DEL FOUNDER (15-sep-2026): EL LABEL FLOTANTE ES LA
+  LEY.** N11′ está derogada y rige **N11″** (`DIRECCION_DISENO_S99` §N11″): la
+  etiqueta va **adentro y flota** —al enfocar se achica y sube al borde—, y **el
+  placeholder de ejemplo muere**. **Alcance: el cliente**; si esta puerta se
+  construye para el prestador, ahí sigue N11′ hasta que se rediseñe.
+  ⚠️ *Se enmienda acá, en su lugar, y no sólo en la norma: esta línea decía que
+  lo que hoy es ley **no entra**, y quien construyera la puerta leyendo sólo este
+  documento habría construido contra la firma — el mismo modo de falla que el
+  canon ya pagó con el magenta (S83), la plata (S88) y la telemedicina (S113).*
+  ✅ **Lo que SÍ sobrevive de esta línea:** el campo también «respira» por foco
+  de borde y color. *Lo que cambió es que ahora la etiqueta se mueve además.*
 - **Ojo** para ver/ocultar, con área de toque generosa — es el ÚNICO componente
   nuevo (no hay glifo de ojo en el registry de 52; gate de ícono).
 - **Jerarquía limpia**: UN primario ocre por pantalla (N26); lo secundario es

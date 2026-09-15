@@ -5,7 +5,8 @@
 > real).** Hermano de `MODELO_LOGIN.md` (el QUÉ); éste es el CÓMO SE SIENTE.
 > Rige entero el canon: regla madre («en cada ícono, la mascota está
 > presente») · motion de marca §5 (300ms · bezier .32,.72,0,1 · escalón 120 ·
-> ceremonia 520) · N11′ · N15 (la ceremonia vive en las pantallas del dueño) ·
+> ceremonia 520) · ~~N11′~~ **N11″** (la etiqueta flota adentro — firma
+> 15-sep-2026) · N15 (la ceremonia vive en las pantallas del dueño) ·
 > N16 (rendimiento con número) · N26/N26.1 · MarcaDeAgua · Entrada · Destape.
 > Toda pieza declara reduce-motion al nacer.
 
@@ -72,16 +73,23 @@ toca antes, corta la ceremonia sin castigo (N15).
 
 - Fondo: **tapiz + MarcaDeAgua** (la cura del prestador, S81-C) + la senda de
   huellas heredada. Jamás blanco pelado.
-- Campos según N11′ (etiqueta afuera, quieta) con **el foco que respira**: el
-  borde del campo activo pasa a tinta plena y gana 1pt, 150ms. El movimiento
-  vive en el borde, no en la etiqueta.
+- ~~Campos según N11′ (etiqueta afuera, quieta)~~ **⇒ N11″ (firma del founder,
+  15-sep-2026): la etiqueta va ADENTRO y FLOTA** —`DIRECCION_DISENO_S99` §N11″—,
+  con **el foco que respira**: el borde del campo activo pasa a tinta plena y
+  gana 1pt, 150ms. ~~El movimiento vive en el borde, no en la etiqueta.~~
+  ⇒ **el movimiento vive en el borde Y en la etiqueta**: son dos gestos
+  distintos —el borde responde al foco, la etiqueta sube para dejar entrar el
+  valor— y ninguno reemplaza al otro. **Alcance: el cliente.**
 - **Ojo** en el campo de clave (el componente nuevo de B, gate por ícono).
 - ☠️ **EL FOCO A TINTA PLENA SE RETIRA — enmienda firmada (founder, 23-ago-2026):**
   la v1.0 pedía que el borde del campo enfocado pasara a **tinta plena**. **Vuelve
   a `accent.active`** (Ley 5 + el sexto slot de S83-B13), y **B revierte en
   `Campo`, `CampoFecha` y `CampoCodigo` de LAS DOS APPS**. Literal del founder:
   *«fue orden mía sin ver el choque»*. **Lo que SÍ queda: el borde gana 1pt en
-  150ms** — el movimiento vive en el borde, no en la etiqueta (N11′ intacta).
+  150ms** — el movimiento vive en el borde, ~~no en la etiqueta (N11′
+  intacta)~~ **y desde el 15-sep-2026 también en la etiqueta, que flota
+  (N11″)**. *Lo que esa enmienda de agosto decidió —a dónde vuelve el borde en
+  foco— no se toca: es otra pregunta.*
   *Se registra la enmienda en vez de reescribir la letra en silencio: B aplicó lo
   pedido Y declaró el choque en la fuente, y ése es el motivo por el que la mesa
   pudo revisarlo antes de que llegara a un gate.*
@@ -137,7 +145,7 @@ documento ya estaba firmado en el canon.
 
 ## Historial
 - v1.0 propuesta (Mesa 105): escrita sobre DIRECCION_ARTE §1/§5,
-  DIRECCION_DISENO N11′/N15/N16/N26 y la medición S104-B del login.
+  DIRECCION_DISENO ~~N11′~~ **N11″**/N15/N16/N26 y la medición S104-B del login.
 - **Depositada por A en S104 (23-ago-2026), verbatim.**
 - **v1.1 — TRES ENMIENDAS FIRMADAS POR EL FOUNDER (23-ago-2026), aplicadas por A
   el mismo día.** Las dos primeras nacieron de que **B reportó el choque en vez de
