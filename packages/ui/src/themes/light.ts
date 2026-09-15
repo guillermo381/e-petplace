@@ -37,6 +37,12 @@ export const lightTheme = {
     card:     palette.superficie,    // #FFFFFF — sin cambio de valor
     elevated: palette.superficie,
     overlay:  palette.rosaTinte,     // el tinte que reemplaza a las capas
+    /* S116-B lote 4 · la superficie apoyada SOBRE LA BANDA. 🔴 **No es
+       `overlay`**: `overlay` es del LIENZO —acá `rosaTinte`— y sobre el
+       ciruela un disco de rosa casi blanco se lee como un globo, no como el
+       respaldo de un retrato. *Medido en la galería: cuatro retratos sin foto
+       dominaban la banda entera.* */
+    sobreGradiente: palette.blancoBanda17,
     hundido:  palette.rosaTinte,
     border:   palette.tintaBorde12,
     warm:     palette.cream,         // narrativa cálida — SIN consumidores
@@ -84,6 +90,16 @@ export const lightTheme = {
 
     /** El estado ACTIVO — magenta, que es el empleo «acción y marca». */
     active:        palette.magentaAccion,
+    /* 🔴 S116-B lote 4 · EL ACENTO **SOBRE LA BANDA**, hermano de
+       `text.onGradient`. Desde el lote 3b la banda es OSCURA en los tres
+       temas (ciruela / ciruela noche), así que un acento que sirve sobre el
+       lienzo NO sirve encima de ella: `magentaAccion` sobre `ciruelaNoche`
+       da un par pobre, y lo dice el propio `dark.ts:56`. **Medido:
+       `magentaLuz` sobre `ciruela` da 5,78:1** — muy por encima del piso
+       gráfico de 3:1. *El valor coincide en los tres temas porque la banda
+       coincide en los tres; es slot y no constante para que el día que la
+       banda cambie haya UN lugar donde mirarlo.* */
+    sobreGradiente: palette.magentaLuz,
 
     /* S116-B · el PAR del glifo (fila · campo · acceso · paso). Ver
 

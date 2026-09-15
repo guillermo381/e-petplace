@@ -64,6 +64,29 @@
 - ⚠️ **El desplazamiento es `DISCO / 2`, no un número:** por eso sigue siendo media mitad el día que el disco cambie de tamaño. *Una pantalla que escribe `marginTop: -32` no sabe por qué es 32.*
 - ⚠️ **La sombra no es adorno:** un círculo blanco sobre el lienzo casi no tiene contorno y sobre el ciruela lo tiene de sobra. La sombra le da el mismo borde a las dos mitades.
 
+### `FilaMascotas`
+- **props:** `mascotas[]` (`id` · `nombre` · `fotoUrl?` · `enMemoria?`) · `elegida` · `onElegir` · `linea?` · `agregar?`
+- **tokens:** `accent.sobreGradiente` · `text.onGradient` · `bg.overlay` · `radius.full`
+- 🔴 **Es un SELECTOR, no una tira informativa, y el cambio de modelo se declara.** Lo que había en el techo del Hogar daba a cada mascota su nombre, su punto de estado y su línea de próxima vacuna: *ocho mascotas eran ocho líneas compitiendo — un tablero de faltantes con forma de fila de caras.* Acá hay **una elegida** y la línea de abajo es la suya. ⚠️ **El costo: el estado de las demás deja de verse sin tocarlas.** Ése es el intercambio, y quien monta tiene que saber que lo hace.
+- 🔴 **El aro SIEMPRE está; lo que cambia es su color.** *Un aro que aparece sólo en el elegido mueve a los vecinos 6 px en cada toque* — la fila entera tiembla y el temblor se lee como defecto aunque sea la respuesta al gesto.
+- 🔴 **El color sale de `accent.sobreGradiente` y NO de `accent.active`.** Medido: `active` vale `magentaAccion` en claro y `tintaV5` en memorial, y **los dos desaparecen sobre la banda**, que desde el lote 3b es ciruela oscura en los tres temas. *Ninguna medición de contraste lo iba a decir porque ese par nunca estuvo declarado.*
+- ⚠️ **La línea de estado llega RESUELTA y `null` no se dibuja.** La voz sale de `calcularVozHogar` sobre el expediente real (L-139), que vive en `@epetplace/domain`. *Un «sin datos» bajo el carrusel es la trampa de la tira vieja concentrada en un renglón.*
+- ⚠️ **La elegida se marca con el aro y con el PESO del nombre, jamás con color de texto.** Decirlo dos veces le quita fuerza al aro.
+- ⚠️ **72 y no 112**: la tira vieja necesitaba 112 porque cada retrato cargaba nombre + punto + vencimiento. Con 112 y el modelo nuevo, la fila empuja el saludo fuera de la banda en pantallas de 360.
+
+### `IdentidadMascota`
+- **props:** `nombre` · `fotoUrl?` · `pastilla?` (`voz` · `tono` · `glifo?` · `complemento?`) · `apoyo?` · `meta?` · `onPressFoto?` · `etiquetaFoto?`
+- **tokens:** `typography.escala.titulo1` (Baloo, vía `Texto variante="titulo"`) · `text.onGradient` · `bg.card` · `elevacion.elevada`
+- 🔴 **EL NOMBRE PASA A BALOO, y es una corrección medida.** El expediente lo dibujaba en `SERIF_LOCAL = Platform.select({ ios: 'Georgia', default: 'serif' })` con su marcador de override: **la serif del sistema operativo** — *dos aparatos mostraban el nombre de la misma mascota en dos tipografías distintas, y ninguna era la de la casa.* En la casa v5 `Texto variante="titulo"` ya resuelve `escala.titulo1` (Baloo 28/31), así que la pieza **no elige una fuente**: pide la variante.
+- ⚠️ **El 44/48 de la serif NO se porta.** El tamaño de una fuente no se traslada a otra: Baloo tiene otra altura de x, y a 44 un nombre de tres sílabas no entra en 360.
+- 🔴 **La pastilla MONTA el aro del retrato.** Suelta debajo se leería como el primer renglón del texto; cabalgando el borde es el estado de la mascota. *Mismo gesto que la tarjeta montando su borde, a otra escala.*
+- ⚠️ **`apoyo` y `meta` son DOS líneas y no una.** `apoyo` es una frase (de dónde llegó), `meta` es metadato (raza · edad · peso), y van en registros distintos. *Mezclarlas convertiría «Llegó de un criadero» en un dato más* — lo declaraba el archivo viejo. El encargo nombró una; la segunda está en el objeto y sacarla borraría raza, edad y peso del techo.
+- ⚠️ **Sin `onPressFoto` el retrato se MIRA**: pasa a `accessibilityRole="image"` y deja de anunciarse como botón. *Un botón deshabilitado sigue diciendo que es un botón, y sin razón visible eso es peor que no serlo* — es el caso de memorial.
+- ⚠️ **Hay un TIPO con este nombre en `@epetplace/api`** (lo que devuelve `obtenerPerfilMascota`). Quien importe los dos en un archivo, lo renombra en el import: `import type { IdentidadMascota as PerfilDeMascota } from '@epetplace/api'`.
+
+### `FiltroPills` — ⭐ **es la fila de pestañas del perfil; no nace una pieza nueva**
+- El encargo del lote 4 pedía «`FilaPestañas` si no existe». **Existe**: `FiltroPills`, promovida en S85-B7, ya es la fila de chips con el elegido marcado y **la pata que pisa** (`MarcaEleccion`), y el chip activo en ciruela está declarado en `palette.ts:63` como su empleo. *Un componente por caso real, y este caso ya tiene el suyo.*
+
 ### `OndaAcceso`
 - **props:** `frase` (dos líneas) · `lado` (`izq`|`der`) · `especies?`
 - **tokens:** `palette.magentaAccion` · `motion.v5.personajePrimeraMs` · `motion.v5.personajeCadaMs` · `motion.v5.personajeFundidoMs` · `spacing`

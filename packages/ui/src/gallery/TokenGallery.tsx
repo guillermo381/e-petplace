@@ -232,6 +232,8 @@ import { NarizNotificacion } from '../brand/NarizNotificacion'
 import { BotonMarcaAjena } from '../components/BotonMarcaAjena'
 import { HojaContenido } from '../components/HojaContenido'
 import { FilaAccionesCostura } from '../components/FilaAccionesCostura'
+import { FilaMascotas } from '../components/FilaMascotas'
+import { IdentidadMascota } from '../components/IdentidadMascota'
 import { OndaAcceso, ALTO_ONDA_ACCESO } from '../components/OndaAcceso'
 import { FilaBeneficio } from '../components/FilaBeneficio'
 import { EsperaLarga } from '../components/EsperaLarga'
@@ -1304,6 +1306,138 @@ function Seccion({ titulo, children }: { titulo: string; children: React.ReactNo
         {titulo}
       </Text>
       {children}
+    </View>
+  )
+}
+
+
+/* ── S116-B lote 4 · EL TECHO DEL HOGAR Y EL DEL EXPEDIENTE ──────────────
+   Las dos piezas viven SOBRE LA BANDA, así que se juzgan ahí y no sueltas
+   sobre el lienzo: *un aro que se lee perfecto sobre papel puede
+   desaparecer sobre ciruela, y ése es exactamente el defecto que el slot
+   `accent.sobreGradiente` vino a cerrar.* Por eso las dos maquetas montan
+   `HojaContenido` + `Cabecera presentacion="fondo"` de verdad. */
+function MaquetaHogar4() {
+  const [elegida, setElegida] = useState('thor')
+  const LINEAS: Record<string, string | null> = {
+    thor: 'Rabia vence el 14 oct · desparasitación al día',
+    zeus: 'Sin próxima vacuna registrada todavía',
+    /* 🔴 El tercero está EN MEMORIA y su línea es `null` — así se ve que la
+       fila no obliga a decir algo de cada mascota. */
+    bruma: null,
+  }
+  return (
+    <View style={{ height: 380, borderRadius: radius.lg, overflow: 'hidden' }}>
+      <HojaContenido
+        arranque={330}
+        fondo={
+          <Cabecera
+            variante="raiz"
+            presentacion="fondo"
+            antetitulo="sábado 13 de septiembre"
+            antetituloVoz="dato"
+            titulo="Buenas tardes, Guillermo"
+            avisos={{ cantidad: 2, onPress: () => {}, etiqueta: 'Avisos' }}
+            carrito={{ cantidad: 3, onPress: () => {}, etiqueta: 'Carrito' }}
+            contenido={
+              <View style={{ paddingTop: spacing[5] }}>
+                <FilaMascotas
+                  mascotas={[
+                    { id: 'thor', nombre: 'Thor' },
+                    { id: 'zeus', nombre: 'Zeus' },
+                    { id: 'bruma', nombre: 'Bruma', enMemoria: true },
+                  ]}
+                  elegida={elegida}
+                  onElegir={setElegida}
+                  linea={LINEAS[elegida] ?? null}
+                  agregar={{ onPress: () => {}, etiqueta: 'Agregar mascota' }}
+                />
+              </View>
+            }
+          />
+        }
+      >
+        <View style={{ paddingHorizontal: spacing[5] }}>
+          <Tarjeta elevacion="plana">
+            <Texto variante="apoyo">Tocá otra cara: cambia el aro y cambia la línea de arriba.</Texto>
+          </Tarjeta>
+        </View>
+      </HojaContenido>
+    </View>
+  )
+}
+
+function MaquetaExpediente4({ memorial = false }: { memorial?: boolean }) {
+  return (
+    <View style={{ height: 560, borderRadius: radius.lg, overflow: 'hidden' }}>
+      <HojaContenido
+        /* 520 y no 400: **con 400 los discos de la costura PISABAN las dos
+           líneas de abajo del nombre.** No es un defecto de la pieza —en la
+           pantalla real el arranque se MIDE con `onLayout` y se acomoda
+           solo—, pero sí es un aviso para quien monte con un número fijo. */
+        arranque={520}
+        fondo={
+          <Cabecera
+            variante="empujada"
+            presentacion="fondo"
+            titulo=""
+            onVolver={() => {}}
+            etiquetaVolver="Volver"
+            accionDerecha={
+              <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+                {!memorial ? (
+                  <DiscoVidrio onPress={() => {}} etiqueta="Editar">
+                    <Icono nombre="lapiz" tamano={20} tinta={palette.white} />
+                  </DiscoVidrio>
+                ) : null}
+                <DiscoVidrio onPress={() => {}} etiqueta="Compartir">
+                  <Icono nombre="compartir" tamano={20} tinta={palette.white} />
+                </DiscoVidrio>
+              </View>
+            }
+            contenido={
+              <IdentidadMascota
+                nombre={memorial ? 'Bruma' : 'Thor'}
+                pastilla={
+                  memorial
+                    ? { voz: 'En memoria', tono: 'neutro' }
+                    : { voz: 'Al día', tono: 'alDia', complemento: '3 por revisar' }
+                }
+                apoyo={memorial ? 'Llegó de un refugio' : 'Llegó de un criadero'}
+                meta={memorial ? 'golden retriever · tenía ~11 años' : 'labrador · 4 años · 24 kg'}
+                onPressFoto={memorial ? undefined : () => {}}
+                etiquetaFoto="Cambiar la foto de Thor"
+              />
+            }
+          />
+        }
+        costura={
+          <FilaAccionesCostura
+            accesos={[
+              { clave: 'citas', palabra: 'Citas', icono: <Icono nombre="hoy" tamano={26} registro="glifo" montaje="control" />, onPress: () => {} },
+              { clave: 'pas', palabra: 'Pasaporte', icono: <Icono nombre="carnet" tamano={26} registro="glifo" montaje="control" />, onPress: () => {} },
+              { clave: 'doc', palabra: 'Documentos', icono: <Icono nombre="documentos" tamano={26} registro="glifo" montaje="control" />, onPress: () => {} },
+              { clave: 'cue', palabra: 'Cuéntanos', icono: <Icono nombre="pluma" tamano={26} registro="glifo" montaje="control" />, onPress: () => {} },
+            ]}
+          />
+        }
+      >
+        <View style={{ paddingHorizontal: spacing[5], gap: spacing[3] }}>
+          {/* Las PESTAÑAS del perfil — y son `FiltroPills`, la pieza que ya
+              existía. Se montan acá para que se vea que el caso está
+              cubierto y que no hacía falta una pieza nueva. */}
+          <FiltroPills
+            activo="resumen"
+            onCambio={() => {}}
+            opciones={[
+              { codigo: 'resumen', etiqueta: 'Resumen', icono: null, capa: null },
+              { codigo: 'salud', etiqueta: 'Salud', icono: null, capa: null },
+              { codigo: 'historia', etiqueta: 'Historia', icono: null, capa: null },
+              { codigo: 'docs', etiqueta: 'Documentos', icono: null, capa: null },
+            ]}
+          />
+        </View>
+      </HojaContenido>
     </View>
   )
 }
@@ -4082,6 +4216,18 @@ function GaleriaInterna({ encabezado }: { encabezado?: ReactNode }) {
                 lo que el founder pidió ver —magenta hasta abajo, sin margen y
                 sin radio— y, con el teclado arriba, que no queda NADA. */}
             <OndaAcceso frase={['Mascotas', 'más felices']} lado="der" />
+          </View>
+        </Seccion>
+
+        <Seccion titulo="⭐ GATE S116-B lote 4 — EL TECHO DEL HOGAR · qué decide: (a) que se lea CUÁL está elegida sin tocar nada —el aro magenta contra el aro apenas insinuado— y que al elegir otra la fila NO se mueva ni un píxel; (b) que la línea de abajo sea la de la elegida y cambie con ella; (c) que Bruma, que está en memoria, se elija igual pero SIN color de marca; (d) que el «+» se lea como control y no como una mascota más. ⚠️ Se juzga TOCANDO: quieta, esta sección sólo prueba el aro">
+          <MaquetaHogar4 />
+        </Seccion>
+
+        <Seccion titulo="⭐ GATE S116-B lote 4 — LA IDENTIDAD DEL EXPEDIENTE · qué decide: (a) que el nombre se lea en BALOO y no en la serif del sistema —si se parece a un libro, está mal—; (b) que la pastilla se lea PEGADA al retrato y no como el primer renglón del texto; (c) que las dos líneas de abajo se distingan entre sí: una es una frase, la otra es metadato; (d) que en memorial el retrato NO se anuncie como botón y no haya editar. Abajo, las pestañas del perfil: son `FiltroPills`, la pieza que ya existía">
+          <View style={{ gap: spacing[4] }}>
+            <MaquetaExpediente4 />
+            <Texto variante="apoyo">· EN MEMORIA · sin editar, el retrato se mira, la edad en pasado</Texto>
+            <MaquetaExpediente4 memorial />
           </View>
         </Seccion>
 

@@ -36,6 +36,8 @@ export const darkTheme = {
     card:     palette.ciruelaProfunda,   // #3B0B47
     elevated: palette.ciruela,           // #4E1160
     overlay:  '#33153B',   // = blanco 6 % sobre ciruelaNoche, PRECOMPUTADO (lección Kaxo)
+    /** S116-B lote 4 · la superficie SOBRE LA BANDA (ver `light.ts`). */
+    sobreGradiente: palette.blancoBanda17,
     hundido:  '#1D0523',   // = negro 24 % sobre ciruelaNoche, PRECOMPUTADO
     border:   'rgba(255,255,255,.12)',
     warm:     palette.cream,
@@ -71,6 +73,8 @@ export const darkTheme = {
     brandBorder:   'rgba(255,127,196,.28)',
 
     active:            palette.magentaLuz,
+    /** S116-B lote 4 · el acento SOBRE LA BANDA (ver `light.ts`). */
+    sobreGradiente:    palette.magentaLuz,
 
 
     /* S116-B · el PAR del glifo (fila · campo · acceso · paso). Ver

@@ -40,6 +40,19 @@ export {
   type AccesoCostura,
 } from './components/FilaAccionesCostura'
 
+/* ══ S116-B lote 4 · LAS DOS PIEZAS DEL TECHO ════════════════════════════
+   Salieron del censo del Hogar y del expediente: eran **~260 líneas de
+   composición local** repartidas en dos pantallas para dibujar la fila de
+   mascotas y la identidad. Lo que ya tenía pieza no nació de nuevo —los
+   cuatro accesos son `FilaAccionesCostura` y las pestañas del perfil son
+   `FiltroPills`, que ya trae los chips con su pata. */
+export { FilaMascotas, type FilaMascotasProps, type MascotaDeFila } from './components/FilaMascotas'
+export {
+  IdentidadMascota,
+  type IdentidadMascotaProps,
+  type PastillaDeIdentidad,
+} from './components/IdentidadMascota'
+
 /* S116-B lote 5 · la franja del pie de 03 y 05. Exporta su ALTO porque
    quien la monte al pie de una hoja que scrollea tiene que reservarle el
    lugar — mismo criterio que los dos altos de `Cabecera`. */

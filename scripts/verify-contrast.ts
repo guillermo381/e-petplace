@@ -480,6 +480,16 @@ function paresDe(t: Theme, nombre: string): Pair[] {
      verificar justo el tono donde el texto se apoya más.* */
   add('sobreGradiente / banda (stop 0)', t.text.onGradient, t.accent.gradient.colors[0])
   add('sobreGradiente / banda (stop final)', t.text.onGradient, t.accent.gradient.colors[t.accent.gradient.colors.length - 1])
+  /* 🔴 **S116-B lote 4 · `accent.sobreGradiente` — el ACENTO de la banda.**
+     Hermano del de arriba, y nace por el mismo defecto un piso más abajo: el
+     texto ya tenía su slot sobre la banda, **el acento no**. `accent.active`
+     vale `magentaAccion` en claro y `tintaV5` en memorial, y los dos
+     desaparecen sobre ciruela — *y ninguna corrida lo iba a decir, porque
+     ese par nunca estuvo declarado.* Va con piso **3:1**: es el aro de
+     elección, gráfica y no texto. Se mide contra los dos extremos del
+     degradado, igual que su hermano. */
+  add('accent.sobreGradiente / banda (stop 0)', t.accent.sobreGradiente, t.accent.gradient.colors[0], undefined, 3)
+  add('accent.sobreGradiente / banda (stop final)', t.accent.sobreGradiente, t.accent.gradient.colors[t.accent.gradient.colors.length - 1], undefined, 3)
   add('CTA oficio (light): papel / tealDark', palette.light0, palette.tealDark)
   add('CTA oficio (dark): textDark0 / tealDark', palette.textDark0, palette.tealDark)
 
