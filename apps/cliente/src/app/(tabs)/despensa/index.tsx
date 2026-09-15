@@ -643,7 +643,24 @@ export default function DespensaDescubrir() {
       <View style={GRILLA_DE_DOS}>
         {lista.map((p, i) => (
           <View key={p.oferta_id} style={CELDA_DE_GRILLA}>
-            <Entrada orden={Math.min(i, 8)}>{tarjetaProducto(p)}</Entrada>
+            {/* ⭐ **S116-C lote 11 · `estira` — la palabra que B pidió, y la fila
+                queda pareja.** Recorrido 4 punto 2: *«las tarjetas se montan en
+                filas de alto igual»*.
+
+                🔴 **Lo que YO había medido y lo que B encontró encima.** Medí que
+                la celda SÍ se estira y la tarjeta no la llena (978 contra 868 px
+                en la misma fila) y lo mandé al buzón. **La cadena tenía DOS
+                cortes, no uno**: el `Animated.View` de `usePresionado` dentro de
+                `TarjetaProducto` —*ese eslón lo pone la primitiva de presión,
+                no el autor de la tarjeta: es invisible al leer la pieza*— y
+                `Entrada`. **Yo había visto el segundo y el primero no.**
+
+                ⚠️ **Y `estira` es opcional a propósito, con su número:** `Entrada`
+                tiene 64 consumidores y `flexGrow` reparte espacio libre donde lo
+                haya ⇒ encenderlo para todos cambiaría pantallas que hoy están
+                bien, **en silencio y sin que ningún gate lo vea**. *La capacidad
+                se ofrece; quien la necesita la pide* — y acá la necesita. */}
+            <Entrada estira orden={Math.min(i, 8)}>{tarjetaProducto(p)}</Entrada>
           </View>
         ))}
       </View>
