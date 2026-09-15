@@ -29,16 +29,17 @@
  * la máquina puede tapar esa puerta*.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Keyboard, ScrollView, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
+  HojaContenido,
+  Cabecera,
   BarraEscribir,
   BurbujaMensaje,
   CabeceraCaso,
   CARA_EN_HILO,
-  Encabezado,
   EscaleraCaso,
   EsqueletoGrupo,
   Esqueleto,
@@ -75,6 +76,7 @@ import { lineaDeEstadoParaFamilia, vocesDeLaEscalera, vozDeEtapa } from '@/lib/p
 import { CartaDeDevolucion } from '@/components/postventa/CartaDeDevolucion';
 import { PermisoWhatsApp } from '@/components/postventa/PermisoWhatsApp';
 import { vozServicio } from '@/lib/voz-servicio';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 type Fase<T> = T | 'cargando' | 'error' | 'noEsTuyo';
 
@@ -117,6 +119,7 @@ const VOZ_ASIENTO: Record<AsientoCaso, 'postventa.asientoCasa' | 'postventa.asie
 };
 
 export default function PantallaDelCaso() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const { casoId } = useLocalSearchParams<{ casoId?: string }>();
@@ -492,7 +495,23 @@ export default function PantallaDelCaso() {
   if (caso === 'cargando') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" titulo={t('postventa.tituloCaso')} atras onAtras={() => router.back()} />
+        {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada" titulo={t('postventa.tituloCaso')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+                presentacion="fondo"
+              />
+            </View>
+          }
+        >
         <View style={{ padding: spacing[5] }}>
           <EsqueletoGrupo>
             <Esqueleto alto={64} />
@@ -500,6 +519,7 @@ export default function PantallaDelCaso() {
             <Esqueleto alto={120} />
           </EsqueletoGrupo>
         </View>
+        </HojaContenido>
       </View>
     );
   }
@@ -507,8 +527,25 @@ export default function PantallaDelCaso() {
   if (caso === 'error' || caso === 'noEsTuyo') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" titulo={t('postventa.tituloCaso')} atras onAtras={() => router.back()} />
+        {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada" titulo={t('postventa.tituloCaso')} onVolver={() => router.back()} etiquetaVolver={t('comun.volver')}
+                presentacion="fondo"
+              />
+            </View>
+          }
+        >
         <EstadoVacio titulo={t(caso === 'noEsTuyo' ? 'postventa.casoNoEsTuyo' : 'postventa.casoNoSePudo')} />
+        </HojaContenido>
       </View>
     );
   }
@@ -527,7 +564,23 @@ export default function PantallaDelCaso() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('postventa.tituloCaso')} atras onAtras={() => router.back()} />
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada" titulo={t('postventa.tituloCaso')} onVolver={() => router.back()} etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+      >
       {/* ═══ §3 · EL SEGUIMIENTO, ENTERO Y SIN NADA ENCIMA ═══════════════════
           ⏪ **Todo esto vivía adentro del `encabezado` de `SuperficieChat`**, o
           sea dentro de una lista invertida: el seguimiento scrolleaba con la
@@ -541,13 +594,10 @@ export default function PantallaDelCaso() {
       {/* `flex: 1` para que el seguimiento tome la pantalla y la barra quede
           abajo: sin él, el ScrollView crece con su contenido y empuja la barra
           fuera de vista. **Lo vi caminando** — la barra asomaba cortada. */}
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{
+      <View style={{
           paddingBottom: spacing[6],
           gap: spacing[3],
-        }}
-      >
+        }}>
         <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[3], gap: spacing[3] }}>
             <CabeceraCaso
               objeto={{
@@ -640,7 +690,7 @@ export default function PantallaDelCaso() {
               </View>
             ) : null}
         </View>
-      </ScrollView>
+      </View>
 
       {/* LA BARRA que sube la hoja — `AsaModal sobre="superficie"`, la enmienda
           de B: sus tokens por defecto están medidos CONTRA VIDEO, y acá no hay
@@ -709,6 +759,7 @@ export default function PantallaDelCaso() {
         }
       />
       </ModalDosAlturas>
+      </HojaContenido>
     </View>
   );
 }

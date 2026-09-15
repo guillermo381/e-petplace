@@ -91,10 +91,11 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-na
 import { scheduleOnRN } from 'react-native-worklets';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
+  HojaContenido,
   Boton,
   Chevron,
   CodigoAEscala,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -123,6 +124,7 @@ import { escaleraDePedido, type VocesEscalera } from '@/lib/despensa/escalera';
 import { ventanaVencida } from '@/lib/despensa/ventana';
 import { useTraduccion } from '@/i18n';
 import { MAPA_NATIVO_DISPONIBLE } from '@/lib/mapa-nativo';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 type Fase<T> = T | 'cargando' | 'error';
 
@@ -169,6 +171,7 @@ const MANIJA = 44;
 type PosicionHoja = 'abajo' | 'reposo' | 'arriba';
 
 export default function DespensaEnCamino() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const { pedidoId } = useLocalSearchParams<{ pedidoId: string }>();
@@ -422,12 +425,26 @@ export default function DespensaEnCamino() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
-        titulo={t('despensa.enCaminoTitulo')}
-        atras
-        onAtras={() => router.back()}
-      />
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={t('despensa.enCaminoTitulo')}
+              onVolver={() => router.back()}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+      >
 
       {detalle === 'cargando' ? (
         <EsqueletoGrupo>
@@ -852,8 +869,7 @@ export default function DespensaEnCamino() {
                   El tope sale del MISMO `hueco` que alimenta los imanes: una
                   sola cuenta, jamás dos que deban coincidir (L-281). */}
               <View style={{ flexShrink: 1, maxHeight: hueco > 0 ? hueco : undefined }}>
-                <ScrollView
-                  contentContainerStyle={{
+                <View style={{
                     paddingHorizontal: spacing[5],
                     paddingTop: spacing[2],
                     // SIN `insets.bottom`: la barra de tabs ya lo pintó y
@@ -861,8 +877,7 @@ export default function DespensaEnCamino() {
                     // visor de una pantalla de tab termina en el filo).
                     paddingBottom: spacing[6],
                     gap: spacing[5],
-                  }}
-                >
+                  }}>
                   {/* 🔴 S100d · PUNTO 24② — EL ORDEN CAMBIA, Y ESO ES LA CURA.
                       Firma del founder: *«al arrastrar no sale la ficha del
                       conductor como en Uber»* — **hoja abajo = mapa + rango ·
@@ -993,12 +1008,13 @@ export default function DespensaEnCamino() {
                       />
                     );
                   })()}
-                </ScrollView>
+                </View>
               </View>
             </GestureHandlerRootView>
           </Animated.View>
         </View>
       )}
+      </HojaContenido>
     </View>
   );
 }

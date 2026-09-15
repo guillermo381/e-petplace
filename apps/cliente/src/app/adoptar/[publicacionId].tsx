@@ -58,9 +58,10 @@ import { Image, ScrollView, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
   Boton,
   Convivencia,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -88,6 +89,8 @@ import {
 import { describirEdad, describirEspera } from '@epetplace/domain';
 
 import { useTraduccion } from '@/i18n';
+import { formatearPrecio } from '@epetplace/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 type Estado =
   | { fase: 'cargando' }
@@ -111,6 +114,7 @@ const MOTIVOS: readonly MotivoReporte[] = [
 ];
 
 export default function PantallaFichaAdoptable() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { publicacionId } = useLocalSearchParams<{ publicacionId: string }>();
   const { theme } = useTheme();
   const { t } = useTraduccion();
@@ -378,7 +382,7 @@ export default function PantallaFichaAdoptable() {
             ? undefined
             : {
                 texto: t('fichaAdoptable.bono', {
-                  monto: f.bonoMonto.toFixed(2),
+                  monto: formatearPrecio(f.bonoMonto),
                   destino: f.bonoDestino ?? t('fichaAdoptable.bonoDestinoSinDeclarar'),
                 }),
                 onExplicar: () => setHoja('bono'),
@@ -419,14 +423,30 @@ export default function PantallaFichaAdoptable() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
-        titulo={estado.fase === 'listo' ? estado.ficha.nombre : t('fichaAdoptable.titulo')}
-        atras
-        onAtras={() => (router.canGoBack() ? router.back() : router.replace('/adoptar'))}
-      />
-
-      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}>
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ El `paddingBottom` con `insets.bottom` que había acá SE RETIRA: lo
+          paga la hoja en su propio render, y sumarlo sería pagarlo dos veces
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={estado.fase === 'listo' ? estado.ficha.nombre : t('fichaAdoptable.titulo')}
+              onVolver={() => (router.canGoBack() ? router.back() : router.replace('/adoptar'))}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        scroll={{ contentContainerStyle: { } }}
+      >
         {estado.fase === 'cargando' ? (
           <View style={{ padding: spacing[5] }}>
             <EsqueletoGrupo>
@@ -469,7 +489,7 @@ export default function PantallaFichaAdoptable() {
         ) : (
           contenido(estado.ficha)
         )}
-      </ScrollView>
+      </HojaContenido>
 
       <Hoja
         visible={hoja === 'verificacion'}

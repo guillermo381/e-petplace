@@ -17,12 +17,15 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Boton, Encabezado, Texto, spacing, useTheme } from '@epetplace/ui';
+import {
+  HojaContenido, Boton, Cabecera, Texto, spacing, useTheme } from '@epetplace/ui';
 import { darDeBajaCorreo } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 export default function Baja() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { t } = useTraduccion();
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
@@ -45,7 +48,29 @@ export default function Baja() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('baja.titulo')} />
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ **Los `ScrollView` verticales que había adentro se volvieron
+          `View`**: la hoja ya scrollea, y dos scrolls verticales anidados
+          dejan al de adentro sin alto propio. Su `contentContainerStyle` pasa
+          a `style` — *el relleno era del contenido, no del scroll.* El
+          `paddingBottom` con `insets.bottom` SE RETIRA: lo paga la hoja
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada" titulo={t('baja.titulo')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+      >
       <View
         style={{
           flex: 1,
@@ -70,6 +95,7 @@ export default function Baja() {
           </>
         )}
       </View>
+      </HojaContenido>
     </View>
   );
 }

@@ -56,9 +56,10 @@ import { ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import {
+  HojaContenido,
   Boton,
   Celda,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -86,11 +87,13 @@ import { vozServicio } from '@/lib/voz-servicio';
 import { useTraduccion } from '@/i18n';
 import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 type Segmento = 'proximos' | 'historial';
 type EjeTipo = 'todos' | string;
 
 export default function LogVeterinaria() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const { t, idioma } = useTraduccion();
@@ -192,18 +195,37 @@ export default function LogVeterinaria() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('logVet.titulo')} atras onAtras={() => router.back()} />
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ **Los `ScrollView` verticales que había adentro se volvieron
+          `View`**: la hoja ya scrollea, y dos scrolls verticales anidados
+          dejan al de adentro sin alto propio. Su `contentContainerStyle` pasa
+          a `style` — *el relleno era del contenido, no del scroll.* El
+          `paddingBottom` con `insets.bottom` SE RETIRA: lo paga la hoja
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        scrollRef={scrollRef}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada" titulo={t('logVet.titulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+      >
 
-      <ScrollView
-        ref={scrollRef}
-        contentContainerStyle={{
+      <View style={{
           paddingHorizontal: spacing[4],
           paddingTop: spacing[2],
           // el pie fijo no tapa la última fila
-          paddingBottom: insets.bottom + spacing[20],
           gap: spacing[4],
-        }}
-      >
+        }}>
         {/* ① la MASCOTA — el primer filtro (con L-b adentro: la pieza de
             C decide relleno vs barrido según cuántos hermanos hay) */}
         {mascotas.length > 1 ? (
@@ -329,7 +351,7 @@ export default function LogVeterinaria() {
         {Array.isArray(filas) && visibles.length > 0 ? (
           <Texto variante="apoyo">{t('logVet.desdeNota')}</Texto>
         ) : null}
-      </ScrollView>
+      </View>
 
       {/* EL CTA VIVO al pie, y LA MASCOTA FILTRADA VIAJA con él */}
       <View
@@ -377,6 +399,7 @@ export default function LogVeterinaria() {
           );
         })()}
       </View>
+      </HojaContenido>
     </SafeAreaView>
   );
 }

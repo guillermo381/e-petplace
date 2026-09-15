@@ -23,10 +23,11 @@ import { ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
+  HojaContenido,
   Boton,
   Campo,
   Celda,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -60,6 +61,7 @@ import {
 import { fechaCortaMono } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
 import { FiltroPills } from '@/components/filtro-pills';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 // §7 (S65) — matching compartido del vocabulario (el filtro de chips y
 // el autocompletado del texto libre hablan IGUAL): minúsculas sin
@@ -80,6 +82,7 @@ const vozDelChip = (v: ChipVocabularioAgrupado, idioma: string) =>
   idioma === 'en' ? v.nombre_familia_en : v.nombre_familia;
 
 export default function BitacoraFamilia() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const { t, idioma } = useTraduccion();
@@ -308,8 +311,26 @@ export default function BitacoraFamilia() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('adiestramiento.bitacoraTab')} atras onAtras={() => router.back()} />
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[4] }}>
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ El `paddingBottom` con `insets.bottom` que había acá SE RETIRA: lo
+          paga la hoja en su propio render, y sumarlo sería pagarlo dos veces
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera variante="empujada" titulo={t('adiestramiento.bitacoraTab')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        scroll={{ contentContainerStyle: { padding: spacing[4], gap: spacing[4] } }}
+      >
         {/* §7 — registrar cuesta segundos, cero gamificación (LOYALTY §5) */}
         {
           entradas === 'cargando' ? (
@@ -364,7 +385,7 @@ export default function BitacoraFamilia() {
               </Tarjeta>
             </>
           )}
-      </ScrollView>
+      </HojaContenido>
       <Hoja
         visible={hojaAbierta}
         onCerrar={() => setHojaAbierta(false)}

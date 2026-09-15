@@ -15,11 +15,12 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  Boton, Celda, Encabezado, EsperaLarga, EstadoVacio, Icono,
+  HojaContenido,
+  Boton, Celda, Confirmacion, Cabecera, EsperaLarga, EstadoVacio, Icono,
   PantallaConPie, Separador, Tarjeta, Texto, spacing, useAviso, useTheme,
 } from '@epetplace/ui';
 import { comprarPaqueteSalidas, PRESETS_PAQUETE, type PresetPaquete } from '@epetplace/api';
@@ -34,8 +35,11 @@ import { topeDeEspera, useEstadoDeUna } from '@/lib/pagos/deuna-estado';
 import { urlWhatsApp } from '@/lib/contacto';
 import { Linking } from 'react-native';
 import { useTraduccion } from '@/i18n';
+import { formatearPrecio } from '@epetplace/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 export default function CheckoutPaquetePaseo() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { t } = useTraduccion();
   const { theme } = useTheme();
   const router = useRouter();
@@ -216,47 +220,62 @@ export default function CheckoutPaquetePaseo() {
   }
 
   if (exito !== null) {
-    /* ⭐ **LA INVITACIÓN A LA PRIMERA SALIDA VIVE ACÁ**, con sus dos caminos
-       parejos y cero presión — es la misma que estaba en la segunda Hoja de
-       `paquete.tsx`, mudada al único lugar donde ahora se sabe que la compra
-       terminó. *Dejarla allá la habría dejado esperando un evento que ya no
-       ocurre.* */
+    /* ⭐ **S116-C lote 13 · LA CONFIRMACIÓN DE LA CASA.** ☠️ Muere el
+       `EstadoVacio` + glífo 48 + dos botones sueltos.
+
+       ⚠️ **LA INVITACIÓN A LA PRIMERA SALIDA NO SE PIERDE: es la acción
+       PRIMARIA.** Vivía acá con sus dos caminos parejos y cero presión, y la
+       pieza tiene exactamente esa forma — primaria y secundaria. *Lo que
+       cambia es la casa que las envuelve, no la oferta.*
+
+       El `dato` dice **cuántas salidas** compró: es lo que la persona vuelve a
+       mirar de un paquete. */
     return (
       <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <View style={{ flex: 1, justifyContent: 'center', padding: spacing[4], gap: spacing[4] }}>
-          <EstadoVacio
-            icono={<Icono nombre="paseo" tamano={48} />}
+        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: spacing[4] }}>
+          <Confirmacion
+            exclamacion={t('checkout.exitoExclamacion')}
             titulo={t('paquete.exito', { n: exito })}
-            descripcion={t('paquete.primeraVoz')}
-            accion={
-              <Boton
-                variante="primario"
-                etiqueta={t('paquete.primeraReservar')}
-                onPress={() => router.dismissTo('/explorar/paseo')}
-              />
-            }
-          />
-          <Boton
-            variante="secundario"
-            bloque
-            etiqueta={t('paquete.primeraDespues')}
-            onPress={() => {
-              if (router.canDismiss()) router.dismissAll();
-              router.navigate('/hogar/paseos');
+            apoyo={t('paquete.primeraVoz')}
+            lineaExtra={t('checkout.exitoFactura')}
+            primario={{
+              texto: t('paquete.primeraReservar'),
+              onPress: () => router.dismissTo('/explorar/paseo'),
+            }}
+            secundario={{
+              texto: t('paquete.primeraDespues'),
+              onPress: () => {
+                if (router.canDismiss()) router.dismissAll();
+                router.navigate('/hogar/paseos');
+              },
             }}
           />
-        </View>
+        </ScrollView>
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" atras titulo={t('checkout.titulo')} onAtras={() => router.back()} />
-      <PantallaConPie
-        contentContainerStyle={{ padding: spacing[4], gap: spacing[4], paddingBottom: insets.bottom + spacing[4] }}
-        pie={
-          <Boton
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`) + la hoja encima, con la curva ARRIBA.
+          ☠️ **Y muere el `PantallaConPie`**: su pie pasa al slot `pie` de la
+          hoja. *Las dos piezas reservan el alto medido del pie; montadas una
+          dentro de otra serían dos pies y dos reservas* — lo dice el contrato
+          de `HojaContenido`. El `insets.bottom` del relleno también se va: lo
+          paga la hoja (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        scroll={{ contentContainerStyle: { padding: spacing[4], gap: spacing[4], } }}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada" titulo={t('checkout.titulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        pie={<Boton
             variante="primario"
             bloque
             etiqueta={t('checkout.pagar')}
@@ -275,7 +294,7 @@ export default function CheckoutPaquetePaseo() {
             metadataMono={`${texto('duracion')} min`}
           />
           <Separador />
-          <Celda titulo={t('checkout.total')} metadataMono={`$${total.toFixed(2)}`} />
+          <Celda titulo={t('checkout.total')} metadataMono={formatearPrecio(total)} />
         </Tarjeta>
 
         {/* Compra suelta ⇒ **sin `recurrente`**: DeUna se puede elegir. */}
@@ -296,7 +315,7 @@ export default function CheckoutPaquetePaseo() {
         <Texto variante="apoyo">{t('paquete.vigenciaVoz')}</Texto>
 
         {rebote !== null ? <Texto variante="cuerpo">{rebote}</Texto> : null}
-      </PantallaConPie>
+      </HojaContenido>
     </SafeAreaView>
   );
 }

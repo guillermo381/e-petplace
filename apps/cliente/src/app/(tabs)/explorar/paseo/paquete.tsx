@@ -25,9 +25,10 @@ import { ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
+  HojaContenido,
   Boton,
   Celda,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -41,13 +42,15 @@ import {
 } from '@epetplace/ui';
 import {
   obtenerPaseadoresConPaquete,
-  type PaqueteComprado,
   type PaseadorConPaquete,
 } from '@epetplace/api';
 import { PaqueteHoja } from '@/components/paquete-hoja';
 import { useTraduccion } from '@/i18n';
+import { formatearPrecio } from '@epetplace/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 export default function PaqueteComprar() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
@@ -58,7 +61,11 @@ export default function PaqueteComprar() {
 
   const [lista, setLista] = useState<PaseadorConPaquete[] | 'cargando' | 'error'>('cargando');
   const [elegido, setElegido] = useState<PaseadorConPaquete | null>(null);
-  const [comprado, setComprado] = useState<PaqueteComprado | null>(null);
+  /* ☠️ **`comprado` MURIÓ CON SU HOJA — ver la lápida más abajo.** Su estado
+     era el disparo de una pantalla que ya no podía abrirse, y las dos
+     condiciones que lo leían (`comprado === null`) eran **siempre verdaderas**:
+     *un guard que no puede dar falso no es un guard, es ruido con forma de
+     cuidado.* */
 
   const cargar = useCallback(() => {
     setLista('cargando');
@@ -76,8 +83,26 @@ export default function PaqueteComprar() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('paquete.pantallaTitulo')} atras onAtras={() => router.back()} />
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[3] }}>
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ El `paddingBottom` con `insets.bottom` que había acá SE RETIRA: lo
+          paga la hoja en su propio render, y sumarlo sería pagarlo dos veces
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera variante="empujada" titulo={t('paquete.pantallaTitulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        scroll={{ contentContainerStyle: { padding: spacing[4], gap: spacing[3] } }}
+      >
         {lista === 'cargando' ? (
           <EsqueletoGrupo>
             <View style={{ gap: spacing[3] }}>
@@ -106,7 +131,7 @@ export default function PaqueteComprar() {
                 <Celda
                   titulo={p.prestador_nombre}
                   subtitulo={p.servicio_nombre}
-                  metadataMono={`$${p.precio_paquete.toFixed(2)} · ${p.duracion_minutos} min`}
+                  metadataMono={`${formatearPrecio(p.precio_paquete)} · ${p.duracion_minutos} min`}
                   interactiva
                   accessibilityRole="button"
                   onPress={() => setElegido(p)}
@@ -115,16 +140,16 @@ export default function PaqueteComprar() {
             ))}
           </Tarjeta>
         )}
-      </ScrollView>
+      </HojaContenido>
 
       {/* La compra — anclada al paseador ELEGIDO, sin mascota ni fecha */}
       <Hoja
-        visible={elegido !== null && comprado === null}
+        visible={elegido !== null}
         titulo={t('paquete.hojaTitulo')}
         onCerrar={() => setElegido(null)}
         conCerrar
       >
-        {elegido !== null && comprado === null ? (
+        {elegido !== null ? (
           <PaqueteHoja
             paseador={elegido}
             /* ⭐ S109-C · La Hoja cierra y el pago vive en su propia pantalla.
@@ -151,47 +176,25 @@ export default function PaqueteComprar() {
         ) : null}
       </Hoja>
 
-      {/* LA FIRMA: la invitación opcional a la primera reserva (v1.4) —
-          dos caminos parejos, cero presión */}
-      <Hoja
-        visible={comprado !== null}
-        titulo={t('paquete.primeraTitulo')}
-        onCerrar={() => {
-          setComprado(null);
-          if (router.canDismiss()) router.dismissAll();
-          router.navigate('/hogar/paseos');
-        }}
-        conCerrar
-      >
-        {comprado !== null ? (
-          <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
-            <Celda
-              titulo={t('paquete.exito', { n: comprado.saldo_total })}
-              subtitulo={t('paquete.primeraVoz')}
-            />
-            <Boton
-              variante="primario"
-              bloque
-              etiqueta={t('paquete.primeraReservar')}
-              onPress={() => {
-                setComprado(null);
-                mostrar({ texto: t('paquete.saldoActivo', { n: comprado.saldo_total }), variante: 'exito' });
-                router.dismissTo('/explorar/paseo');
-              }}
-            />
-            <Boton
-              variante="secundario"
-              bloque
-              etiqueta={t('paquete.primeraDespues')}
-              onPress={() => {
-                setComprado(null);
-                if (router.canDismiss()) router.dismissAll();
-                router.navigate('/hogar/paseos');
-              }}
-            />
-          </View>
-        ) : null}
-      </Hoja>
+      {/* ☠️ **S116-C lote 13 · LA SEGUNDA HOJA MURIÓ, Y LA MATÓ EL CENSO.**
+
+          Acá vivía la invitación a la primera reserva. **Nunca se abría.**
+          Medido: `setComprado` se llama **cuatro veces y las cuatro con `null`**
+          ⇒ `comprado` no puede dejar de ser `null`, así que `visible` es
+          siempre `false`. *No es código que dejó de usarse: es código que ya
+          no puede ejecutarse.*
+
+          🔴 **Y su propia muerte estaba escrita en el archivo que la reemplazó:**
+          `checkout-paquete.tsx` dice que la invitación *«es la misma que estaba
+          en la segunda Hoja de `paquete.tsx`, mudada al único lugar donde ahora
+          se sabe que la compra terminó — dejarla allá la habría dejado esperando
+          un evento que ya no ocurre»*. **Se mudó y no se borró.** El texto
+          predijo exactamente lo que quedó, y sobrevivió igual.
+
+          ⚠️ **Apareció censando superficies de confirmación**, no leyendo este
+          archivo: era la única de la lista que **no se podía convertir**, y
+          preguntarse por qué fue lo que la encontró. *La invitación viva es la
+          de `checkout-paquete`, que en este mismo lote pasó a `Confirmacion`.* */}
     </SafeAreaView>
   );
 }

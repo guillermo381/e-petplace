@@ -48,6 +48,7 @@ import {
 import { elegirDestinoDevolucion, leerOpcionesDeDevolucion } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { formatearPrecio } from '@epetplace/i18n';
 
 type Opciones = {
   monto: number;
@@ -109,7 +110,7 @@ export function CartaDeDevolucion({
   if (opciones === null) return <Esqueleto alto={140} />;
   if (opciones === 'error') return <Texto variante="apoyo">{t('postventa.devolucionNoSePudo')}</Texto>;
 
-  const monto = opciones.monto.toFixed(2);
+  const monto = formatearPrecio(opciones.monto);
 
   return (
     <View style={{ gap: spacing[3] }}>

@@ -35798,3 +35798,16 @@ A la abrió en `main` y yo en mi rama, **con el mismo número y la misma conclus
 ⚠️ **Con su número, que es lo que cierra la pregunta:** los **12** usos de `palette.` del cliente, **ninguno es un claro fijo** (el único `white` es el logo de DeUna, legítimo). *No hay una pila de valores hardcodeados esperando — hay una decisión de acento y unas pantallas que nadie caminó.*
 
 ✅ **Y las cinco líneas que sí eran un bug ya están curadas** (lote 16): `Cabecera:209·213·217` y `bienvenida.tsx:155·165` pasaron de `'inverso'` a **`sobreGradiente`** (`text.onGradient`, que existía en los tres temas y **no tenía puerta desde `Texto`**).
+
+> **Un valor fijo que hoy acierta por casualidad es el que mañana nadie encuentra** (firma del founder). *El forzado de claro las volvía invisibles: las cinco habrían pasado el próximo censo por estar en una pantalla que nadie mira en oscuro.*
+
+### 🔴 LO QUE FALTA NO ES UNA LISTA — ES UNA DECISIÓN Y UN RECORRIDO
+
+**Esto es la conclusión del censo, y es lo que la ficha existe para dejar escrito:**
+
+**① UNA decisión de mesa: ¿`magentaLuz` es el acento del oscuro?** Hoy los temas resuelven `accent.cta`, `accent.activoLleno` y el orbe del asistente a **`magentaLuz`**, un rosa claro. El founder lo vio y lo llamó *«rosa pálido en vez de magenta»*. **No es un bug de ninguna pieza: las piezas leen el tema y el tema contesta eso.** Es una decisión de dirección de arte, y **cambiarla mueve todos esos slots a la vez**.
+
+**② Y después, RECORRER las pantallas en oscuro.** Lo demás que aparezca va a salir de caminar, no de grepear: *el censo por código encuentra la clase —`'inverso'` sobre superficie fija— y no encuentra el tono que quedó feo.*
+
+
+**☠️ MUERTE:** cuando la mesa decida ① y el recorrido de ② esté hecho, con el forzado de claro retirado del `_layout` — que es **una línea**, y para eso se dejó así.

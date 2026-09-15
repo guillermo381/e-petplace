@@ -38,11 +38,12 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
+  HojaContenido,
   Boton,
   Celda,
   CeldaNavegacion,
   CitaEnVivo,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -68,7 +69,7 @@ import {
   type CitaHistorialMascota,
   type PresupuestoFamilia,
 } from '@epetplace/api';
-import { fechaCortaMono, fechaLargaHumana } from '@epetplace/i18n';
+import { fechaYHoraHumana, fechaCortaMono, fechaLargaHumana } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
 import { esMemorial } from '@/lib/memorial';
@@ -78,6 +79,7 @@ import { useCasosPorObjeto } from '@/lib/postventa/useCasosPorObjeto';
 import { useEstadoVida } from '@/lib/postventa/useEstadoVida';
 import { useVentanaDeCaso } from '@/lib/postventa/useVentanaDeCaso';
 import { vozServicio } from '@/lib/voz-servicio';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 /**
  * ¿Esta cita ocurre por video?
@@ -136,6 +138,7 @@ function iconoOficio(
 }
 
 export default function CitasDeMascota() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const { t, idioma } = useTraduccion();
@@ -374,7 +377,13 @@ export default function CitasDeMascota() {
     const cuando =
       c.fecha === null
         ? t('citasMascota.faltaCoordinar')
-        : `${fechaLargaHumana(c.fecha, idioma)}${c.hora !== null ? ` · ${c.hora}` : ''}`;
+        : /* 🔴 **`D-1096` · LA VOZ DE LA FAMILIA.** Decía «15 de septiembre ·
+             01:00» —fecha larga + la hora CRUDA de la columna `time`—. La
+             firma pide «sáb 13 sep · 3:00 p. m.», y la composición entera vive
+             en el riel: acá no se concatena nada. *El separador también es de
+             la forma; tres pantallas que lo escriben a mano son tres lugares
+             donde cambiarlo cambia dos.* */
+          fechaYHoraHumana(c.fecha, c.hora, idioma);
     const tarjeta = (
       <Tarjeta elevacion="reposo">
         <View style={{ gap: spacing[3] }}>
@@ -384,7 +393,13 @@ export default function CitasDeMascota() {
               <Texto variante="titulo">{servicio}</Texto>
             </View>
           ) : null}
-          <Texto variante="datoMd">{cuando}</Texto>
+          {/* 🔴 **`D-1096` · SALE DE LA FUENTE MONO.** La firma dice «ni la
+              fuente mono», y esto es la frase que contesta *«¿cuándo es?»* —
+              no es metadata de máquina. `datoMd` era mono a 18; `cuerpo` es la
+              prosa de la casa en primary. ⚠️ **La pierde de tamaño y eso es a
+              propósito**: el que preside la tarjeta es el SERVICIO, y con dos
+              líneas grandes competían. */}
+          <Texto variante="cuerpo">{cuando}</Texto>
           {/* S106-C t3 · estado y MODALIDAD conviven: una dice en qué punto
               está la cita, la otra POR DÓNDE ocurre. La etiqueta de la
               modalidad la arma la pieza (B) — no se le escribe texto. */}
@@ -532,8 +547,26 @@ export default function CitasDeMascota() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={[]}>
-      <Encabezado variante="navegacion" titulo={titulo} atras onAtras={() => router.back()} />
-      <ScrollView contentContainerStyle={{ padding: spacing[4], gap: spacing[4], paddingBottom: insets.bottom + spacing[8] }}>
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ El `paddingBottom` con `insets.bottom` que había acá SE RETIRA: lo
+          paga la hoja en su propio render, y sumarlo sería pagarlo dos veces
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera variante="empujada" titulo={titulo} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        scroll={{ contentContainerStyle: { padding: spacing[4], gap: spacing[4], } }}
+      >
         {/* Presupuestos pendientes — ARRIBA del detalle de la cita. Aparecen
             aunque no haya cita activa (el presupuesto vive por su cuenta). */}
         {presupuestos.map((p) => {
@@ -655,7 +688,7 @@ export default function CitasDeMascota() {
                         detalle={
                           c.fecha === null
                             ? t('citasMascota.faltaCoordinar')
-                            : `${fechaCortaMono(c.fecha, idioma)}${c.hora !== null ? ` · ${c.hora}` : ''}`
+                            : fechaYHoraHumana(c.fecha, c.hora, idioma)
                         }
                         onPress={() => router.setParams({ citaId: c.cita_id })}
                       />
@@ -737,7 +770,7 @@ export default function CitasDeMascota() {
               ) : null}
             </View>
           ) : null}
-      </ScrollView>
+      </HojaContenido>
     </SafeAreaView>
   );
 }

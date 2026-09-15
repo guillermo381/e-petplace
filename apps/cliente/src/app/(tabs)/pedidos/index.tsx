@@ -28,6 +28,8 @@ import { Image } from 'expo-image';
 import { router, useFocusEffect } from 'expo-router';
 import { GLIFO_NODO } from '@/lib/despensa/escalera';
 import {
+  HojaContenido,
+  Cabecera,
   Boton,
   CeldaNavegacion,
   FiltroPills,
@@ -50,7 +52,7 @@ import {
   type PedidoEnLista,
   type ResumenItemsPedido,
 } from '@epetplace/api';
-import { fechaLargaHumana } from '@epetplace/i18n';
+import { formatearPrecio, fechaLargaHumana } from '@epetplace/i18n';
 import {
   escaleraDePedido,
   portadorDeEstado,
@@ -58,8 +60,9 @@ import {
   type VocesEscalera,
 } from '@/lib/despensa/escalera';
 import { ventanaVencida } from '@/lib/despensa/ventana';
+import { unidadesEnCarrito, useCarrito } from '@/lib/despensa/carrito';
 import { useTraduccion } from '@/i18n';
-import { AccionCarrito } from '@/components/accion-carrito';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 type Fase<T> = T | 'cargando' | 'error';
 
@@ -68,7 +71,9 @@ type Fase<T> = T | 'cargando' | 'error';
 const TOPE_VIVOS = 2;
 
 export default function DespensaPedidos() {
+  const cabecera = useAltoDeCabecera('raiz');
   const { theme } = useTheme();
+  const unidadesCarrito = unidadesEnCarrito(useCarrito());
   const { t, idioma } = useTraduccion();
 
   const [pedidos, setPedidos] = useState<Fase<PedidoEnLista[]>>('cargando');
@@ -287,7 +292,7 @@ export default function DespensaPedidos() {
               : { etiqueta: p.narrativa_nombre, tono: 'info' as const }
             : undefined
         }
-        monto={`$ ${p.total.toFixed(2)}`}
+        monto={formatearPrecio(p.total)}
         pasos={conIconos(pasos, GLIFO_NODO)}
         desvio={desvio}
         acento="control"
@@ -366,10 +371,34 @@ export default function DespensaPedidos() {
           casa no tiene flecha de atrás. *Un «atrás» en la raíz de un tab
           ofrece un camino que no existe* (Ley 23), y encima `router.back()`
           desde acá saltaría a cualquier pantalla anterior. */}
-      <Encabezado variante="portada" saludo={t('despensa.tusPedidos')} accionDer={<AccionCarrito />} />
-
-      <ScrollView
-        contentContainerStyle={{
+      {/* ⭐ **S116-C lote 3b · LA PORTADA PASA A `Cabecera variante="raiz"`.**
+          `saludo` → `titulo` y **el carrito deja de ser un `ReactNode` en
+          `accionDer` y pasa a la prop `carrito`**, que la pieza ya trae. ☠️ Con
+          eso muere el montaje de `AccionCarrito` acá: *un `ReactNode` suelto
+          deja que cada pantalla arme su disco, y ahí vuelve la copia que
+          `DiscoVidrio` acaba de terminar* (la razón es de B, en el catálogo). */}
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ El `paddingBottom` con `insets.bottom` que había acá SE RETIRA: lo
+          paga la hoja en su propio render, y sumarlo sería pagarlo dos veces
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="raiz"
+              titulo={t('despensa.tusPedidos')}
+              carrito={{ cantidad: unidadesCarrito, onPress: () => router.push('/despensa/carrito'), etiqueta: t('despensa.abrirCarrito', { count: unidadesCarrito }) }}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        scroll={{ contentContainerStyle: {
           paddingTop: spacing[4],
           // 🔴 SIN `insets.bottom`, y es CONCESIÓN MEDIDA, no gusto.
           // B midió que **el navegador ya acota**: el `ScrollView` de una
@@ -382,7 +411,7 @@ export default function DespensaPedidos() {
           // pantallas — dos reglas para lo mismo divergen.
           paddingBottom: spacing[8],
           gap: spacing[4],
-        }}
+        } }}
       >
         {pedidos === 'cargando' ? (
           <EsqueletoGrupo>
@@ -577,7 +606,7 @@ export default function DespensaPedidos() {
             </View>
           </>
         )}
-      </ScrollView>
+      </HojaContenido>
     </View>
   );
 }

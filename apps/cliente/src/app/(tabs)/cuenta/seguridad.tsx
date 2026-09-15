@@ -68,9 +68,10 @@ import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
   Boton,
   Campo,
-  Encabezado,
+  Cabecera,
   EvitaTeclado,
   Interruptor,
   Texto,
@@ -82,8 +83,10 @@ import { cambiarContrasena, MIN_LARGO_CONTRASENA, segundosDeEspera } from '@epet
 
 import { useTraduccion } from '@/i18n';
 import { biometricoDisponible, bloqueoActivado, fijarBloqueo, pedirIdentidad } from '@/lib/bloqueo-biometrico';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 export default function Seguridad() {
+  const cabecera = useAltoDeCabecera('empujada');
   const router = useRouter();
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
@@ -212,22 +215,39 @@ export default function Seguridad() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
-        titulo={t('seguridad.tituloPantalla')}
-        atras
-        onAtras={() => router.back()}
-      />
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ **Los `ScrollView` verticales que había adentro se volvieron
+          `View`**: la hoja ya scrollea, y dos scrolls verticales anidados
+          dejan al de adentro sin alto propio. Su `contentContainerStyle` pasa
+          a `style` — *el relleno era del contenido, no del scroll.* El
+          `paddingBottom` con `insets.bottom` SE RETIRA: lo paga la hoja
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        scroll={{ keyboardShouldPersistTaps: 'handled' }}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={t('seguridad.tituloPantalla')}
+              onVolver={() => router.back()}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+      >
 
       <EvitaTeclado>
-        <ScrollView
-          contentContainerStyle={{
+        <View style={{
             padding: spacing[5],
-            paddingBottom: insets.bottom + spacing[8],
             gap: spacing[2],
-          }}
-          keyboardShouldPersistTaps="handled"
-        >
+          }}>
           <Texto variante="seccion">{t('seguridad.titulo')}</Texto>
           {/* PIDE LA ACTUAL, y no es fricción de formulario: el wrapper
               RE-AUTENTICA con ella antes de escribir. Un teléfono desbloqueado
@@ -321,8 +341,9 @@ export default function Seguridad() {
               )}
             </View>
           )}
-        </ScrollView>
+        </View>
       </EvitaTeclado>
+      </HojaContenido>
     </View>
   );
 }

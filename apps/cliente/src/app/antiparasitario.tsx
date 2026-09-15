@@ -43,10 +43,11 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
   Boton,
   Campo,
   CampoFecha,
-  Encabezado,
+  Cabecera,
   EvitaTeclado,
   SelectorOpcion,
   Texto,
@@ -64,6 +65,7 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 /** Hoy en fecha LOCAL por partes literales — **jamás `toISOString()`**, que
  *  corre el día en UTC−5 (D-312, hallazgo S55). */
@@ -72,6 +74,7 @@ function hoyLocal(): string {
 }
 
 export default function RegistrarAntiparasitario() {
+  const cabecera = useAltoDeCabecera('empujada');
   const router = useRouter();
   const { theme } = useTheme();
   const { t } = useTraduccion();
@@ -168,17 +171,35 @@ export default function RegistrarAntiparasitario() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
-        titulo={t('antiparasitario.titulo', { mascota: nombre })}
-        atras
-        onAtras={() => router.back()}
-      />
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ **Los `ScrollView` verticales que había adentro se volvieron
+          `View`**: la hoja ya scrollea, y dos scrolls verticales anidados
+          dejan al de adentro sin alto propio. Su `contentContainerStyle` pasa
+          a `style` — *el relleno era del contenido, no del scroll.* El
+          `paddingBottom` con `insets.bottom` SE RETIRA: lo paga la hoja
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        scroll={{ keyboardShouldPersistTaps: 'handled' }}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={t('antiparasitario.titulo', { mascota: nombre })}
+              onVolver={() => router.back()}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+      >
       <EvitaTeclado>
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[4] }}
-        >
+        <View style={{ padding: spacing[5], gap: spacing[4] }}>
           <Campo
             label={t('antiparasitario.productoLabel')}
             value={producto}
@@ -296,8 +317,9 @@ export default function RegistrarAntiparasitario() {
             razonDeshabilitado={razonDelFreno}
             onPress={() => void guardar()}
           />
-        </ScrollView>
+        </View>
       </EvitaTeclado>
+      </HojaContenido>
     </View>
   );
 }

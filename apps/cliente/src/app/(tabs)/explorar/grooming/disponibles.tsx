@@ -25,9 +25,10 @@ import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
+  HojaContenido,
   Boton,
   Celda,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -50,8 +51,11 @@ import { TallaPelajeHoja } from '@/components/talla-pelaje-hoja';
 import { useTraduccion } from '@/i18n';
 import { PreviewPrestador } from '@/components/preview-prestador';
 import { useReservaGrooming } from '@/lib/reserva/grooming';
+import { formatearPrecio } from '@epetplace/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 export default function GroomingDisponibles() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
@@ -128,8 +132,26 @@ export default function GroomingDisponibles() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('grooming.quienTitulo')} atras onAtras={() => router.back()} />
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[3] }}>
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ El `paddingBottom` con `insets.bottom` que había acá SE RETIRA: lo
+          paga la hoja en su propio render, y sumarlo sería pagarlo dos veces
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera variante="empujada" titulo={t('grooming.quienTitulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        scroll={{ contentContainerStyle: { padding: spacing[4], gap: spacing[3] } }}
+      >
         {/* la ventana elegida, en voz de máquina — la duración no viaja:
             es de cada groomer (servicio × talla) */}
         <Celda
@@ -172,7 +194,7 @@ export default function GroomingDisponibles() {
                     contexto={g.direccion !== null
                       ? [g.direccion, g.ciudad].filter(Boolean).join(' · ')
                       : t('grooming.enSuLocal')}
-                    precio={`$${g.precio.toFixed(2)} · ${g.duracion_minutos} min`}
+                    precio={`${formatearPrecio(g.precio)} · ${g.duracion_minutos} min`}
                     perfil={perfiles[g.prestador_id]}
                     /* ⚡ D-730 · la ventana viaja con el tap, para que la ficha
                        pueda reservar en vez de pedirle a esta lista que lo haga. */
@@ -196,7 +218,7 @@ export default function GroomingDisponibles() {
             {mascota !== null ? t('grooming.precioDeSuPerfil', { nombre: mascota.nombre }) : null}
           </Text>
         ) : null}
-      </ScrollView>
+      </HojaContenido>
 
       {/* §3 — el cinturón: declarar SIEMPRE continúa (recarga precios) */}
       <TallaPelajeHoja

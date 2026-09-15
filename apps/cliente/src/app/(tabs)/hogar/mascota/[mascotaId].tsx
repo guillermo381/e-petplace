@@ -25,10 +25,9 @@
  * muerto es la remoción de la pasada.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Linking, Platform, Pressable, ScrollView, Share, StatusBar, Text, View } from 'react-native';
+import {useCallback, useEffect, useRef, useState } from 'react';
+import { Linking, Platform, Pressable, Share, StatusBar, Text, View } from 'react-native';
 import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PaseoSocialHoja } from '@/components/paseo-social-hoja';
@@ -36,11 +35,12 @@ import { TallaPelajeHoja } from '@/components/talla-pelaje-hoja';
 import Svg, { Path } from 'react-native-svg';
 import Animated from 'react-native-reanimated';
 import {
+  Cabecera,
+  DiscoVidrio,
   BarrasSemana,
   Boton,
   Celda,
   CeldaNavegacion,
-  Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -63,7 +63,8 @@ import {
   type IconoNombre,
   type LineaDeVidaEstadoPie,
   FichaRaza,
-  FilaAcciones,
+  FilaAccionesCostura,
+  HojaContenido,
   TarjetaConociendolo,
   TarjetaHoy,
   TarjetaMetrica,
@@ -125,6 +126,7 @@ import { CantoCurva } from '@/components/canto-curva';
 import { FilaDocumento } from '@/components/fila-documento';
 import { vozEdad, vozNacimiento, vozOrigen } from '@/lib/voz-mascota';
 import { contarPendientesDe } from '@/lib/pendientes';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 import { itemsDeSeguridad } from '@/lib/perfil/seguridad';
 import { coberturaDePlagas, medicacionDeLaCelda, proximaDesparasitacion } from '@/lib/perfil/hoy';
 import { tipoDeLineaDeVida } from '@/lib/perfil/tipo-linea-vida';
@@ -327,6 +329,10 @@ export default function PerfilDeMascota() {
   const router = useRouter();
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
+  /* El arranque de la hoja = el alto REAL de la cabecera, medido una vez
+     (`lib/alto-de-cabecera`). Arranca en la parte fija de la pieza para que
+     no haya un parpadeo en el primer cuadro. */
+  const cabecera = useAltoDeCabecera('empujada');
   const { t, idioma } = useTraduccion();
   const { mostrar } = useAviso();
   const { mascotaId } = useLocalSearchParams<{ mascotaId: string }>();
@@ -800,7 +806,23 @@ export default function PerfilDeMascota() {
   if (perfil === 'cargando') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" titulo="" atras onAtras={() => router.back()} />
+        {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada" titulo="" onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+                presentacion="fondo"
+              />
+            </View>
+          }
+        >
         <View style={{ padding: spacing[5] }}>
           <EsqueletoGrupo etiqueta={t('hogar.cargando')}>
             <View style={{ alignItems: 'center', gap: spacing[3] }}>
@@ -811,6 +833,7 @@ export default function PerfilDeMascota() {
             </View>
           </EsqueletoGrupo>
         </View>
+        </HojaContenido>
       </View>
     );
   }
@@ -818,7 +841,23 @@ export default function PerfilDeMascota() {
   if (perfil === 'error') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" titulo="" atras onAtras={() => router.back()} />
+        {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada" titulo="" onVolver={() => router.back()} etiquetaVolver={t('comun.volver')}
+                presentacion="fondo"
+              />
+            </View>
+          }
+        >
         <View style={{ flex: 1, justifyContent: 'center', padding: spacing[5] }}>
           <EstadoVacio
             titulo={t('perfil.error')}
@@ -826,6 +865,7 @@ export default function PerfilDeMascota() {
             accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setPerfil('cargando')} />}
           />
         </View>
+        </HojaContenido>
       </View>
     );
   }
@@ -1144,328 +1184,326 @@ export default function PerfilDeMascota() {
           paleta v7 entera (okL/atnL/nulL "terrosos", capas remapeadas,
           papel y tinta propios, gradiente de 4 stops). NADA de eso se
           porta: la composición viaja con NUESTROS tokens. */}
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* ── ① TECHO RETRATO (lámina: "el retrato no es un retrato" —
-            110px sobre fondo casi blanco es un avatar de lista, no el
-            sujeto de la pantalla). Techo de MARCA + retrato circular
-            con ARO + sello que MONTA el aro + nombre serif + meta mono.
-            A4 (§9bis.2 FIRMADA): la luz de la esquina, único adorno. */}
-        {(() => {
-          const relleno = {
-            paddingTop: insets.top + spacing[3],
-            paddingHorizontal: spacing[5],
-            paddingBottom: spacing[12],
-            borderBottomLeftRadius: 30,
-            borderBottomRightRadius: 30,
-            overflow: 'hidden' as const,
-          };
-          const sobreMarca = esMemorial ? theme.text.primary : theme.text.onGradient;
-          const contenido = (
-            <>
-              {!esMemorial ? (
-                <View
-                  style={{
-                    position: 'absolute',
-                    top: -96,
-                    right: -70,
-                    width: 262,
-                    height: 262,
-                    borderRadius: radius.full,
-                    backgroundColor: 'rgba(255,255,255,0.07)',
-                  }}
-                />
-              ) : null}
-              {/* atrás · editar · compartir — la lámina cierra lápiz y
-                  compartir como CONTROLES (trazo 1.9 SIN huella: no son
-                  objetos del oficio, Ley 12). */}
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t('perfil.volver')}
-                  onPress={() => router.back()}
-                  style={{ width: 38, height: 38, borderRadius: radius.full, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' }}
-                >
-                  <Svg width={20} height={20} viewBox="0 0 24 24">
-                    <Path d="m14 5-7 7 7 7" stroke={sobreMarca} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                  </Svg>
-                </Pressable>
+      {/* ⭐ **LA ESTRUCTURA DE LA CASA — S116-C lote 3b · `D-1106`.** El techo
+          propio del expediente MURIÓ. El ciruela deja de ser una banda que esta
+          pantalla se pintaba y pasa a ser **el fondo**; el expediente vive en
+          una hoja de lienzo que desliza encima. Lo monta `HojaContenido`, y la
+          banda la pinta `Cabecera` en `presentacion="fondo"` con el hero en su
+          slot `contenido`.
+
+          ☠️ **Y con el techo mueren tres cosas que eran de la COPIA, no del
+          diseño** — las tres las declaraba el propio archivo:
+          · **la flecha dibujada a mano** (`<Path d="m14 5-7 7 7 7">`): la
+            cabecera trae la suya, que es el `Chevron` de la casa. *Era el
+            ejemplo que el censo de B usó para nombrar este techo.*
+          · **la rama de memorial**: el techo local pintaba `bg.card` con el
+            texto en tinta. El degradado del tema **ya resuelve memorial**
+            —`memorialPlano`, ciruela noche `#26062E`— así que la banda es
+            oscura en los tres temas y el texto va `onGradient` en los tres.
+            *Una rama por tema menos es una rama menos que puede divergir.*
+          · **la luz de la esquina**: era el adorno de una banda propia. La
+            banda de la casa tiene el suyo y no se le agrega otro encima.
+
+          🔴 **Y el retrato sin foto cambió de color POR ESTO, no por gusto:**
+          la huella se pintaba `capa.identidad`, que en memorial es `tintaV5`
+          —tinta oscura—. Sobre el `bg.card` claro del techo viejo se veía;
+          **sobre la ciruela noche de la banda nueva desaparecía.** Va
+          `onGradient`, que es lo que la banda exige. */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              presentacion="fondo"
+              titulo=""
+              onVolver={() => router.back()}
+              etiquetaVolver={t('perfil.volver')}
+              accionDerecha={
                 <View style={{ flexDirection: 'row', gap: spacing[2] }}>
-                  {/* 🔴 **EL LÁPIZ CUELGA DE `!esMemorial`, Y LO ENCONTRÉ
-                      CORRIENDO LA DESPEDIDA DE VERDAD.** La Hoja del menú ya
-                      estaba bajo el guard, pero **el botón que la abre no**:
-                      en memorial se dibujaba y al tocarlo **no pasaba nada**.
-                      *Un control que se ve, se toca y no hace nada es peor que
-                      uno ausente: el ausente no promete.* Ningún gate lo veía
-                      —`verify:pide-en-memorial` mide TEXTOS que piden algo, y
-                      «Editar» no pide nada— así que sólo apareció al ejercer
-                      el camino entero sobre una mascota real. */}
                   {!esMemorial ? (
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={t('perfil.editar')}
-                    /* ⭐ **C11 · el lápiz abre el MENÚ DE EDICIÓN**, que
-                       antes no existía: iba derecho a la foto, y la raza se
-                       editaba desde otro lado. Agrupar lo que ya había es lo
-                       que le da casa a la despedida — *un acto grave no cuelga
-                       de un botón suelto en una ficha que se abre todos los
-                       días*. La foto sigue a un toque de distancia. */
-                    onPress={() => setMenuEdicion(true)}
-                    style={{ width: 38, height: 38, borderRadius: radius.full, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' }}
-                  >
-                    {/* S86-B · del registry (D-645). Estaba dibujado a mano
-                        ACÁ, en un archivo que ya importaba `Icono` — y le
-                        faltaba el CORTE DEL BISEL que el registry declara
-                        imprescindible: «sin él, a 21px la punta se lee como un
-                        triángulo mudo». La copia no envejeció mal: nació
-                        incompleta. */}
-                    <Icono nombre="lapiz" tamano={20} tinta={sobreMarca} />
-                  </Pressable>
+                    <DiscoVidrio onPress={() => setMenuEdicion(true)} etiqueta={t('perfil.editar')}>
+                      <Icono nombre="lapiz" tamano={20} tinta={theme.text.onGradient} />
+                    </DiscoVidrio>
                   ) : null}
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={t('perfil.compartir')}
+                  <DiscoVidrio
                     onPress={() => void Share.share({ message: t('perfil.compartirMensaje', { nombre: mascota.nombre }) })}
-                    style={{ width: 38, height: 38, borderRadius: radius.full, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' }}
+                    etiqueta={t('perfil.compartir')}
                   >
-                    {/* S86-B · del registry (D-645). ⚠️ Y ES EL CASO QUE
-                        MIDE EL LÍMITE DEL VIGILANTE: acá los TRES paths del
-                        glifo viajaban CONCATENADOS en un solo `d=`, así que
-                        R30 no podía verlo — sus tres paths sueltos quedan por
-                        debajo del umbral de 18 chars que la regla usa para no
-                        cazar chevrones por casualidad. Se curó el sitio en vez
-                        de aflojar el umbral: bajarlo compra ruido, no cobertura. */}
-                    <Icono nombre="compartir" tamano={20} tinta={sobreMarca} />
-                  </Pressable>
+                    <Icono nombre="compartir" tamano={20} tinta={theme.text.onGradient} />
+                  </DiscoVidrio>
                 </View>
-              </View>
+              }
+              contenido={
+                <>
+                  {/* EL RETRATO — 200 con aro. CHOQUE DECLARADO (la lámina lo
+                      declara igual): el squircle 32% S61-A10 NO aplica — el
+                      retrato de la ficha es circular, no un avatar suelto;
+                      por eso no pasa por AvatarMascota. */}
+                  <View style={{ alignItems: 'center', marginTop: spacing[5] }}>
+                    {/* En memorial el retrato se MIRA: deja de ser boton y pasa a
+                        ser imagen con su nombre. No se apaga con `disabled` a
+                        secas porque un boton deshabilitado sigue anunciandose como
+                        boton —y sin razon visible seria el defecto que la casa
+                        persigue—: acá no hay accion apagada, hay una foto. */}
+                    <Pressable
+                      accessibilityRole={esMemorial ? 'image' : 'button'}
+                      accessibilityLabel={esMemorial ? mascota.nombre : t('fotoEncuadre.editarFotoA11y', { nombre: mascota.nombre })}
+                      disabled={esMemorial}
+                      onPress={
+                        esMemorial
+                          ? undefined
+                          : () =>
+                              router.push({ pathname: '/hogar/foto-mascota', params: { mascotaId: mascota.id, nombre: mascota.nombre, especie: mascota.especie } })
+                      }
+                      {...presionAvatar.handlers}
+                    >
+                      <Animated.View style={presionAvatar.estiloPresionado}>
+                        <View
+                          style={{
+                            width: 200,
+                            height: 200,
+                            borderRadius: radius.full,
+                            borderWidth: 8,
+                            borderColor: esMemorial ? theme.bg.overlay : 'rgba(255,255,255,0.2)',
+                            backgroundColor: theme.bg.overlay,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            overflow: 'hidden',
+                          }}
+                        >
+                          {fotoFirmada !== undefined ? (
+                            <Image
+                              source={{ uri: fotoFirmada }}
+                              style={{ width: '100%', height: '100%' }}
+                              contentFit="cover"
+                              accessibilityIgnoresInvertColors
+                            />
+                          ) : (
+                            <Svg width={84} height={84} viewBox="0 0 24 24">
+                              <Huella color={theme.text.onGradient} escala={0.9} x={1.2} y={1.2} />
+                            </Svg>
+                          )}
+                        </View>
+                      </Animated.View>
+                      {/* EL SELLO que MONTA el aro — el mismo gesto que la
+                          tarjeta montando el borde, a otra escala. */}
+                      {pastilla !== null ? (
+                        <View
+                          style={{
+                            position: 'absolute',
+                            bottom: -spacing[2],
+                            alignSelf: 'center',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            gap: spacing[1.5],
+                            borderRadius: radius.full,
+                            backgroundColor: theme.bg.card,
+                            paddingHorizontal: spacing[3],
+                            paddingVertical: spacing[1.5],
+                            boxShadow: theme.elevacion.elevada,
+                          }}
+                        >
+                          {pastilla === 'alDia' && !esMemorial ? (
+                            <Svg width={14} height={14} viewBox="0 0 24 24">
+                              <Path d="m5 12.6 4.6 4.6L19 7.8" stroke={theme.status.successText} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                            </Svg>
+                          ) : null}
+                          <Texto variante="dato" color={pastilla === 'pideAtencion' && !esMemorial ? 'danger' : 'primary'}>
+                            {/* ⭐ **EN MEMORIAL EL CHIP NO EMPUJA** (E, S113 · fase 3).
+                                Decía «Conociéndolo» sobre Sombra: *una invitación a
+                                seguir conociendo a quien ya no está.* Y «Necesita
+                                atención» sería peor.
+                                🔴 El chip **no se borra**: dice lo que es. *Quitarlo
+                                dejaría el retrato sin su línea y la composición
+                                cambia; decir la verdad cuesta lo mismo.* */}
+                            {esMemorial
+                              ? t('perfil.pastillaEnMemoria')
+                              : pastilla === 'alDia'
+                              ? t('perfil.pastillaAlDia')
+                              : pastilla === 'pideAtencion'
+                                ? t('perfil.pastillaAtencion')
+                                : t('perfil.pastillaConociendo')}
+                          </Texto>
+                          {/* A8 · LA SEGUNDA VERDAD, al lado y no en lugar de la
+                              primera. Va en la MISMA pastilla a propósito: dos
+                              píldoras separadas se leerían como dos estados en
+                              competencia, y esto no compite — completa. El punto
+                              separador es terciario para que el peso siga siendo
+                              del estado de cuidado.
+                              Cero pendientes = NADA, jamás «0 por revisar»: un cero
+                              dicho es ruido, y la ausencia ya es la buena noticia
+                              (la misma firma que «Ponte al día» desapareciendo). */}
+                          {pendientes > 0 ? (
+                            <>
+                              <Texto variante="dato" color="tertiary">
+                                ·
+                              </Texto>
+                              <Texto variante="dato" color="secondary">
+                                {pendientes === 1
+                                  ? t('perfil.pastillaPendientesUno')
+                                  : t('perfil.pastillaPendientes', { n: pendientes })}
+                              </Texto>
+                            </>
+                          ) : null}
+                        </View>
+                      ) : null}
+                    </Pressable>
+                  </View>
 
-              {/* EL RETRATO — 200 con aro. CHOQUE DECLARADO (la lámina lo
-                  declara igual): el squircle 32% S61-A10 NO aplica — el
-                  retrato de la ficha es circular, no un avatar suelto;
-                  por eso no pasa por AvatarMascota. */}
-              <View style={{ alignItems: 'center', marginTop: spacing[5] }}>
-                {/* En memorial el retrato se MIRA: deja de ser boton y pasa a
-                    ser imagen con su nombre. No se apaga con `disabled` a
-                    secas porque un boton deshabilitado sigue anunciandose como
-                    boton —y sin razon visible seria el defecto que la casa
-                    persigue—: acá no hay accion apagada, hay una foto. */}
-                <Pressable
-                  accessibilityRole={esMemorial ? 'image' : 'button'}
-                  accessibilityLabel={esMemorial ? mascota.nombre : t('fotoEncuadre.editarFotoA11y', { nombre: mascota.nombre })}
-                  disabled={esMemorial}
-                  onPress={
-                    esMemorial
-                      ? undefined
-                      : () =>
-                          router.push({ pathname: '/hogar/foto-mascota', params: { mascotaId: mascota.id, nombre: mascota.nombre, especie: mascota.especie } })
-                  }
-                  {...presionAvatar.handlers}
-                >
-                  <Animated.View style={presionAvatar.estiloPresionado}>
-                    <View
+                  {/* @override-s82c — el nombre en SERIF (la pieza es de B) */}
+                  <Text
+                    accessibilityRole="header"
+                    style={{
+                      fontFamily: SERIF_LOCAL,
+                      fontSize: 44,
+                      lineHeight: 48,
+                      textAlign: 'center',
+                      color: theme.text.onGradient,
+                      marginTop: spacing[6],
+                    }}
+                  >
+                    {mascota.nombre}
+                  </Text>
+
+                  {/* S91 · P1 — EL ORIGEN EN HUMANO, bajo el nombre.
+                      Va en SANS y no en la línea mono de abajo a propósito: esa
+                      línea es METADATO (raza · edad · peso) y ésta es una FRASE.
+                      Mezclarlas convertiría «Llegó de un criadero» en un dato más.
+                      Ausente cuando nadie lo declaró — el silencio no se comenta. */}
+                  {lineaOrigen !== null ? (
+                    <Text
                       style={{
-                        width: 200,
-                        height: 200,
-                        borderRadius: radius.full,
-                        borderWidth: 8,
-                        borderColor: esMemorial ? theme.bg.overlay : 'rgba(255,255,255,0.2)',
-                        backgroundColor: theme.bg.overlay,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        overflow: 'hidden',
+                        fontFamily: typography.family.sans.regular,
+                        fontSize: typography.size.base,
+                        textAlign: 'center',
+                        color: theme.text.onGradient,
+                        opacity: esMemorial ? 1 : 0.9,
+                        marginTop: spacing[1.5],
                       }}
                     >
-                      {fotoFirmada !== undefined ? (
-                        <Image
-                          source={{ uri: fotoFirmada }}
-                          style={{ width: '100%', height: '100%' }}
-                          contentFit="cover"
-                          accessibilityIgnoresInvertColors
-                        />
-                      ) : (
-                        <Svg width={84} height={84} viewBox="0 0 24 24">
-                          <Huella color={theme.capa.identidad} escala={0.9} x={1.2} y={1.2} />
-                        </Svg>
-                      )}
-                    </View>
-                  </Animated.View>
-                  {/* EL SELLO que MONTA el aro — el mismo gesto que la
-                      tarjeta montando el borde, a otra escala. */}
-                  {pastilla !== null ? (
-                    <View
-                      style={{
-                        position: 'absolute',
-                        bottom: -spacing[2],
-                        alignSelf: 'center',
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        gap: spacing[1.5],
-                        borderRadius: radius.full,
-                        backgroundColor: theme.bg.card,
-                        paddingHorizontal: spacing[3],
-                        paddingVertical: spacing[1.5],
-                        boxShadow: theme.elevacion.elevada,
-                      }}
-                    >
-                      {pastilla === 'alDia' && !esMemorial ? (
-                        <Svg width={14} height={14} viewBox="0 0 24 24">
-                          <Path d="m5 12.6 4.6 4.6L19 7.8" stroke={theme.status.successText} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                        </Svg>
-                      ) : null}
-                      <Texto variante="dato" color={pastilla === 'pideAtencion' && !esMemorial ? 'danger' : 'primary'}>
-                        {/* ⭐ **EN MEMORIAL EL CHIP NO EMPUJA** (E, S113 · fase 3).
-                            Decía «Conociéndolo» sobre Sombra: *una invitación a
-                            seguir conociendo a quien ya no está.* Y «Necesita
-                            atención» sería peor.
-                            🔴 El chip **no se borra**: dice lo que es. *Quitarlo
-                            dejaría el retrato sin su línea y la composición
-                            cambia; decir la verdad cuesta lo mismo.* */}
-                        {esMemorial
-                          ? t('perfil.pastillaEnMemoria')
-                          : pastilla === 'alDia'
-                          ? t('perfil.pastillaAlDia')
-                          : pastilla === 'pideAtencion'
-                            ? t('perfil.pastillaAtencion')
-                            : t('perfil.pastillaConociendo')}
-                      </Texto>
-                      {/* A8 · LA SEGUNDA VERDAD, al lado y no en lugar de la
-                          primera. Va en la MISMA pastilla a propósito: dos
-                          píldoras separadas se leerían como dos estados en
-                          competencia, y esto no compite — completa. El punto
-                          separador es terciario para que el peso siga siendo
-                          del estado de cuidado.
-                          Cero pendientes = NADA, jamás «0 por revisar»: un cero
-                          dicho es ruido, y la ausencia ya es la buena noticia
-                          (la misma firma que «Ponte al día» desapareciendo). */}
-                      {pendientes > 0 ? (
-                        <>
-                          <Texto variante="dato" color="tertiary">
-                            ·
-                          </Texto>
-                          <Texto variante="dato" color="secondary">
-                            {pendientes === 1
-                              ? t('perfil.pastillaPendientesUno')
-                              : t('perfil.pastillaPendientes', { n: pendientes })}
-                          </Texto>
-                        </>
-                      ) : null}
-                    </View>
+                      {lineaOrigen}
+                    </Text>
                   ) : null}
-                </Pressable>
-              </View>
 
-              {/* @override-s82c — el nombre en SERIF (la pieza es de B) */}
-              <Text
-                accessibilityRole="header"
-                style={{
-                  fontFamily: SERIF_LOCAL,
-                  fontSize: 44,
-                  lineHeight: 48,
-                  textAlign: 'center',
-                  color: sobreMarca,
-                  marginTop: spacing[6],
-                }}
-              >
-                {mascota.nombre}
-              </Text>
-
-              {/* S91 · P1 — EL ORIGEN EN HUMANO, bajo el nombre.
-                  Va en SANS y no en la línea mono de abajo a propósito: esa
-                  línea es METADATO (raza · edad · peso) y ésta es una FRASE.
-                  Mezclarlas convertiría «Llegó de un criadero» en un dato más.
-                  Ausente cuando nadie lo declaró — el silencio no se comenta. */}
-              {lineaOrigen !== null ? (
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.regular,
-                    fontSize: typography.size.base,
-                    textAlign: 'center',
-                    color: sobreMarca,
-                    opacity: esMemorial ? 1 : 0.9,
-                    marginTop: spacing[1.5],
-                  }}
-                >
-                  {lineaOrigen}
-                </Text>
-              ) : null}
-
-              <Text
-                style={{
-                  fontFamily: typography.family.mono.regular,
-                  fontSize: typography.size.sm,
-                  letterSpacing: typography.tracking.mono,
-                  textAlign: 'center',
-                  color: sobreMarca,
-                  opacity: esMemorial ? 1 : 0.76,
-                  marginTop: spacing[2],
-                }}
-              >
-                {[
-                  esAcuario ? (tipoAgua === 'marino' ? t('perfil.aguaMarino') : tipoAgua === 'dulce' ? t('perfil.aguaDulce') : null) : mascota.raza,
-                  esAcuario || meses === null
-                    ? null
-                    : meses !== null
-                    ? /* ⭐ **EN MEMORIAL LA EDAD VA EN PASADO** (E, S113 · fase 3).
-                         Decía «~11 años» en la pantalla de quien ya no está —
-                         *el presente afirma que sigue teniendo esa edad, y eso
-                         no es un detalle de estilo: es la pantalla hablando
-                         como si nada hubiera pasado.* La cifra no cambia; lo
-                         que cambia es el tiempo del verbo. */
-                      esMemorial
-                      ? t('perfil.edadTenia', {
-                          edad: vozEdad(
+                  <Text
+                    style={{
+                      fontFamily: typography.family.mono.regular,
+                      fontSize: typography.size.sm,
+                      letterSpacing: typography.tracking.mono,
+                      textAlign: 'center',
+                      color: theme.text.onGradient,
+                      opacity: esMemorial ? 1 : 0.76,
+                      marginTop: spacing[2],
+                    }}
+                  >
+                    {[
+                      esAcuario ? (tipoAgua === 'marino' ? t('perfil.aguaMarino') : tipoAgua === 'dulce' ? t('perfil.aguaDulce') : null) : mascota.raza,
+                      esAcuario || meses === null
+                        ? null
+                        : meses !== null
+                        ? /* ⭐ **EN MEMORIAL LA EDAD VA EN PASADO** (E, S113 · fase 3).
+                             Decía «~11 años» en la pantalla de quien ya no está —
+                             *el presente afirma que sigue teniendo esa edad, y eso
+                             no es un detalle de estilo: es la pantalla hablando
+                             como si nada hubiera pasado.* La cifra no cambia; lo
+                             que cambia es el tiempo del verbo. */
+                          esMemorial
+                          ? t('perfil.edadTenia', {
+                              edad: vozEdad(
+                                meses,
+                                mascota.fecha_nacimiento_precision,
+                                mascota.fecha_nacimiento !== null
+                                  ? Number(mascota.fecha_nacimiento.slice(0, 4))
+                                  : null,
+                                t,
+                              ),
+                            })
+                          : vozEdad(
                             meses,
                             mascota.fecha_nacimiento_precision,
                             mascota.fecha_nacimiento !== null
                               ? Number(mascota.fecha_nacimiento.slice(0, 4))
                               : null,
                             t,
-                          ),
-                        })
-                      : vozEdad(
-                        meses,
-                        mascota.fecha_nacimiento_precision,
-                        mascota.fecha_nacimiento !== null
-                          ? Number(mascota.fecha_nacimiento.slice(0, 4))
+                          )
                           : null,
-                        t,
-                      )
-                      : null,
-                  /* 🔴 **EL ENCABEZADO TAMBIÉN LEÍA EL SNAPSHOT.** Curé
-                     identidad y dejé éste — y era el que estaba a la vista:
-                     medido en Thor, el retrato decía «11,4 kg» (clínica,
-                     21-jul) mientras identidad ya decía 24 (familia, 4-sep).
-                     *Dos números de la misma mascota en la misma pantalla, y el
-                     más viejo arriba de todo.* Ahora los dos salen de
-                     `pesoVigente` — **una derivación, tres superficies**.
-                     Acá va SOLO el número: el encabezado es una línea de
-                     identidad de un vistazo, y la fecha y el «quién» viven en
-                     su fila, donde hay lugar para leerlos. */
-                  esAcuario || pesoVigente === null ? null : `${pesoVigente.kg} kg`,
-                ]
-                  .filter((x): x is string => x !== null && x !== '')
-                  .join(' · ')
-                  .toLowerCase()}
-              </Text>
-            </>
-          );
-          return esMemorial ? (
-            <View style={[relleno, { backgroundColor: theme.bg.card }]}>{contenido}</View>
-          ) : (
-            <LinearGradient
-              colors={[...theme.accent.gradient.colors] as [string, string, ...string[]]}
-              locations={[...theme.accent.gradient.locations] as [number, number, ...number[]]}
-              start={{ x: 0.13, y: 0 }}
-              end={{ x: 0.87, y: 1 }}
-              style={relleno}
-            >
-              {contenido}
-            </LinearGradient>
-          );
-        })()}
+                      /* 🔴 **EL ENCABEZADO TAMBIÉN LEÍA EL SNAPSHOT.** Curé
+                         identidad y dejé éste — y era el que estaba a la vista:
+                         medido en Thor, el retrato decía «11,4 kg» (clínica,
+                         21-jul) mientras identidad ya decía 24 (familia, 4-sep).
+                         *Dos números de la misma mascota en la misma pantalla, y el
+                         más viejo arriba de todo.* Ahora los dos salen de
+                         `pesoVigente` — **una derivación, tres superficies**.
+                         Acá va SOLO el número: el encabezado es una línea de
+                         identidad de un vistazo, y la fecha y el «quién» viven en
+                         su fila, donde hay lugar para leerlos. */
+                      esAcuario || pesoVigente === null ? null : `${pesoVigente.kg} kg`,
+                    ]
+                      .filter((x): x is string => x !== null && x !== '')
+                      .join(' · ')
+                      .toLowerCase()}
+                  </Text>
+                </>
+              }
+            />
+          </View>
+        }
+        costura={
+          <FilaAccionesCostura
+            accesos={
+              esMemorial
+                ? [
+                    {
+                      clave: 'documentos',
+                      palabra: t('perfil.documentos'),
+                      icono: <Icono nombre="documentos" tamano={26} registro="glifo" montaje="control" />,
+                      onPress: abrirDocumentos,
+                    },
+                    {
+                      clave: 'contanos',
+                      palabra: t('contanos.pastilla'),
+                      icono: <Icono nombre="pluma" tamano={26} registro="glifo" montaje="control" />,
+                      onPress: contanos.abrir,
+                    },
+                  ]
+                : [
+                    {
+                      clave: 'citas',
+                      palabra: t('perfil.accionCitas'),
+                      icono: <Icono nombre="hoy" tamano={26} registro="glifo" montaje="control" />,
+                      onPress: () => router.push({ pathname: '/citas/[mascotaId]', params: { mascotaId: mascota.id } }),
+                    },
+                    {
+                      clave: 'pasaporte',
+                      /* 🔴 **`pasaporte.palabra`, no `pasaporte.entrada`.** La
+                         entrada dice «Pasaporte y QR» —tres palabras— y la fila
+                         de la costura es de UNA: su propia pieza declara que con
+                         dos la etiqueta sale cortada, *y eso es la señal, no un
+                         defecto que haya que disimular*. La llave nueva existe
+                         para esta fila; la larga sigue viva donde hay lugar. */
+                      palabra: t('pasaporte.palabra'),
+                      icono: <Icono nombre="carnet" tamano={26} registro="glifo" montaje="control" />,
+                      onPress: () => router.push({ pathname: '/hogar/mascota/pasaporte', params: { mascotaId: mascota.id } }),
+                    },
+                    {
+                      clave: 'documentos',
+                      palabra: t('perfil.documentos'),
+                      icono: <Icono nombre="documentos" tamano={26} registro="glifo" montaje="control" />,
+                      onPress: abrirDocumentos,
+                    },
+                    {
+                      clave: 'contanos',
+                      palabra: t('contanos.pastilla'),
+                      icono: <Icono nombre="pluma" tamano={26} registro="glifo" montaje="control" />,
+                      onPress: contanos.abrir,
+                    },
+                  ]
+            }
+          />
+        }
+        scroll={{ showsVerticalScrollIndicator: false }}
+      >
 
         {/* ☠️ **EL BLOQUE «18 PASEOS · 8 VACUNAS» MURIÓ** (ojo del founder,
             2.2.2 · ⑩). Era el solape que montaba el borde bajo el hero, con dos
@@ -1481,69 +1519,17 @@ export default function PerfilDeMascota() {
             al morir, el hero cierra contra las acciones. Ley 37: se retira
             entero, no se comenta. */}
 
-        {/* ⭐ **LAS CUATRO ACCIONES, bajo el hero** (S113-C · 2.2 → 2.2.4).
-            *Son lo que la familia viene a hacer, y hasta 2.2 estaban repartidas
-            entre el fondo de la pantalla y tres secciones distintas.*
+        {/* ☠️ **LAS CUATRO ACCIONES SE MUDARON A LA COSTURA** (S116-C lote 3b,
+            orden del founder: *«los cuatro círculos: Citas · Pasaporte ·
+            Documentos · Cuéntanos, una palabra cada uno»*). Vivían acá como
+            `FilaAcciones` bajo el hero; ahora **pisan la costura** entre el
+            ciruela y la hoja, que es el lugar que la estructura de la casa les
+            da. **No cambió el conjunto ni el filtro de memorial** —de quien ya
+            no está se leen sus papeles y se guarda un recuerdo; Citas y
+            Pasaporte no—: cambió dónde se montan. Ley 37: se retiran enteras.
 
-            ── QUÉ CAMBIÓ, Y POR QUÉ CADA COSA ─────────────────────────────
-            ☠️ **Nexo salió** (orden del founder): *ya está flotante en toda la
-            app, y acá ocupaba un lugar que no necesita.*
-            ⭐ **Entró Documentos**, y su destino es `irADocumentos` — el
-            plegable de «Identidad y papeles», con scroll y desplegado. **Con
-            la bóveda de la fase 3 gana pantalla propia y esta línea cambia**;
-            por eso el destino vive en una función y no acá.
-
-            ── 🔴 EN MEMORIAL VAN DOS, Y ES FIRMA DEL FOUNDER ──────────────
-            *De quien ya no está se siguen leyendo sus papeles y se sigue
-            pudiendo guardar un recuerdo; Citas y Pasaporte no.* Las dos que
-            salen son las que miran hacia adelante —agendar, encontrar a
-            alguien que se perdió—; las dos que quedan miran lo que hubo.
-
-            ⚠️ Antes acá no se dibujaba **ninguna**, con la razón «las cuatro
-            piden o llevan a pedir». Era cierto de las cuatro de entonces: con
-            Nexo adentro y sin Documentos, ninguna sobrevivía el filtro. *La
-            regla no cambió: cambió el conjunto al que se le aplica.* */}
-        <View style={{ marginTop: spacing[4], paddingHorizontal: spacing[5] }}>
-          <FilaAcciones
-            acciones={
-              esMemorial
-                ? [
-                    {
-                      etiqueta: t('perfil.documentos'),
-                      glifo: 'documentos',
-                      onPress: abrirDocumentos,
-                    },
-                    {
-                      etiqueta: t('contanos.pastilla'),
-                      glifo: 'pluma',
-                      onPress: contanos.abrir,
-                    },
-                  ]
-                : [
-                    {
-                      etiqueta: t('perfil.accionCitas'),
-                      glifo: 'hoy',
-                      onPress: () => router.push({ pathname: '/citas/[mascotaId]', params: { mascotaId: mascota.id } }),
-                    },
-                    {
-                      etiqueta: t('pasaporte.entrada'),
-                      glifo: 'carnet',
-                      onPress: () => router.push({ pathname: '/hogar/mascota/pasaporte', params: { mascotaId: mascota.id } }),
-                    },
-                    {
-                      etiqueta: t('perfil.documentos'),
-                      glifo: 'documentos',
-                      onPress: abrirDocumentos,
-                    },
-                    {
-                      etiqueta: t('contanos.pastilla'),
-                      glifo: 'pluma',
-                      onPress: contanos.abrir,
-                    },
-                  ]
-            }
-          />
-        </View>
+            ⚠️ **Lo único que cambió de contenido es la voz del pasaporte**, que
+            pasa de «Pasaporte y QR» a una palabra — ver la nota en la costura. */}
 
         {/* ⭐ **LA FRANJA DE SEGURIDAD** (S113-C · 1.1 · C6) — lo que hay que
             saber ANTES de tocar a esta mascota, arriba de todo lo demás.
@@ -2624,7 +2610,21 @@ export default function PerfilDeMascota() {
           {`p0c · esta pantalla pidió todo ${vecesFoco} vez/veces`}
         </Texto>
         ) : null}
-      </ScrollView>
+      </HojaContenido>
+      {/* 🔴 **EL AGUA VA DESPUÉS DE LA HOJA, Y ES LA CURA DE HABERLA METIDO
+          ADENTRO (S116-C lote 3b).** Su propia lámina la manda **FIJA**
+          —*«centrada en pantalla, no scrollea: el agua vive fuera del
+          cuerpo»*—, y al mudarla dentro de `HojaContenido` pasó a ser un hijo
+          del scroll: **se iba con el contenido**. Tampoco puede ir ANTES, que
+          es donde vivía: `HojaContenido` pinta su degradado en absoluto sobre
+          todo el alto y la hoja es opaca, así que ahí quedaba tapada entera.
+          ⇒ hermana posterior, `pointerEvents="none"`: se queda quieta, no toma
+          ningún toque, y sobre el ciruela su tinta al 4-6 % es imperceptible
+          —que es lo correcto: el agua es del papel—. */}
+      {/* @override-s82c — r5 ítem 1: LA MARCA DE AGUA del fondo,
+          escalada a SALIRSE por los cuatro lados al 4% ("una forma
+          completa es una marca; cortada es papel — así la Ley 4 no
+          muerde", letra founder). Fija, detrás de todo. */}
 
       {/* ═══ LA HOJA DE «SE PERDIÓ» — la voz es de AYUDA, no de trámite ═════
           Dice qué va a pasar en dos líneas, y la segunda es una promesa que la

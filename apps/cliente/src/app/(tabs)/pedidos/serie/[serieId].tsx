@@ -35,13 +35,15 @@ import { ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  Encabezado, Esqueleto, EsqueletoGrupo, EstadoVacio, spacing, useAviso, useTheme,
+  HojaContenido,
+  Cabecera, Esqueleto, EsqueletoGrupo, EstadoVacio, spacing, useAviso, useTheme,
 } from '@epetplace/ui';
 import { alternarRecurrencia } from '@epetplace/api';
 
 import { SerieRecurrenteVista } from '@/components/serie-recurrente';
 import type { SerieRecurrente } from '@/lib/serie/contrato';
 import { useTraduccion } from '@/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 /**
  * 🔴 EL ENCHUFE PENDIENTE — pedido a la pista A.
@@ -57,6 +59,7 @@ async function cargarSerie(_serieId: string): Promise<SerieRecurrente | null> {
 }
 
 export default function SerieDePedidos() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { serieId } = useLocalSearchParams<{ serieId: string }>();
   const router = useRouter();
   const { theme } = useTheme();
@@ -96,18 +99,32 @@ export default function SerieDePedidos() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
-        titulo={t('serie.titulo')}
-        atras
-        onAtras={() => router.back()}
-      />
-      <ScrollView
-        contentContainerStyle={{
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ El `paddingBottom` con `insets.bottom` que había acá SE RETIRA: lo
+          paga la hoja en su propio render, y sumarlo sería pagarlo dos veces
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={t('serie.titulo')}
+              onVolver={() => router.back()}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        scroll={{ contentContainerStyle: {
           padding: spacing[5],
-          paddingBottom: insets.bottom + spacing[6],
           gap: spacing[4],
-        }}
+        } }}
       >
         {cargando ? (
           /* N16: `Esqueleto` en toda lectura — el spinner está muerto. */
@@ -132,7 +149,7 @@ export default function SerieDePedidos() {
             cancelando={cancelando}
           />
         )}
-      </ScrollView>
+      </HojaContenido>
     </View>
   );
 }

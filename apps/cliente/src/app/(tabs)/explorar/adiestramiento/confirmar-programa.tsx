@@ -17,10 +17,12 @@ import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
+  HojaContenido,
+  Cabecera,
   Boton,
   Celda,
-  Encabezado,
   EsperaLarga,
+  Confirmacion,
   EstadoVacio,
   Icono,
   Separador,
@@ -38,6 +40,8 @@ import { AvisoNoCargo } from '@/components/aviso-no-cargo';
 import { cobrar } from '@/lib/pagos/cobro';
 import { useEsperaDeConfirmacion } from '@/lib/pagos/espera-confirmacion';
 import { useTraduccion } from '@/i18n';
+import { formatearPrecio } from '@epetplace/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 /** 'YYYY-MM-DD' → Date LOCAL (jamás new Date(iso): ancla UTC y corre el
  *  día — hallazgo de harness S55). */
@@ -47,6 +51,7 @@ function fechaLocal(iso: string): Date {
 }
 
 export default function ConfirmarPrograma() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const { mostrar } = useAviso();
@@ -202,68 +207,88 @@ export default function ConfirmarPrograma() {
 
   if (fase === 'exito' && compra !== null) {
     const fmt = fmtHumana;
+    /* ⭐ **S116-C lote 13 · LA CONFIRMACIÓN DE LA CASA.** ☠️ Muere el
+       `EstadoVacio` + glífo 48 + un botón.
+
+       ⚠️ **El texto honesto de S109-C se conserva ENTERO** y baja a `apoyo`:
+       dice las N sesiones con su primera, su última y su vigencia. *Ese texto
+       se peleó una sesión para dejar de afirmar algo falso sobre la agenda de
+       un profesional; cambiar la envoltura no puede costarle una palabra.*
+
+       El `dato` dice **cuántas sesiones** y **desde cuándo**: es lo que la
+       persona vuelve a mirar de un programa. */
     return (
       <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <View style={{ flex: 1, justifyContent: 'center', padding: spacing[4] }}>
-          <EstadoVacio
-            icono={<Icono nombre="training" tamano={48} />}
-            /* ═══ 🔴 S109-C · EL TEXTO SE MUEVE CON EL MOTOR ═════════════════
-               ⏪ Decía **«Las {{n}} sesiones quedaron en la agenda»** — y era
-               cierto: `contratar_programa` las creaba al comprar. **Dejó de
-               serlo el día que A publicó el arco nuevo** (`20260905120000`): el
-               programa nace `pendiente` y *las sesiones nacen cuando el pago se
-               confirma*.
-
-               🔴 **Y no es una imprecisión: es una afirmación falsa sobre la
-               agenda de un profesional.** La familia salía creyendo que N
-               horarios estaban tomados y no había ninguno.
-
-               Lo que se dice ahora es lo que hay: **el programa quedó
-               registrado, falta el pago, y las sesiones se agendan cuando se
-               confirme** — con las fechas PREVISTAS nombradas como previstas.
-               *Un texto honesto se mueve en el mismo acto que cambia lo que
-               describe; éste llegó tarde por una sesión y por eso se movió
-               apenas la firma lo permitió.* */
-            /* ⭐ La frase original VUELVE, y ahora es cierta: se dice después de
-               que el servidor confirmó, y las N sesiones nacen en ese acto. */
+        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: spacing[4] }}>
+          <Confirmacion
+            exclamacion={t('checkout.exitoExclamacion')}
             titulo={t('adiestramiento.programaExitoTitulo')}
-            descripcion={t('adiestramiento.programaExitoDetalle', {
+            apoyo={t('adiestramiento.programaExitoDetalle', {
               n: String(compra.n_sesiones),
               primera: fmt.format(fechaLocal(compra.primera_sesion)),
               ultima: fmt.format(fechaLocal(compra.ultima_sesion)),
               vigencia: fmt.format(fechaLocal(compra.vigencia_hasta)),
             })}
-            accion={
-              <Boton
-                variante="primario"
-                etiqueta={t('adiestramiento.irAlHogar')}
-                onPress={() => {
-                  if (router.canDismiss()) router.dismissAll();
-                  router.navigate('/hogar');
-                }}
-              />
-            }
+            dato={{
+              etiqueta: t('adiestramiento.programaExitoDato', { n: String(compra.n_sesiones) }),
+              valor: fmt.format(fechaLocal(compra.primera_sesion)),
+            }}
+            lineaExtra={t('checkout.exitoFactura')}
+            primario={{
+              texto: t('adiestramiento.irAlHogar'),
+              onPress: () => {
+                if (router.canDismiss()) router.dismissAll();
+                router.navigate('/hogar');
+              },
+            }}
+            secundario={{
+              texto: t('checkout.exitoExplorarMas'),
+              onPress: () => {
+                if (router.canDismiss()) router.dismissAll();
+                router.navigate('/explorar');
+              },
+            }}
           />
-        </View>
+        </ScrollView>
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
-        titulo={t('adiestramiento.resumenProgramaTitulo')}
-        atras
-        onAtras={() => router.back()}
-      />
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[4] }}>
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ **Los `ScrollView` verticales que había adentro se volvieron
+          `View`**: la hoja ya scrollea, y dos scrolls verticales anidados
+          dejan al de adentro sin alto propio. Su `contentContainerStyle` pasa
+          a `style` — *el relleno era del contenido, no del scroll.* El
+          `paddingBottom` con `insets.bottom` SE RETIRA: lo paga la hoja
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={t('adiestramiento.resumenProgramaTitulo')}
+              onVolver={() => router.back()}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+      >
+      <View style={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[4] }}>
         {/* el QUÉ comprado, con su gente */}
         <Tarjeta relleno="ninguno">
           <Celda
             titulo={typeof params.programaNombre === 'string' ? params.programaNombre : ''}
             subtitulo={typeof params.prestadorNombre === 'string' ? params.prestadorNombre : undefined}
-            metadataMono={`$${precio.toFixed(2)} · ${typeof params.duracion === 'string' ? params.duracion : ''} min`}
+            metadataMono={`${formatearPrecio(precio)} · ${typeof params.duracion === 'string' ? params.duracion : ''} min`}
           />
         </Tarjeta>
 
@@ -351,7 +376,7 @@ export default function ConfirmarPrograma() {
 
         <SeccionMedioDePago medio={medio} />
         {rebote !== null ? <Texto variante="cuerpo">{rebote}</Texto> : null}
-      </ScrollView>
+      </View>
 
       <View
         style={{
@@ -374,6 +399,7 @@ export default function ConfirmarPrograma() {
           onPress={() => void comprar()}
         />
       </View>
+      </HojaContenido>
     </SafeAreaView>
   );
 }

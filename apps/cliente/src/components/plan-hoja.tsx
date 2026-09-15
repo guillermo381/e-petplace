@@ -39,6 +39,7 @@ import {
   type PlanContratado,
 } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
+import { formatearPrecio } from '@epetplace/i18n';
 
 type Frecuencia = 'semanal' | 'quincenal' | 'mensual';
 
@@ -251,7 +252,7 @@ export function PlanHoja({
               {t('plan.precioMes')}
             </Text>
             <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.sm, color: theme.text.primary, fontVariant: ['tabular-nums'] }}>
-              {precioMensual !== null ? `$${precioMensual.toFixed(2)}` : '—'}
+              {precioMensual !== null ? formatearPrecio(precioMensual) : '—'}
             </Text>
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>

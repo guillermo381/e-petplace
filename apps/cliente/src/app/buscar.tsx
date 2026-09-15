@@ -27,8 +27,9 @@ import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
+  Cabecera,
   Campo,
-  Encabezado,
   PieDeCampo,
   ResultadosBusqueda,
   spacing,
@@ -40,8 +41,10 @@ import { ElegirMascotaHoja } from '@/components/nexo/elegir-mascota-hoja';
 import { useTraduccion } from '@/i18n';
 import { focoNexo } from '@/lib/nexo/atajos';
 import { useHogarVivo } from '@/lib/nexo/hogar-vivo';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 export default function PantallaBuscar() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { t } = useTraduccion();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -102,12 +105,33 @@ export default function PantallaBuscar() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Encabezado
-        variante="navegacion"
-        titulo={t('busqueda.entrada')}
-        atras
-        onAtras={() => router.back()}
-      />
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ **Los `ScrollView` verticales que había adentro se volvieron
+          `View`**: la hoja ya scrollea, y dos scrolls verticales anidados
+          dejan al de adentro sin alto propio. Su `contentContainerStyle` pasa
+          a `style` — *el relleno era del contenido, no del scroll.* El
+          `paddingBottom` con `insets.bottom` SE RETIRA: lo paga la hoja
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        scroll={{ keyboardDismissMode: 'on-drag' }}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={t('busqueda.entrada')}
+              onVolver={() => router.back()}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+      >
       <View style={{ paddingHorizontal: spacing[5], paddingTop: spacing[3] }}>
         {/* 🔴 **El teclado sale solo.** *Quien entró acá vino a escribir;
             pedirle un toque más para empezar es cobrarle el viaje dos veces.*
@@ -133,22 +157,9 @@ export default function PantallaBuscar() {
         />
         <PieDeCampo />
       </View>
-      <ScrollView
-        contentContainerStyle={{
-          paddingBottom: insets.bottom + spacing[8],
+      <View style={{
           paddingHorizontal: spacing[5],
-        }}
-        /* Al arrastrar la lista el teclado se va: *la familia ya escribió y
-           ahora está mirando.* */
-        keyboardDismissMode="on-drag"
-        /* 🔴 **Y AL TOCAR, EL TOQUE LLEGA.** Medido en aparato: con el teclado
-           arriba, el primer toque sobre «Preguntarle a Nexo» **sólo cerraba el
-           teclado** y se lo tragaba — había que tocar dos veces. *Un control
-           que necesita dos toques se lee como roto en el primero*, y es
-           justamente el chip de la salida que esta pantalla acaba de curar.
-           `"handled"` deja pasar el toque a quien lo maneja. */
-        keyboardShouldPersistTaps="handled"
-      >
+        }}>
         {busqueda.termino.trim().length >= 2 ? (
           <ResultadosBusqueda
             termino={busqueda.termino}
@@ -163,7 +174,7 @@ export default function PantallaBuscar() {
             }}
           />
         ) : null}
-      </ScrollView>
+      </View>
       <ElegirMascotaHoja
         visible={eligiendo}
         titulo={t('nexo.elegirMascota')}
@@ -171,6 +182,7 @@ export default function PantallaBuscar() {
         onElegir={irANexo}
         onCerrar={() => setEligiendo(false)}
       />
+      </HojaContenido>
     </View>
   );
 }

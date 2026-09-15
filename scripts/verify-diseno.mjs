@@ -1189,30 +1189,38 @@ function r13(archivos) {
   return { fallos, info: `${total} contorneados (${nota})${total < sumaBaseline ? ' — BAJÓ: actualizar baseline' : ''}` };
 }
 
-/** R14 · LA TARJETA NO TAPA EL SALUDO (S82-C r4, defecto 2 del gate
- *  mecanizado): la tarjeta de recomendaciones solapa la banda SOLO
- *  dentro del respiro que el techo deja al pie — SOLAPE_RECO tiene que
- *  ser ESTRICTAMENTE MENOR que RESPIRO_BANDA en hogar/index. Las
- *  constantes se leen del fuente (spacing[K]); si desaparecen o dejan
- *  de ser spacing-token, la regla FALLA (el silencio no verifica,
- *  L-192). Tabla de spacing espejada del token (estable desde v3.1). */
-const SPACING_R14 = { 4: 16, 5: 20, 6: 24, 7: 28, 8: 32, 10: 40, 12: 48, 14: 56, 16: 64 };
-function r14(archivos) {
-  const hogar = archivos.find((a) => /hogar\/index\.tsx$/.test(a.path));
-  if (!hogar) return { fallos: ['R14: hogar/index.tsx no encontrado — sin fuente no hay verificación'], info: 'SIN FUENTE' };
-  const respiro = hogar.src.match(/RESPIRO_BANDA = spacing\[(\d+)\]/);
-  const solape = hogar.src.match(/SOLAPE_RECO = spacing\[(\d+)\]/);
-  if (!respiro || !solape)
-    return { fallos: ['R14: RESPIRO_BANDA/SOLAPE_RECO no encontrados en hogar/index — la relación no se puede verificar (L-192)'], info: 'CONSTANTES AUSENTES' };
-  const r = SPACING_R14[Number(respiro[1])];
-  const s = SPACING_R14[Number(solape[1])];
-  if (r === undefined || s === undefined)
-    return { fallos: [`R14: spacing[${respiro[1]}]/spacing[${solape[1]}] fuera de la tabla espejada — ensanchar SPACING_R14`], info: 'TOKEN DESCONOCIDO' };
-  const fallos = s >= r
-    ? [`hogar/index — SOLAPE_RECO (${s}) ≥ RESPIRO_BANDA (${r}): la tarjeta TAPA el saludo/nombres del techo (defecto 2 del gate r4)`]
-    : [];
-  return { fallos, info: `solape=${s} < respiro=${r}` };
-}
+/* ☠️ **R14 SE RETIRÓ EN S116-C (lote 3b · `D-1106`) — SU OBJETO DEJÓ DE
+ *  EXISTIR EN EL MISMO COMMIT QUE LA RETIRA.**
+ *
+ *  QUÉ VIGILABA: que `SOLAPE_RECO` fuera ESTRICTAMENTE MENOR que
+ *  `RESPIRO_BANDA` en `hogar/index` — dos constantes locales del **techo que
+ *  el Hogar se pintaba**. La tarjeta de «Ponte al día» subía con un margen
+ *  negativo para pegarse a la banda, y la regla existía para que ese solape
+ *  no le tapara el saludo (defecto 2 del gate r4 de S82-C).
+ *
+ *  QUÉ LA MATA: el techo local del Hogar **ya no existe**. El ciruela es hoy
+ *  el fondo de la pantalla, lo pinta `Cabecera` en `presentacion="fondo"` y
+ *  la hoja se apoya encima con `HojaContenido` — *el solape dejó de ser un
+ *  margen negativo que una pantalla elige y pasó a ser la COSTURA, que es
+ *  geometría de la pieza*. Las dos constantes quedaron sin consumidor y se
+ *  van con ella; `SOLAPE_RECO` ya venía citado sólo en comentarios `⏪` desde
+ *  que la tarjeta bajó con su aire.
+ *
+ *  POR QUÉ SE VA ENTERA Y NO SE REESCRIBE CONTRA LA PIEZA: lo que la regla
+ *  protegía —que la tarjeta no tape el saludo— **hoy es inexpresable**: la
+ *  tarjeta vive dentro de la hoja y el saludo dentro de la banda, y son dos
+ *  superficies distintas. *Una regla que no puede producir su rojo no está
+ *  midiendo* (`L-459`), y su verde habría pasado a significar «no miré».
+ *
+ *  ⚠️ **TERRITORIO: este archivo es de B, y lo toca C.** Mismo precedente
+ *  exacto que el retiro de `R18` en S112-C: la regla se queda ROJA en el
+ *  instante en que su objeto muere, y dejarla roja frena el pre-commit de
+ *  todas las pistas por un rojo que no es de ninguna. Se retira en el commit
+ *  que la causa y se declara en el parte y en el buzón de B.
+ *
+ *  ⚠️ **Y con ella baja el contador de reglas: 81 → 80.** *Un número de
+ *  reglas que no baja cuando una se jubila es el mismo defecto que un
+ *  baseline que no se asienta.* */
 
 /** R16 · EL GUARD DEL PAPEL TAPIZ (S82-B r9 — mecaniza la promesa de los
  *  puntos 4 y 5 de la orden: "el prestador NO recibe tinte" y "la
@@ -2812,7 +2820,6 @@ const FIXTURES = {
   R11: [{ path: '(fixture)/es.ts', src: "    vozCardM3: '{{nombre}} completó el 60% de su nivel — ¡sigue la racha!'," }],
   R12: [{ tema: 'light', clase: 'texto', nombre: '(fixture)', ratio: 2.0, minimo: 4.5 }],
   R13: [{ path: '(fixture)', src: '<Pressable style={{ borderWidth: 1.5, borderColor: theme.border.default }}>' }],
-  R14: [{ path: 'x/hogar/index.tsx', src: 'const RESPIRO_BANDA = spacing[8];\nconst SOLAPE_RECO = spacing[14];' }],
   R15: [{ tema: 'light', ruta: '(fixture)', valor: '#0F5E56' }],
   // tinte ENCENDIDO y ningún override en lightOficio = el caso que la
   // regla existe para atrapar.
@@ -8736,7 +8743,7 @@ function r91(fixture) {
   }
 }
 
-const REGLAS = { R91: r91, R90: r90, R89: r89, R88: r88, R87: r87, R86: r86, R85: r85, R84: r84, R83: r83, R82: r82, R81: r81, R80: r80, R79: r79, R78: r78, R77: r77, R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R91: r91, R90: r90, R89: r89, R88: r88, R87: r87, R86: r86, R85: r85, R84: r84, R83: r83, R82: r82, R81: r81, R80: r80, R79: r79, R78: r78, R77: r77, R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -8948,12 +8955,6 @@ const EXTRAS_BRAZOS = [
         'setMascotas(r.data);',
     },
   ]],
-  // ── R14: los tres guards, en el orden en que la función los alcanza ──
-  ['R14·sin la fuente (hogar/index.tsx ausente)', r14, [{ path: 'x/OTRO.tsx', src: '' }]],
-  ['R14·constantes ausentes en el hogar', r14, [{ path: 'x/hogar/index.tsx', src: 'const NADA = 1;' }]],
-  ['R14·spacing fuera de la tabla espejada', r14, [
-    { path: 'x/hogar/index.tsx', src: 'const RESPIRO_BANDA = spacing[99];\nconst SOLAPE_RECO = spacing[98];' },
-  ]],
   // ── R16: el guard de fuente que nació decorativo EN B3, escrito por mí ──
   ['R16·sin los tokens del tapiz en palette', r16, { palette: '', temas: '' }],
   // S85-B1 · los DOS brazos de __DEV__ tienen su rojo por separado, y el
@@ -9125,7 +9126,6 @@ const corridas = [
   ['R9 (Ley 17.5/EstadoVacio — informativa)', r9(apps)],
   ['R10 (override-s82c atado a su casa)', r10(apps)],
   ['R11 (LOYALTY §3: la voz del momento sin score)', r11(dics)],
-  ['R14 (el solape no tapa el saludo)', r14(apps)],
   ['R35 (Ley 1: el color aplicado sale del tema — ui+galería+apps)', r35([...apps, ...ui, ...galeria])],
 ];
 // R12 y R15 corren sobre el volcador vivo; si cayó, FALLAN FUERTE.

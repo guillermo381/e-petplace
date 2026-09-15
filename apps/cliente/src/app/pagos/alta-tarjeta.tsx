@@ -21,15 +21,18 @@ import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { WebView } from 'react-native-webview';
-import { Encabezado, EsperaLarga, useTheme, useAviso } from '@epetplace/ui';
+import {
+  HojaContenido, Cabecera, EsperaLarga, useTheme, useAviso } from '@epetplace/ui';
 import { obtenerAltaTarjeta, type EstadoAlta } from '@epetplace/api';
 import { obtenerIdiomaActual } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 const BASE = process.env.EXPO_PUBLIC_PAGOS_ALTA_URL ?? '';
 
 export default function AltaTarjeta() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { alta, uid } = useLocalSearchParams<{ alta: string; uid?: string }>();
   const { theme } = useTheme();
   const { t } = useTraduccion();
@@ -94,12 +97,32 @@ export default function AltaTarjeta() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
-        titulo={t('cuenta.gateAltaTarjeta')}
-        atras
-        onAtras={() => void cerrarLeyendoElServidor()}
-      />
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ **Los `ScrollView` verticales que había adentro se volvieron
+          `View`**: la hoja ya scrollea, y dos scrolls verticales anidados
+          dejan al de adentro sin alto propio. Su `contentContainerStyle` pasa
+          a `style` — *el relleno era del contenido, no del scroll.* El
+          `paddingBottom` con `insets.bottom` SE RETIRA: lo paga la hoja
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={t('cuenta.gateAltaTarjeta')}
+              onVolver={() => void cerrarLeyendoElServidor()}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+      >
 
       <View style={{ flex: 1 }}>
         <WebView
@@ -166,6 +189,7 @@ export default function AltaTarjeta() {
           style={{ flex: 1, backgroundColor: theme.bg.base }}
         />
       </View>
+      </HojaContenido>
     </SafeAreaView>
   );
 }

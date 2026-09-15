@@ -43,6 +43,7 @@
 import { useState, type ReactNode, type RefObject } from 'react'
 import { View, type ScrollView, type ScrollViewProps } from 'react-native'
 import Animated, {
+  type AnimatedRef,
   Extrapolation,
   interpolate,
   runOnJS,
@@ -51,7 +52,6 @@ import Animated, {
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
-  type AnimatedRef,
 } from 'react-native-reanimated'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'

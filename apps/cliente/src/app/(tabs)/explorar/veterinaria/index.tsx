@@ -69,6 +69,7 @@ import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
 import { FiltroMascotas } from '@/components/filtro-pills';
 import { CabezalOficio, GrillaElegir, PieReserva, SelectorDia, SinQuienReservar } from '@/components/reserva-piezas';
 import { vozServicio } from '@/lib/voz-servicio';
+import { formatearPrecio } from '@epetplace/i18n';
 
 function fechaLocalISO(d: Date): string {
   return new Intl.DateTimeFormat('en-CA').format(d);
@@ -447,8 +448,8 @@ export default function VeterinariaCuando() {
                   {servicioElegido !== null ? (
                     <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
                       {servicioElegido.varia
-                        ? t('veterinaria.precioDesde', { nombre: mascota.nombre, precio: servicioElegido.desde_precio.toFixed(2) })
-                        : t('veterinaria.precioExacto', { nombre: mascota.nombre, precio: servicioElegido.desde_precio.toFixed(2) })}
+                        ? t('veterinaria.precioDesde', { nombre: mascota.nombre, precio: formatearPrecio(servicioElegido.desde_precio) })
+                        : t('veterinaria.precioExacto', { nombre: mascota.nombre, precio: formatearPrecio(servicioElegido.desde_precio) })}
                     </Text>
                   ) : (
                     /* 🔴 SIN SERVICIO ELEGIDO, LA PANTALLA LO PIDE. Retirar el
@@ -535,7 +536,7 @@ export default function VeterinariaCuando() {
           FIRMADA) manda: el exacto no existe hasta elegir prestador. */}
       {Array.isArray(mascotas) && elegibles.length > 0 && servicioElegido !== null ? (
         <PieReserva
-          total={`$ ${servicioElegido.desde_precio.toFixed(2)}`}
+          total={formatearPrecio(servicioElegido.desde_precio)}
           totalDesde={servicioElegido.varia}
           cuando={hora !== null ? `${dias.find((d) => d.iso === dia)?.corta ?? ''} · ${hora}` : null}
           etiqueta={t('explorar.verQuienPuede')}

@@ -51,11 +51,12 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
   HojaFiltros,
   BloqueConCriterio,
   Boton,
   CeldaNavegacion,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -79,6 +80,7 @@ import {
 import { describirEdad, describirEspera } from '@epetplace/domain';
 
 import { useTraduccion } from '@/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 /** Las dos especies que la casa adopta hoy. **El día que el motor acepte otra,
  *  este arreglo se queda corto y hay que venir acá** — se declara en vez de
@@ -108,6 +110,7 @@ type Estado =
     };
 
 export default function Adoptar() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
@@ -282,19 +285,32 @@ export default function Adoptar() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
-        titulo={t('adoptar.titulo')}
-        atras
-        onAtras={() => router.back()}
-      />
-
-      <ScrollView
-        contentContainerStyle={{
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ El `paddingBottom` con `insets.bottom` que había acá SE RETIRA: lo
+          paga la hoja en su propio render, y sumarlo sería pagarlo dos veces
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={t('adoptar.titulo')}
+              onVolver={() => router.back()}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        scroll={{ contentContainerStyle: {
           padding: spacing[5],
           gap: spacing[5],
-          paddingBottom: insets.bottom + spacing[8],
-        }}
+          } }}
       >
         {/* LA VUELTA A LAS CONVERSACIONES. Sólo con sesión: sin cuenta no hay
             ninguna, y ofrecerla sería llevar a un vacío garantizado (Ley 23).
@@ -470,7 +486,7 @@ export default function Adoptar() {
             ) : null}
           </>
         )}
-      </ScrollView>
+      </HojaContenido>
 
       {/* N22 · LA «i» EXPLICA — y lo que explica es POR QUÉ, no CÓMO. */}
       <Hoja

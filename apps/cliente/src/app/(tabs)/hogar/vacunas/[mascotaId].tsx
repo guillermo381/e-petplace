@@ -68,15 +68,16 @@
  *    ahí junto a los otros cómputos del expediente.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import {useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
+  Cabecera,
   Boton,
-  Encabezado,
   Entrada,
   Esqueleto,
   EsqueletoGrupo,
@@ -108,6 +109,7 @@ import { FiltroPills, type OpcionFiltro } from '@/components/filtro-pills';
 import { useTraduccion } from '@/i18n';
 /* Alias: acá también hay un `esMemorial` local. Ver la nota del Hogar. */
 import { esMemorial as mascotaEnMemorial } from '@/lib/memorial';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 /** Cuántas filas se ven antes del pie que revela (la lámina: 3). */
 const TOPE_VISIBLE = 3;
@@ -138,6 +140,7 @@ function Chevron({ abierto, color }: { abierto: boolean; color: string }) {
 }
 
 export default function PlanDeVacunas() {
+  const cabecera = useAltoDeCabecera('empujada');
   const router = useRouter();
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
@@ -199,7 +202,23 @@ export default function PlanDeVacunas() {
   if (perfil === 'cargando') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" titulo="" atras onAtras={() => router.back()} />
+        {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada" titulo="" onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+                presentacion="fondo"
+              />
+            </View>
+          }
+        >
         <View style={{ padding: spacing[5], gap: spacing[5] }}>
           <EsqueletoGrupo etiqueta={t('planVacunas.cargando')}>
             <View style={{ flexDirection: 'row', gap: spacing[4] }}>
@@ -224,6 +243,7 @@ export default function PlanDeVacunas() {
             ))}
           </EsqueletoGrupo>
         </View>
+        </HojaContenido>
       </View>
     );
   }
@@ -232,7 +252,23 @@ export default function PlanDeVacunas() {
   if (perfil === 'error') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" titulo="" atras onAtras={() => router.back()} />
+        {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada" titulo="" onVolver={() => router.back()} etiquetaVolver={t('comun.volver')}
+                presentacion="fondo"
+              />
+            </View>
+          }
+        >
         <View style={{ flex: 1, justifyContent: 'center', padding: spacing[5] }}>
           <EstadoVacio
             titulo={t('planVacunas.errorTitulo')}
@@ -249,6 +285,7 @@ export default function PlanDeVacunas() {
             }
           />
         </View>
+        </HojaContenido>
       </View>
     );
   }
@@ -269,11 +306,24 @@ export default function PlanDeVacunas() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo="" atras onAtras={() => router.back()} />
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}
-        showsVerticalScrollIndicator={false}
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada" titulo="" onVolver={() => router.back()} etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
       >
+      <View style={{ }}>
         {/* La identidad de la pantalla — quién, y de qué se habla.
             r6 (ORDEN FOUNDER en dispositivo): EL ISOTIPO A LA IZQUIERDA,
             antes del texto. Es el LOCKUP de `Encabezado portada`
@@ -481,7 +531,8 @@ export default function PlanDeVacunas() {
             ) : null}
           </>
         )}
-      </ScrollView>
+      </View>
+      </HojaContenido>
     </View>
   );
 }

@@ -139,6 +139,11 @@ export function useReservaVeterinaria(ctx: ContextoVeterinaria, alConflicto?: ()
           fecha: r.data.fecha,
           hora: r.data.hora,
           duracion: String(r.data.duracion_minutos),
+          /* ⭐ **S116-C lote 13 · `mascotaId` VIAJA AL CHECKOUT.** Lo pide el
+             «Ver la cita» de la confirmación nueva: `/citas/[mascotaId]` es la
+             única puerta al detalle, y el checkout no lo tenía. *Ya estaba
+             acá — lo que faltaba era ponerlo en la URL.* */
+          mascotaId: ctx.mascotaId,
           direccion: v.direccion ?? '',
           ciudad: v.ciudad ?? '',
           /* 🔴 S106-C t3 · ACÁ UNA TELECONSULTA VIAJABA COMO `'local'`.

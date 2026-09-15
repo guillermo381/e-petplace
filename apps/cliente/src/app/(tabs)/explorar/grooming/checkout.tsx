@@ -30,11 +30,14 @@ import { obtenerDireccionHogar, type DireccionHogar } from '@epetplace/api';
 import { CheckoutReserva } from '@/components/checkout-reserva';
 import { DireccionHogarForm } from '@/components/direccion-hogar-form';
 import { useTraduccion } from '@/i18n';
+import { formatearPrecio } from '@epetplace/i18n';
 
 export default function GroomingCheckout() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const params = useLocalSearchParams<{
+    /** ⭐ S116-C lote 13 — lo pide «Ver la cita» de la confirmación. */
+    mascotaId: string;
     citaId: string;
     expiraEn: string;
     precio: string;
@@ -87,6 +90,7 @@ export default function GroomingCheckout() {
   return (
     <CheckoutReserva
       citaId={typeof params.citaId === 'string' ? params.citaId : ''}
+      mascotaId={typeof params.mascotaId === 'string' ? params.mascotaId : ''}
       expiraEn={typeof params.expiraEn === 'string' ? params.expiraEn : ''}
       precio={Number(params.precio ?? 0)}
       prestadorNombre={typeof params.prestadorNombre === 'string' ? params.prestadorNombre : ''}
@@ -94,7 +98,6 @@ export default function GroomingCheckout() {
       fecha={typeof params.fecha === 'string' ? params.fecha : ''}
       hora={typeof params.hora === 'string' ? params.hora : ''}
       duracion={typeof params.duracion === 'string' ? params.duracion : ''}
-      exitoIcono="grooming"
       resumenEtiqueta={t('grooming.checkoutResumen')}
       exitoTitulo={t('grooming.exitoTitulo')}
       exitoDetalle={t('grooming.exitoDetalle')}
@@ -143,9 +146,9 @@ export default function GroomingCheckout() {
           {hayDesglose ? (
             <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
               {[
-                `${t('grooming.desgloseServicio')} $${precioBase.toFixed(2)}`,
-                extraPelaje > 0 ? `${t('grooming.desgloseExtraPelaje')} +$${extraPelaje.toFixed(2)}` : null,
-                recargoDomicilio > 0 ? `${t('grooming.desgloseDomicilio')} +$${recargoDomicilio.toFixed(2)}` : null,
+                `${t('grooming.desgloseServicio')} ${formatearPrecio(precioBase)}`,
+                extraPelaje > 0 ? `${t('grooming.desgloseExtraPelaje')} +${formatearPrecio(extraPelaje)}` : null,
+                recargoDomicilio > 0 ? `${t('grooming.desgloseDomicilio')} +${formatearPrecio(recargoDomicilio)}` : null,
               ]
                 .filter(Boolean)
                 .join(' · ')}

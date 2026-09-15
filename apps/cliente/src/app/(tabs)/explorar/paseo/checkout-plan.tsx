@@ -39,11 +39,12 @@
  */
 
 import { useCallback, useState, useEffect } from 'react';
-import { View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  Boton, Celda, Encabezado, EsperaLarga, EstadoVacio, Icono,
+  HojaContenido,
+  Boton, Celda, Confirmacion, Cabecera, EsperaLarga, EstadoVacio, Icono,
   PantallaConPie, Separador, Tarjeta, Texto, spacing, useAviso, useTheme,
 } from '@epetplace/ui';
 import { contratarPlanPaseo } from '@epetplace/api';
@@ -60,8 +61,11 @@ import { useMedioDePago, SeccionMedioDePago } from '@/components/seccion-medio-d
 import { SeccionFacturacion, useFacturacion } from '@/components/seccion-facturacion';
 import { AvisoNoCargo } from '@/components/aviso-no-cargo';
 import { useTraduccion } from '@/i18n';
+import { formatearPrecio } from '@epetplace/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 export default function CheckoutPlanPaseo() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { t } = useTraduccion();
   const { theme } = useTheme();
   const router = useRouter();
@@ -217,37 +221,63 @@ export default function CheckoutPlanPaseo() {
   }
 
   if (fase === 'exito') {
+    /* ⭐ **S116-C lote 13 · LA CONFIRMACIÓN DE LA CASA.** ☠️ Muere el
+       `EstadoVacio` + glífo 48 + un botón. *La misma razón que en la cita: la
+       plata pasó y algo quedó agendado — es el mismo hecho que celebra la
+       Despensa, y hasta hoy se contaba con otra pantalla.*
+
+       El `dato` lleva **qué se contrató** y su precio; el detalle de familia baja
+       a `apoyo`. **«Ver el plan» va al hub de paseos**, que es donde el plan
+       vive — no hay una pantalla de plan aparte. */
     return (
       <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <View style={{ flex: 1, justifyContent: 'center', padding: spacing[4] }}>
-          <EstadoVacio
-            icono={<Icono nombre="paseo" tamano={48} />}
+        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: spacing[4] }}>
+          <Confirmacion
+            exclamacion={t('checkout.exitoExclamacion')}
             titulo={t('checkoutPlan.exitoTitulo')}
-            /* El comprobante en palabras de familia: qué compró, no un id. */
-            descripcion={t('checkoutPlan.exitoDetalle', { precio: precio.toFixed(2) })}
-            accion={
-              <Boton
-                variante="primario"
-                etiqueta={t('checkout.volverHogar')}
-                onPress={() => {
-                  if (router.canDismiss()) router.dismissAll();
-                  router.navigate('/hogar/paseos');
-                }}
-              />
-            }
+            apoyo={t('checkoutPlan.exitoDetalle', { precio: formatearPrecio(precio) })}
+            lineaExtra={t('checkout.exitoFactura')}
+            primario={{
+              texto: t('checkoutPlan.exitoVerPlan'),
+              onPress: () => {
+                if (router.canDismiss()) router.dismissAll();
+                router.navigate('/hogar/paseos');
+              },
+            }}
+            secundario={{
+              texto: t('checkout.exitoExplorarMas'),
+              onPress: () => {
+                if (router.canDismiss()) router.dismissAll();
+                router.navigate('/explorar');
+              },
+            }}
           />
-        </View>
+        </ScrollView>
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" atras titulo={t('checkout.titulo')} onAtras={() => router.back()} />
-      <PantallaConPie
-        contentContainerStyle={{ padding: spacing[4], gap: spacing[4], paddingBottom: insets.bottom + spacing[4] }}
-        pie={
-          <Boton
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`) + la hoja encima, con la curva ARRIBA.
+          ☠️ **Y muere el `PantallaConPie`**: su pie pasa al slot `pie` de la
+          hoja. *Las dos piezas reservan el alto medido del pie; montadas una
+          dentro de otra serían dos pies y dos reservas* — lo dice el contrato
+          de `HojaContenido`. El `insets.bottom` del relleno también se va: lo
+          paga la hoja (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        scroll={{ contentContainerStyle: { padding: spacing[4], gap: spacing[4], } }}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada" titulo={t('checkout.titulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        pie={<Boton
             variante="primario"
             bloque
             /* El sufijo «(simulado)» **sale del mismo mapa que la banda**: no
@@ -266,7 +296,7 @@ export default function CheckoutPlanPaseo() {
             metadataMono={`${dias.length}×/sem · ${texto('hora').slice(0, 5)}`}
           />
           <Separador />
-          <Celda titulo={t('checkout.total')} metadataMono={`$${precio.toFixed(2)}`} />
+          <Celda titulo={t('checkout.total')} metadataMono={formatearPrecio(precio)} />
         </Tarjeta>
 
         {/* ═══ 🔴 LOS TRES AVISOS — en esta pantalla, sin abrir nada más ═══ */}
@@ -320,7 +350,7 @@ export default function CheckoutPlanPaseo() {
         {simula('plan_paseo') ? <Texto variante="apoyo">{t('checkout.simuladoAviso')}</Texto> : null}
 
         {rebote !== null ? <Texto variante="cuerpo">{rebote}</Texto> : null}
-      </PantallaConPie>
+      </HojaContenido>
     </SafeAreaView>
   );
 }

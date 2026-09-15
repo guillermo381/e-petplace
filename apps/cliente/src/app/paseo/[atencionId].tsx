@@ -22,7 +22,7 @@
  * la voz de otro.
  */
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import {useCallback, useMemo, useRef, useState } from 'react';
 import { Platform, Pressable, RefreshControl, ScrollView, Text, View, useWindowDimensions, type LayoutChangeEvent } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
@@ -32,11 +32,12 @@ import { Image } from 'expo-image';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
+  Cabecera,
   AvatarMascota,
   Boton,
   CitaEnVivo,
   Cronometro,
-  Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -69,6 +70,7 @@ import { esMemorial } from '@/lib/memorial';
 import { destinoDeLaPuerta, veredictoDeLaPuerta } from '@/lib/postventa/puerta';
 import { useCasoDelObjeto } from '@/lib/postventa/useCasoDelObjeto';
 import { useVentanaDeCaso } from '@/lib/postventa/useVentanaDeCaso';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 function horaMono(iso: string | null): string {
   if (iso === null) return '--:--';
@@ -84,6 +86,7 @@ const SONDEO_MS = 30_000;
 const TICK_ETIQUETA_MS = 10_000;
 
 export default function DetallePaseo() {
+  const cabecera = useAltoDeCabecera('empujada');
   const router = useRouter();
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
@@ -308,7 +311,23 @@ export default function DetallePaseo() {
   if (detalle === 'cargando') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" titulo={t('atencion.titulo')} atras onAtras={() => router.back()} />
+        {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada" titulo={t('atencion.titulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+                presentacion="fondo"
+              />
+            </View>
+          }
+        >
         <View style={{ padding: spacing[5] }}>
           <EsqueletoGrupo etiqueta={t('atencion.cargando')}>
             <View style={{ gap: spacing[3] }}>
@@ -318,6 +337,7 @@ export default function DetallePaseo() {
             </View>
           </EsqueletoGrupo>
         </View>
+        </HojaContenido>
       </View>
     );
   }
@@ -326,7 +346,23 @@ export default function DetallePaseo() {
     const esError = detalle === 'error';
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" titulo={t('atencion.titulo')} atras onAtras={() => router.back()} />
+        {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada" titulo={t('atencion.titulo')} onVolver={() => router.back()} etiquetaVolver={t('comun.volver')}
+                presentacion="fondo"
+              />
+            </View>
+          }
+        >
         <View style={{ flex: 1, justifyContent: 'center', padding: spacing[5] }}>
           <EstadoVacio
             titulo={esError ? t('atencion.errorTitulo') : t('atencion.noEncontradoTitulo')}
@@ -347,6 +383,7 @@ export default function DetallePaseo() {
             }
           />
         </View>
+        </HojaContenido>
       </View>
     );
   }
@@ -760,27 +797,33 @@ export default function DetallePaseo() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
-        titulo={
-          detalle.iniciada_en !== null
-            ? t(esGrooming ? 'grooming.vivoTituloConFecha' : 'paseo.tituloConFecha', {
-                fecha: fechaLargaHumana(detalle.iniciada_en, idioma),
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={
+              detalle.iniciada_en !== null
+              ? t(esGrooming ? 'grooming.vivoTituloConFecha' : 'paseo.tituloConFecha', {
+              fecha: fechaLargaHumana(detalle.iniciada_en, idioma),
               })
-            : t(esGrooming ? 'grooming.vivoTitulo' : 'paseo.titulo')
-        }
-        atras
-        onAtras={() => router.back()}
-      />
-      <ScrollView
-        contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[4] }}
-        refreshControl={
-          // §7.4 — pull-to-refresh SOLO en la cara viva
-          enVivo ? (
-            <RefreshControl refreshing={refrescando} onRefresh={() => void recargar('pull')} tintColor={theme.text.secondary} />
-          ) : undefined
+              : t(esGrooming ? 'grooming.vivoTitulo' : 'paseo.titulo')
+              }
+              onVolver={() => router.back()}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
         }
       >
+      <View style={{ padding: spacing[5], gap: spacing[4] }}>
         {enVivo ? (
           <>
             {/* ══ CARA EN VIVO (§7.3) — el hero vivo: UNA CitaEnVivo por
@@ -956,7 +999,7 @@ export default function DetallePaseo() {
             />
           </View>
         )}
-      </ScrollView>
+      </View>
 
       <VisorFoto
         visible={visorAbierto}
@@ -965,6 +1008,7 @@ export default function DetallePaseo() {
         indiceInicial={fotoInicial}
         etiqueta={t(esGrooming ? 'grooming.fotosDeLaSesion' : 'paseo.fotosDelPaseo')}
       />
+      </HojaContenido>
     </View>
   );
 }

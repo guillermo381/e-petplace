@@ -31,6 +31,8 @@ export default function PaseoCheckout() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const params = useLocalSearchParams<{
+    /** ⭐ S116-C lote 13 — lo pide «Ver la cita» de la confirmación. */
+    mascotaId: string;
     citaId: string;
     expiraEn: string;
     precio: string;
@@ -65,6 +67,7 @@ export default function PaseoCheckout() {
   return (
     <CheckoutReserva
       citaId={typeof params.citaId === 'string' ? params.citaId : ''}
+      mascotaId={typeof params.mascotaId === 'string' ? params.mascotaId : ''}
       expiraEn={typeof params.expiraEn === 'string' ? params.expiraEn : ''}
       precio={Number(params.precio ?? 0)}
       prestadorNombre={typeof params.prestadorNombre === 'string' ? params.prestadorNombre : ''}
@@ -72,7 +75,6 @@ export default function PaseoCheckout() {
       fecha={typeof params.fecha === 'string' ? params.fecha : ''}
       hora={typeof params.hora === 'string' ? params.hora : ''}
       duracion={typeof params.duracion === 'string' ? params.duracion : ''}
-      exitoIcono="paseo"
       resumenEtiqueta={t('checkout.resumen')}
       exitoTitulo={t('checkout.exitoTitulo')}
       exitoDetalle={t('checkout.exitoDetalle')}

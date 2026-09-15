@@ -52,10 +52,11 @@ import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
   AvatarMascota,
   Boton,
   Celda,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -79,10 +80,11 @@ import {
   obtenerMisPlanesPaseo,
   obtenerPerfilesPublicos,
 } from '@epetplace/api';
-import { fechaLargaHumana, obtenerIdiomaActual } from '@epetplace/i18n';
+import { formatearPrecio, fechaLargaHumana, obtenerIdiomaActual } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
 import { hoyLocal } from '@/lib/corte-agenda';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 /**
  * El modelo NORMALIZADO. Cada sujeto recurrente se traduce a esto y el render
@@ -178,6 +180,7 @@ type Estado =
   | { fase: 'listo'; items: Item[]; pendientes: MesPendienteGuarderia[] };
 
 export default function Recurrentes() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { t } = useTraduccion();
   const { theme } = useTheme();
   const router = useRouter();
@@ -397,14 +400,29 @@ export default function Recurrentes() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
-        atras
-        titulo={t('recurrentes.titulo')}
-        onAtras={() => router.back()}
-      />
-      <ScrollView
-        contentContainerStyle={{ padding: spacing[5], gap: spacing[4], paddingBottom: insets.bottom + spacing[8] }}
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ El `paddingBottom` con `insets.bottom` que había acá SE RETIRA: lo
+          paga la hoja en su propio render, y sumarlo sería pagarlo dos veces
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={t('recurrentes.titulo')}
+              onVolver={() => router.back()}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        scroll={{ contentContainerStyle: { padding: spacing[5], gap: spacing[4], } }}
       >
         {estado.fase === 'cargando' ? (
           <EsqueletoGrupo>
@@ -448,7 +466,7 @@ export default function Recurrentes() {
                   <Celda
                     titulo={t('recurrentes.mesPorPagar')}
                     subtitulo={m.prestadorNombre.length > 0 ? m.prestadorNombre : undefined}
-                    metadataMono={t('recurrentes.alMes', { precio: m.monto.toFixed(2) })}
+                    metadataMono={t('recurrentes.alMes', { precio: formatearPrecio(m.monto) })}
                     interactiva
                     accessibilityRole="button"
                     onPress={() => router.push(`/pagos/mensualidad?suscripcionId=${m.suscripcionId}`)}
@@ -537,7 +555,7 @@ export default function Recurrentes() {
                   <Celda
                     titulo={it.titulo}
                     subtitulo={it.donde ?? undefined}
-                    metadataMono={t('recurrentes.alMes', { precio: it.precio.toFixed(2) })}
+                    metadataMono={t('recurrentes.alMes', { precio: formatearPrecio(it.precio) })}
                   />
                   <View style={{ paddingHorizontal: spacing[4], paddingBottom: spacing[3], gap: 2 }}>
                     {/* 🔴 Antes que nada: si el cobro no entró, **eso** es lo
@@ -633,7 +651,7 @@ export default function Recurrentes() {
           <Texto variante="seccion">{t('recurrentes.despensaTitulo')}</Texto>
           <Texto variante="apoyo">{t('recurrentes.despensaDetalle')}</Texto>
         </View>
-      </ScrollView>
+      </HojaContenido>
 
       {/* EL MODAL — está para que no se apague sin querer, **no para convencer
           de quedarse**: sin culpa, sin oferta de retención, sin letra chica. */}

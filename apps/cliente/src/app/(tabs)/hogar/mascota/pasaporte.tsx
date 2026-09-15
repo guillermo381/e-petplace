@@ -20,15 +20,16 @@
  * pantalla que existe para dar una URL y arranca pidiendo permiso para
  * dársela no está protegiendo nada.* Emitir es idempotente del lado del motor.
  */
-import { useCallback, useEffect, useState } from 'react';
+import {useCallback, useEffect, useState } from 'react';
 import { Modal, Pressable, Share, View } from 'react-native';
 import { Image } from 'expo-image';
 import { WebView } from 'react-native-webview';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
+  HojaContenido,
+  Cabecera,
   AccionesPasaporte,
   ConfiguracionPasaporte,
-  Encabezado,
   EsperaDeMarca,
   EsperaLarga,
   EstadoVacio,
@@ -50,6 +51,7 @@ import {
 } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
 import { esMemorial as mascotaEnMemorial } from '@/lib/memorial';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 const BASE = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
 /** 🔴 **LA PÁGINA VIVE EN EL SITIO, no en la edge.** La edge quedó con
@@ -59,6 +61,7 @@ const urlPublica = (token: string) => `https://www.epetplace.com/p/${token}`;
 const urlQrPng = (token: string) => `${BASE}/functions/v1/pasaporte/${token}.png`;
 
 export default function Pasaporte() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { t } = useTraduccion();
   const { theme } = useTheme();
   const router = useRouter();
@@ -183,13 +186,22 @@ export default function Pasaporte() {
             normal—; el tercero, el del QR a pantalla completa, sí lo tenía.
             *Un callejón no se ve como defecto: se ve como que la app se
             colgó.* */}
-      <Encabezado
-        variante="navegacion"
-        titulo={t('pasaporte.titulo')}
-        atras
-        onAtras={() => router.back()}
-      />
-        <EstadoVacio titulo={t('pasaporte.enMemoria', { nombre: m.nombre })} />
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada"
+                titulo={t('pasaporte.titulo')}
+                onVolver={() => router.back()}
+                etiquetaVolver={t('comun.volver')}
+                presentacion="fondo"
+              />
+            </View>
+          }
+        >
+          <EstadoVacio titulo={t('pasaporte.enMemoria', { nombre: m.nombre })} />
+        </HojaContenido>
       </View>
     );
   }
@@ -201,140 +213,149 @@ export default function Pasaporte() {
             normal—; el tercero, el del QR a pantalla completa, sí lo tenía.
             *Un callejón no se ve como defecto: se ve como que la app se
             colgó.* */}
-      <Encabezado
-        variante="navegacion"
-        titulo={t('pasaporte.titulo')}
-        atras
-        onAtras={() => router.back()}
-      />
-      <View style={{ padding: spacing[5], gap: spacing[5] }}>
-        {token === null ? (
-          /* ⭐ **S116-C lote 7 · la GENERACIÓN del pasaporte es espera larga.**
-             Acá el servidor firma un token y arma el QR; la pantalla no tiene
-             nada que ofrecer mientras tanto. *Es el mismo hecho que el carné y
-             que el pago, y por eso lleva la misma pieza.* */
-          <View style={{ height: 420 }}>
-            {/* Alto explícito: acá la espera vive DENTRO de un scroll, y una
-                pieza `flex: 1` adentro de un contenedor sin alto colapsa a
-                cero. *El número es de este montaje, no de la pieza.* */}
-            <EsperaLarga titulo={t('pasaporte.generandoTitulo')} apoyo={t('pasaporte.generandoApoyo')} />
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={t('pasaporte.titulo')}
+              onVolver={() => router.back()}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
           </View>
-        ) : (
-          <>
-            {/* 🔴 **EL QR SE TOCA Y SE AGRANDA.** Es lo que hace que OTRO
-                teléfono lo lea: un código chico, en una pantalla a medio
-                brillo, no escanea. *La acción no es decorativa — es la única
-                forma de que la chapita funcione antes de existir en metal.* */}
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('pasaporte.ampliarQr')}
-              onPress={() => setQrGrande(true)}
-            >
-            {/* 🔴 `enMemoria` pasa a ser OBLIGATORIA en la pieza (S114-B, orden
-                del founder): su default `false` era el guard apagado por
-                omisión, escrito en el tipo. **Acá la variable ya existía** —se
-                calcula arriba con la regla que la firma del 7-sep ratificó,
-                `&& !== 'perdida'`— así que la cura es pasarla.
-                ⚠️ **Cruce de territorio declarado y MÍNIMO:** el cambio de API
-                es de `packages/ui` (B) y esto es su única consecuencia en la
-                app; una prop, cero lógica nueva. *Se toca acá porque dejar el
-                árbol sin compilar para que otro escriba una palabra es peor que
-                escribirla.* */}
-            <TarjetaPasaporte
-              enMemoria={enMemoria}
-              nombre={m.nombre}
-              fotoUrl={foto}
-              especieYRaza={[m.especie, m.raza].filter((x) => x !== null && x !== '').join(' · ')}
-              sexoYEdad={m.sexo ?? ''}
-              chip={vis.chip && m.microchip !== null ? m.microchip : undefined}
-              etiquetaChip={t('perfil.microchip')}
-              /* Del SERVIDOR: la pieza no genera códigos y esta pantalla
-                 tampoco. Llega dibujado. */
-              qr={{ tipo: 'url', url: urlQrPng(token) }}
-              vozQr={t('pasaporte.vozQr', { nombre: m.nombre })}
-              estado={perdida ? { estado: 'perdida', desde: t('pasaporte.desdeHoy') } : { estado: 'activo' }}
-              vozPerdida={t('pasaporte.perdidaEnTarjeta')}
-            />
-            </Pressable>
+        }
+      >
+        <View style={{ padding: spacing[5], gap: spacing[5] }}>
+          {token === null ? (
+            /* ⭐ **S116-C lote 7 · la GENERACIÓN del pasaporte es espera larga.**
+               Acá el servidor firma un token y arma el QR; la pantalla no tiene
+               nada que ofrecer mientras tanto. *Es el mismo hecho que el carné y
+               que el pago, y por eso lleva la misma pieza.* */
+            <View style={{ height: 420 }}>
+              {/* Alto explícito: acá la espera vive DENTRO de un scroll, y una
+                  pieza `flex: 1` adentro de un contenedor sin alto colapsa a
+                  cero. *El número es de este montaje, no de la pieza.* */}
+              <EsperaLarga titulo={t('pasaporte.generandoTitulo')} apoyo={t('pasaporte.generandoApoyo')} />
+            </View>
+          ) : (
+            <>
+              {/* 🔴 **EL QR SE TOCA Y SE AGRANDA.** Es lo que hace que OTRO
+                  teléfono lo lea: un código chico, en una pantalla a medio
+                  brillo, no escanea. *La acción no es decorativa — es la única
+                  forma de que la chapita funcione antes de existir en metal.* */}
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('pasaporte.ampliarQr')}
+                onPress={() => setQrGrande(true)}
+              >
+              {/* 🔴 `enMemoria` pasa a ser OBLIGATORIA en la pieza (S114-B, orden
+                  del founder): su default `false` era el guard apagado por
+                  omisión, escrito en el tipo. **Acá la variable ya existía** —se
+                  calcula arriba con la regla que la firma del 7-sep ratificó,
+                  `&& !== 'perdida'`— así que la cura es pasarla.
+                  ⚠️ **Cruce de territorio declarado y MÍNIMO:** el cambio de API
+                  es de `packages/ui` (B) y esto es su única consecuencia en la
+                  app; una prop, cero lógica nueva. *Se toca acá porque dejar el
+                  árbol sin compilar para que otro escriba una palabra es peor que
+                  escribirla.* */}
+              <TarjetaPasaporte
+                enMemoria={enMemoria}
+                nombre={m.nombre}
+                fotoUrl={foto}
+                especieYRaza={[m.especie, m.raza].filter((x) => x !== null && x !== '').join(' · ')}
+                sexoYEdad={m.sexo ?? ''}
+                chip={vis.chip && m.microchip !== null ? m.microchip : undefined}
+                etiquetaChip={t('perfil.microchip')}
+                /* Del SERVIDOR: la pieza no genera códigos y esta pantalla
+                   tampoco. Llega dibujado. */
+                qr={{ tipo: 'url', url: urlQrPng(token) }}
+                vozQr={t('pasaporte.vozQr', { nombre: m.nombre })}
+                estado={perdida ? { estado: 'perdida', desde: t('pasaporte.desdeHoy') } : { estado: 'activo' }}
+                vozPerdida={t('pasaporte.perdidaEnTarjeta')}
+              />
+              </Pressable>
 
-            <AccionesPasaporte
-              /* ⭐ **«VER EL PASAPORTE», no «compartir enlace».** Compartir el
-                 enlace y compartir el QR eran **la misma cosa dos veces** —el
-                 QR *es* el enlace—, y ninguna de las dos dejaba a la familia
-                 ver lo que un extraño va a leer. *Configurar qué se muestra sin
-                 poder mirarlo es firmar a ciegas.* Abre la página real, la
-                 misma que sale del QR, dentro de la app. */
-              vozCompartir={t('pasaporte.verPasaporte')}
-              onCompartir={() => setViendo(true)}
-              vozDescargarQr={t('pasaporte.compartirQr')}
-              /* ⭐ **«COMPARTIR EL QR», no «descargar»** (firma del founder).
-                 Se manda **la imagen del servidor** al share del sistema, que
-                 es lo que ya ofrece WhatsApp, Gmail y guardar en Archivos **sin
-                 pedir un solo permiso**.
-
-                 ⚠️ **Y lo que este share NO hace, medido:** `Share` de RN sólo
-                 lleva texto y `url`; **`url` la respeta iOS y Android la
-                 ignora**. Para poner el ARCHIVO en la hoja del sistema —y que
-                 aparezca «Fotos»— hace falta `expo-sharing`, que **no está
-                 instalado** (medido) y **es nativo: no viaja por OTA**.
-                 ⇒ Hoy se comparte el enlace a la imagen, que abre y se guarda
-                 desde el navegador. *El archivo entra con la build, junto al
-                 permiso de galería y NFC* — anotado en `S113-NFC-BUILD.md`.
-
-                 🔴 **«Guardar en galería» no se dibuja**, y es la misma razón:
-                 sin el permiso nativo el botón existiría para fallar. *Un
-                 control que promete guardar y no puede es peor que su
-                 ausencia.* */
-              onDescargarQr={() =>
-                void Share.share({ message: urlQrPng(token), url: urlQrPng(token) })
-              }
-            />
-
-            <ConfiguracionPasaporte
-              visibilidad={vis}
-              onCambiar={guardarVisibilidad}
-              /* 🔴 La pieza pide **la CONSECUENCIA, no la descripción del
-                 campo** —*«quien encuentre a Thor va a ver tu teléfono»*— y
-                 tiene razón: un interruptor de privacidad que explica qué es el
-                 campo no ayuda a decidir; el que dice qué va a pasar, sí. Por
-                 eso el texto nombra a la mascota. */
-              opciones={{
-                contacto: { etiqueta: t('pasaporte.optContacto'), consecuencia: t('pasaporte.optContactoDetalle', { nombre: m.nombre }) },
-                salud: { etiqueta: t('pasaporte.optSalud'), consecuencia: t('pasaporte.optSaludDetalle', { nombre: m.nombre }) },
-                chip: { etiqueta: t('pasaporte.optChip'), consecuencia: t('pasaporte.optChipDetalle', { nombre: m.nombre }) },
-              }}
-            />
-
-            {/* C5 · revocar. **Va al final y con su consecuencia dicha**: la
-                placa impresa deja de funcionar, y eso no se descubre después. */}
-            <View style={{ gap: spacing[2] }}>
-              <Texto variante="apoyo">{t('pasaporte.revocarAviso')}</Texto>
               <AccionesPasaporte
-                vozCompartir={t('pasaporte.verComoLoVen')}
+                /* ⭐ **«VER EL PASAPORTE», no «compartir enlace».** Compartir el
+                   enlace y compartir el QR eran **la misma cosa dos veces** —el
+                   QR *es* el enlace—, y ninguna de las dos dejaba a la familia
+                   ver lo que un extraño va a leer. *Configurar qué se muestra sin
+                   poder mirarlo es firmar a ciegas.* Abre la página real, la
+                   misma que sale del QR, dentro de la app. */
+                vozCompartir={t('pasaporte.verPasaporte')}
                 onCompartir={() => setViendo(true)}
-                vozDescargarQr={t('pasaporte.emitirNuevo')}
-                onDescargarQr={() => {
-                  if (mascotaId === undefined || trabajando) return;
-                  setTrabajando(true);
-                  void revocarPasaporte(mascotaId).then(async (r) => {
-                    if (!r.ok) {
-                      setTrabajando(false);
-                      aviso.mostrar({ variante: 'error', texto: r.mensaje });
-                      return;
-                    }
-                    const e = await emitirPasaporte(mascotaId);
-                    setTrabajando(false);
-                    if (e.ok) {
-                      setToken(e.data.token);
-                      aviso.mostrar({ variante: 'exito', texto: t('pasaporte.emitido') });
-                    } else aviso.mostrar({ variante: 'error', texto: e.mensaje });
-                  });
+                vozDescargarQr={t('pasaporte.compartirQr')}
+                /* ⭐ **«COMPARTIR EL QR», no «descargar»** (firma del founder).
+                   Se manda **la imagen del servidor** al share del sistema, que
+                   es lo que ya ofrece WhatsApp, Gmail y guardar en Archivos **sin
+                   pedir un solo permiso**.
+
+                   ⚠️ **Y lo que este share NO hace, medido:** `Share` de RN sólo
+                   lleva texto y `url`; **`url` la respeta iOS y Android la
+                   ignora**. Para poner el ARCHIVO en la hoja del sistema —y que
+                   aparezca «Fotos»— hace falta `expo-sharing`, que **no está
+                   instalado** (medido) y **es nativo: no viaja por OTA**.
+                   ⇒ Hoy se comparte el enlace a la imagen, que abre y se guarda
+                   desde el navegador. *El archivo entra con la build, junto al
+                   permiso de galería y NFC* — anotado en `S113-NFC-BUILD.md`.
+
+                   🔴 **«Guardar en galería» no se dibuja**, y es la misma razón:
+                   sin el permiso nativo el botón existiría para fallar. *Un
+                   control que promete guardar y no puede es peor que su
+                   ausencia.* */
+                onDescargarQr={() =>
+                  void Share.share({ message: urlQrPng(token), url: urlQrPng(token) })
+                }
+              />
+
+              <ConfiguracionPasaporte
+                visibilidad={vis}
+                onCambiar={guardarVisibilidad}
+                /* 🔴 La pieza pide **la CONSECUENCIA, no la descripción del
+                   campo** —*«quien encuentre a Thor va a ver tu teléfono»*— y
+                   tiene razón: un interruptor de privacidad que explica qué es el
+                   campo no ayuda a decidir; el que dice qué va a pasar, sí. Por
+                   eso el texto nombra a la mascota. */
+                opciones={{
+                  contacto: { etiqueta: t('pasaporte.optContacto'), consecuencia: t('pasaporte.optContactoDetalle', { nombre: m.nombre }) },
+                  salud: { etiqueta: t('pasaporte.optSalud'), consecuencia: t('pasaporte.optSaludDetalle', { nombre: m.nombre }) },
+                  chip: { etiqueta: t('pasaporte.optChip'), consecuencia: t('pasaporte.optChipDetalle', { nombre: m.nombre }) },
                 }}
               />
-            </View>
-          </>
-        )}
-      </View>
+
+              {/* C5 · revocar. **Va al final y con su consecuencia dicha**: la
+                  placa impresa deja de funcionar, y eso no se descubre después. */}
+              <View style={{ gap: spacing[2] }}>
+                <Texto variante="apoyo">{t('pasaporte.revocarAviso')}</Texto>
+                <AccionesPasaporte
+                  vozCompartir={t('pasaporte.verComoLoVen')}
+                  onCompartir={() => setViendo(true)}
+                  vozDescargarQr={t('pasaporte.emitirNuevo')}
+                  onDescargarQr={() => {
+                    if (mascotaId === undefined || trabajando) return;
+                    setTrabajando(true);
+                    void revocarPasaporte(mascotaId).then(async (r) => {
+                      if (!r.ok) {
+                        setTrabajando(false);
+                        aviso.mostrar({ variante: 'error', texto: r.mensaje });
+                        return;
+                      }
+                      const e = await emitirPasaporte(mascotaId);
+                      setTrabajando(false);
+                      if (e.ok) {
+                        setToken(e.data.token);
+                        aviso.mostrar({ variante: 'exito', texto: t('pasaporte.emitido') });
+                      } else aviso.mostrar({ variante: 'error', texto: e.mensaje });
+                    });
+                  }}
+                />
+              </View>
+            </>
+          )}
+        </View>
+      </HojaContenido>
 
       {/* ⭐ **LA VISTA PREVIA: lo que ve un extraño, sin salir de la app.**
           Es la MISMA página que sale del QR —no una maqueta— porque *una vista
@@ -348,11 +369,19 @@ export default function Pasaporte() {
                 `atras` dibuja el chevron que esta app ya usa en todas sus
                 pantallas — *un control que la persona reconoce de memoria no
                 necesita que le expliquen qué hace, y no hay texto que recortar.* */}
-            <Encabezado
-              variante="navegacion"
+            {/* 🔴 **FONDO SÍ, HOJA NO — y es la única excepción del lote, con
+                su razón medida.** La cabecera-tarjeta muere igual (la curva
+                invertida no queda en ningún lado), pero *el contenido de este
+                Modal es un `WebView` a `flex: 1`*: montarlo dentro del scroll
+                de la hoja lo dejaría sin alto propio y colapsaría a cero. **No
+                es una pantalla de hoja: es una página completa** — la misma que
+                ve quien escanea el QR. */}
+            <Cabecera
+              variante="empujada"
               titulo={t('pasaporte.verPasaporte')}
-              atras
-              onAtras={() => setViendo(false)}
+              onVolver={() => setViendo(false)}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
             />
             <WebView source={{ uri: urlPublica(token) }} style={{ flex: 1 }} />
           </View>

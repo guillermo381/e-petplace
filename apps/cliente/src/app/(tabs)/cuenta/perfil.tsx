@@ -11,10 +11,11 @@ import { ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
   Boton,
   Campo,
   Celda,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -36,10 +37,12 @@ import {
 
 import { subirAvatar } from '@/lib/subir-avatar';
 import { useTraduccion } from '@/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 const DIAMETRO = 96;
 
 export default function PerfilCuenta() {
+  const cabecera = useAltoDeCabecera('empujada');
   const router = useRouter();
   const { theme } = useTheme();
   const { t } = useTraduccion();
@@ -133,7 +136,30 @@ export default function PerfilCuenta() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('cuenta.perfil')} atras onAtras={() => router.back()} />
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ **Los `ScrollView` verticales que había adentro se volvieron
+          `View`**: la hoja ya scrollea, y dos scrolls verticales anidados
+          dejan al de adentro sin alto propio. Su `contentContainerStyle` pasa
+          a `style` — *el relleno era del contenido, no del scroll.* El
+          `paddingBottom` con `insets.bottom` SE RETIRA: lo paga la hoja
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        scroll={{ keyboardShouldPersistTaps: 'handled' }}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada" titulo={t('cuenta.perfil')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+      >
 
       {estado === 'cargando' ? (
         <View style={{ padding: spacing[5] }}>
@@ -154,10 +180,7 @@ export default function PerfilCuenta() {
         </View>
       ) : (
         <EvitaTeclado>
-        <ScrollView
-          contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[2] }}
-          keyboardShouldPersistTaps="handled"
-        >
+        <View style={{ padding: spacing[5], gap: spacing[2] }}>
           {/* La foto: círculo con la inicial como estado sin-foto digno */}
           <View style={{ alignItems: 'center', gap: spacing[3], marginBottom: spacing[4] }}>
             {fotoUrl !== null && fotoNueva !== null ? (
@@ -200,7 +223,7 @@ export default function PerfilCuenta() {
             deshabilitado
           />
           <Boton etiqueta={t('cuenta.guardar')} bloque cargando={guardando} onPress={() => void guardar()} />
-        </ScrollView>
+        </View>
         </EvitaTeclado>
       )}
 
@@ -220,6 +243,7 @@ export default function PerfilCuenta() {
           />
         ) : null}
       </Hoja>
+      </HojaContenido>
     </View>
   );
 }

@@ -39,7 +39,8 @@ import { Linking, ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  Boton, Celda, Encabezado, EsperaLarga, EstadoVacio, Icono, Tarjeta, Texto,
+  HojaContenido,
+  Boton, Celda, Cabecera, EsperaLarga, EstadoVacio, Icono, Tarjeta, Texto,
   spacing, useAviso, useTheme,
 } from '@epetplace/ui';
 import {
@@ -60,7 +61,7 @@ import { useEsperaDeConfirmacion, type SujetoEnEspera } from '@/lib/pagos/espera
 import { SeccionMedioDePago, useMedioDePago } from '@/components/seccion-medio-de-pago';
 import { SeccionFacturacion, useFacturacion } from '@/components/seccion-facturacion';
 import { AvisoNoCargo } from '@/components/aviso-no-cargo';
-import { parsearPrecio } from '@epetplace/i18n';
+import { formatearPrecio, parsearPrecio } from '@epetplace/i18n';
 import { EsperaDeUna } from '@/components/espera-deuna';
 import { urlWhatsApp } from '@/lib/contacto';
 import { topeDeEspera, useEstadoDeUna } from '@/lib/pagos/deuna-estado';
@@ -69,8 +70,10 @@ import { CheckImagenes } from '@/components/check-imagenes';
 import { fechaLargaHumana, obtenerIdiomaActual } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 export default function CheckoutGuarderia() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { t } = useTraduccion();
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
@@ -697,11 +700,31 @@ export default function CheckoutGuarderia() {
   if (esPaquete || esMensual || holdDia === null) {
     return (
       <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" atras titulo={t('checkout.titulo')} onAtras={() => router.back()} />
-        <ScrollView
-          ref={scrollRef}
-          contentContainerStyle={{ padding: spacing[5], gap: spacing[4], paddingBottom: insets.bottom + spacing[8] }}
+        {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ **Los `ScrollView` verticales que había adentro se volvieron
+          `View`**: la hoja ya scrollea, y dos scrolls verticales anidados
+          dejan al de adentro sin alto propio. Su `contentContainerStyle` pasa
+          a `style` — *el relleno era del contenido, no del scroll.* El
+          `paddingBottom` con `insets.bottom` SE RETIRA: lo paga la hoja
+          (`R53`). */}
+        <HojaContenido
+          arranque={cabecera.arranque}
+          scrollRef={scrollRef}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada" titulo={t('checkout.titulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+                presentacion="fondo"
+              />
+            </View>
+          }
         >
+        <View style={{ padding: spacing[5], gap: spacing[4], }}>
           <Texto variante="seccion">{t('checkout.resumen')}</Texto>
           <Tarjeta relleno="ninguno">
             <Celda
@@ -735,7 +758,7 @@ export default function CheckoutGuarderia() {
               metadataMono={
                 esPaquete
                   ? precioPaquete.fase === 'listo'
-                    ? `$ ${precioPaquete.precio.toFixed(2)}`
+                    ? formatearPrecio(precioPaquete.precio)
                     : undefined
                   : texto('precio')
               }
@@ -801,7 +824,7 @@ export default function CheckoutGuarderia() {
           ) : null}
 
           {rebote !== null ? <Texto variante="cuerpo">{rebote}</Texto> : null}
-        </ScrollView>
+        </View>
         <View style={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[4] }}>
           <Boton
             variante="primario"
@@ -891,6 +914,7 @@ export default function CheckoutGuarderia() {
             onPress={() => void (esPaquete || esMensual ? pagar() : reservarElDia())}
           />
         </View>
+        </HojaContenido>
       </SafeAreaView>
     );
   }
@@ -898,6 +922,7 @@ export default function CheckoutGuarderia() {
   return (
     <CheckoutReserva
       citaId={holdDia.citaId}
+      mascotaId={texto('mascotaId')}
       expiraEn={holdDia.expiraEn}
       precio={holdDia.precio}
       prestadorNombre={texto('prestadorNombre')}
@@ -906,7 +931,6 @@ export default function CheckoutGuarderia() {
       /* Sin hora: la estadía ocupa el día entre las dos ventanas. */
       hora={t('checkoutGuarderia.sinHora')}
       duracion={t('checkoutGuarderia.duracion')}
-      exitoIcono="guarderia"
       resumenEtiqueta={t('checkout.resumen')}
       exitoTitulo={t('checkoutGuarderia.exitoTitulo')}
       exitoDetalle={t('checkoutGuarderia.exitoDetalle')}

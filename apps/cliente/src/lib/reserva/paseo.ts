@@ -273,6 +273,11 @@ export function useReservaPaseo(ctx: ContextoPaseo, alConflicto?: () => void) {
           fecha: r.data.fecha,
           hora: r.data.hora,
           duracion: String(p.duracion_minutos),
+          /* ⭐ **S116-C lote 13 · `mascotaId` VIAJA AL CHECKOUT.** Lo pide el
+             «Ver la cita» de la confirmación nueva: `/citas/[mascotaId]` es la
+             única puerta al detalle, y el checkout no lo tenía. *Ya estaba
+             acá — lo que faltaba era ponerlo en la URL.* */
+          mascotaId: mascotaId,
         },
       });
     },

@@ -41,10 +41,11 @@ import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import {
+  HojaContenido,
   Boton,
   Campo,
   Celda,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -63,6 +64,7 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 type Estado =
   | { fase: 'cargando' }
@@ -70,6 +72,7 @@ type Estado =
   | { fase: 'listo'; lista: RefugioEnBusqueda[] };
 
 export default function BuscarRefugios() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const [texto, setTexto] = useState('');
@@ -100,12 +103,32 @@ export default function BuscarRefugios() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <MarcaDeAgua />
-      <Encabezado
-        variante="navegacion"
-        titulo={t('buscarRefugios.titulo')}
-        atras
-        onAtras={() => (router.canGoBack() ? router.back() : router.replace('/adoptar'))}
-      />
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ **Los `ScrollView` verticales que había adentro se volvieron
+          `View`**: la hoja ya scrollea, y dos scrolls verticales anidados
+          dejan al de adentro sin alto propio. Su `contentContainerStyle` pasa
+          a `style` — *el relleno era del contenido, no del scroll.* El
+          `paddingBottom` con `insets.bottom` SE RETIRA: lo paga la hoja
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={t('buscarRefugios.titulo')}
+              onVolver={() => (router.canGoBack() ? router.back() : router.replace('/adoptar'))}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+      >
       <EvitaTeclado>
         <View style={{ padding: spacing[5], paddingBottom: spacing[3] }}>
           <Campo
@@ -116,7 +139,7 @@ export default function BuscarRefugios() {
           />
         </View>
 
-        <ScrollView contentContainerStyle={{ paddingHorizontal: spacing[5], paddingBottom: spacing[8] }}>
+        <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[8] }}>
           {estado.fase === 'cargando' ? (
             <EsqueletoGrupo>
               <Esqueleto alto={64} />
@@ -202,8 +225,9 @@ export default function BuscarRefugios() {
               ))}
             </Tarjeta>
           )}
-        </ScrollView>
+        </View>
       </EvitaTeclado>
+      </HojaContenido>
     </View>
   );
 }

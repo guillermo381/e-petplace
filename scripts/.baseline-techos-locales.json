@@ -1,8 +1,6 @@
 {
-  "baseline": 2,
-  "techos": [
-    "(tabs)/hogar/index.tsx",
-    "(tabs)/hogar/mascota/[mascotaId].tsx"
-  ],
-  "sembrado": "2026-09-15T03:04:52.288Z"
+  "baseline": 0,
+  "techos": [],
+  "sembrado": "2026-09-15T03:04:52.288Z",
+  "asentado": "2026-09-15 · S116-C lote 3b · D-1106: los dos techos propios pasaron a Cabecera.contenido"
 }

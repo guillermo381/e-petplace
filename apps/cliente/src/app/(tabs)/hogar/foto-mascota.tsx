@@ -17,9 +17,10 @@ import { Image as ImagenRN, ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
   AvatarMascota,
   Boton,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   Texto,
@@ -36,6 +37,7 @@ import { ENCUADRE_DEFAULT, clampEncuadre, type DimFoto, type Encuadre } from '@/
 import { subirAvatar } from '@/lib/subir-avatar';
 import { useTraduccion } from '@/i18n';
 import { urlGenericaDeEspecie } from '@/lib/cara-mascota';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 type FotoVigente =
   | { t: 'cargando' }
@@ -44,6 +46,7 @@ type FotoVigente =
   | { t: 'error'; mensaje: string };
 
 export default function FotoMascota() {
+  const cabecera = useAltoDeCabecera('empujada');
   const router = useRouter();
   const { theme } = useTheme();
   const { t } = useTraduccion();
@@ -167,15 +170,29 @@ export default function FotoMascota() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
-        titulo={t('fotoEncuadre.tituloEditar', { nombre })}
-        atras
-        onAtras={() => router.back()}
-      />
-      <ScrollView
-        scrollEnabled={!gestoActivo}
-        contentContainerStyle={{ padding: spacing[5], paddingTop: spacing[5], paddingBottom: insets.bottom + spacing[8], gap: spacing[5] }}
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ El `paddingBottom` con `insets.bottom` que había acá SE RETIRA: lo
+          paga la hoja en su propio render, y sumarlo sería pagarlo dos veces
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={t('fotoEncuadre.tituloEditar', { nombre })}
+              onVolver={() => router.back()}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        scroll={{ scrollEnabled: !gestoActivo, contentContainerStyle: { padding: spacing[5], paddingTop: spacing[5], gap: spacing[5] } }}
       >
         {vigente.t === 'cargando' && fotoNueva === null ? (
           <EsqueletoGrupo etiqueta={t('hogar.cargando')}>
@@ -249,7 +266,7 @@ export default function FotoMascota() {
         {editorUri !== null ? (
           <Boton etiqueta={t('fotoEncuadre.listo')} bloque cargando={guardando} onPress={() => void guardar()} />
         ) : null}
-      </ScrollView>
+      </HojaContenido>
 
       <HojaFotoMascota
         visible={hojaAbierta}

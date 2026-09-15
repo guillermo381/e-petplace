@@ -38,7 +38,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Linking } from 'react-native';
 import {
-  Encabezado,
+  HojaContenido,
+  Cabecera,
   HojaTraerPapeles,
   Hoja,
   PantallaDocumentos,
@@ -65,8 +66,10 @@ import {
 import { abrirReceta, resolverDescarga, type Descarga } from '@/lib/descarga-papel';
 import { useTraerPapeles } from '@/components/traer-papeles';
 import { useTraduccion } from '@/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 export default function RutaDocumentos() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { mascotaId, nombre, memorial } = useLocalSearchParams<{
     mascotaId: string;
     nombre?: string;
@@ -198,12 +201,32 @@ export default function RutaDocumentos() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Encabezado
-        variante="navegacion"
-        titulo={t('documentos.titulo')}
-        atras
-        onAtras={() => router.back()}
-      />
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ **Los `ScrollView` verticales que había adentro se volvieron
+          `View`**: la hoja ya scrollea, y dos scrolls verticales anidados
+          dejan al de adentro sin alto propio. Su `contentContainerStyle` pasa
+          a `style` — *el relleno era del contenido, no del scroll.* El
+          `paddingBottom` con `insets.bottom` SE RETIRA: lo paga la hoja
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={t('documentos.titulo')}
+              onVolver={() => router.back()}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+      >
       {/* ⭐ **LA PIEZA DE B, con la bóveda viva** (fase 3 · C2).
           Acá vivía una composición propia con dos secciones a mano. *La pieza
           hace lo mismo y además agrupa, oculta los grupos vacíos y trae su
@@ -270,6 +293,7 @@ export default function RutaDocumentos() {
           ))}
         </Tarjeta>
       </Hoja>
+      </HojaContenido>
     </View>
   );
 }

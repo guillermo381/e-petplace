@@ -42,14 +42,15 @@
  * mejor que la familia hasta que tenga con qué.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import {useCallback, useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
+  HojaContenido,
+  Cabecera,
   Boton,
   Campo,
-  Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -70,6 +71,7 @@ import {
 
 import { useTraduccion } from '@/i18n';
 import { codigoParaElMotor, motivosParaLaPantalla, pideContar } from '@/lib/postventa/motivos';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 type Fase<T> = T | 'cargando' | 'error';
 
@@ -103,6 +105,7 @@ function esObjeto(v: unknown): v is ObjetoPostventa {
 }
 
 export default function PostventaMotivo() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
@@ -205,12 +208,26 @@ export default function PostventaMotivo() {
   if (motivos === 'cargando') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado
-          variante="navegacion"
-          titulo={t('postventa.tituloMotivo')}
-          atras
-          onAtras={() => router.back()}
-        />
+        {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada"
+                titulo={t('postventa.tituloMotivo')}
+                onVolver={() => router.back()}
+                etiquetaVolver={t('comun.volver')}
+                presentacion="fondo"
+              />
+            </View>
+          }
+        >
         <View style={{ padding: spacing[5] }}>
           <EsqueletoGrupo>
             <Esqueleto alto={44} />
@@ -218,6 +235,7 @@ export default function PostventaMotivo() {
             <Esqueleto alto={44} />
           </EsqueletoGrupo>
         </View>
+        </HojaContenido>
       </View>
     );
   }
@@ -226,34 +244,59 @@ export default function PostventaMotivo() {
   if (motivos === 'error' || preparados === null) {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado
-          variante="navegacion"
-          titulo={t('postventa.tituloMotivo')}
-          atras
-          onAtras={() => router.back()}
-        />
+        {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada"
+                titulo={t('postventa.tituloMotivo')}
+                onVolver={() => router.back()}
+                etiquetaVolver={t('comun.volver')}
+                presentacion="fondo"
+              />
+            </View>
+          }
+        >
         <EstadoVacio titulo={t('postventa.errorCatalogo')} />
+        </HojaContenido>
       </View>
     );
   }
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-          variante="navegacion"
-          titulo={t('postventa.tituloMotivo')}
-          atras
-          onAtras={() => router.back()}
-        />
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={t('postventa.tituloMotivo')}
+              onVolver={() => router.back()}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+      >
       <EvitaTeclado>
-        <ScrollView
-          contentContainerStyle={{
+        <View style={{
             padding: spacing[5],
-            paddingBottom: insets.bottom + spacing[6],
             gap: spacing[4],
-          }}
-          keyboardShouldPersistTaps="handled"
-        >
+          }}>
           {confirmando ? (
             /* ══ §2 · LA CONFIRMACIÓN — «Nada se crea sin mi sí» ═══════════ */
             <Tarjeta>
@@ -340,8 +383,9 @@ export default function PostventaMotivo() {
               )}
             </>
           )}
-        </ScrollView>
+        </View>
       </EvitaTeclado>
+      </HojaContenido>
     </View>
   );
 }

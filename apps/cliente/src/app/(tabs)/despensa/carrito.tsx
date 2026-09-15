@@ -38,14 +38,14 @@ import { useCallback, useMemo, useState } from 'react';
 import { View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import {
+  HojaContenido,
   Boton,
   Celda,
-  Encabezado,
+  Cabecera,
   Hoja,
   EstadoVacio,
   SelectorDestinoItem,
   Separador,
-  PantallaConPie,
   StepperCantidad,
   Texto,
   spacing,
@@ -79,6 +79,8 @@ import {
 import { decidirTope } from '@/lib/despensa/tope-de-compra';
 import { useTraduccion } from '@/i18n';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
+import { formatearPrecio } from '@epetplace/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 /** Tres fases, jamás dos (L-218: `[]` es TRES situaciones distintas —
  *  cargando, error y de verdad no hay — y decidir con `length === 0`
@@ -86,6 +88,7 @@ import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 type Fase<T> = T | 'cargando' | 'error';
 
 export default function DespensaCarrito() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
@@ -352,14 +355,54 @@ export default function DespensaCarrito() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
-        titulo={t('despensa.carritoTitulo')}
-        atras
-        onAtras={() => router.back()}
-      />
-
-      {items.length === 0 ? (
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela + hoja.
+          ☠️ **Y muere el `PantallaConPie`**: su pie pasa al slot `pie` de la
+          hoja. *Las dos piezas reservan el alto medido del pie; una dentro de
+          otra serían dos pies y dos reservas* — lo dice el contrato de
+          `HojaContenido`.
+          ⚠️ **El pie sigue siendo CONDICIONAL**: con el carrito vacío no hay
+          nada que confirmar. *Un CTA sobre una pantalla sin ítems no está
+          apagado: está de más.* */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        scroll={{ contentContainerStyle: { paddingTop: spacing[4], gap: spacing[5] } }}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={t('despensa.carritoTitulo')}
+              onVolver={() => router.back()}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        pie={
+          items.length === 0 ? undefined : (
+              /* ⚠️ FRAGMENTO, NO `View` — `PantallaConPie` lleva
+                 `pointerEvents="box-none"` y cubre UNA capa: un `View` propio acá
+                 reabre la zona muerta de gesto del tercio inferior (R54, aviso de
+                 B con el caso). */
+              <>
+                {/* El CTA apagado DICE QUÉ FALTA (S73-B), igual que en la ficha. */}
+                {/* Sin `{{n}}`: la casa no tiene convención de plural (cero
+                    `_one`/`_other` en los diccionarios) y cada ítem afectado ya
+                    se nombra arriba. *Un contador acá obligaría a elegir entre
+                    «1 productos» y una regla de plural que el riel no tiene.* */}
+                {bloqueados > 0 ? (
+                  <Texto variante="apoyo">{t('despensa.faltaSacarNoDisponibles')}</Texto>
+                ) : null}
+                <Boton
+                  etiqueta={t('despensa.continuar')}
+                  bloque
+                  deshabilitado={bloqueados > 0}
+                  onPress={() => router.push('/despensa/checkout')}
+                />
+              </>
+          )
+        }
+      >
+        {items.length === 0 ? (
         <EstadoVacio
           titulo={t('despensa.carritoVacioTitulo')}
           descripcion={t('despensa.carritoVacioDetalle')}
@@ -371,41 +414,8 @@ export default function DespensaCarrito() {
             />
           }
         />
-      ) : (
-        /* 🔴 H-105 · EL PIE RESERVA SU PROPIO LUGAR (pieza de B, S100b).
-           ☠️ Acá vivía `paddingBottom: insets.bottom + spacing[8] + 120`. Ese
-           120 era una ESTIMACIÓN del alto del pie, y B lo midió en el aparato:
-           el aviso del total quedaba **9.6 dp debajo del CTA**, inalcanzable.
-           La cura no fue elegir mejor el número: es que ya no hay número. El
-           pie se mide a sí mismo y esa misma medida reserva el scroll — dos
-           cuentas que debían coincidir pasaron a ser una.
-           Y el `insets.bottom` también se fue: vive adentro de la pieza (Ley 8,
-           precedente `Hoja` S65). */
-        <PantallaConPie
-          contentContainerStyle={{ paddingTop: spacing[4], gap: spacing[5] }}
-          pie={
-            /* ⚠️ FRAGMENTO, NO `View` — `PantallaConPie` lleva
-               `pointerEvents="box-none"` y cubre UNA capa: un `View` propio acá
-               reabre la zona muerta de gesto del tercio inferior (R54, aviso de
-               B con el caso). */
-            <>
-              {/* El CTA apagado DICE QUÉ FALTA (S73-B), igual que en la ficha. */}
-              {/* Sin `{{n}}`: la casa no tiene convención de plural (cero
-                  `_one`/`_other` en los diccionarios) y cada ítem afectado ya
-                  se nombra arriba. *Un contador acá obligaría a elegir entre
-                  «1 productos» y una regla de plural que el riel no tiene.* */}
-              {bloqueados > 0 ? (
-                <Texto variante="apoyo">{t('despensa.faltaSacarNoDisponibles')}</Texto>
-              ) : null}
-              <Boton
-                etiqueta={t('despensa.continuar')}
-                bloque
-                deshabilitado={bloqueados > 0}
-                onPress={() => router.push('/despensa/checkout')}
-              />
-            </>
-          }
-        >
+        ) : (
+        <>
             {items.map((item, i) => (
               <View key={item.oferta_id} style={{ gap: spacing[3] }}>
                 {i > 0 ? <Separador /> : null}
@@ -415,7 +425,7 @@ export default function DespensaCarrito() {
                   subtitulo={[item.marca, item.presentacion]
                     .filter((x) => x !== null && x !== '')
                     .join(' · ')}
-                  metadataMono={`$ ${item.precio.toFixed(2)}`}
+                  metadataMono={formatearPrecio(item.precio)}
                 />
 
                 {/* 🔴 A-01 · LO QUE LE PASÓ A ESTE ÍTEM MIENTRAS ESTABA GUARDADO.
@@ -439,7 +449,7 @@ export default function DespensaCarrito() {
                   <View style={{ paddingHorizontal: spacing[5] }}>
                     <Texto variante="apoyo">
                       {t('despensa.itemPrecioCambio', {
-                        precio: `$ ${(precioNuevoDe(item) ?? 0).toFixed(2)}`,
+                        precio: formatearPrecio((precioNuevoDe(item) ?? 0)),
                       })}
                     </Texto>
                   </View>
@@ -589,8 +599,9 @@ export default function DespensaCarrito() {
             <View style={{ paddingHorizontal: spacing[5] }}>
               <Texto variante="apoyo">{t('despensa.totalLoDiceElMotor')}</Texto>
             </View>
-        </PantallaConPie>
-      )}
+        </>
+        )}
+      </HojaContenido>
 
       {/* G-09 · LO QUE LA «i» ABRE. El texto es el MISMO de siempre y no se
           recortó al mudarlo: los dos límites de §6.4 —la donación jamás entra a

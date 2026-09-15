@@ -41,11 +41,12 @@ import { Linking, ScrollView, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { GLIFO_NODO } from '@/lib/despensa/escalera';
 import {
+  HojaContenido,
   Boton,
   Celda,
   CeldaNavegacion,
   CodigoAEscala,
-  Encabezado,
+  Cabecera,
   EscaleraEstados,
   Esqueleto,
   EsqueletoGrupo,
@@ -77,7 +78,7 @@ import {
   type LineaDePedido,
   type MascotaResumen,
 } from '@epetplace/api';
-import { fechaLargaHumana } from '@epetplace/i18n';
+import { formatearPrecio, fechaLargaHumana } from '@epetplace/i18n';
 
 import { cierreDelPedido } from '@/lib/postventa/cierre-del-pedido';
 import { destinoDeLaPuerta, veredictoDeLaPuerta } from '@/lib/postventa/puerta';
@@ -89,10 +90,12 @@ import { ventanaVencida } from '@/lib/despensa/ventana';
 import { CelebracionEntrega } from '@/components/celebracion-entrega';
 import { urlWhatsApp, WHATSAPP_EQUIPO_HUMANO } from '@/lib/contacto';
 import { useTraduccion } from '@/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 type Fase<T> = T | 'cargando' | 'error';
 
 export default function DespensaPedido() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const { mostrar } = useAviso();
@@ -307,15 +310,29 @@ export default function DespensaPedido() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
-        titulo={t('despensa.pedidoTitulo')}
-        atras
-        onAtras={() => router.back()}
-      />
-
-      <ScrollView
-        contentContainerStyle={{
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ El `paddingBottom` con `insets.bottom` que había acá SE RETIRA: lo
+          paga la hoja en su propio render, y sumarlo sería pagarlo dos veces
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={t('despensa.pedidoTitulo')}
+              onVolver={() => router.back()}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        scroll={{ contentContainerStyle: {
           paddingTop: spacing[4],
           // 🔴 SIN `insets.bottom`, y es CONCESIÓN MEDIDA, no gusto.
           // B midió que **el navegador ya acota**: el `ScrollView` de una
@@ -328,7 +345,7 @@ export default function DespensaPedido() {
           // pantallas — dos reglas para lo mismo divergen.
           paddingBottom: spacing[8],
           gap: spacing[5],
-        }}
+        } }}
       >
         {detalle === 'cargando' ? (
           <EsqueletoGrupo>
@@ -685,7 +702,7 @@ export default function DespensaPedido() {
                       ]
                         .filter((x): x is string => x !== null)
                         .join(' · ')}
-                      metadataMono={`$ ${linea.subtotal.toFixed(2)}`}
+                      metadataMono={formatearPrecio(linea.subtotal)}
                     />
                     {/* §4 — el ítem sin destino se ata cuando el dueño quiera. */}
                     {destino === null && elegibles.length > 0 ? (
@@ -748,18 +765,18 @@ export default function DespensaPedido() {
             <Tarjeta relleno="amplio">
             <View style={{ gap: spacing[2] }}>
               <Texto variante="seccion">{t('despensa.resumen')}</Texto>
-              <FilaMonto etiqueta={t('despensa.subtotal')} monto={`$ ${detalle.subtotal.toFixed(2)}`} />
-              <FilaMonto etiqueta={t('despensa.impuesto')} monto={`$ ${detalle.impuesto_total.toFixed(2)}`} />
+              <FilaMonto etiqueta={t('despensa.subtotal')} monto={formatearPrecio(detalle.subtotal)} />
+              <FilaMonto etiqueta={t('despensa.impuesto')} monto={formatearPrecio(detalle.impuesto_total)} />
               <FilaMonto
                 etiqueta={
                   detalle.pedido.metodo_entrega === 'retiro'
                     ? t('despensa.envioRetiro')
                     : t('despensa.envio')
                 }
-                monto={`$ ${detalle.costo_envio.toFixed(2)}`}
+                monto={formatearPrecio(detalle.costo_envio)}
               />
               <Separador />
-              <FilaMonto etiqueta={t('despensa.total')} monto={`$ ${detalle.pedido.total.toFixed(2)}`} destacada />
+              <FilaMonto etiqueta={t('despensa.total')} monto={formatearPrecio(detalle.pedido.total)} destacada />
 
               {/* 🔴 S100c-D · LA FACTURA — el founder la pidió como acceso de
                   la casa de Pedidos, y **vive acá y no en una casa aparte**
@@ -881,7 +898,7 @@ export default function DespensaPedido() {
             )}
           </>
         )}
-      </ScrollView>
+      </HojaContenido>
 
       {/* La confirmación de cancelar — una decisión con consecuencias
           viste de Hoja, no de toque accidental. */}
