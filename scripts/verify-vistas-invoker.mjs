@@ -29,6 +29,44 @@ import { execFileSync } from 'node:child_process'
 
 const FORMAS = ['security_invoker=true', 'security_invoker=on']
 
+/* ═══════════════════════════════════════════════════════════════════════════
+ * ⚖️ LAS DOS EXENTAS — FIRMA DE LA MESA, 15-sep-2026, CON SU MEDICIÓN AL LADO
+ *
+ * 🔴 **LA VISTA ES EL PERMISO, y por eso acá la regla se da vuelta.** Estas dos
+ * existen para exponer **MENOS** que su tabla: `prestadores` tiene 41 columnas
+ * —teléfono, dirección exacta, lat/lon, datos de cuenta— con su RLS cerrada a
+ * propósito desde S84/S91, y `v_prestadores_publicos` publica una proyección
+ * curada (zona aproximada en vez de coordenadas, sin contacto). **La vista no
+ * atraviesa la RLS por descuido: es la única puerta que la casa quiso abrir.**
+ *
+ * ⚠️ **LA MEDICIÓN, que es la razón de que esto esté escrito acá y no en un
+ * acta:** el 15-sep se «curó» este rojo poniéndoles `security_invoker = on`, y
+ * **el gate se puso VERDE mientras la app se moría**. Con una sesión real:
+ *
+ *     GET /rest/v1/v_prestadores_publicos → 403
+ *     {"code":"42501","message":"permission denied for table prestadores"}
+ *
+ * ⇒ **«Cerca de ti» quedaba VACÍO para todo el mundo.** Se revirtió
+ * (`20260915200000`). *La cura que este gate propone, sobre estas dos, rompe
+ * producción — y nada de lo que el gate mide puede verlo.*
+ *
+ * ⇒ **Por eso la exención va POR NOMBRE y con el 403 escrito:** para que quien
+ * las vea en rojo no las «arregle» sin medir. *Una exención sin su razón es una
+ * regla más floja; con la razón es una regla que aprendió algo.*
+ *
+ * ⚠️ **ALCANCE: SÓLO ESTAS DOS.** Las demás vistas sin invoker de este proyecto
+ * —`v_gmv_mensual`, `v_metricas_tiempo_real`, `v_motivos_resueltos`— **NO están
+ * exentas y siguen en rojo**: son de otro dominio, nadie midió qué pasa si se
+ * las cura, y *eximir de paso lo que no se midió es cómo un gate de seguridad
+ * se vacía sin que nadie lo decida.*
+ * ═══════════════════════════════════════════════════════════════════════════ */
+const EXENTAS = new Map([
+  ['v_prestadores_publicos',
+   'la vista ES el permiso: `prestadores` está cerrada por RLS y esto publica su proyección curada. Con invoker → 403 permission denied y «Cerca de ti» vacío (medido 15-sep, revertido en 20260915200000).'],
+  ['v_vitrina_publicada',
+   'misma clase: publica la vitrina de despensa sobre tablas cerradas. Firma de la mesa 15-sep-2026.'],
+])
+
 function sql(texto) {
   const salida = execFileSync('npx',
     ['--yes', 'supabase', '--experimental', 'db', 'query', '--linked', '--file', '/dev/stdin'],
@@ -75,10 +113,35 @@ if (filas.length === 0) {
   process.exit(2)
 }
 
-const malas = filas.filter((f) => !f.opts.split('|').some((o) => FORMAS.includes(o)))
-console.log(`verify:vistas-invoker · ${filas.length} vista(s) en public · ${malas.length} sin security_invoker`)
+const sinOpcion = filas.filter((f) => !f.opts.split('|').some((o) => FORMAS.includes(o)))
+const malas = sinOpcion.filter((f) => !EXENTAS.has(f.vista))
+const exentas = sinOpcion.filter((f) => EXENTAS.has(f.vista))
+
+console.log(`verify:vistas-invoker · ${filas.length} vista(s) en public · ${sinOpcion.length} sin security_invoker · ${exentas.length} exenta(s) por firma`)
+
+/* Las exentas se IMPRIMEN, no se callan: una exención invisible es una regla
+   que dejó de existir sin que nadie lo note. */
+for (const e of exentas) {
+  console.log(`  ⚖️ ${e.vista} — EXENTA por firma de la mesa (15-sep-2026)`)
+  console.log(`     ${EXENTAS.get(e.vista)}`)
+}
+
+/* 🔴 Y la exención se VERIFICA en la otra dirección: si una exenta apareciera
+   CON invoker, alguien la «arregló» y la app está rota ahora mismo. El gate lo
+   dice en vez de callarse por estar en su lista. */
+const rotas = filas.filter((f) => EXENTAS.has(f.vista) && f.opts.split('|').some((o) => FORMAS.includes(o)))
+for (const r of rotas) {
+  console.log(`  ✗ ${r.vista} TIENE security_invoker, y está EXENTA: alguien la «curó».`)
+  console.log(`     ${EXENTAS.get(r.vista)}`)
+}
+
 for (const m of malas) {
   console.log(`  ✗ ${m.vista}${m.anon ? '   🔴 y anon TIENE SELECT' : ''}`)
+}
+if (rotas.length > 0) {
+  console.log('\n✗ Una vista EXENTA quedó con `security_invoker`: la vitrina está devolviendo 403.')
+  console.log('  Cura: ALTER VIEW <nombre> RESET (security_invoker);')
+  process.exit(1)
 }
 if (malas.length > 0) {
   console.log('\n✗ Una vista sin `security_invoker` corre como su dueño y atraviesa la RLS.')
