@@ -414,41 +414,27 @@ export default function Login() {
           </View>
         </HojaContenido>
       </EvitaTeclado>
-      {/* ⭐ **S116-C lote 10 · LA ONDA SALE DE LA HOJA — recorrido 4 del
-          founder: *«va FUERA de la hoja: montala en la raíz de la pantalla,
-          hermana de la hoja, no dentro de su pie ni de ningún contenedor con
-          relleno»*.
+      {/* ⭐ **S116-C lote 11 · LA ONDA SE MONTA PELADA — mi envoltorio MUERE.**
 
-          🔴 **LO QUE EL SLOT DE PIE LE HACÍA, medido en `PieFijo:135`:** con
-          `material='lienzo'` (el default) el pie envuelve a su hijo en
-          `paddingHorizontal: spacing[5]` + `paddingTop` + `paddingBottom` **y
-          un `backgroundColor: theme.bg.base`**. ⇒ la onda quedaba **metida
-          20 dp hacia adentro por cada lado y con una franja de lienzo detrás**:
-          *el magenta no llegaba al filo de la pantalla, que es exactamente lo
-          que la pieza dice que tiene que hacer* («el magenta tiene que llegar
-          al filo… lo que no puede quedar debajo de la barra es el CONTENIDO»,
-          `OndaAcceso:185`).
+          ⏪ En el lote 10 la saqué del slot `pie` y la colgué de un `View`
+          absoluto propio, con su `R53-DECLARADO` al lado. **B se llevó esa
+          geometría ADENTRO de la pieza en su lote 13** — `position:'absolute'`,
+          `bottom:0`, ancho de PANTALLA por `useWindowDimensions`, `zIndex: 2`,
+          cero margen y cero radio — y con eso mi envoltorio deja de ayudar y
+          pasa a estorbar: **un absoluto se ancla al padding box de su padre**,
+          así que la onda quedaría anclada a mi `View` (alto 0) en vez de a la
+          pantalla, que es justo el defecto que la mudanza vino a matar.
 
-          ⏪ **Y esto REVIERTE mi lote 3i, que la había movido al pie.** Lo
-          digo entero porque entonces escribí que con eso *«muere mi excepción
-          de R53»*: la excepción vuelve, y vuelve **declarada**. La razón por
-          la que R53 existe —*un consumidor que TECLEA el alto de un pie*— **no
-          aplica acá**: el número es `ALTO_ONDA_ACCESO`, la constante que la
-          propia pieza exporta para esto. *Lo que R53 mató fue un `96`
-          tecleado; esto es el alto que la pieza publica.*
+          🔴 **Y muere también mi excepción de `R53`, esta vez de verdad**: ya no
+          hay ningún `position:'absolute' + bottom:0` escrito por esta pantalla.
+          *Lo escribí dos veces — en el 3i y en el 10 — y las dos fue falso; lo
+          que faltaba no era mi declaración: era que la pieza se plantara sola.*
 
-          ⚠️ **Va FUERA de `EvitaTeclado` a propósito**: es decoración, no un
-          control. Con el teclado arriba se queda en el borde de la pantalla y
-          el teclado la tapa — *subirla con el teclado le robaría al formulario
-          los 156 dp que la persona necesita justo cuando está escribiendo*.
-
-          R53-DECLARADO: no es un pie de controles sino una banda decorativa
-          que TIENE que sangrar hasta el filo, y su reserva no es una
-          estimación: es `ALTO_ONDA_ACCESO`, el alto que la propia pieza
-          exporta. Nada tocable vive debajo de ella. */}
-      <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }} pointerEvents="none">
-        <OndaAcceso frase={[t('login.ondaA'), t('login.ondaB')]} lado="der" />
-      </View>
+          ⚠️ **Lo que SÍ sigue siendo mío es la RESERVA**, y B la volvió
+          obligatoria al no ocupar lugar en el flujo: el `paddingBottom` de
+          `ALTO_ONDA_ACCESO` de arriba es lo único que deja «Entrar» y el botón
+          de Google enteros sobre la ola. */}
+      <OndaAcceso frase={[t('login.ondaA'), t('login.ondaB')]} lado="der" />
 
 
       {/* §5 · LA LLEGADA — la huella se completa una vez, sobre el tapiz.
