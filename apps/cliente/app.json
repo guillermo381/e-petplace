@@ -50,6 +50,7 @@
     },
     "plugins": [
       "expo-router",
+      "./plugins/with-barra-sin-velo",
       [
         "expo-notifications",
         {
