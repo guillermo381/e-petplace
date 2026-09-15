@@ -50,6 +50,7 @@ import {
   GAP_ETIQUETA,
   TAMANO_ETIQUETA,
   ALTO_CAJA_CAMPO_V5,
+  ALTO_INTERIOR_CAMPO_V5,
   ALTO_ETIQUETA_FLOTANTE,
   TAMANO_ETIQUETA_FLOTANTE,
   DISCO_GLIFO_CAMPO,
@@ -586,7 +587,23 @@ export function Campo({
 
             `minWidth: 0` se queda igual, con su propio trabajo: sin él un
             rótulo largo empuja al ojo fuera de la caja en vez de truncarse. */}
-        <View style={{ flex: 1, minWidth: 0, minHeight: ALTO_LINEA, justifyContent: 'center' }}>
+        <View
+          style={{
+            flex: 1,
+            minWidth: 0,
+            /* 🔴 **ALTO EXPLÍCITO EN v5 — los dos renglones por CONSTRUCCIÓN.**
+               38 = etiqueta flotada (14) + línea de entrada (24). *Con el alto
+               fijo en la suma de sus dos hijos no hay nada que `center`
+               reparta, así que la etiqueta no puede comerle lugar al valor
+               pase lo que pase.* ⏪ Acá había un `minHeight` de una sola línea
+               y eso dejaba la decisión al reparto — que es de donde salió el
+               defecto que el founder vio. */
+            ...(v5
+              ? { height: multilinea ? undefined : ALTO_INTERIOR_CAMPO_V5 }
+              : { minHeight: ALTO_LINEA }),
+            justifyContent: 'center',
+          }}
+        >
         {flotando ? <EtiquetaFlotante label={label} flotando /> : null}
 
         <TextInput
@@ -632,7 +649,21 @@ export function Campo({
             inputProps.onBlur?.(e)
           }}
           style={{
-            flex: 1,
+            /* 🔴 **SIN `flex: 1`, Y ES LA CAUSA DEL DEFECTO QUE EL FOUNDER
+               VIO.** Hasta el lote 6 este input era hijo directo de la FILA,
+               así que `flex: 1` repartía el **ancho**. El lote 6 lo metió
+               dentro de una COLUMNA para alojar la etiqueta — y ahí el mismo
+               `flex: 1` pasó a repartir el **ALTO**: la etiqueta y el valor
+               se peleaban el mismo renglón. **Medido en el aparato: el input
+               caía de 23 dp a 11.**
+               *El `flex` no se movió ni cambió de valor: cambió de eje porque
+               le cambiaron el padre. Es la clase de defecto que no se ve
+               leyendo el diff de la línea, porque la línea no está en el
+               diff.*
+               El ancho ya lo da la columna: en un contenedor columna los
+               hijos se estiran solos. **Multilínea conserva su `flex`**,
+               que ahí sí es el alto y es lo que se quiere. */
+            flex: multilinea ? 1 : undefined,
             fontFamily: typography.family.sans.regular,
             fontSize: typography.size.base,
             color: theme.text.primary,

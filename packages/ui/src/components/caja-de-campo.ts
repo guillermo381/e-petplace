@@ -231,6 +231,21 @@ export const ALTO_ETIQUETA_FLOTANTE = Math.round(
  *  campo: **−16**. */
 export const ALTO_CAJA_CAMPO_V5 = ALTO_ETIQUETA_FLOTANTE + ALTO_LINEA_CAMPO + spacing[2] * 2 // 54
 
+/** N11″ · **el INTERIOR de la caja: los dos renglones, etiqueta y valor.**
+ *
+ * 🔴 **Nace de un defecto del founder en el aparato, y el número es la
+ * mitad de la cura:** *«la etiqueta chica y el valor comparten renglón en
+ * vez de tener el suyo»*. **Medido: con la etiqueta arriba, el input
+ * pasaba de 23 dp a 11.** La causa era un `flex: 1` heredado —ver la nota
+ * en `Campo`— y **el remedio completo son dos cosas**: quitarle el `flex`
+ * al input **y darle a la columna un alto EXPLÍCITO**, para que los dos
+ * renglones existan por construcción y no por lo que sobre.
+ *
+ * *Un `justifyContent: 'center'` sobre un alto que nadie fijó reparte lo
+ * que haya; si el alto está fijo en la suma de sus dos hijos, no hay nada
+ * que repartir — y ése es exactamente el estado que la orden pide.* */
+export const ALTO_INTERIOR_CAMPO_V5 = ALTO_ETIQUETA_FLOTANTE + ALTO_LINEA_CAMPO // 38
+
 /** N11″ · el disco del glifo a la izquierda. El par `accent.glifo` /
  *  `accent.glifoBg` ya nombra al CAMPO entre sus cuatro empleos («fila ·
  *  campo · acceso · paso»), así que el color no se elige acá: se pide. */
