@@ -43,10 +43,32 @@ import { useTheme } from '../ThemeProvider'
  */
 export type CabeceraProps = {
   variante: 'raiz' | 'empujada'
-  /** Mayúsculas chiquitas en rosa sobre ciruela: la fecha, el barrio,
-   *  «ACTIVIDAD». La pieza **no** lo pone en mayúsculas: el token
-   *  `antetitulo` ya trae `textTransform` (letra §2). */
+  /** La línea de arriba del título: el barrio, «ACTIVIDAD», la fecha. La
+   *  pieza **no** la pone en mayúsculas: el token `antetitulo` ya trae su
+   *  `textTransform` (letra §2). */
   antetitulo?: string
+  /** 🔴 **EN QUÉ VOZ HABLA EL ANTETÍTULO (pedido de C, lote 3f).**
+   *
+   *  `'rotulo'` (default) es lo de siempre: **sans bold 11 en MAYÚSCULAS con
+   *  tracking** — un rótulo que clasifica lo que viene abajo.
+   *  `'dato'` lo monta en la receta `dato`: **mono, minúsculas, sin
+   *  tracking** — la Ley 3, para cuando esa línea no clasifica sino que
+   *  **dice un dato de máquina**.
+   *
+   *  **Nació de un caso real, no de simetría:** al absorber el techo del
+   *  Hogar, la fecha —*«lunes, 14 de septiembre»*, mono minúscula, y así
+   *  está en la lámina— cayó en el único slot que hay encima del título y
+   *  **salió «LUNES, 14 DE SEPTIEMBRE»**.
+   *
+   *  ⚠️ **Es una unión cerrada y NO un `ReactNode`, y la razón es de C:**
+   *  *un slot libre ahí deja que cada pantalla elija su tipografía encima de
+   *  la banda, y eso es justo lo que la cabecera cerró.*
+   *
+   *  ⚠️ **Y no es que `antetitulo` estuviera mal:** nació como **rótulo** y
+   *  lo dice su propio comentario. *Lo que apareció después es un segundo
+   *  uso —una línea de contexto que es un dato— que cuando se escribió no
+   *  existía.* */
+  antetituloVoz?: 'rotulo' | 'dato'
   titulo: string
   /** Una línea de apoyo. En raíz va en blanco al 70 %; en empujada es el
    *  subtítulo. */
@@ -162,6 +184,7 @@ export const ALTO_CABECERA_EMPUJADA_FIJO =
 export function Cabecera({
   variante,
   antetitulo,
+  antetituloVoz = 'rotulo',
   titulo,
   apoyo,
   accionDerecha,
@@ -205,19 +228,39 @@ export function Cabecera({
      cabecera dejara de pintarlo. ⇒ como `fondo` es un `View` transparente.
      *Quien la monte como fondo tiene que darle una superficie debajo; hoy
      el único que lo hace es `HojaContenido`, que es para lo que nació.* */
-  const estiloSuperficie = {
-        paddingTop: insets.top + (esRaiz ? spacing[3] : spacing[2]),
-        paddingHorizontal: m.lados,
-        paddingBottom: m.bottom,
-        /* Como FONDO no lleva radio ni sombra: no está apoyada sobre
-           nada — es lo que está debajo de todo. La hoja que se le monta
-           encima pone su propio radio, que es el que se ve. */
-        borderBottomLeftRadius: esFondo ? 0 : radius.cabeceraV5,
-        borderBottomRightRadius: esFondo ? 0 : radius.cabeceraV5,
-        gap: spacing[3],
-        /* Apenas perceptible: despega, no levanta. */
-        boxShadow: esFondo ? undefined : theme.elevacion.reposo,
+  /* 🔴 **LA CURVA INVERTIDA ES INEXPRESABLE COMO FONDO (lote 3c, firma del
+     founder).** ⏪ Antes esto era UN objeto con dos ternarios —
+     `borderBottomLeftRadius: esFondo ? 0 : …` y `boxShadow: esFondo ? … `—.
+     **Daba el píxel correcto y aun así estaba mal**, y la diferencia es la
+     que el founder pidió:
+
+     > **Un ternario documenta la regla; dos objetos la hacen imposible.** En
+     > el ternario el radio SIGUE ESTANDO en el estilo del fondo —vale `0`—,
+     > así que alcanza con que alguien lo cambie, lo copie o agregue el
+     > tercer caso *«fondo pero con un bordercito»* para que vuelva. **Acá el
+     > estilo del fondo NO TIENE la clave**: no hay qué cambiar.
+
+     La estructura firmada es **fondo ciruela sin radio + hoja con las
+     esquinas de ARRIBA redondeadas**. *La curva de abajo es de una tarjeta
+     apoyada sobre algo; el fondo no está apoyado sobre nada — es lo que está
+     debajo de todo.* */
+  const base = {
+    paddingTop: insets.top + (esRaiz ? spacing[3] : spacing[2]),
+    paddingHorizontal: m.lados,
+    paddingBottom: m.bottom,
+    gap: spacing[3],
   }
+  /** Como TARJETA: apoyada, con su curva de abajo y su sombra apenas
+   *  perceptible — despega, no levanta. */
+  const estiloTarjeta = {
+    ...base,
+    borderBottomLeftRadius: radius.cabeceraV5,
+    borderBottomRightRadius: radius.cabeceraV5,
+    boxShadow: theme.elevacion.reposo,
+  }
+  /** Como FONDO: **`base` y nada más.** El radio y la sombra no están
+   *  puestos en cero — **no existen en este objeto**. */
+  const estiloSuperficie = esFondo ? base : estiloTarjeta
 
   /* El armado interno de la banda. Se llama `cuerpo` desde el lote 3b: el
      nombre `contenido` pasó a ser el SLOT público. */
@@ -245,7 +288,7 @@ export function Cabecera({
               tenía puerta desde `Texto`. *El valor correcto estaba escrito
               desde hacía sesiones; lo que faltaba era poder pedirlo.* */}
           {antetitulo !== undefined ? (
-            <Texto variante="antetitulo" color="sobreGradiente">
+            <Texto variante={antetituloVoz === 'dato' ? 'dato' : 'antetitulo'} color="sobreGradiente">
               {antetitulo}
             </Texto>
           ) : null}

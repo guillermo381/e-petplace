@@ -62,7 +62,6 @@ import {
   Tarjeta,
   HojaContenido,
   Huella,
-  Isotipo,
   Texto,
   VisorFoto,
   motion,
@@ -2789,24 +2788,17 @@ export default function Hogar() {
           ⇒ hermana posterior, `pointerEvents="none"`: se queda quieta, no toma
           ningún toque, y sobre el ciruela su tinta al 4-6 % es imperceptible
           —que es lo correcto: el agua es del papel—. */}
-      {/* @override-s82c — LA MARCA DE AGUA (ítem 4 de la lámina
-          posición-consolidada): el isotipo en tinta al 6%, CENTRADO EN
-          PANTALLA (fijo — no scrollea, como en la lámina: el agua vive
-          fuera del cuerpo). OVERRIDE LOCAL de esta pantalla: NO se
-          generaliza — la promoción es de B después del gate (guard R10).
-          CHOQUE DECLARADO, no resuelto en silencio (regla S63): la Ley 4
-          dice isotipo UNO por pantalla y el techo ya lleva el suyo — la
-          lámina del founder ordena el agua igual; el gate resuelve.
-          Calibración DE LÁMINA: opacidad .06 y ~340 de ancho (size 210 ×
-          ratio del viewBox) — números de acuerdo, no tokens. */}
-      <View
-        pointerEvents="none"
-        style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, alignItems: 'center', justifyContent: 'center' }}
-      >
-        <View style={{ opacity: 0.06 }}>
-          <Isotipo size={210} variant="tinta" color={theme.text.primary} />
-        </View>
-      </View>
+      {/* ☠️ **LA MARCA DE AGUA MURIÓ — firma del founder (recorrido 5, lote 3c
+          de B), y la traigo a mi rama sin discutirla.** Era el isotipo VIEJO en
+          tinta, escalado para salirse por los cuatro lados con su letra al lado
+          (*«una forma completa es una marca; cortada es papel»*).
+          🔴 **Ese argumento es el que cae**: sangrarlo la volvía papel para la
+          Ley 4 **pero seguía siendo el dibujo viejo**, y lo que el founder
+          rechazó es el DIBUJO, no su encuadre.
+          ⚠️ **NO se rellena**: queda el lienzo liso.
+          ⏪ En este lote yo la había MOVIDO —de antes de la hoja a después, para
+          que no se fuera con el scroll—. *Esa cura era correcta para el
+          problema que tenía y se vuelve innecesaria: no hay nada que ubicar.* */}
     </View>
   );
 }

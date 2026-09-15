@@ -56,7 +56,6 @@ import {
   Boton,
   EstadoVacio,
   Icono,
-  Isotipo,
   Texto,
   radius,
   spacing,
@@ -167,9 +166,19 @@ export function CabezalOficio({
             />
           </Svg>
         </Pressable>
-        {/* el glifo del oficio ADELANTE; el isotipo TEÑIDO detrás de él */}
+        {/* ☠️ **LA MARCA SE FUE Y QUEDA EL GLIFO DEL OFICIO (firma del
+            founder, lote 3e).** ⏪ Acá vivían LOS DOS: el glifo adelante y el
+            isotipo viejo teñido detrás, a 20 px.
+
+            🔴 **Este lugar pedía un glifo del oficio, no la marca** — y el
+            glifo **ya estaba puesto**: la cura es sacar lo que sobraba, no
+            agregar nada. *El isotipo teñido era un adorno detrás de la pieza
+            que de verdad informaba.*
+
+            ⚠️ **En el color de siempre:** `registro="capa"` tiñe el glifo con
+            el color de su capa, que es el que la fila usa desde que existe —
+            **no se toca**. */}
         <Icono nombre={oficio} tamano={24} registro="capa" />
-        <Isotipo size={20} color={colorOficio} />
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text
             numberOfLines={1}

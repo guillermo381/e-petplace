@@ -49,7 +49,6 @@ import {
   Hoja,
   Huella,
   Icono,
-  Isotipo,
   PieRevelar,
   Separador,
   ChipEntidad,
@@ -2607,18 +2606,17 @@ export default function PerfilDeMascota() {
           ⇒ hermana posterior, `pointerEvents="none"`: se queda quieta, no toma
           ningún toque, y sobre el ciruela su tinta al 4-6 % es imperceptible
           —que es lo correcto: el agua es del papel—. */}
-      {/* @override-s82c — r5 ítem 1: LA MARCA DE AGUA del fondo,
-          escalada a SALIRSE por los cuatro lados al 4% ("una forma
-          completa es una marca; cortada es papel — así la Ley 4 no
-          muerde", letra founder). Fija, detrás de todo. */}
-      <View
-        pointerEvents="none"
-        style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}
-      >
-        <View style={{ opacity: 0.04 }}>
-          <Isotipo size={1000} variant="tinta" color={theme.text.primary} />
-        </View>
-      </View>
+      {/* ☠️ **LA MARCA DE AGUA MURIÓ — firma del founder (recorrido 5, lote 3c
+          de B), y la traigo a mi rama sin discutirla.** Era el isotipo VIEJO en
+          tinta, escalado para salirse por los cuatro lados con su letra al lado
+          (*«una forma completa es una marca; cortada es papel»*).
+          🔴 **Ese argumento es el que cae**: sangrarlo la volvía papel para la
+          Ley 4 **pero seguía siendo el dibujo viejo**, y lo que el founder
+          rechazó es el DIBUJO, no su encuadre.
+          ⚠️ **NO se rellena**: queda el lienzo liso.
+          ⏪ En este lote yo la había MOVIDO —de antes de la hoja a después, para
+          que no se fuera con el scroll—. *Esa cura era correcta para el
+          problema que tenía y se vuelve innecesaria: no hay nada que ubicar.* */}
 
       {/* ═══ LA HOJA DE «SE PERDIÓ» — la voz es de AYUDA, no de trámite ═════
           Dice qué va a pasar en dos líneas, y la segunda es una promesa que la

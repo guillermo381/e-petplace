@@ -53,7 +53,23 @@ const ALTURA_MIN: Record<CeldaDensidad, number> = {
 // S44-B4.1 (enmienda de arquitecto): metadataMono y fin CONVIVEN —
 // apilados en la zona fin (mono arriba, nodo abajo, alineados al borde).
 // El caso real: hora de la cita + Insignia de estado en la agenda.
-type ZonaFin = { fin?: ReactNode; metadataMono?: string }
+//
+// 🔴 **`metadata` (lote 3f, pedido de C) — EL HERMANO EN SANS.**
+//
+// La firma del founder dice *«toda fecha por el riel: la familia lee «sáb 13
+// sep · 3:00 p. m.», **nunca la fuente mono**»*. C curó la VOZ en las tres
+// superficies y **no pudo curar la FUENTE donde la pone esta pieza**: su
+// único slot de metadata es mono, y además minuscula adentro.
+//
+// > ⚠️ **Lo que cambió NO es la prop: es que una fecha de cita dejó de ser
+// > metadata de máquina.** Los minutos («60 min»), los montos y los folios
+// > siguen siendo voz de máquina y siguen bien en `metadataMono` — *por eso
+// > no se jubila ni se cambia: se le da un hermano.*
+//
+// **Sin `toLowerCase()`**, y es la mitad que importa: el riel entrega «Mar 15
+// sept» y *una fecha de familia no se minuscula — se muestra como la escribió
+// quien la formateó.*
+type ZonaFin = { fin?: ReactNode; metadataMono?: string; metadata?: string }
 
 type Comun = ZonaFin & {
   titulo: string
@@ -140,6 +156,7 @@ export function Celda(props: CeldaProps) {
   const [presionada, setPresionada] = useState(false)
 
   const metadataMono = 'metadataMono' in props ? props.metadataMono : undefined
+  const metadata = 'metadata' in props ? props.metadata : undefined
   const fin = 'fin' in props ? props.fin : undefined
 
   const cuerpo = (
@@ -237,7 +254,7 @@ export function Celda(props: CeldaProps) {
         ) : null}
       </View>
 
-      {metadataMono || fin ? (
+      {metadataMono || metadata || fin ? (
         // LA OTRA MITAD DEL REPARTO (el porqué completo, arriba): este
         // bloque CEDE.
         //
@@ -286,6 +303,19 @@ export function Celda(props: CeldaProps) {
               }}
             >
               {metadataMono.toLowerCase()}
+            </Text>
+          ) : null}
+          {metadata ? (
+            // Voz de FAMILIA en la zona de metadata: sans, sin forzar caja.
+            // Mismo lugar y misma alineación que su hermano mono.
+            <Text
+              style={{
+                fontFamily: typography.family.sans.regular,
+                fontSize: typography.size.sm,
+                color: theme.text.secondary,
+              }}
+            >
+              {metadata}
             </Text>
           ) : null}
           {fin ? <View>{fin}</View> : null}

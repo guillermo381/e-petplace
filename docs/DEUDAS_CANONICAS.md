@@ -35785,18 +35785,19 @@ const colorScheme = FORZAR_CLARO ? 'light' : colorSchemeDelSistema;
 
 ---
 
-## `D-1123` 🟡 — EL OSCURO DEL CLIENTE: **UNA decisión + un recorrido**, no una lista de valores
+### ⭐ ENMIENDA DE B (lote 3c) — **la ficha se escribió DOS VECES el mismo día, y las dos decían lo mismo**
 
-**Estado:** ABIERTA · **FIRMADA POR EL FOUNDER** (14-sep-2026) · **Dueño: mesa** (la decisión) + **B** (lo que salga del recorrido) · **disparo: DESPUÉS de F&F**.
-⚠️ **Nació como `D-1122` y se renumeró al mergear:** A tomó ese número en `main` el mismo día para la marca de agua de los papeles. *Dos pistas pidieron el próximo libre con minutos de diferencia y las dos leyeron el mismo tope — el censo cruzado que corrí contra las ramas vivas no vio la de A porque todavía no estaba empujada.* **La colisión la cazó el merge, que es tarde pero es el único que la puede ver.**
+A la abrió en `main` y yo en mi rama, **con el mismo número y la misma conclusión**. *No fue colisión de numeración: fue que las dos pistas midieron el mismo defecto y llegaron al mismo lugar.* **Rige la de arriba** (la de A); esto conserva sólo lo que mi censo agrega:
 
-**Origen:** recorrido 5 del founder con el teléfono en oscuro; censo de B en el lote 15, ejecución en el lote 16.
+**CALIBRAR EL OSCURO ES UNA DECISIÓN + UN RECORRIDO, NO UNA LISTA DE VALORES.**
 
-### Lo que se hizo YA, y por qué no cierra la ficha
+**① Una decisión de mesa: ¿`magentaLuz` es el acento del oscuro?** `accent.cta`, `accent.activoLleno` y el orbe resuelven ahí — el «rosa pálido» que vio el founder. **No es un bug de ninguna pieza: las piezas leen el tema y el tema contesta eso.**
 
-**El cliente va en claro SIEMPRE** (`apps/cliente/src/app/_layout.tsx`, con lápida y fecha de revisión). ⚠️ **El tema oscuro sigue existiendo y sigue siendo isomorfo:** lo que se apagó es **quién lo elige**, no el tema — los tres siguen portando los mismos slots, la galería lo sigue montando y `verify:contrast` sigue midiendo los tres. *Apagar un tema borrándolo sería perder el trabajo; apagar su elección es una línea.*
+**② Y después, recorrer las pantallas.** *El censo por código encuentra la CLASE —`'inverso'` sobre superficie fija— y no encuentra el TONO que quedó feo.*
 
-**Y las cinco líneas del censo se curaron igual, aunque hoy nadie las vea en oscuro:** `Cabecera:209·213·217` y `bienvenida.tsx:155·165` pasaron de `'inverso'` a **`sobreGradiente`** (`text.onGradient`, que ya existía en los tres temas y no tenía puerta desde `Texto`).
+⚠️ **Con su número, que es lo que cierra la pregunta:** los **12** usos de `palette.` del cliente, **ninguno es un claro fijo** (el único `white` es el logo de DeUna, legítimo). *No hay una pila de valores hardcodeados esperando — hay una decisión de acento y unas pantallas que nadie caminó.*
+
+✅ **Y las cinco líneas que sí eran un bug ya están curadas** (lote 16): `Cabecera:209·213·217` y `bienvenida.tsx:155·165` pasaron de `'inverso'` a **`sobreGradiente`** (`text.onGradient`, que existía en los tres temas y **no tenía puerta desde `Texto`**).
 
 > **Un valor fijo que hoy acierta por casualidad es el que mañana nadie encuentra** (firma del founder). *El forzado de claro las volvía invisibles: las cinco habrían pasado el próximo censo por estar en una pantalla que nadie mira en oscuro.*
 
