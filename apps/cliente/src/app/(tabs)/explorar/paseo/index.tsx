@@ -60,6 +60,7 @@ import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
 import { FiltroMascotas } from '@/components/filtro-pills';
 import { CabezalOficio, DiaSinHorarios, GrillaElegir, PieReserva, SelectorDia, SinQuienReservar } from '@/components/reserva-piezas';
+import { formatearPrecio } from '@epetplace/i18n';
 
 function fechaLocalISO(d: Date): string {
   return new Intl.DateTimeFormat('en-CA').format(d);
@@ -700,7 +701,7 @@ export default function PaseoCuando() {
           DESAPARECE cuando no hay qué totalizar (tercera ley). */}
       {Array.isArray(oferta) && oferta.length > 0 && elegibles.length > 0 && pieVive ? (
         <PieReserva
-          total={bloqueElegido !== null ? `$ ${bloqueElegido.desde.toFixed(2)}` : null}
+          total={bloqueElegido !== null ? formatearPrecio(bloqueElegido.desde) : null}
           totalDesde={bloqueElegido?.varia ?? false}
           cuando={hora !== null ? `${dias.find((d) => d.iso === dia)?.corta ?? ''} · ${hora}` : null}
           etiqueta={t('explorar.verQuienPuede')}

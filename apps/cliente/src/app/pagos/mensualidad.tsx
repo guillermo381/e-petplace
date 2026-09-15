@@ -40,7 +40,7 @@ import {
   Boton, Celda, Confirmacion, Esqueleto, EstadoVacio, Icono, Tarjeta, Texto, spacing, useTheme,
 } from '@epetplace/ui';
 import { obtenerMisPlanesGuarderia, type PlanGuarderia } from '@epetplace/api';
-import { fechaLargaHumana, obtenerIdiomaActual } from '@epetplace/i18n';
+import { formatearPrecio, fechaLargaHumana, obtenerIdiomaActual } from '@epetplace/i18n';
 
 import { EsperaDeUna } from '@/components/espera-deuna';
 import { topeDeEspera, useEstadoDeUna } from '@/lib/pagos/deuna-estado';
@@ -155,7 +155,7 @@ export default function PagarMensualidad() {
             <Celda
               titulo={t('linkMensual.concepto')}
               subtitulo={plan.prestadorNombre}
-              metadataMono={`$${plan.precioMensual.toFixed(2)}`}
+              metadataMono={formatearPrecio(plan.precioMensual)}
             />
             {/* El período **sólo si el motor lo dice**: sin él no se nombra un
                 mes inventado. */}

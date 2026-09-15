@@ -30,6 +30,7 @@ import { ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
   Boton,
   Cabecera,
   Esqueleto,
@@ -58,11 +59,12 @@ import {
   type PaqueteCompradoGuarderia,
   type PlanGuarderia,
 } from '@epetplace/api';
-import { fechaCortaMono, obtenerIdiomaActual } from '@epetplace/i18n';
+import { formatearPrecio, fechaCortaMono, obtenerIdiomaActual } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
 import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 /* ☠️ ACÁ VIVÍA `LISTA_DISPONIBLE = false`, y murió el 29-ago: **A publicó
    `obtenerMisEstadiasGuarderia`** y el enchufe se conectó. *La constante existía
@@ -88,6 +90,7 @@ function restanteMmSs(iso: string): string {
 }
 
 export default function LogGuarderia() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
@@ -329,9 +332,26 @@ export default function LogGuarderia() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Cabecera variante="empujada" titulo={t('logGuarderia.titulo')} onVolver={alAtras}  etiquetaVolver={t('comun.volver')} />
-
-      <ScrollView contentContainerStyle={{ padding: spacing[5], gap: spacing[5], paddingBottom: insets.bottom + spacing[8] }}>
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ El `paddingBottom` con `insets.bottom` que había acá SE RETIRA: lo
+          paga la hoja en su propio render, y sumarlo sería pagarlo dos veces
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera variante="empujada" titulo={t('logGuarderia.titulo')} onVolver={alAtras}  etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        scroll={{ contentContainerStyle: { padding: spacing[5], gap: spacing[5], } }}
+      >
         {mascotas.fase === 'cargando' ? (
           <EsqueletoGrupo>
             <Esqueleto alto={56} />
@@ -423,7 +443,7 @@ export default function LogGuarderia() {
                   titulo={t('logGuarderia.planTitulo')}
                   /* `CeldaNavegacion` no tiene subtítulo: el lugar y el precio
                      van juntos en el detalle, que es voz de la pantalla. */
-                  detalle={`${pl.prestadorNombre} · ${t('logGuarderia.planDetalle', { precio: pl.precioMensual.toFixed(2) })}`}
+                  detalle={`${pl.prestadorNombre} · ${t('logGuarderia.planDetalle', { precio: formatearPrecio(pl.precioMensual) })}`}
                   onPress={() => router.push('/cuenta/recurrentes')}
                 />
               </Tarjeta>
@@ -728,7 +748,7 @@ export default function LogGuarderia() {
             })()}
           </>
         )}
-      </ScrollView>
+      </HojaContenido>
 
       {/* EL CTA AL PIE — el de sus cuatro hermanas: lleva al flujo con la
           mascota elegida, y dice POR QUÉ está apagado cuando lo está. */}

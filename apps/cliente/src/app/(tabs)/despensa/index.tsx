@@ -97,6 +97,7 @@ import { decidirTope } from '@/lib/despensa/tope-de-compra';
 import { cruzarConVigilados } from '@/lib/despensa/composicion';
 import { useTraduccion } from '@/i18n';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
+import { formatearPrecio } from '@epetplace/i18n';
 
 type Fase<T> = T | 'cargando' | 'error';
 
@@ -451,7 +452,7 @@ export default function DespensaDescubrir() {
    */
   function precioPorKilo(p: ProductoDeVitrina): string | undefined {
     if (p.peso_kg === null || p.peso_kg <= 0) return undefined;
-    return t('despensa.porKilo', { monto: (p.precio / p.peso_kg).toFixed(2) });
+    return t('despensa.porKilo', { monto: formatearPrecio((p.precio / p.peso_kg)) });
   }
 
   /**

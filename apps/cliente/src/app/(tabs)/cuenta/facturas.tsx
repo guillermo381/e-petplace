@@ -73,6 +73,7 @@ import { Linking, ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
   Boton,
   Celda,
   Texto,
@@ -95,6 +96,7 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 /** El mapeo, EXHAUSTIVO por tipo: si A agrega un estado, el tsc lo exige acá.
  *  `null` = la pieza de B no lo expresa todavía (ver la cabecera). */
@@ -118,6 +120,7 @@ const ESTADO_TARJETA: Record<EstadoVisibleFiscal, EstadoFactura | null> = {
 type Carga = 'cargando' | 'error' | DocumentoFiscalMio[];
 
 export default function FacturasScreen() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const router = useRouter();
@@ -154,14 +157,28 @@ export default function FacturasScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Cabecera variante="empujada" titulo={t('facturas.titulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
-
-      <ScrollView
-        contentContainerStyle={{
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ El `paddingBottom` con `insets.bottom` que había acá SE RETIRA: lo
+          paga la hoja en su propio render, y sumarlo sería pagarlo dos veces
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera variante="empujada" titulo={t('facturas.titulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        scroll={{ contentContainerStyle: {
           padding: spacing[5],
-          paddingBottom: insets.bottom + spacing[6],
           gap: spacing[4],
-        }}
+        } }}
       >
         {docs === 'cargando' ? (
           <EsqueletoGrupo>
@@ -239,7 +256,7 @@ export default function FacturasScreen() {
             })}
           </>
         )}
-      </ScrollView>
+      </HojaContenido>
     </View>
   );
 }

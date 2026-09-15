@@ -25,6 +25,7 @@ import { ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
+  HojaContenido,
   Boton,
   Celda,
   Cabecera,
@@ -45,8 +46,11 @@ import {
 } from '@epetplace/api';
 import { PaqueteHoja } from '@/components/paquete-hoja';
 import { useTraduccion } from '@/i18n';
+import { formatearPrecio } from '@epetplace/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 export default function PaqueteComprar() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
@@ -79,8 +83,26 @@ export default function PaqueteComprar() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Cabecera variante="empujada" titulo={t('paquete.pantallaTitulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[3] }}>
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ El `paddingBottom` con `insets.bottom` que había acá SE RETIRA: lo
+          paga la hoja en su propio render, y sumarlo sería pagarlo dos veces
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera variante="empujada" titulo={t('paquete.pantallaTitulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        scroll={{ contentContainerStyle: { padding: spacing[4], gap: spacing[3] } }}
+      >
         {lista === 'cargando' ? (
           <EsqueletoGrupo>
             <View style={{ gap: spacing[3] }}>
@@ -109,7 +131,7 @@ export default function PaqueteComprar() {
                 <Celda
                   titulo={p.prestador_nombre}
                   subtitulo={p.servicio_nombre}
-                  metadataMono={`$${p.precio_paquete.toFixed(2)} · ${p.duracion_minutos} min`}
+                  metadataMono={`${formatearPrecio(p.precio_paquete)} · ${p.duracion_minutos} min`}
                   interactiva
                   accessibilityRole="button"
                   onPress={() => setElegido(p)}
@@ -118,7 +140,7 @@ export default function PaqueteComprar() {
             ))}
           </Tarjeta>
         )}
-      </ScrollView>
+      </HojaContenido>
 
       {/* La compra — anclada al paseador ELEGIDO, sin mascota ni fecha */}
       <Hoja

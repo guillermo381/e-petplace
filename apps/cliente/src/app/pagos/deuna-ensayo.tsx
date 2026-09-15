@@ -28,16 +28,19 @@
 import {useState } from 'react';
 import { Linking, ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Cabecera, Boton, Encabezado, EstadoVacio, Tarjeta, Texto, spacing, useTheme } from '@epetplace/ui';
+import {
+  HojaContenido, Cabecera, Boton, Encabezado, EstadoVacio, Tarjeta, Texto, spacing, useTheme } from '@epetplace/ui';
 
 import { EsperaDeUna } from '@/components/espera-deuna';
 import { ENSAYO, useEstadoDeUna, type GuionDeEnsayo } from '@/lib/pagos/deuna-estado';
 import { urlWhatsApp } from '@/lib/contacto';
 import { useTraduccion } from '@/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 const GUIONES = Object.keys(ENSAYO) as GuionDeEnsayo[];
 
 export default function DeUnaEnsayo() {
+  const cabecera = useAltoDeCabecera('empujada');
   const router = useRouter();
   const { theme } = useTheme();
   const { t } = useTraduccion();
@@ -47,21 +50,52 @@ export default function DeUnaEnsayo() {
   if (!__DEV__) {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Cabecera variante="empujada" titulo="—" onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
+        {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada" titulo="—" onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+                presentacion="fondo"
+              />
+            </View>
+          }
+        >
         <EstadoVacio registro="pantalla" titulo="—" descripcion="—" />
+        </HojaContenido>
       </View>
     );
   }
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Cabecera
-        variante="empujada"
-        titulo="Ensayo · código Deuna"
-        onVolver={() => router.back()}
-        etiquetaVolver={t('comun.volver')}
-      />
-      <ScrollView contentContainerStyle={{ padding: spacing[5], gap: spacing[4] }}>
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo="Ensayo · código Deuna"
+              onVolver={() => router.back()}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+      >
+      <View style={{ padding: spacing[5], gap: spacing[4] }}>
         {/* El selector de guion es del ANDAMIO — sin voz de i18n a propósito:
             *una cadena de ensayo en el diccionario es una cadena que alguien
             va a encontrar después y no va a saber si se usa.* */}
@@ -87,7 +121,8 @@ export default function DeUnaEnsayo() {
             onSoporte={() => void Linking.openURL(urlWhatsApp(t('cuenta.soporteDesdeCobro')))}
           />
         </Tarjeta>
-      </ScrollView>
+      </View>
+      </HojaContenido>
     </View>
   );
 }

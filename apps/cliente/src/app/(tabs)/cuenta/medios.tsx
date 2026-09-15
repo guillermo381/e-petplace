@@ -19,16 +19,19 @@ import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
+  HojaContenido,
   Boton, Cabecera, EstadoVacio, EsqueletoGrupo, Hoja, Separador, Texto, spacing, useTheme,
 } from '@epetplace/ui';
 import { listarTarjetasVerificadas, borrarTarjetaGuardada, type TarjetaVerificada } from '@epetplace/api';
 import { FilaMedioDePago, VozVencida, desempatarMedios, nombreDeMarca, vencida } from '@/components/fila-medio-de-pago';
 import { abrirAltaDeTarjeta } from '@/lib/pagos/alta-tarjeta';
 import { useTraduccion } from '@/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 type Estado = 'cargando' | 'error' | 'listo';
 
 export default function MediosDePago() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { t } = useTraduccion();
   const router = useRouter();
   const { theme } = useTheme();
@@ -126,13 +129,30 @@ export default function MediosDePago() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Cabecera
-        variante="empujada"
-        titulo={t('cuenta.medios')}
-        onVolver={() => router.back()}
-        etiquetaVolver={t('comun.volver')}
-      />
-      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + spacing[6], gap: spacing[4] }}>
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ El `paddingBottom` con `insets.bottom` que había acá SE RETIRA: lo
+          paga la hoja en su propio render, y sumarlo sería pagarlo dos veces
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={t('cuenta.medios')}
+              onVolver={() => router.back()}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        scroll={{ contentContainerStyle: { gap: spacing[4] } }}
+      >
         <View style={{ paddingHorizontal: spacing[5] }}>
           <Texto variante="apoyo">{t('cuenta.mediosSub')}</Texto>
         </View>
@@ -210,7 +230,7 @@ export default function MediosDePago() {
           <Separador />
           <Boton etiqueta={t('cuenta.medioAgregar')} bloque onPress={() => void agregar()} />
         </View>
-      </ScrollView>
+      </HojaContenido>
 
       {/* ═══ P1 · LA DOBLE CONFIRMACIÓN ═══════════════════════════════════
           🔴 **La segunda confirmación DICE QUÉ SE BORRA, con su nombre.** *Un

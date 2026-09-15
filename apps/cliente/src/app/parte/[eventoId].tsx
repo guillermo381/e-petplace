@@ -28,6 +28,7 @@ import { ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
+  HojaContenido,
   Boton,
   Celda,
   CeldaNavegacion,
@@ -50,6 +51,7 @@ import { obtenerParteConsulta, type ItemFormulaParte, type ParteConsulta } from 
 import { fechaLargaHumana } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 /**
  * S71-A CURA-2(c) 🔴 — el estado del estudio se LEÍA del wrapper y se
@@ -84,6 +86,7 @@ const VOZ_EXAMEN: Record<
 };
 
 export default function ParteConsultaScreen() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const { t, idioma } = useTraduccion();
@@ -115,7 +118,29 @@ export default function ParteConsultaScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={[]}>
-      <Cabecera variante="empujada" titulo={titulo} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ **Los `ScrollView` verticales que había adentro se volvieron
+          `View`**: la hoja ya scrollea, y dos scrolls verticales anidados
+          dejan al de adentro sin alto propio. Su `contentContainerStyle` pasa
+          a `style` — *el relleno era del contenido, no del scroll.* El
+          `paddingBottom` con `insets.bottom` SE RETIRA: lo paga la hoja
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada" titulo={titulo} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+      >
 
       {estado === 'cargando' ? (
         <View style={{ padding: spacing[4], gap: spacing[4] }}>
@@ -137,9 +162,7 @@ export default function ParteConsultaScreen() {
           />
         </View>
       ) : (
-        <ScrollView
-          contentContainerStyle={{ padding: spacing[4], gap: spacing[4], paddingBottom: insets.bottom + spacing[8] }}
-        >
+        <View style={{ padding: spacing[4], gap: spacing[4], }}>
           {/* 0 — QUÉ ENCONTRÓ: el diagnóstico preside (la firma). */}
           <Entrada>
             <View style={{ gap: spacing[4] }}>
@@ -282,7 +305,7 @@ export default function ParteConsultaScreen() {
               </Tarjeta>
             </View>
           </Entrada>
-        </ScrollView>
+        </View>
       )}
 
       {/* El registro clínico preservado (Ley 3) */}
@@ -306,6 +329,7 @@ export default function ParteConsultaScreen() {
           </HojaScroll>
         </Hoja>
       ) : null}
+      </HojaContenido>
     </SafeAreaView>
   );
 }

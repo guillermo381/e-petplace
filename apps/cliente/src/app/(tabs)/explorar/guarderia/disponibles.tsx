@@ -50,6 +50,7 @@ import { ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
   Celda,
   Cabecera,
   Esqueleto,
@@ -70,11 +71,12 @@ import {
   type PerfilPublico,
 } from '@epetplace/api';
 
-import { fechaCortaMono, obtenerIdiomaActual } from '@epetplace/i18n';
+import { formatearPrecio, fechaCortaMono, obtenerIdiomaActual } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
 import { CabezalOficio } from '@/components/reserva-piezas';
 import { PreviewPrestador } from '@/components/preview-prestador';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 /** 'HH:MM:SS' → 'HH:MM'. El motor manda la verdad; la pantalla la recorta. */
 const aHoraCorta = (h: string) => h.slice(0, 5);
@@ -125,6 +127,7 @@ type PreciosPaquete =
   | { fase: 'listo'; porLugar: Record<string, number> };
 
 export default function QuienPuedeGuarderia() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
@@ -272,14 +275,30 @@ export default function QuienPuedeGuarderia() {
           veces en la misma pantalla le enseña a la familia a no leer.*
           Censado contra «Groomers disponibles», su hermana: `Encabezado` de
           navegación + **una sola línea de contexto**. */}
-      <Cabecera
-        variante="empujada"
-        titulo={t('hubGuarderia.lugaresTitulo')}
-        onVolver={() => router.back()}
-        etiquetaVolver={t('comun.volver')}
-      />
-
-      <ScrollView contentContainerStyle={{ padding: spacing[5], gap: spacing[3], paddingBottom: insets.bottom + spacing[8] }}>
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ El `paddingBottom` con `insets.bottom` que había acá SE RETIRA: lo
+          paga la hoja en su propio render, y sumarlo sería pagarlo dos veces
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={t('hubGuarderia.lugaresTitulo')}
+              onVolver={() => router.back()}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        scroll={{ contentContainerStyle: { padding: spacing[5], gap: spacing[3], } }}
+      >
         {/* ⏪ ACÁ ABAJO COLGABA LA FECHA EN CRUDO —`2026-09-01`— al pie de la
             lista. Dos cosas mal: **voz de máquina** donde va la de la casa, y
             **el contexto al final**, cuando es lo que enmarca todo lo de
@@ -391,7 +410,7 @@ export default function QuienPuedeGuarderia() {
                       ...params,
                       prestadorId: g.prestadorId,
                       prestadorNombre: g.prestadorNombre,
-                      ...(precio === null ? {} : { precio: `$ ${precio.toFixed(2)}` }),
+                      ...(precio === null ? {} : { precio: formatearPrecio(precio) }),
                     },
                   })
                 }
@@ -419,10 +438,10 @@ export default function QuienPuedeGuarderia() {
                   precio === null
                     ? ''
                     : modalidad === 'dia'
-                      ? t('hubGuarderia.porDia', { precio: precio.toFixed(2) })
+                      ? t('hubGuarderia.porDia', { precio: formatearPrecio(precio) })
                       : modalidad === 'mensual'
-                        ? t('hubGuarderia.porMes', { precio: precio.toFixed(2) })
-                        : t('hubGuarderia.porPaquete', { precio: precio.toFixed(2) })
+                        ? t('hubGuarderia.porMes', { precio: formatearPrecio(precio) })
+                        : t('hubGuarderia.porPaquete', { precio: formatearPrecio(precio) })
                 }
                 perfil={perfiles[g.prestadorId]}
                 /* La ventana viaja con el tap para que el lugar pueda reservar,
@@ -475,7 +494,7 @@ export default function QuienPuedeGuarderia() {
           </Tarjeta>
         )}
 
-      </ScrollView>
+      </HojaContenido>
     </SafeAreaView>
   );
 }

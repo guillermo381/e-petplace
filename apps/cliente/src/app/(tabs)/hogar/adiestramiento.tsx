@@ -33,6 +33,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import {
+  HojaContenido,
   Boton,
   CeldaNavegacion,
   Campo,
@@ -77,6 +78,7 @@ import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 import { FiltroMascotas, FiltroPills } from '@/components/filtro-pills';
 import { esHistorial, esProxima } from '@/lib/corte-agenda';
 import { DetalleCita } from '@/components/detalle-cita';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 // §7 (S65) — matching compartido del vocabulario (el filtro de chips y
 // el autocompletado del texto libre hablan IGUAL): minúsculas sin
@@ -100,6 +102,7 @@ function restanteMmSs(iso: string): string {
 }
 
 export default function HubAdiestramiento() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const { t, idioma } = useTraduccion();
@@ -266,10 +269,31 @@ export default function HubAdiestramiento() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Cabecera variante="empujada" titulo={t('adiestramiento.hubTitulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
-      <ScrollView
-        ref={scrollRef}
-        contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[4] }}>
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ **Los `ScrollView` verticales que había adentro se volvieron
+          `View`**: la hoja ya scrollea, y dos scrolls verticales anidados
+          dejan al de adentro sin alto propio. Su `contentContainerStyle` pasa
+          a `style` — *el relleno era del contenido, no del scroll.* El
+          `paddingBottom` con `insets.bottom` SE RETIRA: lo paga la hoja
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        scrollRef={scrollRef}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada" titulo={t('adiestramiento.hubTitulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+      >
+      <View style={{ padding: spacing[4], gap: spacing[4] }}>
 
         {/* ① la MASCOTA — el PRIMER filtro (la pieza decide relleno vs
             barrido con L-b adentro). Entra SIN filtro: ninguna nace
@@ -467,7 +491,7 @@ export default function HubAdiestramiento() {
             })}
           </View>
         )}
-      </ScrollView>
+      </View>
 
       {/* r34 · AGENDAR baja al PIE FIJO, como los otros tres. Y con el
           CTA VIVO: apagado pero tocable, la razón señala la hilera, y la
@@ -507,6 +531,7 @@ export default function HubAdiestramiento() {
 
       {/* §7 — la Hoja de registro: chips + texto, guardar. Segundos,
           jamás un formulario. */}
+      </HojaContenido>
     </SafeAreaView>
   );
 }

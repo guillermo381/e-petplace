@@ -111,7 +111,7 @@ import {
 } from '@epetplace/api';
 import { calcularVozHogar, type VozEstadoHogar } from '@epetplace/domain';
 
-import { diaSemanaCorto, fechaCortaMono, fechaLargaHumana } from '@epetplace/i18n';
+import { fechaCortaHumana, fechaYHoraHumana, formatearPrecio, diaSemanaCorto, fechaCortaMono, fechaLargaHumana } from '@epetplace/i18n';
 
 import { InvitacionAvisos } from '@/components/invitacion-avisos';
 import { ventanaVencida } from '@/lib/despensa/ventana';
@@ -1127,23 +1127,35 @@ export default function Hogar() {
         {/* ⭐ **06 · EL HOGAR SIN MASCOTA — S116-C lote 3.**
             La cabecera raíz de la casa, con su saludo. *Una pantalla vacía
             sin techo se lee como una pantalla que no cargó.* */}
-        <Cabecera
-          variante="raiz"
-          /* **El MISMO saludo que el Hogar poblado**, no una voz paralela:
-             `saludoPorFranja` + el primer nombre del perfil. *Dos formas de
-             saludar en la misma app son dos que envejecen distinto.* */
-          antetitulo={fechaLargaHumana(hoyVacio.toISOString().slice(0, 10), idioma)}
-          titulo={`${saludoPorFranja(hoyVacio.getHours(), t)}${nombrePerfil ? `, ${nombrePerfil.trim().split(' ')[0]}` : ''}`}
-          apoyo={t('hogar.vacioApoyo')}
-        />
-        <ScrollView
-          contentContainerStyle={{
+        {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="raiz"
+                /* **El MISMO saludo que el Hogar poblado**, no una voz paralela:
+                `saludoPorFranja` + el primer nombre del perfil. *Dos formas de
+                saludar en la misma app son dos que envejecen distinto.* */
+                antetitulo={fechaLargaHumana(hoyVacio.toISOString().slice(0, 10), idioma)}
+                titulo={`${saludoPorFranja(hoyVacio.getHours(), t)}${nombrePerfil ? `, ${nombrePerfil.trim().split(' ')[0]}` : ''}`}
+                apoyo={t('hogar.vacioApoyo')}
+                presentacion="fondo"
+              />
+            </View>
+          }
+        >
+        <View style={{
             flexGrow: 1,
             justifyContent: 'center',
             padding: spacing[5],
             gap: spacing[4],
-          }}
-        >
+          }}>
           {/* ── ① LOS QUE ESPERAN — PRESIDE ─────────────────────────────
               🔴 **Sin contador, igual que en Explorar:** §4 prohíbe convertir
               la lista en inventario. *Se presentan vidas, no stock.*
@@ -1245,7 +1257,7 @@ export default function Hogar() {
               </Pressable>
             </View>
           </Tarjeta>
-        </ScrollView>
+        </View>
 
         <Hoja
           visible={hojaPorQueRegistrar}
@@ -1261,6 +1273,7 @@ export default function Hogar() {
             />
           </View>
         </Hoja>
+        </HojaContenido>
       </View>
     );
   }
@@ -1399,7 +1412,23 @@ export default function Hogar() {
               ? t('hogar.presupuestoDe', { negocio: p.negocioNombre })
               : t('hogar.presupuestoPara', { mascota: p.mascotaNombre ?? '' }),
           detalle: t('hogar.presupuestoDetalle', {
-            total: p.total,
+            /* 🔴 **ACÁ VIAJABA UN NÚMERO CRUDO A UNA FRASE QUE LE PONÍA EL `$`
+               ADELANTE, y `verify:moneda` NO LO VEÍA:** su discriminador busca
+               las dos formas de formatear a mano —el redondeo a dos decimales
+               y la plantilla con el símbolo pegado— y esto no era ninguna de
+               las dos: el símbolo vivía en el DICCIONARIO y el número llegaba
+               crudo desde el código. ⇒ un
+               presupuesto de 45 se leía **«$45»**, sin decimales y sin miles,
+               en la primera fila del Hogar. *La fuga no estaba en el código:
+               estaba repartida entre el código y el diccionario, que es
+               justamente donde ningún grep de una sola cara la encuentra.*
+               Censadas las cuatro llaves con `$` pegado a un placeholder: ésta
+               era la única con consumidor. Las otras tres (`cuandoDesde`,
+               `cuandoPrecio`, `tamanoEstadiasDesde`) están MUERTAS —cero
+               consumidores, medido— y se les saca el `$` igual: *una llave
+               muerta con el patrón viejo adentro enseña el patrón viejo al
+               primero que la estrene.* */
+            total: formatearPrecio(p.total),
             mascota: p.mascotaNombre ?? '',
             fecha: fechaLargaHumana(p.venceEn.slice(0, 10), idioma),
           }),
@@ -1576,8 +1605,16 @@ export default function Hogar() {
             capa: 'cuidado',
             icono: 'hoy',
             titulo: t('hogar.recoCitaDe', { mascota: m.nombre }),
-            detalle: `${fechaCortaMono(pc.fecha, idioma)}${pc.hora ? ` · ${pc.hora}` : ''}`,
-            detalleMono: true,
+            /* 🔴 **`D-1096` · LA PRIMERA FILA DEL HOGAR DECÍA «15 sept 2026 ·
+               01:00».** Fecha mono con año + la hora cruda de la columna
+               `time`, y `detalleMono` encima. La firma pide «sáb 13 sep · 3:00
+               p. m.» y **el año sobra**: la cita que la familia tiene enfrente
+               es de este año, y el día de semana informa mucho más —decide por
+               «es sábado», no por «es el 13»—.
+               ⚠️ **`detalleMono` se apaga acá y no se borra la prop**: sigue
+               viva para lo que SÍ es voz de máquina (Ley 3). *Lo que cambió no
+               es la prop: es que una cita no es metadata.* */
+            detalle: fechaYHoraHumana(pc.fecha, pc.hora ?? null, idioma),
             onPress: () => router.push({ pathname: '/citas/[mascotaId]', params: { mascotaId: m.id, nombre: m.nombre } }),
           },
         ];
@@ -2280,7 +2317,11 @@ export default function Hogar() {
 
         const datoPaseo =
           rp.proxima !== null
-            ? fechaCortaMono(rp.proxima.fecha, idioma)
+            /* `D-1096` · el rail decía «14 sept 2026» y **salía cortado**
+               —«14 sept 20…»— en un cuadrado de tres por fila. La forma corta
+               del riel entra entera Y habla la voz de la familia: el ancho
+               dejó de ser un problema porque el año no estaba informando. */
+            ? fechaCortaHumana(rp.proxima.fecha, idioma)
             : rp.salidas_saldo > 0
               ? rp.salidas_saldo === 1
                 ? t('hogar.railSaldoUna')
@@ -2319,9 +2360,9 @@ export default function Hogar() {
             nombre: t('hogar.railEstetica'),
             dato:
               re.proxima !== null
-                ? fechaCortaMono(re.proxima.fecha, idioma)
+                ? fechaCortaHumana(re.proxima.fecha, idioma)
                 : esReciente(re.ultima_cerrada) && re.ultima_cerrada !== null
-                  ? fechaCortaMono(re.ultima_cerrada, idioma)
+                  ? fechaCortaHumana(re.ultima_cerrada, idioma)
                   : null,
             actividad: re.proxima !== null || esReciente(re.ultima_cerrada),
             fechaProxima: re.proxima?.fecha ?? null,
@@ -2334,9 +2375,9 @@ export default function Hogar() {
             nombre: t('hogar.railAdiestramiento'),
             dato:
               ra.proxima !== null
-                ? fechaCortaMono(ra.proxima.fecha, idioma)
+                ? fechaCortaHumana(ra.proxima.fecha, idioma)
                 : esReciente(ra.ultima_cerrada) && ra.ultima_cerrada !== null
-                  ? fechaCortaMono(ra.ultima_cerrada, idioma)
+                  ? fechaCortaHumana(ra.ultima_cerrada, idioma)
                   : null,
             actividad: ra.proxima !== null || esReciente(ra.ultima_cerrada),
             fechaProxima: ra.proxima?.fecha ?? null,
@@ -2350,9 +2391,9 @@ export default function Hogar() {
             // por-coordinar no tiene forma E4 (sin fecha) → sin dato
             dato:
               rv.proxima !== null
-                ? fechaCortaMono(rv.proxima.fecha, idioma)
+                ? fechaCortaHumana(rv.proxima.fecha, idioma)
                 : esReciente(rv.ultima_cerrada) && rv.ultima_cerrada !== null
-                  ? fechaCortaMono(rv.ultima_cerrada, idioma)
+                  ? fechaCortaHumana(rv.ultima_cerrada, idioma)
                   : null,
             actividad: rv.proxima !== null || rv.por_coordinar || esReciente(rv.ultima_cerrada),
             fechaProxima: rv.proxima?.fecha ?? null,
@@ -2381,9 +2422,9 @@ export default function Hogar() {
                la ACTIVIDAD, que es lo que enciende la celda. */
             dato:
               rg.proxima !== null
-                ? fechaCortaMono(rg.proxima.fecha, idioma)
+                ? fechaCortaHumana(rg.proxima.fecha, idioma)
                 : esReciente(rg.ultima_cerrada) && rg.ultima_cerrada !== null
-                  ? fechaCortaMono(rg.ultima_cerrada, idioma)
+                  ? fechaCortaHumana(rg.ultima_cerrada, idioma)
                   : null,
             actividad: rg.proxima !== null || rg.en_curso || esReciente(rg.ultima_cerrada),
             fechaProxima: rg.proxima?.fecha ?? null,

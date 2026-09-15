@@ -33,6 +33,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
   Boton,
   Celda,
   CeldaNavegacion,
@@ -77,7 +78,7 @@ import {
   type PlanPaseo,
   type EstadoVidaMascota,
 } from '@epetplace/api';
-import { fechaCortaMono, obtenerIdiomaActual } from '@epetplace/i18n';
+import { fechaYHoraHumana, horaHumana, formatearPrecio, fechaCortaMono, obtenerIdiomaActual } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
 import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
@@ -85,6 +86,7 @@ import { FiltroMascotas, FiltroPills } from '@/components/filtro-pills';
 import { CantoCurva } from '@/components/canto-curva';
 import { esHistorial, esProxima } from '@/lib/corte-agenda';
 import { DetalleCita } from '@/components/detalle-cita';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 // S60-A6 pieza 2 (D-366): el tap Agenda MURIÓ fusionado en Próximos —
 // enmienda DECLARADA de D-366, no reapertura del servicio cerrado.
@@ -95,6 +97,7 @@ function hoyLocal(): string {
 }
 
 export default function MisPaseos() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const { t } = useTraduccion();
@@ -278,7 +281,7 @@ export default function MisPaseos() {
       return;
     }
     setDetalle(null);
-    mostrar({ texto: t('suelto.cancelado', { monto: r.data.reembolso_monto.toFixed(2) }), variante: 'exito' });
+    mostrar({ texto: t('suelto.cancelado', { monto: formatearPrecio(r.data.reembolso_monto) }), variante: 'exito' });
     cargar();
   }
 
@@ -475,7 +478,30 @@ export default function MisPaseos() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Cabecera variante="empujada" titulo={t('plan.hubTitulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ **Los `ScrollView` verticales que había adentro se volvieron
+          `View`**: la hoja ya scrollea, y dos scrolls verticales anidados
+          dejan al de adentro sin alto propio. Su `contentContainerStyle` pasa
+          a `style` — *el relleno era del contenido, no del scroll.* El
+          `paddingBottom` con `insets.bottom` SE RETIRA: lo paga la hoja
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        scrollRef={scrollRef}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada" titulo={t('plan.hubTitulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+      >
 
       {planes === 'cargando' ? (
         <View style={{ padding: spacing[5] }}>
@@ -504,10 +530,7 @@ export default function MisPaseos() {
          un vacío DE SECCIÓN con su glifo y su voz. La composición vive;
          lo que cambia es qué dice la sección. */
       ) : (
-        <ScrollView
-          ref={scrollRef}
-          contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[4] }}
-        >
+        <View style={{ padding: spacing[4], gap: spacing[4] }}>
           {/* r12 · LOS TRES EJES DEL LOG (el CTA de agendar se fue al
               PIE FIJO — abajo). ① la MASCOTA es el PRIMER filtro (con
               su regla L-b adentro: pleno con 2-3, barrido con 4+). */}
@@ -786,7 +809,7 @@ export default function MisPaseos() {
                               ? 'paquete.citaDePaquete'
                               : 'suelto.citaSuelta',
                         )} · ${f.cita.duracion_minutos} min`}
-                        metadataMono={`${fechaCortaMono(f.cita.fecha, idioma)} · ${f.cita.hora.slice(0, 5)}`}
+                        metadataMono={fechaYHoraHumana(f.cita.fecha, f.cita.hora, idioma)}
                         /* 🔴 S105-C · LA MARCA DE CANCELADA, Y CURA UNA FILA
                            QUE MENTÍA. `cerradaP` manda al historial todo lo
                            que no es `confirmada`, y esta fila **no pintaba el
@@ -884,8 +907,10 @@ export default function MisPaseos() {
                                     : 'suelto.citaSuelta',
                               )}
                             </Texto>
-                            <Texto variante="dato" numberOfLines={1}>
-                              {`${fechaCortaMono(c.fecha, idioma)} · ${c.hora.slice(0, 5)} · ${c.duracion_minutos} min`}
+                            {/* `D-1096` · sale de mono: la fila dice cuándo
+                                sale su perro, no un dato de máquina. */}
+                            <Texto variante="apoyo" numberOfLines={1}>
+                              {`${fechaYHoraHumana(c.fecha, c.hora, idioma)} · ${c.duracion_minutos} min`}
                             </Texto>
                           </View>
                           <Insignia
@@ -923,7 +948,7 @@ export default function MisPaseos() {
               )}
             </View>
           )}
-        </ScrollView>
+        </View>
       )}
 
       {/* r12-4 · AGENDAR — PIE FIJO, como el "ver quién puede" de la
@@ -1071,7 +1096,7 @@ export default function MisPaseos() {
             <Celda
               titulo={fechaCortaMono(detalle.fecha, idioma)}
               subtitulo={t(detalle.origen === 'paquete' ? 'paquete.citaDePaquete' : 'suelto.citaSuelta')}
-              metadataMono={`${detalle.hora.slice(0, 5)} · ${detalle.duracion_minutos} min${detalle.precio !== null ? ` · $${detalle.precio.toFixed(2)}` : ''}`}
+              metadataMono={`${horaHumana(detalle.hora, idioma)} · ${detalle.duracion_minutos} min${detalle.precio !== null ? ` · ${formatearPrecio(detalle.precio)}` : ''}`}
             />
             {/* 🔴 S105-C · UNA CITA CANCELADA NO OFRECE NADA, Y CURA UN
                 TERCER DEFECTO que apareció midiendo los otros dos: acá abajo
@@ -1183,6 +1208,7 @@ export default function MisPaseos() {
           ) : null}
         </HojaScroll>
       </Hoja>
+      </HojaContenido>
     </View>
   );
 }

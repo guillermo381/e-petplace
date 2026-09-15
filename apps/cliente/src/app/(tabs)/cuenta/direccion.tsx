@@ -11,6 +11,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
   Boton,
   Cabecera,
   Esqueleto,
@@ -25,8 +26,10 @@ import { obtenerDireccionHogar, type DireccionHogar } from '@epetplace/api';
 
 import { DireccionHogarForm } from '@/components/direccion-hogar-form';
 import { useTraduccion } from '@/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 export default function DireccionCuenta() {
+  const cabecera = useAltoDeCabecera('empujada');
   const router = useRouter();
   const { theme } = useTheme();
   const { t } = useTraduccion();
@@ -55,7 +58,30 @@ export default function DireccionCuenta() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Cabecera variante="empujada" titulo={t('direccion.titulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ **Los `ScrollView` verticales que había adentro se volvieron
+          `View`**: la hoja ya scrollea, y dos scrolls verticales anidados
+          dejan al de adentro sin alto propio. Su `contentContainerStyle` pasa
+          a `style` — *el relleno era del contenido, no del scroll.* El
+          `paddingBottom` con `insets.bottom` SE RETIRA: lo paga la hoja
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        scroll={{ keyboardShouldPersistTaps: 'handled' }}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada" titulo={t('direccion.titulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+      >
 
       {estado === 'cargando' ? (
         <View style={{ padding: spacing[5] }}>
@@ -87,10 +113,7 @@ export default function DireccionCuenta() {
         // Cura S56 (orden founder): el campo enfocado SIEMPRE visible —
         // el teclado empuja el scroll, no lo tapa (Android e iOS).
         <EvitaTeclado>
-          <ScrollView
-            contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[4] }}
-            keyboardShouldPersistTaps="handled"
-          >
+          <View style={{ padding: spacing[5], gap: spacing[4] }}>
             <Text
               style={{
                 fontFamily: typography.family.sans.regular,
@@ -102,9 +125,10 @@ export default function DireccionCuenta() {
               {t('direccion.voz')}
             </Text>
             <DireccionHogarForm inicial={direccion} onGuardada={() => router.back()} />
-          </ScrollView>
+          </View>
         </EvitaTeclado>
       )}
+      </HojaContenido>
     </View>
   );
 }

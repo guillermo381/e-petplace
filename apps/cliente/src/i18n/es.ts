@@ -646,7 +646,7 @@ export const clienteEs = {
     venceEnMin: 'Vence en {{n}} min',
     presupuestoDe: 'Presupuesto de {{negocio}}',
     presupuestoPara: 'Presupuesto para {{mascota}}',
-    presupuestoDetalle: '${{total}} por {{mascota}} · vence el {{fecha}}',
+    presupuestoDetalle: '{{total}} por {{mascota}} · vence el {{fecha}}',
     porCoordinarTitulo: 'La cita de {{mascota}} espera fecha',
     railPaseos: 'Paseos',
     railEstetica: 'Estética',
@@ -1343,8 +1343,8 @@ export const clienteEs = {
     verQuienPuede: 'Ver quién puede',
     // S55-B4 — el CUÁNDO tipo Teams: duración → día → grilla de inicios
     cuandoSalidaBano: 'La salida al baño.',
-    cuandoDesde: 'desde ${{precio}}',
-    cuandoPrecio: '${{precio}}',
+    cuandoDesde: 'desde {{precio}}',
+    cuandoPrecio: '{{precio}}',
     // r15 · EL DÍA CERRADO — el estado que hasta hoy no se podía
     // decir: "cierra los domingos" viajaba con la voz de "no hay lugar".
     // r15-bis · LA MASCOTA QUE NO RESUELVE — la falla RUIDOSA. Antes
@@ -1479,8 +1479,8 @@ export const clienteEs = {
     titulo: 'Veterinaria',
     paraQuien: '¿Para quién es?',
     servicioEtiqueta: '¿Qué necesita?',
-    precioDesde: 'Para {{nombre}}: desde ${{precio}}',
-    precioExacto: 'Para {{nombre}}: ${{precio}}',
+    precioDesde: 'Para {{nombre}}: desde {{precio}}',
+    precioExacto: 'Para {{nombre}}: {{precio}}',
     /* 🔴 Ocupa el lugar del precio cuando todavía no se eligió servicio: sin
        esto, retirar el default dejaba un hueco silencioso donde antes había
        un precio — el usuario vería que algo falta y no QUÉ. */
@@ -1850,8 +1850,8 @@ export const clienteEs = {
     dondeEtiqueta: '¿Dónde?',
     modalidadLocal: 'En el local',
     modalidadDomicilio: 'A domicilio',
-    modalidadDomicilioRecargo: 'A domicilio · +${{recargo}}',
-    modalidadDomicilioRecargoDesde: 'A domicilio · desde +${{recargo}}',
+    modalidadDomicilioRecargo: 'A domicilio · +{{recargo}}',
+    modalidadDomicilioRecargoDesde: 'A domicilio · desde +{{recargo}}',
     dondeDomicilioTitulo: 'A dónde vamos',
     direccionDomicilioVoz: 'Para ir a tu casa necesitamos tu dirección. Se guarda una vez y la puedes editar siempre.',
     desgloseServicio: 'servicio',
@@ -1859,15 +1859,15 @@ export const clienteEs = {
     desgloseDomicilio: 'domicilio',
     // S61-A5 cura 3 — el peldaño 0 sin mascota (LOTE S61, GATE PENDIENTE;
     // la letra del pedido decía "Contanos" — transpuesta a tuteo, regla 27)
-    precioDesdePublico: 'Desde ${{precio}} — el precio final es por su talla',
+    precioDesdePublico: 'Desde {{precio}} — el precio final es por su talla',
     horariosSinMascotaTitulo: 'Cuéntanos para quién es',
     horariosSinMascotaDetalle: 'Elígela arriba y te mostramos los horarios con su precio.',
     // el CUÁNDO adaptado: servicio → hora (la duración es consecuencia)
     vacioTitulo: 'Todavía no hay groomers ofreciendo',
     vacioDetalle: 'Un groomer acá baña, corta y documenta cada sesión en su historia. Cuando uno active su oferta real, lo verás con precios de verdad.',
     servicioEtiqueta: 'Servicio',
-    precioDesde: 'Para {{nombre}}: desde ${{precio}}',
-    precioExacto: 'Para {{nombre}}: ${{precio}}',
+    precioDesde: 'Para {{nombre}}: desde {{precio}}',
+    precioExacto: 'Para {{nombre}}: {{precio}}',
     sinInicios: 'Ese día no hay horarios libres. Prueba con otro día.',
     // el QUIÉN con el precio resuelto + el DÓNDE (v1 en el local)
     ventanaPara: 'Grooming para {{nombre}}',
@@ -2106,7 +2106,7 @@ export const clienteEs = {
     ventanasVoz: 'Puedes cancelar hasta un día antes; después, solo reagendarlo. Con menos de 2 horas, el paseo se pierde.',
     reagendar: 'Reagendar',
     cancelar: 'Cancelar el paseo',
-    cancelado: 'Paseo cancelado — devolución simulada de ${{monto}} registrada.',
+    cancelado: 'Paseo cancelado — devolución simulada de {{monto}} registrada.',
     reagendado: 'Listo — el paseo se movió.',
     reagendarTitulo: 'Reagendar este paseo',
     reagendarVoz: 'A otro horario real de tu mismo paseador. Tu pago viaja con el paseo.',
@@ -2274,7 +2274,7 @@ export const clienteEs = {
     verificadoTitulo: '¿Qué significa «verificado»?',
     verificadoCuerpo:
       'Alguien de e-PetPlace revisó quién es este refugio antes de dejarlo publicar. No es una garantía sobre el animal ni sobre la adopción: es que sabemos con quién estás hablando.',
-    bono: 'Bono de adopción: ${{monto}} · {{destino}}',
+    bono: 'Bono de adopción: {{monto}} · {{destino}}',
     bonoDestinoSinDeclarar: 'destino no declarado',
     bonoTitulo: '¿Qué es el bono de adopción?',
     bonoCuerpo:
@@ -3258,7 +3258,7 @@ export const clienteEs = {
     // alimento y que casi ningún catálogo pone. Solo aparece cuando la variante
     // declara su peso: sin `peso_kg` no hay cuenta, y una cuenta inventada
     // sobre un peso ausente sería peor que no decir nada.
-    porKilo: '${{monto}}/kg',
+    porKilo: '{{monto}}/kg',
 
     // 🔴 S100-C — LAS SEÑALES CORTAS DE LA TARJETA (prop `alergia` de B).
     // CORTAS a propósito: en media pantalla una frase con el nombre de la
@@ -4185,7 +4185,7 @@ export const clienteEs = {
     queDiaInicio: '¿Desde qué día?',
     cuantasEstadias: '¿Cuántas estadías?',
     tamanoEstadias: '{{n}} estadías',
-    tamanoEstadiasDesde: '{{n}} · desde ${{precio}}',
+    tamanoEstadiasDesde: '{{n}} · desde {{precio}}',
     lugaresTitulo: 'Lugares con cupo ese día',
     /* ⭐ S108-C · QUÉ mide el número del pie. Va como segunda línea del
        precio, y es lo que hace que el «desde» se pinte: la pieza lo cuelga
@@ -4193,14 +4193,14 @@ export const clienteEs = {
     unidadDia: 'Un día',
     unidadPaquete: 'Paquete de {{n}} estadías',
     unidadMes: 'Al mes',
-    porDia: '${{precio}} por día',
+    porDia: '{{precio}} por día',
     /* El cupo de ESE día. El singular tiene key propia (patrón del saldo
        del paquete: la pluralización no es una interpolación). */
     cupo: 'Quedan {{n}} lugares ese día',
     contextoPara: 'Guardería para {{nombre}}',
     cupoUno: 'Queda 1 lugar ese día',
-    porMes: '${{precio}} por mes',
-    porPaquete: '${{precio}} el paquete',
+    porMes: '{{precio}} por mes',
+    porPaquete: '{{precio}} el paquete',
     sinElegiblesTitulo: 'Todavía no puedes usar la guardería',
     sinElegiblesDetalle: 'La guardería es para perros y gatos. Cuando registres uno, va a aparecer acá.',
     diaCerrado: 'No abren',
@@ -4318,7 +4318,7 @@ export const clienteEs = {
     esperaTitulo: 'Estamos armando tu plan',
     esperaCuerpo: 'Dejamos tus salidas agendadas para todo el período.',
     exitoTitulo: 'Tu plan quedó activo',
-    exitoDetalle: 'Pagas ${{precio}} al mes y tus salidas quedan agendadas. Lo administras desde Cuenta › Pagos recurrentes y suscripciones.',
+    exitoDetalle: 'Pagas {{precio}} al mes y tus salidas quedan agendadas. Lo administras desde Cuenta › Pagos recurrentes y suscripciones.',
   },
   /* ⭐ S109-C · El destino del LINK MENSUAL. Voz de familia porque quien llega
      viene de un correo: *un código de seis dígitos sin decir qué se está
@@ -4343,7 +4343,7 @@ export const clienteEs = {
     planTitulo: 'Tu plan mensual',
     /* ⭐ S108-C · Prometía cancelar y **no había puerta** (la RPC existía sin
        wrapper ni pantalla). Hoy la hay, y la frase dice DÓNDE. */
-    planDetalle: '${{precio}} al mes. Se renueva solo hasta que lo canceles desde Cuenta.',
+    planDetalle: '{{precio}} al mes. Se renueva solo hasta que lo canceles desde Cuenta.',
     /* ⭐ S108-C · Los dos paquetes que no están listos, cada uno con su voz.
        *«Falta pagarlo» y «se venció el tiempo para pagarlo» son dos estados
        distintos y ninguno puede quedar sin decirse.* */
@@ -4444,7 +4444,7 @@ export const clienteEs = {
     noCargoDetalle: 'No es que no tengas: no pudimos preguntar. Prueba de nuevo.',
     guarderiaPlan: 'Plan mensual de guardería',
     paseoPlan: 'Plan mensual de paseos',
-    alMes: '${{precio}} al mes',
+    alMes: '{{precio}} al mes',
     /* ⭐ S108-C · **La fecha del cobro vuelve, con el dato correcto.** A la
        publicó resuelta por el servidor (`proximoCobro`), con la regla que
        recupera el día original — 31-ene → 28-feb → **31-mar**. Ya no sale de
@@ -4838,8 +4838,8 @@ export const clienteEs = {
     enviarMensaje: 'Enviar',
     reintentar: 'Reintentar',
     // §4 · LA PLATA
-    montoTotal: 'Te devolvemos ${{monto}} — el total de este servicio.',
-    montoParcial: 'Te devolvemos ${{monto}} — la parte que no se hizo.',
+    montoTotal: 'Te devolvemos {{monto}} — el total de este servicio.',
+    montoParcial: 'Te devolvemos {{monto}} — la parte que no se hizo.',
     bancoTitulo: 'A tu banco',
     bancoVoz: 'Vuelve a la tarjeta con la que pagaste.',
     bancoTiempo: 'Depende de tu banco: en promedio 15 días hábiles.',

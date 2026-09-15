@@ -74,7 +74,7 @@ import {
   type CausaSinGuarderias,
   type RequisitosGuarderia,
 } from '@epetplace/api';
-import { obtenerIdiomaActual } from '@epetplace/i18n';
+import { formatearPrecio, obtenerIdiomaActual } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
 import { CabezalOficio, PieReserva } from '@/components/reserva-piezas';
@@ -421,10 +421,10 @@ export default function ElegirGuarderia() {
   const total =
     modalidad === 'paquete'
       ? tamano !== null && precioPorTamano[tamano] !== undefined
-        ? `$ ${precioPorTamano[tamano].toFixed(2)}`
+        ? formatearPrecio(precioPorTamano[tamano])
         : null
       : resumen.fase === 'listo' && resumen.precioDesde !== null
-        ? `$ ${resumen.precioDesde.toFixed(2)}`
+        ? formatearPrecio(resumen.precioDesde)
         : null;
 
   /**

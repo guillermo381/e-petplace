@@ -99,7 +99,7 @@ import {
   type PedidoCreado,
   type PromesaEntrega,
 } from '@epetplace/api';
-import { fechaDiaSemanaHumana, diaSemanaCorto } from '@epetplace/i18n';
+import { formatearPrecio, fechaDiaSemanaHumana, diaSemanaCorto } from '@epetplace/i18n';
 import { DireccionHogarForm } from '@/components/direccion-hogar-form';
 import { FilaMonto } from '@/components/despensa-piezas';
 import { agruparPorVendedor, useCarrito, vaciarCarrito } from '@/lib/despensa/carrito';
@@ -848,7 +848,7 @@ export default function DespensaCheckout() {
     };
   }, [fase, items, receptor, telefono, direccion, metodo, instrucciones]);
 
-  const dinero = (v: number | null) => (v !== null ? `$ ${v.toFixed(2)}` : null);
+  const dinero = (v: number | null) => (v !== null ? formatearPrecio(v) : null);
 
   /** 🔴 EL BACK POR GESTO NO ESQUIVA LA CANCELACIÓN. El chevron del
    *  encabezado pasa por `volverAEditar`, pero el gesto del sistema y el

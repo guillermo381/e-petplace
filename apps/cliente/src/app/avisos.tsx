@@ -31,6 +31,7 @@ import Svg from 'react-native-svg';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
   Boton,
   Cabecera,
   Esqueleto,
@@ -55,11 +56,13 @@ import {
 
 import { useTraduccion } from '@/i18n';
 import { destinoDeAviso, type DestinoAviso } from '@/lib/destino-aviso';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 /** Lado de la huella-marcador de no leído: presencia, jamás número. */
 const LADO_HUELLA = 10;
 
 export default function Avisos() {
+  const cabecera = useAltoDeCabecera('empujada');
   const router = useRouter();
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
@@ -133,9 +136,26 @@ export default function Avisos() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Cabecera variante="empujada" titulo={t('avisos.titulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
-
-      <ScrollView contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6] }}>
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ El `paddingBottom` con `insets.bottom` que había acá SE RETIRA: lo
+          paga la hoja en su propio render, y sumarlo sería pagarlo dos veces
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera variante="empujada" titulo={t('avisos.titulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        scroll={{ contentContainerStyle: { padding: spacing[5], } }}
+      >
         {estado === 'cargando' ? (
           <EsqueletoGrupo>
             <View style={{ gap: spacing[3] }}>
@@ -217,7 +237,7 @@ export default function Avisos() {
             })}
           </Tarjeta>
         )}
-      </ScrollView>
+      </HojaContenido>
     </View>
   );
 }

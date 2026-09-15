@@ -43,6 +43,7 @@ import { Pressable, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
   BarraEscribir,
   EscaleraSolicitud,
   Boton,
@@ -91,6 +92,7 @@ import {
 
 import { useTraduccion } from '@/i18n';
 import { marcarLeidoLocal } from '@/lib/pendientes-adopcion';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 /** Los borradores vivos, por hilo. **Sólo en memoria**: sobrevive a la
  *  pantalla y no al cierre de la app — que es lo que §2.4 pide («cuando vuelvo
@@ -104,6 +106,7 @@ type Estado =
   | { fase: 'listo'; hilo: MiSolicitud; cara: string | null };
 
 export default function HiloSolicitud() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { solicitudId } = useLocalSearchParams<{ solicitudId: string }>();
   const { theme } = useTheme();
   const { t } = useTraduccion();
@@ -547,12 +550,26 @@ export default function HiloSolicitud() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Cabecera
-        variante="empujada"
-        titulo={estado.fase === 'listo' ? estado.hilo.mascotaNombre : t('hiloAdopcion.titulo')}
-        onVolver={() => router.back()}
-        etiquetaVolver={t('comun.volver')}
-      />
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={estado.fase === 'listo' ? estado.hilo.mascotaNombre : t('hiloAdopcion.titulo')}
+              onVolver={() => router.back()}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+      >
 
       {estado.fase === 'cargando' ? (
         <View style={{ padding: spacing[5] }}>
@@ -784,6 +801,7 @@ export default function HiloSolicitud() {
       >
         <Texto variante="cuerpo">{t('hiloAdopcion.desistirCuerpo')}</Texto>
       </HojaConfirmacionDestructiva>
+      </HojaContenido>
     </SafeAreaView>
   );
 }

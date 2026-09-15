@@ -84,7 +84,7 @@ import {
   useTheme,
   Cabecera,
 } from '@epetplace/ui';
-import {
+import { formatearPrecio,
   precioPorKg,
   fechaDiaSemanaHumana,
   MONEDA_FALLBACK,
@@ -822,7 +822,7 @@ export default function DespensaProducto() {
                 etiqueta={
                   variante !== null
                     ? t('despensa.agregarConPrecio', {
-                        precio: `$ ${(variante.precio * cantidad).toFixed(2)}`,
+                        precio: formatearPrecio((variante.precio * cantidad)),
                       })
                     : t('despensa.agregar')
                 }
@@ -1052,7 +1052,7 @@ export default function DespensaProducto() {
                      */
                     etiqueta:
                       comprables.filter((o) => o.presentacion === v.presentacion).length > 1
-                        ? `${v.presentacion} · $ ${v.precio.toFixed(2)}`
+                        ? `${v.presentacion} · ${formatearPrecio(v.precio)}`
                         : v.presentacion,
                   }))}
                   seleccionada={varianteId ?? undefined}

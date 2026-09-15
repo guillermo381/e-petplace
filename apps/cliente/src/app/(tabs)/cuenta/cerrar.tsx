@@ -49,6 +49,7 @@ import { Linking, ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
   Cabecera,
   Boton,
   CeldaNavegacion,
@@ -61,6 +62,7 @@ import { cerrarSesion, solicitarCierreCuenta } from '@epetplace/api';
 import { fechaLargaHumana } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 const CORREO_PRIVACIDAD = 'privacidad@epetplace.com';
 
@@ -71,6 +73,7 @@ type Resultado =
   | { tipo: 'error'; texto: string };
 
 export default function CerrarCuenta() {
+  const cabecera = useAltoDeCabecera('empujada');
   const router = useRouter();
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
@@ -108,14 +111,27 @@ export default function CerrarCuenta() {
   if (resultado !== null) {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Cabecera variante="empujada" titulo={t('cerrarCuenta.titulo')} />
-        <ScrollView
-          contentContainerStyle={{
-            padding: spacing[5],
-            paddingBottom: insets.bottom + spacing[8],
-            gap: spacing[4],
-          }}
+        {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada" titulo={t('cerrarCuenta.titulo')}
+                presentacion="fondo"
+              />
+            </View>
+          }
         >
+        <View style={{
+            padding: spacing[5],
+            gap: spacing[4],
+          }}>
           {resultado.tipo === 'listo' && (
             <>
               <Texto variante="titulo">
@@ -158,7 +174,8 @@ export default function CerrarCuenta() {
               />
             </>
           )}
-        </ScrollView>
+        </View>
+        </HojaContenido>
       </View>
     );
   }
@@ -167,14 +184,27 @@ export default function CerrarCuenta() {
   if (paso === 'confirmar') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Cabecera variante="empujada" titulo={t('cerrarCuenta.titulo')} onVolver={() => setPaso('info')} etiquetaVolver={t('comun.volver')} />
-        <ScrollView
-          contentContainerStyle={{
-            padding: spacing[5],
-            paddingBottom: insets.bottom + spacing[8],
-            gap: spacing[4],
-          }}
+        {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada" titulo={t('cerrarCuenta.titulo')} onVolver={() => setPaso('info')} etiquetaVolver={t('comun.volver')}
+                presentacion="fondo"
+              />
+            </View>
+          }
         >
+        <View style={{
+            padding: spacing[5],
+            gap: spacing[4],
+          }}>
           <Texto variante="titulo">{t('cerrarCuenta.confirmarTitulo')}</Texto>
           {/* El mensaje COMPLETO antes del toque: pierde el acceso hoy, tiene
               30 días para volver por el correo, y después no podrá entrar a
@@ -201,7 +231,8 @@ export default function CerrarCuenta() {
             />
             <Boton variante="ghost" etiqueta={t('cerrarCuenta.volver')} bloque onPress={() => setPaso('info')} />
           </View>
-        </ScrollView>
+        </View>
+        </HojaContenido>
       </View>
     );
   }
@@ -209,14 +240,27 @@ export default function CerrarCuenta() {
   // ── PASO 1 · QUÉ SE VA / QUÉ QUEDA ─────────────────────────────────────
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Cabecera variante="empujada" titulo={t('cerrarCuenta.titulo')} onVolver={() => router.back()} etiquetaVolver={t('comun.volver')} />
-      <ScrollView
-        contentContainerStyle={{
-          padding: spacing[5],
-          paddingBottom: insets.bottom + spacing[8],
-          gap: spacing[5],
-        }}
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada" titulo={t('cerrarCuenta.titulo')} onVolver={() => router.back()} etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
       >
+      <View style={{
+          padding: spacing[5],
+          gap: spacing[5],
+        }}>
         <Texto variante="cuerpo" color="secondary">
           {t('cerrarCuenta.intro')}
         </Texto>
@@ -254,7 +298,8 @@ export default function CerrarCuenta() {
         <View style={{ paddingTop: spacing[2] }}>
           <Boton variante="secundario" etiqueta={t('cerrarCuenta.continuar')} bloque onPress={() => setPaso('confirmar')} />
         </View>
-      </ScrollView>
+      </View>
+      </HojaContenido>
     </View>
   );
 }

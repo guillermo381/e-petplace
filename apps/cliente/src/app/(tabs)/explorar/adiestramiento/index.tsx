@@ -53,6 +53,7 @@ import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
 import { FiltroMascotas } from '@/components/filtro-pills';
 import { CabezalOficio, GrillaElegir, PieReserva, SelectorDia, SinQuienReservar } from '@/components/reserva-piezas';
+import { formatearPrecio } from '@epetplace/i18n';
 
 function fechaLocalISO(d: Date): string {
   return new Intl.DateTimeFormat('en-CA').format(d);
@@ -465,7 +466,7 @@ export default function AdiestramientoCuando() {
              🔴 Y `varia` es `true` en cuanto hay MÁS DE UNA forma: con dos
              precios distintos el número deja de ser el precio y pasa a ser un
              punto de partida. */
-          total={precioDesde !== null ? `$ ${precioDesde.toFixed(2)}` : null}
+          total={precioDesde !== null ? formatearPrecio(precioDesde) : null}
           totalDesde={ofertaPublica.length > 1 || ofertaPublica.some((o) => o.varia)}
           cuando={hora !== null ? `${dias.find((d) => d.iso === dia)?.corta ?? ''} · ${hora}` : null}
           etiqueta={t('explorar.verQuienPuede')}

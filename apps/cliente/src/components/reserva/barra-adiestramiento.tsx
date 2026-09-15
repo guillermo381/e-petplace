@@ -58,6 +58,7 @@ import { useTraduccion } from '@/i18n';
 import { useReservaAdiestramiento } from '@/lib/reserva/adiestramiento';
 import { hoyLocal } from '@/lib/corte-agenda';
 import { vozOfertaAdiestramiento } from '@/lib/adiestramiento-voz';
+import { formatearPrecio } from '@epetplace/i18n';
 
 export function BarraAdiestramiento({
   ofertaId,
@@ -158,7 +159,7 @@ export function BarraAdiestramiento({
                 <Celda
                   titulo={vozOfertaAdiestramiento(o, t)}
                   subtitulo={t('adiestramiento.duracionMin', { n: String(o.duracion_minutos) })}
-                  metadataMono={`$${o.precio.toFixed(2)}`}
+                  metadataMono={formatearPrecio(o.precio)}
                   interactiva
                   accessibilityRole="button"
                   onPress={() => tomar(o)}

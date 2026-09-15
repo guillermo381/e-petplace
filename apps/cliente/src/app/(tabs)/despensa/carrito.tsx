@@ -79,6 +79,7 @@ import {
 import { decidirTope } from '@/lib/despensa/tope-de-compra';
 import { useTraduccion } from '@/i18n';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
+import { formatearPrecio } from '@epetplace/i18n';
 
 /** Tres fases, jamás dos (L-218: `[]` es TRES situaciones distintas —
  *  cargando, error y de verdad no hay — y decidir con `length === 0`
@@ -415,7 +416,7 @@ export default function DespensaCarrito() {
                   subtitulo={[item.marca, item.presentacion]
                     .filter((x) => x !== null && x !== '')
                     .join(' · ')}
-                  metadataMono={`$ ${item.precio.toFixed(2)}`}
+                  metadataMono={formatearPrecio(item.precio)}
                 />
 
                 {/* 🔴 A-01 · LO QUE LE PASÓ A ESTE ÍTEM MIENTRAS ESTABA GUARDADO.
@@ -439,7 +440,7 @@ export default function DespensaCarrito() {
                   <View style={{ paddingHorizontal: spacing[5] }}>
                     <Texto variante="apoyo">
                       {t('despensa.itemPrecioCambio', {
-                        precio: `$ ${(precioNuevoDe(item) ?? 0).toFixed(2)}`,
+                        precio: formatearPrecio((precioNuevoDe(item) ?? 0)),
                       })}
                     </Texto>
                   </View>

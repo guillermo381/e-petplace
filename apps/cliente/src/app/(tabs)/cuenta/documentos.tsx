@@ -30,6 +30,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
   Cabecera,
   Esqueleto,
   EsqueletoGrupo,
@@ -58,6 +59,7 @@ import { PAPELES_DE_MASCOTA, componerPapeles } from '@/lib/papeles';
 import { abrirReceta, resolverDescarga, type Descarga } from '@/lib/descarga-papel';
 import { FilaDocumento } from '@/components/fila-documento';
 import { HojaReceta } from '@/components/hoja-receta';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 interface MascotaConFoto {
   id: string;
@@ -85,6 +87,7 @@ function TituloBloque({ texto }: { texto: string }) {
 }
 
 export default function DocumentosDelHogar() {
+  const cabecera = useAltoDeCabecera('empujada');
   const router = useRouter();
   const { theme } = useTheme();
   const { t } = useTraduccion();
@@ -201,18 +204,31 @@ export default function DocumentosDelHogar() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Cabecera
-        variante="empujada"
-        titulo={t('documentos.titulo')}
-        onVolver={() => router.back()}
-        etiquetaVolver={t('comun.volver')}
-      />
-
-      <ScrollView
-        contentContainerStyle={{
-          paddingBottom: insets.bottom + spacing[6],
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ El `paddingBottom` con `insets.bottom` que había acá SE RETIRA: lo
+          paga la hoja en su propio render, y sumarlo sería pagarlo dos veces
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={t('documentos.titulo')}
+              onVolver={() => router.back()}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        scroll={{ contentContainerStyle: {
           gap: spacing[5],
-        }}
+        } }}
       >
         {mascotas === 'cargando' ? (
           <View style={{ padding: spacing[5] }}>
@@ -278,7 +294,7 @@ export default function DocumentosDelHogar() {
             ))}
           </>
         )}
-      </ScrollView>
+      </HojaContenido>
 
       <HojaReceta
         consultas={eligiendo?.consultas ?? null}

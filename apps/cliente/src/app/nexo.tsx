@@ -26,6 +26,7 @@ import {useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
+  HojaContenido,
   Cabecera,
   AvisoAnticipacion,
   BurbujaMensaje,
@@ -68,6 +69,7 @@ import { fechaCortaMono, horaCortaDeMensaje, type IdiomaSoportado } from '@epetp
 import { useTraduccion } from '@/i18n';
 import { esMemorial } from '@/lib/memorial';
 import { useEstadoVida } from '@/lib/postventa/useEstadoVida';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 /** Un turno dibujado. El hilo mezcla **lo que se guardó** (viene del servidor)
  *  con **lo que acaba de pasar**, y por eso el id es local: dos fuentes en una
@@ -95,6 +97,7 @@ type Linea = {
 const hora = (idioma: IdiomaSoportado) => horaCortaDeMensaje(new Date().toISOString(), idioma);
 
 export default function Nexo() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { t, idioma } = useTraduccion();
   const router = useRouter();
   const aviso = useAviso();
@@ -276,8 +279,25 @@ export default function Nexo() {
   if (contexto === 'error') {
     return (
       <View style={{ flex: 1 }}>
-        <Cabecera variante="empujada" titulo={t('nexo.titulo')} />
+        {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada" titulo={t('nexo.titulo')}
+                presentacion="fondo"
+              />
+            </View>
+          }
+        >
         <EstadoVacio titulo={t('nexo.sinContexto')} descripcion={t('nexo.sinContextoDetalle')} />
+        </HojaContenido>
       </View>
     );
   }
@@ -322,8 +342,25 @@ export default function Nexo() {
   if (enMemorial) {
     return (
       <View style={{ flex: 1 }}>
-        <Cabecera variante="empujada" titulo={nombreVivo ?? t('nexo.titulo')} />
+        {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada" titulo={nombreVivo ?? t('nexo.titulo')}
+                presentacion="fondo"
+              />
+            </View>
+          }
+        >
         <EstadoVacio titulo={t('nexo.enMemorial')} />
+        </HojaContenido>
       </View>
     );
   }
@@ -331,12 +368,24 @@ export default function Nexo() {
   return (
     <EvitaTeclado>
       <View style={{ flex: 1 }}>
-        <Cabecera variante="empujada" titulo={nombreVivo ?? t('nexo.titulo')} />
-        <ScrollView
-          ref={scroll}
-          onContentSizeChange={() => scroll.current?.scrollToEnd({ animated: true })}
-          contentContainerStyle={{ padding: spacing[5], gap: spacing[4] }}
+        {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada" titulo={nombreVivo ?? t('nexo.titulo')}
+                presentacion="fondo"
+              />
+            </View>
+          }
         >
+        <View style={{ padding: spacing[5], gap: spacing[4] }}>
           {/* 🔴 Sin nombre **no se dibuja la invitación**: «Pregúntame algo de
               ,» es peor que no decir nada. Cuando el contexto llega, la frase
               aparece entera. */}
@@ -493,7 +542,7 @@ export default function Nexo() {
               campo: t('nexo.memoriaCampo'),
             }}
           />
-        </ScrollView>
+        </View>
 
         {/* 🔴 **EL BOTÓN DE ENVIAR, A LA VISTA** (pasada del founder). Antes
             sólo se enviaba con la tecla del teclado: *en un teclado sin «enviar»
@@ -585,6 +634,7 @@ export default function Nexo() {
         <View style={{ paddingHorizontal: spacing[5] }}>
           <PieDeCampo />
         </View>
+        </HojaContenido>
       </View>
     </EvitaTeclado>
   );

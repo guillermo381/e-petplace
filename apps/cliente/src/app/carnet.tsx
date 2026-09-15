@@ -32,6 +32,7 @@ import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
   EsperaLarga,
   Boton,
   Campo,
@@ -63,6 +64,7 @@ import { borrarFotoMascota, leerBase64, subirFotoMascota } from '@/lib/subir-ava
 import { faltaParaConfirmar } from '@/lib/carnet/confirmable';
 import type { ConfianzaExtraccion } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 // 1600px: el texto del carnet tiene que seguir siendo legible para el
 // modelo (800 de avatar lo destruye); a calidad 0.7 queda en ~300-500KB.
@@ -139,6 +141,7 @@ function hoyIso(): string {
 }
 
 export default function CarnetDeVacunas() {
+  const cabecera = useAltoDeCabecera('empujada');
   const router = useRouter();
   const { theme } = useTheme();
   const { t } = useTraduccion();
@@ -429,7 +432,30 @@ function camposDe(
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Cabecera variante="empujada" titulo={t('carnet.titulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ **Los `ScrollView` verticales que había adentro se volvieron
+          `View`**: la hoja ya scrollea, y dos scrolls verticales anidados
+          dejan al de adentro sin alto propio. Su `contentContainerStyle` pasa
+          a `style` — *el relleno era del contenido, no del scroll.* El
+          `paddingBottom` con `insets.bottom` SE RETIRA: lo paga la hoja
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        scrollRef={scrollRef}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada" titulo={t('carnet.titulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+      >
 
       {/* B2 · captura */}
       {fase.t === 'captura' && (
@@ -489,10 +515,7 @@ function camposDe(
 
       {/* B4 · revisión — LA red */}
       {fase.t === 'revision' && foto && (
-        <ScrollView
-          ref={scrollRef}
-          contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[4] }}
-        >
+        <View style={{ padding: spacing[5], gap: spacing[4] }}>
           {/* el carnet PRESIDE — tap → VisorFoto */}
           <Pressable
             onPress={() => setVisorAbierto(true)}
@@ -595,7 +618,7 @@ function camposDe(
             cargando={guardando}
             onPress={() => void guardar()}
           />
-        </ScrollView>
+        </View>
       )}
 
       {/* galería secundaria en Hoja (patrón SelectorAvatar) */}
@@ -642,6 +665,7 @@ function camposDe(
           etiqueta={t('carnet.carnetDe', { nombre })}
         />
       )}
+      </HojaContenido>
     </View>
   );
 }

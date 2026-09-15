@@ -1,5 +1,6 @@
 {
-  "baseline": { "cliente": 58, "prestador": 51 },
+  "baseline": { "cliente": 0, "prestador": 51 },
+  "asentado_cliente": "2026-09-15 · S116-C lote 3b · 58 -> 0: las 58 ocurrencias del cliente pasan por `formatearPrecio`. El prestador NO se tocó: es su propia sesión y su número queda intacto (el baseline es POR APP justamente para esto).",
   "sembrado": "2026-09-13 · S116-A (re-sembrado con el discriminador ensanchado)",
   "firmado": "mesa 13-sep-2026 — trinquete del riel de moneda (D-1095)",
   "por_que_58_y_no_41": "El primer discriminador exigía un `$` en la misma línea y PERDÍA 17 sitios, los 17 plata de verdad: el patrón `t('clave', { precio: x.toFixed(2) })`, donde el $ vive en el diccionario de i18n y no en la línea. En pantalla sale $6.00 igual. Se reconcilió contra el censo de C (que reportó 56 cliente · 51 prestador): el prestador coincide EXACTO con este discriminador, y el cliente da 58 porque cuenta también los que C descontó.",

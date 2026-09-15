@@ -14,6 +14,7 @@ import * as Updates from 'expo-updates';
 import { abrirAltaDeTarjeta } from '@/lib/pagos/alta-tarjeta';
 import { MAPA_NATIVO_DISPONIBLE } from '@/lib/mapa-nativo';
 import {
+  HojaContenido,
   Cabecera,
   AIRE_RAIZ,
   Boton,
@@ -34,6 +35,7 @@ import { cerrarSesion } from '@epetplace/api';
 import { unidadesEnCarrito, useCarrito } from '@/lib/despensa/carrito';
 import { useTraduccion } from '@/i18n';
 import { escucharConteos, leerConteos } from '@/lib/medicion/montajes';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 /**
  * EL CONTEO DE MONTAJES EN PANTALLA — S116-C lote 3.
@@ -106,6 +108,7 @@ function TituloBloque({ texto }: { texto: string }) {
 const HAY_CONFIG_PAGOS = Boolean(process.env.EXPO_PUBLIC_PAGOS_ALTA_URL);
 
 export default function Cuenta() {
+  const cabecera = useAltoDeCabecera('raiz');
   const unidadesCarrito = unidadesEnCarrito(useCarrito());
   const router = useRouter();
   const { theme } = useTheme();
@@ -260,18 +263,38 @@ export default function Cuenta() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: AIRE_RAIZ + insets.bottom }}>
         {/* ⭐ **S116-C lote 3b · LA PORTADA PASA A `Cabecera variante="raiz"`.**
             `saludo` → `titulo` y **el carrito deja de ser un `ReactNode` en
             `accionDer` y pasa a la prop `carrito`**, que la pieza ya trae. ☠️ Con
             eso muere el montaje de `AccionCarrito` acá: *un `ReactNode` suelto
             deja que cada pantalla arme su disco, y ahí vuelve la copia que
             `DiscoVidrio` acaba de terminar* (la razón es de B, en el catálogo). */}
-        <Cabecera
-          variante="raiz"
-          titulo={t('cuenta.titulo')}
-          carrito={{ cantidad: unidadesCarrito, onPress: () => router.push('/despensa/carrito'), etiqueta: t('despensa.abrirCarrito', { count: unidadesCarrito }) }}
-        />
+        {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ **Los `ScrollView` verticales que había adentro se volvieron
+          `View`**: la hoja ya scrollea, y dos scrolls verticales anidados
+          dejan al de adentro sin alto propio. Su `contentContainerStyle` pasa
+          a `style` — *el relleno era del contenido, no del scroll.* El
+          `paddingBottom` con `insets.bottom` SE RETIRA: lo paga la hoja
+          (`R53`). */}
+        <HojaContenido
+          arranque={cabecera.arranque}
+          scroll={{ contentContainerStyle: { paddingBottom: AIRE_RAIZ } }}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="raiz"
+                titulo={t('cuenta.titulo')}
+                carrito={{ cantidad: unidadesCarrito, onPress: () => router.push('/despensa/carrito'), etiqueta: t('despensa.abrirCarrito', { count: unidadesCarrito }) }}
+                presentacion="fondo"
+              />
+            </View>
+          }
+        >
 
         <View style={{ paddingHorizontal: spacing[4], gap: spacing[6], marginTop: spacing[2] }}>
           <Tarjeta relleno="ninguno">
@@ -490,7 +513,7 @@ export default function Cuenta() {
               chevron, jamás un botón sin caja.** El sello del update queda
               debajo, a dos dedos, que es la vecindad que la firma pedía. ── */}
         </View>
-      </ScrollView>
+        </HojaContenido>
 
       <Hoja visible={salirAbierta} onCerrar={() => setSalirAbierta(false)} titulo={t('ajustes.titulo')}>
         <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>

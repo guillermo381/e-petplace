@@ -31,6 +31,7 @@
 
 import { View } from 'react-native';
 import { Boton, FilaDato, Separador, Texto, spacing } from '@epetplace/ui';
+import { formatearPrecio } from '@epetplace/i18n';
 
 export function DetalleCita({
   prestador,
@@ -59,7 +60,7 @@ export function DetalleCita({
         <FilaDato disposicion="horizontal" etiqueta={etiquetaPrestador} valor={prestador} />
       ) : null}
       {costo !== null ? (
-        <FilaDato disposicion="horizontal" etiqueta={etiquetaCosto} valor={`$ ${costo.toFixed(2)}`} mono />
+        <FilaDato disposicion="horizontal" etiqueta={etiquetaCosto} valor={formatearPrecio(costo)} mono />
       ) : vozSinCosto !== undefined ? (
         <Texto variante="apoyo">{vozSinCosto}</Texto>
       ) : null}

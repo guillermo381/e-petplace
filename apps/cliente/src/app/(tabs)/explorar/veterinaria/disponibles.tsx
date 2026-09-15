@@ -18,6 +18,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
+  HojaContenido,
   AvisoTeleconsulta,
   Boton,
   Celda,
@@ -45,8 +46,11 @@ import { useTraduccion } from '@/i18n';
 import { useReservaVeterinaria } from '@/lib/reserva/veterinaria';
 import { HojaPersonasVet } from '@/components/reserva/hoja-personas-vet';
 import { PreviewPrestador } from '@/components/preview-prestador';
+import { formatearPrecio } from '@epetplace/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 export default function VeterinariaDisponibles() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
@@ -146,8 +150,26 @@ export default function VeterinariaDisponibles() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Cabecera variante="empujada" titulo={t('veterinaria.quienTitulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[3] }}>
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ El `paddingBottom` con `insets.bottom` que había acá SE RETIRA: lo
+          paga la hoja en su propio render, y sumarlo sería pagarlo dos veces
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera variante="empujada" titulo={t('veterinaria.quienTitulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        scroll={{ contentContainerStyle: { padding: spacing[4], gap: spacing[3] } }}
+      >
         {/* la ventana elegida, en voz de máquina — la duración no viaja:
             es de cada vet (su oferta) */}
         <Celda
@@ -192,7 +214,7 @@ export default function VeterinariaDisponibles() {
                       : v.direccion !== null
                         ? [v.direccion, v.ciudad].filter(Boolean).join(' · ')
                         : t('veterinaria.enSuClinica')}
-                    precio={`$${v.precio.toFixed(2)} · ${v.duracion_minutos} min`}
+                    precio={`${formatearPrecio(v.precio)} · ${v.duracion_minutos} min`}
                     perfil={perfiles[v.prestador_id]}
                     /* ⚡ D-730 · la ventana viaja con el tap, para que la ficha reserve. */
                     contextoReserva={{ oficio: 'veterinaria', fecha, hora, mascotaId, tipoServicio }}
@@ -215,7 +237,7 @@ export default function VeterinariaDisponibles() {
             {t('veterinaria.precioDeOferta')}
           </Text>
         ) : null}
-      </ScrollView>
+      </HojaContenido>
 
       <HojaPersonasVet
         estado={hojaPersonas}

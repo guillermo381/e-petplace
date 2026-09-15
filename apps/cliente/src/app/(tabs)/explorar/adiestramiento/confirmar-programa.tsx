@@ -17,6 +17,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
+  HojaContenido,
   Cabecera,
   Boton,
   Celda,
@@ -39,6 +40,8 @@ import { AvisoNoCargo } from '@/components/aviso-no-cargo';
 import { cobrar } from '@/lib/pagos/cobro';
 import { useEsperaDeConfirmacion } from '@/lib/pagos/espera-confirmacion';
 import { useTraduccion } from '@/i18n';
+import { formatearPrecio } from '@epetplace/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 /** 'YYYY-MM-DD' → Date LOCAL (jamás new Date(iso): ancla UTC y corre el
  *  día — hallazgo de harness S55). */
@@ -48,6 +51,7 @@ function fechaLocal(iso: string): Date {
 }
 
 export default function ConfirmarPrograma() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const { mostrar } = useAviso();
@@ -252,19 +256,39 @@ export default function ConfirmarPrograma() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Cabecera
-        variante="empujada"
-        titulo={t('adiestramiento.resumenProgramaTitulo')}
-        onVolver={() => router.back()}
-        etiquetaVolver={t('comun.volver')}
-      />
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[4] }}>
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ **Los `ScrollView` verticales que había adentro se volvieron
+          `View`**: la hoja ya scrollea, y dos scrolls verticales anidados
+          dejan al de adentro sin alto propio. Su `contentContainerStyle` pasa
+          a `style` — *el relleno era del contenido, no del scroll.* El
+          `paddingBottom` con `insets.bottom` SE RETIRA: lo paga la hoja
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={t('adiestramiento.resumenProgramaTitulo')}
+              onVolver={() => router.back()}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+      >
+      <View style={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[4] }}>
         {/* el QUÉ comprado, con su gente */}
         <Tarjeta relleno="ninguno">
           <Celda
             titulo={typeof params.programaNombre === 'string' ? params.programaNombre : ''}
             subtitulo={typeof params.prestadorNombre === 'string' ? params.prestadorNombre : undefined}
-            metadataMono={`$${precio.toFixed(2)} · ${typeof params.duracion === 'string' ? params.duracion : ''} min`}
+            metadataMono={`${formatearPrecio(precio)} · ${typeof params.duracion === 'string' ? params.duracion : ''} min`}
           />
         </Tarjeta>
 
@@ -352,7 +376,7 @@ export default function ConfirmarPrograma() {
 
         <SeccionMedioDePago medio={medio} />
         {rebote !== null ? <Texto variante="cuerpo">{rebote}</Texto> : null}
-      </ScrollView>
+      </View>
 
       <View
         style={{
@@ -375,6 +399,7 @@ export default function ConfirmarPrograma() {
           onPress={() => void comprar()}
         />
       </View>
+      </HojaContenido>
     </SafeAreaView>
   );
 }

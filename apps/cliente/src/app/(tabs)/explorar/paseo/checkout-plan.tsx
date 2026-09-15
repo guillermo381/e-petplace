@@ -60,6 +60,7 @@ import { useMedioDePago, SeccionMedioDePago } from '@/components/seccion-medio-d
 import { SeccionFacturacion, useFacturacion } from '@/components/seccion-facturacion';
 import { AvisoNoCargo } from '@/components/aviso-no-cargo';
 import { useTraduccion } from '@/i18n';
+import { formatearPrecio } from '@epetplace/i18n';
 
 export default function CheckoutPlanPaseo() {
   const { t } = useTraduccion();
@@ -231,7 +232,7 @@ export default function CheckoutPlanPaseo() {
           <Confirmacion
             exclamacion={t('checkout.exitoExclamacion')}
             titulo={t('checkoutPlan.exitoTitulo')}
-            apoyo={t('checkoutPlan.exitoDetalle', { precio: precio.toFixed(2) })}
+            apoyo={t('checkoutPlan.exitoDetalle', { precio: formatearPrecio(precio) })}
             lineaExtra={t('checkout.exitoFactura')}
             primario={{
               texto: t('checkoutPlan.exitoVerPlan'),
@@ -278,7 +279,7 @@ export default function CheckoutPlanPaseo() {
             metadataMono={`${dias.length}×/sem · ${texto('hora').slice(0, 5)}`}
           />
           <Separador />
-          <Celda titulo={t('checkout.total')} metadataMono={`$${precio.toFixed(2)}`} />
+          <Celda titulo={t('checkout.total')} metadataMono={formatearPrecio(precio)} />
         </Tarjeta>
 
         {/* ═══ 🔴 LOS TRES AVISOS — en esta pantalla, sin abrir nada más ═══ */}

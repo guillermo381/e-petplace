@@ -28,6 +28,7 @@ import { Image } from 'expo-image';
 import { router, useFocusEffect } from 'expo-router';
 import { GLIFO_NODO } from '@/lib/despensa/escalera';
 import {
+  HojaContenido,
   Cabecera,
   Boton,
   CeldaNavegacion,
@@ -51,7 +52,7 @@ import {
   type PedidoEnLista,
   type ResumenItemsPedido,
 } from '@epetplace/api';
-import { fechaLargaHumana } from '@epetplace/i18n';
+import { formatearPrecio, fechaLargaHumana } from '@epetplace/i18n';
 import {
   escaleraDePedido,
   portadorDeEstado,
@@ -61,6 +62,7 @@ import {
 import { ventanaVencida } from '@/lib/despensa/ventana';
 import { unidadesEnCarrito, useCarrito } from '@/lib/despensa/carrito';
 import { useTraduccion } from '@/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 type Fase<T> = T | 'cargando' | 'error';
 
@@ -69,6 +71,7 @@ type Fase<T> = T | 'cargando' | 'error';
 const TOPE_VIVOS = 2;
 
 export default function DespensaPedidos() {
+  const cabecera = useAltoDeCabecera('raiz');
   const { theme } = useTheme();
   const unidadesCarrito = unidadesEnCarrito(useCarrito());
   const { t, idioma } = useTraduccion();
@@ -289,7 +292,7 @@ export default function DespensaPedidos() {
               : { etiqueta: p.narrativa_nombre, tono: 'info' as const }
             : undefined
         }
-        monto={`$ ${p.total.toFixed(2)}`}
+        monto={formatearPrecio(p.total)}
         pasos={conIconos(pasos, GLIFO_NODO)}
         desvio={desvio}
         acento="control"
@@ -374,14 +377,28 @@ export default function DespensaPedidos() {
           eso muere el montaje de `AccionCarrito` acá: *un `ReactNode` suelto
           deja que cada pantalla arme su disco, y ahí vuelve la copia que
           `DiscoVidrio` acaba de terminar* (la razón es de B, en el catálogo). */}
-      <Cabecera
-        variante="raiz"
-        titulo={t('despensa.tusPedidos')}
-        carrito={{ cantidad: unidadesCarrito, onPress: () => router.push('/despensa/carrito'), etiqueta: t('despensa.abrirCarrito', { count: unidadesCarrito }) }}
-      />
-
-      <ScrollView
-        contentContainerStyle={{
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ El `paddingBottom` con `insets.bottom` que había acá SE RETIRA: lo
+          paga la hoja en su propio render, y sumarlo sería pagarlo dos veces
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="raiz"
+              titulo={t('despensa.tusPedidos')}
+              carrito={{ cantidad: unidadesCarrito, onPress: () => router.push('/despensa/carrito'), etiqueta: t('despensa.abrirCarrito', { count: unidadesCarrito }) }}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        scroll={{ contentContainerStyle: {
           paddingTop: spacing[4],
           // 🔴 SIN `insets.bottom`, y es CONCESIÓN MEDIDA, no gusto.
           // B midió que **el navegador ya acota**: el `ScrollView` de una
@@ -394,7 +411,7 @@ export default function DespensaPedidos() {
           // pantallas — dos reglas para lo mismo divergen.
           paddingBottom: spacing[8],
           gap: spacing[4],
-        }}
+        } }}
       >
         {pedidos === 'cargando' ? (
           <EsqueletoGrupo>
@@ -589,7 +606,7 @@ export default function DespensaPedidos() {
             </View>
           </>
         )}
-      </ScrollView>
+      </HojaContenido>
     </View>
   );
 }

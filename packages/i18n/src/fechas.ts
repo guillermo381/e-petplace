@@ -98,6 +98,58 @@ export function fechaCortaHumana(iso: string, idioma: IdiomaSoportado): string {
     .replace(/,/g, '');
 }
 
+/**
+ * 🔴 **«3:00 p. m.» — LA HORA EN VOZ DE FAMILIA (S116-C · lote 3b · `D-1096`).**
+ *
+ * Firma del founder: *«la familia lee “sáb 13 sep · 3:00 p. m.”, nunca
+ * “2026-09-13 · 15:00” ni la fuente mono»*.
+ *
+ * ── POR QUÉ NACE Y NO SE REUSA `horaCortaDeMensaje` ───────────────────────
+ * Esa función **fija `hour12: false` a propósito y lo dice en su cuerpo**: la
+ * hora de un mensaje va bajo cada burbuja y con el sufijo ocupa el doble de
+ * ancho. *Son dos horas distintas con dos razones opuestas escritas*, así que
+ * ensanchar aquélla con una bandera habría borrado su razón. Conviven.
+ *
+ * ── LO QUE ACEPTA, y por qué las dos formas ───────────────────────────────
+ * `'15:00'` o `'15:00:00'` —como viene de una columna `time`— y también un ISO
+ * completo. **La fecha no se usa para nada**: sólo se necesita un `Date` al que
+ * pedirle el formato, así que las horas sueltas se anclan a una fecha fija.
+ * *Anclarlas a `new Date()` habría hecho que el resultado dependiera del día en
+ * que se corre, que es la clase de cosa que no falla nunca hasta que falla.*
+ *
+ * Degrada al texto que entró, **jamás a una hora inventada** (`L-197`).
+ */
+export function horaHumana(hora: string, idioma: IdiomaSoportado): string {
+  const m = /(\d{1,2}):(\d{2})/.exec(hora);
+  if (m === null) return hora;
+  const h = Number(m[1]);
+  const min = Number(m[2]);
+  if (h > 23 || min > 59) return hora;
+  const locale = idioma === 'en' ? 'en-US' : 'es-EC';
+  /* Fecha fija y arbitraria: sólo se pinta la hora. */
+  return new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: '2-digit', hour12: true }).format(
+    new Date(2000, 0, 1, h, min),
+  );
+}
+
+/**
+ * 🔴 **«sáb 13 sep · 3:00 p. m.» — LA CITA COMO LA LEE LA FAMILIA.**
+ *
+ * Es la composición literal que el founder firmó, y vive **acá y no en cada
+ * pantalla** porque el separador es parte de la forma: *tres pantallas que
+ * concatenan «fecha · hora» a mano son tres lugares donde el día que la mesa
+ * cambie el punto medio sólo cambian dos.*
+ *
+ * **Sin hora devuelve sólo la fecha** —y eso NO es un caso raro: una cita por
+ * coordinar no tiene hora, y decir «sáb 13 sep · » con la cola colgando sería
+ * dibujar un dato que no existe (`L-139`).
+ */
+export function fechaYHoraHumana(iso: string, hora: string | null, idioma: IdiomaSoportado): string {
+  const f = fechaCortaHumana(iso, idioma);
+  if (hora === null || hora.length === 0) return f;
+  return `${f} · ${horaHumana(hora, idioma)}`;
+}
+
 /** dd mon yyyy en mono-voz (minúsculas), para metadata chica. */
 export function fechaCortaMono(iso: string, idioma: IdiomaSoportado): string {
   const [a, m, d] = iso.slice(0, 10).split('-').map(Number);

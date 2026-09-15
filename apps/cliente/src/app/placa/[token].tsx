@@ -30,6 +30,7 @@ import { ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
   Boton,
   Cabecera,
   EstadoVacio,
@@ -50,6 +51,7 @@ import {
 
 import { CeldaNavegacion } from '@epetplace/ui';
 import { useTraduccion } from '@/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 type Fase =
   | { f: 'mirando' }
@@ -58,6 +60,7 @@ type Fase =
   | { f: 'ajena' };
 
 export default function PlacaSinActivar() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { token } = useLocalSearchParams<{ token: string }>();
   const { t } = useTraduccion();
   const router = useRouter();
@@ -138,18 +141,32 @@ export default function PlacaSinActivar() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Cabecera
-        variante="empujada"
-        titulo={t('placa.titulo')}
-        onVolver={() => router.back()}
-        etiquetaVolver={t('comun.volver')}
-      />
-      <ScrollView
-        contentContainerStyle={{
-          paddingBottom: insets.bottom + spacing[8],
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ El `paddingBottom` con `insets.bottom` que había acá SE RETIRA: lo
+          paga la hoja en su propio render, y sumarlo sería pagarlo dos veces
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={t('placa.titulo')}
+              onVolver={() => router.back()}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        scroll={{ contentContainerStyle: {
           paddingHorizontal: spacing[5],
           gap: spacing[5],
-        }}
+        } }}
       >
         {fase.f === 'mirando' ? (
           <Texto variante="apoyo">{t('placa.mirando')}</Texto>
@@ -197,7 +214,7 @@ export default function PlacaSinActivar() {
             />
           </>
         )}
-      </ScrollView>
+      </HojaContenido>
     </View>
   );
 }

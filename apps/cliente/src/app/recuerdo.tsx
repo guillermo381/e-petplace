@@ -37,6 +37,7 @@ import { Image, Pressable, ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
   Boton,
   Campo,
   CampoFecha,
@@ -57,6 +58,7 @@ import { HojaFotoMascota } from '@/components/HojaFotoMascota';
 import { cuerpoDelRecuerdo, frenoDelRecuerdo, keyDelRebote } from '@/lib/recuerdo/decidir';
 import { subirFotoMascota } from '@/lib/subir-avatar';
 import { useTraduccion } from '@/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 /** Las cinco razones de la subida, en voz de la casa. **Se reusan, no se
  *  copian** — ver la cabecera. */
@@ -75,6 +77,7 @@ function hoyLocal(): string {
 }
 
 export default function Recuerdo() {
+  const cabecera = useAltoDeCabecera('empujada');
   const router = useRouter();
   const { theme } = useTheme();
   const { t } = useTraduccion();
@@ -150,17 +153,35 @@ export default function Recuerdo() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Cabecera
-        variante="empujada"
-        titulo={t('recuerdo.titulo', { mascota: nombre })}
-        onVolver={() => router.back()}
-        etiquetaVolver={t('comun.volver')}
-      />
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ **Los `ScrollView` verticales que había adentro se volvieron
+          `View`**: la hoja ya scrollea, y dos scrolls verticales anidados
+          dejan al de adentro sin alto propio. Su `contentContainerStyle` pasa
+          a `style` — *el relleno era del contenido, no del scroll.* El
+          `paddingBottom` con `insets.bottom` SE RETIRA: lo paga la hoja
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        scroll={{ keyboardShouldPersistTaps: 'handled' }}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={t('recuerdo.titulo', { mascota: nombre })}
+              onVolver={() => router.back()}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+      >
       <EvitaTeclado>
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[4] }}
-        >
+        <View style={{ padding: spacing[5], gap: spacing[4] }}>
           {/* LA FOTO, GRANDE Y ARRIBA. Sin foto **no hay ícono de error**: hay
               un lugar que invita — la misma diferencia que hay entre «falta un
               dato» y «acá va algo tuyo». */}
@@ -226,7 +247,7 @@ export default function Recuerdo() {
             razonDeshabilitado={razonDelFreno}
             onPress={() => void guardar()}
           />
-        </ScrollView>
+        </View>
       </EvitaTeclado>
 
       <HojaFotoMascota
@@ -236,6 +257,7 @@ export default function Recuerdo() {
         onFoto={(f) => setFoto(f)}
         onPermisoDenegado={() => mostrar({ variante: 'error', texto: t('recuerdo.permisoDenegado') })}
       />
+      </HojaContenido>
     </View>
   );
 }

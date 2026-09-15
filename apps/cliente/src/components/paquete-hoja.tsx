@@ -37,6 +37,7 @@ import {
   type PresetPaquete,
 } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
+import { formatearPrecio } from '@epetplace/i18n';
 
 export function PaqueteHoja({
   paseador,
@@ -112,7 +113,7 @@ export function PaqueteHoja({
               {t('paquete.precioPorSalida')}
             </Text>
             <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.sm, color: theme.text.primary, fontVariant: ['tabular-nums'] }}>
-              ${paseador.precio_paquete.toFixed(2)} · {paseador.duracion_minutos} min
+              {formatearPrecio(paseador.precio_paquete)} · {paseador.duracion_minutos} min
             </Text>
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -120,7 +121,7 @@ export function PaqueteHoja({
               {t('paquete.total')}
             </Text>
             <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.sm, color: theme.text.primary, fontVariant: ['tabular-nums'] }}>
-              ${total.toFixed(2)}
+              {formatearPrecio(total)}
             </Text>
           </View>
         </View>

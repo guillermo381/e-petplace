@@ -62,6 +62,7 @@ import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
 import { FiltroMascotas } from '@/components/filtro-pills';
 import { CabezalOficio, GrillaElegir, PieReserva, SelectorDia, SinQuienReservar } from '@/components/reserva-piezas';
 import { vozServicio } from '@/lib/voz-servicio';
+import { formatearPrecio } from '@epetplace/i18n';
 
 function fechaLocalISO(d: Date): string {
   return new Intl.DateTimeFormat('en-CA').format(d);
@@ -389,7 +390,7 @@ export default function GroomingCuando() {
                       const elegida = ofertaPublica.find((o) => o.tipo_servicio === tipoServicio) ?? null;
                       return elegida !== null ? (
                         <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
-                          {t('grooming.precioDesdePublico', { precio: elegida.desde_precio.toFixed(2) })}
+                          {t('grooming.precioDesdePublico', { precio: formatearPrecio(elegida.desde_precio) })}
                         </Text>
                       ) : null;
                     })()}
@@ -480,8 +481,8 @@ export default function GroomingCuando() {
                   {servicioElegido !== null ? (
                     <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
                       {servicioElegido.varia
-                        ? t('grooming.precioDesde', { nombre: mascota.nombre, precio: servicioElegido.desde_precio.toFixed(2) })
-                        : t('grooming.precioExacto', { nombre: mascota.nombre, precio: servicioElegido.desde_precio.toFixed(2) })}
+                        ? t('grooming.precioDesde', { nombre: mascota.nombre, precio: formatearPrecio(servicioElegido.desde_precio) })
+                        : t('grooming.precioExacto', { nombre: mascota.nombre, precio: formatearPrecio(servicioElegido.desde_precio) })}
                     </Text>
                   ) : null}
                 </View>
@@ -519,8 +520,8 @@ export default function GroomingCuando() {
                       return (
                         <Texto variante="apoyo">
                           {o?.recargo_domicilio_varia
-                            ? t('grooming.modalidadDomicilioRecargoDesde', { recargo: recargo.toFixed(2) })
-                            : t('grooming.modalidadDomicilioRecargo', { recargo: recargo.toFixed(2) })}
+                            ? t('grooming.modalidadDomicilioRecargoDesde', { recargo: formatearPrecio(recargo) })
+                            : t('grooming.modalidadDomicilioRecargo', { recargo: formatearPrecio(recargo) })}
                         </Texto>
                       );
                     })()}
@@ -600,7 +601,7 @@ export default function GroomingCuando() {
           el exacto no existe hasta elegir groomer. */}
       {Array.isArray(mascotas) && elegibles.length > 0 && servicioElegido !== null ? (
         <PieReserva
-          total={`$ ${servicioElegido.desde_precio.toFixed(2)}`}
+          total={formatearPrecio(servicioElegido.desde_precio)}
           totalDesde={servicioElegido.varia}
           cuando={hora !== null ? `${dias.find((d) => d.iso === dia)?.corta ?? ''} · ${hora}` : null}
           etiqueta={t('explorar.verQuienPuede')}

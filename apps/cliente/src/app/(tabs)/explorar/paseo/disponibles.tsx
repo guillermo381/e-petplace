@@ -21,6 +21,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
+  HojaContenido,
   AvatarMascota,
   Boton,
   Celda,
@@ -47,10 +48,13 @@ import { useTraduccion } from '@/i18n';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 import { useHogarPaseo } from '@/lib/reserva/paseo';
 import { PreviewPrestador } from '@/components/preview-prestador';
+import { fechaYHoraHumana, formatearPrecio } from '@epetplace/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 export default function PaseoDisponibles() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
-  const { t } = useTraduccion();
+  const { t, idioma } = useTraduccion();
   const { mostrar } = useAviso();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ fecha: string; hora: string; duracion: string; plan?: string; mascotaId?: string }>();
@@ -114,8 +118,26 @@ export default function PaseoDisponibles() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Cabecera variante="empujada" titulo={t('explorar.quienTitulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[3] }}>
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ El `paddingBottom` con `insets.bottom` que había acá SE RETIRA: lo
+          paga la hoja en su propio render, y sumarlo sería pagarlo dos veces
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera variante="empujada" titulo={t('explorar.quienTitulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        scroll={{ contentContainerStyle: { padding: spacing[4], gap: spacing[3] } }}
+      >
         {/* la ventana elegida, en voz de máquina — con el PARA QUIÉN
             visible (S61-A3, rasgo 1).
             ⚠️ D-727 — ACÁ SE REUSABA `grooming.ventanaPara`, y el reuso estaba
@@ -150,8 +172,14 @@ export default function PaseoDisponibles() {
               // La ventana APILADA en la zona fin (S44-B4.1): en una sola
               // línea el mono de 26 caracteres exprimía el título a cero
               // con el avatar presente (hallazgo M3 S73).
-              metadataMono={fecha}
-              fin={<Texto variante="dato">{`${hora} · ${duracion} min`}</Texto>}
+              // 🔴 `D-1096` · ACÁ SE LEÍA «2026-09-15 · 02:30», el ejemplo
+              // literal de lo que la firma prohíbe — y era el más crudo de
+              // todos: el ISO viajaba del parámetro de URL a la pantalla sin
+              // tocar nada. Lo encontré CAMINANDO la reserva para capturar el
+              // pago, no censando: ningún gate mira un `metadataMono={fecha}`,
+              // porque ni formatea ni concatena. Los minutos se quedan con la
+              // fila — «30 min» SÍ es voz de máquina (Ley 3).
+              fin={<Texto variante="apoyo">{`${fechaYHoraHumana(fecha, hora, idioma)} · ${duracion} min`}</Texto>}
             />
           );
         })()}
@@ -201,7 +229,7 @@ export default function PaseoDisponibles() {
                   nombre={p.prestador_nombre}
                   oficio={t('hogar.railPaseos')}
                   contexto={p.servicio_nombre}
-                  precio={`$${p.precio.toFixed(2)} · ${p.duracion_minutos} min`}
+                  precio={`${formatearPrecio(p.precio)} · ${p.duracion_minutos} min`}
                   perfil={perfiles[p.prestador_id]}
                   /* ⚡ D-730 · la ventana viaja con el tap: la ficha la necesita
                      entera para reservar, y estos valores ya venían por la URL
@@ -227,7 +255,7 @@ export default function PaseoDisponibles() {
             ningún modal: te saca de la pantalla**. Un instrumento que solo se
             ve cuando sale un cartel no puede medir un rebote silencioso —
             L-221 en chiquito, otra vez. */}
-      </ScrollView>
+      </HojaContenido>
 
     </SafeAreaView>
   );

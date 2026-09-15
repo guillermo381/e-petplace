@@ -72,6 +72,7 @@ import { Boton, Celda, Hoja, Separador, Tarjeta, Texto, spacing } from '@epetpla
 
 import type { SerieRecurrente } from '@/lib/serie/contrato';
 import { useTraduccion } from '@/i18n';
+import { formatearPrecio } from '@epetplace/i18n';
 
 export type SerieRecurrenteVistaProps = {
   serie: SerieRecurrente;
@@ -149,7 +150,7 @@ export function SerieRecurrenteVista({
             /* 🔴 La plata que no conocemos NO se dibuja como número. */
             metadataMono={
               serie.montoEsperado !== null
-                ? `$${serie.montoEsperado.toFixed(2)}`
+                ? formatearPrecio(serie.montoEsperado)
                 : undefined
             }
           />

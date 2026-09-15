@@ -33,6 +33,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
   Boton,
   Celda,
   Cabecera,
@@ -46,11 +47,13 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import { obtenerMisPagos, type PagoDelDueno } from '@epetplace/api';
-import { fechaCortaMono } from '@epetplace/i18n';
+import { formatearPrecio, fechaCortaMono } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 export default function PagosCuenta() {
+  const cabecera = useAltoDeCabecera('empujada');
   const router = useRouter();
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
@@ -74,9 +77,26 @@ export default function PagosCuenta() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Cabecera variante="empujada" titulo={t('cuenta.pagos')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
-
-      <ScrollView contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[5] }}>
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ El `paddingBottom` con `insets.bottom` que había acá SE RETIRA: lo
+          paga la hoja en su propio render, y sumarlo sería pagarlo dos veces
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera variante="empujada" titulo={t('cuenta.pagos')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        scroll={{ contentContainerStyle: { padding: spacing[5], gap: spacing[5] } }}
+      >
         {pagos === 'cargando' ? (
           <EsqueletoGrupo>
             <View style={{ gap: spacing[3] }}>
@@ -102,7 +122,7 @@ export default function PagosCuenta() {
                   metadataMono={`${p.fecha ? fechaCortaMono(p.fecha, idioma) : ''}${p.hora ? ` · ${p.hora}` : ''}`}
                   fin={
                     <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.sm, letterSpacing: typography.tracking.mono, color: theme.text.primary }}>
-                      {p.monto !== null ? `$${p.monto.toFixed(2)}` : '—'}
+                      {p.monto !== null ? formatearPrecio(p.monto) : '—'}
                     </Text>
                   }
                 />
@@ -122,7 +142,7 @@ export default function PagosCuenta() {
             {t('cuenta.pagosMetodosYaEsta')}
           </Text>
         </View>
-      </ScrollView>
+      </HojaContenido>
     </View>
   );
 }

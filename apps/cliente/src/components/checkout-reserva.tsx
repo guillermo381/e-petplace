@@ -65,6 +65,7 @@ import { EsperaDeUna } from '@/components/espera-deuna';
 import { topeDeEspera, useEstadoDeUna } from '@/lib/pagos/deuna-estado';
 import { urlWhatsApp } from '@/lib/contacto';
 import { useTraduccion } from '@/i18n';
+import { fechaYHoraHumana, formatearPrecio } from '@epetplace/i18n';
 
 /**
  * ☠️ `rechazado` y `timeout` MURIERON como fases (Ley 37).
@@ -137,7 +138,7 @@ export function CheckoutReserva({
   exitoExtra?: ReactNode;
 }) {
   const { theme } = useTheme();
-  const { t } = useTraduccion();
+  const { t, idioma } = useTraduccion();
   const { mostrar } = useAviso();
   const insets = useSafeAreaInsets();
 
@@ -417,7 +418,7 @@ export function CheckoutReserva({
           apoyo={exitoDetalle}
           dato={{
             etiqueta: [servicioNombre, prestadorNombre].filter((v) => v.length > 0).join(' · '),
-            valor: [fecha, hora].filter((v) => v.length > 0).join(' · '),
+            valor: fechaYHoraHumana(fecha, hora.length > 0 ? hora : null, idioma),
           }}
           lineaExtra={t('checkout.exitoFactura')}
           primario={{
@@ -540,13 +541,19 @@ export function CheckoutReserva({
                   ? t('checkout.conPrestador', { prestador: prestadorNombre })
                   : undefined
               }
-              metadataMono={`${fecha} · ${hora.slice(0, 5)} · ${duracion} min`}
+              /* 🔴 **`D-1096` · ACÁ SE LEÍA «2026-09-15 · 15:00», que es el
+                 ejemplo literal de lo que la firma prohíbe.** `fecha` llega
+                 como parámetro de URL —ISO crudo— y la hora salía de un
+                 `slice(0,5)` sobre la columna `time`. Las dos pasan por el
+                 riel; los minutos siguen en `metadataMono` porque «60 min» SÍ
+                 es voz de máquina (Ley 3) y la duración no es una fecha. */
+              metadataMono={`${fechaYHoraHumana(fecha, hora, idioma)} · ${duracion} min`}
             />
             <Separador />
             {/* lugar hecho para el cupón (B4) — deshabilitado honesto */}
             <Celda titulo={t('checkout.cupon')} fin={<Insignia estado="info" etiqueta={t('checkout.cuponPronto')} />} />
             <Separador />
-            <Celda titulo={t('checkout.total')} metadataMono={`$${precio.toFixed(2)}`} />
+            <Celda titulo={t('checkout.total')} metadataMono={formatearPrecio(precio)} />
           </Tarjeta>
         </View>
 

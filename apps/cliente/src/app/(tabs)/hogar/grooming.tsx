@@ -27,6 +27,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import {
+  HojaContenido,
   Boton,
   Cabecera,
   Esqueleto,
@@ -57,10 +58,12 @@ import { vozServicio } from '@/lib/voz-servicio';
 import { FiltroMascotas, FiltroPills } from '@/components/filtro-pills';
 import { esHistorial, esProxima } from '@/lib/corte-agenda';
 import { DetalleCita } from '@/components/detalle-cita';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 type Tap = 'proximos' | 'historial';
 
 export default function HubGrooming() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const { t, idioma } = useTraduccion();
@@ -209,11 +212,31 @@ export default function HubGrooming() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Cabecera variante="empujada" titulo={t('grooming.hubTitulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
-      <ScrollView
-        ref={scrollRef}
-        contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[4] }}
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ **Los `ScrollView` verticales que había adentro se volvieron
+          `View`**: la hoja ya scrollea, y dos scrolls verticales anidados
+          dejan al de adentro sin alto propio. Su `contentContainerStyle` pasa
+          a `style` — *el relleno era del contenido, no del scroll.* El
+          `paddingBottom` con `insets.bottom` SE RETIRA: lo paga la hoja
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        scrollRef={scrollRef}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada" titulo={t('grooming.hubTitulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
       >
+      <View style={{ padding: spacing[4], gap: spacing[4] }}>
         {/* ① la MASCOTA — el PRIMER filtro. Entra SIN filtro y ninguna
             nace elegida (el chip "Todas" murió: el log sin filtro ES el
             estado inicial, no una opción que haya que tocar). */}
@@ -293,7 +316,7 @@ export default function HubGrooming() {
         ) : (
           <View style={{ gap: spacing[2.5] }}>{historial.map((f) => filaHistorial(f, true))}</View>
         )}
-      </ScrollView>
+      </View>
 
       {/* EL CTA VIVO, en PIE FIJO. Apagado SIGUE TOCABLE (razonDeshabilitado)
           y la ETIQUETA nombra lo que falta además del hint — S63-B: el
@@ -337,6 +360,7 @@ export default function HubGrooming() {
           />
         </View>
       ) : null}
+      </HojaContenido>
     </SafeAreaView>
   );
 }

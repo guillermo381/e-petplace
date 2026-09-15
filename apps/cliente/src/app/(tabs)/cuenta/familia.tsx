@@ -30,6 +30,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
 import {
+  HojaContenido,
   Boton,
   Campo,
   Celda,
@@ -60,6 +61,7 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 type TraductorCuenta = ReturnType<typeof useTraduccion>['t'];
 
@@ -87,6 +89,7 @@ type Invitacion =
   | { fase: 'listo'; enlace: string; email: string; avisoPorCorreo: boolean; correoSuprimido: boolean };
 
 export default function FamiliaCuenta() {
+  const cabecera = useAltoDeCabecera('empujada');
   const router = useRouter();
   const { theme } = useTheme();
   const { t } = useTraduccion();
@@ -254,7 +257,30 @@ export default function FamiliaCuenta() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Cabecera variante="empujada" titulo={t('cuenta.familia')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b (precisión del founder).**
+          *Migrar no es cambiar `Encabezado` por `Cabecera`.* El ciruela es el
+          FONDO —`presentacion="fondo"`: sin radio inferior, sin sombra— y el
+          contenido vive en una hoja de lienzo que lo tapa al scrollear. **La
+          curva es de la HOJA y mira hacia ARRIBA**; la cabecera-tarjeta con las
+          esquinas de abajo redondeadas muere en el cliente.
+          ⚠️ **Los `ScrollView` verticales que había adentro se volvieron
+          `View`**: la hoja ya scrollea, y dos scrolls verticales anidados
+          dejan al de adentro sin alto propio. Su `contentContainerStyle` pasa
+          a `style` — *el relleno era del contenido, no del scroll.* El
+          `paddingBottom` con `insets.bottom` SE RETIRA: lo paga la hoja
+          (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        scroll={{ keyboardShouldPersistTaps: 'handled' }}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada" titulo={t('cuenta.familia')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+      >
 
       {familia === 'cargando' ? (
         <View style={{ padding: spacing[5] }}>
@@ -274,10 +300,7 @@ export default function FamiliaCuenta() {
         </View>
       ) : (
         <EvitaTeclado>
-        <ScrollView
-          contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[4] }}
-          keyboardShouldPersistTaps="handled"
-        >
+        <View style={{ padding: spacing[5], gap: spacing[4] }}>
           <Campo
             label={t('cuenta.familiaNombreLabel')}
             placeholder={t('cuenta.familiaNombrePlaceholder')}
@@ -338,7 +361,7 @@ export default function FamiliaCuenta() {
               ) : null}
             </Tarjeta>
           </View>
-        </ScrollView>
+        </View>
         </EvitaTeclado>
       )}
 
@@ -435,6 +458,7 @@ export default function FamiliaCuenta() {
           </View>
         </EvitaTeclado>
       </Hoja>
+      </HojaContenido>
     </View>
   );
 }

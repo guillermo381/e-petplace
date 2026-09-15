@@ -34,6 +34,7 @@ import { topeDeEspera, useEstadoDeUna } from '@/lib/pagos/deuna-estado';
 import { urlWhatsApp } from '@/lib/contacto';
 import { Linking } from 'react-native';
 import { useTraduccion } from '@/i18n';
+import { formatearPrecio } from '@epetplace/i18n';
 
 export default function CheckoutPaquetePaseo() {
   const { t } = useTraduccion();
@@ -276,7 +277,7 @@ export default function CheckoutPaquetePaseo() {
             metadataMono={`${texto('duracion')} min`}
           />
           <Separador />
-          <Celda titulo={t('checkout.total')} metadataMono={`$${total.toFixed(2)}`} />
+          <Celda titulo={t('checkout.total')} metadataMono={formatearPrecio(total)} />
         </Tarjeta>
 
         {/* Compra suelta ⇒ **sin `recurrente`**: DeUna se puede elegir. */}

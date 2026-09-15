@@ -30,6 +30,7 @@ import { obtenerDireccionHogar, type DireccionHogar } from '@epetplace/api';
 import { CheckoutReserva } from '@/components/checkout-reserva';
 import { DireccionHogarForm } from '@/components/direccion-hogar-form';
 import { useTraduccion } from '@/i18n';
+import { formatearPrecio } from '@epetplace/i18n';
 
 export default function GroomingCheckout() {
   const { theme } = useTheme();
@@ -145,9 +146,9 @@ export default function GroomingCheckout() {
           {hayDesglose ? (
             <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
               {[
-                `${t('grooming.desgloseServicio')} $${precioBase.toFixed(2)}`,
-                extraPelaje > 0 ? `${t('grooming.desgloseExtraPelaje')} +$${extraPelaje.toFixed(2)}` : null,
-                recargoDomicilio > 0 ? `${t('grooming.desgloseDomicilio')} +$${recargoDomicilio.toFixed(2)}` : null,
+                `${t('grooming.desgloseServicio')} ${formatearPrecio(precioBase)}`,
+                extraPelaje > 0 ? `${t('grooming.desgloseExtraPelaje')} +${formatearPrecio(extraPelaje)}` : null,
+                recargoDomicilio > 0 ? `${t('grooming.desgloseDomicilio')} +${formatearPrecio(recargoDomicilio)}` : null,
               ]
                 .filter(Boolean)
                 .join(' · ')}

@@ -807,7 +807,23 @@ export default function PerfilDeMascota() {
   if (perfil === 'cargando') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Cabecera variante="empujada" titulo="" onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
+        {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada" titulo="" onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+                presentacion="fondo"
+              />
+            </View>
+          }
+        >
         <View style={{ padding: spacing[5] }}>
           <EsqueletoGrupo etiqueta={t('hogar.cargando')}>
             <View style={{ alignItems: 'center', gap: spacing[3] }}>
@@ -818,6 +834,7 @@ export default function PerfilDeMascota() {
             </View>
           </EsqueletoGrupo>
         </View>
+        </HojaContenido>
       </View>
     );
   }
@@ -825,7 +842,23 @@ export default function PerfilDeMascota() {
   if (perfil === 'error') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Cabecera variante="empujada" titulo="" onVolver={() => router.back()} etiquetaVolver={t('comun.volver')} />
+        {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+        <HojaContenido
+          arranque={cabecera.arranque}
+          fondo={
+            <View onLayout={cabecera.alMedir}>
+              <Cabecera
+                variante="empujada" titulo="" onVolver={() => router.back()} etiquetaVolver={t('comun.volver')}
+                presentacion="fondo"
+              />
+            </View>
+          }
+        >
         <View style={{ flex: 1, justifyContent: 'center', padding: spacing[5] }}>
           <EstadoVacio
             titulo={t('perfil.error')}
@@ -833,6 +866,7 @@ export default function PerfilDeMascota() {
             accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setPerfil('cargando')} />}
           />
         </View>
+        </HojaContenido>
       </View>
     );
   }
