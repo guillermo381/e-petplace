@@ -397,6 +397,11 @@ export const clienteEs = {
     /* ⭐ S116-C lote 3 — EL ALTA EN TRES PASOS. Voz en tuteo neutro, sin
        género. Las claves de los cinco pasos viejos se conservan: varias
        siguen vivas en el cierre y en la bifurcación. */
+    /* ⭐ S116-C lote 10 · el interludio de raza. */
+    mirandoSalir: 'Seguir sin reconocer',
+    razaOrigen: 'De dónde viene',
+    razaComoEs: 'Cómo es',
+    saltar: 'Saltar',
     nuevaMascota: 'Nueva mascota',
     paso: 'Paso {{actual}} de {{total}}',
     volver: 'Volver',
@@ -2348,6 +2353,12 @@ export const clienteEs = {
      *  del lector) — se declara genérico, no se inventa un texto. */
     sinVozTitulo: 'Aviso',
     noLeido: 'Sin leer',
+    /* ⭐ S116-C lote 10 · la voz del TOCABLE de la campana, ahora que lleva
+       número. Con 0 dice sólo «Avisos»: *un «0 sin leer» es ruido con forma
+       de dato*, la misma regla que el disco ya aplica al no dibujarse. */
+    abrirConNoLeidos_one: 'Avisos, {{count}} sin leer',
+    abrirConNoLeidos_other: 'Avisos, {{count}} sin leer',
+    abrirConNoLeidos: 'Avisos, {{count}} sin leer',
     momentoRecien: 'Recién',
     momentoMin: 'Hace {{n}} min',
     momentoHoras: 'Hace {{n}} h',
@@ -3137,7 +3148,12 @@ export const clienteEs = {
     biometricoRechazado: 'No pudimos confirmarlo. Prueba de nuevo.',
   },
   despensa: {
-    abrirCarrito: 'Carrito, {{n}} productos',
+    /* ⭐ S116-C lote 10 · plural. Decía «1 productos» — medido en el techo
+       del Hogar al tocar el disco. *La voz de un control que el founder acaba
+       de pedir no puede estar mal conjugada.* */
+    abrirCarrito_one: 'Carrito, {{count}} producto',
+    abrirCarrito_other: 'Carrito, {{count}} productos',
+    abrirCarrito: 'Carrito, {{count}} productos',
     usarMiSaldo: 'Usar mi saldo de {{saldo}} en este pedido',
     saldoCubreTodo: 'Tu saldo cubre todo: {{saldo}}.',
     saldoMixto: 'Se pagan {{saldo}} con tu saldo y {{resto}} con tu tarjeta.',

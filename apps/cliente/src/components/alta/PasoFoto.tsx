@@ -141,7 +141,29 @@ export function PasoFoto({
         const base64 = await leerBase64(foto.uri);
         /* Sin `especie`: que la proponga. La clave no viaja —no se manda `''`—
            porque la edge rebota la cadena vacía a propósito. */
-        const r = await sugerirRaza({ imageBase64: base64 });
+        /* 🔴 **S116-C lote 10 · EL TECHO, Y LO ENCONTRÉ COLGADO EN EL APARATO.**
+           Recorriendo el punto 3 volví de 2/3 a 1/3 y toqué «Continuar» otra
+           vez: **la pantalla se quedó en «Mirando la foto» más de tres
+           minutos, DOS veces.** La uri que sobrevive al viaje por params ya no
+           apunta a un archivo legible —el temporal del picker se limpia— y
+           `fetch` no trae techo propio.
+
+           *El código de abajo dice «se avanza SIEMPRE» y era verdad — pero sólo
+           si la promesa TERMINA.* Una promesa colgada no falla: deja la
+           pantalla quieta, sin error, sin log y sin salida. **Es exactamente
+           la clase que esta casa ya tiene escrita** (*un arnés colgado no
+           falla: su silencio se lee como progreso*), un piso más abajo.
+
+           30 s: la identificación normal tarda 3-6 s medidos acá, así que el
+           techo no corta ninguna corrida sana — y **al vencer NO rebota: cae
+           al mismo `catch` y el alta sigue**, que es lo que la regla de esta
+           misma función ya manda. */
+        const r = await Promise.race([
+          sugerirRaza({ imageBase64: base64 }),
+          new Promise<never>((_, rechazar) =>
+            setTimeout(() => rechazar(new Error('sugerir-raza: sin respuesta en 30 s')), 30_000),
+          ),
+        ]);
         if (!r.ok) {
           if (__DEV__) console.warn(`[sugerir-raza] no se pudo · codigo=${r.codigo}`);
         } else {
@@ -223,7 +245,28 @@ export function PasoFoto({
           metía debajo del reloj**. *Un padding no es un inset: uno es aire de
           composición y el otro es lo que el aparato se reserva.* Lo pone quien
           la coloca, que es el único que sabe que acá va a sangre. */}
-          <EsperaLarga titulo={t('alta.mirandoTitulo')} apoyo={t('alta.mirandoApoyo')} />
+          {/* ⭐ **Y LA ESPERA GANA SU PUERTA.** ⏪ No tenía `pie`, con su razón
+              escrita: *«de esta espera no se sale — la identificación termina
+              sola y avanza»*. **Era cierto hasta que se colgó.** Con la
+              promesa colgada (ver el techo, arriba) la persona quedaba
+              encerrada: ni botón, ni error, ni atrás.
+
+              El techo cura la causa; esto cura la CONSECUENCIA, y hacen falta
+              los dos — *el techo tapa la falla que ya conozco; la puerta tapa
+              la que todavía no.* La salida avanza sin reconocer nada: es lo
+              mismo que hace el fallo, así que no inventa un camino nuevo. */}
+          <EsperaLarga
+            titulo={t('alta.mirandoTitulo')}
+            apoyo={t('alta.mirandoApoyo')}
+            pie={
+              <Boton
+                etiqueta={t('alta.mirandoSalir')}
+                variante="ghost"
+                bloque
+                onPress={() => onAvanzar({ fotoUri: foto?.uri, conFoto: foto === null ? undefined : '1' })}
+              />
+            }
+          />
         </SafeAreaView>
       ) : (
       <HojaContenido

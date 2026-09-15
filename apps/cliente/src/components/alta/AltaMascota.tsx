@@ -25,6 +25,7 @@ import { PasoCierre } from './PasoCierre';
 import { PasoDatosBasicos } from './PasoDatosBasicos';
 import { PasoCarnet } from './PasoCarnet';
 import { PasoFoto } from './PasoFoto';
+import { PasoRazaFicha } from './PasoRazaFicha';
 import {
   aParams,
   esPaso,
@@ -49,22 +50,28 @@ export function AltaMascota({ modo, pasoFijo }: { modo: ModoAlta; pasoFijo?: Pas
 
   const rutaPaso = MODO[modo].rutaPaso;
 
-  const avanzar = (parcial: BorradorAlta) => {
+  const avanzar = (parcial: BorradorAlta) => irAlSiguiente(parcial, false);
+
+  /* ⭐ **S116-C lote 10 · SALTAR = AVANZAR CON `replace`.** Lo pide la
+     pantalla de raza, que se salta sola cuando no tiene nada que contar: con
+     `push` quedaría en la pila y el «atrás» del formulario caería en una
+     pantalla que se vuelve a saltar — *un gesto que no te devuelve a donde
+     estabas se lee como roto, no como rápido.*
+
+     Comparte TODO con `avanzar` salvo el verbo de navegación, así que sale del
+     mismo cuerpo: *dos funciones que sólo difieren en `push`/`replace` divergen
+     el día que alguien toque una.* */
+  const irAlSiguiente = (parcial: BorradorAlta, reemplazando: boolean) => {
     const proximo = siguiente(paso);
     if (proximo === null) return;
-    // EL TOKEN DEL INTENTO nace en el primer avance y de ahí viaja solo (ver
-    // `tokenIntento` en tipos.ts). Acá y no en el cierre: en el cierre ya sería
-    // tarde —cada re-montaje generaría uno nuevo y no habría nada que
-    // reconocer—, y acá el `...borrador` de los pasos siguientes lo conserva.
     const conToken: BorradorAlta = {
       ...borrador,
       ...parcial,
       tokenIntento: borrador.tokenIntento ?? nuevoTokenIntento(),
     };
-    router.push({
-      pathname: rutaPaso,
-      params: { ...aParams(conToken), paso: proximo },
-    });
+    const destino = { pathname: rutaPaso, params: { ...aParams(conToken), paso: proximo } } as const;
+    if (reemplazando) router.replace(destino);
+    else router.push(destino);
   };
 
   const atras = () => {
@@ -80,6 +87,15 @@ export function AltaMascota({ modo, pasoFijo }: { modo: ModoAlta; pasoFijo?: Pas
       return <PasoDatosBasicos modo={modo} borrador={borrador} onAvanzar={avanzar} onAtras={atras} />;
     case 'foto':
       return <PasoFoto borrador={borrador} onAvanzar={avanzar} onAtras={atras} />;
+    case 'raza':
+      return (
+        <PasoRazaFicha
+          borrador={borrador}
+          onAvanzar={avanzar}
+          onSaltar={(parcial) => irAlSiguiente(parcial, true)}
+          onAtras={atras}
+        />
+      );
     case 'carnet':
       return <PasoCarnet borrador={borrador} onAvanzar={avanzar} onAtras={atras} />;
     case 'cierre':

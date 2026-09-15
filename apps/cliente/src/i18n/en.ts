@@ -261,6 +261,10 @@ export const clienteEn = {
   // why the two namespaces merged, and for the two voice calls the gate
   // still has to arbitrate). BATCH S91 · GATE PENDING.
   alta: {
+    mirandoSalir: 'Continue without recognizing',
+    razaOrigen: 'Where it comes from',
+    razaComoEs: "What it's like",
+    saltar: 'Skip',
     nuevaMascota: 'New pet',
     paso: 'Step {{actual}} of {{total}}',
     volver: 'Back',
@@ -1847,6 +1851,9 @@ export const clienteEn = {
     errorCargar: "We couldn't load your updates.",
     sinVozTitulo: 'Update',
     noLeido: 'Unread',
+    abrirConNoLeidos_one: 'Updates, {{count}} unread',
+    abrirConNoLeidos_other: 'Updates, {{count}} unread',
+    abrirConNoLeidos: 'Updates, {{count}} unread',
     momentoRecien: 'Just now',
     momentoMin: '{{n}} min ago',
     momentoHoras: '{{n}} h ago',
@@ -2303,7 +2310,9 @@ export const clienteEn = {
     biometricoRechazado: 'We couldn’t confirm it. Try again.',
   },
   despensa: {
-    abrirCarrito: 'Cart, {{n}} items',
+    abrirCarrito_one: 'Cart, {{count}} item',
+    abrirCarrito_other: 'Cart, {{count}} items',
+    abrirCarrito: 'Cart, {{count}} items',
     usarMiSaldo: 'Use my {{saldo}} balance on this order',
     saldoCubreTodo: 'Your balance covers it all: {{saldo}}.',
     saldoMixto: '{{saldo}} from your balance and {{resto}} from your card.',
