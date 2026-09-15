@@ -118,6 +118,15 @@ export {
   // S91 (pedido de C): la ficha PÚBLICA, por la vista y jamás por la tabla.
   obtenerPerfilesPublicos,
   obtenerPerfilesPublicosPorCuenta,
+} from './wrappers/prestador';
+/* ⚠️ **PRÉSTAMO DECLARADO — lo escribió C (S116-C lote 5), en territorio de A.**
+   Archivo nuevo, devuelve SÓLO ids, misma vista pública. Su cabecera dice por
+   qué y cómo se borra; el pedido vive en el buzón. */
+export {
+  listarIdsPrestadoresPublicos,
+  type CodigoErrorExplorar,
+} from './wrappers/explorar';
+export {
   type PerfilPublico,
   type ServicioPublico,
   type NombreReservador,

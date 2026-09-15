@@ -5058,4 +5058,48 @@ export const clienteEs = {
     historialCitasFallo: 'No pudimos traer las citas anteriores. Los pedidos sí están.',
   },
 
+  /* ⭐ **S116-C lote 5 · EXPLORAR v5** — la banda con su buscador, la grilla de
+     oficios cabalgando la costura, y «cerca de ti» con negocios reales. */
+  explorarV5: {
+    titulo: 'Explorar',
+    /** El antetítulo dice DÓNDE estás parado: es lo que vuelve «cerca» un dato
+     *  y no una promesa. Sin dirección guardada no se dibuja (ley del nulo). */
+    buscarEtiqueta: 'Buscar',
+    cercaDeTi: 'Cerca de ti',
+    /* La distancia y el oficio en una línea: es lo que separa una fila de su
+       vecina cuando los nombres se parecen. */
+    lineaOficioDistancia: '{{oficio}} · a {{km}} km',
+    lineaOficioSinDistancia: '{{oficio}}',
+    desde: 'desde',
+    ver: 'Ver',
+    /* 🔴 Un oficio sin nadie cerca NO se esconde: se toca y esto es lo que
+       dice. La segunda línea es una PROMESA de la casa — su productor no
+       existe todavía y está pedido en el buzón. */
+    sinNadieTitulo: 'Todavía no hay {{oficio}} cerca de ti',
+    sinNadieDetalle: 'Te avisamos apenas llegue el primero a tu zona.',
+    sinNadieCerrar: 'Entendido',
+    vozSinDisponibles: 'Todavía no hay nadie cerca',
+    /* El vacío de la lista, distinto del oficio sin nadie: acá no hay NINGUNO
+       de ningún oficio. */
+    vacioTitulo: 'Todavía no hay negocios cerca',
+    vacioDetalle: 'Estamos sumando a los primeros de tu zona.',
+    /* La búsqueda que no encuentra: dice qué buscó, no «no hay nada». */
+    sinResultados: 'Nada coincide con «{{texto}}»',
+    sinResultadosDetalle: 'Prueba con el nombre del negocio o del servicio.',
+    error: 'No pudimos cargar los negocios',
+    /* La tarjeta destacada de la casa. Sin promo viva NO se dibuja. */
+    destacadaCta: 'Ver la promoción',
+    /* 🔴 **UNA PALABRA POR DISCO — contrato de `GrillaOficios`.** Los títulos
+       del riel de servicios son la voz LARGA («Estética y baño»), y la pieza
+       declara que *«si necesita dos, el disco NO crece: se cambia la palabra»*.
+       Estas son esas palabras. *No reemplazan a las largas: conviven, porque
+       la ficha del oficio sí tiene lugar para la frase entera.* */
+    oficioPaseo: 'Paseo',
+    oficioGrooming: 'Estética',
+    oficioVeterinaria: 'Salud',
+    oficioAdiestramiento: 'Escuela',
+    oficioGuarderia: 'Guardería',
+    oficioHotel: 'Hotel',
+  },
+
 } as const;

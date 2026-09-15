@@ -3629,4 +3629,31 @@ export const clienteEn = {
     historialCitasFallo: "We couldn't bring the past appointments. Your orders are here.",
   },
 
+  /* S116-C lote 5 · EXPLORAR v5 — el espejo. */
+  explorarV5: {
+    titulo: 'Explore',
+    buscarEtiqueta: 'Search',
+    cercaDeTi: 'Near you',
+    lineaOficioDistancia: '{{oficio}} · {{km}} km away',
+    lineaOficioSinDistancia: '{{oficio}}',
+    desde: 'from',
+    ver: 'See',
+    sinNadieTitulo: 'No {{oficio}} near you yet',
+    sinNadieDetalle: "We'll let you know as soon as the first one arrives.",
+    sinNadieCerrar: 'Got it',
+    vozSinDisponibles: 'Nobody nearby yet',
+    vacioTitulo: 'No businesses near you yet',
+    vacioDetalle: "We're bringing in the first ones in your area.",
+    sinResultados: 'Nothing matches “{{texto}}”',
+    sinResultadosDetalle: 'Try the name of the business or the service.',
+    error: "We couldn't load the businesses",
+    destacadaCta: 'See the promotion',
+    oficioPaseo: 'Walk',
+    oficioGrooming: 'Grooming',
+    oficioVeterinaria: 'Health',
+    oficioAdiestramiento: 'Training',
+    oficioGuarderia: 'Daycare',
+    oficioHotel: 'Hotel',
+  },
+
 } as const satisfies Espejo<typeof clienteEs>;

@@ -1,17 +1,46 @@
 /**
- * EXPLORAR v1 — descubrimiento DELIBERADO (S51-B2.4, DISEÑO_EXPERIENCIA
- * §8): para cuando el dueño BUSCA. Tres bloques:
- *   1. Servicios ACTIVOS por country_config (la DB dice la verdad —
- *      regla 21; cero hardcode). v1 son fichas informativas SIN CTA
- *      muerta: agendar llega con A2 y se dice honesto.
- *   2. Refugios/adopción (M0, día 1) — 🔴 **S112-C: DEJÓ DE SER UN VACÍO.**
- *      Decía «hoy 0 refugios en DB → vacío digno que dice la verdad», y era
- *      cierto hasta que S111-A construyó el motor y S111-C la vidriera. Desde
- *      entonces el texto pasó de honesto a FALSO, y **el vacío tampoco
- *      navegaba**: la sección anunciaba la adopción y no llevaba a ella.
- *      Ahora **PREGUNTA** y dice la verdad en los dos casos (ver §2 abajo).
- *   3. "Próximamente honesto" — sin fechas prometidas (hotel,
- *      guardería, seguros, telemedicina, Prime preparado-apagado).
+ * ═══════════════════════════════════════════════════════════════════════════
+ * EXPLORAR — **quién puede cuidar a tu mascota, cerca** (S116-C · lote 5)
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * TESIS (Ley 14): *dónde estás, qué oficios hay, y quién los hace cerca.*
+ *
+ * FIRMA (Ley 15): la **grilla de oficios cabalgando la costura** —discos
+ * blancos con el glifo en ciruela, tres por fila— y debajo negocios REALES con
+ * su distancia. *Hasta hoy esta pantalla mostraba cinco fichas informativas que
+ * llevaban al hub de cada oficio: decía qué servicios EXISTEN, no quién los
+ * hace.*
+ *
+ * ── LO QUE CAMBIA, y lo que NO ──────────────────────────────────────────────
+ * **Cambia:** el buscador entra a la banda ciruela (misma firma que la
+ * Despensa) · las cinco fichas se vuelven `GrillaOficios` en la costura · nace
+ * «Cerca de ti» con `TarjetaPrestador` sobre `v_prestadores_publicos`.
+ *
+ * **NO cambia, y se conserva a propósito:** «Refugios y adopción» y
+ * «Próximamente» siguen abajo, enteros. *El encargo describe lo que va arriba;
+ * no dijo de sacar lo de abajo, y quitarlo sería estrechar el alcance por mi
+ * cuenta.*
+ *
+ * ── LAS TRES COSAS QUE EL OBJETO DIJO Y HAY QUE SABER ───────────────────────
+ * ① 🔴 **NINGÚN negocio tiene reseñas**: medido, los 11 de
+ *    `v_prestadores_publicos` están en `total_resenas = 0`. El contrato de
+ *    `TarjetaPrestador` dice *«sin reseñas la línea NO EXISTE, ni como “0
+ *    reseñas”»* ⇒ **hoy ninguna tarjeta muestra calificación, y eso es lo
+ *    correcto**: un cero con una estrella al lado diría «mal calificado» donde
+ *    lo que pasa es «sin calificar».
+ * ② ⚠️ **La tarjeta destacada NO se dibuja porque no hay promo**: existe
+ *    `cupones` en la base y **cero lector de promociones de la casa**. La
+ *    condición del encargo —*«si hay promo»*— hoy es falsa. Cuando exista el
+ *    productor, la tarjeta entra entre la grilla y la lista (ley del nulo,
+ *    19.9: el hueco no se reserva).
+ * ③ ⚠️ **El buscador filtra lo que YA se trajo**, no consulta un motor de
+ *    búsqueda: no existe uno de negocios (`buscarEnMiFamilia` busca en TU
+ *    familia). *Se dice acá para que nadie lea la lupa como una promesa de
+ *    buscar en todo el catálogo.*
+ *
+ * ESCALERA (§4b): peldaño 0 = sin dirección, «cerca» no se afirma y el
+ * antetítulo no se dibuja · 1 = la grilla con sus oficios marcados · 2 = los
+ * negocios con distancia real.
  */
 
 import { useCallback, useState } from 'react';
@@ -22,22 +51,40 @@ import {
   HojaContenido,
   Cabecera,
   AIRE_RAIZ,
+  AvatarMascota,
+  Campo,
   Celda,
   CeldaNavegacion,
   Boton,
-  Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  GrillaOficios,
+  Hoja,
   Icono,
   Separador,
   Tarjeta,
+  TarjetaPrestador,
+  Texto,
+  glifoDeOficio,
   spacing,
   typography,
   useTheme,
+  type Oficio,
+  type OficioDeGrilla,
 } from '@epetplace/ui';
 import type { ReactNode } from 'react';
-import { obtenerAdoptables, obtenerServiciosPais, type ServiciosPais } from '@epetplace/api';
+import {
+  obtenerAdoptables,
+  obtenerServiciosPais,
+  obtenerDireccionHogar,
+  listarIdsPrestadoresPublicos,
+  obtenerPerfilesPublicos,
+  type ServiciosPais,
+  type DireccionHogar,
+  type PerfilPublico,
+} from '@epetplace/api';
+import { oficioDeServicio, distanciaKm } from '@/lib/oficio-de-servicio';
 
 // S58 (D-361): adiestramiento migró al set b′ — la estrella murió
 // (violaba el set); el silbato canónico vive en el registry.
@@ -86,6 +133,17 @@ export default function Explorar() {
      decide ella, que es la que sabe ordenarlo (§4). */
   const [hayAdoptables, setHayAdoptables] = useState<boolean | null>(null);
 
+  /* ── LO QUE EL LOTE 5 AGREGA ────────────────────────────────────────────
+     La dirección manda DOS cosas: el barrio del antetítulo y el punto contra
+     el que se mide la distancia. **Sin ella no se afirma «cerca»** — ni en el
+     antetítulo ni en las filas — y la lista igual se muestra: *no saber dónde
+     vive la familia no es razón para esconderle quién hay.* */
+  const [direccion, setDireccion] = useState<DireccionHogar | null | 'cargando'>('cargando');
+  const [perfiles, setPerfiles] = useState<PerfilPublico[] | 'cargando' | 'error'>('cargando');
+  const [busqueda, setBusqueda] = useState('');
+  /** El oficio que se tocó sin tener a nadie cerca. `null` = la hoja cerrada. */
+  const [sinNadie, setSinNadie] = useState<Oficio | null>(null);
+
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
@@ -95,6 +153,25 @@ export default function Explorar() {
          CADENA). */
       void obtenerServiciosPais(PAIS_SOFT_LAUNCH).then((r) => {
         if (vigente) setServicios(r.ok ? r.data : 'error');
+      });
+      /* La dirección, para el barrio y para la distancia. Un fallo NO es «no
+         tiene dirección»: se distinguen porque una cosa es no saber y la otra
+         es saber que no hay (`L-178`). Acá los dos caen en `null` y la
+         consecuencia es la misma —no se afirma «cerca»—, así que no se
+         inventa un tercer estado que nadie usaría. */
+      void obtenerDireccionHogar().then((r) => {
+        if (vigente) setDireccion(r.ok ? r.data : null);
+      });
+      /* ⚠️ **DOS VIAJES ENCADENADOS, y el porqué está en el lector prestado:**
+         no hay forma de pedir los perfiles sin tener antes sus ids. Es el costo
+         declarado de `listarIdsPrestadoresPublicos` y la cura es de A. */
+      void listarIdsPrestadoresPublicos().then(async (ids) => {
+        if (!vigente) return;
+        if (!ids.ok) { setPerfiles('error'); return; }
+        if (ids.data.length === 0) { setPerfiles([]); return; }
+        const ps = await obtenerPerfilesPublicos(ids.data);
+        if (!vigente) return;
+        setPerfiles(ps.ok ? ps.data : 'error');
       });
       /* El gate corta ANTES de la petición: una lectura para decidir algo que
          no se va a dibujar es un viaje pagado para nada. */
@@ -201,6 +278,149 @@ export default function Explorar() {
        agenda desde veterinaria. */
   }
 
+  /* ══════════════════════════════════════════════════════════════════════════
+   *  LO QUE LA PANTALLA DERIVA — y por qué acá y no en un `useMemo`
+   *  ─────────────────────────────────────────────────────────────────────────
+   *  Son listas de a lo sumo 11 elementos sobre datos que ya están en memoria.
+   *  *Memoizar esto costaría más lectura que el cálculo que ahorra* — la casa
+   *  ya midió que el costo vive en los VIAJES, no en el render (`L-223`).
+   * ═════════════════════════════════════════════════════════════════════════ */
+
+  const listaPerfiles = Array.isArray(perfiles) ? perfiles : [];
+  const puntoCasa =
+    direccion !== 'cargando' && direccion !== null && direccion.lat !== null && direccion.lon !== null
+      ? { lat: direccion.lat, lon: direccion.lon }
+      : null;
+
+  /** El barrio del antetítulo: el sector si lo hay, si no la ciudad. **Sin
+   *  dirección no se dibuja** — un antetítulo vacío deja un renglón mudo. */
+  const barrio =
+    direccion !== 'cargando' && direccion !== null
+      ? ((direccion.sector ?? '').trim() || (direccion.ciudad ?? '').trim() || null)
+      : null;
+
+  /** Qué oficios tiene cada negocio, ya traducidos del vocabulario del motor. */
+  const oficiosDe = (p: PerfilPublico): Oficio[] => {
+    const vistos: Oficio[] = [];
+    for (const sv of p.servicios) {
+      const o = oficioDeServicio(sv);
+      if (o !== null && !vistos.includes(o)) vistos.push(o);
+    }
+    return vistos;
+  };
+
+  /** La distancia a la ZONA del negocio, o `null` si falta alguna de las dos
+   *  puntas. *`null` viaja y la fila deja de decir «a X km»; no se rellena con
+   *  un cero, que diría «está acá mismo».* */
+  const kmDe = (p: PerfilPublico): number | null =>
+    puntoCasa !== null && p.zona_lat !== null && p.zona_lon !== null
+      ? distanciaKm(puntoCasa, { lat: p.zona_lat, lon: p.zona_lon })
+      : null;
+
+  /* 🔴 **LA GRILLA SALE DE LA CONFIG DEL PAÍS, y `disponible` DE LOS DATOS.**
+     Son dos preguntas distintas, y tenerlas separadas es lo que permite el caso
+     que el encargo pide: *el país ofrece el oficio* (por eso está en la grilla)
+     y *nadie lo hace todavía cerca* (por eso sale marcado). Si la grilla se
+     armara con los oficios que hay, ese caso sería inexpresable. */
+  const conAlguien = new Set<Oficio>();
+  for (const p of listaPerfiles) for (const o of oficiosDe(p)) conAlguien.add(o);
+
+  /** `vet` es la clave vieja de esta pantalla; el oficio se llama
+   *  `veterinaria`. Se traduce acá y NO se renombra la ficha: esa clave viaja a
+   *  las rutas del hub, y renombrarla es otro lote. */
+  const oficioDeFicha = (clave: string): Oficio => (clave === 'vet' ? 'veterinaria' : (clave as Oficio));
+
+  /** La voz LARGA de un oficio, del riel — jamás la clave del motor. */
+  const vozOficio = (o: Oficio): string =>
+    (fichasActivas.find((x) => oficioDeFicha(x.clave) === o)?.titulo ?? o).replace(/­/g, '');
+
+  /** La palabra CORTA, la del disco. **Sin entrada cae a la larga**: *un disco
+   *  con la palabra larga se ve apretado; uno vacío no se ve.* */
+  const palabraDeOficio = (o: Oficio): string => {
+    const corta: Partial<Record<Oficio, string>> = {
+      paseo: t('explorarV5.oficioPaseo'),
+      grooming: t('explorarV5.oficioGrooming'),
+      veterinaria: t('explorarV5.oficioVeterinaria'),
+      adiestramiento: t('explorarV5.oficioAdiestramiento'),
+      guarderia: t('explorarV5.oficioGuarderia'),
+      hotel: t('explorarV5.oficioHotel'),
+    };
+    return corta[o] ?? vozOficio(o);
+  };
+
+  /* 🔴 **LAS DOS VOCES VAN ANTES DE `oficiosDeGrilla`, y no es estilo.**
+     `oficiosDeGrilla` es un `const` que se construye EN EL RENDER, así que usar
+     acá una función declarada más abajo es **TDZ: revienta al montar**. Es la
+     misma clase que `verify:ref-antes-de-uso` vigila desde S112 —el `useRef`
+     leído antes de declararse que crasheaba el hilo de adopción—, y acá la
+     cazó mover el código, no un gate: *el orden de dos `const` no lo mira
+     nadie hasta que la pantalla no abre.* */
+  const oficiosDeGrilla: OficioDeGrilla[] = fichasActivas.map((f) => {
+    const oficio = oficioDeFicha(f.clave);
+    return {
+      clave: oficio,
+      glifo: glifoDeOficio(oficio),
+      /* 🔴 **LA PALABRA CORTA, no el título del riel de servicios.** Aquél es la
+         voz larga («Estética y baño») y la pieza declara que *«si necesita dos,
+         el disco NO crece: se cambia la palabra»*. **Medido en la captura:** con
+         el título largo la grilla dibujaba tres palabras en un disco de un
+         tercio de ancho. La voz larga sigue viva donde hay lugar —la ficha del
+         oficio, la línea de la tarjeta—: son dos registros, no una corrección. */
+      etiqueta: palabraDeOficio(oficio),
+      disponible: conAlguien.has(oficio),
+    };
+  });
+
+  /** «Cerca de ti»: los negocios que hacen alguno de los oficios de la grilla,
+   *  ordenados por distancia —los que no la tienen, al final— y filtrados por
+   *  lo que se escribió arriba. */
+  const cercaDeTi = listaPerfiles
+    .flatMap((p) => {
+      /* Un negocio sin oficio de vitrina NO se lista: un refugio, o una cuenta
+         sin servicios publicados, no es un resultado de esta lista. */
+      if (oficiosDe(p).length === 0) return [];
+      /* 🔴 **EL OFICIO DE LA FILA ES EL DEL SERVICIO MÁS BARATO, y no el
+         primero que aparezca.** Es lo que hace que la línea y el precio digan
+         lo mismo: *«Veterinaria · desde $10» sobre un negocio cuyo servicio de
+         $10 es un paseo describe otra cosa.* ⏪ La primera versión tomaba
+         `oficios[0]` —el orden en que el motor devolvió los servicios— y la
+         captura lo mostró: **tres negocios distintos, los tres rotulados
+         «Veterinaria»**, uno de ellos con paseo más barato. */
+      let barato: { oficio: Oficio; precio: number } | null = null;
+      for (const sv of p.servicios) {
+        const o = oficioDeServicio(sv);
+        if (o === null || typeof sv.precio !== 'number' || sv.precio <= 0) continue;
+        if (barato === null || sv.precio < barato.precio) barato = { oficio: o, precio: sv.precio };
+      }
+      /* Sin ningún servicio con precio, la fila conserva su primer oficio y el
+         bloque de precio no se dibuja (contrato de la pieza). */
+      const primero = oficiosDe(p)[0];
+      if (primero === undefined) return [];
+      return [{
+        perfil: p,
+        oficio: barato?.oficio ?? primero,
+        km: kmDe(p),
+        desde: barato?.precio ?? null,
+      }];
+    })
+    .filter((r) => {
+      const q = busqueda.trim().toLowerCase();
+      if (q === '') return true;
+      /* Se busca por el nombre del negocio y por el de sus servicios: son las
+         dos formas en que alguien nombra lo que busca. */
+      return (
+        r.perfil.nombre_comercial.toLowerCase().includes(q) ||
+        r.perfil.servicios.some((sv) => sv.nombre.toLowerCase().includes(q))
+      );
+    })
+    .sort((a, b) => {
+      if (a.km === null && b.km === null) return 0;
+      if (a.km === null) return 1;
+      if (b.km === null) return -1;
+      return a.km - b.km;
+    });
+
+
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
               {/* ⭐ **S116-C lote 3b · LA PORTADA PASA A `Cabecera variante="raiz"`.**
@@ -223,14 +443,84 @@ export default function Explorar() {
           (`R53`). */}
         <HojaContenido
           arranque={cabecera.arranque}
-
+          /* ⭐ **LA GRILLA CABALGA LA COSTURA**, que es el slot que
+             `HojaContenido` tiene para eso y lo que `GrillaOficios` espera: su
+             contrato dice que se desplaza `DISCO / 2` y que **sólo la primera
+             fila pisa la costura**. *Montarla adentro de la hoja la dejaría
+             apoyada, no cabalgando, y el desplazamiento lo tendría que
+             adivinar la pantalla.* */
+          costura={
+            servicios === 'cargando' || servicios === 'error' ? null : (
+              <GrillaOficios
+                oficios={oficiosDeGrilla}
+                vozSinDisponibles={t('explorarV5.vozSinDisponibles')}
+                /* 🔴 **UN OFICIO SIN NADIE CERCA NO SE ESCONDE Y SE TOCA** —
+                   firma de la mesa, y la pieza lo deja tocable justamente para
+                   que la pantalla pueda explicarlo. Acá está la otra mitad de
+                   ese contrato: *un control apagado no puede decir por qué lo
+                   está.* */
+                onElegir={(clave) => {
+                  const oficio = clave as Oficio;
+                  if (!conAlguien.has(oficio)) { setSinNadie(oficio); return; }
+                  const ficha = fichasActivas.find((f) => oficioDeFicha(f.clave) === oficio);
+                  ficha?.onPress?.();
+                }}
+              />
+            )
+          }
           fondo={
             <View onLayout={cabecera.alMedir}>
               <Cabecera
                 variante="raiz"
-                titulo={t('explorar.titulo')}
+                /* ⭐ **EL ANTETÍTULO DICE DÓNDE ESTÁS PARADO.** Es lo que vuelve
+                   «cerca de ti» un dato y no una figura: sin él la lista de
+                   abajo afirma una cercanía contra un punto que nadie declaró.
+                   **Sin dirección guardada NO se dibuja** — `undefined`, no una
+                   cadena vacía: la pieza no reserva renglón para un dato que no
+                   existe (19.9). */
+                antetitulo={barrio ?? undefined}
+                titulo={t('explorarV5.titulo')}
                 carrito={{ cantidad: unidadesCarrito, onPress: () => router.push('/despensa/carrito'), etiqueta: t('despensa.abrirCarrito', { count: unidadesCarrito }) }}
                 presentacion="fondo"
+                contenido={
+                  /* ⭐ **EL BUSCADOR EN LA BANDA — la misma firma que la
+                     Despensa**, y el encargo lo dice literal: *«lo mismo en
+                     Explorar»*. Sin el disco del filtro al lado: acá no hay
+                     facetas que abrir, y reservarle el lugar a un control que
+                     no existe dejaría un hueco a la derecha.
+
+                     ⚠️ **Sin `paddingHorizontal`**: los lados los paga la
+                     cabecera. Sumarlos acá los pagaría dos veces (`R53`). */
+                  /* 🔴 **CON SU ETIQUETA ADENTRO Y SIN TEXTO DE EJEMPLO — N11″.**
+                     ⏪ La primera versión copiaba el buscador de la Despensa
+                     —apagaba la etiqueta y ponía un ejemplo en su lugar— y
+                     **`verify:etiqueta-dentro` la paró con razón**: ésas son las
+                     dos puertas de atrás por las que la etiqueta vuelve a
+                     salirse del campo, y la letra de §N11″ —firmada el 15-sep—
+                     dice que *«el nombre del campo va DENTRO del campo,
+                     flotando… el placeholder de ejemplo muere»*.
+
+                     ⚠️ **Y ESTE COMENTARIO NO PUEDE NOMBRAR ESAS DOS PROPS.** La
+                     primera redacción las citaba literales y **volvió a encender
+                     el gate sobre la línea que las cura**: un censo por patrón
+                     no distingue una CITA de un montaje. *Tercera vez en esta
+                     tanda —antes `verify:moneda` y `verify:techos-locales`—, así
+                     que la regla es de clase y no un descuido: **se describe el
+                     marcador, jamás se escribe.***
+                     *El de la Despensa es deuda conocida con dueño; copiarlo
+                     habría sido heredar el defecto en vez de la forma.*
+                     ⚠️ **La etiqueta es corta a propósito**: flotando al borde
+                     comparte renglón con el glifo, y «Busca un servicio o un
+                     negocio» ahí no entra. La frase larga muere con el
+                     placeholder — su trabajo lo hace la lupa. */
+                  <Campo
+                    label={t('explorarV5.buscarEtiqueta')}
+                    value={busqueda}
+                    onChangeText={setBusqueda}
+                    autoCapitalize="none"
+                    iconoIzq={<Icono nombre="lupa" tamano={20} registro="glifo" montaje="control" />}
+                  />
+                }
               />
             </View>
           }
@@ -246,126 +536,104 @@ export default function Explorar() {
           <View style={{ paddingBottom: AIRE_RAIZ }}>
 
           <View style={{ paddingHorizontal: spacing[4], gap: spacing[6], marginTop: spacing[2] }}>
-            {/* ── Servicios activos ── */}
+            {/* ══════════════════════════════════════════════════════════════
+                ⭐ **CERCA DE TI — negocios REALES, no fichas de servicio.**
+
+                ⏪ **ACÁ VIVÍAN LAS CINCO FICHAS INFORMATIVAS** (una tarjeta por
+                oficio con su glifo y su voz, en grilla de tres). Murieron con
+                la grilla de la costura, que hace su trabajo mejor: *decían qué
+                servicios EXISTEN; esta lista dice QUIÉN los hace y a qué
+                distancia*, que es la pregunta con la que alguien abre Explorar.
+
+                🔴 **LA CALIFICACIÓN NO SE DIBUJA HOY, Y NO ES UN OLVIDO.**
+                Medido contra la base: los 11 negocios públicos están en
+                `total_resenas = 0`. El contrato de la pieza dice *«sin reseñas
+                la línea NO EXISTE, ni como “0 reseñas”»* — *un negocio nuevo no
+                está peor calificado: está sin calificar.* ⇒ se pasa `null`
+                explícito y la línea desaparece sola el día que alguien reseñe.
+
+                ⚠️ **La tarjeta destacada de la casa NO está montada porque no
+                hay qué montar**: existe `cupones` en la base y **cero lector de
+                promociones**. La condición del encargo —*«si hay promo»*— hoy
+                es falsa, así que el lugar queda vacío en vez de reservado.
+                ═══════════════════════════════════════════════════════════ */}
             <View style={{ gap: spacing[3] }}>
-              <TituloBloque texto={t('explorar.servicios')} />
-              {servicios === 'cargando' ? (
+              <TituloBloque texto={t('explorarV5.cercaDeTi')} />
+              {perfiles === 'cargando' ? (
                 <EsqueletoGrupo>
                   <View style={{ gap: spacing[3] }}>
-                    <Esqueleto forma="bloque" ancho="100%" alto={72} />
-                    <Esqueleto forma="bloque" ancho="100%" alto={72} />
+                    <Esqueleto forma="bloque" ancho="100%" alto={96} />
+                    <Esqueleto forma="bloque" ancho="100%" alto={96} />
                   </View>
                 </EsqueletoGrupo>
-              ) : servicios === 'error' ? (
+              ) : perfiles === 'error' ? (
                 <EstadoVacio
-                  titulo={t('explorar.error')}
+                  registro="seccion"
+                  titulo={t('explorarV5.error')}
                   descripcion={t('hogar.errorHistoriaDetalle')}
-                  accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setServicios('cargando')} />}
+                  accion={
+                    <Boton
+                      variante="secundario"
+                      etiqueta={t('hogar.reintentar')}
+                      onPress={() => setPerfiles('cargando')}
+                    />
+                  }
                 />
+              ) : cercaDeTi.length === 0 ? (
+                /* 🔴 **DOS VACÍOS DISTINTOS, y confundirlos sería mentir:** no
+                   hay ninguno, o no hay ninguno QUE COINCIDA con lo escrito.
+                   *«No hay negocios cerca» sobre una búsqueda de tres letras es
+                   falso, y el que lo lee no tiene cómo saberlo.* */
+                busqueda.trim() !== '' ? (
+                  <EstadoVacio
+                    registro="seccion"
+                    titulo={t('explorarV5.sinResultados', { texto: busqueda.trim() })}
+                    descripcion={t('explorarV5.sinResultadosDetalle')}
+                  />
+                ) : (
+                  <EstadoVacio
+                    registro="seccion"
+                    titulo={t('explorarV5.vacioTitulo')}
+                    descripcion={t('explorarV5.vacioDetalle')}
+                  />
+                )
               ) : (
                 <View style={{ gap: spacing[3] }}>
-                  {/* QW2 (S53, decisión founder): grilla de 2 columnas,
-                      cards cuadradas con el Icono b′ PRESIDIENDO. */}
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] }}>
-                    {/* ═══════════════════════════════════════════════════════════
-                        🔴 ESTE BLOQUE TIENE UNA COPIA VIVA, Y SI LO TOCÁS SIN
-                        TOCARLA, UN INSTRUMENTO EMPIEZA A MENTIR.
-
-                        La galería lo reproduce **transcrito a mano** para poder
-                        comparar las tres baldosas de la casa (`D-973`):
-                        `packages/ui/src/gallery/TokenGallery.tsx`, sección
-                        *«D-973 · LA BALDOSA DEL CLIENTE, REPRODUCIDA FIEL»*.
-
-                        **No se importa porque no hay qué importar:** esta baldosa
-                        no es un componente — vive INLINE acá adentro. *Y ése es
-                        exactamente el hecho que `D-973` pone sobre la mesa.*
-
-                        ⚠️ **La advertencia estaba escrita allá y no acá**, que es
-                        el lado que rompe: la copia avisa «quien toque aquella,
-                        mira ésta» **y aquella no se enteraba**. *Una nota que sólo
-                        vive en la copia protege a la copia de nadie.*
-                        ═══════════════════════════════════════════════════════════ */}
-                    {fichasActivas.map((f) => {
-                      const contenido = (
-                        <View style={{ aspectRatio: 1.05, justifyContent: 'space-between' }}>
-                          <View style={{ paddingTop: spacing[1] }}>{f.icono}</View>
-                          <View style={{ gap: 2 }}>
-                            {/* ⭐ S107-C · el label baja de `base` a `sm` y se
-                                acota a dos líneas: con la baldosa a 31 % el
-                                texto se salía de su espacio. *El tamaño del
-                                texto vive acá, en el consumidor — se midió antes
-                                de pedírselo a B.* */}
-                            <Text
-                              numberOfLines={2}
-                              style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.primary }}
-                            >
-                              {f.titulo}
-                            </Text>
-                            {/* ☠️ S107-C · LA DESCRIPCIÓN DEL PRODUCTO Y EL
-                                «Toca para entrar» SALIERON (firma del founder).
-                                La causa del desborde acá no era el tamaño del
-                                texto: **era cuánta información cargaba la
-                                baldosa**. Con tres columnas entraban glifo +
-                                nombre + descripción + una llamada a la acción en
-                                ~100 pt de ancho.
-                                🔴 **El chevron reemplaza al texto porque dice lo
-                                mismo ocupando una fila de nada** — y *«toca para
-                                entrar» le explica a alguien que ya sabe tocar
-                                una tarjeta*. */}
-                            {/* ☠️ S107-C · EL CHEVRON SE RETIRÓ (firma del
-                                founder, con su razón medida): **quedaba en un
-                                lugar distinto en cada baldosa** porque el label
-                                ocupa distinta cantidad de líneas — «Adiestramiento»
-                                lo empujaba abajo y «Paseo» lo dejaba arriba.
-                                🔴 **Y no se pierde nada: que la tarjeta es
-                                tocable ya lo dice ser una tarjeta.** *Un
-                                indicador que se mueve solo llama la atención
-                                sobre sí mismo en vez de sobre lo que señala.*
-                                ⚠️ La etiqueta accesible **se queda**: sin texto
-                                ni chevron, es lo único que dice a dónde entra. */}
-                          </View>
-                        </View>
-                      );
-                      /* ⭐ S107-C · TRES COLUMNAS, igual que la grilla de
-                         Negocio: con cinco servicios activos, dos columnas dejan
-                         la última fila con una ficha del doble de ancho — y una
-                         ficha más grande se lee como más importante.
-                         `flexGrow: 0` para que la fila corta se vea corta y no
-                         se estire a llenar. */
-                      return (
-                        <View key={f.clave} style={{ flexBasis: '31%', flexGrow: 0 }}>
-                          {/* 🔴 SIN TEXTO, LA ETIQUETA CARGA EL DESTINO.
-                              Un chevron no se anuncia: quien no ve la pantalla
-                              oiría «botón» y nada más. La etiqueta dice **a
-                              dónde entra**, que es lo que el texto retirado
-                              decía peor. */}
-                          {f.onPress ? (
-                            <Tarjeta
-                              relleno="amplio"
-                              interactiva
-                              onPress={f.onPress}
-                              accessibilityRole="button"
-                              /* 🔴 El guion blando SE QUITA de la etiqueta
-                                 accesible: sirve para partir un renglón, y acá
-                                 no hay renglón que partir. *La mayoría de los
-                                 lectores lo ignora, pero «la mayoría» no es una
-                                 garantía cuando el costo de asegurarlo es un
-                                 `replace`.* */
-                              etiqueta={t('explorar.entrarA', { servicio: f.titulo.replace(/\u00AD/g, '') })}
-                            >
-                              {contenido}
-                            </Tarjeta>
-                          ) : (
-                            <Tarjeta relleno="amplio">{contenido}</Tarjeta>
-                          )}
-                        </View>
-                      );
-                    })}
-                  </View>
-                  {/* ☠️ S107-C · «Agendar veterinaria llega pronto» RETIRADO.
-                      No pertenecía acá: esta sección lista los servicios que YA
-                      se agendan, y una nota que dice lo contrario debajo de
-                      ellos contradice lo que la pantalla está mostrando. */}
+                  {cercaDeTi.map((r) => (
+                    <TarjetaPrestador
+                      key={r.perfil.id}
+                      nombre={r.perfil.nombre_comercial}
+                      /* El retrato sale de `AvatarMascota`, que es la pieza que
+                         la casa ya usa para una cara con su respaldo de
+                         iniciales. **Sin foto no queda un hueco**: dibuja el
+                         monograma del nombre. */
+                      retrato={<AvatarMascota nombre={r.perfil.nombre_comercial} fotoUrl={r.perfil.foto_url ?? undefined} tamano="md" />}
+                      /* La distancia entra a la línea **sólo si existe**: sin
+                         dirección guardada la fila dice el oficio y nada más,
+                         en vez de afirmar una cercanía que nadie midió. */
+                      lineaOficio={
+                        r.km === null
+                          ? t('explorarV5.lineaOficioSinDistancia', { oficio: vozOficio(r.oficio) })
+                          : t('explorarV5.lineaOficioDistancia', {
+                              oficio: vozOficio(r.oficio),
+                              km: r.km.toFixed(1),
+                            })
+                      }
+                      calificacion={null}
+                      vozResenas={null}
+                      desde={r.desde}
+                      vozDesde={t('explorarV5.desde')}
+                      vozVer={t('explorarV5.ver')}
+                      /* La vitrina del negocio, que ya existe y es a sangre por
+                         letra firmada de S91. */
+                      onPress={() =>
+                        router.push({
+                          pathname: '/prestador/[prestadorId]',
+                          params: { prestadorId: r.perfil.id },
+                        })
+                      }
+                    />
+                  ))}
                 </View>
               )}
             </View>
@@ -442,6 +710,38 @@ export default function Explorar() {
           </View>
           </View>
         </HojaContenido>
+
+        {/* ══════════════════════════════════════════════════════════════════
+            ⭐ **EL OFICIO QUE TODAVÍA NO TIENE A NADIE — la otra mitad del
+            contrato de `GrillaOficios`.**
+
+            La pieza deja tocable el oficio apagado *«porque un control apagado
+            no puede explicar por qué lo está»*, y deja explícito que **lo que
+            sigue es de quien monta**. Esto es eso: la explicación.
+
+            ⚠️ **LA SEGUNDA LÍNEA ES UNA PROMESA SIN PRODUCTOR, y se declara.**
+            «Te avisamos apenas llegue el primero» es la copia del encargo, y
+            **no existe el motor que lo dispare**: no hay suscripción a «oficio
+            + zona» en ningún lado. *Se monta porque es la palabra de la casa y
+            se declara porque una promesa que nadie va a cumplir es peor que no
+            hacerla* — el pedido vive en el buzón.
+            ═══════════════════════════════════════════════════════════════ */}
+        <Hoja
+          visible={sinNadie !== null}
+          onCerrar={() => setSinNadie(null)}
+          titulo={sinNadie === null ? '' : t('explorarV5.sinNadieTitulo', { oficio: vozOficio(sinNadie).toLowerCase() })}
+          conCerrar
+        >
+          <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
+            <Texto variante="cuerpo">{t('explorarV5.sinNadieDetalle')}</Texto>
+            <Boton
+              variante="secundario"
+              bloque
+              etiqueta={t('explorarV5.sinNadieCerrar')}
+              onPress={() => setSinNadie(null)}
+            />
+          </View>
+        </Hoja>
     </SafeAreaView>
   );
 }
