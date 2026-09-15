@@ -226,7 +226,6 @@ export function HabitantesAcuarioHoja({
             {/* La que el catálogo no tiene (ley S59) */}
             <Campo
               label={t('perfil.habitantesOtraLabel')}
-              placeholder={t('perfil.habitantesOtraPlaceholder')}
               value={libre}
               onChangeText={setLibre}
               autoCapitalize="words"

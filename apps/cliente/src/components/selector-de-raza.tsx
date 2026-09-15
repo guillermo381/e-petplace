@@ -116,7 +116,6 @@ export function SelectorDeRaza({
     <View style={{ gap: spacing[4] }}>
       <Campo
         label={t('alta.razaLabel')}
-        placeholder={t('alta.razaPlaceholder')}
         value={valor.raza ?? ''}
         onChangeText={(v) =>
           // Tipear a mano DESHACE la elección: si el texto ya no es el de la

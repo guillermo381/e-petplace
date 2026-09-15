@@ -68,6 +68,26 @@ export type PrecioRegistro =
   | 'ficha'
   /** El de un renglón de resumen (subtotal, envío, impuesto). */
   | 'linea'
+  /** ⭐ **S116-B lote 5 · EL PRECIO EN BALOO, la cifra de la casa v5.**
+   *
+   *  🔴 **Nace de un hueco que esta pieza tenía y su cabecera no podía ver:**
+   *  la letra v5 dice *«Baloo 2 800 para display, títulos y CIFRAS»* y
+   *  `typography.escala` la declara desde el lote 2 (`cifra` 44/44 ·
+   *  `cifraChica` 22/22) — **pero los tres registros de acá siguen en PJS**,
+   *  o sea en la escala v4. *La voz única del precio se quedó una letra
+   *  atrás, y como no falla nada, nadie lo iba a notar hasta que una
+   *  pantalla pidiera la cifra de la casa.*
+   *
+   *  ⚠️ **Es `cifraChica` (22) y NO `cifra` (44), declarado:** 44 es la
+   *  cifra de un dato que preside una pantalla; en una fila de resultados
+   *  aplastaría al nombre del negocio, que es lo que de verdad se elige.
+   *  *El registro nombra la VOZ —Baloo—, no el tamaño más grande que esa
+   *  voz tenga.*
+   *
+   *  ⚠️ **No cambia ninguno de los otros tres.** Migrarlos a Baloo es una
+   *  decisión de mesa con su propio gate: toca los 53 sitios que esta pieza
+   *  unificó. */
+  | 'cifra'
 
 export interface PrecioTextProps {
   /** El monto, **en la moneda que se va a mostrar** (ver la cabecera:
@@ -134,6 +154,7 @@ const RECETA: Record<PrecioRegistro, { size: number; familia: string; leading: n
   vitrina: { size: typography.size.md, familia: typography.family.sans.medium, leading: 26 },
   ficha: { size: typography.size.xl, familia: typography.family.sans.medium, leading: 34 },
   linea: { size: typography.size.base, familia: typography.family.sans.regular, leading: 24 },
+  cifra: { size: typography.escala.cifraChica.size, familia: typography.escala.cifraChica.familia, leading: typography.escala.cifraChica.lineHeight },
 }
 
 /* 🔴 S115-B · EL FORMATEO SE MUDÓ AL RIEL, y esta línea es la fuente única.

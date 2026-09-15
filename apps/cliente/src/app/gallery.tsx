@@ -200,10 +200,21 @@ export default function GalleryRoute() {
       <TokenGallery
         solo={solo}
         encabezado={
-          /* La lámina va PRIMERA: es la decisión más grande que queda abierta. */
-          <ThemeProvider defaultMode="dark">
-            <LaminaSeparacionOscuro />
-          </ThemeProvider>
+          /* 🔴 **CON `?solo=` LA LÁMINA NO VA** (S116-B lote 4). Medido al usar
+             el instrumento: el filtro recorta las secciones **y la lámina se
+             renderiza igual**, así que pedir una pieza seguía costando varios
+             swipes para pasar por arriba de una lámina de pantalla y media.
+             *Un salto de sección que te deja a tres swipes de la sección no es
+             un salto.* La lámina no es una sección: es el encabezado del
+             documento, y quien pide una pieza no pidió el documento.
+
+             Sin el parámetro, la galería es exactamente la de antes —la lámina
+             va PRIMERA, que es la decisión más grande que queda abierta—. */
+          solo === undefined ? (
+            <ThemeProvider defaultMode="dark">
+              <LaminaSeparacionOscuro />
+            </ThemeProvider>
+          ) : undefined
         }
       />
     </SafeAreaView>

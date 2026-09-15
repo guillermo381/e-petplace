@@ -1,91 +1,85 @@
-# S116-B · LOTE 8 — las cuatro del recorrido 2
+# S116-B · LOTE 8 — `CampoFecha` adentro, `CampoCodigo` exento, y los 26 clasificados
 
-**Rama `pista/s116-b-05`.**
+**Rama `pista/s116-b-05`.** Gates: `verify:etiqueta-dentro` VERDE con **④ en 0** · `verify:diseno` VERDE (80) · `verify:contrast` 504/0 · `verify:catalogo-v5` VERDE (49) · `tsc` 0 en las cuatro.
 
-**Gates:** `verify:diseno` VERDE (81 reglas) · `verify:contrast` 461/0 · `verify:catalogo-v5` VERDE (32 piezas) · `verify:reduced-motion` VERDE · `verify:isotipo-path` VERDE · `tsc` 0 en las cuatro superficies.
+**La ley ya está depositada** y el gate se refundó en ella: `DIRECCION_DISENO_S99` §N11″ (`pista/s116-a-08` @ `abab9ad8`). *El gate había nacido citando el lote 6 porque ese día la letra no estaba en ninguno de los tres lugares medidos; hoy cuelga de donde tiene que colgar.*
 
 ---
 
-## ① LA ONDA — eran DOS causas, no una
+## ① UN CHOQUE ABIERTO CON LA LETRA — declarado, no resuelto por mí
 
-**El color.** Lo ponían la ola y la banda, **cada una en su caja**, así que todo lo que quedara entre ellas o alrededor salía lienzo: el SVG a 100 % deja subpíxeles en los cantos y cualquier redondeo de alto abre una línea abajo.
+N11″ hereda de N11′ la cláusula **«≥24 px entre un campo y el siguiente»**… y **la orden del lote 6 fue bajar ese aire a 10-12**, que es lo que construí y medí (12 exactos, 40,3 dp → 12).
 
-> **Un color que se compone de dos piezas tiene tantas junturas como piezas.**
+*La cláusula conserva el número pero perdió su razón*: existía **para que la etiqueta de AFUERA no se leyera como el pie del campo de arriba**, y con N11″ ya no hay etiqueta afuera. **Rige lo ordenado y medido; la letra necesita la enmienda.** → buzón de A. *Dos letras firmadas que se contradicen son peores que una equivocada.*
 
-Ahora **el magenta vive en la raíz**: cualquier superficie que la onda ocupe es magenta por construcción, y las junturas **no pueden existir**.
+## ② `CampoFecha` — la mitad que faltaba
 
-**El inset.** Vuelve al **crudo**. El derivado mide *cuánto de la barra queda debajo del contenedor* — correcto para un pie que vive DENTRO de un contenedor y **equivocado para una franja que tiene que llegar al borde físico**. *Es la misma lección que el asistente ya me había cobrado en el lote 6, cobrada de nuevo en la pieza de al lado.*
+La ley entró en `Campo` y esta pieza se quedó afuera, así que **convivían en seis pantallas**. Ahora flota igual.
 
-La adenda rige tal cual: **el inset empuja el CONTENIDO y no mueve un píxel del color.**
+⏪ **Y la razón que S100 había escrito acá se DA VUELTA, no se tira:** decía que *«la caja de una fecha muestra un valor LARGO, así que era justo donde el rótulo encogido peor se leía»*. **Flotando, el valor largo deja de compartir renglón con el rótulo** — *el caso que peor se llevaba con N11 es el que más gana con N11″.*
 
-### 🔴 LA CAPTURA NO SE PUDO TOMAR — séptimo intento medido, y ya no es una excusa: es una deuda
+🔴 **Flota con valor *o* con la hoja abierta.** En `Campo` el disparo es el foco; acá no hay foco —es un botón— y su equivalente es la hoja abierta. ✅ Y lo que S99 escribió sigue en pie: **la etiqueta vive dentro del `Pressable`**, así que tocar el rótulo abre el selector.
 
-| vía | resultado, medido |
+**`EtiquetaFlotante` nace al aparecer el SEGUNDO consumidor, no antes.** *Dos inline que coinciden hoy coinciden por copia.*
+
+## ③ 🔴 UN DEFECTO QUE LA CAPTURA DESTAPÓ, Y ERA DEL LOTE 6
+
+**La caja del producto de `antiparasitario` salía VACÍA — sin rótulo y sin campo.** Y sólo pasaba **cuando el campo no tiene glifo** (sin `autoComplete` ni `secure`).
+
+**Causa medida:** la columna que el lote 6 creó para alojar etiqueta y valor es `flex: 1` + `justifyContent: 'center'`, y **sin el disco de 32 a la izquierda la fila no tiene ningún hijo con alto propio**: la columna se centra sobre cero y el input no se dibuja.
+
+⚠️ **Aislado en dos corridas, y mi primera hipótesis era la equivocada:** con `minWidth: 0` solo, el input seguía sin dibujarse. *El `minWidth` es el reflejo de flexbox que uno escribe de memoria; lo que faltaba era el alto.*
+
+⚠️ **Y antes de eso perdí dos mediciones con instrumentos mal usados, que vale anotar:** `grep -c` sobre el XML del volcado cuenta **líneas**, y el volcado es **una sola línea** — me dio «1 EditText» en una pantalla que tenía 3, y casi concluyo que `Campo` estaba roto en todos lados. *El instrumento decía un número perfectamente creíble.*
+
+## ④ `CampoCodigo` — excepción declarada, y es la tercera vez que cambia de estatus
+
+> **Ocho casillas de un dígito no tienen dónde poner una etiqueta flotante; su rótulo vive arriba del grupo.**
+
+🔴 **Flotar significa subir al borde superior DE LA CAJA, y acá hay ocho: ¿en cuál flota?** El rótulo no es de una caja: es del GRUPO. *La ley se escribió para un control con un cuerpo; éste tiene ocho.*
+
+⏪ **S99 la escribió como excepción · N11′ la celebró como «la excepción de ayer es la norma de hoy» · N11″ la vuelve excepción.** **La forma nunca cambió; lo que cambió tres veces es si era la norma.** *Por eso ahora está firmada y no heredada: una excepción que sobrevive por inercia es indistinguible de un olvido.* Escrita en la pieza y en `PIEZAS_EXENTAS` del gate, que **imprime las exentas en cada corrida**.
+
+## ⑤ EL GATE, corregido — y el defecto era mío
+
+**La regla ④ estaba atada al NOMBRE de la pieza.** Al curar `CampoFecha` **siguió contando 6, porque seguía llamándose igual** — *una regla atada a un nombre da un número que dejó de significar lo que dice.* Lo cacé porque **el founder había predicho el número («la regla ④ baja a 0») y no bajó.**
+
+⚠️ **Y el discriminador se corrigió DOS veces más:** *«renderiza `<EtiquetaDeCampo`»* marcaba a las dos piezas curadas —porque las dos la siguen renderizando **para el prestador**—, y *«el archivo menciona `formaV5`»* tampoco, porque `CampoCodigo` lo menciona **para otra cosa**. ⇒ **lo que decide es si ESA LÍNEA lleva el guard de casa.** Ahora la lista se deriva de la fuente y **una pieza nueva con la etiqueta suelta aparece sin que nadie la liste** (rojo probado).
+
+## ⑥ LOS 26 PLACEHOLDERS, clasificados — **26 → 16**
+
+**El corte es el de la letra:** `etiquetaVisible={false}` es la exención de búsqueda, *«el único lugar donde el placeholder sobrevive»*.
+
+**① EXENCIÓN (4) — no bajan nunca, y eso mueve el piso del trinquete a 4, no a 0:**
+`despensa/index.tsx:1094` · `buscar.tsx:150` · `nexo.tsx:581` · `postventa/motivo.tsx:351` †
+
+**② EJEMPLO en PIEZAS (10) — CURADOS por B en este lote:**
+`alta/PasoDatosBasicos.tsx:252, 301` · `chips-rasgos.tsx:129` · `habitantes-acuario-hoja.tsx:229` · `registrar-medicacion-hoja.tsx:82, 88` · `registrar-peso-hoja.tsx:84` · `seccion-facturacion.tsx:249, 263` · `selector-de-raza.tsx:119`
+
+**③ EJEMPLO en PANTALLAS (12) — buzón para C, con archivo y línea:**
+
+| archivo:línea | llave |
 |---|---|
-| `cliente://gallery` | no navega |
-| `cliente:///gallery` (triple barra, host vacío) | no navega |
-| `exp+cliente:///gallery` | no navega |
-| dev-client con `…/--/gallery` como `url` | rompe: lo toma como manifiesto |
-| galería del **prestador** (es un tab, sería alcanzable) | `resolve-activity` → **`No activity found`**: el APK no es dev build |
-| la pantalla **03**, consumidor real | vive en la rama de **C** |
-| **la galería por WEB** (`localhost:8090/gallery`) | **`curl` la sirve** (HTML real), pero **Chrome da `ERR_CONNECTION_REFUSED`**: el navegador no alcanza el localhost del host |
+| `app/(tabs)/cuenta/familia.tsx:306` | `cuenta.familiaNombrePlaceholder` |
+| `app/(tabs)/despensa/checkout.tsx:1912` | **literal** `"+593 99 123 4567"` |
+| `app/(tabs)/despensa/reclamo.tsx:225` | `despensa.reclamoCodigoPlaceholder` |
+| `app/(tabs)/hogar/bitacora.tsx:436` | `adiestramiento.bitacoraFiltroPlaceholder` ‡ |
+| `app/(tabs)/hogar/bitacora.tsx:463` | `adiestramiento.bitacoraTextoPlaceholder` |
+| `app/(tabs)/hogar/mascota/despedida.tsx:122` | `despedida.palabrasPlaceholder` |
+| `app/antiparasitario.tsx:207` | `antiparasitario.productoPlaceholder` |
+| `app/carnet.tsx:640` | `carnet.fechaPlaceholder` |
+| `app/login.tsx:272` | `login.emailPlaceholder` |
+| `app/recuerdo.tsx:217` | `recuerdo.textoPlaceholder` |
+| `app/registro.tsx:231` | `registro.nombrePlaceholder` |
+| `app/registro.tsx:240` | `registro.emailPlaceholder` |
 
-**Lo accionable, y es de una línea:** la entrada a `/gallery` se retiró de Cuenta en S106 *sobre la premisa de que «se alcanza por deep link con cable»*. **Medido siete veces: esa premisa es falsa.** ⇒ **o vuelve una entrada (aunque sea sólo en `__DEV__`), o `/gallery` deja de ser la superficie de gate de `packages/ui`.** *Hoy `R17` obliga a mantener una galería que nadie puede abrir, y eso lleva tres lotes bloqueando capturas.*
+† ⚠️ **`postventa/motivo.tsx` queda exento por casualidad, y se dice:** tiene `etiquetaVisible={false}` **pero no es una búsqueda — es un `multilinea={5}` para un relato.** *Mi regla usa `etiquetaVisible={false}` como proxy de «búsqueda», y este campo apagó su etiqueta por otra razón.* **Ese campo debería llevar la etiqueta flotando, no apagada.**
+‡ **`bitacora:436` es un FILTRO con etiqueta visible**, así que su placeholder muere por la regla. Si C quiere darle la exención completa, es apagar la etiqueta y poner la lupa — decisión suya.
 
----
+**Llaves huérfanas tras la cura de B:** 8 de las 10 quedan sin ningún consumidor (`pesoPlaceholder` · `contaMasEjemplo` · `habitantesOtraPlaceholder` · `cualPlaceholder` · `dosisPlaceholder` · `pesoHojaPlaceholder` · `nombreFormato` · `razaPlaceholder`). `nombrePlaceholder` **sigue viva** por `registro.tsx:231`. Su retiro es una pasada de Ley 37 sobre `es.ts`/`en.ts` con su espejo — **no la hago acá para no tocar el diccionario de C en el mismo commit.**
 
-## ② `FilaBeneficio`
-
-**No anuncia toque — y no es «una celda con el `onPress` apagado»:** ni `Pressable`, ni `accessibilityRole`, ni chevrón, ni hundido. **No están apagados: no están.**
-
-> *Una celda de navegación dice «acá se entra» con todo su cuerpo; quitarle el toque deja una puerta que no abre, y quien la toque concluye que la app está rota.*
-
-Para el lector de pantalla la diferencia es total: una celda se anuncia **«botón»**, y acá no hay botón que anunciar — hay una frase sobre lo que la app hace.
-
-**Cuatro tarjetas, no una lista con divisores:** *una lista dice «estos ítems van juntos»; cuatro tarjetas dicen «cada uno vale por sí mismo»*, que es lo que una pantalla de propuesta necesita.
-
----
-
-## ③ `EsperaLarga`
-
-**No sabe cuánto falta y no lo finge — por eso muere la línea de progreso.**
-
-> *Una barra que avanza sin saber hacia dónde es una promesa que nadie puede cumplir, y cuando se queda quieta al 80 % lo que comunica es que algo se rompió.* **Lo que esta pieza comunica es otra cosa: que hay alguien acá.**
-
-🔴 **Es la única pieza de la casa con movimiento sin fin, firmado.** En el asistente el halo respira tres veces y descansa **porque una animación infinita deja la ventana no-idle**; acá esa razón no aplica: *la espera es lo que dura, y una pantalla de espera detenida a los 24 s dice lo contrario de lo que vino a decir.* ⚠️ **Consecuencia declarada: mientras esté, `uiautomator` no reporta `idle`.**
-
-Consume `lib/rueda-de-caras` y el halo del asistente. **Nada se redibuja.**
-
-⚠️ **Lo que NO pude medir:** qué «línea de progreso» muere exactamente. **Censado: no existe una pieza de progreso de espera en `packages/ui`** — la más cercana es `EsperaDeMarca` (la huella respirando), que **no es una línea** y tiene cuatro consumidores vivos. Si la línea vive en una pantalla de C, muere cuando esa pantalla adopte `EsperaLarga`. *No la maté a ciegas.*
-
----
-
-## ③bis LA RUEDA DE CARAS SUBE A `lib/`
-
-Como la mesa pidió: *«sin copiarla»*. **Lo que se pierde al copiarla no es código: es la CADENCIA.** Cuatro ruedas escritas aparte giran a cuatro ritmos el día que alguien ajuste una, y *cuatro pantallas de la misma app respirando distinto se lee como que la app está mal hecha*, sin que nada falle.
-
-**No dibuja**: devuelve qué cara toca y cuánta opacidad. *Una rueda que además dibujara obligaría a las cuatro superficies a verse igual, y no lo son.*
-
-✅ **`R77` cazó la mudanza sola:** su tabla apuntaba a `OndaAcceso.tsx::LAS_SEIS`, que ya no existe — *«un lector que se fue deja la tabla afirmando algo sobre nada»*. Reapuntada.
-
----
-
-## ④ LOS ATAJOS — censados del objeto, no de la memoria
-
-**`apps/cliente/src/lib/nexo/atajos.ts:57`** — `ORDEN_DE_PATA = ['peso', 'vacuna', 'antiparasitario', 'foto']`.
-
-⚠️ **La mesa los nombró como *«agregar recuerdo, carné de vacunas y los demás»* y el objeto dice otra cosa:** «carné» ≈ `vacuna` y «recuerdo» ≈ `foto`, **pero `peso` y `antiparasitario` no estaban en la lista dictada y sí en el código.** *Se declara para que la mesa elija sobre lo que hay, no sobre lo que recordamos.*
-
-Nace **`HojaAsistente`** y **`BotonAsistente` la monta él**: *si cada pantalla la montara, abrir el asistente sería un acto distinto en cada una, y el estado de «abierta» se olvidaría de cerrarse en alguna.*
-
-El botón pasa a ser una **unión**: o abre su hoja (y entonces exige campo **y** atajos), o tiene `onPress`. *Un asistente con atajos y sin campo no es una configuración: es una hoja a medio construir* — y así no compila. **La lista vacía sí es legal.**
-
-**Filas de lista y no los dedos del orbe**, y la consecuencia es buena: *una lista crece a cinco sin rediseñar nada; el abanico no podía pasar de cuatro sin dejar de ser una pata.*
-
----
-
-## ⑤ EL TSC DE LAS APPS CAZÓ LO QUE EL DE `packages/ui` DEJÓ PASAR — tercera vez en esta sesión
-
-`estiloPresionado` lleva `transitionProperty`, que el `ViewStyle` de la config de las apps **no acepta** en un `Pressable`. `packages/ui` compilaba en 0. El hundido va en un `Animated.View`, como el resto de la casa.
-
-> *El gate que vale es el del hook, que compila las cuatro superficies.*
+## ⑦ AL BUZÓN
+- **A** — **la cláusula «≥24 px» de N11″ choca con el aire de 12 que el founder ordenó y B midió.** La letra necesita la enmienda; el número heredado perdió su razón.
+- **A** — N11″ dice *«no hay gate que lo vigile todavía»*: **ya lo hay** (`verify:etiqueta-dentro`, lote 7, cuatro reglas con su rojo).
+- **C** — los 12 placeholders de pantalla (tabla arriba) + los dos casos de borde († y ‡).
+- **C** — las 8 llaves huérfanas del diccionario.

@@ -42,6 +42,10 @@ export const memorialTheme = {
     card:     palette.superficie,           // §4: la superficie del claro
     elevated: palette.superficie,
     overlay:  palette.grisCalidoMemorial,   // §4: reemplaza al rosa tinte
+    /** S116-B lote 4 · la superficie SOBRE LA BANDA. Blanco tenue también
+     *  acá: la banda de memorial es ciruela noche, y el gris cálido del
+     *  lienzo encima de ella desaparece. */
+    sobreGradiente: palette.blancoBanda17,
     hundido:  palette.grisCalidoMemorial,
     border:   palette.tintaBorde12,
     warm:     palette.cream,
@@ -79,6 +83,13 @@ export const memorialTheme = {
     /* 🔴 LOS CUATRO QUE MEMORIAL NO TENÍA. Ya no degradan por fallback:
        existen, en tinta y gris, que es lo que §4 pide. */
     active:            palette.tintaV5,
+    /* S116-B lote 4 · el acento SOBRE LA BANDA. 🔴 **En memorial NO es
+       tinta**: `tintaV5` es oscuro y la banda de memorial es `ciruelaNoche`,
+       o sea tinta sobre tinta. Va **blanco**, que es como memorial degrada
+       todo lo de marca (Ley 8: el isotipo va blanco, el botón marca baja a
+       primario). *La elección se sigue viendo —aro pleno contra aro apenas
+       insinuado— y no entra una gota de color de marca donde no corresponde.* */
+    sobreGradiente:    palette.white,
 
     /* S116-B · el PAR del glifo (fila · campo · acceso · paso). Ver
 

@@ -40,11 +40,17 @@ import Animated, { cubicBezier } from 'react-native-reanimated'
 import { typography } from '../tokens/typography'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
-import { estiloDeCaja, ALTO_CAJA_CAMPO } from './caja-de-campo'
+import {
+  estiloDeCaja,
+  ALTO_CAJA_CAMPO,
+  ALTO_CAJA_CAMPO_V5,
+  ALTO_LINEA_CAMPO,
+  formaV5,
+} from './caja-de-campo'
 import { motion } from '../tokens/motion'
 import { opacity } from '../tokens/opacity'
 import { useTheme } from '../ThemeProvider'
-import { EtiquetaDeCampo, PieDeCampo } from './Campo'
+import { EtiquetaDeCampo, EtiquetaFlotante, PieDeCampo } from './Campo'
 import { useTraduccionUi } from '../i18n'
 import { Hoja, HojaScroll } from './Hoja'
 import { Boton } from './Boton'
@@ -228,6 +234,9 @@ export function CampoFecha({
   placeholder = placeholder ?? t('campoFecha.placeholder')
   tituloHoja = tituloHoja ?? t('campoFecha.tituloHoja')
   const [abierta, setAbierta] = useState(false)
+  const v5 = formaV5(theme)
+  /* N11″ — ver el porqué del doble disparo junto a `EtiquetaFlotante`. */
+  const flotando = valor !== undefined || abierta
   const [modoEtapa, setModoEtapa] = useState(false)
 
   const hoy = new Date()
@@ -291,19 +300,26 @@ export function CampoFecha({
           text: valor ? `${texto}, precisión ${valor.precision}` : placeholder,
         }}
       >
-        {/* S100-B · N11′ — la etiqueta sale de la CAJA y se queda DENTRO
-            del Pressable. Las dos mitades importan:
-            · **fuera de la caja** porque lo pide N11′, y porque acá el
-              argumento pesa más que en `Campo`: la caja de una fecha
-              muestra un valor LARGO («12 de septiembre de 2019»), así
-              que era justo donde el rótulo encogido peor se leía.
-            · **dentro del Pressable** porque la razón que S99 escribió
-              sigue siendo buena —*la etiqueta forma parte del control*—
-              y así tocar el rótulo abre el selector, que es el
-              comportamiento de un `<label for>` de toda la vida.
-            ⇒ *La enmienda mueve el píxel sin tirar el razonamiento que
-            había abajo.* */}
-        <EtiquetaDeCampo>{label}</EtiquetaDeCampo>
+        {/* ⭐ **N11″ · LA ETIQUETA ENTRA A LA CAJA Y FLOTA** (letra firmada,
+            `DIRECCION_DISENO_S99` §N11″, 15-sep-2026).
+            🔴 **Era la mitad que faltaba, y el censo la midió:** N11″ entró en
+            `Campo` y esta pieza se quedó con la etiqueta afuera, así que las
+            dos convivían **en seis pantallas del cliente** —en `carnet.tsx`,
+            en líneas consecutivas—. N11 lo prohíbe con todas las letras:
+            *«dos estilos de campo jamás conviven en la misma región de una
+            pantalla»*.
+
+            ⏪ **Y la razón que S100 escribió acá se DA VUELTA, no se tira:**
+            decía *«la caja de una fecha muestra un valor LARGO («12 de
+            septiembre de 2019»), así que era justo donde el rótulo encogido
+            peor se leía»*. **Con la etiqueta flotando el valor largo deja de
+            compartir renglón con el rótulo** — o sea que el caso que peor se
+            llevaba con N11 es justamente el que más gana con N11″.
+
+            ✅ **Lo que S99 escribió SIGUE EN PIE: la etiqueta vive DENTRO del
+            `Pressable`**, así que tocar el rótulo abre el selector — el
+            comportamiento de un `<label for>` de toda la vida. */}
+        {!v5 ? <EtiquetaDeCampo>{label}</EtiquetaDeCampo> : null}
 
         <Animated.View
           style={{
@@ -312,22 +328,45 @@ export function CampoFecha({
                «receta Campo» y era literal: la copia. */
             ...estiloDeCaja(theme, { error: !!error, enfocado: abierta }),
             justifyContent: 'center',
-            height: ALTO,
+            height: v5 ? ALTO_CAJA_CAMPO_V5 : ALTO,
             paddingHorizontal: spacing[3],
             paddingVertical: 0,
             transitionTimingFunction: cubicBezier(...motion.easing.easeOut.bezier),
           }}
         >
-          <Text
-            numberOfLines={1}
-            style={{
-              fontFamily: typography.family.sans.regular, // ser vivo: DM Sans, jamás mono
-              fontSize: typography.size.base,
-              color: valor ? theme.text.primary : theme.text.tertiary,
-            }}
-          >
-            {texto}
-          </Text>
+          {/* 🔴 **FLOTA CON VALOR *O* CON LA HOJA ABIERTA.** En `Campo` el
+              disparo es el FOCO; acá no hay foco —es un botón— y su
+              equivalente es **la hoja abierta**: es el momento en que la
+              persona está parada en este campo. *Con la hoja abierta y sin
+              fecha todavía, el cuerpo queda vacío y el rótulo arriba, que es
+              exactamente lo que hace `Campo` al enfocar un campo vacío.*
+              ⚠️ Y la caja ya se pinta como elegida en ese estado: `enfocado:
+              abierta` estaba puesto desde antes — no hizo falta agregarlo. */}
+          {v5 ? <EtiquetaFlotante label={label} flotando={flotando} /> : null}
+
+          {/* ☠️ **EL PLACEHOLDER DE FECHA MUERE con v5.** `texto` caía al
+              placeholder cuando no había valor —«Elegí una fecha»— y ese
+              trabajo ahora lo hace la etiqueta. *Dos textos grises en el
+              mismo renglón son dos.* Sin valor el cuerpo queda VACÍO y el
+              rótulo lo ocupa, centrado. */}
+          {!v5 || valor !== undefined ? (
+            <Text
+              numberOfLines={1}
+              style={{
+                fontFamily: typography.family.sans.regular, // ser vivo: DM Sans, jamás mono
+                fontSize: typography.size.base,
+                lineHeight: v5 ? ALTO_LINEA_CAMPO : undefined,
+                color: valor ? theme.text.primary : theme.text.tertiary,
+              }}
+            >
+              {texto}
+            </Text>
+          ) : (
+            /* El cuerpo reserva su renglón aunque esté vacío: si no, la caja
+               se centraría sobre la etiqueta sola y el rótulo no quedaría
+               donde va a quedar cuando haya fecha. */
+            <View style={{ height: ALTO_LINEA_CAMPO }} />
+          )}
         </Animated.View>
       </Pressable>
 

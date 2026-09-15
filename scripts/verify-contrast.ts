@@ -157,6 +157,17 @@ function paresDe(t: Theme, nombre: string): Pair[] {
    *  dos. *Cuando un elemento se muda al vecino más duro y el gate sigue
    *  verde, el verde vale más que antes.* */
   add('text.secondary / bg.base (etiqueta N11′ afuera)', t.text.secondary, t.bg.base)
+  /* ⭐ **S116-B lote 6 · N11″ — LA ETIQUETA VUELVE ADENTRO, y su par cambia
+     de fondo.** El de arriba mide la etiqueta de N11′ contra el LIENZO,
+     porque vivía afuera de la caja. **Flotando vive contra el INTERIOR del
+     campo**, que es otra superficie — `bg.card` en claro, `bg.overlay` en
+     los oscuros (`interiorDeCaja`). *Dejar sólo el par viejo habría dado
+     verde sobre un fondo que la etiqueta ya no pisa.*
+     🔴 **La orden fija el piso: «tinta 65 % mínimo»** — que es literalmente
+     `text.secondary` (`tintaTexto65`). Se mide contra las dos superficies
+     porque el interior cambia por tema. */
+  add('N11″ · etiqueta flotada / interior del campo (claro)', t.text.secondary, t.bg.card)
+  add('N11″ · etiqueta flotada / interior del campo (oscuros)', t.text.secondary, t.bg.overlay)
 
   // Acentos usados como texto (links, labels) sobre base y card
   add('accent.primary / bg.base', t.accent.primary, t.bg.base)
@@ -480,6 +491,26 @@ function paresDe(t: Theme, nombre: string): Pair[] {
      verificar justo el tono donde el texto se apoya más.* */
   add('sobreGradiente / banda (stop 0)', t.text.onGradient, t.accent.gradient.colors[0])
   add('sobreGradiente / banda (stop final)', t.text.onGradient, t.accent.gradient.colors[t.accent.gradient.colors.length - 1])
+  /* 🔴 **S116-B lote 4 · `accent.sobreGradiente` — el ACENTO de la banda.**
+     Hermano del de arriba, y nace por el mismo defecto un piso más abajo: el
+     texto ya tenía su slot sobre la banda, **el acento no**. `accent.active`
+     vale `magentaAccion` en claro y `tintaV5` en memorial, y los dos
+     desaparecen sobre ciruela — *y ninguna corrida lo iba a decir, porque
+     ese par nunca estuvo declarado.* Va con piso **3:1**: es el aro de
+     elección, gráfica y no texto. Se mide contra los dos extremos del
+     degradado, igual que su hermano. */
+  add('accent.sobreGradiente / banda (stop 0)', t.accent.sobreGradiente, t.accent.gradient.colors[0], undefined, 3)
+  add('accent.sobreGradiente / banda (stop final)', t.accent.sobreGradiente, t.accent.gradient.colors[t.accent.gradient.colors.length - 1], undefined, 3)
+  /* 🔴 **S116-B lote 5 · `controlLleno` / `sobreControlLleno` — EL PAR DE LA
+     SELECCIÓN, que existía desde el lote 2 y NUNCA ESTUVO MEDIDO.**
+     `SelectorOpcion` lo montaba en su modo entidad y hoy se le suman el día
+     y la hora elegidos. *Un par que nadie declara es un par cuyo verde no
+     dice nada: el gate sólo mide lo que está en esta lista, y por eso la
+     lista tiene que crecer con el código.* ⚠️ **Se invierte por tema** —en
+     claro ciruela con letra blanca, en oscuro `rosaSobreCiruela` con letra
+     `ciruelaNoche`—, así que medirlo con un blanco fijo habría acertado en
+     claro por casualidad. */
+  add('SELECCIÓN · su letra sobre el relleno de control', t.accent.sobreControlLleno, t.accent.controlLleno)
   add('CTA oficio (light): papel / tealDark', palette.light0, palette.tealDark)
   add('CTA oficio (dark): textDark0 / tealDark', palette.textDark0, palette.tealDark)
 

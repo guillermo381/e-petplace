@@ -201,7 +201,7 @@ export type TextoVariante = 'titulo' | 'seccion' | 'cuerpo' | 'apoyo' | 'enfasis
  * eligen por la SUPERFICIE, no por el tema**: el CTA cambia de color (por
  * casa), la franja de la onda no cambia nunca (fijo), y la banda cambia de
  * tono pero sigue siendo oscura (por tema). */
-export type TextoColor = 'primary' | 'secondary' | 'tertiary' | 'danger' | 'success' | 'warning' | 'sobreVideo' | 'warm' | 'inverso' | 'acentoSobreOscuro' | 'sobreCta' | 'sobreMagenta' | 'sobreGradiente'
+export type TextoColor = 'primary' | 'secondary' | 'tertiary' | 'danger' | 'success' | 'warning' | 'sobreVideo' | 'warm' | 'inverso' | 'acentoSobreOscuro' | 'sobreCta' | 'sobreMagenta' | 'sobreGradiente' | 'sobreControl'
 
 export type TextoProps = {
   children: ReactNode
@@ -484,12 +484,21 @@ export function Texto({ children, variante = 'cuerpo', color, numberOfLines, cen
             ? theme.text.onGradient
           : c === 'sobreMagenta'
             ? palette.white
+          /* ⭐ **S116-B lote 5 · `sobreControl` — la letra SOBRE el relleno de
+             SELECCIÓN.** Hermano de `sobreCta`, y hace falta aparte porque
+             **el par se invierte por tema**: en claro el relleno es ciruela
+             y la letra blanca; en oscuro el relleno es `rosaSobreCiruela` y
+             la letra `ciruelaNoche`. *Un blanco fijo acertaría en claro por
+             casualidad y desaparecería en oscuro* — que es exactamente lo
+             que le pasó al título de la cabecera antes de `sobreGradiente`. */
+          : c === 'sobreControl'
+            ? (theme.accent as { sobreControlLleno?: string }).sobreControlLleno ?? theme.accent.ctaTexto
           : c === 'inverso'
             /* El slot del tema se llama `inverse` (inglés, como todo el
                shape del tema) y la prop `inverso` (español, como toda la
                API pública de la casa). Se traduce acá, en un solo lugar. */
             ? theme.text.inverse
-            : theme.text[c as Exclude<TextoColor, 'danger' | 'success' | 'warning' | 'sobreVideo' | 'inverso' | 'acentoSobreOscuro' | 'sobreCta' | 'sobreMagenta' | 'sobreGradiente'>]
+            : theme.text[c as Exclude<TextoColor, 'danger' | 'success' | 'warning' | 'sobreVideo' | 'inverso' | 'acentoSobreOscuro' | 'sobreCta' | 'sobreMagenta' | 'sobreGradiente' | 'sobreControl'>]
 
   return (
     <Text

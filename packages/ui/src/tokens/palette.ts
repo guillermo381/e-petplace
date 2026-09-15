@@ -127,6 +127,13 @@ export const palette = {
   tintaTexto50:     'rgba(28,29,32,.50)',   // terciario — apoyo decorativo, jamás un dato
   tintaBorde12:     'rgba(28,29,32,.12)',   // el borde que se ve
   tintaBorde09:     'rgba(28,29,32,.09)',   // el hairline de tarjeta
+  /* 🔴 **S116-B lote 4 · LA SUPERFICIE APOYADA SOBRE LA BANDA.** El respaldo
+     de un retrato sin foto, el disco del «+». **Va con ALFA REAL y no
+     precomputado, al revés que `bg.overlay` del oscuro, y la razón es que la
+     banda es un DEGRADADO:** un opaco calculado contra un stop se despega del
+     otro, y estas piezas viven justo donde el degradado se mueve. *La lección
+     Kaxo manda precomputar cuando el fondo es UNO; acá no lo es.* */
+  blancoBanda17:    'rgba(255,255,255,.17)',
 
   /* 🔴 **EL GRIS CÁLIDO DEL MEMORIAL — «B lo deriva de tinta al 6 %»
      (letra §4, textual).** Es el reemplazo del `rosaTinte` en memorial:

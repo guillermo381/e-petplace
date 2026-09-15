@@ -49,14 +49,20 @@ import {
   ALTO_LINEA_CAMPO,
   GAP_ETIQUETA,
   TAMANO_ETIQUETA,
+  ALTO_CAJA_CAMPO_V5,
+  ALTO_ETIQUETA_FLOTANTE,
+  TAMANO_ETIQUETA_FLOTANTE,
+  DISCO_GLIFO_CAMPO,
+  formaV5,
 } from './caja-de-campo'
 import { typography } from '../tokens/typography'
+import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
 import { motion } from '../tokens/motion'
 import { opacity } from '../tokens/opacity'
 import { useTheme } from '../ThemeProvider'
 import { useTraduccionUi } from '../i18n'
-import { Icono } from './Icono'
+import { Icono, type IconoNombre } from './Icono'
 
 /** ⏪ S99-B · `BORDE` y el fondo salen ahora de `caja-de-campo.ts` — la
  *  anatomía vivía copiada en tres piezas (ver su cabecera). Acá quedan
@@ -168,10 +174,45 @@ export interface PieDeCampoProps {
 export function PieDeCampo({ ayuda, error, tono = 'alarma' }: PieDeCampoProps) {
   const { theme } = useTheme()
   const mensaje = error ?? ayuda
+  const v5 = formaV5(theme)
+
+  /* ⭐ **S116-B lote 6 · EL AIRE ENTRE CAMPOS HERMANOS, y el defecto NO
+     estaba donde parecía.**
+     ═════════════════════════════════════════════════════════════════
+     🔴 **Medido en el emulador ANTES de tocar nada: entre una caja y el
+     rótulo siguiente había 121 px = 40,3 dp.** El founder lo llamó *«muy
+     separados»* y pidió bajarlo al token de tarjetas hermanas (10-12).
+     **Y el `gap` de las pantallas ya era 8** (`registro.tsx:228` ·
+     `login.tsx:269`), o sea MENOS que lo pedido: *si sólo se hubiera
+     mirado el `gap`, la conclusión habría sido que ya estaba bien.*
+
+     **Los 40 salían de acá: este slot reserva 25 dp SIEMPRE**, tenga o
+     no algo que decir. Lo reservaba por dos razones y **hoy sólo queda
+     una y media**:
+       · *que nada empuje el layout cuando aparece un error* — sigue
+         viva, y se respeta (ver abajo);
+       · *garantizar ≥24 entre un campo y el siguiente para que la
+         etiqueta de afuera no se leyera como el pie del campo de
+         arriba* (N11′) — ☠️ **muere con N11″: ya no hay etiqueta
+         afuera.** La razón se fue con la cosa que protegía.
+
+     ⇒ **Vacío reserva `spacing[1]` (4)**, que sumado al `gap: 8` de las
+     pantallas da **12 exactos**: el token que la orden nombra, sin que
+     nadie toque una pantalla.
+
+     ⚠️ **LO QUE ESTO CUESTA, declarado y no escondido: al aparecer un
+     error, el campo CRECE 21 dp y lo de abajo se corre.** *No es gratis
+     y no se disimula.* Se acepta con su razón: **un error aparece al
+     ENVIAR, no mientras se tipea**, y la regla rectora dice literalmente
+     *«nada se mueve mientras alguien tipea»* — el mismo corte que deja
+     flotar la etiqueta al enfocar. **Un campo con `ayuda` no salta
+     nunca**: su pie ya está dibujado desde el principio.
+     ═════════════════════════════════════════════════════════════════ */
+  const reservaVacia = v5 ? spacing[1] : ALTO_PIE_CAMPO
 
   return (
     // Slot de altura RESERVADA: error reemplaza a ayuda, nada empuja el layout
-    <View style={{ minHeight: ALTO_PIE_CAMPO, justifyContent: 'flex-end' }}>
+    <View style={{ minHeight: mensaje ? ALTO_PIE_CAMPO : reservaVacia, justifyContent: 'flex-end' }}>
       {mensaje ? (
         <Text
           accessibilityLiveRegion={error ? 'polite' : 'none'}
@@ -199,6 +240,127 @@ export function PieDeCampo({ ayuda, error, tono = 'alarma' }: PieDeCampoProps) {
           {mensaje}
         </Text>
       ) : null}
+    </View>
+  )
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+ * N11″ · QUÉ GLIFO LE TOCA A UN CAMPO — y **por qué se DERIVA en vez de
+ * pedirse**.
+ *
+ * 🔴 **Lo decidió un censo: `iconoIzq` tiene CERO consumidores en las
+ * dos apps.** Ninguna pantalla pasa un glifo hoy, y el encargo dice
+ * explícito *«sin que C toque pantallas»* — así que una prop nueva
+ * habría dibujado exactamente nada.
+ *
+ * ⚠️ **Y no es una heurística sobre el texto del rótulo, que sería
+ * adivinar.** `autoComplete` es **vocabulario estándar de la
+ * plataforma, declarado por el consumidor**: las tres pantallas del
+ * encargo ya lo pasan (`name` · `email` · `new-password`). *Se lee lo
+ * que el campo ya dijo de sí mismo, no lo que parece por cómo se llama.*
+ *
+ * ⚠️ **Cae a NADA, y eso es la mitad honesta.** Un campo que no declara
+ * su tipo no recibe un glifo genérico: recibe ninguno. *Un genérico
+ * repetido en cinco campos no informa —es la Ley 12— y además enseñaría
+ * mal el vocabulario.* Quien quiera decirlo explícito tiene `iconoIzq`,
+ * que **gana sobre la derivación**.
+ * ═══════════════════════════════════════════════════════════════════ */
+const GLIFO_POR_AUTOCOMPLETE: Record<string, IconoNombre> = {
+  /* ⚠️ **`cuenta` y no `perfil`**: `perfil` es un ALIAS del registry
+     (`Icono.tsx:603` → `perfil: 'cuenta'`) y no es un `IconoNombre`. *Lo
+     cazó el tsc; a ojo los dos nombres parecen igual de válidos.* */
+  name: 'cuenta',
+  'given-name': 'cuenta',
+  username: 'cuenta',
+  email: 'correo',
+  password: 'contrasena',
+  'new-password': 'contrasena',
+  'current-password': 'contrasena',
+}
+
+function glifoDelCampo(
+  secure: boolean,
+  autoComplete: string | undefined,
+): IconoNombre | undefined {
+  if (autoComplete !== undefined && autoComplete in GLIFO_POR_AUTOCOMPLETE) {
+    return GLIFO_POR_AUTOCOMPLETE[autoComplete]
+  }
+  /* `secure` sin `autoComplete` sigue siendo inequívoco: lo que se
+     escribe tapado es una clave. */
+  return secure ? 'contrasena' : undefined
+}
+
+
+/**
+ * EtiquetaFlotante — N11″, **escrita UNA vez para las dos piezas de campo.**
+ *
+ * 🔴 **Nace al aparecer el segundo consumidor, no antes.** El lote 6 la
+ * escribió inline en `Campo` porque era el único caso; hoy `CampoFecha`
+ * necesita exactamente lo mismo, y *dos inline que coinciden hoy coinciden
+ * por copia — la forma más frágil de coincidir.* Es la misma disciplina con
+ * la que nacieron `EtiquetaDeCampo` y `PieDeCampo`, que esta pieza reemplaza
+ * y acompaña.
+ *
+ * ⚠️ **Lo que NO resuelve, a propósito: el CUERPO.** Uno es un `TextInput` y
+ * el otro un `<Text>` que muestra una fecha; el que los envuelva decide qué
+ * va debajo. *Una pieza que además dibujara el cuerpo tendría dos anatomías
+ * y volveríamos al defecto que esto viene a cerrar.*
+ *
+ * ── LOS DOS ESTADOS ───────────────────────────────────────────────────
+ * · **flotando**: rótulo chico arriba (11 px), el cuerpo debajo.
+ * · **en reposo**: rótulo a tamaño base, ABSOLUTO y centrado sobre el
+ *   cuerpo vacío — así el cuerpo nunca se desmonta ni cambia de alto.
+ *
+ * ⚠️ **Fuera del árbol de accesibilidad, las tres props juntas.** El
+ * control ya dice su nombre por `accessibilityLabel`; esto es el MISMO
+ * nombre dibujado. *Medido: con las props sólo en el `View` que envuelve,
+ * el nodo seguía en el volcado de `uiautomator`.*
+ */
+export function EtiquetaFlotante({ label, flotando }: { label: string; flotando: boolean }) {
+  const { theme } = useTheme()
+  const invisibleAlLector = {
+    accessible: false,
+    accessibilityElementsHidden: true,
+    importantForAccessibility: 'no' as const,
+  }
+  if (flotando) {
+    return (
+      <Text
+        numberOfLines={1}
+        {...invisibleAlLector}
+        style={{
+          fontFamily: typography.family.sans.regular,
+          fontSize: TAMANO_ETIQUETA_FLOTANTE,
+          lineHeight: ALTO_ETIQUETA_FLOTANTE,
+          /* 🔴 `secondary` = `tintaTexto65`, el 65 % que la orden fija como
+             piso. `tertiary` da 2,18 en claro y sería exactamente el rótulo
+             ilegible que N11′ temía. Medido contra el interior del campo:
+             5,26 claro · 7,86 oscuro · 5,26 memorial. */
+          color: theme.text.secondary,
+        }}
+      >
+        {label}
+      </Text>
+    )
+  }
+  return (
+    <View
+      pointerEvents="none"
+      {...invisibleAlLector}
+      style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center' }}
+    >
+      <Text
+        numberOfLines={1}
+        {...invisibleAlLector}
+        style={{
+          fontFamily: typography.family.sans.regular,
+          fontSize: typography.size.base,
+          color: theme.text.secondary,
+        }}
+      >
+        {label}
+      </Text>
     </View>
   )
 }
@@ -310,12 +472,33 @@ export function Campo({
   const { t } = useTraduccionUi()
   const [enfocado, setEnfocado] = useState(false)
   const [oculto, setOculto] = useState(true)
+  const [textoInterno, setTextoInterno] = useState(false)
 
   // El color del contorno y el interior salen de la anatomía compartida
   // (`caja-de-campo.ts`): tres piezas, una definición.
+  const v5 = formaV5(theme)
+  /* 🔴 **LA ETIQUETA FLOTA AL ENFOCAR, NO AL PRIMER CARÁCTER** — y esa
+     diferencia es toda la razón por la que la regla rectora sigue
+     entera: al enfocar es ANTES de tipear, así que nada se mueve
+     mientras alguien escribe. Con el campo ya lleno se queda arriba.
+     ⚠️ `value` se lee de las props del input **porque los tres campos del
+     encargo son controlados** (medido en `registro.tsx`); para los no
+     controlados, el estado interno lo sigue con `onChangeText`. *Leer sólo
+     `value` habría dejado la etiqueta plantada encima del texto en
+     cualquier campo sin `value`, que es un defecto sin síntoma hasta que
+     aparece el primero.* */
+  const valorDeProps = typeof inputProps.value === 'string' ? inputProps.value : undefined
+  const hayTexto = valorDeProps !== undefined ? valorDeProps.length > 0 : textoInterno
+  /* En multilínea la etiqueta flota SIEMPRE: un área de varias líneas no
+     tiene un renglón donde el rótulo pueda esperar centrado. */
+  const flotando = v5 && (enfocado || hayTexto || !!multilinea)
+  const glifo = v5 ? glifoDelCampo(secure, inputProps.autoComplete) : undefined
+
   const altoCampo = multilinea
     ? multilinea * ALTO_LINEA + spacing[3] * 2
-    : ALTO
+    : v5
+      ? ALTO_CAJA_CAMPO_V5
+      : ALTO
 
   return (
     <View style={{ opacity: deshabilitado ? opacity.disabled : 1 }}>
@@ -330,7 +513,12 @@ export function Campo({
           pieza sigue siendo que nada se mueve mientras alguien tipea —
           y ahora es más fácil de cumplir, porque la etiqueta ya no
           comparte caja con el valor. */}
-      {etiquetaVisible ? <EtiquetaDeCampo>{label}</EtiquetaDeCampo> : null}
+      {/* ⭐ **N11″ · CON LA GEOMETRÍA v5 LA ETIQUETA NO VA ACÁ AFUERA: VIVE
+          ADENTRO Y FLOTA.** El arco entero de esta ley —tres vueltas— y lo
+          que esta enmienda contesta y lo que NO, están en la cabecera de
+          `caja-de-campo.ts`. El prestador conserva la de N11′, que es lo
+          que su gate midió. */}
+      {etiquetaVisible && !v5 ? <EtiquetaDeCampo>{label}</EtiquetaDeCampo> : null}
 
       <Animated.View
         style={{
@@ -350,7 +538,56 @@ export function Campo({
             gap: spacing[2],
           }}
         >
-        {iconoIzq ? <View style={multilinea ? { paddingTop: spacing[1] } : null}>{iconoIzq}</View> : null}
+        {/* ⭐ **N11″ · EL DISCO DEL GLIFO.** `iconoIzq` gana sobre la
+            derivación: quien lo diga explícito manda. El color sale del
+            par `accent.glifo`/`glifoBg`, que ya nombra al CAMPO entre sus
+            cuatro empleos — no se elige acá. */}
+        {iconoIzq ? (
+          <View style={multilinea ? { paddingTop: spacing[1] } : null}>{iconoIzq}</View>
+        ) : glifo !== undefined ? (
+          <View
+            style={{
+              width: DISCO_GLIFO_CAMPO,
+              height: DISCO_GLIFO_CAMPO,
+              borderRadius: radius.full,
+              backgroundColor: theme.accent.glifoBg,
+              alignItems: 'center',
+              justifyContent: 'center',
+              ...(multilinea ? { marginTop: spacing[1] } : null),
+            }}
+          >
+            <Icono nombre={glifo} tamano={18} registro="glifo" />
+          </View>
+        ) : null}
+
+        {/* ⭐ **N11″ · LA COLUMNA DE LA ETIQUETA Y EL VALOR.** Con `flotando`
+            son dos renglones (14 + 24 = 38, que es el interior exacto de la
+            caja de 54); sin flotar, el rótulo se monta ABSOLUTO encima del
+            input vacío y centrado en los mismos 38. *El input nunca se
+            desmonta ni cambia de alto: si lo hiciera, el foco se perdería
+            al primer carácter y la caja saltaría.* */}
+        {/* 🔴 **`minHeight` NO ES DEFENSIVO: SIN ÉL LA COLUMNA COLAPSA A
+            CERO Y EL INPUT NO SE DIBUJA.** Medido en `antiparasitario`: la
+            caja salía **vacía —sin rótulo y sin campo—** y el defecto
+            aparecía **sólo cuando el campo NO tiene glifo**, o sea cuando no
+            declara `autoComplete` ni es `secure`. *Con el disco de 32 a la
+            izquierda la fila tenía un hijo con alto propio y la columna se
+            estiraba con él; sin el disco no hay de dónde sacarlo, y un
+            `flex: 1` con `justifyContent: 'center'` se centra sobre cero.*
+
+            ⚠️ **Aislado con dos corridas, y la primera hipótesis era la
+            equivocada:** con `minWidth: 0` solo, el input seguía sin
+            dibujarse. *El `minWidth` es el reflejo de flexbox que uno
+            escribe de memoria; acá lo que faltaba era el alto.*
+
+            ⏪ **Y el defecto no existía antes de N11″**: la columna nació en
+            el lote 6 para alojar etiqueta y valor. *Lo destapó el primer
+            campo sin glifo que alguien miró.*
+
+            `minWidth: 0` se queda igual, con su propio trabajo: sin él un
+            rótulo largo empuja al ojo fuera de la caja en vez de truncarse. */}
+        <View style={{ flex: 1, minWidth: 0, minHeight: ALTO_LINEA, justifyContent: 'center' }}>
+        {flotando ? <EtiquetaFlotante label={label} flotando /> : null}
 
         <TextInput
           {...inputProps}
@@ -370,8 +607,22 @@ export function Campo({
              28 lectores—; lo que cambia es que un placeholder deja de contar
              como decorativo.* */
           placeholderTextColor={theme.text.secondary}
+          /* ☠️ **N11″ · EL PLACEHOLDER DE EJEMPLO MUERE en la casa v5** — la
+             etiqueta hace ese trabajo, y dos textos grises en el mismo
+             renglón son dos. ⚠️ **Con UNA excepción viva**: la búsqueda
+             (`etiquetaVisible={false}`), donde N11′ firmó *lupa +
+             placeholder* y no hay etiqueta que pueda flotar. *Se apaga acá
+             y no en las pantallas: el encargo dice sin que C las toque, y
+             además así el que quede olvidado en un diccionario deja de
+             dibujarse solo.* */
+          placeholder={v5 && etiquetaVisible ? undefined : inputProps.placeholder}
           accessibilityLabel={label}
           accessibilityHint={ayuda}
+          onChangeText={(texto) => {
+            /* Sólo para el caso NO controlado — ver `hayTexto`. */
+            setTextoInterno(texto.length > 0)
+            inputProps.onChangeText?.(texto)
+          }}
           onFocus={(e) => {
             setEnfocado(true)
             inputProps.onFocus?.(e)
@@ -392,6 +643,9 @@ export function Campo({
             textAlignVertical: multilinea ? 'top' : 'center',
           }}
         />
+
+        {v5 && etiquetaVisible && !flotando ? <EtiquetaFlotante label={label} flotando={false} /> : null}
+        </View>
 
         {secure ? (
           /* ── S104-B · LA PALABRA «Ver» PASA A SER EL OJO ───────────────

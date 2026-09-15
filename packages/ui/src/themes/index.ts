@@ -136,6 +136,27 @@ export type SlotDeTema =
   | 'accent.glifo'
   | 'accent.glifoBg'
   | 'accent.atmosfera'
+  /* ⭐ **S116-B lote 4 · EL DECIMOTERCERO — `accent.sobreGradiente`.**
+   *  El hermano de `text.onGradient`: el acento que se dibuja ENCIMA de la
+   *  banda, no sobre el lienzo.
+   *
+   * 🔴 **Nace porque desde el lote 3b la banda es OSCURA en los tres
+   * temas** (ciruela en claro y oscuro, ciruela noche en memorial), y eso
+   * rompe el supuesto de todos los acentos existentes: `accent.active`
+   * vale `magentaAccion` en claro y `tintaV5` en memorial, y los dos
+   * DESAPARECEN sobre esa banda. *Un acento que se eligió mirando el
+   * lienzo no sirve encima de algo que no es el lienzo, y ninguna medición
+   * de contraste lo iba a decir porque el par nunca estuvo declarado.*
+   *
+   * **Su valor coincide en claro y oscuro (`magentaLuz`, 5,78:1 sobre
+   * ciruela) porque la banda coincide** — es slot y no constante para que
+   * el día que la banda cambie haya UN lugar. En memorial va blanco: la
+   * degradación de Ley 8, sin una gota de marca. */
+  | 'accent.sobreGradiente'
+  /** S116-B lote 4 · EL DECIMOCUARTO — la SUPERFICIE sobre la banda,
+   *  hermana del acento. Mismo defecto, un piso más abajo: `bg.overlay` es
+   *  del lienzo y sobre el ciruela no sirve. */
+  | 'bg.sobreGradiente'
 export type ThemeMode = 'light' | 'dark' | 'memorial'
 export type ServiceKey = keyof typeof lightTheme.services
 export type StatusKey = 'success' | 'warning' | 'danger' | 'info'
@@ -227,7 +248,7 @@ const lightOficio: Theme = {
   // El comentario de arriba ya lo anticipaba sin saberlo: *«`accent.primary`
   // es el MISMO teal en las dos casas y por lo tanto NO las distingue»* —
   // dejó de serlo, y por eso ahora tiene que estar acá.
-  accent: { ...lightTheme.accent, cta: palette.tealDark, ctaTexto: palette.light0, ctaElevado: false, formaV5: false, primary: palette.tealDark, primaryBg: palette.tealAlpha16, primaryBorder: palette.tealBorderL, control: palette.tealDark, hito: palette.tealDark, controlBg: palette.tealAlpha16, active: palette.tealDark, marcaEleccion: palette.tealDark, atmosfera: palette.tealDark, glifo: palette.tealDark, glifoBg: palette.tealAlpha16, activoLleno: palette.tealDark, sobreActivoLleno: palette.light0 },
+  accent: { ...lightTheme.accent, cta: palette.tealDark, ctaTexto: palette.light0, ctaElevado: false, formaV5: false, primary: palette.tealDark, primaryBg: palette.tealAlpha16, primaryBorder: palette.tealBorderL, control: palette.tealDark, hito: palette.tealDark, controlBg: palette.tealAlpha16, active: palette.tealDark, marcaEleccion: palette.tealDark, sobreGradiente: palette.teal, atmosfera: palette.tealDark, glifo: palette.tealDark, glifoBg: palette.tealAlpha16, activoLleno: palette.tealDark, sobreActivoLleno: palette.light0 },
 }
 const darkOficio: Theme = {
   ...darkTheme,
@@ -278,7 +299,7 @@ const darkOficio: Theme = {
   // ⇒ sobre superficie oscura manda el hex PURO, con su contenido en
   // tinta. **Medido S83-B31: fill 10.50 · label 11.01.**
   // 🔴 S116-B · EL NOVENO SLOT, su registro oscuro (ver `lightOficio`).
-  accent: { ...darkTheme.accent, cta: palette.teal, ctaTexto: palette.textLight0, ctaElevado: false, formaV5: false, primary: palette.teal, primaryBg: palette.tealAlpha15, primaryBorder: palette.tealBorder, control: palette.teal, hito: palette.teal, controlBg: palette.tealAlpha15, active: palette.teal, marcaEleccion: palette.teal, atmosfera: palette.teal, glifo: palette.teal, glifoBg: palette.tealAlpha15, activoLleno: palette.teal, sobreActivoLleno: palette.textLight0 },
+  accent: { ...darkTheme.accent, cta: palette.teal, ctaTexto: palette.textLight0, ctaElevado: false, formaV5: false, primary: palette.teal, primaryBg: palette.tealAlpha15, primaryBorder: palette.tealBorder, control: palette.teal, hito: palette.teal, controlBg: palette.tealAlpha15, active: palette.teal, marcaEleccion: palette.teal, sobreGradiente: palette.teal, atmosfera: palette.teal, glifo: palette.teal, glifoBg: palette.tealAlpha15, activoLleno: palette.teal, sobreActivoLleno: palette.textLight0 },
 }
 
 /** El default del producto es CLARO (B1 §7.3). Dark es opt-in. Memorial es automático (M6). */

@@ -126,7 +126,6 @@ export function useChipsRasgos(mascotaId: string, nombre: string, alGuardar: () 
             «otro»: es el detalle de lo que los chips ya nombraron. */}
         <Campo
           label={t('rasgos.contaMas')}
-          placeholder={t('rasgos.contaMasEjemplo')}
           value={texto}
           onChangeText={setTexto}
           multilinea={3}

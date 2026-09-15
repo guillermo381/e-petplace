@@ -46,7 +46,7 @@
  */
 
 import { useEffect, useState } from 'react'
-import { Pressable, View } from 'react-native'
+import { Pressable, ScrollView, View } from 'react-native'
 import Animated, {
   Easing,
   interpolateColor,
@@ -63,6 +63,9 @@ import { Texto } from './Texto'
 import { typography } from '../tokens/typography'
 import { spacing } from '../tokens/spacing'
 import { useTheme } from '../ThemeProvider'
+import { llenoDeSeleccion } from './lleno-de-seleccion'
+import { radius } from '../tokens/radius'
+import { MarcaEleccion } from '../brand/MarcaEleccion'
 
 export type DiaOpcion = { iso: string; dia: string; numero: string }
 
@@ -277,6 +280,119 @@ function ItemRueda({
   )
 }
 
+
+/* ══════════════════════════════════════════════════════════════════════
+ *  LA TIRA — LA ANATOMÍA v5 DE ESTE MISMO TRABAJO (S116-B lote 5)
+ * ══════════════════════════════════════════════════════════════════════
+ *
+ * Cuadrados deslizables: el nombre corto arriba, el número en Baloo, el
+ * elegido en ciruela con letra blanca y **la pata pisándolo**.
+ *
+ * ── 🔴 POR QUÉ CONVIVE CON LA RUEDA EN LUGAR DE REEMPLAZARLA ──────────
+ * Son **el mismo trabajo** (Ley 19: elegir un día ⇒ UN componente), así que
+ * no nace una pieza hermana. Lo que cambia es **de qué casa es la
+ * anatomía**, y esa pregunta ya tiene su slot: **`accent.formaV5` — «¿esta
+ * casa recibió la geometría del rediseño?»**. Cliente sí, prestador no
+ * (letra §5), memorial no (§4).
+ *
+ * *No es una prop de variante inventada para la ocasión: es la decisión que
+ * la casa ya tomó, aplicada donde corresponde.* La consecuencia práctica es
+ * la que importa: **los NUEVE montajes vivos —seis del cliente y tres del
+ * prestador— no se tocan**, y cada uno recibe la anatomía de su casa.
+ *
+ * ⚠️ **Y por eso la física firmada de la rueda queda INTACTA.** Sus números
+ * salieron de un gate en dispositivo (S82-C r12) y su propia cabecera dice
+ * que no se recalibran sin otro gate. Un reemplazo habría cambiado la
+ * portada del prestador sin que nadie la mirara.
+ *
+ * ── EL CERRADO SE VE APAGADO Y **NO SE ELIGE** ────────────────────────
+ * ⚠️ **Acá SÍ va `disabled`, y es lo contrario de lo que decidió la rueda.**
+ * La rueda lo dejó tocable porque el nulo honesto —la voz que explica por
+ * qué no hay— sólo se monta para el día ELEGIDO, así que sin poder elegirlo
+ * esa voz era inalcanzable. **En la tira el encargo es explícito**: *«si un
+ * día u hora no tiene lugar, se ve apagado y no se elige»*. La contrapartida
+ * se declara: quien monte la tira tiene que decir en otro lado por qué ese
+ * día no está, porque acá ya no se llega tocándolo. → buzón.
+ */
+const CUADRO = 60
+
+function TiraDias({
+  dias,
+  elegido,
+  cerrados,
+  etiquetaCerrado,
+  onElegir,
+}: {
+  dias: DiaOpcion[]
+  elegido: string
+  cerrados: Set<string>
+  etiquetaCerrado: string
+  onElegir: (iso: string) => void
+}) {
+  const { theme } = useTheme()
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      accessibilityRole="radiogroup"
+      contentContainerStyle={{ gap: spacing[2], paddingHorizontal: spacing[5], paddingBottom: spacing[3] }}
+    >
+      {dias.map((d) => {
+        const esElegido = d.iso === elegido
+        const cerrado = cerrados.has(d.iso)
+        return (
+          <View key={d.iso} style={{ alignItems: 'center' }}>
+            <Pressable
+              accessibilityRole="radio"
+              accessibilityState={{ selected: esElegido, disabled: cerrado }}
+              accessibilityLabel={cerrado ? `${d.dia} ${d.numero}, ${etiquetaCerrado}` : `${d.dia} ${d.numero}`}
+              disabled={cerrado}
+              onPress={() => onElegir(d.iso)}
+              style={{
+                width: CUADRO,
+                height: CUADRO + spacing[3],
+                borderRadius: radius.md,
+                borderCurve: 'continuous',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: spacing[0.5],
+                backgroundColor: esElegido ? llenoDeSeleccion(theme) : theme.bg.card,
+                boxShadow: esElegido ? undefined : theme.elevacion.reposo,
+                /* Apagado: **pierde presencia, no forma.** El cuadro sigue
+                   entero — lo que falta no es el día, es el lugar. */
+                opacity: cerrado ? 0.4 : 1,
+              }}
+            >
+              <Texto variante="apoyo" color={esElegido ? 'sobreControl' : 'tertiary'}>
+                {d.dia}
+              </Texto>
+              {/* 🔴 **EL NÚMERO EN BALOO, y acá SÍ.** La rueda lo puso en
+                  sans con tabular-nums *«porque un día que ELEGÍS es una
+                  elección, no un dato leído»* — y ese criterio sigue siendo
+                  cierto: lo que cambia es que la casa v5 **tiene una voz
+                  propia para las cifras** (`escala.cifraChica`, Baloo 22) y
+                  no la tenía cuando la rueda se calibró. *La tira no
+                  contradice a la rueda: hereda su razón y la dice con la
+                  tipografía que ahora existe.* */}
+              <Texto variante="dato" color={esElegido ? 'sobreControl' : 'primary'} tabular>
+                {d.numero}
+              </Texto>
+              {/* 🔴 **LA PATA VA ADENTRO DEL CUADRO, no al lado.** La
+                  primitiva es `position: 'absolute'` con `top: -MONTA`, o sea
+                  que **se posiciona contra su PADRE**: colgada de la columna
+                  quedaba flotando arriba de todo, lejos de lo que tiene que
+                  pisar. *Lo vio la captura: un puntito suelto en el aire, no
+                  una pata apoyada.* Hermana del número, como en `FiltroPills`
+                  es hermana del label. */}
+              {esElegido ? <MarcaEleccion color={theme.accent.marcaEleccion} /> : null}
+            </Pressable>
+          </View>
+        )
+      })}
+    </ScrollView>
+  )
+}
+
 export interface SelectorDiaProps {
   dias: DiaOpcion[]
   elegido: string
@@ -299,7 +415,23 @@ export interface SelectorDiaProps {
 }
 
 export function SelectorDia(props: SelectorDiaProps) {
+  const { theme } = useTheme()
   const cerrados = props.cerrados ?? new Set<string>()
+  /* La anatomía la decide LA CASA, no el consumidor (ver la cabecera de
+     `TiraDias`). `formaV5` ya es el slot que contesta «¿esta casa recibió
+     la geometría del rediseño?». */
+  const v5 = 'formaV5' in theme.accent && theme.accent.formaV5 === true
+  if (v5) {
+    return (
+      <TiraDias
+        dias={props.dias}
+        elegido={props.elegido}
+        cerrados={cerrados}
+        etiquetaCerrado={props.etiquetaCerrado}
+        onElegir={props.onElegir}
+      />
+    )
+  }
   return (
     <RuedaDias
       dias={props.dias}

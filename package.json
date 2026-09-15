@@ -163,6 +163,7 @@
     "verify:piezas-locales": "node scripts/verify-piezas-locales.mjs",
     "verify:techos-locales": "node scripts/verify-techos-locales.mjs",
     "verify:boton-alto": "node scripts/verify-boton-alto.mjs",
+    "verify:etiqueta-dentro": "node scripts/verify-etiqueta-dentro.mjs",
     "verify:auth-receptor": "node scripts/verify-auth-receptor.mjs"
   },
   "devDependencies": {
