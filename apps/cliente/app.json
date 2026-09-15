@@ -8,7 +8,6 @@
     "scheme": "cliente",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
       "infoPlist": {
         "NSMicrophoneUsageDescription": "Para que el veterinario pueda escucharte durante tu videoconsulta.",
         "NSCameraUsageDescription": "Para la foto de tu mascota y para tus videoconsultas con el veterinario."
@@ -19,7 +18,7 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png",
-        "backgroundColor": "#050508"
+        "backgroundColor": "#26062E"
       },
       "predictiveBackGestureEnabled": false,
       "permissions": [
