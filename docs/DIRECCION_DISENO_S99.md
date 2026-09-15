@@ -112,16 +112,18 @@ frena antes de que se escriba.**
 
 ## N11 · EL CAMPO DE ESCRITURA
 
-> ⚠️ **ENMENDADA POR N11′ (firma del founder, 17-ago-2026 — gate de S100).**
-> La cláusula de la etiqueta adentro está **DEROGADA**; todo lo demás de N11
-> sigue vigente. **La enmienda vive abajo, en esta misma sección** — no en un
-> parte de pista. *La letra vieja se tacha y no se borra.*
+> ⚠️ **TERCERA VUELTA DE ESTA LEY. RIGE N11″ (firma del founder, 15-sep-2026).**
+> ~~ENMENDADA POR N11′ (17-ago-2026)~~ — **N11′ queda DEROGADA**: la etiqueta
+> vuelve ADENTRO, **flotando**. Las dos enmiendas viven abajo, en esta misma
+> sección, **la vieja tachada y no borrada** — y N11′ se conserva entera
+> porque *su argumento es exactamente lo que la tercera vuelta tiene que
+> contestar, y una ley derogada sin su razón a la vista se vuelve a proponer.*
 
 **El interior del campo es lo más claro de su región.** Interior claro y
 vacío · **contorno visible ≥3:1** contra el fondo · **caja cerrada** (jamás
-subrayado suelto) · ~~**etiqueta adentro de los límites de la caja**~~
-**⇒ DEROGADO por N11′: la etiqueta va AFUERA Y ARRIBA** · radios
-de la escala N4.
+subrayado suelto) · **etiqueta ADENTRO, FLOTANDO** ~~etiqueta adentro de los
+límites de la caja~~ ~~**⇒ DEROGADO por N11′: la etiqueta va AFUERA Y
+ARRIBA**~~ **⇒ ver N11″** · radios de la escala N4.
 
 **☠️ El relleno gris sólido muere:** se lee como deshabilitado, tiene señal
 fuerte de «botón» y débil de «hueco vacío». Es la ley 19.8 aplicada al
@@ -132,7 +134,15 @@ existe, por eso no se rellena.
 Estados: foco con presencia (borde en acento + elevación sutil) · error con
 voz (N12.4) · deshabilitado ahora sí distinguible del vacío.
 
-### N11′ · LA ETIQUETA SALE DE LA CAJA — enmienda firmada, 17-ago-2026
+### ~~N11′ · LA ETIQUETA SALE DE LA CAJA~~ — **DEROGADA el 15-sep-2026 por N11″**
+
+> ☠️ **DEROGADA, y se conserva ENTERA a propósito.** Lo que sigue es la letra
+> de S100 tal como se firmó; **no rige**. Se deja porque **N11″ no la
+> contradice de gusto: la contesta**, y quien lea sólo la ley nueva no va a
+> entender qué problema resolvía la vieja — que es como una ley derogada
+> vuelve a proponerse tres sesiones después.
+> **Lo que muere de esta enmienda está tachado abajo, cláusula por cláusula.**
+> Lo que NO está tachado **sigue vigente** y N11″ lo hereda sin discutirlo.
 
 > **POR QUÉ ESTÁ ACÁ Y NO EN UN PARTE:** esta firma vivió su primer día en
 > `docs/loop/S100-B.md` y en una lámina. Un parte de pista es justo lo que
@@ -144,8 +154,10 @@ voz (N12.4) · deshabilitado ahora sí distinguible del vacío.
 > proponer.* Texto copiado **VERBATIM** de su fuente, sin re-redactar.
 
 > · **ENMIENDA N11′** (una ley firmada se reabre con EVIDENCIA, jamás con
-> preferencia — esta se reabrió y se sostuvo): **LA ETIQUETA VA AFUERA Y
-> ARRIBA DEL CAMPO, SIEMPRE VISIBLE Y SIEMPRE DEL MISMO TAMAÑO.**
+> preferencia — esta se reabrió y se sostuvo): ~~**LA ETIQUETA VA AFUERA Y
+> ARRIBA DEL CAMPO, SIEMPRE VISIBLE Y SIEMPRE DEL MISMO TAMAÑO.**~~
+> ☠️ **MUERTA** — la etiqueta vuelve adentro y **sí cambia de tamaño**: eso
+> es, literalmente, lo que significa flotar (N11″).
 > Razón: la etiqueta adentro tiene que encogerse para dejar entrar el
 > valor, y pierde legibilidad justo cuando el campo está lleno — que es
 > cuando la persona revisa antes de pagar. En español pesa el doble
@@ -156,23 +168,33 @@ voz (N12.4) · deshabilitado ahora sí distinguible del vacío.
 > sigue muerto), foco con acento + elevación sutil, radios N4.
 > **LOS NÚMEROS QUE EVITAN QUE LA ETIQUETA SE DESPEGUE** (el riesgo real
 > de sacarla afuera):
-> · etiqueta a **6-8px de SU campo** · **≥24px entre un campo y el
->   siguiente**. La etiqueta tiene que estar inequívocamente más cerca de
->   su caja que de la de arriba. Si esa proporción se rompe, la ley se
->   rompió.
-> · la etiqueta **jamás cambia de tamaño ni de color** por foco o por
->   contenido.
-> · **EL PLACEHOLDER DEJA DE REPETIR LA ETIQUETA Y PASA A SER UN EJEMPLO
+> · ~~etiqueta a **6-8px de SU campo**~~ ☠️ **sin objeto**: adentro no hay
+>   distancia que proteger — *el problema que estos números resolvían
+>   desaparece con la etiqueta, no se resuelve mejor.* · ~~**≥24px entre un
+>   campo y el siguiente**~~ ☠️ **MUERTO TAMBIÉN (firma del founder,
+>   15-sep-2026) — ver el bloque de abajo.**
+>   ~~La etiqueta tiene que estar inequívocamente más cerca de su caja que
+>   de la de arriba. Si esa proporción se rompe, la ley se rompió.~~
+> · ~~la etiqueta **jamás cambia de tamaño ni de color** por foco o por
+>   contenido.~~ ☠️ **MUERTA, y es la cláusula que N11″ invierte de frente.**
+> · ~~**EL PLACEHOLDER DEJA DE REPETIR LA ETIQUETA Y PASA A SER UN EJEMPLO
 >   DEL FORMATO**: bajo «Teléfono de contacto» va «+593 99 123 4567», no
 >   «Teléfono». Repetir la etiqueta adentro es desperdiciar el único lugar
->   donde se puede enseñar el formato sin hablar.
+>   donde se puede enseñar el formato sin hablar.~~ ☠️ **MUERTA: el
+>   placeholder de ejemplo se retira** (firma 15-sep). Su lugar lo ocupa la
+>   etiqueta hasta que alguien escribe. ⚠️ **Y lo que se pierde se declara:
+>   el formato deja de enseñarse sin hablar** — si un campo lo necesita, va
+>   en el pie (N12.4), que es donde ya vive todo lo que el campo explica.
 > · el **error va DEBAJO del campo, jamás reemplaza a la etiqueta** (N12.4
 >   sigue mandando: qué está mal y cómo se arregla, con ejemplo real).
 > **EXENCIÓN:** el campo de **BÚSQUEDA no lleva etiqueta** — lupa +
 > placeholder, que es el patrón universal. Poner «Buscar» arriba de una
 > lupa es decir dos veces lo mismo.
-> **COSTO ACEPTADO:** afuera cuesta altura. Se compensa con **MENOS CAMPOS
-> POR PANTALLA**, jamás encogiendo.
+> ~~**COSTO ACEPTADO:** afuera cuesta altura. Se compensa con **MENOS CAMPOS
+> POR PANTALLA**, jamás encogiendo.~~ ☠️ **sin objeto**: adentro no cuesta
+> altura. *«Menos campos por pantalla» sigue siendo buen oficio; deja de ser
+> una compensación obligada, que es distinto — una regla que sobrevive a su
+> razón se aplica después donde no corresponde.*
 
 **Su alcance, medido en S100-B (no estimado):** **123 `<Campo>` vivos**
 (98 prestador · 25 cliente) + **19 `<CampoFecha>`** + 15 en galería. **No
@@ -182,16 +204,135 @@ enmienda se ejecutó en las tres piezas de campo con una sola definición
 (`EtiquetaDeCampo`, hermana simétrica de `PieDeCampo`), **para que no
 puedan divergir**.
 
-**Y el hallazgo que la orienta:** `CampoCodigo` **ya cumplía N11′** desde
+**Y el hallazgo que la orientaba:** `CampoCodigo` **ya cumplía N11′** desde
 siempre, con su razón escrita como *excepción* (*«una caja de UN dígito no
 tiene lugar para un rótulo»*). ***La excepción de ayer es la norma de
-hoy*** — N11′ no le pide que cambie: le da la razón. *Cuando una enmienda
-hace que una excepción vieja deje de ser excepción, la enmienda está bien
-orientada.*
+hoy*** — N11′ no le pide que cambie: le da la razón.
+⊳ **Y N11″ lo devuelve a su lugar: vuelve a ser EXCEPCIÓN, con su razón
+intacta.** Una caja de un dígito tampoco tiene lugar para una etiqueta
+flotante. *La observación de N11′ sigue siendo buena —cuando una enmienda
+convierte una excepción en norma, está bien orientada— pero **no vale al
+revés**: que una excepción vuelva a serlo no dice nada malo de la ley nueva.
+`CampoCodigo` no se toca en ninguna de las tres vueltas, y eso es lo único
+que hay que recordar de él.*
 
 **Fuentes de este depósito** (se leen si hace falta el contexto de
 ejecución, jamás para re-derivar la ley): `docs/loop/S100-B.md` §«LA
 ENMIENDA N11′» · `docs/laminas/2026-08-17-s100b-LAS-SEIS-RECETAS-DE-FORMA.md`.
+
+### N11″ · LA ETIQUETA VUELVE ADENTRO Y FLOTA — enmienda firmada, 15-sep-2026
+
+> **LA LEY, en una línea:** en **todos los formularios de la casa**, el nombre
+> del campo va **DENTRO del campo, flotando**. La etiqueta **ocupa el lugar del
+> placeholder**; al enfocar **se achica y sube al borde superior de la caja**, y
+> **queda a la vista mientras se escribe**. **El placeholder de ejemplo muere.**
+
+**ES LA TERCERA VUELTA DE ESTA LEY, y decirlo es parte de la ley:**
+
+| | dónde vivía la etiqueta | por qué se movió |
+|---|---|---|
+| **N11** · S99 | adentro, **quieta** | era la vara del artesano: la caja limpia |
+| **N11′** · S100 | **afuera y arriba** | adentro se encoge y pierde legibilidad justo cuando el campo está lleno |
+| **N11″** · S116 | **adentro, FLOTANDO** | flotando **cada uno tiene su renglón** |
+
+🔴 **NO es volver a N11.** N11 tenía la etiqueta **quieta adentro**, compitiendo
+con el valor **por el mismo renglón** — y ése era el defecto que N11′ midió bien.
+**N11″ no lo niega: lo disuelve.** La etiqueta sube al borde, el valor se queda
+en el cuerpo, y **dejan de compartir línea**: ya no hay que elegir entre ver el
+rótulo y ver lo que se escribió. *Una ley que vuelve sobre sus pasos sin cambiar
+de forma es una preferencia; ésta volvió con una geometría distinta.*
+
+**QUÉ CONTESTA, punto por punto, del argumento de N11′:**
+- *«la etiqueta adentro tiene que encogerse para dejar entrar el valor»* — **sí
+  se encoge, y ya no le hace falta el espacio del valor**: se va al borde.
+- *«pierde legibilidad justo cuando el campo está lleno, que es cuando la
+  persona revisa antes de pagar»* — **con el campo lleno la etiqueta sigue
+  visible**, que es exactamente lo que N11′ quería garantizar sacándola afuera.
+- *«el autofill del sistema tapa el interior de la caja»* — el autofill llena el
+  **cuerpo**; la etiqueta está en el **borde**. Mismo mecanismo, misma respuesta.
+
+---
+
+### ⚠️ LO QUE ESTA ENMIENDA **NO** CONTESTA — medido por B
+
+> **Un rótulo largo en español, a 11 px, sigue siendo una nota al pie.**
+> «Instrucciones de entrega» encogida no se vuelve legible por flotar: se vuelve
+> chica en otro lugar.
+
+**Y eso era la MITAD del argumento de N11′, no un detalle**: *«en español pesa el
+doble»*. N11″ contesta la mitad geométrica —el renglón compartido— **y no
+contesta la tipográfica**. Se dice acá y no se descubre en una pantalla.
+
+**LA SALIDA, y su forma exigible:** ese caso **puede llevar la etiqueta AFUERA**,
+y entonces:
+- **es una EXCEPCIÓN DECLARADA EN LA PANTALLA** — escrita ahí, con el rótulo que
+  la motiva y su medida. *La excepción se firma en el lugar donde se ejerce.*
+- **JAMÁS POR OMISIÓN.** Un campo con la etiqueta afuera *porque quedaba mejor*,
+  *porque la pieza no llegaba* o *porque se copió de otra pantalla* **es un
+  incumplimiento**, no una excepción. **La diferencia entre las dos es un
+  comentario**, y por eso el comentario es la regla: sin él no se distinguen.
+
+*El riesgo de una excepción sin declarar no es esa pantalla: es que a la tercera
+nadie sabe cuál es la norma.*
+
+---
+
+**ALCANCE: EL CLIENTE.** **El prestador sigue con su dosis** —la etiqueta afuera
+de N11′, sus **98 `<Campo>`** medidos en S100-B— **hasta que se rediseñe.** *No
+es una deuda ni un olvido: su rediseño no es de esta letra, y mover 98 campos de
+una casa que nadie está mirando es trabajo que no sirve a nadie hoy.*
+⚠️ **Consecuencia aceptada, dicha en vez de descubierta: durante un tiempo las
+dos casas van a tener formularios distintos.** N11 prohíbe que dos estilos de
+campo convivan **en la misma región de una pantalla** — no prohíbe que dos apps
+distintas vayan a distinta velocidad.
+
+**LO QUE SIGUE VIGENTE Y N11″ HEREDA SIN DISCUTIRLO** (de N11 y de lo no tachado
+de N11′): caja cerrada, jamás subrayado suelto · contorno ≥3:1 · interior claro
+(**el relleno gris sólido sigue muerto**) · radios N4 · ~~**≥24 px entre un campo
+y el siguiente**~~ **⇒ DEROGADO, ver abajo** · foco con presencia · **el error va
+DEBAJO del campo** y no reemplaza a nada (N12.4 manda) · **dos estilos de campo
+jamás conviven en la misma región** · **EXENCIÓN de BÚSQUEDA**: lupa +
+placeholder, sin etiqueta — *reforzada, no tocada: es el único lugar donde el
+placeholder sobrevive.*
+
+---
+
+### ⊳ ENMIENDA A N11″ · **EL AIRE BAJA A 10–12** — firma del founder, 15-sep-2026
+
+> ~~**≥24 px entre un campo y el siguiente**~~ ⇒ **10–12 px.**
+
+🔴 **NO es aflojar un número: la razón de los 24 ya no existe.** Estaba escrita
+en el propio N11′ y era una sola —**pertenencia**—: con la etiqueta AFUERA, si el
+campo de arriba quedaba demasiado cerca, **su rótulo se leía como el pie del
+campo anterior**. *«La etiqueta tiene que estar inequívocamente más cerca de su
+caja que de la de arriba»* — ése era todo el argumento, y **se fue con la cosa
+que protegía**: adentro no hay ningún rótulo suelto que pueda confundirse de
+dueño.
+
+**Y B lo midió antes de tocar nada** (`docs/loop/S116-B-LOTE6.md` §③, emulador de
+360 dp): **121 px = 40,3 dp** entre una caja y el rótulo siguiente. Los 40 no
+salían del `gap` sino **del pie, que reservaba 25 dp siempre** — y su literal es
+exacto: *«tenía dos razones y una murió con N11″… la razón se fue con la cosa que
+protegía»*. ⇒ el vacío reserva **4**, que con el `gap: 8` de las pantallas da
+**12 exactos**.
+
+⚠️ **Y el hallazgo que ese mismo censo dejó, que vale más que el número:** el
+`gap` de las pantallas **ya era 8** (`registro.tsx:228` · `login.tsx:269`), o sea
+**menos que los 10-12 pedidos**. ***Si sólo se hubiera mirado el `gap`, la
+conclusión habría sido «ya está bien» y el encargo habría quedado sin cura***: el
+defecto estaba en el pie, no donde lo buscaba el número.
+
+⏪ **CORRECCIÓN DE UNA LÍNEA QUE ESCRIBÍ YO, y se conserva:** al depositar N11″
+marqué el ≥24 como *«SIGUE VIGENTE (es ritmo, no pertenencia)»*. **Era falso en su
+mitad importante:** su razón declarada ERA la pertenencia, y yo le inventé otra
+para dejarlo vivo. *Una cláusula que sobrevive con una razón distinta de la que
+tenía no es una cláusula heredada: es una nueva, sin firmar.*
+
+**LA EJECUCIÓN ES DE B, y la ley no la presupone.** El cambio vive en las piezas
+de campo de `packages/ui` —la misma definición única que N11′ estrenó
+(`EtiquetaDeCampo`), **para que no puedan divergir**— y **no hay gate que lo
+vigile todavía**: *su verde no existe, así que nadie puede confundir «no lo mide
+nadie» con «está cumplido».*
 
 ## N12 · EL FORMULARIO PREMIUM
 
@@ -1156,6 +1297,35 @@ destape). B la prototipa SOLO si le ve valor; entra únicamente por gate en
 dispositivo, como enmienda de primitiva — jamás por pantalla.
 
 ## Historial
+
+- **v1.6 (15-sep-2026, S116-A → FIRMADA por el founder 15-sep-2026):** **el
+  ≥24 px entre campos queda DEROGADO ⇒ 10–12 px.** No es aflojar un número: **la
+  razón de los 24 era la PERTENENCIA** —que el rótulo de afuera no se leyera como
+  el pie del campo de arriba— y **se fue con la etiqueta afuera**. Medido por B
+  antes de tocar nada (`S116-B-LOTE6` §③): 121 px = **40,3 dp**, que no salían del
+  `gap` sino del **pie reservando 25 dp siempre**; el vacío pasa a reservar 4 y
+  con el `gap: 8` da **12 exactos**. ⚠️ Con el hallazgo que deja: **el `gap` ya
+  era 8, o sea MENOS que lo pedido** — *mirar sólo el `gap` habría concluido «ya
+  está bien» y el encargo quedaba sin cura.* ⏪ **Y corrige una línea de la v1.5
+  que escribí yo**: había marcado el ≥24 como «sigue vigente (es ritmo, no
+  pertenencia)», inventándole una razón para dejarlo vivo. *Una cláusula que
+  sobrevive con una razón distinta de la que tenía no es heredada: es nueva y sin
+  firmar.*
+
+- **v1.5 (15-sep-2026, S116-A → FIRMADA por el founder 15-sep-2026):** **N11′
+  queda DEROGADA y nace N11″ — la etiqueta vuelve ADENTRO del campo,
+  FLOTANDO**: ocupa el lugar del placeholder, al enfocar se achica y sube al
+  borde superior, y queda a la vista mientras se escribe. **El placeholder de
+  ejemplo muere.** Es la **tercera vuelta** de esta ley y el documento lo dice:
+  no es volver a N11 —aquélla tenía la etiqueta quieta, compartiendo renglón con
+  el valor— sino **disolver** el defecto que N11′ midió bien. **N11′ se conserva
+  entera, tachada cláusula por cláusula**, con lo que sobrevive marcado como
+  vigente. ⚠️ **Y se escribe lo que la enmienda NO contesta, medido por B:** un
+  rótulo largo en español («Instrucciones de entrega») a 11 px **sigue siendo una
+  nota al pie** — ese caso puede llevar la etiqueta afuera **como excepción
+  DECLARADA EN LA PANTALLA, jamás por omisión**. **Alcance: el cliente**; el
+  prestador sigue con la dosis de N11′ (sus 98 campos) hasta que se rediseñe.
+  Depositada por A; **la ejecución es de B y no hay gate que la vigile todavía**.
 
 - **v1.4 (3-sep-2026, S112-A → FIRMADA 3-sep-2026):** **N25 ③ y su ⚠️
   quedan DEROGADAS en su propio lugar**, con el texto viejo tachado y no

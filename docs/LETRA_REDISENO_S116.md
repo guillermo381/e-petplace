@@ -29,6 +29,8 @@
 
 **Sombras:** por `elevation` + `shadow*` (tokens `shadows.ts`/`elevacion.ts`), nunca CSS. En claro, la superficie en reposo conserva el hairline (enmienda S86 sigue).
 
+**⊳ ENMIENDA firmada por el founder el 15-sep-2026 — EL CAMPO:** la etiqueta va **DENTRO del campo y FLOTA** —ocupa el lugar del placeholder y al enfocar se achica y sube al borde superior, quedando a la vista mientras se escribe—, y **el placeholder de ejemplo muere**; el radio 18 y el foco borde 1,5 + halo 4 al 10 % en ciruela **no se tocan**. Es la **tercera vuelta** de esta ley y **la norma entera vive en `DIRECCION_DISENO_S99` §N11″** —incluido lo que NO contesta: un rótulo largo en español a 11 px sigue siendo nota al pie, y ese caso lleva la etiqueta afuera **como excepción declarada en la pantalla, jamás por omisión**—: acá va sólo el puntero, **porque una ley escrita dos veces se enmienda una sola** (precedente del magenta S83 y de la plata S88). **Alcance: el cliente**; el prestador sigue con N11′ hasta que se rediseñe.
+
 ## 3. Método (resumen de `S116-PLAN-REDISENO.md`, que rige entero)
 
 - Tokens v4 → v5 **en el lugar**, sin llave. El primer OTA a preview muestra toda la app con piel nueva; la estructura llega lote a lote.
