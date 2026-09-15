@@ -1772,7 +1772,16 @@ export default function Hogar() {
             <Cabecera
               variante="raiz"
               presentacion="fondo"
+              // ✅ **LA FECHA VUELVE AL MONO (lote 3f de B).** Cuando absorbí
+              // el techo, `antetitulo` sólo sabía hablar como RÓTULO —sans bold
+              // 11 en mayúsculas— y la fecha pasó a leerse «LUNES, 14 DE
+              // SEPTIEMBRE». Lo declaré como lo que costaba y lo pedí; B entregó
+              // la voz. *La pieza no estaba mal: `antetitulo` nació rótulo, y lo
+              // que apareció después fue un segundo uso que no existía cuando se
+              // escribió.* Vuelve la Ley 3 y vuelve la lámina: la fecha en mono,
+              // en minúsculas, SOBRE el saludo.
               antetitulo={fechaConDiaMono(hoy, idioma)}
+              antetituloVoz="dato"
               titulo={`${saludoPorFranja(hoy.getHours(), t)}${nombrePerfil ? `, ${nombrePerfil.trim().split(' ')[0]}` : ''}`}
               carrito={{
                 cantidad: unidadesEnCarrito(carrito),
