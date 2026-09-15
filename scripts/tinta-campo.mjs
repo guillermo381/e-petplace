@@ -77,14 +77,30 @@ const hueco = val.de - rot.a - 1
 const altoVal = (val.a - val.de + 1) / 3
 console.log(`\n  rótulo  · ${((rot.a - rot.de + 1) / 3).toFixed(1)} dp de tinta`)
 console.log(`  valor   · ${altoVal.toFixed(1)} dp de tinta`)
+console.log(`  razón valor/rótulo: ${(altoVal / ((rot.a - rot.de + 1) / 3)).toFixed(2)}`)
 console.log(`  HUECO entre los dos: ${hueco} px (${(hueco / 3).toFixed(1)} dp)`)
-const MIN_VALOR = 14 // un renglón de 15 sp da ~15-20 dp de tinta con descendentes
-const ok = hueco > 0 && altoVal >= MIN_VALOR
+/* 🔴 **EL PISO ES RELATIVO AL RÓTULO, NO ABSOLUTO — y la corrección la
+   forzó una imagen que contradecía al instrumento.** ⏪ Era `>= 14 dp`, y
+   marcó ROJO sobre un campo que en la captura **se veía entero**: el valor
+   era «1712345675», **sólo dígitos, sin una sola descendente**, así que su
+   tinta ocupa menos alto que un texto con «g» o «p». *Un umbral absoluto no
+   sabe qué caracteres tiene el texto que mide.*
+   ⇒ Se compara contra el rótulo, que está en la MISMA fuente y la misma
+   escala: el valor (15 sp) tiene que dar más tinta que el rótulo (11 sp).
+   **En el caso roto los dos daban 6,7 dp — razón 1,0, que es justamente la
+   firma del recorte**; en los sanos va de 1,5 a 3,2.
+   ⚠️ Sigue sin ser perfecto: si el rótulo tuviera descendentes y el valor
+   no, la razón baja. **Por eso el veredicto acompaña siempre al recorte
+   ampliado, y el recorte manda.** */
+const RAZON_MINIMA = 1.15
+const altoRot = (rot.a - rot.de + 1) / 3
+const razon = altoVal / altoRot
+const ok = hueco > 0 && razon >= RAZON_MINIMA
 console.log(
   ok
     ? '  ✓ LIMPIO — hueco entre los dos Y el valor con su altura entera'
     : hueco <= 0
       ? '  ✗ SE TOCAN'
-      : `  ✗ EL VALOR ESTÁ RECORTADO (${altoVal.toFixed(1)} dp < ${MIN_VALOR})`,
+      : `  ✗ EL VALOR ESTÁ RECORTADO (razón valor/rótulo ${razon.toFixed(2)} < ${RAZON_MINIMA})`,
 )
 process.exit(ok ? 0 : 1)

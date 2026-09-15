@@ -1,116 +1,60 @@
-# S116-B · LOTE 11 — la letra del CTA, el abanico, y la galería destrabada
+# S116-B · LOTE 11 — las tres verificadas, y la clase con su gate
 
-**Rama `pista/s116-b-05` · commit `4fc2f0e4`.**
-
-**Gates:** `verify:diseno` VERDE (81 reglas) · `verify:contrast` **464/0** · `verify:catalogo-v5` VERDE (33 piezas en 28 entradas) · `verify:reduced-motion` VERDE · `verify:isotipo-path` VERDE · `tsc` 0 en `packages/ui`, `packages/api`, `apps/cliente`, `apps/prestador`.
+**Rama `pista/s116-b-05`.** Gates: `verify:alto-con-texto` **NUEVO, verde con su rojo y sus dos exenciones probadas** · `verify:etiqueta-dentro` VERDE · `verify:diseno` VERDE (80) · `verify:contrast` 504/0 · `verify:catalogo-v5` VERDE (49) · `tsc` 0 en las cuatro.
 
 ---
 
-## ① LA LETRA DEL CTA — y el censo mueve dónde estaba el defecto
+## ① EL MARCADOR, ANTES DE MEDIR — y esta vez en las DOS direcciones
 
-**`Boton` NO era el ofensor.** Su primario ya resuelve `{ fondo: theme.accent.cta, texto: theme.accent.ctaTexto }`, y en claro `ctaTexto` es **blanco**. Los botones magenta que dibuja la pieza salen con la letra blanca desde que existe el slot.
+**Lo que bloqueó el lote 10 fue un bundle viejo.** Acá el canal se probó primero: marcador puesto → **281.110 píxeles amarillos**; marcador quitado → **0**. *Confirmar que el cambio LLEGA no alcanza: hay que confirmar que además SE VA, o un marcador que quedó pegado prueba lo mismo que uno que nunca llegó.* Letra del sistema en **1,3** durante toda la medición.
 
-**El único ofensor vive en `FilaConfirmacionVacuna.tsx`, líneas 381 y 515**: un CTA **dibujado a mano** con `backgroundColor: theme.accent.cta` y un `<Texto color={… : undefined}>` que cae a `text.primary`.
+## ② LAS TRES, VERIFICADAS EN PÍXELES
 
-> **Un CTA a mano hereda el fondo del acento y se olvida de su letra.** El fondo es una línea de estilo que alguien escribió; la letra es una **ausencia**, y una ausencia no se revisa.
+| pantalla | rótulo | valor | razón | hueco | |
+|---|--:|--:|--:|--:|---|
+| **05** · antes de curar *(rojo del instrumento)* | 9,0 dp | **6,7 dp** | **0,74** | 4,0 dp | ✗ |
+| **03** · login, correo largo | 9,0 dp | **29,0 dp** | 3,22 | 5,7 dp | ✓ |
+| **alta** · datos básicos | 9,0 dp | **29,0 dp** | 3,22 | 5,7 dp | ✓ |
+| **pago** · `CampoIdentificacion` | 9,0 dp | **13,3 dp** | 1,48 | 13,3 dp | ✓ |
 
-**Medido (`verify:contrast`, tres pares nuevos):**
+📷 `lote11-03-escala13.png` · `lote11-alta-escala13.png` · `lote11-pago-escala13.png` — recortes ampliados ×2.
 
-| par | ratio | veredicto |
-|---|---|---|
-| blanco sobre `magentaAccion` | **5,13** | pasa texto (4,5) |
-| tinta sobre `magentaAccion` | **3,29** | **falla** — es lo que el founder veía |
-| tinta sobre `magentaLuz` (CTA en oscuro) | **7,91** | pasa |
-| blanco sobre `magentaLuz` | **2,31** | **falla** |
+⚠️ **El «pago» se verificó en la PIEZA, no en la pantalla, y se dice:** `cuenta/datos-facturacion` queda en esqueletos **sin `.env.local`** —que se borra por seguridad al cerrar cada sesión— así que medí `CampoIdentificacion` en la galería. **Es la pieza donde vive «Prueba RUC»** y compone `Campo` por dentro, así que hereda la cura; pero **no es la pantalla**, y eso no es lo mismo.
 
-⚠️ **«Blanco siempre» no se puede obedecer al pie, y el número lo dice.** En **oscuro** el CTA no es magenta: es `magentaLuz`, un rosa claro. Ahí la tinta da 7,91 y el blanco 2,31 — pintarlo blanco por regla **rompería el tema oscuro**. **La regla verdadera es BLANCO SOBRE MAGENTA**, que es exactamente lo que el founder vio y lo que el slot ya hacía.
+## ③ 🔴 EL INSTRUMENTO SE CORRIGIÓ OTRA VEZ, Y LO FORZÓ UNA IMAGEN
 
-⚠️ **Y no hay token que matar:** ninguno pinta tinta sobre magenta. Lo que faltaba era **una forma de decirlo desde una pantalla**. `Texto` gana el color **`sobreCta`**, que resuelve `theme.accent.ctaTexto` — **por casa**.
+El piso del valor era **absoluto** (`≥ 14 dp`) y marcó **ROJO sobre un campo que en la captura se veía entero**: el valor era «1712345675», **sólo dígitos, sin una sola descendente**, así que su tinta ocupa menos alto. *Un umbral absoluto no sabe qué caracteres tiene el texto que mide.*
 
-> **`'inverso'` no alcanzaba, y ésa es la parte fina:** habría dado el color correcto en claro **por casualidad** y el equivocado en oscuro. Un color que acierta por coincidencia es un defecto que todavía no pasó.
+⇒ **El piso pasa a ser RELATIVO al rótulo**, que está en la misma fuente y la misma escala: el valor (15 sp) tiene que dar más tinta que el rótulo (11 sp). **En el caso roto los dos daban 6,7 dp — razón 1,00, que es justamente la firma del recorte.**
 
----
+⚠️ **Sigue sin ser perfecto** —si el rótulo tuviera descendentes y el valor no, la razón baja— **y por eso el veredicto acompaña siempre al recorte, y el recorte manda.** *Es la cuarta corrección del instrumento en esta ley: por oscuridad, por hueco, por umbral absoluto, y ahora por razón.*
 
-## ② `AbanicoAsistente` REEMPLAZA A `HojaAsistente`, que muere con lápida
+## ④ LA CLASE — el censo, con su número
 
-**Por qué la hoja estaba mal, y no es estética:**
+**72 sospechosos**, de los cuales **30 son la galería** (maquetas) y **42 producto**:
 
-> **Una hoja modal tapa la pantalla desde la que se la abrió — y el contexto de lo que se va a preguntar ES esa pantalla.** Preguntar sobre algo no puede empezar por esconderlo.
+| | sospechosos |
+|---|--:|
+| `packages/ui` (sin galería) | **31** |
+| `apps/cliente` | **11** |
 
-Segunda razón, de gesto: **una hoja pide dos manos o un pulgar que viaje**; el abanico nace donde está el dedo, a 46 px del botón que lo abrió.
+Los que más pesan: `Insignia` (4) · `hogar/index.tsx` (5) · `FichaMascotaHogar` (2) · `FichaPrestador` (2) · y uno cada uno en `Encabezado`, `CampoCodigo`, `CampoFecha`, `CitaEnVivo`, `EscaleraEstados`, `FichaVacuna`, `Hoja`, `LineaDeVida`, `PresenciaCoach`, `StepperCantidad`, `VisorFoto`, `disco-contador`, `EstadoConexion`, `Convivencia`, `Destape`, `BadgeFecha`, `AvisoTeleconsulta`, `BurbujaPendientes`, los tres `*.web` de mapas. **La lista completa con archivo y línea sale del propio gate cuando se pone en rojo.**
 
-**Lo que se reusa y lo que no.** Se reusa el **motion** del orbe —`motion.coach.escalonadoMs` al abrir, `motion.coach.cierreMs` al cerrar— y con él su regla: **se abre escalonado y se recoge de golpe**, porque *escalonar la salida hace esperar a quien ya decidió irse*. **No** se reusa el arco de pata: el sketch pide **columna**.
+**⇒ Entra como TRINQUETE con baseline 31/11, no como cero** — es lo que el encargo pedía decidir con el número. *Curar 42 sitios en una tanda sería tocarlos sin mirar ninguno en el aparato: la forma de convertir un defecto medido en cuarenta y dos defectos nuevos.*
 
-**Las tres decisiones de forma, con su razón:**
-- **La etiqueta va a la IZQUIERDA, no debajo.** Debajo, cuatro etiquetas empujan la columna a lo alto y el último atajo queda fuera del pulgar.
-- **El velo ocupa la pantalla entera.** *«Se cierra tocando fuera» sólo se cumple si «fuera» es tocable.*
-- **El botón también cierra.** Uno que sólo abre deja a quien se arrepintió buscando dónde tocar.
+## ⑤ EL GATE — `verify:alto-con-texto`
 
-«Pregúntale a Nexo» se dibuja **primero en el DOM y arriba en pantalla**, con el **último** escalón de entrada: la columna crece hacia arriba y el ojo la termina de leer ahí.
+Marca un `height:` numérico que **es un estilo de texto** (`fontSize`/`lineHeight` cerca) **o que CONTIENE texto**. **No marca**, y cada exención es una forma de estar bien:
+- **`minHeight`/`maxHeight`** — *piso, no jaula*: deja crecer, que es la cura.
+- **derivado de la escala** (`getFontScale`, `medidas.`) — sigue la preferencia, la otra cura.
+- **porcentajes** — no son dp, no se desincronizan.
 
-**El contrato de atajos viaja intacto**, como pidió la mesa: `atajos[] { glifo, texto, onPress }`.
+**Rojo probado y las DOS exenciones también:** un `{ height: 40, fontSize: 14 }` nuevo → ✗ 32 (exit 1) · el mismo con `minHeight` → ✓ 31 · el mismo derivado de `medidas.linea` → ✓ 31. Árbol restaurado.
 
-`HojaAsistente.tsx` **borrado**; queda `HojaAsistente.LAPIDA.md` con el porqué.
+☠️ **La galería queda fuera con su razón:** sus alturas son cajas de maqueta y no prometen contener el texto de nadie. *Meterlas haría que el número más grande del gate fuera el que menos importa.*
 
----
+⚠️ **Su verde dice «no nacieron altos fijos nuevos sobre texto», jamás «los que hay están bien».** Lo que prueba que un campo se lee entero es una captura con la letra agrandada — `scripts/tinta-campo.mjs`.
 
-## ③ LA GALERÍA DESTRABADA — la causa estaba a dos líneas en dos archivos
-
-**Dos `ScrollView` verticales anidados:** `apps/cliente/src/app/gallery.tsx` envolvía todo en uno para poner la lámina arriba, y `TokenGallery` trae el suyo.
-
-> **Un scroll vertical adentro de otro no reparte el gesto: se lo queda el de adentro**, que con `flex:1` mide lo que su contenido y cree que no tiene nada que desplazar.
-
-**Síntoma que producía: 360 swipes sin mover un píxel.** Lo declaré durante cuatro lotes como «el scroll se traba», sin saber por qué.
-
-**Consecuencia que lo vuelve grave, y es la que lo hace un defecto de gate y no de comodidad:**
-
-> **Ninguna pieza que viva debajo de ese punto se podía gatear.** Una galería que no se puede recorrer entera es una galería que **miente sobre lo que contiene** — y es la única superficie por la que el founder mira `packages/ui`.
-
-**Cura:** `TokenGallery` gana `encabezado?: ReactNode`, la lámina entra **adentro del único scroll**, y el `ScrollView` externo de la ruta muere. El anidamiento queda **inexpresable desde la ruta**: ya no hay dónde ponerlo.
-
-De paso muere el `lazy`/`Suspense` del lote 9, con su arco documentado: *cambié siete segundos en blanco por una espera infinita bien dibujada.*
-
----
-
-## ④ LO QUE NO HICE, DECLARADO
-
-- **El censo del punto 1 devolvió UN ofensor, no una lista.** Busqué `accent.cta` como `backgroundColor` en las dos apps y en `packages/ui`: los demás son `Boton`, que ya resolvía bien. *Un censo que devuelve uno también dice algo — dice que la pieza estaba sana y el defecto era de una pantalla.*
-- **`FilaConfirmacionVacuna` sigue dibujando su CTA a mano.** Curé su letra, no su anatomía: volverla `Boton` es cambio de pieza ajena a este lote y se declara en vez de hacerse de paso.
-
----
-
-## ⑤ LAS CAPTURAS — y una medición del instrumento antes que ninguna
-
-⚠️ **Mi propio «se trabó otra vez» era del instrumento, no del producto, y estuvo a un paso de entrar a este parte como hallazgo.** Después de la cura corrí **seis swipes encadenados de 200 ms sin pausa**: la pantalla quedó **idéntica**, y lo anoté como «queda un segundo anidamiento». **Un solo swipe de 300 ms desde la misma coordenada movió la galería.** Los flings encadenados se cancelan entre sí y el resultado se lee exactamente igual que un scroll trabado.
-
-> **El síntoma del instrumento y el del defecto son el mismo píxel.** La única diferencia es que uno se va cambiando la duración del gesto.
-
-⇒ **toda medición de scroll va con swipes espaciados**, y el control es un swipe solo.
-
-**Lo capturado, con lo que prueba:**
-
-| captura | qué prueba |
-|---|---|
-| `lote11-cta-blanco.png` | **Punto 1 en la pantalla exacta que nombró el founder** — revisión del carnet, los dos «Es correcta» magenta con **letra blanca** |
-| `lote11-carrito-raiz-y-checkout.png` | El carrito con su contador en el slot derecho de la cabecera **raíz**, y abajo la tarjeta de checkout que **no lo dibuja aunque se le pase** |
-| `lote11-confeti-en-vuelo.png` | El confeti **cayendo** — magenta, rosa, ciruela — alrededor del check de «¡Listo!». *Tomada persiguiendo la ventana de 1,5 s: la pieza no tiene loop, así que la captura es del momento o no es.* |
-| `lote11-tarjeta-producto.png` | Lote 7 sostenido: nombre a dos líneas y **«Agregar» entero**, sin recorte |
-
-🔴 **EL ABANICO NO SE CAPTURÓ, y la razón es un hallazgo que vale más que la captura: EN LA APP NO EXISTE TODAVÍA.**
-
-Medido en `apps/cliente/src/app/(tabs)/_layout.tsx:145` — el cliente monta la **variante sin abanico**:
-
-```
-<BotonAsistente onPress={() => router.push('/nexo')} etiqueta={…} />
-```
-
-**Sin `atajos`, el botón es un enlace a Nexo**, y eso es lo que hace hoy en las cinco tabs: lo toqué en el Hogar y **navegó derecho a la pantalla de Nexo**. La pieza tiene el abanico; **la app todavía no se lo pide.** ⇒ **el cableado es de C**, y es la única mitad que falta para que el founder vea lo que pidió.
-
-⚠️ **Y la mitad que es mía, declarada: la entrada de galería del abanico no la pude alcanzar.** La galería es un solo scroll muy largo y la sección vive a **~9 % del contenido**; los barridos automáticos la pasaron de largo o la app se cerró a mitad de recorrido. **No es que el scroll esté trabado** —eso quedó curado y medido arriba—: es que **recorrer a ciegas una galería sin índice no es un método**, y lo digo en vez de reportar una captura que no tomé.
-
-☠️ **Y una cura que escribí y REVERTÍ en el mismo turno, porque se apoyaba en una hipótesis y no en una medición.** Vi que la entrada montaba el botón dentro de un `View` de 220 px, razoné que su `bottom` absoluto lo empujaría fuera, y lo saqué con un comentario que lo declaraba defecto. **Después hice la cuenta: `insets.bottom + barraAlto + SEPARACION − margen` ≈ 114 px — entra en 220.** El montaje estaba bien y el que no llegaba era yo.
-
-> **Una explicación que encaja con el síntoma no es una medición del síntoma.** La mía encajaba perfecto — y el número, que costaba una resta, decía lo contrario.
-
-**Tampoco se capturó la onda con teclado arriba y abajo**: vive en las pantallas de acceso y el emulador está con sesión abierta; cerrarla es tocar una cuenta compartida con las otras pistas.
-
+## ⑥ AL BUZÓN
+- **mesa** — los 42 esperan priorización **mirando**, no por lista. El gate impide que crezcan mientras tanto.
+- **C** — 11 de los 42 son del cliente; el gate los nombra al ponerse en rojo.
