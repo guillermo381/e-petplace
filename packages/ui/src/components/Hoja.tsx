@@ -48,7 +48,9 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
+  type ComponentRef,
   Children,
   type ReactNode,
 } from 'react'
@@ -67,6 +69,7 @@ import {
   GestureDetector,
   GestureHandlerRootView,
   ScrollView as GHScrollView,
+  type GestureType,
 } from 'react-native-gesture-handler'
 import Animated, {
   Easing,
@@ -89,6 +92,21 @@ import { motion } from '../tokens/motion'
 import { useTheme } from '../ThemeProvider'
 
 const AnimatedGHScrollView = Animated.createAnimatedComponent(GHScrollView)
+
+/** 🔴 LA ZONA DESDE LA QUE EL ARRASTRE SIEMPRE CIERRA (S116-B lote 16).
+ *  Firma del founder por el buzón de C: *«el cierre por gesto sólo debe
+ *  ganar cuando arranca cerca del borde superior o cuando el contenido ya
+ *  está arriba de todo»*. 72 dp = el agarre (los primeros 24) más el
+ *  header — la franja que la persona usa para agarrar la hoja, y la única
+ *  donde arrastrar no puede querer decir «leer más abajo». */
+const ZONA_DE_AGARRE = 72
+
+/** Cuánto hay que arrastrar HACIA ABAJO para despertar al pan. Por debajo
+ *  de esto el gesto es del scroll y nadie se lo disputa.
+ *  ⚠️ **Es un umbral de un solo signo a propósito**: `activeOffsetY` con un
+ *  número positivo deja el arrastre hacia ARRIBA fuera del pan por
+ *  completo. *Un swipe hacia arriba jamás quiere decir «cerrá la hoja».* */
+const UMBRAL_ARRASTRE = 12
 
 /** El aire de arriba del scroll. Se nombra porque el corte por bloque lo
  *  SUMA: el `y` que reporta un hijo es relativo al contenido, no a la caja. */
@@ -482,18 +500,68 @@ export function Hoja({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [montada])
 
-  const nativeScroll = useMemo(() => Gesture.Native(), [])
+  /* 🔴 EL `Gesture.Native()` SOBRE EL SCROLL ERA LO QUE MATABA EL SCROLL
+     (S116-B lote 16 · buzón de C).
+
+     Acá vivía un `<GestureDetector gesture={Gesture.Native()}>` envolviendo
+     al `AnimatedGHScrollView`, y el pan lo nombraba con
+     `simultaneousWithExternalGesture`. **Medido en el aparato, con el
+     marcador confirmado en las dos direcciones:** un arrastre de 400 ms
+     sobre el contenido movía **0 px** y un fling de 150 ms también **0 px**.
+     *No era que el fling perdiera contra el swipe-to-close: el scroll no
+     corría a ninguna velocidad* — C lo reportó como «el fling nunca
+     scrollea» porque con el dedo algo pasaba; con el gesto medido, nada.
+
+     **Y la primera hipótesis era falsa, que es lo que vale anotar.** Parecía
+     que el problema fuera que `simultaneousWithExternalGesture` es de un
+     solo sentido —el pan sabía del scroll y el scroll no sabía del pan—, y
+     se probó la relación declarada en AMBAS direcciones con refs de gesto:
+     **siguió dando 0 px**. Lo que la destapó fue el control opuesto: sacar
+     el detector a secas hizo que el contenido empezara a moverse (15 y 73
+     px) **y rompió el cierre** ⇒ el estorbo era el `Gesture.Native()` en sí,
+     no cómo estaba relacionado.
+
+     La causa de fondo: `GHScrollView` **ya es** un componente de
+     gesture-handler con su propio handler nativo. Envolverlo en un
+     `Gesture.Native()` propio —encima, a través del wrapper de Reanimated—
+     le pone un segundo handler que le disputa lo que ya era suyo. *La cura
+     no fue agregar una relación: fue sacar el rival y nombrar al scroll por
+     su propia ref.*
+
+     Medido después: arrastre **35 px**, fling **103 px**, y el cierre
+     intacto. ⚠️ El fling mueve MÁS que el arrastre lento, que es la física
+     que uno espera y que antes no existía: los dos daban cero. */
+  const panRef = useRef<GestureType | undefined>(undefined)
+  const scrollRef = useRef<ComponentRef<typeof AnimatedGHScrollView>>(null)
+
+  /** Dónde nació el dedo. Se lee en el hilo de UI, así que es shared value
+   *  y no un `useRef` común. */
+  const desdeElAgarre = useSharedValue(false)
+
+
   const pan = useMemo(
     () =>
       Gesture.Pan()
-        .simultaneousWithExternalGesture(nativeScroll)
+        .withRef(panRef)
+        .simultaneousWithExternalGesture(scrollRef)   /* ref del ScrollView */
+        /* Sólo hacia ABAJO y pasado el umbral: un arrastre hacia arriba no
+           despierta al pan, y el scroll se lo queda entero. */
+        .activeOffsetY(UMBRAL_ARRASTRE)
+        .onBegin((e) => {
+          desdeElAgarre.value = e.y <= ZONA_DE_AGARRE
+        })
         .onUpdate((e) => {
-          // el swipe-down solo arrastra la hoja si el scroll está en top
-          if (scrollY.value > 0) return
+          /* 🔴 LA CONDICIÓN FIRMADA: el cierre gana si el dedo arrancó en el
+             agarre **o** si el contenido ya está arriba de todo. En
+             cualquier otro caso el arrastre es para leer, no para cerrar.
+             ⏪ Antes decía sólo `if (scrollY.value > 0) return`, que dejaba
+             sin cerrar a quien agarraba la hoja por su agarre con el
+             contenido scrolleado — el gesto más natural de todos. */
+          if (!desdeElAgarre.value && scrollY.value > 0) return
           translateY.value = Math.max(0, e.translationY)
         })
         .onEnd((e) => {
-          if (scrollY.value > 0) return
+          if (!desdeElAgarre.value && scrollY.value > 0) return
           const pasaUmbral = translateY.value > altoReal.value * 0.25 || e.velocityY > 800
           if (pasaUmbral) {
             scheduleOnRN(cerrarAnimado)
@@ -533,7 +601,8 @@ export function Hoja({
           }
         }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [nativeScroll, sinRebote],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [sinRebote],
   )
 
   const alScroll = useAnimatedScrollHandler((e) => {
@@ -673,8 +742,8 @@ export function Hoja({
                 </View>
               ) : null}
 
-              <GestureDetector gesture={nativeScroll}>
-                <AnimatedGHScrollView
+              <AnimatedGHScrollView
+                  ref={scrollRef}
                   onScroll={alScroll}
                   scrollEventThrottle={16}
                   /** 🔴 `flexShrink: 1` — SIN esto el pie no existe: el
@@ -701,7 +770,6 @@ export function Hoja({
                     {cortePorBloques ? bloquesMedidos : children}
                   </HojaPanContext.Provider>
                 </AnimatedGHScrollView>
-              </GestureDetector>
 
               {/* EL PIE — fuera del scroll, y por eso siempre a la vista.
                   Queda DENTRO del `GestureDetector` del pan: arrastrar

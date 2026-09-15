@@ -56,6 +56,16 @@
 - ⚠️ **No rebota**, y la pieza no te deja cambiarlo (`bounces` no está en `scroll`). *Una hoja que rebota al soltar se comporta como una tarjeta suelta; ésta está apoyada.*
 - ⚠️ Con `useReducedMotion` **la hoja sigue subiendo** —eso es el scroll— y lo que se apaga es el fundido. *Quitar el scroll dejaría la pantalla inservible; quitar el fundido no le saca información a nadie.*
 
+### `Hoja` — el modal del sistema
+> Es pieza vieja (S43) y **no** del rediseño, pero entra al catálogo porque **su gesto cambió en el lote 12** y C monta Hojas con formularios largos adentro.
+
+- **props:** `visible` · `onCerrar` · `titulo` · `altura` (`contenido`/`media`/`completa`) · `conCerrar` · `pie`
+- 🔴 **EL SCROLL INTERNO NO ANDABA, Y NO ERA EL FLING.** C lo reportó como *«un fling rápido nunca scrollea, un arrastre lento sí»*. **Medido en el aparato: un arrastre de 400 ms movía 0 px y un fling de 150 ms también 0 px** — *el scroll no corría a ninguna velocidad*. La causa era un `Gesture.Native()` propio envolviendo al `ScrollView`: **`GHScrollView` ya trae su handler nativo**, y ponerle otro encima le disputa lo que ya era suyo. ⇒ se sacó ese detector y el pan nombra al scroll **por su propia ref**. Después: arrastre **78 px**, fling **73 px**, cierre intacto.
+- 🔴 **EL CIERRE POR GESTO GANA EN DOS CASOS Y NO EN UNO** (firma del founder): si el dedo **arranca en el agarre** (los primeros 72 dp: agarre + header) **o** si el contenido **ya está arriba de todo**. ⏪ Antes sólo miraba lo segundo, así que **agarrar la hoja por su agarre con el contenido scrolleado no la cerraba** — el gesto más natural de todos.
+- ⚠️ **El pan sólo despierta hacia ABAJO** (`activeOffsetY` con un número positivo, sin par negativo). *Un arrastre hacia arriba jamás quiere decir «cerrá la hoja»*, así que ni siquiera compite: el scroll se lo queda entero.
+- ⚠️ **Un mapa adentro NO se come el scroll, y la capa que lo bloquea tampoco.** Medido con `PinMovible` real dentro de una Hoja: con el mapa bloqueado, un arrastre que arranca **sobre el mapa** mueve la hoja **352 px**; con el mapa desbloqueado, el gesto es del mapa —que es lo que la persona pidió al tocar «Ajustar el punto»— y la capa sigue comiendo el horizontal (**0,00 %** de píxeles del mapa cambiados). *La capa nunca fue el problema: lo era la Hoja, que no scrolleaba con nada.*
+- ⚠️ **No montes un `HojaScroll` adentro**: la Hoja ya envuelve a sus hijos en su propio scroll y quedarían dos verticales anidados — el de adentro se queda el gesto sin tener qué desplazar. El contenido va directo.
+
 ### `FilaAccionesCostura`
 - **props:** `accesos[]` (`clave` · `icono` · `palabra` · `onPress`)
 - **tokens:** `medidas.margen` · `theme.elevacion.elevada` · `theme.bg.card`
