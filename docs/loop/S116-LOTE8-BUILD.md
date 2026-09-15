@@ -122,6 +122,33 @@ el resto y la mesa no la contestó todavía.*
 
 ---
 
+## ④bis ⚠️ «ANOTADA SIN INSTALAR» NO SOBREVIVE A UN SOLO `pnpm run`
+
+**Medido en esta misma tanda, y me lo hice yo solo:** después de anotar
+`expo-crypto` en `apps/cliente/package.json`, el primer `pnpm -s verify:…` que
+corrí **resolvió la dependencia y reescribió `pnpm-lock.yaml`** — pnpm v11
+verifica las dependencias antes de ejecutar un script y, si faltan, las instala.
+
+Reproducido a propósito para no acusar sin medir: árbol limpio →
+`pnpm -s verify:gates-existen` → `M pnpm-lock.yaml`, +12 líneas con
+`expo-crypto@57.0.3`.
+
+⇒ **la rama se entrega con el lockfile SIN tocar**, que es el estado que la
+orden pidió, **pero cualquiera que corra un script de pnpm acá lo va a volver a
+mover.** Dos consecuencias prácticas:
+- Quien trabaje en esta rama corre los gates con `node scripts/…` o restaura el
+  lockfile antes de commitear.
+- **Es un argumento de tiempo, no de forma:** mientras la anotación esté sin
+  resolver, `pnpm install --frozen-lockfile` falla para toda pista que abra un
+  worktree nuevo. *Cuanto antes la mesa decida el tren, menos gente lo paga.*
+
+*Lo interesante del caso no es el lockfile: es que **una medición publicada puede
+quedar falsa por un efecto colateral de un comando posterior del mismo autor**.
+La del punto 5a («`--frozen-lockfile` falla») era cierta al escribirla y dejó de
+serlo diez minutos después, sin que nada avisara.*
+
+---
+
 ## ⑤ EL ORDEN
 
 1. **La mesa contesta: ¿APK interno para F&F, o tienda?** Todo lo demás depende.
