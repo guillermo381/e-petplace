@@ -24,11 +24,15 @@
   fondo={<Cabecera variante="raiz" presentacion="fondo" titulo={…} />}
   costura={<FilaAccionesCostura accesos={[…]} />}
   arranque={150}
-  pie={<Boton … />}            {/* o <OndaAcceso …/> con materialDelPie="sangrado" */}
+  pie={<Boton … />}
+  scroll={{ contentContainerStyle: { paddingBottom: ALTO_ONDA_ACCESO } }}
 >
   {tu contenido}
 </HojaContenido>
+<OndaAcceso frase={…} lado="der" />   {/* HERMANA, no `pie`: es absoluta al piso */}
 ```
+
+> ⏪ **La onda salió del slot `pie` (lote 13).** Ahora se ancla al piso físico de la pantalla, así que **no puede vivir en un slot que mide su alto para reservarlo** — el pie mediría cero. Se monta **como hermana**, y el lugar lo reserva `ALTO_ONDA_ACCESO` en el `paddingBottom` del scroll. ⚠️ **Y se monta como hija directa de la raíz de la pantalla, sin padding horizontal:** un absoluto se ancla al padding box de su padre, y un padre con aire lateral devuelve el margen que la pieza vino a matar.
 
 ### 🔴 EL PIE FIJO — CUÁL SE USA CUÁNDO (S116-B, y **no son dos alternativas**)
 
@@ -47,6 +51,7 @@
 - 🔴 **La hoja CRECE HASTA EL PIE siempre** (`flexGrow` en la hoja **y** en el `contentContainer`). ⏪ Con `minHeight: 400` sin `flexGrow`, el contenido corto dejaba asomar el ciruela entre la hoja y el pie: *un mínimo garantiza que no sea más chica, no que llegue abajo*. **El defecto sólo existe cuando sobra pantalla — justo la pantalla con la que nadie prueba.**
 - **tokens:** `radius.cabeceraV5` · `theme.bg.base` (el lienzo) · `theme.accent.gradient`
 - **consumidores:** 6
+- 🔴 **LA HOJA ES OPACA, COLOR LIENZO, SIEMPRE (lote 13).** El founder vio *el wordmark del fondo a través de la hoja, bajo «Email»*. ⚠️ **El color nunca fue el problema y por eso no alcanzaba mirarlo:** los tres temas traen `bg.base` sin alfa. **Lo que dejaba pasar el fondo era el ORDEN DE PINTADO en Android** — una `elevation` de cualquier cosa montada en el fondo sube su capa por encima de sus hermanos. *Un fondo opaco tapado por un hermano que se pinta después sigue siendo opaco y se ve transparente igual.* ⇒ la cura son **dos `zIndex` explícitos** (fondo `0`, hoja `1`), no un color.
 - 🔴 **EL DEGRADADO LO PINTA ESTA PIEZA, no la `Cabecera`** — y no es un detalle de implementación: al scrollear *«el fondo se queda y su CONTENIDO se desvanece»*. **Si el degradado viniera dentro del nodo que se desvanece, se apagaría con él** y la pantalla quedaría blanca detrás de la hoja.
 - ⚠️ **El desvanecido se acopla al SCROLL, no a un `withTiming`:** la opacidad es una función de **dónde está la hoja**. *Una transición temporal se desincroniza del dedo en cuanto alguien scrollea rápido, y el fondo se apaga cuando ya no lo tapa nada.*
 - ⚠️ **No rebota**, y la pieza no te deja cambiarlo (`bounces` no está en `scroll`). *Una hoja que rebota al soltar se comporta como una tarjeta suelta; ésta está apoyada.*
@@ -65,12 +70,15 @@
 - **props:** `frase` (dos líneas) · `lado` (`izq`|`der`) · `especies?`
 - **tokens:** `palette.magentaAccion` · `motion.v5.personajePrimeraMs` · `motion.v5.personajeCadaMs` · `motion.v5.personajeFundidoMs` · `spacing`
 - **consumidores:** 2 · su lugar es el pie del acceso y del alta
-- **exporta:** `ALTO_ONDA_ACCESO` — quien la monte al pie de una hoja que scrollea **tiene que reservarle el lugar**, igual que con los dos altos de `Cabecera`.
+- **exporta:** `ALTO_ONDA_ACCESO` — 🔴 **la única forma que tiene el contenido de no quedar debajo del magenta**, porque la pieza ya no ocupa lugar. ⚠️ Es la parte **FIJA y no incluye el inset** (mismo trato que `AIRE_RAIZ`): lo dibujado es `ALTO_ONDA_ACCESO + insets.bottom`, y *un token que se llevara el inset adentro sería falso en cuanto cambie el aparato*.
 - 🔴 **La ola es un `Path`, no un `borderRadius`:** un radio da un DOMO —simétrico, una sola inflexión— y *una ola tiene dos*. El `viewBox` de 100 con `preserveAspectRatio="none"` la estira con la pantalla en vez de repetirla.
 - 🔴 **La frase llega YA PARTIDA en dos líneas.** Dónde corta es una decisión de redacción; un `numberOfLines={2}` la tomaría por su cuenta con el ancho de cada teléfono.
-- 🔴 **El teclado: alto constante + fundido + DEJAR DE PINTARSE.** Las dos primeras no alcanzaban — C midió **píxeles magenta a y≈1505-1510 con el teclado arriba**. *Una opacidad que llega a 0 no deja nada visible: o el fundido no corrió, o lo que se ve no es esta pieza.* La tercera cierra las dos puertas: **al terminar el fundido la onda deja de dibujarse**, y lo que no está dibujado no deja píxeles pase lo que pase con el listener. ⚠️ **Conserva su alto siempre, pintada o no:** si además se encogiera, el contenido de arriba saltaría — y *«no salta»* es de la misma orden que *«desaparece»*.
+- 🔴 **GEOMETRÍA DICTADA (lote 13, recorrido 4 — cuarta vez que se pide y la primera con números):** `position:'absolute'` · `bottom:0` · `left:0` · **ancho = el de la PANTALLA** (`useWindowDimensions`) · **cero margen propio** · **cero radio abajo** · el magenta **por debajo de la barra de teclas de Android**, hasta el piso físico.
+  > **Antes era un bloque en el flujo, así que el margen y el radio se los ponía quien la montaba y ella no tenía cómo impedirlo.** *Una pieza que pide «sin márgenes» en su documentación está pidiendo que el consumidor se acuerde.* Absoluta y anclada al piso, **no hay dónde ponerle un margen**.
+  ⚠️ **Y la galería era parte del defecto:** sus tres montajes la envolvían en un `View` con `borderRadius: radius.lg` — *una galería que envuelve la pieza en algo que la pieza no tiene no la muestra: la disfraza.*
+- 🔴 **El teclado: fundido + DESMONTE.** ⏪ Antes dejaba un hueco de su alto para que el contenido de arriba no saltara; **siendo absoluta no hay nada que saltar**, así que devuelve **`null`**. *«Cero magenta» se cumple mejor no existiendo que siendo transparente* — y el hueco era la última forma en que un nodo suyo seguía en pantalla.
 - ⚠️ **Absorbe `insets.bottom` como padding, no como margen:** el magenta sangra hasta el filo y sólo el contenido se corre (Ley 8, precedente `Hoja`/`PantallaConPie`).
-- **Su lugar es el `pie` de `HojaContenido` con `materialDelPie="sangrado"`** (ver §⓪).
+- **Su lugar es HERMANA de `HojaContenido`, no su `pie`** (ver §⓪).
 - 🔴 **EL MAGENTA VIVE EN LA RAÍZ** (lote 8). ⏪ Lo ponían la ola y la banda, cada una en su caja: **todo lo que quedara entre ellas o alrededor salía lienzo** —el SVG a 100 % deja subpíxeles en los cantos, y cualquier redondeo abre una línea abajo—. *Un color que se compone de dos piezas tiene tantas junturas como piezas.* Con el fondo en la raíz, las junturas **no pueden existir**.
 - ⚠️ **El inset es el CRUDO, no el derivado** — el derivado mide *cuánto de la barra queda debajo del contenedor*, correcto para un pie y **equivocado para una franja que tiene que llegar al borde físico**. *La misma lección que el asistente ya había cobrado.*
 
@@ -262,6 +270,20 @@ La superficie que agrupa.
 - **tokens:** `radius` · `spacing` · `motion` · `typography` · `theme.accent` · `theme.bg`
 - **consumidores:** 50 · 90
 - ⚠️ **El contorno transparente murió como acción de fila.** Información despliega; acción lleva. El glifo va en círculo rosa tinte.
+
+### EL CONTADOR — *un disco, dos portadores* (`disco-contador`)
+🔴 **Lote 13, orden del founder:** *«el contador es un círculo magenta con el número adentro en blanco, PJS 700, pegado arriba a la derecha del glifo; **la pata muere ahí**. Con cero, no se dibuja. **Misma pieza para campana y carrito**.»*
+- **dónde vive:** `components/disco-contador.tsx` — **geometría compartida, no una pieza exportada** (como `grilla-de-dos` o `caja-de-campo`). *Exportarla obligaría a darle galería a algo que nunca se ve solo.*
+- **quiénes lo portan:** `Badge` (la campana) · `GlifoConContador` (el carrito). **Son dos envoltorios con contratos distintos** —uno recibe el ícono armado, el otro el nombre del glifo— y *«misma pieza» se cumple en el DISCO, que es lo que se ve.*
+- **color:** `palette.magentaAccion` + `palette.white`, **fijos**. ⏪ Antes cada portador usaba `theme.accent.control` sobre `theme.bg.base`: un par medido **y distinto en cada casa** — en oscuro el «círculo magenta con número blanco» salía ciruela con número lienzo. *Un contador que cambia de color con el tema deja de ser la misma señal.* **Medido: blanco sobre magenta 5,13** (pasa el 4,5 de texto; el par ya está en `verify:contrast`).
+- ☠️ **LA PATA MURIÓ**, y lo que se paga queda escrito: la huella decía la novedad **por presencia y jamás con un número**, para no invitar a vaciarla (`MODELO_LOYALTY` §3). *Esa razón sigue siendo buena; el founder decidió otra cosa — se ejecuta y se anota que la mecánica de «bajarlo a cero» vuelve a estar a la vista.*
+- ⚠️ **`Badge` conserva `forma` y `superficie` INERTES**, con fecha de muerte: se van cuando su último consumidor migre. *Romperle el typecheck a la app a mitad de sesión cuesta más que dos props muertas declaradas.*
+
+### LA REJILLA PAREJA — cómo se estira una fila de dos
+🔴 **Lote 13:** *«dos tarjetas de la misma fila miden lo mismo y el botón «Agregar» va pegado al borde inferior en las dos, alineados»*.
+- **La cadena de estiramiento tenía DOS eslabones cortados**, y ninguno estaba donde se lo buscaba: ① el `Animated.View` de `usePresionado` **dentro de `TarjetaProducto`** medía su contenido, así que el `flex: 1` de su `Pressable` no tenía contra qué crecer — *lo pone la primitiva de presión, no el autor de la tarjeta, y por eso es invisible al leer la pieza*; ② `Entrada`, que envuelve a la tarjeta en la grilla, también medía contenido.
+- **`Entrada` gana `estira?: boolean`** (default `false`). ⚠️ **No se le puso `flex: 1` a todos:** tiene **64 consumidores** y `flexGrow` reparte espacio libre **allá donde lo haya** — encenderlo para todos cambiaría pantallas que hoy están bien, en silencio y sin que ningún gate lo vea. *La capacidad se ofrece; quien la necesita la pide.*
+- **Pedido a C, una palabra:** `<Entrada estira orden={…}>` en `grillaProductos` de la despensa.
 
 ### `Insignia` — *el estado*
 Verde al día · ámbar pendiente · rosa informativo.

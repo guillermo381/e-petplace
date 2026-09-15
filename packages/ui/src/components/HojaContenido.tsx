@@ -133,10 +133,31 @@ export function HojaContenido({ fondo, costura, arranque, children, scroll, pie,
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
 
+      {/* 🔴 ACÁ REINSERTÓ B EL BLOQUE DEL FONDO EN EL LOTE 13, y se retira en
+          el merge — **no porque su diagnóstico esté mal, sino porque el bloque
+          ya vive más abajo** (la cura de C, `D-1113`): tomarlo habría montado
+          el slot `fondo` DOS VECES.
+
+          **SU HALLAZGO SE CONSERVA Y ES BUENO:** el founder vio *el wordmark del
+          fondo a través de la hoja, bajo «Email»*, y la causa que B midió es
+          orden de pintado — *en Android una `elevation` de cualquier cosa
+          montada en el fondo sube su capa por encima de sus hermanos*. **La
+          mitad que sobrevive es el `zIndex: 1` de la hoja**, unas líneas abajo.
+
+          ⚠️ **LO QUE QUEDA ABIERTO, y no se resuelve leyendo código (`D-1118`):**
+          el par de B era `zIndex: 0` acá + `zIndex: 1` en la hoja, con el fondo
+          ANTES; la cura de C necesita el fondo DESPUÉS para ganar el toque. **Si
+          el `zIndex` de Android reordena también el despacho de toques, la
+          flecha de volver vuelve a morir** — y eso lo dice un aparato, no una
+          lectura. Va a B con la pregunta exacta. */}
       {/* ③ LA HOJA. Sube con el scroll y desliza sobre el fondo: no la
           movemos nosotros —eso duplicaría el scroll— la mueve su propio
           `paddingTop`, que es contenido del ScrollView. */}
       <Animated.ScrollView
+        /* La otra mitad del par: la hoja va SIEMPRE por encima del fondo.
+           *Sin esto, el orden depende de que nadie monte en el fondo algo con
+           sombra — y eso es una condición que ningún gate mira.* */
+        style={{ zIndex: 1 }}
         onScroll={alScrollear}
         scrollEventThrottle={16}
         bounces={false}
@@ -169,8 +190,15 @@ export function HojaContenido({ fondo, costura, arranque, children, scroll, pie,
                la misma cura. */
             flexGrow: 1,
             minHeight: 400,
-            /* El LIENZO de la letra §2 (`#F8F2F6`), que es el slot
-               `bg.base` — la hoja es del color del lienzo, no blanca. */
+            /* 🔴 **LA HOJA ES OPACA, COLOR LIENZO, SIEMPRE** (orden del
+               founder, lote 13). El LIENZO de la letra §2 (`#F8F2F6`) es el
+               slot `bg.base` — la hoja es del color del lienzo, no blanca.
+               ⚠️ **El color nunca fue el problema y por eso no alcanzaba
+               mirarlo:** los tres temas traen `bg.base` sin alfa. Lo que
+               dejaba pasar el fondo era el ORDEN DE PINTADO en Android, que
+               se cura arriba con los dos `zIndex`. *Un fondo opaco tapado por
+               un hermano que se pinta después sigue siendo opaco y se ve
+               transparente igual.* */
             backgroundColor: theme.bg.base,
             borderTopLeftRadius: radius.cabeceraV5,
             borderTopRightRadius: radius.cabeceraV5,
