@@ -16,8 +16,7 @@
  * misma cosa está cuatro veces y ninguna igual.*
  *
  * ── QUÉ CUENTA, y por qué así ──────────────────────────────────────────────
- * Los `.tsx` de `apps/cliente/src/components`, **recursivo** (hoy: 45 en la
- * raíz + 17 en `alta/`, `reserva/`, `postventa/` y `nexo/`).
+ * Los `.tsx` de **`apps/cliente/src`, recursivo, MENOS `src/app`**.
  * **Los `.ts` NO cuentan** —`foto-encuadre.ts` y `alta/tipos.ts`— porque son
  * helpers y tipos, no piezas: contarlos haría subir el número por trabajo que
  * este gate no vino a frenar.
@@ -29,6 +28,26 @@
  * idéntico, catálogo igual de gordo.* Ese caso sale como AVISO, no como rojo:
  * el trinquete es sobre el número, y ensancharlo a «ningún nombre nuevo» lo
  * volvería ruidoso con cada renombre legítimo.
+ *
+ * ── ⊳ ENSANCHE S116-A LOTE 8 · POR QUÉ `src/` MENOS LAS RUTAS ──────────────
+ * ⏪ Miraba **sólo `src/components`**, así que una pieza guardada en cualquier
+ * otra carpeta —`src/lib`, `src/features`, donde sea— **no existía para el
+ * trinquete**. *La vía barata no era dibujar en la pantalla: era guardar el
+ * dibujo un directorio al costado.*
+ *
+ * 🔴 **Y `src/app` se excluye A PROPÓSITO, que es la mitad difícil del
+ * ensanche:** ahí viven **113 rutas**, y una ruta NO es una pieza del catálogo.
+ * Contarlas subiría el número de 61 a 174 y el trinquete pasaría a medir
+ * *«cuántas pantallas tiene la app»* — un número que sube cuando el producto
+ * crece, o sea un gate que se pone rojo por trabajo legítimo. **Un gate
+ * ruidoso se apaga.**
+ * ⇒ el corpus es *«todo lo que no es una ruta»*, y la exclusión va **por
+ * carpeta y declarada**, no por heurística sobre el contenido del archivo.
+ *
+ * **Lo que apareció al ensancharlo: NADA.** Medido: los 174 `.tsx` del cliente
+ * están **todos** en `app/` (113) o en `components/` (61); cero en cualquier
+ * otro lado. *El valor no es un hallazgo: es que el hueco deje de existir* — y
+ * se dice así en vez de reportar un ensanche como si hubiera encontrado algo.
  *
  * ── LO QUE NO MIDE, declarado ──────────────────────────────────────────────
  * **No sabe si una pieza local está justificada.** Una pantalla puede tener su
@@ -43,7 +62,11 @@ import { join, relative } from 'node:path'
 
 const di = (s) => process.stdout.write(s + '\n')
 const RAIZ = process.cwd()
-const DIR = join(RAIZ, 'apps/cliente/src/components')
+const DIR = join(RAIZ, 'apps/cliente/src')
+/** Las RUTAS no son piezas. Se excluye por carpeta y declarado (ver el bloque
+ *  del ensanche): contarlas convertiría el trinquete en un contador de
+ *  pantallas, que sube cuando el producto crece. */
+const RUTAS = 'app'
 const BASE_FILE = join(RAIZ, 'scripts/.baseline-piezas-locales.json')
 
 function piezas(dir, out = []) {
@@ -51,18 +74,24 @@ function piezas(dir, out = []) {
   for (const e of readdirSync(dir)) {
     if (e === 'node_modules' || e.startsWith('.')) continue
     const p = join(dir, e)
-    if (statSync(p).isDirectory()) piezas(p, out)
+    if (statSync(p).isDirectory()) {
+      if (relative(DIR, p) === RUTAS) continue
+      piezas(p, out)
+    }
     else if (e.endsWith('.tsx')) out.push(relative(DIR, p))
   }
   return out
 }
 
-if (!existsSync(DIR)) { di('ROJO · no existe apps/cliente/src/components — no pude medir.'); process.exit(2) }
+if (!existsSync(DIR)) { di('ROJO · no existe apps/cliente/src — no pude medir.'); process.exit(2) }
 const hoy = piezas(DIR).sort()
 if (hoy.length === 0) { di('ROJO · cero .tsx en el corpus — no pude medir.'); process.exit(2) }
 
 /* ══ AUTO-PRUEBA: si no ve una pieza en subcarpeta, su número miente (L-459) ══ */
 if (!hoy.some((f) => f.includes('/'))) { di('ROJO · auto-prueba: no ve piezas en subcarpetas.'); process.exit(2) }
+/* AUTO-PRUEBA DEL ENSANCHE: si las rutas se colaran, el número saltaría de 61 a
+   174 y el trinquete mediría otra cosa. Su rojo es barato y su silencio caro. */
+if (hoy.some((f) => f === RUTAS || f.startsWith(RUTAS + '/'))) { di('ROJO · auto-prueba: contó una RUTA como pieza.'); process.exit(2) }
 if (hoy.some((f) => f.endsWith('.ts') && !f.endsWith('.tsx'))) { di('ROJO · auto-prueba: contó un .ts como pieza.'); process.exit(2) }
 
 const base = existsSync(BASE_FILE) ? JSON.parse(readFileSync(BASE_FILE, 'utf8')) : null
@@ -75,7 +104,7 @@ const antes = new Set(base.piezas || [])
 const nuevas = hoy.filter((f) => !antes.has(f))
 const idas = [...antes].filter((f) => !hoy.includes(f))
 
-di(`verify:piezas-locales · ${hoy.length} pieza(s) local(es) en apps/cliente/src/components · baseline ${base.baseline} SOLO-BAJA`)
+di(`verify:piezas-locales · ${hoy.length} pieza(s) local(es) en apps/cliente/src (sin las rutas) · baseline ${base.baseline} SOLO-BAJA`)
 
 if (hoy.length > base.baseline) {
   di('')
@@ -83,7 +112,7 @@ if (hoy.length > base.baseline) {
   di('')
   if (nuevas.length) {
     di('  Pieza(s) nueva(s):')
-    for (const f of nuevas) di(`   · apps/cliente/src/components/${f}`)
+    for (const f of nuevas) di(`   · apps/cliente/src/${f}`)
   }
   di('')
   di('  El rediseño se hace en la PIEZA, no en la pantalla (LETRA_REDISENO_S116 §3).')

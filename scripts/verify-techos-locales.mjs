@@ -20,7 +20,8 @@
  * > no frena el techo — frena la pantalla.*
  *
  * ── QUÉ CUENTA COMO TECHO LOCAL ────────────────────────────────────────────
- * Un `.tsx` bajo `apps/cliente/src/app` que monta **`LinearGradient`**. Es el
+ * Un `.tsx` bajo **`apps/cliente/src`** —todo, no sólo las rutas— que monta
+ * **`LinearGradient`**. Es el
  * marcador honesto: la banda de la casa ES un degradado, así que **cualquiera
  * que lo dibuje está componiendo un techo** — y quien use `Cabecera` no
  * necesita importarlo nunca.
@@ -38,21 +39,38 @@
  * `Cabecera` que no tienen.* Van exentas por nombre: una exención nombrada se
  * discute; una regla más laxa se olvida.
  *
+ * ── ⊳ ENSANCHE S116-A LOTE 8 · EL PUNTO CIEGO QUE TENÍA ────────────────────
+ * ⏪ Miraba **sólo `src/app`**, y en este mismo cliente hay **61 `.tsx` en
+ * `src/components`** que el gate no veía — entre ellos la pantalla del pago.
+ * *Una pantalla no deja de ser una pantalla por vivir en otra carpeta*, y el
+ * trinquete se podía esquivar sin querer: bastaba componer la banda en un
+ * componente y montarlo desde la ruta.
+ *
+ * **Lo que apareció al ensancharlo: NADA.** Medido — cero `LinearGradient` en
+ * `src/components`, así que el baseline se queda en 0. *El valor de este
+ * ensanche no es un hallazgo: es que el hueco deje de existir.* Y se dice
+ * así, porque un ensanche que no encuentra nada y se reporta como si hubiera
+ * encontrado algo es la clase de dato que después nadie puede reproducir.
+ *
+ * ⚠️ **Sigue sin medir el prestador**, a propósito: su rediseño no es de esta
+ * letra.
+ *
  * SALIDAS: 0 verde · 1 rojo (subió) · 2 NO CONCLUYENTE (no pudo medir).
  */
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
 
 const RAIZ = process.cwd()
-const APP = join(RAIZ, 'apps/cliente/src/app')
+const APP = join(RAIZ, 'apps/cliente/src')
 const BASE_FILE = join(RAIZ, 'scripts/.baseline-techos-locales.json')
 const di = (t = '') => console.log(t)
 
-/** Láminas de marca a sangre: el degradado ES la pantalla (ver la cabecera). */
-const EXENTAS = new Set(['index.tsx', 'bienvenida.tsx'])
+/** Láminas de marca a sangre: el degradado ES la pantalla (ver la cabecera).
+ *  Van con su carpeta desde el ensanche: el corpus ya no es `src/app`. */
+const EXENTAS = new Set(['app/index.tsx', 'app/bienvenida.tsx'])
 
 if (!existsSync(APP)) {
-  di('⚠️  verify:techos-locales — NO CONCLUYENTE: no existe apps/cliente/src/app')
+  di('⚠️  verify:techos-locales — NO CONCLUYENTE: no existe apps/cliente/src')
   process.exit(2)
 }
 
@@ -83,7 +101,7 @@ const antes = new Set(base.techos || [])
 const nuevos = hoy.filter((f) => !antes.has(f))
 const idos = [...antes].filter((f) => !hoy.includes(f))
 
-di(`verify:techos-locales · ${hoy.length} techo(s) local(es) en apps/cliente/src/app · baseline ${base.baseline} SOLO-BAJA`)
+di(`verify:techos-locales · ${hoy.length} techo(s) local(es) en apps/cliente/src (rutas Y piezas) · baseline ${base.baseline} SOLO-BAJA`)
 for (const f of hoy) di(`   · ${f}`)
 
 if (hoy.length > base.baseline) {
