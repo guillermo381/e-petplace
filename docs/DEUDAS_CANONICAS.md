@@ -35350,7 +35350,7 @@ El bloque del fondo pasa **después** del `ScrollView`, con **`pointerEvents="bo
 
 ---
 
-## `D-1114` 🟡 — LOS CONTEOS DEL CATÁLOGO SE VENCEN **EN CADA MERGE**, y ninguna pista puede verlo sola
+## `D-1114` ☠️ — LOS CONTEOS DEL CATÁLOGO SE VENCEN **EN CADA MERGE**, y ninguna pista puede verlo sola
 
 **Estado:** ABIERTA · **FIRMADA POR LA MESA** (14-sep-2026) · **Dueño: B**, próxima tanda · **la midió A**, que es quien pagaba el costo en cada tanda.
 **Origen:** A, tras curarlo **dos veces seguidas** en dos merges consecutivos (14-sep-2026).
@@ -35389,7 +35389,13 @@ El bloque del fondo pasa **después** del `ScrollView`, con **`pointerEvents="bo
 
 ⚠️ **Y un hallazgo de paso que no es de esta ficha, para B:** `EsperaLarga` tiene **11** consumidores y `EsperaDeMarca` **6** — *dos piezas de espera conviviendo*. Puede ser correcto (esperas de distinta duración) o puede ser una mudanza a medias; **A no lo decide**.
 
-**☠️ MUERTE:** cuando el catálogo no publique un solo conteo y el gate los diga en su salida — verificado por un merge de B+C que no obligue a nadie a editar el documento.
+### ✅ EJECUTADA POR B (lote 14) — cero conteos publicados
+
+**Medido: `- **consumidores:** N` aparece ahora en el catálogo CERO veces.** En su lugar, la puerta del documento declara el comando y **por qué** — citando los dos precedentes de la casa: *el contador de `packages/ui` decía **53 cuando eran 171**, el de wrappers **26 cuando eran 122***.
+
+**Y B resolvió la advertencia que esta ficha le dejó** —*«el catálogo se lee de un vistazo, y "corré este comando" no reemplaza a un número que está ahí»*—: **el gate sigue midiendo y dice el número en su salida**, que es donde un derivado no envejece. Las entradas que necesitan decir algo sobre su uso lo dicen **en prosa y con su condición** (*«todavía sin consumidores en las apps … deja de estar sin nadie el día que el carrito migre»*), que es una afirmación que no caduca sola.
+
+**☠️ MUERTE — MUERTA. Esta tanda fue la primera en siete que no obligó a nadie a editar conteos a mano.**
 
 ---
 
@@ -35493,7 +35499,7 @@ Se toca «vacuna» → navega a `/carnet` **con el abanico abierto detrás**; al
 
 ---
 
-## `D-1118` 🟠 — EL `zIndex` DE B Y EL ORDEN DE C SE PISAN EN `HojaContenido`, y quién gana lo dice un aparato
+## `D-1118` ☠️ — EL `zIndex` DE B Y EL ORDEN DE C SE PISAN EN `HojaContenido`, y quién gana lo dice un aparato
 
 **Estado:** ABIERTA · **Dueño: B** (`HojaContenido` es suyo) · **A resolvió el merge sin decidir el fondo.**
 **Origen:** A, mergeando el lote 13 de B sobre la cura de C (14-sep-2026).
@@ -35521,7 +35527,23 @@ Se toca «vacuna» → navega a `/carnet` **con el abanico abierto detrás**; al
 
 ⚠️ **Y hay una lectura cómoda que conviene descartar de entrada:** *«con el fondo después ya pinta arriba, así que el problema de B no existe»* — **es falso en la dirección peligrosa**: el fondo DESPUÉS pinta encima, que es exactamente el síntoma que el founder vio. Lo que hoy lo tapa es que `estiloFondo` lo lleva a opacidad 0 justo cuando la hoja llega — **y eso depende del scroll, no del orden.** *Con la hoja quieta y algo opaco en el fondo, el síntoma vuelve.*
 
-**☠️ MUERTE:** cuando las dos cosas estén verdes EN APARATO a la vez — la flecha de 03 vuelve y el wordmark no atraviesa la hoja — con la forma que B elija.
+### ✅ CONTESTADA POR EL APARATO Y CURADA EL MISMO DÍA — y las dos mitades del proceso valen
+
+**① C midió, y la respuesta fue la peor de las dos:** `origin/main @ ba205d8d`, emulador, bundle fresco. Toque en el centro del nodo `Volver` de 03 y de 05, **cinco lecturas del árbol a 1,2 s: la pantalla no se mueve.** Repetido con dos formas de toque. **El «atrás» de Android sí funciona** ⇒ la navegación está sana y **lo que no llega es el toque**. ⇒ **el `zIndex` de Android reordena también el despacho.**
+
+🔴 **Y C dejó un hallazgo de instrumento que vale más que el veredicto:** *el árbol de accesibilidad **NO refleja el `zIndex`*** — el botón aparece **último, o sea arriba**, y el toque igual no le llega. **Un volcado que muestra el nodo correcto arriba no prueba que ese nodo reciba el toque.** *Es exactamente la clase de instrumento que da verde por la razón equivocada, y sólo se descubre tocando.*
+
+**② B curó 13 minutos después, y no eligió un lado: mató la disyuntiva.**
+
+| | antes | ahora |
+|---|---|---|
+| orden | el par `zIndex` 0/1, fondo ANTES | **muere el par**; el fondo queda DESPUÉS (el orden de C) |
+| toque | `box-none` fijo | **`pointerEvents={fondoALaVista ? 'box-none' : 'none'}`** — *el toque se apaga con la opacidad* |
+| pintado | `zIndex: 1` en la hoja | **recorte del fondo a su zona** (`height: arranque` + `overflow: 'hidden'`) |
+
+⇒ **«lo que no se ve, no se toca»**, que es la regla que faltaba: la mitad del toque y la mitad del pintado dejan de competir porque **pasan a depender del mismo hecho** —si el fondo está a la vista— en vez de dos mecanismos que se pisan. *La cura no fue elegir entre las dos curas: fue encontrar el hecho del que las dos podían colgar.*
+
+**☠️ MUERTE — MUERTA**, con capturas de B en el aparato (`lote14-d1118-flecha-vuelve.png` · `lote14-d1118-hoja-opaca.png`).
 
 ---
 
@@ -35576,7 +35598,7 @@ Y el costo es el de la casa: **`L-223` dice que el peaje está en la PETICIÓN, 
 
 ---
 
-## `D-1121` 🟢 — `HuellaDeLlegada` QUEDA CON **CERO CONSUMIDORES**: lápida de B
+## `D-1121` ☠️ — `HuellaDeLlegada` QUEDA CON **CERO CONSUMIDORES**: lápida de B
 
 **Estado:** ABIERTA · **Dueño: B** (`brand/RitualDeEntrada.tsx` es suyo) · **próxima tanda** · **la declaró C**, que la dejó sin consumidores y no la mató.
 **Origen:** el censo de C en el lote 10 (14-sep-2026), verificado por A.
@@ -35589,13 +35611,77 @@ Y el costo es el de la casa: **`L-223` dice que el peaje está en la PETICIÓN, 
 
 ⚠️ **Y lo que la lápida tiene que decir, porque no es obvio:** su motivo —el de `EsperaDeMarca`— **sigue vivo y en uso**. Lo que muere es *este* uso (la celebración de una vez), no el gesto. *Una lápida que no distingue las dos cosas hace que el próximo no reuse el motivo por creerlo retirado.*
 
+### ✅ MUERTA (B, lote 14) — y se llevó una pieza más por Ley 37
+
+**El cuerpo salió y la lápida quedó en su lugar** (`brand/RitualDeEntrada.tsx`). **Y al retirarla apareció `LLEGADA`, que era su única lectora**: murió con ella. *Una pieza sin consumidores casi nunca está sola — arrastra la constante, el token o el helper que existían sólo para ella, y ésos no aparecen en ningún censo de consumidores porque no son piezas.*
+
+**☠️ MUERTE — MUERTA.**
+
+---
+
+## `D-1122` 🟠 — LA MARCA DE AGUA DE LOS PAPELES TIENE QUE SER EL **LOGO COMPLETO**, no el isotipo — medido, con una opción que rinde
+
+**Estado:** ABIERTA — **medida, NO cableada** · **Dueño: A** · **espera que el founder la vea.**
+**Origen:** recorrido 5 del founder (14-sep-2026): rechaza el isotipo derivado en los seis papeles, igual que lo rechazó en pantalla. **Pide el logo completo: la nariz con «e-PetPlace» debajo y su bajada.**
+
+> **No se cableó nada.** Lo que sigue es la medición y una recomendación; *lo que hoy está cableado ya tiene su veredicto —el founder dijo que no— y lo que venga tiene que pasar por su ojo antes de entrar.*
+
+### ① ¿Rinde el logo como vector consumible por `pdf-lib`? **NO**, y con estos números
+
+`packages/ui/assets/marca/logo.svg`, medido:
+
+| | logo | isotipo (el que ya falló) |
+|---|--:|--:|
+| `<path>` | **1.310** | 268 |
+| `<clipPath>` | **1.090** | 229 |
+| con `transform` | 197 | 38 |
+| colores de `fill` | **133** | 28 |
+| caracteres de todos los `d` | **408.486** | 70.889 |
+
+**`drawSvgPath` toma UN `d` con UN relleno.** Aplanado a un solo path —1.113 subpaths, 271.072 caracteres— **salen dos rectángulos grises**, igual que con el isotipo: *el dibujo no vive en los paths, vive en los 1.090 clips.*
+
+⚠️ **Y `<text>` = 0**: el texto **ya está trazado a paths**. Eso contesta la duda que B había dejado abierta (*«es probable pero no está probado»*) — **pero no ayuda**: son paths de un trazado de bitmap, no letras vectoriales limpias.
+
+### ② `embedPng` — y acá hay una salida, con su número
+
+| fuente | píxeles | **dpi a 380 pt de ancho** |
+|---|--:|--:|
+| `logo@3x.png` (lo que existe hoy) | 600 | **113,7** |
+| **rasterizando el propio `logo.svg`** | **1.706** | **323,2** |
+
+🔴 **La clave, y es lo que da vuelta la opción ②:** el SVG es un **trazado vectorial** — aunque haya nacido de un bitmap, **sus paths son matemáticos**, así que rasterizarlo a 1.706 px da una imagen **nítida**, no una ampliación. *El techo de 113 dpi no era del logo: era del PNG que alguien exportó a 600 px.*
+
+**300 dpi pedía 1.583 px. Se rasterizó a 2.000 y el dibujo ocupa 1.706 ⇒ 323 dpi, por encima del piso de impresión.**
+
+### La recomendación: **el logo rasterizado a 323 dpi, EN GRIS**
+
+**Y el gris no es un gusto: es la letra de `papel.ts`**, que dice *«EN TINTA CON OPACIDAD — no en color (el matiz muere impreso: verdeVital, teal y oro caen al MISMO gris)»*. El logo a color al 6 % deja un rosa pálido; **en gris queda neutro y se lee igual de bien** — nariz, wordmark y bajada, los tres.
+
+### ⚠️ EL LÍMITE DE MI PROPIA MEDICIÓN, declarado
+
+**Mi inspección tope es ~205 dpi** (`qlmanage` sobre un A4). ⇒ **NO puedo distinguir 113 de 323 dpi mirando una pantalla**: las dos se ven nítidas en mi render. **La decisión entre las dos la toma el NÚMERO, no mi ojo** — y el número dice que 113 está por debajo del piso de impresión y 323 por encima.
+
+*Lo que mi ojo sí puede decir, y dice: el logo completo al 6 % se lee, no pelea con el contenido, y llena la página mejor que el isotipo solo.*
+
+### Lo que esto NO resuelve
+
+- **El pasaporte no entra**, y por tercera vez lo confirmo del objeto: `pasaporte` devuelve **HTML**, `pasaporte-html.ts` **no importa `papel.ts`** —sólo lo nombra en un comentario de su cabecera— y tiene **cero** referencias a isotipo, svg o path. *Los papeles con marca de agua son SEIS, y el pasaporte no es uno de ellos.*
+- **Los otros cinco papeles no se generaron.** Comparten `marcaDeAgua` por construcción, pero *compartir una función no es haber corrido su camino*.
+- **El PNG hay que depositarlo:** hoy el rasterizado vive en un scratchpad. Si el founder aprueba, entra al árbol como asset y `papel.ts` pasa de `drawSvgPath` a `embedPng`, **con el peso declarado** (~278 KB, contra 5 KB del path actual — *y eso multiplica por seis, uno por cada papel que lo embeba*).
+
+**☠️ MUERTE:** cuando el founder mire un A4 generado y firme cuál va — o diga que ninguna, y entonces el isotipo actual se queda con su rechazo escrito al lado.
+
+---
+
 **☠️ MUERTE:** cuando el archivo no exista y su lápida esté al lado, con esa distinción escrita.
 
 ---
 
-## `D-1122` 🟡 — EL OSCURO DEL CLIENTE: **UNA decisión + un recorrido**, no una lista de valores
+## `D-1123` 🟡 — EL OSCURO DEL CLIENTE: **UNA decisión + un recorrido**, no una lista de valores
 
 **Estado:** ABIERTA · **FIRMADA POR EL FOUNDER** (14-sep-2026) · **Dueño: mesa** (la decisión) + **B** (lo que salga del recorrido) · **disparo: DESPUÉS de F&F**.
+⚠️ **Nació como `D-1122` y se renumeró al mergear:** A tomó ese número en `main` el mismo día para la marca de agua de los papeles. *Dos pistas pidieron el próximo libre con minutos de diferencia y las dos leyeron el mismo tope — el censo cruzado que corrí contra las ramas vivas no vio la de A porque todavía no estaba empujada.* **La colisión la cazó el merge, que es tarde pero es el único que la puede ver.**
+
 **Origen:** recorrido 5 del founder con el teléfono en oscuro; censo de B en el lote 15, ejecución en el lote 16.
 
 ### Lo que se hizo YA, y por qué no cierra la ficha
