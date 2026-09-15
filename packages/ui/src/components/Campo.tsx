@@ -35,9 +35,11 @@
 
 import { useState, type ReactNode } from 'react'
 import {
+  PixelRatio,
   Pressable,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
   type TextInputProps,
 } from 'react-native'
@@ -49,9 +51,7 @@ import {
   ALTO_LINEA_CAMPO,
   GAP_ETIQUETA,
   TAMANO_ETIQUETA,
-  ALTO_CAJA_CAMPO_V5,
-  ALTO_INTERIOR_CAMPO_V5,
-  ALTO_ETIQUETA_FLOTANTE,
+  medidasCampoV5,
   TAMANO_ETIQUETA_FLOTANTE,
   DISCO_GLIFO_CAMPO,
   formaV5,
@@ -318,7 +318,19 @@ function glifoDelCampo(
  * nombre dibujado. *Medido: con las props sólo en el `View` que envuelve,
  * el nodo seguía en el volcado de `uiautomator`.*
  */
-export function EtiquetaFlotante({ label, flotando }: { label: string; flotando: boolean }) {
+export function EtiquetaFlotante({
+  label,
+  flotando,
+  alto,
+}: {
+  label: string
+  flotando: boolean
+  /** El alto del renglón, **ya escalado por la letra del sistema**. Se
+   *  pide en vez de calcularse acá para que la pieza y su contenedor usen
+   *  EL MISMO número: *dos cálculos de la misma medida divergen el día que
+   *  alguien toque uno.* */
+  alto: number
+}) {
   const { theme } = useTheme()
   const invisibleAlLector = {
     accessible: false,
@@ -333,7 +345,7 @@ export function EtiquetaFlotante({ label, flotando }: { label: string; flotando:
         style={{
           fontFamily: typography.family.sans.regular,
           fontSize: TAMANO_ETIQUETA_FLOTANTE,
-          lineHeight: ALTO_ETIQUETA_FLOTANTE,
+          lineHeight: alto,
           /* 🔴 `secondary` = `tintaTexto65`, el 65 % que la orden fija como
              piso. `tertiary` da 2,18 en claro y sería exactamente el rótulo
              ilegible que N11′ temía. Medido contra el interior del campo:
@@ -478,6 +490,14 @@ export function Campo({
   // El color del contorno y el interior salen de la anatomía compartida
   // (`caja-de-campo.ts`): tres piezas, una definición.
   const v5 = formaV5(theme)
+  /* 🔴 **LAS MEDIDAS SE LEEN EN CADA RENDER, no del módulo** — el texto
+     escala con la preferencia del sistema y los altos tienen que escalar
+     con él (ver el porqué medido en `caja-de-campo.ts`). `useWindowDimensions`
+     está sólo para que un cambio de configuración vuelva a pasar por acá.
+     *Sin él, el valor se leería una vez y se quedaría con la escala del
+     arranque, que es el mismo defecto con otra ropa.* */
+  useWindowDimensions()
+  const medidas = medidasCampoV5(PixelRatio.getFontScale())
   /* 🔴 **LA ETIQUETA FLOTA AL ENFOCAR, NO AL PRIMER CARÁCTER** — y esa
      diferencia es toda la razón por la que la regla rectora sigue
      entera: al enfocar es ANTES de tipear, así que nada se mueve
@@ -495,11 +515,17 @@ export function Campo({
   const flotando = v5 && (enfocado || hayTexto || !!multilinea)
   const glifo = v5 ? glifoDelCampo(secure, inputProps.autoComplete) : undefined
 
-  const altoCampo = multilinea
-    ? multilinea * ALTO_LINEA + spacing[3] * 2
-    : v5
-      ? ALTO_CAJA_CAMPO_V5
-      : ALTO
+  /* 🔴 **EN v5 EL ALTO ES UN PISO, NO UNA JAULA — y es la tercera forma de
+     esta geometría, con su razón medida.**
+     ⏪ Primero fue `height` fijo (48), después `height` derivado de la escala
+     de letra… **y el valor SEGUÍA recortándose**: con `height` fijo, si el
+     contenido no entra, lo que sobra se corta — y lo que sobra es siempre el
+     texto que la persona está escribiendo.
+     ⇒ **`minHeight`**: la caja reserva su alto de siempre y **crece si hace
+     falta**. *La prioridad es que el texto se lea entero; el resto se
+     acomoda* — permiso explícito de la mesa. Con la letra en 1,0 no se mueve
+     un píxel, porque el contenido entra en el piso. */
+  const altoCampo = multilinea ? multilinea * ALTO_LINEA + spacing[3] * 2 : ALTO
 
   return (
     <View style={{ opacity: deshabilitado ? opacity.disabled : 1 }}>
@@ -525,9 +551,10 @@ export function Campo({
         style={{
           ...estiloDeCaja(theme, { error: !!error, enfocado }),
           justifyContent: 'center',
-          height: altoCampo,
+          ...(v5 && !multilinea
+            ? { minHeight: medidas.caja, paddingVertical: spacing[2] }
+            : { height: altoCampo, paddingVertical: multilinea ? spacing[3] : 0 }),
           paddingHorizontal: spacing[3],
-          paddingVertical: multilinea ? spacing[3] : 0,
           transitionTimingFunction: cubicBezier(...motion.easing.easeOut.bezier),
         }}
       >
@@ -598,13 +625,14 @@ export function Campo({
                pase lo que pase.* ⏪ Acá había un `minHeight` de una sola línea
                y eso dejaba la decisión al reparto — que es de donde salió el
                defecto que el founder vio. */
-            ...(v5
-              ? { height: multilinea ? undefined : ALTO_INTERIOR_CAMPO_V5 }
-              : { minHeight: ALTO_LINEA }),
+            /* Sin alto en v5: los dos renglones son sus dos hijos y el
+               contenedor mide lo que ellos midan. *Fijarlo era lo que
+               permitía que uno le comiera el lugar al otro.* */
+            ...(v5 ? null : { minHeight: ALTO_LINEA }),
             justifyContent: 'center',
           }}
         >
-        {flotando ? <EtiquetaFlotante label={label} flotando /> : null}
+        {flotando ? <EtiquetaFlotante label={label} flotando alto={medidas.etiqueta} /> : null}
 
         <TextInput
           {...inputProps}
@@ -669,13 +697,18 @@ export function Campo({
             color: theme.text.primary,
             // N11: el alto del input lo da la LÍNEA, no la caja — la caja
             // ahora aloja también la etiqueta y su alto es del contenedor.
-            height: multilinea ? '100%' : ALTO_LINEA,
+            /* Sin alto fijo en v5: **un `height` menor que la línea de texto
+               RECORTA el texto en vez de reacomodarlo**, y con la letra del
+               sistema agrandada eso es exactamente lo que pasaba. El
+               `lineHeight` da la medida y el input la respeta. */
+            height: multilinea ? '100%' : v5 ? undefined : ALTO_LINEA,
+            lineHeight: v5 && !multilinea ? medidas.linea : undefined,
             paddingVertical: 0,
             textAlignVertical: multilinea ? 'top' : 'center',
           }}
         />
 
-        {v5 && etiquetaVisible && !flotando ? <EtiquetaFlotante label={label} flotando={false} /> : null}
+        {v5 && etiquetaVisible && !flotando ? <EtiquetaFlotante label={label} flotando={false} alto={medidas.etiqueta} /> : null}
         </View>
 
         {secure ? (
