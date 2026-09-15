@@ -22,9 +22,9 @@
  * que la ley S79 cerraba (coordenada invisible y vieja) no existe más,
  * porque la coordenada dejó de ser invisible.
  *
- * `exigirPunto` (checkout de la despensa): sin punto no se guarda, y el
- * porqué SE DICE. En Cuenta sigue opcional — exigirlo ahí cambiaría un
- * flujo ya gateado, y esa decisión es del founder, no de esta tanda.
+ * `exigirPunto`: sin punto no se guarda, y el porqué SE DICE. **Desde
+ * S116-C lote 6 su default es `true`, y no es una preferencia: es lo que la
+ * TABLA exige.** Ver la nota de la prop.
  *
  * Si Places no está configurado o la red falla mientras se tipea, el
  * formulario degrada EN SILENCIO a captura manual (Ley 23) — con el
@@ -65,15 +65,44 @@ const SEMILLA_QUITO = { lat: -0.1807, lon: -78.4678 };
 export function DireccionHogarForm({
   inicial,
   onGuardada,
-  exigirPunto = false,
+  exigirPunto = true,
   conAlias = false,
   aliasInicial = '',
   direccionId = null,
 }: {
   inicial: DireccionHogar | null;
   onGuardada: (direccion: DireccionHogar) => void;
-  /** §7 de la letra S96: en el checkout de la despensa el punto es
-   *  OBLIGATORIO. Default false: Cuenta no cambia sin su propio gate. */
+  /**
+   * 🔴 **EL DEFAULT PASA DE `false` A `true` — S116-C lote 6.**
+   *
+   * ── MEDIDO CONTRA EL MOTOR, no razonado ─────────────────────────────────
+   * ```
+   * guardar_direccion_hogar  sin p_lat/p_lon → 23514 chk_direccion_con_punto
+   *                          con el punto    → ok:true
+   * ```
+   * **`direcciones_guardadas` EXIGE lat/lon, sin condición.** ⇒ un default
+   * `false` no hacía el flujo «más flexible»: lo hacía **más permisivo que su
+   * propia tabla**, que es `L-528` en su forma cara — *una pantalla más
+   * estricta que su motor es un defecto; una más PERMISIVA también, y su modo
+   * de falla es el silencio.*
+   *
+   * ── EL COSTO, VISTO EN EL APARATO ───────────────────────────────────────
+   * **4 de 6 consumidores no la pasaban** (Cuenta·Tu dirección y los checkouts
+   * de paseo, grooming y veterinaria). En Cuenta, con la dirección escrita y el
+   * botón habilitado, tocar Guardar devolvía **«Ocurrió un error inesperado.
+   * Prueba de nuevo.»** — el rechazo de un CHECK saliendo como error genérico
+   * sobre algo que la app **sí podía explicar**. Y en los checkouts era peor:
+   * sin dirección guardada **no se puede pagar.**
+   *
+   * ⏪ La nota vieja decía: *«En Cuenta sigue opcional — exigirlo ahí cambiaría
+   * un flujo ya gateado, y esa decisión es del founder»*. **Era razonable y era
+   * falsa**: el flujo de Cuenta ya estaba roto, sólo que su rotura se leía como
+   * un error del servidor. *Preservar un flujo que no funciona no es prudencia.*
+   *
+   * Se deja como prop —y no se cablea a `true`— porque el día que exista una
+   * dirección sin punto legítima (un país sin mapa, una dirección postal) la
+   * excepción va a tener que declararse acá, y con su nombre.
+   */
   exigirPunto?: boolean;
   /**
    * 🔴 S100c · MODO LIBRETA — «Oficina», «Casa de mamá», además del hogar.
