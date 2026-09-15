@@ -60,7 +60,7 @@ Medido en el aparato, montando los logos con `resolverUrlsFotos`:
   = Either the object does not exist or you do not have access to it
 ```
 
-Es el logo de **Clínica Aurora**. `v_prestadores_publicos.foto_url` lo entrega,
+**No es uno: son al menos DOS** (Clínica Aurora y otro negocio con `.png`). `v_prestadores_publicos.foto_url` lo entrega,
 así que **la vista promete una foto que la familia no puede leer**. Puede ser
 que el objeto no exista (residuo) o que la policy del bucket no alcance a un
 cliente que no es su dueño. *Las dos son tuyas: yo sólo puedo caer al
@@ -70,3 +70,36 @@ monograma, que es lo que hace.*
 es un PATH, no una URL.** Pasarlo crudo a `AvatarMascota` hace que el avatar
 caiga al monograma **como si no hubiera foto**, en silencio. *Lo cazó la pieza
 avisando por consola con el path que recibió — no un gate ni la captura.*
+
+⚠️ **Y en dev cada fallo abre el overlay rojo** (`console.error` en
+`fotos.ts:78`), que corta el camino en cada pantalla que liste negocios. *No
+pido que se calle —el aviso es correcto— pido que los objetos existan o que la
+vista no los prometa.*
+
+---
+
+## ADENDA (lote 5, ⑤) — **la tarifa de servicio no dice hasta cuándo es gratis**
+
+`tarifa_servicio_vigente` devuelve, medido hoy:
+
+```json
+{"base":0,"vigente":true,"descuento":0.99,"valor_iva":0,
+ "codigo_iva":"EC_IVA_15","tarifa_pct":15.0,"monto_lista":0.99,"promocionada":true}
+```
+
+**Sin fecha de fin.** Y `DesgloseCompra` hace `hasta` **obligatorio** cuando
+`promocionada: true`, con su razón escrita: *«una promoción sin su precio tachado
+—y sin decir hasta cuándo— es inexpresable»*.
+
+⏪ Yo escribí «diciembre» en el riel y **`R84` me paró**: *«una fecha escrita en
+el diccionario es una fecha que caduca en silencio»*. La regla tenía razón —**el
+mes era mío, no del objeto**—.
+
+⇒ hoy la línea se dibuja como **tarifa sin promoción, a su precio real: $0,00**.
+Es cierto y no afirma un plazo que nadie midió. **Lo que se pierde es el precio
+tachado**, que es justo lo que el encargo del founder pide ver en F&F.
+
+**Lo que pido: `vigente_hasta` en la respuesta de `tarifa_servicio_vigente`.**
+Con eso la línea pasa a la variante promocionada —«~~$0,99~~ $0,00 · Gratis hasta
+X»— **en una línea de esta pantalla**, y el mes sale del motor, que es donde la
+vigencia vive.

@@ -124,6 +124,8 @@ export {
    qué y cómo se borra; el pedido vive en el buzón. */
 export {
   listarIdsPrestadoresPublicos,
+  obtenerDesgloseDeCita,
+  type DesgloseDeCita,
   type CodigoErrorExplorar,
 } from './wrappers/explorar';
 export {

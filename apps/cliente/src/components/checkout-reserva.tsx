@@ -36,6 +36,7 @@ import { Linking, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import {
+  DesgloseCompra,
   HojaContenido,
   Cabecera,
   Boton,
@@ -59,6 +60,7 @@ import {
   BotonPagar, SeccionMedioDePago, useMedioDePago,
 } from '@/components/seccion-medio-de-pago';
 import { SeccionFacturacion, useFacturacion } from '@/components/seccion-facturacion';
+import { obtenerDesgloseDeCita, tarifaServicio, type DesgloseDeCita, type TarifaServicio as TarifaDelMotor } from '@epetplace/api';
 import { AvisoNoCargo } from '@/components/aviso-no-cargo';
 import { LineaFacturaEnCamino } from '@/components/linea-factura-en-camino';
 import { cobrar } from '@/lib/pagos/cobro';
@@ -189,6 +191,36 @@ export function CheckoutReserva({
      perfil, el nombre, el correo y su carga: **seis pantallas de cobro los
      necesitan**, así que copiarlos era la divergencia garantizada. */
   const facturacion = useFacturacion(fase === 'resumen');
+
+  /* ══════════════════════════════════════════════════════════════════════════
+   *  ⑤ EL DESGLOSE — **leído, jamás calculado acá**
+   *  ─────────────────────────────────────────────────────────────────────────
+   *  🔴 Esta pantalla tiene `precio` y nada más. Partirlo en subtotal e IVA del
+   *  lado del cliente sería **re-implementar la aritmética fiscal en una
+   *  pantalla**: el día que un servicio tribute 0 %, o que la tarifa cambie, la
+   *  pantalla diría un número y la factura otro. *El desglose que se muestra
+   *  tiene que ser EL MISMO que se cobra, y el único que lo es es el que el
+   *  motor congeló en `cita_desglose`.*
+   *
+   *  ⚠️ **Las dos lecturas son independientes y van juntas**: la tarifa de
+   *  servicio no depende de la cita, y encadenarlas sumaría un viaje.
+   *  Un fallo de cualquiera **no rompe el checkout**: el desglose no se dibuja y
+   *  queda el total, que es el dato que de verdad hace falta para pagar.
+   * ═════════════════════════════════════════════════════════════════════════ */
+  const [desglose, setDesglose] = useState<DesgloseDeCita | null>(null);
+  const [tarifa, setTarifa] = useState<TarifaDelMotor | null>(null);
+
+  useEffect(() => {
+    if (fase !== 'resumen') return;
+    let vigente = true;
+    void obtenerDesgloseDeCita(citaId).then((r) => {
+      if (vigente && r.ok) setDesglose(r.data);
+    });
+    void tarifaServicio().then((r) => {
+      if (vigente && r.ok) setTarifa(r.data);
+    });
+    return () => { vigente = false; };
+  }, [fase, citaId]);
 
   const [riel, setRiel] = useState<'tarjeta' | 'deuna' | null>(null);
 
@@ -596,7 +628,74 @@ export function CheckoutReserva({
               {/* lugar hecho para el cupón (B4) — deshabilitado honesto */}
               <Celda titulo={t('checkout.cupon')} fin={<Insignia estado="info" etiqueta={t('checkout.cuponPronto')} />} />
               <Separador />
-              <Celda titulo={t('checkout.total')} metadataMono={formatearPrecio(precio)} />
+              {/* ⭐ **`DesgloseCompra` — B midió que NADIE lo montaba desde
+                  S115, y el encargo lo pide acá.** Los subtotales 0 % y 15 %, el
+                  IVA **visible aunque sea cero**, y la tarifa de servicio como
+                  línea propia con su precio tachado mientras dure la promoción.
+
+                  🔴 **LOS DOS NULOS SON DISTINTOS Y LA PIEZA LOS DISTINGUE:**
+                  `iva: 0` SE DIBUJA —es un hecho medido: «este servicio tributa
+                  cero»— y `subtotal_0: null` NO —no hay nada en esa tarifa—.
+                  *Es la diferencia entre decir «cero» y no decir nada, y acá la
+                  primera es información fiscal.*
+
+                  🔴 **EL LADO DEL QUE CAE CADA SUBTOTAL LO DICE EL MOTOR**, no
+                  esta pantalla: `codigo_iva` viene congelado con la cita
+                  (`EC_IVA_15` / `EC_IVA_0`). *Adivinarlo acá —«los servicios
+                  llevan 15»— sería exactamente el número que se contradice con
+                  la factura el día que una consulta veterinaria tribute otra
+                  cosa.*
+
+                  ⚠️ **Sin desglose congelado la pieza no se monta** y queda la
+                  fila del total: *un desglose a medias es peor que ninguno.* */}
+              {desglose === null ? (
+                <Celda titulo={t('checkout.total')} metadataMono={formatearPrecio(precio)} />
+              ) : (
+                <View style={{ padding: spacing[3] }}>
+                  <DesgloseCompra
+                    subtotal_0={desglose.codigoIva === 'EC_IVA_0' ? desglose.subtotal : null}
+                    subtotal_15={desglose.codigoIva === 'EC_IVA_0' ? null : desglose.subtotal}
+                    iva={desglose.impuesto}
+                    total={desglose.total}
+                    /* La tarifa vigente sale del MISMO registro que calculó el
+                       impuesto; sin ella, la del motor de la tarifa; sin
+                       ninguna, 0 — y entonces la línea del IVA dice «IVA 0 %»,
+                       que con `impuesto = 0` es cierto. */
+                    tarifaIva={desglose.tarifaPct ?? tarifa?.tarifaPct ?? 0}
+                    /* ⚠️ **Ausente = la línea NO se dibuja**, por contrato: un
+                       «Tarifa de servicio · $0,00» donde no hay tarifa afirma
+                       que existe y que es gratis. Acá `tarifa === null` es
+                       justamente «no pudimos leerla». */
+                    /* 🔴 **LA PROMOCIÓN SE DIBUJA SIN SU «HASTA», Y ESO ES UN
+                       HUECO DECLARADO — no una elección de diseño.**
+
+                       La pieza hace `hasta` **obligatorio** cuando
+                       `promocionada: true`, y con razón: *«una promoción sin
+                       decir hasta cuándo no es una promoción, es un precio que
+                       va a cambiar sin aviso»*. **Y el motor no lo devuelve**:
+                       medido contra `tarifa_servicio_vigente`, la respuesta es
+                       `{base, descuento, valor_iva, codigo_iva, tarifa_pct,
+                       monto_lista, promocionada}` — **sin fecha de fin**.
+
+                       ⏪ La primera versión escribió «diciembre» en el riel y
+                       **`R84` la paró**: *«una fecha escrita en el diccionario
+                       es una fecha que caduca en silencio»*. La regla tiene
+                       razón y **el mes era mío, no del objeto** — lo había
+                       supuesto.
+
+                       ⇒ hasta que A exponga `vigente_hasta`, la línea se dibuja
+                       como **tarifa sin promoción a su precio real de hoy, que
+                       es CERO**. Es cierto —hoy no se cobra— y **no afirma un
+                       plazo que nadie midió**. *Lo que se pierde es el precio
+                       tachado; lo que se evita es decirle a una familia que algo
+                       es gratis «hasta diciembre» y que en noviembre le
+                       cobremos.* Pedido en el buzón. */
+                    tarifaServicio={
+                      tarifa === null ? undefined : { promocionada: false, monto: tarifa.base }
+                    }
+                  />
+                </View>
+              )}
             </Tarjeta>
           </View>
 
