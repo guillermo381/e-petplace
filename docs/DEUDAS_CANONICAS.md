@@ -35616,3 +35616,57 @@ Y el costo es el de la casa: **`L-223` dice que el peaje está en la PETICIÓN, 
 **El cuerpo salió y la lápida quedó en su lugar** (`brand/RitualDeEntrada.tsx`). **Y al retirarla apareció `LLEGADA`, que era su única lectora**: murió con ella. *Una pieza sin consumidores casi nunca está sola — arrastra la constante, el token o el helper que existían sólo para ella, y ésos no aparecen en ningún censo de consumidores porque no son piezas.*
 
 **☠️ MUERTE — MUERTA.**
+
+---
+
+## `D-1122` 🟠 — LA MARCA DE AGUA DE LOS PAPELES TIENE QUE SER EL **LOGO COMPLETO**, no el isotipo — medido, con una opción que rinde
+
+**Estado:** ABIERTA — **medida, NO cableada** · **Dueño: A** · **espera que el founder la vea.**
+**Origen:** recorrido 5 del founder (14-sep-2026): rechaza el isotipo derivado en los seis papeles, igual que lo rechazó en pantalla. **Pide el logo completo: la nariz con «e-PetPlace» debajo y su bajada.**
+
+> **No se cableó nada.** Lo que sigue es la medición y una recomendación; *lo que hoy está cableado ya tiene su veredicto —el founder dijo que no— y lo que venga tiene que pasar por su ojo antes de entrar.*
+
+### ① ¿Rinde el logo como vector consumible por `pdf-lib`? **NO**, y con estos números
+
+`packages/ui/assets/marca/logo.svg`, medido:
+
+| | logo | isotipo (el que ya falló) |
+|---|--:|--:|
+| `<path>` | **1.310** | 268 |
+| `<clipPath>` | **1.090** | 229 |
+| con `transform` | 197 | 38 |
+| colores de `fill` | **133** | 28 |
+| caracteres de todos los `d` | **408.486** | 70.889 |
+
+**`drawSvgPath` toma UN `d` con UN relleno.** Aplanado a un solo path —1.113 subpaths, 271.072 caracteres— **salen dos rectángulos grises**, igual que con el isotipo: *el dibujo no vive en los paths, vive en los 1.090 clips.*
+
+⚠️ **Y `<text>` = 0**: el texto **ya está trazado a paths**. Eso contesta la duda que B había dejado abierta (*«es probable pero no está probado»*) — **pero no ayuda**: son paths de un trazado de bitmap, no letras vectoriales limpias.
+
+### ② `embedPng` — y acá hay una salida, con su número
+
+| fuente | píxeles | **dpi a 380 pt de ancho** |
+|---|--:|--:|
+| `logo@3x.png` (lo que existe hoy) | 600 | **113,7** |
+| **rasterizando el propio `logo.svg`** | **1.706** | **323,2** |
+
+🔴 **La clave, y es lo que da vuelta la opción ②:** el SVG es un **trazado vectorial** — aunque haya nacido de un bitmap, **sus paths son matemáticos**, así que rasterizarlo a 1.706 px da una imagen **nítida**, no una ampliación. *El techo de 113 dpi no era del logo: era del PNG que alguien exportó a 600 px.*
+
+**300 dpi pedía 1.583 px. Se rasterizó a 2.000 y el dibujo ocupa 1.706 ⇒ 323 dpi, por encima del piso de impresión.**
+
+### La recomendación: **el logo rasterizado a 323 dpi, EN GRIS**
+
+**Y el gris no es un gusto: es la letra de `papel.ts`**, que dice *«EN TINTA CON OPACIDAD — no en color (el matiz muere impreso: verdeVital, teal y oro caen al MISMO gris)»*. El logo a color al 6 % deja un rosa pálido; **en gris queda neutro y se lee igual de bien** — nariz, wordmark y bajada, los tres.
+
+### ⚠️ EL LÍMITE DE MI PROPIA MEDICIÓN, declarado
+
+**Mi inspección tope es ~205 dpi** (`qlmanage` sobre un A4). ⇒ **NO puedo distinguir 113 de 323 dpi mirando una pantalla**: las dos se ven nítidas en mi render. **La decisión entre las dos la toma el NÚMERO, no mi ojo** — y el número dice que 113 está por debajo del piso de impresión y 323 por encima.
+
+*Lo que mi ojo sí puede decir, y dice: el logo completo al 6 % se lee, no pelea con el contenido, y llena la página mejor que el isotipo solo.*
+
+### Lo que esto NO resuelve
+
+- **El pasaporte no entra**, y por tercera vez lo confirmo del objeto: `pasaporte` devuelve **HTML**, `pasaporte-html.ts` **no importa `papel.ts`** —sólo lo nombra en un comentario de su cabecera— y tiene **cero** referencias a isotipo, svg o path. *Los papeles con marca de agua son SEIS, y el pasaporte no es uno de ellos.*
+- **Los otros cinco papeles no se generaron.** Comparten `marcaDeAgua` por construcción, pero *compartir una función no es haber corrido su camino*.
+- **El PNG hay que depositarlo:** hoy el rasterizado vive en un scratchpad. Si el founder aprueba, entra al árbol como asset y `papel.ts` pasa de `drawSvgPath` a `embedPng`, **con el peso declarado** (~278 KB, contra 5 KB del path actual — *y eso multiplica por seis, uno por cada papel que lo embeba*).
+
+**☠️ MUERTE:** cuando el founder mire un A4 generado y firme cuál va — o diga que ninguna, y entonces el isotipo actual se queda con su rechazo escrito al lado.
