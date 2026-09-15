@@ -15,6 +15,7 @@
 // piezas SÍ se pueden importar: la galería del cliente.
 
 import { useState } from 'react';
+import { useLocalSearchParams } from 'expo-router';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -183,6 +184,12 @@ function LaminaSeparacionOscuro() {
  * pruebas de la otra.* */
 
 export default function GalleryRoute() {
+  /* 🔴 `?solo=` — EL SALTO DE SECCIÓN (S116-B lote 15). Nació de un costo
+     medido: dos lotes cerraron sin la captura que el encargo pedía porque
+     llegar a una pieza era barrer ~9.800 líneas con swipes y suerte.
+     `cliente:///gallery?solo=abanico` monta esa sección sola. Sin el
+     parámetro, la galería es exactamente la de antes. */
+  const { solo } = useLocalSearchParams<{ solo?: string }>();
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1 }}>
       {/* 🔴 **UN SOLO SCROLL.** Acá había un `ScrollView` envolviendo a
@@ -191,6 +198,7 @@ export default function GalleryRoute() {
           swipes sin mover un píxel.* La lámina entra ahora como `encabezado`
           de la galería, adentro de su scroll. */}
       <TokenGallery
+        solo={solo}
         encabezado={
           /* La lámina va PRIMERA: es la decisión más grande que queda abierta. */
           <ThemeProvider defaultMode="dark">

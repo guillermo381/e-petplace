@@ -250,6 +250,21 @@ La superficie que agrupa.
 - **tokens:** `radius` · `spacing` · `motion` · `typography` · `theme.accent` · `theme.bg`
 - ⚠️ **El contorno transparente murió como acción de fila.** Información despliega; acción lleva. El glifo va en círculo rosa tinte.
 
+### EL OSCURO — `'inverso'` NO significa «sobre fondo oscuro»
+🔴 **Lote 15, medido en el aparato con el teléfono en oscuro.** `text.inverse` es **blanco en claro y TINTA en oscuro**: *significa «al revés del tema», no «sobre fondo oscuro»*. Sobre una superficie que es **la misma en los dos temas** —la franja magenta de `OndaAcceso`, la banda ciruela de `Cabecera`— acierta en claro **por casualidad** y en oscuro deja la letra ilegible (**3,29**).
+- **La regla:** *si la superficie no cambia con el tema, el color de su letra tampoco puede cambiar.* Para magenta: **`Texto color="sobreMagenta"`** (blanco fijo, **5,13**, en el gate).
+- ⚠️ **Es la misma ley que `sobreCta` vista del otro lado:** aquélla resuelve **por casa** porque el CTA cambia de color; ésta es **fija** porque la franja no.
+- **`Personaje`**: su fondo `'blanco'` leía `theme.bg.card` y en oscuro era ciruela. *Un valor cuyo nombre dice «blanco» y en un tema no lo es no es una decisión de tema: es un nombre que miente.* **Y tenía una segunda razón**, escrita en su propia cabecera: el blanco tapa el fondo blanco opaco del asset del roedor.
+- 🔴 **Sin curar y censado** (lote 15, §③): `Cabecera:209·213·217` y `bienvenida.tsx:155·165` — **la cabecera va en toda pantalla del cliente**.
+
+### EL BOTÓN DE LA REJILLA — `Boton tamaño="xs"`
+Alto **30**, letra un escalón menos. *Un CTA de alto de pantalla dentro de una celda de dos columnas compite con el producto que la celda existe para mostrar.*
+- ⚠️ **Bajó la CAJA, no sólo el botón:** `ALTO_STEPPER_ANCHO` 34 → 30, porque `Mutacion` la comparte con el stepper — *dos formas que se turnan en la misma caja tienen que medir lo mismo o la tarjeta salta al tocar* (L-284).
+- **El blanco táctil sigue en 44 por `hitSlop`:** se achica el píxel, nunca el blanco del dedo.
+
+### LA GALERÍA SALTA A UNA SECCIÓN — `?solo=`
+`cliente:///gallery?solo=abanico` monta sólo las secciones cuyo título contenga ese texto. **Nació de un costo medido:** dos lotes cerraron sin su captura porque llegar a una pieza era barrer ~9.800 líneas con swipes. ⚠️ **Filtra, no reordena**: sin parámetro la galería es la de antes — *un instrumento que cambia lo que mide cuando no se lo usa no sirve para medir.*
+
 ### EL CONTADOR — *un disco, dos portadores* (`disco-contador`)
 🔴 **Lote 13, orden del founder:** *«el contador es un círculo magenta con el número adentro en blanco, PJS 700, pegado arriba a la derecha del glifo; **la pata muere ahí**. Con cero, no se dibuja. **Misma pieza para campana y carrito**.»*
 - **dónde vive:** `components/disco-contador.tsx` — **geometría compartida, no una pieza exportada** (como `grilla-de-dos` o `caja-de-campo`). *Exportarla obligaría a darle galería a algo que nunca se ve solo.*

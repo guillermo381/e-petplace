@@ -9,7 +9,7 @@ import { type ReactNode } from 'react'
 import { Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native'
 import Svg, { Path } from 'react-native-svg'
 
-import { useRef, useState } from 'react'
+import { createContext, useContext, useRef, useState } from 'react'
 
 import { palette, gradients } from '../tokens/palette'
 import { typography } from '../tokens/typography'
@@ -1264,8 +1264,33 @@ function MuestraVidrieraAdopcion() {
   )
 }
 
+/* 🔴 **EL FILTRO DE SECCIÓN — la galería deja de recorrerse a ciegas.**
+ *
+ * **Nació de un costo medido, no de una idea:** dos lotes seguidos cerraron
+ * **sin la captura que el encargo pedía**, y las dos veces por lo mismo — esta
+ * galería es un scroll de ~9.800 líneas **sin índice**, así que llegar a una
+ * pieza era barrer con swipes y suerte. *Recorrer a ciegas no es un método: es
+ * lo que se hace cuando no hay uno.*
+ *
+ * Con esto, un gate es **un deep link y una captura**:
+ *
+ *     cliente:///gallery?solo=abanico
+ *
+ * ⚠️ **Filtra, no reordena ni recorta el documento**: sin parámetro la galería
+ * es exactamente la de antes. *Un instrumento que cambia lo que mide cuando no
+ * se lo usa no sirve para medir.* */
+const normalizar = (t: string) =>
+  t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+
+const FiltroDeSeccion = createContext<string | undefined>(undefined)
+
 function Seccion({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   const { theme } = useTheme()
+  const solo = useContext(FiltroDeSeccion)
+  /* Comparación laxa a propósito —minúsculas, sin acentos, por inclusión—:
+     los títulos de gate son frases largas con emojis y nadie va a tipearlas
+     enteras en una URL. */
+  if (solo !== undefined && !normalizar(titulo).includes(normalizar(solo))) return null
   return (
     <View style={{ marginBottom: spacing[10] }}>
       <Text
@@ -3509,7 +3534,7 @@ function ContanosDemo() {
  *
  *  ⇒ el encabezado entra ACÁ, adentro del único scroll. *La ruta deja de
  *  necesitar el suyo, y con eso el anidamiento se vuelve inexpresable.* */
-export function TokenGallery({ encabezado }: { encabezado?: ReactNode } = {}) {
+export function TokenGallery({ encabezado, solo }: { encabezado?: ReactNode; solo?: string } = {}) {
   // Provider PROPIO (S48/D-305): el provider raíz del app está controlado
   // por el tema del sistema, y el selector manual de esta galería
   // (herramienta de verificación) necesita setMode vivo. Se siembra del
@@ -3518,7 +3543,9 @@ export function TokenGallery({ encabezado }: { encabezado?: ReactNode } = {}) {
   return (
     <ThemeProvider defaultMode={mode}>
       <AvisoProvider>
-        <GaleriaInterna encabezado={encabezado} />
+        <FiltroDeSeccion.Provider value={solo}>
+          <GaleriaInterna encabezado={encabezado} />
+        </FiltroDeSeccion.Provider>
       </AvisoProvider>
     </ThemeProvider>
   )
@@ -4137,10 +4164,13 @@ function GaleriaInterna({ encabezado }: { encabezado?: ReactNode }) {
                   /* Los CUATRO del orbe viejo, censados del objeto
                      (`lib/nexo/atajos.ts:57`) — acá como demo, no como la
                      lista de la pieza: C decide cuáles monta por pantalla. */
-                  { glifo: 'peso', texto: 'Registrar el peso', onPress: () => {} },
-                  { glifo: 'vacuna', texto: 'Cargar una vacuna', onPress: () => {} },
-                  { glifo: 'antiparasitario', texto: 'Cargar un antiparasitario', onPress: () => {} },
-                  { glifo: 'foto', texto: 'Agregar una foto', onPress: () => {} },
+                  /* UNA PALABRA cada una (lote 15, firma del founder): en su
+                     teléfono las frases se cortaban —«Anotar s…», «Cargar s…»—
+                     y *un atajo cortado no se lee mal: se lee otra cosa.* */
+                  { glifo: 'peso', texto: 'Peso', onPress: () => {} },
+                  { glifo: 'vacuna', texto: 'Vacuna', onPress: () => {} },
+                  { glifo: 'antiparasitario', texto: 'Antiparasitario', onPress: () => {} },
+                  { glifo: 'foto', texto: 'Recuerdo', onPress: () => {} },
                 ]}
               />
             </View>

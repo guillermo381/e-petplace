@@ -115,7 +115,14 @@ export function Personaje({ especie, tamano = 'hogar', elegido = false, fondo = 
     width: lado,
     height: lado,
     borderRadius: forma === 'circulo' ? lado / 2 : radius.chipV5,
-    backgroundColor: fondo === 'rosa' ? theme.bg.overlay : theme.bg.card,
+    /* 🔴 **`'blanco'` ES BLANCO, no `bg.card` (lote 15).** ⏪ Leía el tema, y
+       en oscuro `bg.card` es **ciruela**: el disco desaparecía sobre la franja
+       magenta de la onda. *Un valor cuyo nombre dice «blanco» y en un tema no
+       lo es no es una decisión de tema: es un nombre que miente.*
+       ⚠️ **Y había una segunda razón, escrita en esta misma cabecera:** el
+       default blanco existe **para tapar el fondo blanco opaco del asset del
+       roedor** — con el círculo en ciruela, ese parche quedaba a la vista. */
+    backgroundColor: fondo === 'rosa' ? theme.bg.overlay : palette.white,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',

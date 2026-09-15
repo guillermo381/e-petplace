@@ -747,7 +747,9 @@ export function TarjetaProducto({
               ⚠️ **SIN OJO: esto se midió sobre el bundle viejo y la cura no se
               vio correr.** Su verificación es el primer paso del recorrido:
               **tocar el `+` y que el stepper mida 36, no 18.** */}
-          <View style={{ marginTop: 'auto', flexShrink: 0, paddingTop: spacing[2], gap: spacing[2] }}>
+          {/* `paddingBottom`: el aire de abajo que pidió el founder — la
+              píldora deja de tocar el borde de la tarjeta. */}
+          <View style={{ marginTop: 'auto', flexShrink: 0, paddingTop: spacing[2], paddingBottom: spacing[1], gap: spacing[2] }}>
               {/* 🔴 CUARTA ITERACIÓN — Y LA PRIMERA QUE NO ELIGE A QUIÉN
                 SACARLE EL RENGLÓN (S100d·bis).
 
@@ -811,7 +813,10 @@ export function TarjetaProducto({
                     // de Laika: el botón OCUPA la caja que después va a
                     // ocupar el stepper.
                     bloque
-                    tamaño="sm"
+                    /* `xs` (lote 15): píldora compacta. *Un CTA de alto de
+                       pantalla dentro de una celda de rejilla compite con el
+                       producto que la celda existe para mostrar.* */
+                    tamaño="xs"
                   />
                 }
                 activo={

@@ -464,6 +464,14 @@ function paresDe(t: Theme, nombre: string): Pair[] {
 
   // S63 — enmienda Ley 21 FIRMADA: el CTA del prestador ancla a tealDark
   // en light Y dark (slot accent.cta, ThemeProvider cta="oficio").
+  /* 🔴 **S116-B lote 15 · `sobreMagenta` — LA FRANJA NO CAMBIA CON EL TEMA.**
+     Medido en el aparato en OSCURO: la frase de `OndaAcceso` salía en tinta
+     sobre la franja magenta (**3,29**) porque pedía `'inverso'`, y
+     `text.inverse` es blanco en claro y **TINTA en oscuro**.
+     *`'inverso'` no significa «sobre fondo oscuro»: significa «al revés del
+     tema»* — sobre una superficie que es magenta en los DOS temas eso acierta
+     en claro por casualidad. Por eso el par se mide UNA vez, fijo. */
+  add('sobreMagenta: blanco / magentaAccion', palette.white, palette.magentaAccion)
   add('CTA oficio (light): papel / tealDark', palette.light0, palette.tealDark)
   add('CTA oficio (dark): textDark0 / tealDark', palette.textDark0, palette.tealDark)
 

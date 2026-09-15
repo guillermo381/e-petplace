@@ -167,7 +167,23 @@ export type TextoVariante = 'titulo' | 'seccion' | 'cuerpo' | 'apoyo' | 'enfasis
  * veía) · en oscuro, sobre `magentaLuz`, tinta da **7,91** y blanco **2,31**.
  * *«Blanco siempre» es cierto sobre MAGENTA y falso como regla: en oscuro el
  * CTA no es magenta.* */
-export type TextoColor = 'primary' | 'secondary' | 'tertiary' | 'danger' | 'success' | 'warning' | 'sobreVideo' | 'warm' | 'inverso' | 'acentoSobreOscuro' | 'sobreCta'
+/* 🔴 **`sobreMagenta` (S116-B lote 15) — el par de una superficie que NO
+ * cambia con el tema.**
+ *
+ * **Medido en el aparato, tema oscuro:** la frase de `OndaAcceso` salía en
+ * **tinta sobre la franja magenta** —`3,29`, el mismo número que el founder
+ * rechazó en el lote 11— porque pedía `'inverso'`, y `text.inverse` es
+ * **blanco en claro y TINTA EN OSCURO**.
+ *
+ * > ⚠️ **`'inverso'` no significa «sobre fondo oscuro»: significa «al revés
+ * > del tema».** Sobre una superficie que es magenta en los DOS temas, eso da
+ * > el color correcto en claro **por casualidad** y el equivocado en oscuro.
+ *
+ * ⇒ Cuando la superficie no cambia, **el color tampoco puede cambiar**: blanco
+ * fijo, medido **5,13** contra `magentaAccion`. *Es la misma ley que `sobreCta`
+ * vista del otro lado — aquélla resuelve POR CASA porque el CTA cambia de
+ * color; ésta es fija porque la franja no.* */
+export type TextoColor = 'primary' | 'secondary' | 'tertiary' | 'danger' | 'success' | 'warning' | 'sobreVideo' | 'warm' | 'inverso' | 'acentoSobreOscuro' | 'sobreCta' | 'sobreMagenta'
 
 export type TextoProps = {
   children: ReactNode
@@ -446,12 +462,14 @@ export function Texto({ children, variante = 'cuerpo', color, numberOfLines, cen
             ? (theme.mode === 'memorial' ? theme.text.inverse : palette.rosaSobreCiruela)
           : c === 'sobreCta'
             ? theme.accent.ctaTexto
+          : c === 'sobreMagenta'
+            ? palette.white
           : c === 'inverso'
             /* El slot del tema se llama `inverse` (inglés, como todo el
                shape del tema) y la prop `inverso` (español, como toda la
                API pública de la casa). Se traduce acá, en un solo lugar. */
             ? theme.text.inverse
-            : theme.text[c as Exclude<TextoColor, 'danger' | 'success' | 'warning' | 'sobreVideo' | 'inverso' | 'acentoSobreOscuro' | 'sobreCta'>]
+            : theme.text[c as Exclude<TextoColor, 'danger' | 'success' | 'warning' | 'sobreVideo' | 'inverso' | 'acentoSobreOscuro' | 'sobreCta' | 'sobreMagenta'>]
 
   return (
     <Text

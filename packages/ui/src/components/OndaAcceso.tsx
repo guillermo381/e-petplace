@@ -204,6 +204,10 @@ export function OndaAcceso({ frase, lado, especies = LAS_SEIS }: OndaAccesoProps
 
   const laCara = (
     <Animated.View style={estiloCara}>
+      {/* ⚠️ El disco lo pinta `Personaje`, y su `'blanco'` pasó a ser blanco
+          de verdad en el mismo lote: leía `bg.card`, que en oscuro es ciruela
+          — *sobre magenta el círculo desaparecía y el personaje quedaba
+          flotando.* */}
       <Personaje especie={cara} tamano="hogar" forma="circulo" />
     </Animated.View>
   )
@@ -214,8 +218,14 @@ export function OndaAcceso({ frase, lado, especies = LAS_SEIS }: OndaAccesoProps
           líneas de un mismo bloque lo decide la variante, y acá la mesa
           pidió DOS líneas — que sean dos elementos lo hace verdad y no
           una consecuencia del ancho. */}
-      <Texto variante="titulo" color="inverso">{frase[0]}</Texto>
-      <Texto variante="titulo" color="inverso">{frase[1]}</Texto>
+      {/* 🔴 **`sobreMagenta`, NO `inverso` (lote 15).** Medido en el aparato
+          en tema oscuro: la frase salía **en tinta sobre la franja magenta**
+          —`3,29`, el número que el founder rechazó en el lote 11— porque
+          `inverso` es `text.inverse`, **blanco en claro y TINTA EN OSCURO**.
+          *La franja es magenta en los dos temas: si la superficie no cambia,
+          el color de su letra tampoco puede cambiar.* */}
+      <Texto variante="titulo" color="sobreMagenta">{frase[0]}</Texto>
+      <Texto variante="titulo" color="sobreMagenta">{frase[1]}</Texto>
     </View>
   )
 

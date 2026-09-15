@@ -99,8 +99,20 @@ function FilaDelAbanico({
         accessibilityLabel={texto}
         style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: spacing[2] }}
       >
+        {/* 🔴 **LA PASTILLA SE AJUSTA AL TEXTO Y NO LO CORTA NUNCA (lote 15).**
+            ⏪ Llevaba `numberOfLines={1}`, así que cuando la fila no entraba
+            **el que cedía era el texto**: el founder vio «Pregúnt…», «Anotar
+            s…», «Cargar s…» en su teléfono.
+            ⚠️ **Truncar era la peor de las tres salidas posibles**, y por eso
+            no alcanza con agrandar la pastilla: un atajo cortado *no se lee
+            mal — se lee OTRA COSA*, y el dedo decide sobre una palabra a
+            medias. **`flexShrink: 0`** para que la fila no la comprima.
+            ⇒ Si una etiqueta no entra en el ancho disponible, **el que está
+            mal es el texto, no la pastilla** (firma del founder), y por eso
+            las cuatro pasaron a UNA palabra. */}
         <View
           style={{
+            flexShrink: 0,
             paddingHorizontal: spacing[3],
             paddingVertical: spacing[1.5],
             borderRadius: radius.full,
@@ -108,9 +120,7 @@ function FilaDelAbanico({
             boxShadow: theme.elevacion.elevada,
           }}
         >
-          <Texto variante="apoyo" numberOfLines={1}>
-            {texto}
-          </Texto>
+          <Texto variante="apoyo">{texto}</Texto>
         </View>
 
         <View
