@@ -172,6 +172,19 @@ function puedeDibujarseConMemorial(cond: ts.Expression, enVerdadero: boolean): b
 }
 
 /** ¿Este nodo sólo se dibuja cuando la mascota NO está en memorial? */
+/** ¿La pieza receptora DECLARA `enMemorial`/`esMemorial`? Se lee su fuente en
+ *  `packages/ui`. **Sin archivo o sin la prop, devuelve `false`** — *un guard
+ *  que no se puede comprobar no es un guard.* */
+function piezaDeclara(pieza: string): boolean {
+  const ruta = new URL(`../../../packages/ui/src/components/${pieza}.tsx`, import.meta.url);
+  try {
+    const src = readFileSync(ruta, 'utf8');
+    return /^\s*(enMemorial|esMemorial)\s*[?:]/m.test(src);
+  } catch {
+    return false;
+  }
+}
+
 function protegido(n: ts.Node): { si: boolean; por: string } {
   let hijo = n;
   let p = n.parent;
@@ -188,6 +201,37 @@ function protegido(n: ts.Node): { si: boolean; por: string } {
       const enDerecha = p.right === hijo || (p.right.getStart() <= hijo.getStart() && hijo.getEnd() <= p.right.getEnd());
       if (enDerecha && !puedeDibujarseConMemorial(p.left, true)) {
         return { si: true, por: `&& … (línea ${ts.getLineAndCharacterOfPosition(p.getSourceFile(), p.getStart()).line + 1})` };
+      }
+    }
+    /* ═══════════════════════════════════════════════════════════════════════
+     * 🔴 **EL GUARD DELEGADO A LA PIEZA — S116-C, `D-1089`.**
+     *
+     * El gate sólo sabía leer guards de la PANTALLA (ternario y `&&`), y el
+     * montaje real de `HojaContanos` no tiene ninguno **a propósito y con su
+     * razón escrita en el archivo vivo**: *«desde que `HojaContanos` recibe
+     * `enMemorial` el guard vive ADENTRO: dos guards para la misma regla es uno
+     * que alguien va a mover sin mover el otro»*. Y el mismo comentario explica
+     * por qué el condicional se sacó: *«mientras estuviera, la Hoja no aparecía
+     * por el condicional, y no se podía saber si la prop hacía algo»*.
+     *
+     * ⇒ el gate aprende esa forma. **Y NO se afloja: se endurece**, porque no
+     * alcanza con que la pantalla PASE la prop — se comprueba que la pieza la
+     * DECLARE. *Pasar `enMemorial` a una pieza que lo ignora sería un guard
+     * decorativo, que es exactamente la clase que este censo existe para cazar.*
+     * Si la pieza no lo declara, esto no protege y el rojo sale igual.
+     * ═══════════════════════════════════════════════════════════════════════ */
+    if (ts.isJsxOpeningElement(p) || ts.isJsxSelfClosingElement(p) || ts.isJsxElement(p)) {
+      const apertura = ts.isJsxElement(p) ? p.openingElement : p;
+      const pieza = apertura.tagName.getText();
+      const pasa = apertura.attributes.properties.some(
+        (a) =>
+          ts.isJsxAttribute(a) &&
+          /^(enMemorial|esMemorial)$/.test(a.name.getText()) &&
+          a.initializer !== undefined &&
+          /esMemorial/.test(a.initializer.getText()),
+      );
+      if (pasa && piezaDeclara(pieza)) {
+        return { si: true, por: `guard DELEGADO a <${pieza}>, que declara la prop` };
       }
     }
     hijo = p;

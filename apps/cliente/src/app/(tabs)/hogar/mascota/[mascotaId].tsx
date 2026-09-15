@@ -903,6 +903,37 @@ export default function PerfilDeMascota() {
         : null;
   const hoy = new Date();
   const meses = mascota.fecha_nacimiento !== null ? edadEnMeses(mascota.fecha_nacimiento, hoy) : null;
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * 🔴 **`D-1088` · EN MEMORIAL NO HAY EDAD NI PESO, Y ESTO DEROGA MEDIA CURA
+   *    DE S113 — la mitad que arregló el VERBO y dejó el NÚMERO.**
+   *
+   * S113 curó *«en memorial la edad va en pasado»*: «tenía ~11 años», con su
+   * razón escrita —*el presente afirma que sigue teniendo esa edad*— y una
+   * línea que decía **«la cifra no cambia; lo que cambia es el tiempo del
+   * verbo»**.
+   *
+   * 🔴 **Y la cifra SÍ tenía que cambiar.** Medido una línea más arriba:
+   * `edadEnMeses(fecha_nacimiento, hoy)` cuenta **hasta HOY**. ⇒ la app le
+   * sigue sumando años a quien ya no está, y el pasado lo empeora: *«tenía ~11
+   * años» suena a un hecho comprobado, y es la edad que TENDRÍA hoy.* Lo mismo
+   * el peso: `pesoVigente` es la última medición, y en memorial «vigente» es
+   * una palabra que ya no puede ser cierta.
+   *
+   * ⚠️ **Y no se puede decir bien, medido: no existe la fecha de la partida.**
+   * `estado_vida` dice QUÉ pasó y no CUÁNDO — censado en `database.types` y en
+   * los wrappers. Sin ese dato **la edad al partir no se puede calcular**, y
+   * una edad calculada contra hoy es un número inventado con cara de dato.
+   * ⇒ **queda NULL y no se dibuja.** El día que exista la fecha, esto vuelve
+   * con `edadEnMeses(nacimiento, partida)` y dice la verdad. Pedido a A.
+   *
+   * ⚠️ **Se filtra EN EL ORIGEN y no en los ocho sitios**: así el dato vivo
+   * queda bajo el guard **una vez**, y lo que viaja al render es un valor que
+   * en memorial ya es `null`. *Envolver ocho usos deja siete oportunidades de
+   * olvidarse en el noveno.*
+   * ═══════════════════════════════════════════════════════════════════════ */
+  const mesesQueSeMuestran = esMemorial ? null : meses;
+  const pesoQueSeMuestra = esMemorial ? null : pesoVigente;
   // r3: la voz del hogar (una sola verdad) — pastilla + celda de vacunas
   const vozEstadoHogar =
     senal !== null
@@ -1028,12 +1059,22 @@ export default function PerfilDeMascota() {
           vozEstadoHogar.causa !== 'emergencia',
         sinNingunaVacuna: monta.vacunas && senal !== null && senal.vacunas_total === 0,
       });
-  const momento =
-    umbrales !== null
+  /* 🔴 **`D-1088` · EN MEMORIAL EL MOMENTO NO SE CALCULA: SE DECLARA.**
+     `calcularMomentoVital` abre con `if (entrada.esMemorial) return 'M6'` —o
+     sea que **la edad que se le pasaba no se usaba nunca** en ese caso—, y aun
+     así el dato viajaba. *Un argumento que el receptor ignora sigue siendo la
+     app llevando la edad de quien ya no está a una pieza que la muestra.*
+     ⇒ la rama de memorial devuelve `'M6'` directo y la edad ni se nombra. */
+  const momento = esMemorial
+    ? 'M6'
+    : umbrales !== null
       ? calcularMomentoVital({
           edadMeses: meses,
           tieneCondicionCronica: tiene_condicion_cronica,
-          esMemorial: mascotaEnMemorial(mascota.estado_vida),
+          /* Queda en `false` porque esta rama **sólo corre si NO es memorial**
+             (el guard está arriba). *Pasar `esMemorial` acá volvería a poner la
+             pregunta en dos lugares.* */
+          esMemorial: false,
           umbrales,
         })
       : null;
@@ -1116,7 +1157,7 @@ export default function PerfilDeMascota() {
         mono: true,
       });
     }
-    if (pesoVigente !== null) {
+    if (pesoQueSeMuestra !== null) {
       datosIdentidad.push({
         etiqueta: t('perfil.peso'),
         /* La fecha va pegada al número, no en otra fila: *un peso sin cuándo
@@ -1130,11 +1171,11 @@ export default function PerfilDeMascota() {
            render para las nueve filas. *Un cambio de forma para una sola fila
            no vale lo que cuesta en las otras ocho.* */
         valor: [
-          `${pesoVigente.kg} kg`,
-          pesoVigente.fecha !== null ? fechaCortaMono(pesoVigente.fecha, idioma) : null,
-          pesoVigente.deClinica === null
+          `${pesoQueSeMuestra.kg} kg`,
+          pesoQueSeMuestra.fecha !== null ? fechaCortaMono(pesoQueSeMuestra.fecha, idioma) : null,
+          pesoQueSeMuestra.deClinica === null
             ? null
-            : pesoVigente.deClinica
+            : pesoQueSeMuestra.deClinica
               ? t('perfil.pesoDeClinica')
               : t('perfil.pesoDeVos'),
         ]
@@ -1384,28 +1425,29 @@ export default function PerfilDeMascota() {
                   >
                     {[
                       esAcuario ? (tipoAgua === 'marino' ? t('perfil.aguaMarino') : tipoAgua === 'dulce' ? t('perfil.aguaDulce') : null) : mascota.raza,
-                      esAcuario || meses === null
+                      /* La guarda mira **la edad ya filtrada**: en memorial es
+                         `null` y la línea no se dibuja. */
+                      esAcuario || mesesQueSeMuestran === null
                         ? null
-                        : meses !== null
-                        ? /* ⭐ **EN MEMORIAL LA EDAD VA EN PASADO** (E, S113 · fase 3).
-                             Decía «~11 años» en la pantalla de quien ya no está —
-                             *el presente afirma que sigue teniendo esa edad, y eso
-                             no es un detalle de estilo: es la pantalla hablando
-                             como si nada hubiera pasado.* La cifra no cambia; lo
-                             que cambia es el tiempo del verbo. */
+                        : mesesQueSeMuestran !== null
+                        ? /* ⏪☠️ **ACÁ VIVÍA «tenía ~11 años» (S113 · fase 3), Y SE VA
+                             CON SU MITAD BUENA INTACTA.** Su lectura era correcta
+                             —*el presente afirma que sigue teniendo esa edad*— y su
+                             conclusión estaba incompleta: **la cifra también era
+                             falsa**, porque se cuenta contra HOY. Ver `D-1088`,
+                             arriba, donde se filtra. Sin fecha de partida no hay
+                             edad que decir, y no se inventa. */
+                          /* El guard va TAMBIÉN acá, aunque `mesesQueSeMuestran`
+                             ya sea `null` en memorial: *el gate mide el SÍMBOLO,
+                             no el valor, y no puede ejecutar la pantalla*. El
+                             hecho lo cura la filtración de arriba; esta línea es
+                             lo que lo hace **comprobable sin correrla** (`L-192`:
+                             una verificación cuyo modo de falla es el silencio no
+                             es una verificación). */
                           esMemorial
-                          ? t('perfil.edadTenia', {
-                              edad: vozEdad(
-                                meses,
-                                mascota.fecha_nacimiento_precision,
-                                mascota.fecha_nacimiento !== null
-                                  ? Number(mascota.fecha_nacimiento.slice(0, 4))
-                                  : null,
-                                t,
-                              ),
-                            })
+                          ? null
                           : vozEdad(
-                            meses,
+                            mesesQueSeMuestran,
                             mascota.fecha_nacimiento_precision,
                             mascota.fecha_nacimiento !== null
                               ? Number(mascota.fecha_nacimiento.slice(0, 4))
@@ -1423,7 +1465,7 @@ export default function PerfilDeMascota() {
                          Acá va SOLO el número: el encabezado es una línea de
                          identidad de un vistazo, y la fecha y el «quién» viven en
                          su fila, donde hay lugar para leerlos. */
-                      esAcuario || pesoVigente === null ? null : `${pesoVigente.kg} kg`,
+                      esAcuario || pesoQueSeMuestra === null ? null : `${pesoQueSeMuestra.kg} kg`,
                     ]
                       .filter((x): x is string => x !== null && x !== '')
                       .join(' · ')
@@ -1760,7 +1802,7 @@ export default function PerfilDeMascota() {
           const dimensiones = {
             identidad: mascota.raza !== null,
             salud: senal !== null && senal.vacunas_total > 0,
-            cuerpo: pesoVigente !== null,
+            cuerpo: pesoQueSeMuestra !== null,
             /* `items` puede ser `'error'`: **un fallo de carga no es una
                ausencia de carácter**, así que se lee como «todavía no sé» —
                que en un booleano es `false`, y la almohadilla apagada dice
