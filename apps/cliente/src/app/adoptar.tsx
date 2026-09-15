@@ -307,185 +307,192 @@ export default function Adoptar() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: {
-          padding: spacing[5],
-          gap: spacing[5],
-          } }}
+
       >
-        {/* LA VUELTA A LAS CONVERSACIONES. Sólo con sesión: sin cuenta no hay
-            ninguna, y ofrecerla sería llevar a un vacío garantizado (Ley 23).
-            🔴 **Sin contador, y sin pedirlas para saber si hay.** Contar
-            exigiría un viaje más en CADA carga de la pantalla más visitada del
-            vertical, y S94-PERF midió que el techo de esta casa son los viajes. */}
-        {conSesion === true ? (
-          <CeldaNavegacion
-            titulo={t('misSolicitudes.entrada')}
-            onPress={() => router.push('/adoptar/solicitudes')}
-          />
-        ) : null}
-
-        {/* LA LÍNEA DE LA PUERTA SIN CUENTA (§4.1) — «nada más» que esto.
-            🔴 `=== false` y no `!== true`: mientras la sesión se pregunta el
-            valor es `null`, y `!== true` le diría a quien YA entró que va a
-            necesitar una cuenta. */}
-        {conSesion === false ? (
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
-            <View style={{ flex: 1 }}>
-              <Texto variante="apoyo" color="tertiary">
-                {t('adoptar.sinCuentaLinea')}
-              </Texto>
-            </View>
-            <Pressable
-              onPress={() => setHojaPorQueCuenta(true)}
-              accessibilityRole="button"
-              /* La etiqueta accesible es el TEXTO QUE ABRE, no «info». */
-              accessibilityLabel={t('adoptar.sinCuentaPorQueTitulo')}
-              hitSlop={12}
-            >
-              <Icono nombre="info" tamano={20} registro="aa" />
-            </Pressable>
-          </View>
-        ) : null}
-
-        {/* ═══ A1 · LOS FILTROS, EN UNA SOLA HOJA ═══════════════════════
-
-            ☠️ **Acá vivían TRES `FiltroPills` con doce chips**, en cuatro ejes
-            apilados sobre la lista. Se retiran enteros (Ley 37) y su razón se
-            conserva: *un riel horizontal esconde parte de un eje sin decir
-            cuánto esconde* — por eso eran `envuelve` y no una tira. **La hoja
-            resuelve lo mismo mejor:** no compite con la lista por el alto de la
-            pantalla, y al abrirse muestra los nueve ejes a la vez en vez de
-            tres.
-
-            🔑 **Y la hoja devuelve `FiltrosAdoptables` TAL CUAL** —los nombres
-            de la lista blanca del motor, `snake_case` incluido—, así que lo que
-            sale entra al lector sin traducción. *Ese pedido fue explícito: una
-            hoja que devuelve su propio vocabulario obliga a un mapa en el
-            medio, y ese mapa es la segunda verdad que diverge sola.* ── */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
-          <Boton
-            variante="secundario"
-            tamaño="sm"
-            etiqueta={
-              /* El botón DICE CUÁNTOS filtros hay puestos. Sin el número, la
-                 hoja esconde lo que la lista ya está aplicando: *una lista
-                 filtrada que no se declara filtrada se lee como un catálogo
-                 pobre.* */
-              cuantosFiltros === 0
-                ? t('adoptar.filtrar')
-                : t('adoptar.filtrarConCuenta', { n: cuantosFiltros })
-            }
-            onPress={() => setHojaFiltros(true)}
-          />
-          {cuantosFiltros > 0 ? (
-            <Boton
-              variante="ghost"
-              tamaño="sm"
-              etiqueta={t('adoptar.limpiarFiltros')}
-              onPress={() => setFiltros({})}
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[5], gap: spacing[5] }}>
+          {/* LA VUELTA A LAS CONVERSACIONES. Sólo con sesión: sin cuenta no hay
+              ninguna, y ofrecerla sería llevar a un vacío garantizado (Ley 23).
+              🔴 **Sin contador, y sin pedirlas para saber si hay.** Contar
+              exigiría un viaje más en CADA carga de la pantalla más visitada del
+              vertical, y S94-PERF midió que el techo de esta casa son los viajes. */}
+          {conSesion === true ? (
+            <CeldaNavegacion
+              titulo={t('misSolicitudes.entrada')}
+              onPress={() => router.push('/adoptar/solicitudes')}
             />
           ) : null}
-          {/* ⭐ **A6 · LA PUERTA AL BUSCADOR DE REFUGIOS** — segunda mitad del
-              literal del founder: *«en adopción puedo buscar un refugio por
-              nombre y ver sus animales»*.
 
-              Va acá, al lado de filtrar, porque es la otra forma de acotar la
-              vidriera: **una filtra animales, la otra entra por la casa que los
-              cuida.** Y va `ghost`: la acción principal de esta pantalla sigue
-              siendo mirar animales (Ley 5 — una superficie con dos acentos no
-              tiene ninguno). */}
-          <View style={{ flex: 1, alignItems: 'flex-end' }}>
-            <Boton
-              variante="ghost"
-              tamaño="sm"
-              etiqueta={t('adoptar.verRefugios')}
-              onPress={() => router.push('/adoptar/refugios')}
-            />
-          </View>
-        </View>
-
-        {estado.fase === 'cargando' ? (
-          <EsqueletoGrupo>
-            <Esqueleto alto={120} />
-            <Esqueleto alto={120} />
-          </EsqueletoGrupo>
-        ) : estado.fase === 'error' ? (
-          <EstadoVacio
-            registro="seccion"
-            titulo={t('adoptar.errorTitulo')}
-            descripcion={t('adoptar.errorDetalle')}
-          />
-        ) : estado.destacados.length === 0 && estado.resto.length === 0 ? (
-          /* Vacío DIGNO y verdadero. **Y distingue si hay filtros puestos**: con
-             filtros el vacío no dice que no hay animales —dice que no hay con
-             ESE criterio—, y ofrece el camino de vuelta. *Un vacío que culpa al
-             catálogo cuando el que filtró fue el usuario le esconde la salida.* */
-          <EstadoVacio
-            registro="seccion"
-            icono={<Icono nombre="refugio" tamano={48} />}
-            titulo={llave === '{}' ? t('adoptar.vacioTitulo') : t('adoptar.vacioFiltradoTitulo')}
-            descripcion={llave === '{}' ? t('adoptar.vacioDetalle') : t('adoptar.vacioFiltradoDetalle')}
-            accion={
-              llave === '{}' ? undefined : (
-                <Boton
-                  variante="secundario"
-                  etiqueta={t('adoptar.limpiarFiltros')}
-                  onPress={() => setFiltros({})}
-                />
-              )
-            }
-          />
-        ) : (
-          <>
-            {/* LOS QUE MÁS ESPERAN — la carta con su criterio. §4.1 pide el
-                porqué **en cada uno**, no sólo en la cabecera: la línea de
-                arriba dice por qué el grupo va primero, y la de cada animal
-                dice cuánto lleva él. */}
-            {estado.destacados.length > 0 ? (
-              <BloqueConCriterio
-                titulo={t('adoptar.destacadosTitulo')}
-                porque={t('adoptar.destacadosPorque')}
+          {/* LA LÍNEA DE LA PUERTA SIN CUENTA (§4.1) — «nada más» que esto.
+              🔴 `=== false` y no `!== true`: mientras la sesión se pregunta el
+              valor es `null`, y `!== true` le diría a quien YA entró que va a
+              necesitar una cuenta. */}
+          {conSesion === false ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+              <View style={{ flex: 1 }}>
+                <Texto variante="apoyo" color="tertiary">
+                  {t('adoptar.sinCuentaLinea')}
+                </Texto>
+              </View>
+              <Pressable
+                onPress={() => setHojaPorQueCuenta(true)}
+                accessibilityRole="button"
+                /* La etiqueta accesible es el TEXTO QUE ABRE, no «info». */
+                accessibilityLabel={t('adoptar.sinCuentaPorQueTitulo')}
+                hitSlop={12}
               >
-                <View style={{ gap: spacing[4] }}>
-                  {estado.destacados.map((a) => {
-                    const e = describirEspera(a.esperaDias);
-                    return (
-                      <View key={a.publicacionId} style={{ gap: spacing[1] }}>
-                        {tarjeta(a, estado.caras)}
-                        <Texto variante="apoyo" color="tertiary">
-                          {t('adoptar.esperaDesde', {
-                            cuanto: t(e.clave as 'espera.dias', e.params),
-                          })}
-                        </Texto>
-                      </View>
-                    );
-                  })}
-                </View>
-              </BloqueConCriterio>
-            ) : null}
+                <Icono nombre="info" tamano={20} registro="aa" />
+              </Pressable>
+            </View>
+          ) : null}
 
-            {/* EL RESTO. Con filtro de convivencia activo, el servidor pone
-                primero a los confirmados: la segunda tanda gana su título y
-                **el mismo peso visual** — «todavía no se sabe» no es un
-                descarte (§4.1). */}
-            {estado.ordenPorConvivencia ? (
-              <Texto variante="apoyo" color="tertiary">
-                {t('adoptar.ordenConvivencia')}
-              </Texto>
-            ) : null}
-            <View style={{ gap: spacing[4] }}>{estado.resto.map((a) => tarjeta(a, estado.caras))}</View>
+          {/* ═══ A1 · LOS FILTROS, EN UNA SOLA HOJA ═══════════════════════
 
-            {estado.hayMas ? (
+              ☠️ **Acá vivían TRES `FiltroPills` con doce chips**, en cuatro ejes
+              apilados sobre la lista. Se retiran enteros (Ley 37) y su razón se
+              conserva: *un riel horizontal esconde parte de un eje sin decir
+              cuánto esconde* — por eso eran `envuelve` y no una tira. **La hoja
+              resuelve lo mismo mejor:** no compite con la lista por el alto de la
+              pantalla, y al abrirse muestra los nueve ejes a la vez en vez de
+              tres.
+
+              🔑 **Y la hoja devuelve `FiltrosAdoptables` TAL CUAL** —los nombres
+              de la lista blanca del motor, `snake_case` incluido—, así que lo que
+              sale entra al lector sin traducción. *Ese pedido fue explícito: una
+              hoja que devuelve su propio vocabulario obliga a un mapa en el
+              medio, y ese mapa es la segunda verdad que diverge sola.* ── */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+            <Boton
+              variante="secundario"
+              tamaño="sm"
+              etiqueta={
+                /* El botón DICE CUÁNTOS filtros hay puestos. Sin el número, la
+                   hoja esconde lo que la lista ya está aplicando: *una lista
+                   filtrada que no se declara filtrada se lee como un catálogo
+                   pobre.* */
+                cuantosFiltros === 0
+                  ? t('adoptar.filtrar')
+                  : t('adoptar.filtrarConCuenta', { n: cuantosFiltros })
+              }
+              onPress={() => setHojaFiltros(true)}
+            />
+            {cuantosFiltros > 0 ? (
               <Boton
-                variante="secundario"
-                bloque
-                etiqueta={t('adoptar.cargarMas')}
-                cargando={trayendoMas}
-                onPress={() => void cargarMas()}
+                variante="ghost"
+                tamaño="sm"
+                etiqueta={t('adoptar.limpiarFiltros')}
+                onPress={() => setFiltros({})}
               />
             ) : null}
-          </>
-        )}
+            {/* ⭐ **A6 · LA PUERTA AL BUSCADOR DE REFUGIOS** — segunda mitad del
+                literal del founder: *«en adopción puedo buscar un refugio por
+                nombre y ver sus animales»*.
+
+                Va acá, al lado de filtrar, porque es la otra forma de acotar la
+                vidriera: **una filtra animales, la otra entra por la casa que los
+                cuida.** Y va `ghost`: la acción principal de esta pantalla sigue
+                siendo mirar animales (Ley 5 — una superficie con dos acentos no
+                tiene ninguno). */}
+            <View style={{ flex: 1, alignItems: 'flex-end' }}>
+              <Boton
+                variante="ghost"
+                tamaño="sm"
+                etiqueta={t('adoptar.verRefugios')}
+                onPress={() => router.push('/adoptar/refugios')}
+              />
+            </View>
+          </View>
+
+          {estado.fase === 'cargando' ? (
+            <EsqueletoGrupo>
+              <Esqueleto alto={120} />
+              <Esqueleto alto={120} />
+            </EsqueletoGrupo>
+          ) : estado.fase === 'error' ? (
+            <EstadoVacio
+              registro="seccion"
+              titulo={t('adoptar.errorTitulo')}
+              descripcion={t('adoptar.errorDetalle')}
+            />
+          ) : estado.destacados.length === 0 && estado.resto.length === 0 ? (
+            /* Vacío DIGNO y verdadero. **Y distingue si hay filtros puestos**: con
+               filtros el vacío no dice que no hay animales —dice que no hay con
+               ESE criterio—, y ofrece el camino de vuelta. *Un vacío que culpa al
+               catálogo cuando el que filtró fue el usuario le esconde la salida.* */
+            <EstadoVacio
+              registro="seccion"
+              icono={<Icono nombre="refugio" tamano={48} />}
+              titulo={llave === '{}' ? t('adoptar.vacioTitulo') : t('adoptar.vacioFiltradoTitulo')}
+              descripcion={llave === '{}' ? t('adoptar.vacioDetalle') : t('adoptar.vacioFiltradoDetalle')}
+              accion={
+                llave === '{}' ? undefined : (
+                  <Boton
+                    variante="secundario"
+                    etiqueta={t('adoptar.limpiarFiltros')}
+                    onPress={() => setFiltros({})}
+                  />
+                )
+              }
+            />
+          ) : (
+            <>
+              {/* LOS QUE MÁS ESPERAN — la carta con su criterio. §4.1 pide el
+                  porqué **en cada uno**, no sólo en la cabecera: la línea de
+                  arriba dice por qué el grupo va primero, y la de cada animal
+                  dice cuánto lleva él. */}
+              {estado.destacados.length > 0 ? (
+                <BloqueConCriterio
+                  titulo={t('adoptar.destacadosTitulo')}
+                  porque={t('adoptar.destacadosPorque')}
+                >
+                  <View style={{ gap: spacing[4] }}>
+                    {estado.destacados.map((a) => {
+                      const e = describirEspera(a.esperaDias);
+                      return (
+                        <View key={a.publicacionId} style={{ gap: spacing[1] }}>
+                          {tarjeta(a, estado.caras)}
+                          <Texto variante="apoyo" color="tertiary">
+                            {t('adoptar.esperaDesde', {
+                              cuanto: t(e.clave as 'espera.dias', e.params),
+                            })}
+                          </Texto>
+                        </View>
+                      );
+                    })}
+                  </View>
+                </BloqueConCriterio>
+              ) : null}
+
+              {/* EL RESTO. Con filtro de convivencia activo, el servidor pone
+                  primero a los confirmados: la segunda tanda gana su título y
+                  **el mismo peso visual** — «todavía no se sabe» no es un
+                  descarte (§4.1). */}
+              {estado.ordenPorConvivencia ? (
+                <Texto variante="apoyo" color="tertiary">
+                  {t('adoptar.ordenConvivencia')}
+                </Texto>
+              ) : null}
+              <View style={{ gap: spacing[4] }}>{estado.resto.map((a) => tarjeta(a, estado.caras))}</View>
+
+              {estado.hayMas ? (
+                <Boton
+                  variante="secundario"
+                  bloque
+                  etiqueta={t('adoptar.cargarMas')}
+                  cargando={trayendoMas}
+                  onPress={() => void cargarMas()}
+                />
+              ) : null}
+            </>
+          )}
+        </View>
       </HojaContenido>
 
       {/* N22 · LA «i» EXPLICA — y lo que explica es POR QUÉ, no CÓMO. */}

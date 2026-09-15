@@ -268,7 +268,7 @@ export default function CheckoutPlanPaseo() {
           paga la hoja (`R53`). */}
       <HojaContenido
         arranque={cabecera.arranque}
-        scroll={{ contentContainerStyle: { padding: spacing[4], gap: spacing[4], } }}
+
         fondo={
           <View onLayout={cabecera.alMedir}>
             <Cabecera
@@ -288,68 +288,78 @@ export default function CheckoutPlanPaseo() {
           />
         }
       >
-        <Texto variante="seccion">{t('checkout.resumen')}</Texto>
-        <Tarjeta relleno="ninguno">
-          <Celda
-            titulo={t('checkoutPlan.servicio')}
-            subtitulo={t('checkout.conPrestador', { prestador: texto('prestadorNombre') })}
-            metadataMono={`${dias.length}×/sem · ${texto('hora').slice(0, 5)}`}
-          />
-          <Separador />
-          <Celda titulo={t('checkout.total')} metadataMono={formatearPrecio(precio)} />
-        </Tarjeta>
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[4], gap: spacing[4] }}>
+          <Texto variante="seccion">{t('checkout.resumen')}</Texto>
+          <Tarjeta relleno="ninguno">
+            <Celda
+              titulo={t('checkoutPlan.servicio')}
+              subtitulo={t('checkout.conPrestador', { prestador: texto('prestadorNombre') })}
+              metadataMono={`${dias.length}×/sem · ${texto('hora').slice(0, 5)}`}
+            />
+            <Separador />
+            <Celda titulo={t('checkout.total')} metadataMono={formatearPrecio(precio)} />
+          </Tarjeta>
 
-        {/* ═══ 🔴 LOS TRES AVISOS — en esta pantalla, sin abrir nada más ═══ */}
-        <View style={{ gap: spacing[2] }}>
-          <Texto variante="seccion">{t('checkoutPlan.antesDePagar')}</Texto>
-          <Texto variante="cuerpo">{t('checkoutPlan.cuandoSeCobra')}</Texto>
-          <Texto variante="cuerpo">{t('checkoutPlan.avisoPrevio')}</Texto>
-          {/* La asimetría, con todas las letras. */}
-          <Texto variante="cuerpo">{t('checkoutPlan.sePausaNoSeCancela')}</Texto>
+          {/* ═══ 🔴 LOS TRES AVISOS — en esta pantalla, sin abrir nada más ═══ */}
+          <View style={{ gap: spacing[2] }}>
+            <Texto variante="seccion">{t('checkoutPlan.antesDePagar')}</Texto>
+            <Texto variante="cuerpo">{t('checkoutPlan.cuandoSeCobra')}</Texto>
+            <Texto variante="cuerpo">{t('checkoutPlan.avisoPrevio')}</Texto>
+            {/* La asimetría, con todas las letras. */}
+            <Texto variante="cuerpo">{t('checkoutPlan.sePausaNoSeCancela')}</Texto>
+          </View>
+
+          {/* ⭐ **YA NO SE ESCRIBE A MANO: SE DERIVA.** El día que el plan cobre,
+              `simula('plan_paseo')` pasa a `false` y **esta banda desaparece sola**
+              — junto con el sufijo del botón, desde la misma línea. */}
+          {/* ⭐ **EL MEDIO SE MONTA SIEMPRE**, también mientras simula: el motor
+              exige declarar el riel para FIRMAR, no para cobrar.
+              🔴 `recurrente`: los dos medios prometen cosas distintas —uno se
+              cobra solo, al otro hay que ir a pagarlo— y las dos promesas van
+              ANTES de elegir. */}
+          {/* 🔴 `deunaCobraEsteSujeto={false}` — **MEDIDO, no supuesto**:
+              `SujetoDeuna` (`pagos-deuna.ts:66-79`) tiene compra · cita · bono ·
+              mensualidad · programa, **y no `plan`**. El riel no sabe nombrar
+              este sujeto ⇒ *dejar la fila tocable sería ofrecer un medio que la
+              pantalla siguiente no puede honrar* (Ley 23).
+              ⚠️ **Y NO es «porque es recurrente»**: la mensualidad de guardería
+              también lo es y SÍ se paga por DeUna, con link mensual. La razón es
+              del SUJETO, y por eso se declara acá y no en la pieza.
+              ⭐ El día que `plan` entre a `SujetoDeuna`, esto es borrar una prop
+              — y `cobro_link_mensual` ya tiene `suscripcion_servicio_id` en su
+              XOR, así que el destino del link existe. Reportado a B. */}
+          {facturacion.props === null ? (
+              facturacion.noCargo || facturacion.reintentando ? (
+                <AvisoNoCargo
+                  onReintentar={facturacion.reintentar}
+                  reintentando={facturacion.reintentando}
+                  motivo={facturacion.motivo}
+                />
+              ) : null
+            ) : (
+            <SeccionFacturacion {...facturacion.props} total={precio} />
+          )}
+
+          <SeccionMedioDePago medio={medio} recurrente deunaCobraEsteSujeto={false} />
+          {/* ☠️ **LA BANDA SE SUMA, NO REEMPLAZA — y no se contradice con la
+              sección de arriba**: el mandato se firma hoy, el débito todavía no
+              sale. *Decir «simulado» al lado de un selector de tarjeta sólo sería
+              confuso si las dos frases hablaran de lo mismo, y no lo hacen.*
+              El día del deploy de B, `plan_paseo` pasa a `false` en
+              `simulado.ts` y **esta banda y el sufijo del CTA desaparecen a la
+              vez**, sin tocar esta pantalla. */}
+          {simula('plan_paseo') ? <Texto variante="apoyo">{t('checkout.simuladoAviso')}</Texto> : null}
+
+          {rebote !== null ? <Texto variante="cuerpo">{rebote}</Texto> : null}
         </View>
-
-        {/* ⭐ **YA NO SE ESCRIBE A MANO: SE DERIVA.** El día que el plan cobre,
-            `simula('plan_paseo')` pasa a `false` y **esta banda desaparece sola**
-            — junto con el sufijo del botón, desde la misma línea. */}
-        {/* ⭐ **EL MEDIO SE MONTA SIEMPRE**, también mientras simula: el motor
-            exige declarar el riel para FIRMAR, no para cobrar.
-            🔴 `recurrente`: los dos medios prometen cosas distintas —uno se
-            cobra solo, al otro hay que ir a pagarlo— y las dos promesas van
-            ANTES de elegir. */}
-        {/* 🔴 `deunaCobraEsteSujeto={false}` — **MEDIDO, no supuesto**:
-            `SujetoDeuna` (`pagos-deuna.ts:66-79`) tiene compra · cita · bono ·
-            mensualidad · programa, **y no `plan`**. El riel no sabe nombrar
-            este sujeto ⇒ *dejar la fila tocable sería ofrecer un medio que la
-            pantalla siguiente no puede honrar* (Ley 23).
-            ⚠️ **Y NO es «porque es recurrente»**: la mensualidad de guardería
-            también lo es y SÍ se paga por DeUna, con link mensual. La razón es
-            del SUJETO, y por eso se declara acá y no en la pieza.
-            ⭐ El día que `plan` entre a `SujetoDeuna`, esto es borrar una prop
-            — y `cobro_link_mensual` ya tiene `suscripcion_servicio_id` en su
-            XOR, así que el destino del link existe. Reportado a B. */}
-        {facturacion.props === null ? (
-            facturacion.noCargo || facturacion.reintentando ? (
-              <AvisoNoCargo
-                onReintentar={facturacion.reintentar}
-                reintentando={facturacion.reintentando}
-                motivo={facturacion.motivo}
-              />
-            ) : null
-          ) : (
-          <SeccionFacturacion {...facturacion.props} total={precio} />
-        )}
-
-        <SeccionMedioDePago medio={medio} recurrente deunaCobraEsteSujeto={false} />
-        {/* ☠️ **LA BANDA SE SUMA, NO REEMPLAZA — y no se contradice con la
-            sección de arriba**: el mandato se firma hoy, el débito todavía no
-            sale. *Decir «simulado» al lado de un selector de tarjeta sólo sería
-            confuso si las dos frases hablaran de lo mismo, y no lo hacen.*
-            El día del deploy de B, `plan_paseo` pasa a `false` en
-            `simulado.ts` y **esta banda y el sufijo del CTA desaparecen a la
-            vez**, sin tocar esta pantalla. */}
-        {simula('plan_paseo') ? <Texto variante="apoyo">{t('checkout.simuladoAviso')}</Texto> : null}
-
-        {rebote !== null ? <Texto variante="cuerpo">{rebote}</Texto> : null}
       </HojaContenido>
     </SafeAreaView>
   );

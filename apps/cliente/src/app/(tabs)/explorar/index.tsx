@@ -223,7 +223,7 @@ export default function Explorar() {
           (`R53`). */}
         <HojaContenido
           arranque={cabecera.arranque}
-          scroll={{ contentContainerStyle: { paddingBottom: AIRE_RAIZ } }}
+
           fondo={
             <View onLayout={cabecera.alMedir}>
               <Cabecera
@@ -235,202 +235,212 @@ export default function Explorar() {
             </View>
           }
         >
+          {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+            `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+            hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+            no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+            a cada lado, el de arriba pegaba el contenido al borde redondeado
+            —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+            *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+            ciruela por lado, que es `spacing[4]` exacto.* */}
+          <View style={{ paddingBottom: AIRE_RAIZ }}>
 
-        <View style={{ paddingHorizontal: spacing[4], gap: spacing[6], marginTop: spacing[2] }}>
-          {/* ── Servicios activos ── */}
-          <View style={{ gap: spacing[3] }}>
-            <TituloBloque texto={t('explorar.servicios')} />
-            {servicios === 'cargando' ? (
-              <EsqueletoGrupo>
-                <View style={{ gap: spacing[3] }}>
-                  <Esqueleto forma="bloque" ancho="100%" alto={72} />
-                  <Esqueleto forma="bloque" ancho="100%" alto={72} />
-                </View>
-              </EsqueletoGrupo>
-            ) : servicios === 'error' ? (
-              <EstadoVacio
-                titulo={t('explorar.error')}
-                descripcion={t('hogar.errorHistoriaDetalle')}
-                accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setServicios('cargando')} />}
-              />
-            ) : (
-              <View style={{ gap: spacing[3] }}>
-                {/* QW2 (S53, decisión founder): grilla de 2 columnas,
-                    cards cuadradas con el Icono b′ PRESIDIENDO. */}
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] }}>
-                  {/* ═══════════════════════════════════════════════════════════
-                      🔴 ESTE BLOQUE TIENE UNA COPIA VIVA, Y SI LO TOCÁS SIN
-                      TOCARLA, UN INSTRUMENTO EMPIEZA A MENTIR.
-
-                      La galería lo reproduce **transcrito a mano** para poder
-                      comparar las tres baldosas de la casa (`D-973`):
-                      `packages/ui/src/gallery/TokenGallery.tsx`, sección
-                      *«D-973 · LA BALDOSA DEL CLIENTE, REPRODUCIDA FIEL»*.
-
-                      **No se importa porque no hay qué importar:** esta baldosa
-                      no es un componente — vive INLINE acá adentro. *Y ése es
-                      exactamente el hecho que `D-973` pone sobre la mesa.*
-
-                      ⚠️ **La advertencia estaba escrita allá y no acá**, que es
-                      el lado que rompe: la copia avisa «quien toque aquella,
-                      mira ésta» **y aquella no se enteraba**. *Una nota que sólo
-                      vive en la copia protege a la copia de nadie.*
-                      ═══════════════════════════════════════════════════════════ */}
-                  {fichasActivas.map((f) => {
-                    const contenido = (
-                      <View style={{ aspectRatio: 1.05, justifyContent: 'space-between' }}>
-                        <View style={{ paddingTop: spacing[1] }}>{f.icono}</View>
-                        <View style={{ gap: 2 }}>
-                          {/* ⭐ S107-C · el label baja de `base` a `sm` y se
-                              acota a dos líneas: con la baldosa a 31 % el
-                              texto se salía de su espacio. *El tamaño del
-                              texto vive acá, en el consumidor — se midió antes
-                              de pedírselo a B.* */}
-                          <Text
-                            numberOfLines={2}
-                            style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.primary }}
-                          >
-                            {f.titulo}
-                          </Text>
-                          {/* ☠️ S107-C · LA DESCRIPCIÓN DEL PRODUCTO Y EL
-                              «Toca para entrar» SALIERON (firma del founder).
-                              La causa del desborde acá no era el tamaño del
-                              texto: **era cuánta información cargaba la
-                              baldosa**. Con tres columnas entraban glifo +
-                              nombre + descripción + una llamada a la acción en
-                              ~100 pt de ancho.
-                              🔴 **El chevron reemplaza al texto porque dice lo
-                              mismo ocupando una fila de nada** — y *«toca para
-                              entrar» le explica a alguien que ya sabe tocar
-                              una tarjeta*. */}
-                          {/* ☠️ S107-C · EL CHEVRON SE RETIRÓ (firma del
-                              founder, con su razón medida): **quedaba en un
-                              lugar distinto en cada baldosa** porque el label
-                              ocupa distinta cantidad de líneas — «Adiestramiento»
-                              lo empujaba abajo y «Paseo» lo dejaba arriba.
-                              🔴 **Y no se pierde nada: que la tarjeta es
-                              tocable ya lo dice ser una tarjeta.** *Un
-                              indicador que se mueve solo llama la atención
-                              sobre sí mismo en vez de sobre lo que señala.*
-                              ⚠️ La etiqueta accesible **se queda**: sin texto
-                              ni chevron, es lo único que dice a dónde entra. */}
-                        </View>
-                      </View>
-                    );
-                    /* ⭐ S107-C · TRES COLUMNAS, igual que la grilla de
-                       Negocio: con cinco servicios activos, dos columnas dejan
-                       la última fila con una ficha del doble de ancho — y una
-                       ficha más grande se lee como más importante.
-                       `flexGrow: 0` para que la fila corta se vea corta y no
-                       se estire a llenar. */
-                    return (
-                      <View key={f.clave} style={{ flexBasis: '31%', flexGrow: 0 }}>
-                        {/* 🔴 SIN TEXTO, LA ETIQUETA CARGA EL DESTINO.
-                            Un chevron no se anuncia: quien no ve la pantalla
-                            oiría «botón» y nada más. La etiqueta dice **a
-                            dónde entra**, que es lo que el texto retirado
-                            decía peor. */}
-                        {f.onPress ? (
-                          <Tarjeta
-                            relleno="amplio"
-                            interactiva
-                            onPress={f.onPress}
-                            accessibilityRole="button"
-                            /* 🔴 El guion blando SE QUITA de la etiqueta
-                               accesible: sirve para partir un renglón, y acá
-                               no hay renglón que partir. *La mayoría de los
-                               lectores lo ignora, pero «la mayoría» no es una
-                               garantía cuando el costo de asegurarlo es un
-                               `replace`.* */
-                            etiqueta={t('explorar.entrarA', { servicio: f.titulo.replace(/\u00AD/g, '') })}
-                          >
-                            {contenido}
-                          </Tarjeta>
-                        ) : (
-                          <Tarjeta relleno="amplio">{contenido}</Tarjeta>
-                        )}
-                      </View>
-                    );
-                  })}
-                </View>
-                {/* ☠️ S107-C · «Agendar veterinaria llega pronto» RETIRADO.
-                    No pertenecía acá: esta sección lista los servicios que YA
-                    se agendan, y una nota que dice lo contrario debajo de
-                    ellos contradice lo que la pantalla está mostrando. */}
-              </View>
-            )}
-          </View>
-
-          {/* ── Refugios / adopción — LA ENTRADA (S112-C) ──────────────────
-
-              **POR QUÉ ACÁ Y NO EN EL HOGAR**, que era la otra opción sobre la
-              mesa: `DISEÑO_EXPERIENCIA` §3 ya la ubicó —*«Refugios: adopción y
-              donaciones, día 1»* vive en EXPLORAR en el mapa firmado— y la
-              razón sigue en pie: **el Hogar es el estado de TU casa** y la
-              adopción es descubrimiento deliberado (§6). Además **el lugar ya
-              estaba hecho**: montarla acá retira, en el mismo acto, un texto
-              que había quedado falso (`L-395`).
-
-              ⚠️ **La excepción es el hogar SIN mascotas**, y no contradice
-              esto: ahí la adopción **sí** es el estado del hogar —no hay nadie
-              de quien contar— y por eso el founder la pidió en esa pantalla.
-              Son dos entradas porque son dos preguntas distintas.
-
-              🔴 **Sin contador, y no es un olvido:** §4 prohíbe convertir la
-              lista en inventario, y S111-C ya quitó el contador de resultados
-              de la vidriera por eso mismo. *Saber que hay 34 no ayuda a elegir
-              a ninguno.* */}
-          <View style={{ gap: spacing[3] }}>
-            <TituloBloque texto={t('explorar.refugios')} />
-            {ADOPCION_ALCANZABLE && hayAdoptables === true ? (
-              /* `CeldaNavegacion` y no `Celda`: **navega**, y la Ley 19.1 le
-                 da su anatomía —glifo del set b′ + chevron de entrada—. Lo
-                 cazó el typecheck, que exige `interactiva` explícito en la
-                 Celda cruda: *la pieza correcta no era la que estaba a mano.* */
-              <Tarjeta>
-                <CeldaNavegacion
-                  icono="refugio"
-                  titulo={t('explorar.adopcionEntrada')}
-                  detalle={t('explorar.adopcionEntradaDetalle')}
-                  onPress={() => router.push('/adoptar')}
-                />
-              </Tarjeta>
-            ) : hayAdoptables === false ? (
-              <EstadoVacio
-                registro="seccion"
-                icono={<Icono nombre="refugio" tamano={48} />}
-                titulo={t('explorar.refugiosVacio')}
-                descripcion={t('explorar.refugiosVacioDetalle')}
-              />
-            ) : (
-              /* Todavía no sabemos: **no se afirma ninguna de las dos cosas.**
-                 Un esqueleto acá sería honesto pero ruidoso en una pantalla que
-                 ya tiene el suyo arriba; el silencio de una sección que aún no
-                 respondió no promete nada. */
-              null
-            )}
-          </View>
-
-          {/* ── Próximamente honesto — UNA sección, filas serenas en
-              texto secundario (P5c: el muro de Insignias ochre murió;
-              el título de la sección ya dice todo) ── */}
-          {proximamente.length > 0 ? (
+          <View style={{ paddingHorizontal: spacing[4], gap: spacing[6], marginTop: spacing[2] }}>
+            {/* ── Servicios activos ── */}
             <View style={{ gap: spacing[3] }}>
-              <TituloBloque texto={t('explorar.proximamente')} />
-              <Tarjeta relleno="ninguno">
-                {/* S58 (D-361): la celda VISTE, no promete — ícono del
-                    registry + fila informativa SIN chevron ni tap (un
-                    coming soon no navega: no es CeldaNavegacion, Ley 19.4) */}
-                {proximamente.map((p, i) => (
-                  <View key={p.nombre}>
-                    {i > 0 ? <Separador /> : null}
-                    <Celda inicio={<Icono nombre={p.icono} tamano={24} registro="aa" />} titulo={p.nombre} />
+              <TituloBloque texto={t('explorar.servicios')} />
+              {servicios === 'cargando' ? (
+                <EsqueletoGrupo>
+                  <View style={{ gap: spacing[3] }}>
+                    <Esqueleto forma="bloque" ancho="100%" alto={72} />
+                    <Esqueleto forma="bloque" ancho="100%" alto={72} />
                   </View>
-                ))}
-              </Tarjeta>
+                </EsqueletoGrupo>
+              ) : servicios === 'error' ? (
+                <EstadoVacio
+                  titulo={t('explorar.error')}
+                  descripcion={t('hogar.errorHistoriaDetalle')}
+                  accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setServicios('cargando')} />}
+                />
+              ) : (
+                <View style={{ gap: spacing[3] }}>
+                  {/* QW2 (S53, decisión founder): grilla de 2 columnas,
+                      cards cuadradas con el Icono b′ PRESIDIENDO. */}
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] }}>
+                    {/* ═══════════════════════════════════════════════════════════
+                        🔴 ESTE BLOQUE TIENE UNA COPIA VIVA, Y SI LO TOCÁS SIN
+                        TOCARLA, UN INSTRUMENTO EMPIEZA A MENTIR.
+
+                        La galería lo reproduce **transcrito a mano** para poder
+                        comparar las tres baldosas de la casa (`D-973`):
+                        `packages/ui/src/gallery/TokenGallery.tsx`, sección
+                        *«D-973 · LA BALDOSA DEL CLIENTE, REPRODUCIDA FIEL»*.
+
+                        **No se importa porque no hay qué importar:** esta baldosa
+                        no es un componente — vive INLINE acá adentro. *Y ése es
+                        exactamente el hecho que `D-973` pone sobre la mesa.*
+
+                        ⚠️ **La advertencia estaba escrita allá y no acá**, que es
+                        el lado que rompe: la copia avisa «quien toque aquella,
+                        mira ésta» **y aquella no se enteraba**. *Una nota que sólo
+                        vive en la copia protege a la copia de nadie.*
+                        ═══════════════════════════════════════════════════════════ */}
+                    {fichasActivas.map((f) => {
+                      const contenido = (
+                        <View style={{ aspectRatio: 1.05, justifyContent: 'space-between' }}>
+                          <View style={{ paddingTop: spacing[1] }}>{f.icono}</View>
+                          <View style={{ gap: 2 }}>
+                            {/* ⭐ S107-C · el label baja de `base` a `sm` y se
+                                acota a dos líneas: con la baldosa a 31 % el
+                                texto se salía de su espacio. *El tamaño del
+                                texto vive acá, en el consumidor — se midió antes
+                                de pedírselo a B.* */}
+                            <Text
+                              numberOfLines={2}
+                              style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.primary }}
+                            >
+                              {f.titulo}
+                            </Text>
+                            {/* ☠️ S107-C · LA DESCRIPCIÓN DEL PRODUCTO Y EL
+                                «Toca para entrar» SALIERON (firma del founder).
+                                La causa del desborde acá no era el tamaño del
+                                texto: **era cuánta información cargaba la
+                                baldosa**. Con tres columnas entraban glifo +
+                                nombre + descripción + una llamada a la acción en
+                                ~100 pt de ancho.
+                                🔴 **El chevron reemplaza al texto porque dice lo
+                                mismo ocupando una fila de nada** — y *«toca para
+                                entrar» le explica a alguien que ya sabe tocar
+                                una tarjeta*. */}
+                            {/* ☠️ S107-C · EL CHEVRON SE RETIRÓ (firma del
+                                founder, con su razón medida): **quedaba en un
+                                lugar distinto en cada baldosa** porque el label
+                                ocupa distinta cantidad de líneas — «Adiestramiento»
+                                lo empujaba abajo y «Paseo» lo dejaba arriba.
+                                🔴 **Y no se pierde nada: que la tarjeta es
+                                tocable ya lo dice ser una tarjeta.** *Un
+                                indicador que se mueve solo llama la atención
+                                sobre sí mismo en vez de sobre lo que señala.*
+                                ⚠️ La etiqueta accesible **se queda**: sin texto
+                                ni chevron, es lo único que dice a dónde entra. */}
+                          </View>
+                        </View>
+                      );
+                      /* ⭐ S107-C · TRES COLUMNAS, igual que la grilla de
+                         Negocio: con cinco servicios activos, dos columnas dejan
+                         la última fila con una ficha del doble de ancho — y una
+                         ficha más grande se lee como más importante.
+                         `flexGrow: 0` para que la fila corta se vea corta y no
+                         se estire a llenar. */
+                      return (
+                        <View key={f.clave} style={{ flexBasis: '31%', flexGrow: 0 }}>
+                          {/* 🔴 SIN TEXTO, LA ETIQUETA CARGA EL DESTINO.
+                              Un chevron no se anuncia: quien no ve la pantalla
+                              oiría «botón» y nada más. La etiqueta dice **a
+                              dónde entra**, que es lo que el texto retirado
+                              decía peor. */}
+                          {f.onPress ? (
+                            <Tarjeta
+                              relleno="amplio"
+                              interactiva
+                              onPress={f.onPress}
+                              accessibilityRole="button"
+                              /* 🔴 El guion blando SE QUITA de la etiqueta
+                                 accesible: sirve para partir un renglón, y acá
+                                 no hay renglón que partir. *La mayoría de los
+                                 lectores lo ignora, pero «la mayoría» no es una
+                                 garantía cuando el costo de asegurarlo es un
+                                 `replace`.* */
+                              etiqueta={t('explorar.entrarA', { servicio: f.titulo.replace(/\u00AD/g, '') })}
+                            >
+                              {contenido}
+                            </Tarjeta>
+                          ) : (
+                            <Tarjeta relleno="amplio">{contenido}</Tarjeta>
+                          )}
+                        </View>
+                      );
+                    })}
+                  </View>
+                  {/* ☠️ S107-C · «Agendar veterinaria llega pronto» RETIRADO.
+                      No pertenecía acá: esta sección lista los servicios que YA
+                      se agendan, y una nota que dice lo contrario debajo de
+                      ellos contradice lo que la pantalla está mostrando. */}
+                </View>
+              )}
             </View>
-          ) : null}
-        </View>
+
+            {/* ── Refugios / adopción — LA ENTRADA (S112-C) ──────────────────
+
+                **POR QUÉ ACÁ Y NO EN EL HOGAR**, que era la otra opción sobre la
+                mesa: `DISEÑO_EXPERIENCIA` §3 ya la ubicó —*«Refugios: adopción y
+                donaciones, día 1»* vive en EXPLORAR en el mapa firmado— y la
+                razón sigue en pie: **el Hogar es el estado de TU casa** y la
+                adopción es descubrimiento deliberado (§6). Además **el lugar ya
+                estaba hecho**: montarla acá retira, en el mismo acto, un texto
+                que había quedado falso (`L-395`).
+
+                ⚠️ **La excepción es el hogar SIN mascotas**, y no contradice
+                esto: ahí la adopción **sí** es el estado del hogar —no hay nadie
+                de quien contar— y por eso el founder la pidió en esa pantalla.
+                Son dos entradas porque son dos preguntas distintas.
+
+                🔴 **Sin contador, y no es un olvido:** §4 prohíbe convertir la
+                lista en inventario, y S111-C ya quitó el contador de resultados
+                de la vidriera por eso mismo. *Saber que hay 34 no ayuda a elegir
+                a ninguno.* */}
+            <View style={{ gap: spacing[3] }}>
+              <TituloBloque texto={t('explorar.refugios')} />
+              {ADOPCION_ALCANZABLE && hayAdoptables === true ? (
+                /* `CeldaNavegacion` y no `Celda`: **navega**, y la Ley 19.1 le
+                   da su anatomía —glifo del set b′ + chevron de entrada—. Lo
+                   cazó el typecheck, que exige `interactiva` explícito en la
+                   Celda cruda: *la pieza correcta no era la que estaba a mano.* */
+                <Tarjeta>
+                  <CeldaNavegacion
+                    icono="refugio"
+                    titulo={t('explorar.adopcionEntrada')}
+                    detalle={t('explorar.adopcionEntradaDetalle')}
+                    onPress={() => router.push('/adoptar')}
+                  />
+                </Tarjeta>
+              ) : hayAdoptables === false ? (
+                <EstadoVacio
+                  registro="seccion"
+                  icono={<Icono nombre="refugio" tamano={48} />}
+                  titulo={t('explorar.refugiosVacio')}
+                  descripcion={t('explorar.refugiosVacioDetalle')}
+                />
+              ) : (
+                /* Todavía no sabemos: **no se afirma ninguna de las dos cosas.**
+                   Un esqueleto acá sería honesto pero ruidoso en una pantalla que
+                   ya tiene el suyo arriba; el silencio de una sección que aún no
+                   respondió no promete nada. */
+                null
+              )}
+            </View>
+
+            {/* ── Próximamente honesto — UNA sección, filas serenas en
+                texto secundario (P5c: el muro de Insignias ochre murió;
+                el título de la sección ya dice todo) ── */}
+            {proximamente.length > 0 ? (
+              <View style={{ gap: spacing[3] }}>
+                <TituloBloque texto={t('explorar.proximamente')} />
+                <Tarjeta relleno="ninguno">
+                  {/* S58 (D-361): la celda VISTE, no promete — ícono del
+                      registry + fila informativa SIN chevron ni tap (un
+                      coming soon no navega: no es CeldaNavegacion, Ley 19.4) */}
+                  {proximamente.map((p, i) => (
+                    <View key={p.nombre}>
+                      {i > 0 ? <Separador /> : null}
+                      <Celda inicio={<Icono nombre={p.icono} tamano={24} registro="aa" />} titulo={p.nombre} />
+                    </View>
+                  ))}
+                </Tarjeta>
+              </View>
+            ) : null}
+          </View>
+          </View>
         </HojaContenido>
     </SafeAreaView>
   );

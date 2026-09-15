@@ -297,203 +297,213 @@ export default function QuienPuedeGuarderia() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: { padding: spacing[5], gap: spacing[3], } }}
+
       >
-        {/* ⏪ ACÁ ABAJO COLGABA LA FECHA EN CRUDO —`2026-09-01`— al pie de la
-            lista. Dos cosas mal: **voz de máquina** donde va la de la casa, y
-            **el contexto al final**, cuando es lo que enmarca todo lo de
-            arriba. Las cuatro hermanas lo resuelven igual: **una `Celda` de
-            contexto POR ENCIMA de la lista** (censo del 29-ago). */}
-        {/* ⏪ La fecha colgaba SUELTA A LA DERECHA de la mascota. La hermana
-            las junta en UNA línea —«Grooming para Thor · 2026-08-30 · 18:00»—
-            porque **es un solo contexto, no dos datos**. */}
-        {fecha !== null ? (
-          <>
-            <Celda
-              titulo={
-                params.mascotaNombre === undefined
-                  ? t('hubGuarderia.titulo')
-                  : t('hubGuarderia.contextoPara', { nombre: params.mascotaNombre })
-              }
-              metadataMono={fechaCortaMono(fecha, idioma)}
-            />
-            <Separador />
-          </>
-        ) : null}
-
-        {lista.fase === 'cargando' ? (
-          <EsqueletoGrupo>
-            <Esqueleto alto={64} />
-            <Esqueleto alto={64} />
-          </EsqueletoGrupo>
-        ) : lista.fase === 'causaDelMotor' ? (
-          /* Sin título de fallo: **no falló nada.** El motor contestó y su
-             respuesta es el contenido de la pantalla. */
-          <EstadoVacio registro="seccion" titulo={lista.mensaje} />
-        ) : lista.fase === 'noPudimos' || precios.fase === 'noPudimos' ? (
-          /* 🔴 El fallo de los precios entra POR ACÁ y no por «no hay lugares»:
-             *no es que ninguna guardería venda ese paquete — es que no pudimos
-             preguntar.* (Ley 13.) */
-          <EstadoVacio
-            registro="seccion"
-            titulo={t('hubGuarderia.listaNoCargoTitulo')}
-            descripcion={t('hubGuarderia.listaNoCargoDetalle')}
-          />
-        ) : precios.fase === 'cargando' ? (
-          /* La lista llegó y los precios del tamaño todavía no. **No se pinta
-             la lista sin ellos**: aparecería y se acortaría sola cuando el
-             filtro de Ley 23 corriera. */
-          <EsqueletoGrupo>
-            <Esqueleto alto={64} />
-            <Esqueleto alto={64} />
-          </EsqueletoGrupo>
-        ) : lugaresVisibles.length === 0 ? (
-          /* 🔴 NO DEBERÍA VERSE NUNCA por cupo: la pantalla anterior no habilita
-             el botón sin lugares (Ley 23). Existe porque **el cupo puede cambiar
-             entre las dos pantallas**, y ahí la verdad es de acá.
-             ⭐ **Y desde S108-C tiene una segunda causa, que se dice aparte:**
-             hay lugares con cupo, pero **ninguno vende ese tamaño de paquete**.
-             *Decir «ninguna tiene cupo» mandaría a la familia a probar otro día
-             para siempre, y el día no es el problema.* */
-          modalidad === 'paquete' && tamano !== null && lista.lugares.length > 0 ? (
-            <EstadoVacio
-              registro="seccion"
-              titulo={t('hubGuarderia.sinLugaresTamanoTitulo', { n: tamano })}
-              descripcion={t('hubGuarderia.sinLugaresTamanoDetalle')}
-            />
-          ) : (
-            <EstadoVacio
-              registro="seccion"
-              titulo={t('hubGuarderia.sinLugaresTitulo')}
-              descripcion={t('hubGuarderia.sinLugaresDetalle')}
-            />
-          )
-        ) : (
-          /* ⏪ **LOS PREVIEWS FLOTABAN SOBRE EL FONDO.** La hermana de
-             grooming los mete en UNA sola tarjeta contenedora, y por eso su
-             lista se lee como una lista y no como fichas sueltas — *y por eso
-             el cupo y las ventanas de guardería quedaban «colgando abajo»:
-             no había caja de la que colgar.* Censado el 30-ago. */
-          <Tarjeta relleno="ninguno">
-          {          lugaresVisibles.map((g) => {
-            const precio = precioDe(g);
-            /* 🔴 LOS CUATRO CAMPOS SON INDEPENDIENTES — firma de A, y el caso
-               es real: **un lugar puede tener la recogida declarada y la
-               devolución no.** *Asumir «vienen los cuatro o ninguno» pintaría
-               un rango con la mitad inventada.* Cada ventana existe sólo si sus
-               DOS extremos llegaron. */
-            const rec = g.recogeDesde !== null && g.recogeHasta !== null
-              ? { desde: g.recogeDesde, hasta: g.recogeHasta }
-              : null;
-            const dev = g.devuelveDesde !== null && g.devuelveHasta !== null
-              ? { desde: g.devuelveDesde, hasta: g.devuelveHasta }
-              : null;
-            return (
-              <PreviewPrestador
-                key={g.prestadorId}
-                prestadorId={g.prestadorId}
-                /* 🔴 **EL TAP VA AL DETALLE DE GUARDERÍA, NO AL PERFIL GENÉRICO.**
-                   *El perfil monta barra de reserva de los CUATRO oficios y
-                   ninguna de guardería* ⇒ la familia llegaba a una pantalla sin
-                   con qué pagar. **Éste es el defecto que el founder reportó
-                   cinco tandas seguidas como «no se puede comprar».**
-
-                   ⚠️ **Y se escribió DOS VECES: la primera se perdió en un
-                   merge.** La prop sobrevivió en la pieza y su consumidor no,
-                   así que el typecheck siguió verde sobre un camino roto —
-                   *una prop opcional que nadie pasa no rompe nada, y por eso
-                   nadie se entera.* **Lo cazó recorrer el dedo, no leer.** */
-                onAbrir={() =>
-                  router.push({
-                    pathname: '/explorar/guarderia/[prestadorId]',
-                    params: {
-                      ...params,
-                      prestadorId: g.prestadorId,
-                      prestadorNombre: g.prestadorNombre,
-                      ...(precio === null ? {} : { precio: formatearPrecio(precio) }),
-                    },
-                  })
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[5], gap: spacing[3] }}>
+          {/* ⏪ ACÁ ABAJO COLGABA LA FECHA EN CRUDO —`2026-09-01`— al pie de la
+              lista. Dos cosas mal: **voz de máquina** donde va la de la casa, y
+              **el contexto al final**, cuando es lo que enmarca todo lo de
+              arriba. Las cuatro hermanas lo resuelven igual: **una `Celda` de
+              contexto POR ENCIMA de la lista** (censo del 29-ago). */}
+          {/* ⏪ La fecha colgaba SUELTA A LA DERECHA de la mascota. La hermana
+              las junta en UNA línea —«Grooming para Thor · 2026-08-30 · 18:00»—
+              porque **es un solo contexto, no dos datos**. */}
+          {fecha !== null ? (
+            <>
+              <Celda
+                titulo={
+                  params.mascotaNombre === undefined
+                    ? t('hubGuarderia.titulo')
+                    : t('hubGuarderia.contextoPara', { nombre: params.mascotaNombre })
                 }
-                ofertaId={g.prestadorServicioId}
-                nombre={g.prestadorNombre}
-                oficio={t('hogar.railGuarderia')}
-                contexto={
-                  g.direccion !== null
-                    ? [g.direccion, g.ciudad].filter(Boolean).join(' · ')
-                    : null
-                }
-                /* 🔴 SIN NÚMERO cuando el lugar no vende esta modalidad — la
-                   pieza acepta la cadena vacía y no pinta el separador
-                   huérfano. *Un guion o un cero se leerían como «gratis».* */
-                /* ⭐ **EL PAQUETE VUELVE A TENER PRECIO, y ahora es el suyo.**
-                   ⏪ Acá decía `modalidad === 'paquete' ? ''` — la cura vieja
-                   del mínimo, que tapó el número equivocado dejando la lista
-                   **sin ningún número** en la pantalla donde se elige a quién
-                   pagarle. *Curar un dato equivocado borrándolo deja a la
-                   familia eligiendo a ciegas: es el mismo defecto con menos
-                   información.* Hoy `precioDe` devuelve el precio del tamaño
-                   elegido en ESE lugar, así que el número se puede pintar y
-                   **es el que va a pagar.** */
-                precio={
-                  precio === null
-                    ? ''
-                    : modalidad === 'dia'
-                      ? t('hubGuarderia.porDia', { precio: formatearPrecio(precio) })
-                      : modalidad === 'mensual'
-                        ? t('hubGuarderia.porMes', { precio: formatearPrecio(precio) })
-                        : t('hubGuarderia.porPaquete', { precio: formatearPrecio(precio) })
-                }
-                perfil={perfiles[g.prestadorId]}
-                /* La ventana viaja con el tap para que el lugar pueda reservar,
-                   como en los cuatro oficios (D-730). */
-                contextoReserva={{
-                  mascotaId: mascotaId ?? '',
-                  ...(typeof params.mascotaNombre === 'string' ? { mascotaNombre: params.mascotaNombre } : {}),
-                  modalidad,
-                  fecha: fecha ?? '',
-                  ...(typeof params.tamano === 'string' ? { tamano: params.tamano } : {}),
-                  prestadorNombre: g.prestadorNombre,
-                }}
-                pie={
-                  <View style={{ gap: spacing[2] }}>
-                    {/* EL CUPO DE ESE DÍA. 🔴 `sobrevendido` NO se pinta: para
-                        la familia, un lugar que puede recibirla puede
-                        recibirla. La sobreventa es operativa del prestador. */}
-                    <Texto variante="apoyo">
-                      {g.disponible === 1
-                        ? t('hubGuarderia.cupoUno')
-                        : t('hubGuarderia.cupo', { n: g.disponible })}
-                    </Texto>
-                    {/* LAS DOS VENTANAS. `FichaFranja` informa —no elige— y su
-                        `devolucion` es opcional porque **un lugar puede tener
-                        sólo la recogida declarada**: ahí no se dibuja un rango
-                        vacío que se lea como dato. */}
-                    {rec !== null ? (
-                      <FichaFranja
-                        recogida={{
-                          rotulo: t('lugarGuarderia.recogida'),
-                          desde: aHoraCorta(rec.desde),
-                          hasta: aHoraCorta(rec.hasta),
-                        }}
-                        devolucion={
-                          dev === null
-                            ? undefined
-                            : {
-                                rotulo: t('lugarGuarderia.devolucion'),
-                                desde: aHoraCorta(dev.desde),
-                                hasta: aHoraCorta(dev.hasta),
-                              }
-                        }
-                      />
-                    ) : null}
-                  </View>
-                }
+                metadataMono={fechaCortaMono(fecha, idioma)}
               />
-            );
-          })}
-          </Tarjeta>
-        )}
+              <Separador />
+            </>
+          ) : null}
 
+          {lista.fase === 'cargando' ? (
+            <EsqueletoGrupo>
+              <Esqueleto alto={64} />
+              <Esqueleto alto={64} />
+            </EsqueletoGrupo>
+          ) : lista.fase === 'causaDelMotor' ? (
+            /* Sin título de fallo: **no falló nada.** El motor contestó y su
+               respuesta es el contenido de la pantalla. */
+            <EstadoVacio registro="seccion" titulo={lista.mensaje} />
+          ) : lista.fase === 'noPudimos' || precios.fase === 'noPudimos' ? (
+            /* 🔴 El fallo de los precios entra POR ACÁ y no por «no hay lugares»:
+               *no es que ninguna guardería venda ese paquete — es que no pudimos
+               preguntar.* (Ley 13.) */
+            <EstadoVacio
+              registro="seccion"
+              titulo={t('hubGuarderia.listaNoCargoTitulo')}
+              descripcion={t('hubGuarderia.listaNoCargoDetalle')}
+            />
+          ) : precios.fase === 'cargando' ? (
+            /* La lista llegó y los precios del tamaño todavía no. **No se pinta
+               la lista sin ellos**: aparecería y se acortaría sola cuando el
+               filtro de Ley 23 corriera. */
+            <EsqueletoGrupo>
+              <Esqueleto alto={64} />
+              <Esqueleto alto={64} />
+            </EsqueletoGrupo>
+          ) : lugaresVisibles.length === 0 ? (
+            /* 🔴 NO DEBERÍA VERSE NUNCA por cupo: la pantalla anterior no habilita
+               el botón sin lugares (Ley 23). Existe porque **el cupo puede cambiar
+               entre las dos pantallas**, y ahí la verdad es de acá.
+               ⭐ **Y desde S108-C tiene una segunda causa, que se dice aparte:**
+               hay lugares con cupo, pero **ninguno vende ese tamaño de paquete**.
+               *Decir «ninguna tiene cupo» mandaría a la familia a probar otro día
+               para siempre, y el día no es el problema.* */
+            modalidad === 'paquete' && tamano !== null && lista.lugares.length > 0 ? (
+              <EstadoVacio
+                registro="seccion"
+                titulo={t('hubGuarderia.sinLugaresTamanoTitulo', { n: tamano })}
+                descripcion={t('hubGuarderia.sinLugaresTamanoDetalle')}
+              />
+            ) : (
+              <EstadoVacio
+                registro="seccion"
+                titulo={t('hubGuarderia.sinLugaresTitulo')}
+                descripcion={t('hubGuarderia.sinLugaresDetalle')}
+              />
+            )
+          ) : (
+            /* ⏪ **LOS PREVIEWS FLOTABAN SOBRE EL FONDO.** La hermana de
+               grooming los mete en UNA sola tarjeta contenedora, y por eso su
+               lista se lee como una lista y no como fichas sueltas — *y por eso
+               el cupo y las ventanas de guardería quedaban «colgando abajo»:
+               no había caja de la que colgar.* Censado el 30-ago. */
+            <Tarjeta relleno="ninguno">
+            {          lugaresVisibles.map((g) => {
+              const precio = precioDe(g);
+              /* 🔴 LOS CUATRO CAMPOS SON INDEPENDIENTES — firma de A, y el caso
+                 es real: **un lugar puede tener la recogida declarada y la
+                 devolución no.** *Asumir «vienen los cuatro o ninguno» pintaría
+                 un rango con la mitad inventada.* Cada ventana existe sólo si sus
+                 DOS extremos llegaron. */
+              const rec = g.recogeDesde !== null && g.recogeHasta !== null
+                ? { desde: g.recogeDesde, hasta: g.recogeHasta }
+                : null;
+              const dev = g.devuelveDesde !== null && g.devuelveHasta !== null
+                ? { desde: g.devuelveDesde, hasta: g.devuelveHasta }
+                : null;
+              return (
+                <PreviewPrestador
+                  key={g.prestadorId}
+                  prestadorId={g.prestadorId}
+                  /* 🔴 **EL TAP VA AL DETALLE DE GUARDERÍA, NO AL PERFIL GENÉRICO.**
+                     *El perfil monta barra de reserva de los CUATRO oficios y
+                     ninguna de guardería* ⇒ la familia llegaba a una pantalla sin
+                     con qué pagar. **Éste es el defecto que el founder reportó
+                     cinco tandas seguidas como «no se puede comprar».**
+
+                     ⚠️ **Y se escribió DOS VECES: la primera se perdió en un
+                     merge.** La prop sobrevivió en la pieza y su consumidor no,
+                     así que el typecheck siguió verde sobre un camino roto —
+                     *una prop opcional que nadie pasa no rompe nada, y por eso
+                     nadie se entera.* **Lo cazó recorrer el dedo, no leer.** */
+                  onAbrir={() =>
+                    router.push({
+                      pathname: '/explorar/guarderia/[prestadorId]',
+                      params: {
+                        ...params,
+                        prestadorId: g.prestadorId,
+                        prestadorNombre: g.prestadorNombre,
+                        ...(precio === null ? {} : { precio: formatearPrecio(precio) }),
+                      },
+                    })
+                  }
+                  ofertaId={g.prestadorServicioId}
+                  nombre={g.prestadorNombre}
+                  oficio={t('hogar.railGuarderia')}
+                  contexto={
+                    g.direccion !== null
+                      ? [g.direccion, g.ciudad].filter(Boolean).join(' · ')
+                      : null
+                  }
+                  /* 🔴 SIN NÚMERO cuando el lugar no vende esta modalidad — la
+                     pieza acepta la cadena vacía y no pinta el separador
+                     huérfano. *Un guion o un cero se leerían como «gratis».* */
+                  /* ⭐ **EL PAQUETE VUELVE A TENER PRECIO, y ahora es el suyo.**
+                     ⏪ Acá decía `modalidad === 'paquete' ? ''` — la cura vieja
+                     del mínimo, que tapó el número equivocado dejando la lista
+                     **sin ningún número** en la pantalla donde se elige a quién
+                     pagarle. *Curar un dato equivocado borrándolo deja a la
+                     familia eligiendo a ciegas: es el mismo defecto con menos
+                     información.* Hoy `precioDe` devuelve el precio del tamaño
+                     elegido en ESE lugar, así que el número se puede pintar y
+                     **es el que va a pagar.** */
+                  precio={
+                    precio === null
+                      ? ''
+                      : modalidad === 'dia'
+                        ? t('hubGuarderia.porDia', { precio: formatearPrecio(precio) })
+                        : modalidad === 'mensual'
+                          ? t('hubGuarderia.porMes', { precio: formatearPrecio(precio) })
+                          : t('hubGuarderia.porPaquete', { precio: formatearPrecio(precio) })
+                  }
+                  perfil={perfiles[g.prestadorId]}
+                  /* La ventana viaja con el tap para que el lugar pueda reservar,
+                     como en los cuatro oficios (D-730). */
+                  contextoReserva={{
+                    mascotaId: mascotaId ?? '',
+                    ...(typeof params.mascotaNombre === 'string' ? { mascotaNombre: params.mascotaNombre } : {}),
+                    modalidad,
+                    fecha: fecha ?? '',
+                    ...(typeof params.tamano === 'string' ? { tamano: params.tamano } : {}),
+                    prestadorNombre: g.prestadorNombre,
+                  }}
+                  pie={
+                    <View style={{ gap: spacing[2] }}>
+                      {/* EL CUPO DE ESE DÍA. 🔴 `sobrevendido` NO se pinta: para
+                          la familia, un lugar que puede recibirla puede
+                          recibirla. La sobreventa es operativa del prestador. */}
+                      <Texto variante="apoyo">
+                        {g.disponible === 1
+                          ? t('hubGuarderia.cupoUno')
+                          : t('hubGuarderia.cupo', { n: g.disponible })}
+                      </Texto>
+                      {/* LAS DOS VENTANAS. `FichaFranja` informa —no elige— y su
+                          `devolucion` es opcional porque **un lugar puede tener
+                          sólo la recogida declarada**: ahí no se dibuja un rango
+                          vacío que se lea como dato. */}
+                      {rec !== null ? (
+                        <FichaFranja
+                          recogida={{
+                            rotulo: t('lugarGuarderia.recogida'),
+                            desde: aHoraCorta(rec.desde),
+                            hasta: aHoraCorta(rec.hasta),
+                          }}
+                          devolucion={
+                            dev === null
+                              ? undefined
+                              : {
+                                  rotulo: t('lugarGuarderia.devolucion'),
+                                  desde: aHoraCorta(dev.desde),
+                                  hasta: aHoraCorta(dev.hasta),
+                                }
+                          }
+                        />
+                      ) : null}
+                    </View>
+                  }
+                />
+              );
+            })}
+            </Tarjeta>
+          )}
+
+        </View>
       </HojaContenido>
     </SafeAreaView>
   );

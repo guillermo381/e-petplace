@@ -163,57 +163,64 @@ export default function PlacaSinActivar() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: {
-          paddingHorizontal: spacing[5],
-          gap: spacing[5],
-        } }}
+
       >
-        {fase.f === 'mirando' ? (
-          <Texto variante="apoyo">{t('placa.mirando')}</Texto>
-        ) : fase.f === 'ajena' ? (
-          /* Ni error rojo ni disculpa: **es un hecho**. */
-          <EstadoVacio registro="seccion" titulo={t('placa.ajena')} />
-        ) : fase.f === 'yaEstaba' ? (
-          /* 🔴 **Y acá tampoco se dice de quién.** Que la placa esté activada
-             es lo único que se puede saber sin sesión. */
-          <EstadoVacio registro="seccion" titulo={t('placa.yaEstaba')} />
-        ) : fase.conSesion ? (
-          <>
-            <Texto variante="cuerpo">{t('placa.esperaAMascota')}</Texto>
-            {mascotas === 'cargando' ? (
-              <Texto variante="apoyo">{t('placa.mirando')}</Texto>
-            ) : mascotas === 'error' ? (
-              /* Ley 13: el fallo DICE que es fallo — **jamás se disfraza de
-                 «no tienes mascotas»**. */
-              <Texto variante="dato" color="danger">{t('placa.noPudimosLeer')}</Texto>
-            ) : mascotas.length === 0 ? (
-              <EstadoVacio registro="seccion" titulo={t('placa.sinMascotas')} />
-            ) : (
-              <Tarjeta relleno="ninguno" elevacion="reposo">
-                {mascotas.map((m, i) => (
-                  <View key={m.id}>
-                    {i > 0 ? <Separador /> : null}
-                    <CeldaNavegacion
-                      titulo={m.nombre}
-                      registro="tinta"
-                      onPress={() => activar(m.id, m.nombre)}
-                    />
-                  </View>
-                ))}
-              </Tarjeta>
-            )}
-          </>
-        ) : (
-          <>
-            <Texto variante="cuerpo">{t('placa.esperaAMascota')}</Texto>
-            {/* Sin sesión: la suya, no la de otro. */}
-            <Boton
-              etiqueta={t('placa.quieroUna')}
-              bloque
-              onPress={() => router.push('/despensa')}
-            />
-          </>
-        )}
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ paddingHorizontal: spacing[5], gap: spacing[5] }}>
+          {fase.f === 'mirando' ? (
+            <Texto variante="apoyo">{t('placa.mirando')}</Texto>
+          ) : fase.f === 'ajena' ? (
+            /* Ni error rojo ni disculpa: **es un hecho**. */
+            <EstadoVacio registro="seccion" titulo={t('placa.ajena')} />
+          ) : fase.f === 'yaEstaba' ? (
+            /* 🔴 **Y acá tampoco se dice de quién.** Que la placa esté activada
+               es lo único que se puede saber sin sesión. */
+            <EstadoVacio registro="seccion" titulo={t('placa.yaEstaba')} />
+          ) : fase.conSesion ? (
+            <>
+              <Texto variante="cuerpo">{t('placa.esperaAMascota')}</Texto>
+              {mascotas === 'cargando' ? (
+                <Texto variante="apoyo">{t('placa.mirando')}</Texto>
+              ) : mascotas === 'error' ? (
+                /* Ley 13: el fallo DICE que es fallo — **jamás se disfraza de
+                   «no tienes mascotas»**. */
+                <Texto variante="dato" color="danger">{t('placa.noPudimosLeer')}</Texto>
+              ) : mascotas.length === 0 ? (
+                <EstadoVacio registro="seccion" titulo={t('placa.sinMascotas')} />
+              ) : (
+                <Tarjeta relleno="ninguno" elevacion="reposo">
+                  {mascotas.map((m, i) => (
+                    <View key={m.id}>
+                      {i > 0 ? <Separador /> : null}
+                      <CeldaNavegacion
+                        titulo={m.nombre}
+                        registro="tinta"
+                        onPress={() => activar(m.id, m.nombre)}
+                      />
+                    </View>
+                  ))}
+                </Tarjeta>
+              )}
+            </>
+          ) : (
+            <>
+              <Texto variante="cuerpo">{t('placa.esperaAMascota')}</Texto>
+              {/* Sin sesión: la suya, no la de otro. */}
+              <Boton
+                etiqueta={t('placa.quieroUna')}
+                bloque
+                onPress={() => router.push('/despensa')}
+              />
+            </>
+          )}
+        </View>
       </HojaContenido>
     </View>
   );

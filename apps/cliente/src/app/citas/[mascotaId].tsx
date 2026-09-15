@@ -565,211 +565,221 @@ export default function CitasDeMascota() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: { padding: spacing[4], gap: spacing[4], } }}
+
       >
-        {/* Presupuestos pendientes — ARRIBA del detalle de la cita. Aparecen
-            aunque no haya cita activa (el presupuesto vive por su cuenta). */}
-        {presupuestos.map((p) => {
-          const abierto = itemsAbiertos[p.id] === true;
-          const ocupado = procesando === p.id;
-          return (
-            <Tarjeta key={p.id} elevacion="reposo">
-              <View style={{ gap: spacing[3] }}>
-                <Texto variante="seccion">{t('presupuesto.tituloPendiente')}</Texto>
-                <Texto variante="apoyo">
-                  {t('presupuesto.recibido', { fecha: fechaLargaHumana(p.recibidoEn.slice(0, 10), idioma) })}
-                  {'  ·  '}
-                  {t('presupuesto.vence', { fecha: fechaLargaHumana(p.venceEn.slice(0, 10), idioma) })}
-                </Texto>
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[4], gap: spacing[4] }}>
+          {/* Presupuestos pendientes — ARRIBA del detalle de la cita. Aparecen
+              aunque no haya cita activa (el presupuesto vive por su cuenta). */}
+          {presupuestos.map((p) => {
+            const abierto = itemsAbiertos[p.id] === true;
+            const ocupado = procesando === p.id;
+            return (
+              <Tarjeta key={p.id} elevacion="reposo">
+                <View style={{ gap: spacing[3] }}>
+                  <Texto variante="seccion">{t('presupuesto.tituloPendiente')}</Texto>
+                  <Texto variante="apoyo">
+                    {t('presupuesto.recibido', { fecha: fechaLargaHumana(p.recibidoEn.slice(0, 10), idioma) })}
+                    {'  ·  '}
+                    {t('presupuesto.vence', { fecha: fechaLargaHumana(p.venceEn.slice(0, 10), idioma) })}
+                  </Texto>
 
-                <Separador />
-                <FilaDato
-                  disposicion="horizontal"
-                  etiqueta={t('presupuesto.total')}
-                  valor={<Texto variante="datoMd">{`$ ${p.total}`}</Texto>}
-                />
-
-                {p.items.length > 0 ? (
-                  <>
-                    {abierto ? (
-                      <View style={{ gap: spacing[2] }}>
-                        {p.items.map((it) => (
-                          <FilaDato
-                            key={it.id}
-                            disposicion="horizontal"
-                            etiqueta={it.cantidad > 1 ? `${it.nombre} ×${it.cantidad}` : it.nombre}
-                            valor={`$ ${it.precio * it.cantidad}`}
-                            mono
-                          />
-                        ))}
-                      </View>
-                    ) : null}
-                    {/* 19.6 — el desglose plegado se revela con el número;
-                        murió el Pressable de texto mudo (D-318). */}
-                    <PieRevelar
-                      n={p.items.length}
-                      revelado={abierto}
-                      onPress={() => setItemsAbiertos((s) => ({ ...s, [p.id]: !abierto }))}
-                    />
-                  </>
-                ) : null}
-
-                <Texto variante="apoyo">{t('presupuesto.queSigue')}</Texto>
-
-                <View style={{ gap: spacing[2] }}>
-                  <Boton
-                    variante="primario"
-                    bloque
-                    etiqueta={t('presupuesto.aprobar')}
-                    cargando={ocupado}
-                    onPress={() => void onAprobar(p.id)}
+                  <Separador />
+                  <FilaDato
+                    disposicion="horizontal"
+                    etiqueta={t('presupuesto.total')}
+                    valor={<Texto variante="datoMd">{`$ ${p.total}`}</Texto>}
                   />
-                  {/* S71-A — "Rechazar" no tenía guard: se podía disparar dos
-                      veces, o encima de un "Aprobar" en vuelo. La segunda
-                      llamada rebota con un error que al dueño le suena a
-                      absurdo ("todavía no fue enviado") sobre algo que acaba
-                      de decidir. Ningún CTA de decisión se dispara dos veces
-                      ni encima del otro: mismo `ocupado` que Aprobar. */}
-                  <Boton
-                    variante="ghost"
-                    bloque
-                    etiqueta={t('presupuesto.rechazar')}
-                    deshabilitado={ocupado}
-                    onPress={() => void onRechazar(p.id)}
-                  />
-                </View>
-              </View>
-            </Tarjeta>
-          );
-        })}
 
-        {estado === 'cargando' ? (
-          <EsqueletoGrupo>
-            <Esqueleto forma="bloque" ancho="100%" alto={140} />
-            <Esqueleto forma="linea" ancho="60%" />
-          </EsqueletoGrupo>
-        ) : estado === 'error' ? (
-          // Ley 13: el fallo dice que es fallo — jamás "sin citas".
-          <EstadoVacio
-            titulo={t('citasMascota.error')}
-            descripcion={t('citasMascota.errorDetalle')}
-            accion={
-              <Boton
-                variante="secundario"
-                etiqueta={t('citasMascota.reintentar')}
-                onPress={() => {
-                  setEstado('cargando');
-                  setIntento((n) => n + 1);
-                }}
-              />
-            }
-          />
-        ) : hero === undefined ? (
-          // Vacío honesto (carrera: la cita expiró/cerró entre la ficha
-          // y el tap). Back del Encabezado — jamás callejón.
-          <EstadoVacio titulo={t('citasMascota.vacio')} descripcion={t('citasMascota.vacioDetalle')} />
-        ) : (
-          <>
-            {detalleHero(hero)}
-
-            {/* N>1 activas: el resto se revela EN LA MISMA pantalla con el
-                número (19.6, PieRevelar — murió el Boton secundario mudo,
-                D-318); con una sola, NO se dibuja (nada apagado). */}
-            {otras.length > 0 && desplegado ? (
-              <View style={{ gap: spacing[3] }}>
-                <Texto variante="seccion">{t('citasMascota.otrasActivas')}</Texto>
-                <Tarjeta relleno="ninguno" elevacion="reposo">
-                  {otras.map((c, i) => (
-                    <View key={c.cita_id}>
-                      {i > 0 ? <Separador /> : null}
-                      <CeldaNavegacion
-                        icono={iconoDe(c.tipo_servicio)}
-                        titulo={nombreVisibleCita(c) ?? vozEstado(c)}
-                        detalle={
-                          c.fecha === null
-                            ? t('citasMascota.faltaCoordinar')
-                            : fechaYHoraHumana(c.fecha, c.hora, idioma)
-                        }
-                        onPress={() => router.setParams({ citaId: c.cita_id })}
+                  {p.items.length > 0 ? (
+                    <>
+                      {abierto ? (
+                        <View style={{ gap: spacing[2] }}>
+                          {p.items.map((it) => (
+                            <FilaDato
+                              key={it.id}
+                              disposicion="horizontal"
+                              etiqueta={it.cantidad > 1 ? `${it.nombre} ×${it.cantidad}` : it.nombre}
+                              valor={`$ ${it.precio * it.cantidad}`}
+                              mono
+                            />
+                          ))}
+                        </View>
+                      ) : null}
+                      {/* 19.6 — el desglose plegado se revela con el número;
+                          murió el Pressable de texto mudo (D-318). */}
+                      <PieRevelar
+                        n={p.items.length}
+                        revelado={abierto}
+                        onPress={() => setItemsAbiertos((s) => ({ ...s, [p.id]: !abierto }))}
                       />
-                    </View>
-                  ))}
-                </Tarjeta>
-              </View>
-            ) : null}
-            {otras.length > 0 ? (
-              <PieRevelar n={otras.length} revelado={desplegado} onPress={() => setDesplegado((d) => !d)} />
-            ) : null}
+                    </>
+                  ) : null}
 
-          </>
-        )}
+                  <Texto variante="apoyo">{t('presupuesto.queSigue')}</Texto>
 
-        {/* ═══ 🔴 EL HISTORIAL VIVÍA DENTRO DE LA RAMA DEL HERO ═══════════════
-            **Medido con el discriminador que sirvió el founder** —«con Thor
-            sólo futuras, con Zeus todas»— y los conteos que trajo A:
+                  <View style={{ gap: spacing[2] }}>
+                    <Boton
+                      variante="primario"
+                      bloque
+                      etiqueta={t('presupuesto.aprobar')}
+                      cargando={ocupado}
+                      onPress={() => void onAprobar(p.id)}
+                    />
+                    {/* S71-A — "Rechazar" no tenía guard: se podía disparar dos
+                        veces, o encima de un "Aprobar" en vuelo. La segunda
+                        llamada rebota con un error que al dueño le suena a
+                        absurdo ("todavía no fue enviado") sobre algo que acaba
+                        de decidir. Ningún CTA de decisión se dispara dos veces
+                        ni encima del otro: mismo `ocupado` que Aprobar. */}
+                    <Boton
+                      variante="ghost"
+                      bloque
+                      etiqueta={t('presupuesto.rechazar')}
+                      deshabilitado={ocupado}
+                      onPress={() => void onRechazar(p.id)}
+                    />
+                  </View>
+                </View>
+              </Tarjeta>
+            );
+          })}
 
-            · **Thor: CERO citas activas futuras** (0 confirmadas, 0 pendientes,
-              0 en curso) y **154 pasadas**.
-            · **Zeus: 5 confirmadas futuras** y 58 pasadas.
-
-            Con Thor, `hero === undefined` ⇒ la pantalla caía en el vacío
-            honesto **y el historial —que estaba en la rama `else`— no se
-            dibujaba nunca**. Con Zeus había hero ⇒ se dibujaban las dos.
-
-            *O sea: la sección que se construyó para las 265 citas pasadas
-            quedaba escondida exactamente en el caso donde es LO ÚNICO que hay.*
-            Y el síntoma se lee al revés de lo que es —parece que a Thor le
-            faltan las pasadas por un filtro— cuando lo que pasa es que **la
-            pantalla entera se cortó antes de llegar a ellas**.
-
-            ⇒ el historial sale de la rama y se dibuja **siempre que la carga
-            terminó**, con o sin citas por venir. La voz de arriba ya lo
-            permitía sin tocarla: dice *«Sin citas por venir»*, que sigue siendo
-            verdad con el historial debajo. */}
-          {/* ═══ ① LO QUE YA PASÓ — la sección que faltaba ════════════════
-              Va DESPUÉS de lo que viene, y ése es el orden correcto: la
-              familia entra a esta pantalla por su próxima cita. *Lo pasado
-              se lee después, no compite con lo que hay que hacer.*
-
-              🔴 **Y no es sólo para reclamar.** Acá vive el parte, las
-              fotos y el acta de un servicio que ocurrió — el reclamo es UNO
-              de los motivos y el menos frecuente. Que no existiera es lo que
-              el founder encontró caminando. */}
-          {fasePasadas === 'error' ? (
-            /* Ley 13: el error del historial NO se disfraza de «no hay
-               historial», y no se lleva puesto lo de arriba. */
-            <EstadoVacio titulo={t('citasMascota.historialNoSePudo')} registro="seccion" />
-          ) : pasadas.length > 0 ? (
-            <View style={{ gap: spacing[3] }}>
-              <Texto variante="seccion">{t('citasMascota.yaPasaron')}</Texto>
-              {pasadas.map((c) => (
-                <View key={c.cita_id}>{detalleHero(c)}</View>
-              ))}
-              {/* El paginado es por CURSOR y lo dice el motor: `cursor:
-                  null` = no hay más, así que el pie DESAPARECE en vez de
-                  ofrecer una carga que no trae nada. */}
-              {cursorPasadas !== null ? (
+          {estado === 'cargando' ? (
+            <EsqueletoGrupo>
+              <Esqueleto forma="bloque" ancho="100%" alto={140} />
+              <Esqueleto forma="linea" ancho="60%" />
+            </EsqueletoGrupo>
+          ) : estado === 'error' ? (
+            // Ley 13: el fallo dice que es fallo — jamás "sin citas".
+            <EstadoVacio
+              titulo={t('citasMascota.error')}
+              descripcion={t('citasMascota.errorDetalle')}
+              accion={
                 <Boton
-                  variante="apoyada"
-                  etiqueta={t('citasMascota.verMasPasadas')}
-                  cargando={trayendoMas}
+                  variante="secundario"
+                  etiqueta={t('citasMascota.reintentar')}
                   onPress={() => {
-                    if (typeof mascotaId !== 'string') return;
-                    setTrayendoMas(true);
-                    void obtenerHistorialCitasMascota(mascotaId, { cursor: cursorPasadas }).then((r) => {
-                      setTrayendoMas(false);
-                      if (!r.ok) return;
-                      /* Se AGREGA al final: el motor entrega de más nuevo a
-                         más viejo, así que la página siguiente es más
-                         vieja y va abajo. */
-                      setPasadas((prev) => [...prev, ...r.data.citas]);
-                      setCursorPasadas(r.data.cursor);
-                    });
+                    setEstado('cargando');
+                    setIntento((n) => n + 1);
                   }}
                 />
+              }
+            />
+          ) : hero === undefined ? (
+            // Vacío honesto (carrera: la cita expiró/cerró entre la ficha
+            // y el tap). Back del Encabezado — jamás callejón.
+            <EstadoVacio titulo={t('citasMascota.vacio')} descripcion={t('citasMascota.vacioDetalle')} />
+          ) : (
+            <>
+              {detalleHero(hero)}
+
+              {/* N>1 activas: el resto se revela EN LA MISMA pantalla con el
+                  número (19.6, PieRevelar — murió el Boton secundario mudo,
+                  D-318); con una sola, NO se dibuja (nada apagado). */}
+              {otras.length > 0 && desplegado ? (
+                <View style={{ gap: spacing[3] }}>
+                  <Texto variante="seccion">{t('citasMascota.otrasActivas')}</Texto>
+                  <Tarjeta relleno="ninguno" elevacion="reposo">
+                    {otras.map((c, i) => (
+                      <View key={c.cita_id}>
+                        {i > 0 ? <Separador /> : null}
+                        <CeldaNavegacion
+                          icono={iconoDe(c.tipo_servicio)}
+                          titulo={nombreVisibleCita(c) ?? vozEstado(c)}
+                          detalle={
+                            c.fecha === null
+                              ? t('citasMascota.faltaCoordinar')
+                              : fechaYHoraHumana(c.fecha, c.hora, idioma)
+                          }
+                          onPress={() => router.setParams({ citaId: c.cita_id })}
+                        />
+                      </View>
+                    ))}
+                  </Tarjeta>
+                </View>
               ) : null}
-            </View>
-          ) : null}
+              {otras.length > 0 ? (
+                <PieRevelar n={otras.length} revelado={desplegado} onPress={() => setDesplegado((d) => !d)} />
+              ) : null}
+
+            </>
+          )}
+
+          {/* ═══ 🔴 EL HISTORIAL VIVÍA DENTRO DE LA RAMA DEL HERO ═══════════════
+              **Medido con el discriminador que sirvió el founder** —«con Thor
+              sólo futuras, con Zeus todas»— y los conteos que trajo A:
+
+              · **Thor: CERO citas activas futuras** (0 confirmadas, 0 pendientes,
+                0 en curso) y **154 pasadas**.
+              · **Zeus: 5 confirmadas futuras** y 58 pasadas.
+
+              Con Thor, `hero === undefined` ⇒ la pantalla caía en el vacío
+              honesto **y el historial —que estaba en la rama `else`— no se
+              dibujaba nunca**. Con Zeus había hero ⇒ se dibujaban las dos.
+
+              *O sea: la sección que se construyó para las 265 citas pasadas
+              quedaba escondida exactamente en el caso donde es LO ÚNICO que hay.*
+              Y el síntoma se lee al revés de lo que es —parece que a Thor le
+              faltan las pasadas por un filtro— cuando lo que pasa es que **la
+              pantalla entera se cortó antes de llegar a ellas**.
+
+              ⇒ el historial sale de la rama y se dibuja **siempre que la carga
+              terminó**, con o sin citas por venir. La voz de arriba ya lo
+              permitía sin tocarla: dice *«Sin citas por venir»*, que sigue siendo
+              verdad con el historial debajo. */}
+            {/* ═══ ① LO QUE YA PASÓ — la sección que faltaba ════════════════
+                Va DESPUÉS de lo que viene, y ése es el orden correcto: la
+                familia entra a esta pantalla por su próxima cita. *Lo pasado
+                se lee después, no compite con lo que hay que hacer.*
+
+                🔴 **Y no es sólo para reclamar.** Acá vive el parte, las
+                fotos y el acta de un servicio que ocurrió — el reclamo es UNO
+                de los motivos y el menos frecuente. Que no existiera es lo que
+                el founder encontró caminando. */}
+            {fasePasadas === 'error' ? (
+              /* Ley 13: el error del historial NO se disfraza de «no hay
+                 historial», y no se lleva puesto lo de arriba. */
+              <EstadoVacio titulo={t('citasMascota.historialNoSePudo')} registro="seccion" />
+            ) : pasadas.length > 0 ? (
+              <View style={{ gap: spacing[3] }}>
+                <Texto variante="seccion">{t('citasMascota.yaPasaron')}</Texto>
+                {pasadas.map((c) => (
+                  <View key={c.cita_id}>{detalleHero(c)}</View>
+                ))}
+                {/* El paginado es por CURSOR y lo dice el motor: `cursor:
+                    null` = no hay más, así que el pie DESAPARECE en vez de
+                    ofrecer una carga que no trae nada. */}
+                {cursorPasadas !== null ? (
+                  <Boton
+                    variante="apoyada"
+                    etiqueta={t('citasMascota.verMasPasadas')}
+                    cargando={trayendoMas}
+                    onPress={() => {
+                      if (typeof mascotaId !== 'string') return;
+                      setTrayendoMas(true);
+                      void obtenerHistorialCitasMascota(mascotaId, { cursor: cursorPasadas }).then((r) => {
+                        setTrayendoMas(false);
+                        if (!r.ok) return;
+                        /* Se AGREGA al final: el motor entrega de más nuevo a
+                           más viejo, así que la página siguiente es más
+                           vieja y va abajo. */
+                        setPasadas((prev) => [...prev, ...r.data.citas]);
+                        setCursorPasadas(r.data.cursor);
+                      });
+                    }}
+                  />
+                ) : null}
+              </View>
+            ) : null}
+        </View>
       </HojaContenido>
     </SafeAreaView>
   );

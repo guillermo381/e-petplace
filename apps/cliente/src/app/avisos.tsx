@@ -154,89 +154,99 @@ export default function Avisos() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: { padding: spacing[5], } }}
+
       >
-        {estado === 'cargando' ? (
-          <EsqueletoGrupo>
-            <View style={{ gap: spacing[3] }}>
-              <Esqueleto forma="bloque" ancho="100%" alto={72} />
-              <Esqueleto forma="bloque" ancho="100%" alto={72} />
-              <Esqueleto forma="bloque" ancho="100%" alto={72} />
-            </View>
-          </EsqueletoGrupo>
-        ) : estado === 'error' ? (
-          <EstadoVacio
-            registro="seccion"
-            titulo={t('avisos.errorCargar')}
-            accion={
-              <Boton
-                variante="secundario"
-                etiqueta={t('cuenta.reintentar')}
-                onPress={() => {
-                  setEstado('cargando');
-                  setIntento((n) => n + 1);
-                }}
-              />
-            }
-          />
-        ) : avisos.length === 0 ? (
-          // §4: vacío honesto — sin ilustración triste ni celebración.
-          <EstadoVacio registro="seccion" titulo={t('avisos.vacio')} />
-        ) : (
-          <Tarjeta>
-            {avisos.map((a, i) => {
-              const destino = destinoDeAviso(a);
-              const titulo = a.titulo ?? t('avisos.sinVozTitulo');
-              const meta = [momento(a.creadoEn), a.mascotaNombre].filter(Boolean).join(' · ');
-              // memorial no porta `active` (degrada a primary) — el guard
-              // es el del precedente de C, no un cast a ciegas.
-              const acento = theme.accent.active;  /* S116-B · memorial ya porta el slot: el fallback era rama muerta. */
-              return (
-                <View key={a.id}>
-                  {i > 0 ? <Separador /> : null}
-                  <Pressable
-                    disabled={destino === null}
-                    onPress={destino !== null ? () => void alTocar(a, destino) : undefined}
-                    accessibilityRole={destino !== null ? 'button' : undefined}
-                    accessibilityLabel={a.leida ? titulo : `${titulo}, ${t('avisos.noLeido')}`}
-                    style={{ paddingVertical: spacing[3], flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}
-                  >
-                    <View style={{ flex: 1, gap: spacing[1] }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
-                        {!a.leida ? (
-                          // La huella marca PRESENCIA (jamás número) — la
-                          // visual se esconde: el estado viaja en el label.
-                          <View importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
-                            <Svg width={LADO_HUELLA} height={LADO_HUELLA} viewBox="0 0 24 24">
-                              <Huella color={acento} />
-                            </Svg>
-                          </View>
-                        ) : null}
-                        <Text
-                          style={{
-                            flex: 1,
-                            fontFamily: a.leida ? typography.family.sans.regular : typography.family.sans.medium,
-                            fontSize: typography.size.base,
-                            color: theme.text.primary,
-                          }}
-                        >
-                          {titulo}
-                        </Text>
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[5] }}>
+          {estado === 'cargando' ? (
+            <EsqueletoGrupo>
+              <View style={{ gap: spacing[3] }}>
+                <Esqueleto forma="bloque" ancho="100%" alto={72} />
+                <Esqueleto forma="bloque" ancho="100%" alto={72} />
+                <Esqueleto forma="bloque" ancho="100%" alto={72} />
+              </View>
+            </EsqueletoGrupo>
+          ) : estado === 'error' ? (
+            <EstadoVacio
+              registro="seccion"
+              titulo={t('avisos.errorCargar')}
+              accion={
+                <Boton
+                  variante="secundario"
+                  etiqueta={t('cuenta.reintentar')}
+                  onPress={() => {
+                    setEstado('cargando');
+                    setIntento((n) => n + 1);
+                  }}
+                />
+              }
+            />
+          ) : avisos.length === 0 ? (
+            // §4: vacío honesto — sin ilustración triste ni celebración.
+            <EstadoVacio registro="seccion" titulo={t('avisos.vacio')} />
+          ) : (
+            <Tarjeta>
+              {avisos.map((a, i) => {
+                const destino = destinoDeAviso(a);
+                const titulo = a.titulo ?? t('avisos.sinVozTitulo');
+                const meta = [momento(a.creadoEn), a.mascotaNombre].filter(Boolean).join(' · ');
+                // memorial no porta `active` (degrada a primary) — el guard
+                // es el del precedente de C, no un cast a ciegas.
+                const acento = theme.accent.active;  /* S116-B · memorial ya porta el slot: el fallback era rama muerta. */
+                return (
+                  <View key={a.id}>
+                    {i > 0 ? <Separador /> : null}
+                    <Pressable
+                      disabled={destino === null}
+                      onPress={destino !== null ? () => void alTocar(a, destino) : undefined}
+                      accessibilityRole={destino !== null ? 'button' : undefined}
+                      accessibilityLabel={a.leida ? titulo : `${titulo}, ${t('avisos.noLeido')}`}
+                      style={{ paddingVertical: spacing[3], flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}
+                    >
+                      <View style={{ flex: 1, gap: spacing[1] }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+                          {!a.leida ? (
+                            // La huella marca PRESENCIA (jamás número) — la
+                            // visual se esconde: el estado viaja en el label.
+                            <View importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
+                              <Svg width={LADO_HUELLA} height={LADO_HUELLA} viewBox="0 0 24 24">
+                                <Huella color={acento} />
+                              </Svg>
+                            </View>
+                          ) : null}
+                          <Text
+                            style={{
+                              flex: 1,
+                              fontFamily: a.leida ? typography.family.sans.regular : typography.family.sans.medium,
+                              fontSize: typography.size.base,
+                              color: theme.text.primary,
+                            }}
+                          >
+                            {titulo}
+                          </Text>
+                        </View>
+                        {a.mensaje !== null ? <Texto variante="apoyo">{a.mensaje}</Texto> : null}
+                        {meta !== '' ? <Texto variante="dato">{meta}</Texto> : null}
                       </View>
-                      {a.mensaje !== null ? <Texto variante="apoyo">{a.mensaje}</Texto> : null}
-                      {meta !== '' ? <Texto variante="dato">{meta}</Texto> : null}
-                    </View>
-                    {destino !== null ? (
-                      <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.lg, color: theme.text.secondary }}>
-                        {'›'}
-                      </Text>
-                    ) : null}
-                  </Pressable>
-                </View>
-              );
-            })}
-          </Tarjeta>
-        )}
+                      {destino !== null ? (
+                        <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.lg, color: theme.text.secondary }}>
+                          {'›'}
+                        </Text>
+                      ) : null}
+                    </Pressable>
+                  </View>
+                );
+              })}
+            </Tarjeta>
+          )}
+        </View>
       </HojaContenido>
     </View>
   );

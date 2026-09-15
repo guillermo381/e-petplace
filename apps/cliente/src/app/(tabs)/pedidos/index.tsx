@@ -398,9 +398,17 @@ export default function DespensaPedidos() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: {
-          paddingTop: spacing[4],
-          // 🔴 SIN `insets.bottom`, y es CONCESIÓN MEDIDA, no gusto.
+
+      >
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ paddingTop: spacing[4], // 🔴 SIN `insets.bottom`, y es CONCESIÓN MEDIDA, no gusto.
           // B midió que **el navegador ya acota**: el `ScrollView` de una
           // pantalla de tab termina en `y = 699.0 dp`, el filo exacto de la
           // barra —que a su vez ya pintó el inset del sistema—. Sumarlo acá
@@ -409,203 +417,201 @@ export default function DespensaPedidos() {
           // *Yo lo había defendido como «aire de cola» y C tenía razón: era
           // una línea vieja, no una posición.* Se unifica en las tres
           // pantallas — dos reglas para lo mismo divergen.
-          paddingBottom: spacing[8],
-          gap: spacing[4],
-        } }}
-      >
-        {pedidos === 'cargando' ? (
-          <EsqueletoGrupo>
-            <View style={{ gap: spacing[3], paddingHorizontal: spacing[5] }}>
-              <Esqueleto forma="bloque" ancho="100%" alto={120} />
-              <Esqueleto forma="bloque" ancho="100%" alto={120} />
-            </View>
-          </EsqueletoGrupo>
-        ) : pedidos === 'error' ? (
-          <EstadoVacio
-            titulo={t('despensa.errorPedidosTitulo')}
-            descripcion={t('despensa.errorVitrinaDetalle')}
-            accion={
-              <Boton
-                variante="secundario"
-                etiqueta={t('hogar.reintentar')}
-                onPress={() => setReintento((n) => n + 1)}
-              />
-            }
-          />
-        ) : pedidos.length === 0 ? (
-          <>
+          paddingBottom: spacing[8], gap: spacing[4] }}>
+          {pedidos === 'cargando' ? (
+            <EsqueletoGrupo>
+              <View style={{ gap: spacing[3], paddingHorizontal: spacing[5] }}>
+                <Esqueleto forma="bloque" ancho="100%" alto={120} />
+                <Esqueleto forma="bloque" ancho="100%" alto={120} />
+              </View>
+            </EsqueletoGrupo>
+          ) : pedidos === 'error' ? (
             <EstadoVacio
-              titulo={t('despensa.sinPedidosTitulo')}
-              descripcion={t('despensa.sinPedidosDetalle')}
+              titulo={t('despensa.errorPedidosTitulo')}
+              descripcion={t('despensa.errorVitrinaDetalle')}
               accion={
                 <Boton
                   variante="secundario"
-                  etiqueta={t('despensa.carritoVacioIr')}
-                  onPress={() => router.push('/despensa')}
+                  etiqueta={t('hogar.reintentar')}
+                  onPress={() => setReintento((n) => n + 1)}
                 />
               }
             />
-            <Separador />
-            <CeldaNavegacion
-              titulo={t('despensa.reclamoEntrada')}
-              detalle={t('despensa.reclamoEntradaDetalle')}
-              onPress={() => router.push('/despensa/reclamo')}
-            />
-          </>
-        ) : (
-          /* 🔴 LA CASA: EN CURSO ARRIBA, HISTORIAL ABAJO (firma del founder,
-             S100c). *Lo que todavía puede pasar algo preside; lo que ya
-             terminó se consulta.* El corte es `es_terminal`, que lo dice el
-             CATÁLOGO —dato del motor, no un `switch` acá—, así que el día
-             que nazca una narrativa nueva cae del lado correcto sola.
-
-             **Los dos rótulos aparecen SOLO si existen las dos secciones**:
-             con una sola, rotular anuncia una división que no está (Chanel). */
-          <>
-            {(() => {
-              /* 🔴 S100d · LA CASA SE REESTRUCTURA (firma del founder).
-                 **Arriba el SEGUIMIENTO VIVO; abajo el histórico con sus
-                 chips.** Y la regla que ordena el resto: *lo vivo desaparece
-                 cuando no existe* — la zona de arriba **no deja hueco ni
-                 estado vacío**, igual que «Ponte al día» en el Hogar.
-
-                 **Sin duplicación, por firma:** el pedido en curso vive
-                 arriba **y no se repite abajo** ⇒ los chips son
-                 «Entregados · Cancelados», no «En curso». *Un pedido que
-                 aparece dos veces en la misma pantalla le pide al dueño que
-                 descubra que son el mismo.*
-
-                 **El corte sigue siendo `es_terminal`** —dato del catálogo,
-                 no un `switch` acá—, así que una narrativa nueva cae del
-                 lado correcto sola. */
-              const vivos = pedidos.filter((p) => !p.es_terminal);
-              const historial = pedidos.filter((p) => p.es_terminal);
-              const visiblesVivos = vivosRevelados ? vivos : vivos.slice(0, TOPE_VIVOS);
-              /* Los chips salen de lo que EXISTE, jamás de un catálogo fijo:
-                 *un filtro que no filtra nada es un filtro inalcanzable con
-                 otro nombre* — y encima enseña que los controles de esta
-                 pantalla no hacen nada (19.9, el nulo no se pinta). */
-              const chips = (
-                [
-                  { codigo: 'entregado' as const, etiqueta: t('despensa.chipEntregados'), icono: null },
-                  { codigo: 'cancelado' as const, etiqueta: t('despensa.chipCancelados'), icono: null },
-                ]
-              ).filter((c) => historial.some((p) => p.narrativa === c.codigo));
-              const historialVisible =
-                filtro === null ? historial : historial.filter((p) => p.narrativa === filtro);
-              return (
-                <>
-                  {vivos.length === 0 ? null : (
-                    <View style={{ paddingHorizontal: spacing[5], gap: spacing[4] }}>
-                      {visiblesVivos.map((p) => tarjetaDe(p))}
-                      {vivos.length > TOPE_VIVOS && !vivosRevelados ? (
-                        <PieRevelar
-                          n={vivos.length - TOPE_VIVOS}
-                          onPress={() => setVivosRevelados(true)}
-                        />
-                      ) : null}
-                    </View>
-                  )}
-
-                  {historial.length === 0 ? null : (
-                    <View style={{ gap: spacing[4] }}>
-                      <View style={{ paddingHorizontal: spacing[5] }}>
-                        <Texto variante="seccion">{t('despensa.pedidosHistorial')}</Texto>
-                      </View>
-                      {chips.length === 0 ? null : (
-                        /* 🔴 `envuelve` Y NO `tira`, con el número de C al
-                           lado. En su tira horizontal midió **5 opciones y 4
-                           alcanzables**, y una que salía con **ancho CERO**:
-                           *un filtro inalcanzable es peor que uno ausente —
-                           ocupa lugar y promete.* Con dos chips **no hay nada
-                           que scrollear**, así que ese modo de falla queda
-                           **inexpresable**, no evitado. *Elegir la
-                           disposición que no puede fallar es más barato que
-                           depender de que la cura del arrastre viaje.* */
-                        <FiltroPills
-                          opciones={chips}
-                          activo={filtro}
-                          onCambio={(c: 'entregado' | 'cancelado') => setFiltro(c === filtro ? null : c)}
-                          disposicion="envuelve"
-                        />
-                      )}
-                      <View style={{ paddingHorizontal: spacing[5], gap: spacing[4] }}>
-                        {historialVisible.map((p) => (
-                          <View key={p.pedido_id} style={{ gap: spacing[2] }}>
-                            {tarjetaDe(p)}
-                            {/* 🔴 S100d · PEDIR DE NUEVO — **la palanca
-                                comercial de esta pantalla**, firmada por el
-                                founder: *en comida de mascota la compra es
-                                CÍCLICA — la bolsa se acaba cada 30-45 días.*
-                                Solo en ENTREGADOS: *ofrecer repetir un pedido
-                                cancelado sería ofrecer repetir algo que no
-                                pasó.*
-
-                                ⚠️ **HOY LLEVA A LA DESPENSA, NO AL PRODUCTO, y
-                                se declara en vez de disimularse.** Para
-                                re-armar el pedido haría falta resolver la
-                                OFERTA VIGENTE de cada ítem —precio y stock de
-                                HOY, no los de la compra vieja— y el lector de
-                                esta lista **no trae `producto_id`**: devuelve
-                                nombre, conteo y portada. *Mandar al carrito
-                                con el precio de un pedido viejo sería prometer
-                                una plata que el motor va a desmentir en el
-                                checkout.*
-                                ⇒ pedido a A: **`producto_id` en el resumen**
-                                —un campo en un lector suyo que ya existe— y
-                                esto pasa a llevar a la ficha en una línea. */}
-                            {/* ✅ S100d · YA LLEVA A LA FICHA. A ensanchó su
-                                lector con `producto_id` —**de la MISMA fila**
-                                que el nombre y la portada, cero viajes
-                                nuevos— y esto pasó de media palanca a
-                                entera: se vuelve a comprar **al precio y con
-                                el stock de HOY**.
-
-                                🔴 **SIN `producto_id` NO SE OFRECE EL CAMINO,
-                                y es contrato de A**: `null` significa que el
-                                producto **ya no está publicado** ⇒ el botón
-                                llevaría a una ficha que no existe. *Una
-                                puerta que rebota es peor que ninguna puerta*
-                                (Ley 23) — y acá rebotaría justo cuando la
-                                familia quiso repetir su compra.
-
-                                **Solo en ENTREGADOS**: ofrecer repetir un
-                                pedido cancelado sería ofrecer repetir algo
-                                que no pasó. */}
-                            {p.narrativa === 'entregado' && resumen[p.pedido_id]?.producto_id ? (
-                              <Boton
-                                variante="secundario"
-                                etiqueta={t('despensa.pedirDeNuevo')}
-                                onPress={() =>
-                                  router.push({
-                                    pathname: '/despensa/producto/[productoId]',
-                                    params: { productoId: resumen[p.pedido_id]!.producto_id! },
-                                  })
-                                }
-                              />
-                            ) : null}
-                          </View>
-                        ))}
-                      </View>
-                    </View>
-                  )}
-                </>
-              );
-            })()}
-            {/* EL ACCESO DEL LOCAL — el founder lo pidió adentro de esta casa,
-                y hasta hoy vivía SOLO en el estado vacío. *Una entrada que
-                existe solo cuando no tenés nada es una entrada que nadie
-                encuentra el día que la necesita.* */}
-            <View style={{ paddingTop: spacing[2] }}>
+          ) : pedidos.length === 0 ? (
+            <>
+              <EstadoVacio
+                titulo={t('despensa.sinPedidosTitulo')}
+                descripcion={t('despensa.sinPedidosDetalle')}
+                accion={
+                  <Boton
+                    variante="secundario"
+                    etiqueta={t('despensa.carritoVacioIr')}
+                    onPress={() => router.push('/despensa')}
+                  />
+                }
+              />
               <Separador />
               <CeldaNavegacion
                 titulo={t('despensa.reclamoEntrada')}
                 detalle={t('despensa.reclamoEntradaDetalle')}
                 onPress={() => router.push('/despensa/reclamo')}
               />
-            </View>
-          </>
-        )}
+            </>
+          ) : (
+            /* 🔴 LA CASA: EN CURSO ARRIBA, HISTORIAL ABAJO (firma del founder,
+               S100c). *Lo que todavía puede pasar algo preside; lo que ya
+               terminó se consulta.* El corte es `es_terminal`, que lo dice el
+               CATÁLOGO —dato del motor, no un `switch` acá—, así que el día
+               que nazca una narrativa nueva cae del lado correcto sola.
+
+               **Los dos rótulos aparecen SOLO si existen las dos secciones**:
+               con una sola, rotular anuncia una división que no está (Chanel). */
+            <>
+              {(() => {
+                /* 🔴 S100d · LA CASA SE REESTRUCTURA (firma del founder).
+                   **Arriba el SEGUIMIENTO VIVO; abajo el histórico con sus
+                   chips.** Y la regla que ordena el resto: *lo vivo desaparece
+                   cuando no existe* — la zona de arriba **no deja hueco ni
+                   estado vacío**, igual que «Ponte al día» en el Hogar.
+
+                   **Sin duplicación, por firma:** el pedido en curso vive
+                   arriba **y no se repite abajo** ⇒ los chips son
+                   «Entregados · Cancelados», no «En curso». *Un pedido que
+                   aparece dos veces en la misma pantalla le pide al dueño que
+                   descubra que son el mismo.*
+
+                   **El corte sigue siendo `es_terminal`** —dato del catálogo,
+                   no un `switch` acá—, así que una narrativa nueva cae del
+                   lado correcto sola. */
+                const vivos = pedidos.filter((p) => !p.es_terminal);
+                const historial = pedidos.filter((p) => p.es_terminal);
+                const visiblesVivos = vivosRevelados ? vivos : vivos.slice(0, TOPE_VIVOS);
+                /* Los chips salen de lo que EXISTE, jamás de un catálogo fijo:
+                   *un filtro que no filtra nada es un filtro inalcanzable con
+                   otro nombre* — y encima enseña que los controles de esta
+                   pantalla no hacen nada (19.9, el nulo no se pinta). */
+                const chips = (
+                  [
+                    { codigo: 'entregado' as const, etiqueta: t('despensa.chipEntregados'), icono: null },
+                    { codigo: 'cancelado' as const, etiqueta: t('despensa.chipCancelados'), icono: null },
+                  ]
+                ).filter((c) => historial.some((p) => p.narrativa === c.codigo));
+                const historialVisible =
+                  filtro === null ? historial : historial.filter((p) => p.narrativa === filtro);
+                return (
+                  <>
+                    {vivos.length === 0 ? null : (
+                      <View style={{ paddingHorizontal: spacing[5], gap: spacing[4] }}>
+                        {visiblesVivos.map((p) => tarjetaDe(p))}
+                        {vivos.length > TOPE_VIVOS && !vivosRevelados ? (
+                          <PieRevelar
+                            n={vivos.length - TOPE_VIVOS}
+                            onPress={() => setVivosRevelados(true)}
+                          />
+                        ) : null}
+                      </View>
+                    )}
+
+                    {historial.length === 0 ? null : (
+                      <View style={{ gap: spacing[4] }}>
+                        <View style={{ paddingHorizontal: spacing[5] }}>
+                          <Texto variante="seccion">{t('despensa.pedidosHistorial')}</Texto>
+                        </View>
+                        {chips.length === 0 ? null : (
+                          /* 🔴 `envuelve` Y NO `tira`, con el número de C al
+                             lado. En su tira horizontal midió **5 opciones y 4
+                             alcanzables**, y una que salía con **ancho CERO**:
+                             *un filtro inalcanzable es peor que uno ausente —
+                             ocupa lugar y promete.* Con dos chips **no hay nada
+                             que scrollear**, así que ese modo de falla queda
+                             **inexpresable**, no evitado. *Elegir la
+                             disposición que no puede fallar es más barato que
+                             depender de que la cura del arrastre viaje.* */
+                          <FiltroPills
+                            opciones={chips}
+                            activo={filtro}
+                            onCambio={(c: 'entregado' | 'cancelado') => setFiltro(c === filtro ? null : c)}
+                            disposicion="envuelve"
+                          />
+                        )}
+                        <View style={{ paddingHorizontal: spacing[5], gap: spacing[4] }}>
+                          {historialVisible.map((p) => (
+                            <View key={p.pedido_id} style={{ gap: spacing[2] }}>
+                              {tarjetaDe(p)}
+                              {/* 🔴 S100d · PEDIR DE NUEVO — **la palanca
+                                  comercial de esta pantalla**, firmada por el
+                                  founder: *en comida de mascota la compra es
+                                  CÍCLICA — la bolsa se acaba cada 30-45 días.*
+                                  Solo en ENTREGADOS: *ofrecer repetir un pedido
+                                  cancelado sería ofrecer repetir algo que no
+                                  pasó.*
+
+                                  ⚠️ **HOY LLEVA A LA DESPENSA, NO AL PRODUCTO, y
+                                  se declara en vez de disimularse.** Para
+                                  re-armar el pedido haría falta resolver la
+                                  OFERTA VIGENTE de cada ítem —precio y stock de
+                                  HOY, no los de la compra vieja— y el lector de
+                                  esta lista **no trae `producto_id`**: devuelve
+                                  nombre, conteo y portada. *Mandar al carrito
+                                  con el precio de un pedido viejo sería prometer
+                                  una plata que el motor va a desmentir en el
+                                  checkout.*
+                                  ⇒ pedido a A: **`producto_id` en el resumen**
+                                  —un campo en un lector suyo que ya existe— y
+                                  esto pasa a llevar a la ficha en una línea. */}
+                              {/* ✅ S100d · YA LLEVA A LA FICHA. A ensanchó su
+                                  lector con `producto_id` —**de la MISMA fila**
+                                  que el nombre y la portada, cero viajes
+                                  nuevos— y esto pasó de media palanca a
+                                  entera: se vuelve a comprar **al precio y con
+                                  el stock de HOY**.
+
+                                  🔴 **SIN `producto_id` NO SE OFRECE EL CAMINO,
+                                  y es contrato de A**: `null` significa que el
+                                  producto **ya no está publicado** ⇒ el botón
+                                  llevaría a una ficha que no existe. *Una
+                                  puerta que rebota es peor que ninguna puerta*
+                                  (Ley 23) — y acá rebotaría justo cuando la
+                                  familia quiso repetir su compra.
+
+                                  **Solo en ENTREGADOS**: ofrecer repetir un
+                                  pedido cancelado sería ofrecer repetir algo
+                                  que no pasó. */}
+                              {p.narrativa === 'entregado' && resumen[p.pedido_id]?.producto_id ? (
+                                <Boton
+                                  variante="secundario"
+                                  etiqueta={t('despensa.pedirDeNuevo')}
+                                  onPress={() =>
+                                    router.push({
+                                      pathname: '/despensa/producto/[productoId]',
+                                      params: { productoId: resumen[p.pedido_id]!.producto_id! },
+                                    })
+                                  }
+                                />
+                              ) : null}
+                            </View>
+                          ))}
+                        </View>
+                      </View>
+                    )}
+                  </>
+                );
+              })()}
+              {/* EL ACCESO DEL LOCAL — el founder lo pidió adentro de esta casa,
+                  y hasta hoy vivía SOLO en el estado vacío. *Una entrada que
+                  existe solo cuando no tenés nada es una entrada que nadie
+                  encuentra el día que la necesita.* */}
+              <View style={{ paddingTop: spacing[2] }}>
+                <Separador />
+                <CeldaNavegacion
+                  titulo={t('despensa.reclamoEntrada')}
+                  detalle={t('despensa.reclamoEntradaDetalle')}
+                  onPress={() => router.push('/despensa/reclamo')}
+                />
+              </View>
+            </>
+          )}
+        </View>
       </HojaContenido>
     </View>
   );

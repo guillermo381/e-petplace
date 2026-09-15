@@ -209,74 +209,81 @@ export default function MisCasos() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: {
-          padding: spacing[5],
-          gap: spacing[3],
-        } }}
+
       >
-        {casos === 'cargando' ? (
-          <EsqueletoGrupo>
-            <Esqueleto alto={72} />
-            <Esqueleto alto={72} />
-          </EsqueletoGrupo>
-        ) : casos === 'error' ? (
-          /* Ley 13: el error jamás se disfraza de vacío. */
-          <EstadoVacio titulo={t('postventa.misCasosNoSePudo')} />
-        ) : casos.length === 0 ? (
-          /* Vacío SERENO — no haber tenido que reclamar nada es la buena
-             noticia, no un hueco que llenar. */
-          <EstadoVacio titulo={t('postventa.misCasosVacio')} />
-        ) : (
-          <>
-            <Texto variante="apoyo">{t('postventa.misCasosIntro')}</Texto>
-            {/* Los filtros van ARRIBA de la lista y sólo cuando hay algo que
-                filtrar: dos hileras de pastillas sobre una lista vacía son
-                controles que no controlan nada (Ley 23 — la puerta no ofrece
-                lo que no tiene). */}
-            <FiltrosDeCaso
-              estado={filtroEstado}
-              onEstado={setFiltroEstado}
-              fecha={filtroFecha}
-              onFecha={setFiltroFecha}
-            />
-            {/* 🔴 **DOS VACÍOS DISTINTOS, y por eso son dos ramas.** Uno dice
-                «no tuviste que reclamar nada» —la buena noticia— y el otro
-                «lo que buscás no está con estos filtros», que se resuelve
-                tocando una pastilla. *Un solo texto para los dos le diría a
-                una familia que no tiene casos cuando tiene seis.* */}
-            {/* ⚠️ **ESTA RAMA NO ESTÁ EJERCIDA EN APARATO, y no es un olvido.**
-                Firmado por la mesa el 8-sep: se declara y **no se fuerza**.
-
-                Por qué no se puede hoy: el filtro de período mira
-                `creadoEn` DEL CASO (firmado con su razón — ver abajo), y **los
-                ocho casos de esta familia se abrieron esta semana**, así que
-                ninguna combinación de los dos ejes da cero. Medido contra la
-                base: la única fecha vieja del sujeto que se sembró
-                (`b630e1ce`) es `pedidos.created_at` = 16-ago, **y no la lee
-                nadie** — el caso se creó hoy y su objeto se tocó hoy.
-
-                🔴 **QUÉ HARÍA FALTA PARA EJERCERLA**, para que el día que
-                alguien vuelva acá no tenga que re-deducirlo:
-                  · **un caso ABIERTO hace más de 7 días** — o sea
-                    `casos_postventa.creado_en` viejo de verdad;
-                  · **no se siembra tocando el objeto**: retroceder esa fecha
-                    exige un `UPDATE` sobre la tabla, que ninguna RPC hace y
-                    que la mesa decidió NO ejecutar;
-                  · ⇒ **el sujeto natural llega en octubre**, cuando existan
-                    casos con semanas encima. Ahí se camina y se captura.
-
-                *Fabricar el dato para ver esta rama en verde sería el verde
-                por conveniencia que esta casa castiga.* */}
-            {filas.length === 0 ? <EstadoVacio titulo={t('postventa.filtroSinNada')} /> : null}
-            {filas.map((f) => (
-              <FilaBandejaCaso
-                key={f.clave}
-                caso={f}
-                onPress={() => router.push(`/postventa/caso/${f.clave}`)}
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[5], gap: spacing[3] }}>
+          {casos === 'cargando' ? (
+            <EsqueletoGrupo>
+              <Esqueleto alto={72} />
+              <Esqueleto alto={72} />
+            </EsqueletoGrupo>
+          ) : casos === 'error' ? (
+            /* Ley 13: el error jamás se disfraza de vacío. */
+            <EstadoVacio titulo={t('postventa.misCasosNoSePudo')} />
+          ) : casos.length === 0 ? (
+            /* Vacío SERENO — no haber tenido que reclamar nada es la buena
+               noticia, no un hueco que llenar. */
+            <EstadoVacio titulo={t('postventa.misCasosVacio')} />
+          ) : (
+            <>
+              <Texto variante="apoyo">{t('postventa.misCasosIntro')}</Texto>
+              {/* Los filtros van ARRIBA de la lista y sólo cuando hay algo que
+                  filtrar: dos hileras de pastillas sobre una lista vacía son
+                  controles que no controlan nada (Ley 23 — la puerta no ofrece
+                  lo que no tiene). */}
+              <FiltrosDeCaso
+                estado={filtroEstado}
+                onEstado={setFiltroEstado}
+                fecha={filtroFecha}
+                onFecha={setFiltroFecha}
               />
-            ))}
-          </>
-        )}
+              {/* 🔴 **DOS VACÍOS DISTINTOS, y por eso son dos ramas.** Uno dice
+                  «no tuviste que reclamar nada» —la buena noticia— y el otro
+                  «lo que buscás no está con estos filtros», que se resuelve
+                  tocando una pastilla. *Un solo texto para los dos le diría a
+                  una familia que no tiene casos cuando tiene seis.* */}
+              {/* ⚠️ **ESTA RAMA NO ESTÁ EJERCIDA EN APARATO, y no es un olvido.**
+                  Firmado por la mesa el 8-sep: se declara y **no se fuerza**.
+
+                  Por qué no se puede hoy: el filtro de período mira
+                  `creadoEn` DEL CASO (firmado con su razón — ver abajo), y **los
+                  ocho casos de esta familia se abrieron esta semana**, así que
+                  ninguna combinación de los dos ejes da cero. Medido contra la
+                  base: la única fecha vieja del sujeto que se sembró
+                  (`b630e1ce`) es `pedidos.created_at` = 16-ago, **y no la lee
+                  nadie** — el caso se creó hoy y su objeto se tocó hoy.
+
+                  🔴 **QUÉ HARÍA FALTA PARA EJERCERLA**, para que el día que
+                  alguien vuelva acá no tenga que re-deducirlo:
+                    · **un caso ABIERTO hace más de 7 días** — o sea
+                      `casos_postventa.creado_en` viejo de verdad;
+                    · **no se siembra tocando el objeto**: retroceder esa fecha
+                      exige un `UPDATE` sobre la tabla, que ninguna RPC hace y
+                      que la mesa decidió NO ejecutar;
+                    · ⇒ **el sujeto natural llega en octubre**, cuando existan
+                      casos con semanas encima. Ahí se camina y se captura.
+
+                  *Fabricar el dato para ver esta rama en verde sería el verde
+                  por conveniencia que esta casa castiga.* */}
+              {filas.length === 0 ? <EstadoVacio titulo={t('postventa.filtroSinNada')} /> : null}
+              {filas.map((f) => (
+                <FilaBandejaCaso
+                  key={f.clave}
+                  caso={f}
+                  onPress={() => router.push(`/postventa/caso/${f.clave}`)}
+                />
+              ))}
+            </>
+          )}
+        </View>
       </HojaContenido>
     </View>
   );

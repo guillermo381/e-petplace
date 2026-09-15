@@ -146,158 +146,168 @@ export default function ParteAdiestramientoPantalla() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: { padding: spacing[4], gap: spacing[5] } }}
-      >
-        {parte === 'cargando' ? (
-          <EsqueletoGrupo>
-            <View style={{ gap: spacing[3] }}>
-              <Esqueleto forma="bloque" ancho="60%" alto={24} />
-              <Esqueleto forma="bloque" ancho="100%" alto={56} />
-              <Esqueleto forma="bloque" ancho="100%" alto={180} />
-            </View>
-          </EsqueletoGrupo>
-        ) : parte === 'error' ? (
-          <EstadoVacio
-            titulo={t('adiestramiento.parteError')}
-            descripcion={t('hogar.errorHistoriaDetalle')}
-            accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setIntento((n) => n + 1)} />}
-          />
-        ) : (
-          <>
-            {/* 0 — LA FIRMA: sesión k de N + la frase de vínculo (§6).
-                Memorial: progresion llega NULL y la sección NO existe. */}
-            <Entrada>
-              <View style={{ gap: spacing[3] }}>
-                {parte.sesion !== null ? (
-                  <Texto variante="dato">
-                    {t('adiestramiento.sesionKdeN', {
-                      k: String(parte.sesion.numero),
-                      n: String(parte.sesion.de),
-                    }).toLowerCase()}
-                  </Texto>
-                ) : null}
-                {parte.progresion !== null ? (
-                  // Voz humana xl con interlineado de prosa — fuera de la
-                  // API de Texto (candidata de mesa, declarada arriba).
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.light,
-                      fontSize: typography.size.xl,
-                      lineHeight: Math.round(typography.size.xl * 1.3),
-                      color: theme.text.primary,
-                    }}
-                  >
-                    {fraseProgresion(parte.progresion)}
-                  </Text>
-                ) : null}
-              </View>
-            </Entrada>
 
-            {/* 1 — LO QUE PASÓ: chips en voz de familia + los clips. */}
-            <Entrada orden={1}>
-              <View style={{ gap: spacing[5] }}>
-                {parte.objetivos.length > 0 ? (
-                  <View style={{ gap: spacing[2] }}>
-                    <Texto variante="seccion">{t('adiestramiento.parteObjetivos')}</Texto>
-                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
-                      {parte.objetivos.map((o) => (
-                        <Insignia
-                          key={o.codigo}
-                          estado={o.alcanzado ? 'alDia' : 'info'}
-                          etiqueta={idioma === 'en' ? o.nombre_familia_en : o.nombre_familia}
-                        />
+      >
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[4], gap: spacing[5] }}>
+          {parte === 'cargando' ? (
+            <EsqueletoGrupo>
+              <View style={{ gap: spacing[3] }}>
+                <Esqueleto forma="bloque" ancho="60%" alto={24} />
+                <Esqueleto forma="bloque" ancho="100%" alto={56} />
+                <Esqueleto forma="bloque" ancho="100%" alto={180} />
+              </View>
+            </EsqueletoGrupo>
+          ) : parte === 'error' ? (
+            <EstadoVacio
+              titulo={t('adiestramiento.parteError')}
+              descripcion={t('hogar.errorHistoriaDetalle')}
+              accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setIntento((n) => n + 1)} />}
+            />
+          ) : (
+            <>
+              {/* 0 — LA FIRMA: sesión k de N + la frase de vínculo (§6).
+                  Memorial: progresion llega NULL y la sección NO existe. */}
+              <Entrada>
+                <View style={{ gap: spacing[3] }}>
+                  {parte.sesion !== null ? (
+                    <Texto variante="dato">
+                      {t('adiestramiento.sesionKdeN', {
+                        k: String(parte.sesion.numero),
+                        n: String(parte.sesion.de),
+                      }).toLowerCase()}
+                    </Texto>
+                  ) : null}
+                  {parte.progresion !== null ? (
+                    // Voz humana xl con interlineado de prosa — fuera de la
+                    // API de Texto (candidata de mesa, declarada arriba).
+                    <Text
+                      style={{
+                        fontFamily: typography.family.sans.light,
+                        fontSize: typography.size.xl,
+                        lineHeight: Math.round(typography.size.xl * 1.3),
+                        color: theme.text.primary,
+                      }}
+                    >
+                      {fraseProgresion(parte.progresion)}
+                    </Text>
+                  ) : null}
+                </View>
+              </Entrada>
+
+              {/* 1 — LO QUE PASÓ: chips en voz de familia + los clips. */}
+              <Entrada orden={1}>
+                <View style={{ gap: spacing[5] }}>
+                  {parte.objetivos.length > 0 ? (
+                    <View style={{ gap: spacing[2] }}>
+                      <Texto variante="seccion">{t('adiestramiento.parteObjetivos')}</Texto>
+                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
+                        {parte.objetivos.map((o) => (
+                          <Insignia
+                            key={o.codigo}
+                            estado={o.alcanzado ? 'alDia' : 'info'}
+                            etiqueta={idioma === 'en' ? o.nombre_familia_en : o.nombre_familia}
+                          />
+                        ))}
+                      </View>
+                    </View>
+                  ) : null}
+
+                  {/* Los clips — el medio del oficio (§5); ≤3, techo del motor */}
+                  {parte.clips.length > 0 ? (
+                    <View style={{ gap: spacing[3] }}>
+                      <Texto variante="seccion">{t('adiestramiento.parteClips')}</Texto>
+                      {parte.clips.map((c) => {
+                        const url = clipUrls[c.storage_path];
+                        return url !== undefined ? (
+                          <ClipSesion
+                            key={c.storage_path}
+                            uri={url}
+                            duracionSegundos={c.duracion_segundos}
+                            descripcion={c.descripcion}
+                          />
+                        ) : null;
+                      })}
+                    </View>
+                  ) : null}
+                </View>
+              </Entrada>
+
+              {/* 2 — EL RESTO: la nota, lo de practicar, el mensaje. */}
+              <Entrada orden={2}>
+                <View style={{ gap: spacing[5] }}>
+                  {parte.notas.length > 0 ? (
+                    <View style={{ gap: spacing[2] }}>
+                      <Texto variante="seccion">{t('adiestramiento.parteNotas')}</Texto>
+                      {parte.notas.map((n, i) => (
+                        // Prosa con interlineado — fuera de la API de Texto
+                        // (candidata de mesa, declarada arriba).
+                        <Text
+                          key={i}
+                          style={{
+                            fontFamily: typography.family.sans.regular,
+                            fontSize: typography.size.md,
+                            lineHeight: Math.round(typography.size.md * 1.45),
+                            color: theme.text.primary,
+                          }}
+                        >
+                          {n.texto}
+                        </Text>
                       ))}
                     </View>
-                  </View>
-                ) : null}
+                  ) : null}
 
-                {/* Los clips — el medio del oficio (§5); ≤3, techo del motor */}
-                {parte.clips.length > 0 ? (
-                  <View style={{ gap: spacing[3] }}>
-                    <Texto variante="seccion">{t('adiestramiento.parteClips')}</Texto>
-                    {parte.clips.map((c) => {
-                      const url = clipUrls[c.storage_path];
-                      return url !== undefined ? (
-                        <ClipSesion
-                          key={c.storage_path}
-                          uri={url}
-                          duracionSegundos={c.duracion_segundos}
-                          descripcion={c.descripcion}
-                        />
-                      ) : null;
-                    })}
-                  </View>
-                ) : null}
-              </View>
-            </Entrada>
+                  {/* Para practicar en casa (§5 founder S62) — sección propia */}
+                  {parte.instrucciones_familia !== null ? (
+                    <Tarjeta tinte="cuidado">
+                      <View style={{ gap: spacing[2] }}>
+                        <Texto variante="seccion">{t('adiestramiento.parteInstrucciones')}</Texto>
+                        <Text
+                          style={{
+                            fontFamily: typography.family.sans.regular,
+                            fontSize: typography.size.md,
+                            lineHeight: Math.round(typography.size.md * 1.45),
+                            color: theme.text.primary,
+                          }}
+                        >
+                          {parte.instrucciones_familia}
+                        </Text>
+                      </View>
+                    </Tarjeta>
+                  ) : null}
 
-            {/* 2 — EL RESTO: la nota, lo de practicar, el mensaje. */}
-            <Entrada orden={2}>
-              <View style={{ gap: spacing[5] }}>
-                {parte.notas.length > 0 ? (
-                  <View style={{ gap: spacing[2] }}>
-                    <Texto variante="seccion">{t('adiestramiento.parteNotas')}</Texto>
-                    {parte.notas.map((n, i) => (
-                      // Prosa con interlineado — fuera de la API de Texto
-                      // (candidata de mesa, declarada arriba).
-                      <Text
-                        key={i}
-                        style={{
-                          fontFamily: typography.family.sans.regular,
-                          fontSize: typography.size.md,
-                          lineHeight: Math.round(typography.size.md * 1.45),
-                          color: theme.text.primary,
-                        }}
-                      >
-                        {n.texto}
-                      </Text>
-                    ))}
-                  </View>
-                ) : null}
-
-                {/* Para practicar en casa (§5 founder S62) — sección propia */}
-                {parte.instrucciones_familia !== null ? (
-                  <Tarjeta tinte="cuidado">
-                    <View style={{ gap: spacing[2] }}>
-                      <Texto variante="seccion">{t('adiestramiento.parteInstrucciones')}</Texto>
-                      <Text
-                        style={{
-                          fontFamily: typography.family.sans.regular,
-                          fontSize: typography.size.md,
-                          lineHeight: Math.round(typography.size.md * 1.45),
-                          color: theme.text.primary,
-                        }}
-                      >
-                        {parte.instrucciones_familia}
-                      </Text>
-                    </View>
-                  </Tarjeta>
-                ) : null}
-
-                {/* El mensaje a la familia — cierre emocional VERBATIM
-                    (patrón del parte del paseo) */}
-                {parte.mensaje_familia !== null ? (
-                  <>
-                    <Separador />
-                    <View style={{ gap: spacing[2] }}>
-                      <Texto variante="seccion">{t('adiestramiento.parteMensajeTitulo')}</Texto>
-                      <Text
-                        style={{
-                          fontFamily: typography.family.sans.light,
-                          fontSize: typography.size.lg,
-                          lineHeight: Math.round(typography.size.lg * 1.4),
-                          color: theme.text.primary,
-                        }}
-                      >
-                        {parte.mensaje_familia}
-                      </Text>
-                    </View>
-                  </>
-                ) : null}
-              </View>
-            </Entrada>
-          </>
-        )}
+                  {/* El mensaje a la familia — cierre emocional VERBATIM
+                      (patrón del parte del paseo) */}
+                  {parte.mensaje_familia !== null ? (
+                    <>
+                      <Separador />
+                      <View style={{ gap: spacing[2] }}>
+                        <Texto variante="seccion">{t('adiestramiento.parteMensajeTitulo')}</Texto>
+                        <Text
+                          style={{
+                            fontFamily: typography.family.sans.light,
+                            fontSize: typography.size.lg,
+                            lineHeight: Math.round(typography.size.lg * 1.4),
+                            color: theme.text.primary,
+                          }}
+                        >
+                          {parte.mensaje_familia}
+                        </Text>
+                      </View>
+                    </>
+                  ) : null}
+                </View>
+              </Entrada>
+            </>
+          )}
+        </View>
       </HojaContenido>
     </SafeAreaView>
   );

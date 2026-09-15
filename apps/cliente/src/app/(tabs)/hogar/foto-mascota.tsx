@@ -192,80 +192,91 @@ export default function FotoMascota() {
             />
           </View>
         }
-        scroll={{ scrollEnabled: !gestoActivo, contentContainerStyle: { padding: spacing[5], paddingTop: spacing[5], gap: spacing[5] } }}
+        scroll={{ scrollEnabled: !gestoActivo }}
+
       >
-        {vigente.t === 'cargando' && fotoNueva === null ? (
-          <EsqueletoGrupo etiqueta={t('hogar.cargando')}>
-            <View style={{ alignItems: 'center', gap: spacing[4] }}>
-              <Esqueleto forma="bloque" alto={248} ancho={248} />
-              <Esqueleto forma="linea" ancho="60%" />
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[5], paddingTop: spacing[5], gap: spacing[5] }}>
+          {vigente.t === 'cargando' && fotoNueva === null ? (
+            <EsqueletoGrupo etiqueta={t('hogar.cargando')}>
+              <View style={{ alignItems: 'center', gap: spacing[4] }}>
+                <Esqueleto forma="bloque" alto={248} ancho={248} />
+                <Esqueleto forma="linea" ancho="60%" />
+              </View>
+            </EsqueletoGrupo>
+          ) : null}
+
+          {vigente.t === 'error' && fotoNueva === null ? (
+            <View style={{ alignItems: 'center', gap: spacing[4], paddingTop: spacing[6] }}>
+              <Texto variante="cuerpo" centrado>
+                {vigente.mensaje}
+              </Texto>
+              <Boton variante="secundario" bloque etiqueta={t('fotoEncuadre.elegirFoto')} onPress={() => setHojaAbierta(true)} />
             </View>
-          </EsqueletoGrupo>
-        ) : null}
+          ) : null}
 
-        {vigente.t === 'error' && fotoNueva === null ? (
-          <View style={{ alignItems: 'center', gap: spacing[4], paddingTop: spacing[6] }}>
-            <Texto variante="cuerpo" centrado>
-              {vigente.mensaje}
+          {vigente.t === 'sin_foto' && fotoNueva === null ? (
+            <View style={{ alignItems: 'center', gap: spacing[4], paddingTop: spacing[6] }}>
+              {/* 🔴 C-B (S112-C) · ESTA ES LA PANTALLA DE «no tiene foto», y era
+                  justo donde el monograma se veía más grande: una inicial en el
+                  lugar exacto donde el dueño viene a poner una cara. Ahora
+                  muestra la de su especie — *la app dice qué animal es mientras
+                  él elige la foto, en vez de decirle que no sabe.*
+
+                  ⭐ La especie **viaja por la RUTA**, no por una consulta: la
+                  pantalla que navega acá ya la tiene en la mano. Pedirla de
+                  nuevo sería un viaje entero por un dato que estaba a un
+                  parámetro de distancia (L-223: el costo es la petición).
+
+                  ☠️ Esto resucita —con lector de verdad— lo que S103-C mató con
+                  razón: aquel estado `especie` alimentaba un prop que **no
+                  pintaba nada**. Lo que cambió no es que el dato volvió: es que
+                  ahora algo lo lee. */}
+              <AvatarMascota nombre={nombre} fotoUrl={urlGenericaDeEspecie(params.especie)} tamano="lg" />
+              <Texto variante="apoyo" centrado>
+                {t('fotoEncuadre.elegirDetalle')}
+              </Texto>
+              <Boton variante="secundario" bloque etiqueta={t('fotoEncuadre.elegirFoto')} onPress={() => setHojaAbierta(true)} />
+            </View>
+          ) : null}
+
+          {editorUri !== null && editorDim !== null ? (
+            <>
+              <EncuadreFoto
+                key={editorUri}
+                uri={editorUri}
+                dim={editorDim}
+                inicial={editorInicial}
+                nombre={nombre}
+                onCambio={setEncuadre}
+                onInteraccion={setGestoActivo}
+              />
+              <Boton variante="ghost" bloque etiqueta={t('fotoEncuadre.cargarOtra')} onPress={() => setHojaAbierta(true)} />
+            </>
+          ) : null}
+
+          {permisoDenegado ? (
+            <Texto variante="apoyo" color="danger" centrado>
+              {t('fotoEncuadre.permisoCamara')}
             </Texto>
-            <Boton variante="secundario" bloque etiqueta={t('fotoEncuadre.elegirFoto')} onPress={() => setHojaAbierta(true)} />
-          </View>
-        ) : null}
-
-        {vigente.t === 'sin_foto' && fotoNueva === null ? (
-          <View style={{ alignItems: 'center', gap: spacing[4], paddingTop: spacing[6] }}>
-            {/* 🔴 C-B (S112-C) · ESTA ES LA PANTALLA DE «no tiene foto», y era
-                justo donde el monograma se veía más grande: una inicial en el
-                lugar exacto donde el dueño viene a poner una cara. Ahora
-                muestra la de su especie — *la app dice qué animal es mientras
-                él elige la foto, en vez de decirle que no sabe.*
-
-                ⭐ La especie **viaja por la RUTA**, no por una consulta: la
-                pantalla que navega acá ya la tiene en la mano. Pedirla de
-                nuevo sería un viaje entero por un dato que estaba a un
-                parámetro de distancia (L-223: el costo es la petición).
-
-                ☠️ Esto resucita —con lector de verdad— lo que S103-C mató con
-                razón: aquel estado `especie` alimentaba un prop que **no
-                pintaba nada**. Lo que cambió no es que el dato volvió: es que
-                ahora algo lo lee. */}
-            <AvatarMascota nombre={nombre} fotoUrl={urlGenericaDeEspecie(params.especie)} tamano="lg" />
-            <Texto variante="apoyo" centrado>
-              {t('fotoEncuadre.elegirDetalle')}
+          ) : null}
+          {errorGuardar !== null ? (
+            <Texto variante="apoyo" color="danger" centrado>
+              {errorGuardar}
             </Texto>
-            <Boton variante="secundario" bloque etiqueta={t('fotoEncuadre.elegirFoto')} onPress={() => setHojaAbierta(true)} />
-          </View>
-        ) : null}
+          ) : null}
 
-        {editorUri !== null && editorDim !== null ? (
-          <>
-            <EncuadreFoto
-              key={editorUri}
-              uri={editorUri}
-              dim={editorDim}
-              inicial={editorInicial}
-              nombre={nombre}
-              onCambio={setEncuadre}
-              onInteraccion={setGestoActivo}
-            />
-            <Boton variante="ghost" bloque etiqueta={t('fotoEncuadre.cargarOtra')} onPress={() => setHojaAbierta(true)} />
-          </>
-        ) : null}
-
-        {permisoDenegado ? (
-          <Texto variante="apoyo" color="danger" centrado>
-            {t('fotoEncuadre.permisoCamara')}
-          </Texto>
-        ) : null}
-        {errorGuardar !== null ? (
-          <Texto variante="apoyo" color="danger" centrado>
-            {errorGuardar}
-          </Texto>
-        ) : null}
-
-        {editorUri !== null ? (
-          <Boton etiqueta={t('fotoEncuadre.listo')} bloque cargando={guardando} onPress={() => void guardar()} />
-        ) : null}
+          {editorUri !== null ? (
+            <Boton etiqueta={t('fotoEncuadre.listo')} bloque cargando={guardando} onPress={() => void guardar()} />
+          ) : null}
+        </View>
       </HojaContenido>
 
       <HojaFotoMascota

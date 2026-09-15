@@ -95,52 +95,62 @@ export default function PagosCuenta() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: { padding: spacing[5], gap: spacing[5] } }}
-      >
-        {pagos === 'cargando' ? (
-          <EsqueletoGrupo>
-            <View style={{ gap: spacing[3] }}>
-              <Esqueleto forma="bloque" ancho="100%" alto={64} />
-              <Esqueleto forma="bloque" ancho="100%" alto={64} />
-            </View>
-          </EsqueletoGrupo>
-        ) : pagos === 'error' ? (
-          <EstadoVacio
-            titulo={t('cuenta.errorCargar')}
-            accion={<Boton variante="secundario" etiqueta={t('cuenta.reintentar')} onPress={() => { setPagos('cargando'); setIntento((n) => n + 1); }} />}
-          />
-        ) : pagos.length === 0 ? (
-          <EstadoVacio titulo={t('cuenta.pagosVacioTitulo')} descripcion={t('cuenta.pagosVacio')} />
-        ) : (
-          <Tarjeta relleno="ninguno">
-            {pagos.map((p, i) => (
-              <View key={p.cita_id}>
-                {i > 0 ? <Separador /> : null}
-                <Celda
-                  titulo={vozServicio(p.tipo_servicio)}
-                  subtitulo={p.pago_simulado ? t('cuenta.pagoSimulado') : undefined}
-                  metadataMono={`${p.fecha ? fechaCortaMono(p.fecha, idioma) : ''}${p.hora ? ` · ${p.hora}` : ''}`}
-                  fin={
-                    <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.sm, letterSpacing: typography.tracking.mono, color: theme.text.primary }}>
-                      {p.monto !== null ? formatearPrecio(p.monto) : '—'}
-                    </Text>
-                  }
-                />
-              </View>
-            ))}
-          </Tarjeta>
-        )}
 
-        <View style={{ gap: spacing[2] }}>
-          <Text
-            accessibilityRole="header"
-            style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}
-          >
-            {t('cuenta.pagosMetodos')}
-          </Text>
-          <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
-            {t('cuenta.pagosMetodosYaEsta')}
-          </Text>
+      >
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[5], gap: spacing[5] }}>
+          {pagos === 'cargando' ? (
+            <EsqueletoGrupo>
+              <View style={{ gap: spacing[3] }}>
+                <Esqueleto forma="bloque" ancho="100%" alto={64} />
+                <Esqueleto forma="bloque" ancho="100%" alto={64} />
+              </View>
+            </EsqueletoGrupo>
+          ) : pagos === 'error' ? (
+            <EstadoVacio
+              titulo={t('cuenta.errorCargar')}
+              accion={<Boton variante="secundario" etiqueta={t('cuenta.reintentar')} onPress={() => { setPagos('cargando'); setIntento((n) => n + 1); }} />}
+            />
+          ) : pagos.length === 0 ? (
+            <EstadoVacio titulo={t('cuenta.pagosVacioTitulo')} descripcion={t('cuenta.pagosVacio')} />
+          ) : (
+            <Tarjeta relleno="ninguno">
+              {pagos.map((p, i) => (
+                <View key={p.cita_id}>
+                  {i > 0 ? <Separador /> : null}
+                  <Celda
+                    titulo={vozServicio(p.tipo_servicio)}
+                    subtitulo={p.pago_simulado ? t('cuenta.pagoSimulado') : undefined}
+                    metadataMono={`${p.fecha ? fechaCortaMono(p.fecha, idioma) : ''}${p.hora ? ` · ${p.hora}` : ''}`}
+                    fin={
+                      <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.sm, letterSpacing: typography.tracking.mono, color: theme.text.primary }}>
+                        {p.monto !== null ? formatearPrecio(p.monto) : '—'}
+                      </Text>
+                    }
+                  />
+                </View>
+              ))}
+            </Tarjeta>
+          )}
+
+          <View style={{ gap: spacing[2] }}>
+            <Text
+              accessibilityRole="header"
+              style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}
+            >
+              {t('cuenta.pagosMetodos')}
+            </Text>
+            <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
+              {t('cuenta.pagosMetodosYaEsta')}
+            </Text>
+          </View>
         </View>
       </HojaContenido>
     </View>

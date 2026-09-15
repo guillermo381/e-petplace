@@ -150,74 +150,84 @@ export default function GroomingDisponibles() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: { padding: spacing[4], gap: spacing[3] } }}
+
       >
-        {/* la ventana elegida, en voz de máquina — la duración no viaja:
-            es de cada groomer (servicio × talla) */}
-        <Celda
-          titulo={mascota !== null ? t('grooming.ventanaPara', { nombre: mascota.nombre }) : t('grooming.titulo')}
-          metadataMono={`${fecha} · ${hora}`}
-        />
-        <Separador />
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[4], gap: spacing[3] }}>
+          {/* la ventana elegida, en voz de máquina — la duración no viaja:
+              es de cada groomer (servicio × talla) */}
+          <Celda
+            titulo={mascota !== null ? t('grooming.ventanaPara', { nombre: mascota.nombre }) : t('grooming.titulo')}
+            metadataMono={`${fecha} · ${hora}`}
+          />
+          <Separador />
 
-        {disponibles === 'cargando' || perfil === 'cargando' ? (
-          <EsqueletoGrupo>
-            <View style={{ gap: spacing[3] }}>
-              <Esqueleto forma="bloque" ancho="100%" alto={64} />
-              <Esqueleto forma="bloque" ancho="100%" alto={64} />
-            </View>
-          </EsqueletoGrupo>
-        ) : disponibles === 'error' || perfil === 'error' ? (
-          <EstadoVacio
-            titulo={t('grooming.errorTitulo')}
-            descripcion={t('hogar.errorHistoriaDetalle')}
-            accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={cargarGroomers} />}
-          />
-        ) : disponibles.length === 0 ? (
-          // Peldaño 0 — nadie puede: vuelta barata al CUÁNDO.
-          <EstadoVacio
-            icono={<Icono nombre="grooming" tamano={48} />}
-            titulo={t('explorar.nadiePuede')}
-            descripcion={t('explorar.nadiePuedeDetalle')}
-            accion={<Boton variante="primario" etiqueta={t('explorar.probarOtroHorario')} onPress={() => router.back()} />}
-          />
-        ) : (
-          <Tarjeta relleno="ninguno">
-            {disponibles.map((g, i) => (
-              <View key={g.prestador_servicio_id}>
-                {i > 0 ? <Separador /> : null}
-                <PreviewPrestador
-                    prestadorId={g.prestador_id}
-                  ofertaId={g.prestador_servicio_id}
-                    nombre={g.prestador_nombre}
-                    oficio={t('hogar.railEstetica')}
-                    contexto={g.direccion !== null
-                      ? [g.direccion, g.ciudad].filter(Boolean).join(' · ')
-                      : t('grooming.enSuLocal')}
-                    precio={`${formatearPrecio(g.precio)} · ${g.duracion_minutos} min`}
-                    perfil={perfiles[g.prestador_id]}
-                    /* ⚡ D-730 · la ventana viaja con el tap, para que la ficha
-                       pueda reservar en vez de pedirle a esta lista que lo haga. */
-                    contextoReserva={{ oficio: 'grooming', fecha, hora, mascotaId, tipoServicio, modalidad }}
-                />
+          {disponibles === 'cargando' || perfil === 'cargando' ? (
+            <EsqueletoGrupo>
+              <View style={{ gap: spacing[3] }}>
+                <Esqueleto forma="bloque" ancho="100%" alto={64} />
+                <Esqueleto forma="bloque" ancho="100%" alto={64} />
               </View>
-            ))}
-          </Tarjeta>
-        )}
+            </EsqueletoGrupo>
+          ) : disponibles === 'error' || perfil === 'error' ? (
+            <EstadoVacio
+              titulo={t('grooming.errorTitulo')}
+              descripcion={t('hogar.errorHistoriaDetalle')}
+              accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={cargarGroomers} />}
+            />
+          ) : disponibles.length === 0 ? (
+            // Peldaño 0 — nadie puede: vuelta barata al CUÁNDO.
+            <EstadoVacio
+              icono={<Icono nombre="grooming" tamano={48} />}
+              titulo={t('explorar.nadiePuede')}
+              descripcion={t('explorar.nadiePuedeDetalle')}
+              accion={<Boton variante="primario" etiqueta={t('explorar.probarOtroHorario')} onPress={() => router.back()} />}
+            />
+          ) : (
+            <Tarjeta relleno="ninguno">
+              {disponibles.map((g, i) => (
+                <View key={g.prestador_servicio_id}>
+                  {i > 0 ? <Separador /> : null}
+                  <PreviewPrestador
+                      prestadorId={g.prestador_id}
+                    ofertaId={g.prestador_servicio_id}
+                      nombre={g.prestador_nombre}
+                      oficio={t('hogar.railEstetica')}
+                      contexto={g.direccion !== null
+                        ? [g.direccion, g.ciudad].filter(Boolean).join(' · ')
+                        : t('grooming.enSuLocal')}
+                      precio={`${formatearPrecio(g.precio)} · ${g.duracion_minutos} min`}
+                      perfil={perfiles[g.prestador_id]}
+                      /* ⚡ D-730 · la ventana viaja con el tap, para que la ficha
+                         pueda reservar en vez de pedirle a esta lista que lo haga. */
+                      contextoReserva={{ oficio: 'grooming', fecha, hora, mascotaId, tipoServicio, modalidad }}
+                  />
+                </View>
+              ))}
+            </Tarjeta>
+          )}
 
-        {Array.isArray(disponibles) && disponibles.length > 0 ? (
-          // el precio pintado ya es el de SU mascota — se dice sereno
-          <Text
-            style={{
-              fontFamily: typography.family.sans.regular,
-              fontSize: typography.size.sm,
-              lineHeight: Math.round(typography.size.sm * 1.4),
-              color: theme.text.secondary,
-            }}
-          >
-            {mascota !== null ? t('grooming.precioDeSuPerfil', { nombre: mascota.nombre }) : null}
-          </Text>
-        ) : null}
+          {Array.isArray(disponibles) && disponibles.length > 0 ? (
+            // el precio pintado ya es el de SU mascota — se dice sereno
+            <Text
+              style={{
+                fontFamily: typography.family.sans.regular,
+                fontSize: typography.size.sm,
+                lineHeight: Math.round(typography.size.sm * 1.4),
+                color: theme.text.secondary,
+              }}
+            >
+              {mascota !== null ? t('grooming.precioDeSuPerfil', { nombre: mascota.nombre }) : null}
+            </Text>
+          ) : null}
+        </View>
       </HojaContenido>
 
       {/* §3 — el cinturón: declarar SIEMPRE continúa (recarga precios) */}

@@ -422,234 +422,244 @@ export default function Recurrentes() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: { padding: spacing[5], gap: spacing[4], } }}
+
       >
-        {estado.fase === 'cargando' ? (
-          <EsqueletoGrupo>
-            <Esqueleto alto={72} />
-            <Esqueleto alto={72} />
-          </EsqueletoGrupo>
-        ) : estado.fase === 'noPudimos' ? (
-          <EstadoVacio
-            registro="seccion"
-            titulo={t('recurrentes.noCargoTitulo')}
-            descripcion={t('recurrentes.noCargoDetalle')}
-          />
-        ) : estado.items.length === 0 && estado.pendientes.length === 0 ? (
-          /* El vacío con calma — no queda mudo. */
-          <EstadoVacio
-            registro="seccion"
-            titulo={t('recurrentes.vacioTitulo')}
-            descripcion={t('recurrentes.vacioDetalle')}
-          />
-        ) : (
-          <>
-            {/* ═══ ⭐ S109-C · LOS MESES POR PAGAR — ARRIBA DE TODO ══════════
-                🔴 **Es lo único accionable de esta pantalla, y tiene fecha de
-                vencimiento.** El resto informa; esto pide un acto. *Un mes que
-                no se paga no falla ruidosamente: el plan simplemente no se
-                renueva, y la familia se entera por el silencio.*
-                ⚠️ Sólo existe en el mandato por DeUna — con tarjeta se cobra
-                solo y esta lista viene vacía. */}
-            {estado.pendientes.map((m) => {
-              /* 🔴 **LOS DOS RELOJES NO SE MEZCLAN.** `mesVenceEn` es el fin del
-                 período pagado (días); `codigoExpiraEn` es de DeUna (minutos).
-                 *Juntarlos en un contador diría que se acabó algo que no se
-                 acabó* — por eso el código ni siquiera se muestra acá: la
-                 tarjeta LLEVA a la pantalla del link, que es la que lo maneja.
-                 ⭐ Y el veredicto lo da ESTA pantalla, no el servidor: A manda
-                 instantes justamente para que el «ya venció» se pueda volver a
-                 mirar un minuto después. */
-              const vencido = m.mesVenceEn !== null && new Date(m.mesVenceEn).getTime() <= Date.now();
-              return (
-                <Tarjeta key={m.linkId} relleno="ninguno">
-                  <Celda
-                    titulo={t('recurrentes.mesPorPagar')}
-                    subtitulo={m.prestadorNombre.length > 0 ? m.prestadorNombre : undefined}
-                    metadataMono={t('recurrentes.alMes', { precio: formatearPrecio(m.monto) })}
-                    interactiva
-                    accessibilityRole="button"
-                    onPress={() => router.push(`/pagos/mensualidad?suscripcionId=${m.suscripcionId}`)}
-                  />
-                  <View style={{ paddingHorizontal: spacing[4], paddingBottom: spacing[3] }}>
-                    <Texto variante="apoyo">
-                      {/* ⭐ Vencido y por vencer son **dos verdades distintas** y
-                          la familia hace cosas distintas con cada una: ante la
-                          primera el plan ya no se renovó, ante la segunda
-                          todavía llega. *Contarlas con la misma frase le
-                          quitaría a la segunda su urgencia y a la primera su
-                          honestidad.* */}
-                      {vencido
-                        ? t('recurrentes.mesVencido')
-                        : m.mesVenceEn === null
-                          ? t('recurrentes.mesSinFecha')
-                          : t('recurrentes.mesVenceEl', {
-                              fecha: fechaLargaHumana(m.mesVenceEn.slice(0, 10), idioma),
-                            })}
-                    </Texto>
-                  </View>
-                </Tarjeta>
-              );
-            })}
-            {estado.items.length > 0 ? <Texto variante="apoyo">{t('recurrentes.intro')}</Texto> : null}
-            <Tarjeta relleno="ninguno">
-              {estado.items.map((it, i) => (
-                <View key={it.clave}>
-                  {i > 0 ? <Separador /> : null}
-                  {/* ⭐ **DE QUIÉN ES ESTE PLAN** (G7). La cara PRESIDE la fila:
-                      *«todo se contrata por mascota»* es firma del founder, y
-                      una familia con dos animales no debería adivinar cuál está
-                      pagando. Sin nombre no se dibuja nada — **no se inventa un
-                      sujeto**, y el plan sigue visible con su precio y su fecha,
-                      que es lo que la familia vino a mirar. */}
-                  {it.mascotaNombre !== null ? (
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        gap: spacing[3],
-                        paddingHorizontal: spacing[4],
-                        paddingTop: spacing[3],
-                      }}
-                    >
-                      <AvatarMascota
-                        nombre={it.mascotaNombre}
-                        fotoUrl={
-                          caraDeMascota({
-                            especie: it.mascotaEspecie ?? '',
-                            razaSlug: null,
-                            fotoUri: it.mascotaCara,
-                          }) ?? undefined
-                        }
-                        tamano="sm"
-                      />
-                      <Texto variante="cuerpo">{it.mascotaNombre}</Texto>
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[5], gap: spacing[4] }}>
+          {estado.fase === 'cargando' ? (
+            <EsqueletoGrupo>
+              <Esqueleto alto={72} />
+              <Esqueleto alto={72} />
+            </EsqueletoGrupo>
+          ) : estado.fase === 'noPudimos' ? (
+            <EstadoVacio
+              registro="seccion"
+              titulo={t('recurrentes.noCargoTitulo')}
+              descripcion={t('recurrentes.noCargoDetalle')}
+            />
+          ) : estado.items.length === 0 && estado.pendientes.length === 0 ? (
+            /* El vacío con calma — no queda mudo. */
+            <EstadoVacio
+              registro="seccion"
+              titulo={t('recurrentes.vacioTitulo')}
+              descripcion={t('recurrentes.vacioDetalle')}
+            />
+          ) : (
+            <>
+              {/* ═══ ⭐ S109-C · LOS MESES POR PAGAR — ARRIBA DE TODO ══════════
+                  🔴 **Es lo único accionable de esta pantalla, y tiene fecha de
+                  vencimiento.** El resto informa; esto pide un acto. *Un mes que
+                  no se paga no falla ruidosamente: el plan simplemente no se
+                  renueva, y la familia se entera por el silencio.*
+                  ⚠️ Sólo existe en el mandato por DeUna — con tarjeta se cobra
+                  solo y esta lista viene vacía. */}
+              {estado.pendientes.map((m) => {
+                /* 🔴 **LOS DOS RELOJES NO SE MEZCLAN.** `mesVenceEn` es el fin del
+                   período pagado (días); `codigoExpiraEn` es de DeUna (minutos).
+                   *Juntarlos en un contador diría que se acabó algo que no se
+                   acabó* — por eso el código ni siquiera se muestra acá: la
+                   tarjeta LLEVA a la pantalla del link, que es la que lo maneja.
+                   ⭐ Y el veredicto lo da ESTA pantalla, no el servidor: A manda
+                   instantes justamente para que el «ya venció» se pueda volver a
+                   mirar un minuto después. */
+                const vencido = m.mesVenceEn !== null && new Date(m.mesVenceEn).getTime() <= Date.now();
+                return (
+                  <Tarjeta key={m.linkId} relleno="ninguno">
+                    <Celda
+                      titulo={t('recurrentes.mesPorPagar')}
+                      subtitulo={m.prestadorNombre.length > 0 ? m.prestadorNombre : undefined}
+                      metadataMono={t('recurrentes.alMes', { precio: formatearPrecio(m.monto) })}
+                      interactiva
+                      accessibilityRole="button"
+                      onPress={() => router.push(`/pagos/mensualidad?suscripcionId=${m.suscripcionId}`)}
+                    />
+                    <View style={{ paddingHorizontal: spacing[4], paddingBottom: spacing[3] }}>
+                      <Texto variante="apoyo">
+                        {/* ⭐ Vencido y por vencer son **dos verdades distintas** y
+                            la familia hace cosas distintas con cada una: ante la
+                            primera el plan ya no se renovó, ante la segunda
+                            todavía llega. *Contarlas con la misma frase le
+                            quitaría a la segunda su urgencia y a la primera su
+                            honestidad.* */}
+                        {vencido
+                          ? t('recurrentes.mesVencido')
+                          : m.mesVenceEn === null
+                            ? t('recurrentes.mesSinFecha')
+                            : t('recurrentes.mesVenceEl', {
+                                fecha: fechaLargaHumana(m.mesVenceEn.slice(0, 10), idioma),
+                              })}
+                      </Texto>
                     </View>
-                  ) : null}
-                  {/* ═══ G8 · EL INTERRUPTOR NO SE ENCONTRABA ══════════════
-
-                      🔴 **Rojo del founder (2-sep): no encontró «Cancelar
-                      suscripción».** Y no estaba escondida: estaba **acá**, como
-                      un `Interruptor` en el `fin` de esta celda. *Su etiqueta
-                      era el título del plan* —o sea que la palabra «cancelar» no
-                      aparecía en ningún lado de la pantalla—, y un switch dice
-                      «encendido/apagado», jamás **qué pasa si lo movés**.
-
-                      ⚠️ **Lo que falla no es el descubrimiento, es el NOMBRE.**
-                      Alguien que viene a dar de baja busca un verbo; un
-                      interruptor es un estado. *Un control que existe y no se
-                      llama como lo que hace es indistinguible de uno que no
-                      existe.*
-
-                      ⇒ **Un botón por fila, visible, con el verbo escrito** — no
-                      detrás de otro toque, que es la letra del founder. El
-                      switch muere (Ley 37): dos controles para el mismo acto
-                      dejan a la familia preguntándose si hacen lo mismo.
-
-                      🔑 **El botón sigue diciendo lo que el motor hace, no lo que
-                      la palabra promete:** cancelar detiene la RENOVACIÓN, y el
-                      período ya pagado corre entero (`P24`). Por eso el botón
-                      abre la MISMA Hoja de confirmación de antes —la que
-                      explica eso— y la línea de abajo sigue diciendo hasta qué
-                      día está cubierto. ── */}
-                  <Celda
-                    titulo={it.titulo}
-                    subtitulo={it.donde ?? undefined}
-                    metadataMono={t('recurrentes.alMes', { precio: formatearPrecio(it.precio) })}
-                  />
-                  <View style={{ paddingHorizontal: spacing[4], paddingBottom: spacing[3], gap: 2 }}>
-                    {/* 🔴 Antes que nada: si el cobro no entró, **eso** es lo
-                        que hay que leer. *Decir «se renueva solo» sobre algo que
-                        no se pudo cobrar es prometer un servicio que puede
-                        cortarse.* */}
-                    {it.pagoPendiente ? (
-                      <Texto variante="apoyo">{t('recurrentes.pagoPendiente')}</Texto>
-                    ) : it.encendido ? (
-                      <Texto variante="apoyo">
-                        {/* ⭐ La fecha del cobro cuando el motor la da; si no,
-                            hasta cuándo está cubierto. **Nunca una deducida.** */}
-                        {it.proximoCobro !== null
-                          ? t('recurrentes.proximoCobro', { fecha: fechaLargaHumana(it.proximoCobro, idioma) })
-                          : it.cubiertoHasta === null
-                            ? t('recurrentes.proximoCobroSinFecha')
-                            : t('recurrentes.cubiertoHasta', { fecha: fechaLargaHumana(it.cubiertoHasta, idioma) })}
-                      </Texto>
-                    ) : (
-                      /* 🔴 APAGADO: hasta qué día sigue cubierto. Esta línea es
-                         la que impide que la familia crea que se cortó hoy. */
-                      <Texto variante="apoyo">
-                        {it.cubiertoHasta === null
-                          ? t('recurrentes.apagadoSinFecha')
-                          : t('recurrentes.apagadoHasta', {
-                              fecha: fechaLargaHumana(it.cubiertoHasta, idioma),
-                            })}
-                      </Texto>
-                    )}
-
-                    {/* ⭐ **G7 · EL PLAN QUE NO SIRVE PARA ESA MASCOTA LO DICE.**
-                        Va ARRIBA del verbo y no abajo: *si la familia está por
-                        cancelar, ésta es la razón por la que vino* — y si no lo
-                        estaba, es la razón por la que debería.
-
-                        Se nombran las especies que el comprable SÍ admite,
-                        leídas del catálogo, **jamás escritas acá**: el día que
-                        guardería acepte conejos, esta frase cambia sola. Sin
-                        lista no se dibuja nada — *«tu plan no sirve» sin decir
-                        para qué sirve es una acusación, no una explicación.* */}
-                    {it.especieNoAplica && it.especiesElegibles !== null && it.mascotaNombre !== null ? (
-                      <Texto variante="apoyo">
-                        {t('recurrentes.especieNoAplica', {
-                          nombre: it.mascotaNombre,
-                          especies: it.especiesElegibles.join(' · '),
-                        })}
-                      </Texto>
-                    ) : null}
-
-                    {/* El verbo, visible. **Encender no confirma** —no hay nada
-                        que perder y el gesto ya es deliberado—; **apagar
-                        siempre**, porque del otro lado hay un servicio que la
-                        familia está usando.
-
-                        Apagado y NO `reversible` ⇒ **no se dibuja nada**, y eso
-                        es Ley 23 en su forma barata: la guardería no vuelve a
-                        `activa` por ninguna función del motor (medido), así que
-                        ofrecer «Reactivar» ahí sería enseñarle a la familia a
-                        deshacer algo que no se puede deshacer. La línea de
-                        arriba ya dice hasta cuándo sigue cubierta. */}
-                    {it.encendido ? (
-                      <View style={{ alignSelf: 'flex-start', paddingTop: spacing[2] }}>
-                        <Boton
-                          variante="secundario"
-                          tamaño="sm"
-                          etiqueta={t('recurrentes.cancelar')}
-                          onPress={() => setConfirmando(it)}
+                  </Tarjeta>
+                );
+              })}
+              {estado.items.length > 0 ? <Texto variante="apoyo">{t('recurrentes.intro')}</Texto> : null}
+              <Tarjeta relleno="ninguno">
+                {estado.items.map((it, i) => (
+                  <View key={it.clave}>
+                    {i > 0 ? <Separador /> : null}
+                    {/* ⭐ **DE QUIÉN ES ESTE PLAN** (G7). La cara PRESIDE la fila:
+                        *«todo se contrata por mascota»* es firma del founder, y
+                        una familia con dos animales no debería adivinar cuál está
+                        pagando. Sin nombre no se dibuja nada — **no se inventa un
+                        sujeto**, y el plan sigue visible con su precio y su fecha,
+                        que es lo que la familia vino a mirar. */}
+                    {it.mascotaNombre !== null ? (
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: spacing[3],
+                          paddingHorizontal: spacing[4],
+                          paddingTop: spacing[3],
+                        }}
+                      >
+                        <AvatarMascota
+                          nombre={it.mascotaNombre}
+                          fotoUrl={
+                            caraDeMascota({
+                              especie: it.mascotaEspecie ?? '',
+                              razaSlug: null,
+                              fotoUri: it.mascotaCara,
+                            }) ?? undefined
+                          }
+                          tamano="sm"
                         />
-                      </View>
-                    ) : it.reversible ? (
-                      <View style={{ alignSelf: 'flex-start', paddingTop: spacing[2] }}>
-                        <Boton
-                          variante="secundario"
-                          tamaño="sm"
-                          etiqueta={t('recurrentes.reactivar')}
-                          cargando={trabajando}
-                          onPress={() => void encender(it)}
-                        />
+                        <Texto variante="cuerpo">{it.mascotaNombre}</Texto>
                       </View>
                     ) : null}
+                    {/* ═══ G8 · EL INTERRUPTOR NO SE ENCONTRABA ══════════════
+
+                        🔴 **Rojo del founder (2-sep): no encontró «Cancelar
+                        suscripción».** Y no estaba escondida: estaba **acá**, como
+                        un `Interruptor` en el `fin` de esta celda. *Su etiqueta
+                        era el título del plan* —o sea que la palabra «cancelar» no
+                        aparecía en ningún lado de la pantalla—, y un switch dice
+                        «encendido/apagado», jamás **qué pasa si lo movés**.
+
+                        ⚠️ **Lo que falla no es el descubrimiento, es el NOMBRE.**
+                        Alguien que viene a dar de baja busca un verbo; un
+                        interruptor es un estado. *Un control que existe y no se
+                        llama como lo que hace es indistinguible de uno que no
+                        existe.*
+
+                        ⇒ **Un botón por fila, visible, con el verbo escrito** — no
+                        detrás de otro toque, que es la letra del founder. El
+                        switch muere (Ley 37): dos controles para el mismo acto
+                        dejan a la familia preguntándose si hacen lo mismo.
+
+                        🔑 **El botón sigue diciendo lo que el motor hace, no lo que
+                        la palabra promete:** cancelar detiene la RENOVACIÓN, y el
+                        período ya pagado corre entero (`P24`). Por eso el botón
+                        abre la MISMA Hoja de confirmación de antes —la que
+                        explica eso— y la línea de abajo sigue diciendo hasta qué
+                        día está cubierto. ── */}
+                    <Celda
+                      titulo={it.titulo}
+                      subtitulo={it.donde ?? undefined}
+                      metadataMono={t('recurrentes.alMes', { precio: formatearPrecio(it.precio) })}
+                    />
+                    <View style={{ paddingHorizontal: spacing[4], paddingBottom: spacing[3], gap: 2 }}>
+                      {/* 🔴 Antes que nada: si el cobro no entró, **eso** es lo
+                          que hay que leer. *Decir «se renueva solo» sobre algo que
+                          no se pudo cobrar es prometer un servicio que puede
+                          cortarse.* */}
+                      {it.pagoPendiente ? (
+                        <Texto variante="apoyo">{t('recurrentes.pagoPendiente')}</Texto>
+                      ) : it.encendido ? (
+                        <Texto variante="apoyo">
+                          {/* ⭐ La fecha del cobro cuando el motor la da; si no,
+                              hasta cuándo está cubierto. **Nunca una deducida.** */}
+                          {it.proximoCobro !== null
+                            ? t('recurrentes.proximoCobro', { fecha: fechaLargaHumana(it.proximoCobro, idioma) })
+                            : it.cubiertoHasta === null
+                              ? t('recurrentes.proximoCobroSinFecha')
+                              : t('recurrentes.cubiertoHasta', { fecha: fechaLargaHumana(it.cubiertoHasta, idioma) })}
+                        </Texto>
+                      ) : (
+                        /* 🔴 APAGADO: hasta qué día sigue cubierto. Esta línea es
+                           la que impide que la familia crea que se cortó hoy. */
+                        <Texto variante="apoyo">
+                          {it.cubiertoHasta === null
+                            ? t('recurrentes.apagadoSinFecha')
+                            : t('recurrentes.apagadoHasta', {
+                                fecha: fechaLargaHumana(it.cubiertoHasta, idioma),
+                              })}
+                        </Texto>
+                      )}
+
+                      {/* ⭐ **G7 · EL PLAN QUE NO SIRVE PARA ESA MASCOTA LO DICE.**
+                          Va ARRIBA del verbo y no abajo: *si la familia está por
+                          cancelar, ésta es la razón por la que vino* — y si no lo
+                          estaba, es la razón por la que debería.
+
+                          Se nombran las especies que el comprable SÍ admite,
+                          leídas del catálogo, **jamás escritas acá**: el día que
+                          guardería acepte conejos, esta frase cambia sola. Sin
+                          lista no se dibuja nada — *«tu plan no sirve» sin decir
+                          para qué sirve es una acusación, no una explicación.* */}
+                      {it.especieNoAplica && it.especiesElegibles !== null && it.mascotaNombre !== null ? (
+                        <Texto variante="apoyo">
+                          {t('recurrentes.especieNoAplica', {
+                            nombre: it.mascotaNombre,
+                            especies: it.especiesElegibles.join(' · '),
+                          })}
+                        </Texto>
+                      ) : null}
+
+                      {/* El verbo, visible. **Encender no confirma** —no hay nada
+                          que perder y el gesto ya es deliberado—; **apagar
+                          siempre**, porque del otro lado hay un servicio que la
+                          familia está usando.
+
+                          Apagado y NO `reversible` ⇒ **no se dibuja nada**, y eso
+                          es Ley 23 en su forma barata: la guardería no vuelve a
+                          `activa` por ninguna función del motor (medido), así que
+                          ofrecer «Reactivar» ahí sería enseñarle a la familia a
+                          deshacer algo que no se puede deshacer. La línea de
+                          arriba ya dice hasta cuándo sigue cubierta. */}
+                      {it.encendido ? (
+                        <View style={{ alignSelf: 'flex-start', paddingTop: spacing[2] }}>
+                          <Boton
+                            variante="secundario"
+                            tamaño="sm"
+                            etiqueta={t('recurrentes.cancelar')}
+                            onPress={() => setConfirmando(it)}
+                          />
+                        </View>
+                      ) : it.reversible ? (
+                        <View style={{ alignSelf: 'flex-start', paddingTop: spacing[2] }}>
+                          <Boton
+                            variante="secundario"
+                            tamaño="sm"
+                            etiqueta={t('recurrentes.reactivar')}
+                            cargando={trabajando}
+                            onPress={() => void encender(it)}
+                          />
+                        </View>
+                      ) : null}
+                    </View>
                   </View>
-                </View>
-              ))}
-            </Tarjeta>
-          </>
-        )}
+                ))}
+              </Tarjeta>
+            </>
+          )}
 
-        {/* ⚠️ LA AUSENCIA DECLARADA — el tercer sujeto recurrente que esta
-            pantalla todavía no puede listar. Se dice SIEMPRE, también con la
-            lista vacía: *si no, «no tienes nada que se cobre solo» sería falso
-            para quien tenga una compra recurrente andando.* */}
-        <View style={{ gap: spacing[2] }}>
-          <Texto variante="seccion">{t('recurrentes.despensaTitulo')}</Texto>
-          <Texto variante="apoyo">{t('recurrentes.despensaDetalle')}</Texto>
+          {/* ⚠️ LA AUSENCIA DECLARADA — el tercer sujeto recurrente que esta
+              pantalla todavía no puede listar. Se dice SIEMPRE, también con la
+              lista vacía: *si no, «no tienes nada que se cobre solo» sería falso
+              para quien tenga una compra recurrente andando.* */}
+          <View style={{ gap: spacing[2] }}>
+            <Texto variante="seccion">{t('recurrentes.despensaTitulo')}</Texto>
+            <Texto variante="apoyo">{t('recurrentes.despensaDetalle')}</Texto>
+          </View>
         </View>
       </HojaContenido>
 
