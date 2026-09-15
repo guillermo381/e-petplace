@@ -72,6 +72,32 @@ export type CabeceraProps = {
    *  vez no compilan: *«un lugar para UN botón»* — dos acentos en la
    *  cabecera es la Ley 5 rota. */
   carrito?: { cantidad: number; onPress: () => void; etiqueta: string }
+  /** 🔴 **La campana con su contador (lote 3b).** Hermana del carrito y en el
+   *  mismo slot: **el censo encontró DOS acciones-con-contador en raíz**, y la
+   *  campana vivía dibujada a mano en el techo local del Hogar — el techo que
+   *  este lote borra. Se dibuja **sólo en `raiz`**, igual que el carrito.
+   *  ⚠️ **Prop propia y no un `accionDerecha` genérico**: *un `ReactNode`
+   *  suelto deja que cada pantalla arme su disco, y ahí vuelve la copia que
+   *  `DiscoVidrio` acaba de terminar.* */
+  avisos?: { cantidad: number; onPress: () => void; etiqueta: string }
+  /** 🔴 **EL CONTENIDO PROPIO DENTRO DE LA BANDA (`D-1106`, lote 3b).**
+   *
+   *  Lo pedían **los dos techos locales que quedaban**, y el censo los midió:
+   *  · **el Hogar** — fecha en mono, saludo y **la fila de mascotas ADENTRO
+   *    del degradado** (su propio código lo declara: *«HeroMarca no tiene
+   *    slots para fecha-antes-del-saludo ni para la fila de mascotas»*);
+   *  · **el Expediente** — el hero de la mascota, con su flecha de volver
+   *    **dibujada con un `Path` a mano**.
+   *
+   *  Va **debajo del título y dentro de la banda**, así que hereda su color y
+   *  su inset. *La alternativa era que cada pantalla siguiera copiando el
+   *  degradado, la curva y la safe area — que es literalmente lo que las dos
+   *  venían haciendo, con «COPIANDO NIVEL de la primitiva» escrito al lado.*
+   *
+   *  ⚠️ **Es un slot, no una pieza nueva:** el contenido lo arma la pantalla
+   *  porque es suyo —una fila de mascotas no es de la cabecera—; lo que deja
+   *  de ser suyo es **el techo**. */
+  contenido?: ReactNode
   /** Cuando la pantalla es un paso de un flujo. Se dibuja bajo el título
    *  con la pieza `BarraPasos`, que la cabecera no redibuja. */
   pasos?: { total: number; actual: number; etiqueta: string }
@@ -140,6 +166,8 @@ export function Cabecera({
   apoyo,
   accionDerecha,
   carrito,
+  avisos,
+  contenido,
   pasos,
   onVolver,
   etiquetaVolver,
@@ -191,7 +219,9 @@ export function Cabecera({
         boxShadow: esFondo ? undefined : theme.elevacion.reposo,
   }
 
-  const contenido = (
+  /* El armado interno de la banda. Se llama `cuerpo` desde el lote 3b: el
+     nombre `contenido` pasó a ser el SLOT público. */
+  const cuerpo = (
     <>
       <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing[3] }}>
         {!esRaiz && onVolver !== undefined ? (
@@ -229,17 +259,35 @@ export function Cabecera({
           ) : null}
         </View>
 
-        {/* El carrito gana el slot cuando está; si no, lo que la pantalla
-            mande. **En `empujada` el carrito no se dibuja pase lo que
-            pase** — ver su nota en las props. */}
-        {esRaiz && carrito !== undefined ? (
-          <DiscoVidrio onPress={carrito.onPress} etiqueta={carrito.etiqueta}>
-            <GlifoConContador nombre="carrito" cuenta={carrito.cantidad} dentroDeTocable />
-          </DiscoVidrio>
+        {/* 🔴 **EL SLOT DERECHO ADMITE LOS DOS DISCOS (lote 3b).** El censo
+            encontró **dos** acciones-con-contador vivas en raíz —el carrito de
+            las cinco tabs y la campana del Hogar— y hasta hoy sólo cabía una.
+            *La campana se dibujaba en el techo local del Hogar, y ése es
+            exactamente el techo que este lote viene a borrar.*
+            ⚠️ **En `empujada` no se dibuja NINGUNO de los dos**: las pantallas
+            de checkout son empujadas, así que *la regla «ahí no se muestra» no
+            se recuerda — se cumple sola.* */}
+        {esRaiz && (carrito !== undefined || avisos !== undefined) ? (
+          <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+            {avisos !== undefined ? (
+              <DiscoVidrio onPress={avisos.onPress} etiqueta={avisos.etiqueta}>
+                <GlifoConContador nombre="campana" cuenta={avisos.cantidad} dentroDeTocable />
+              </DiscoVidrio>
+            ) : null}
+            {carrito !== undefined ? (
+              <DiscoVidrio onPress={carrito.onPress} etiqueta={carrito.etiqueta}>
+                <GlifoConContador nombre="carrito" cuenta={carrito.cantidad} dentroDeTocable />
+              </DiscoVidrio>
+            ) : null}
+          </View>
         ) : accionDerecha !== undefined ? (
           <View>{accionDerecha}</View>
         ) : null}
       </View>
+
+      {/* El contenido propio va DENTRO de la banda y debajo del título:
+          hereda el degradado, la curva y el inset que la pantalla copiaba. */}
+      {contenido !== undefined ? <View>{contenido}</View> : null}
 
       {pasos !== undefined ? <BarraPasos {...pasos} /> : null}
     </>
@@ -248,7 +296,7 @@ export function Cabecera({
   /* Las dos ramas, explícitas: un componente elegido por variable no se
      puede tipar sin ensanchar las props de las dos (el gate lo frenó). */
   return esFondo ? (
-    <View style={estiloSuperficie}>{contenido}</View>
+    <View style={estiloSuperficie}>{cuerpo}</View>
   ) : (
     <LinearGradient
       colors={grad.colors as unknown as readonly [string, string, ...string[]]}
@@ -257,7 +305,7 @@ export function Cabecera({
       end={{ x: 0.2, y: 1 }}
       style={estiloSuperficie}
     >
-      {contenido}
+      {cuerpo}
     </LinearGradient>
   )
 }

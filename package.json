@@ -161,6 +161,7 @@
     "verify:assets-resuelven": "node scripts/verify-assets-resuelven.mjs",
     "verify:moneda": "node scripts/verify-moneda.mjs",
     "verify:piezas-locales": "node scripts/verify-piezas-locales.mjs",
+    "verify:techos-locales": "node scripts/verify-techos-locales.mjs",
     "verify:auth-receptor": "node scripts/verify-auth-receptor.mjs"
   },
   "devDependencies": {

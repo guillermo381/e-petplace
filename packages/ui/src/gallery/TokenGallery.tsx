@@ -4105,6 +4105,23 @@ function GaleriaInterna({ encabezado }: { encabezado?: ReactNode }) {
               apoyo="El slot derecho, como antes del rediseño."
               carrito={{ cantidad: 3, onPress: () => {}, etiqueta: 'Carrito, 3 productos' }}
             />
+            {/* ⭐ GATE lote 3b — LA CABECERA ABSORBE LOS DOS TECHOS LOCALES.
+                Arriba: contenido propio dentro de la banda (la fila de
+                mascotas del Hogar) + los DOS discos del slot derecho. */}
+            <Cabecera
+              variante="raiz"
+              antetitulo="LUNES, 14 DE SEPTIEMBRE"
+              titulo="Buenas tardes, Guillermo"
+              avisos={{ cantidad: 2, onPress: () => {}, etiqueta: 'Avisos, 2 sin leer' }}
+              carrito={{ cantidad: 3, onPress: () => {}, etiqueta: 'Carrito, 3 productos' }}
+              contenido={
+                <View style={{ flexDirection: 'row', gap: spacing[3], paddingTop: spacing[4] }}>
+                  <Personaje especie="perro" tamano="hogar" forma="circulo" />
+                  <Personaje especie="gato" tamano="hogar" forma="circulo" />
+                  <Personaje especie="conejo" tamano="hogar" forma="circulo" />
+                </View>
+              }
+            />
             <Cabecera
               variante="empujada"
               titulo="Checkout"
