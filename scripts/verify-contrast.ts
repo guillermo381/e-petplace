@@ -490,6 +490,16 @@ function paresDe(t: Theme, nombre: string): Pair[] {
      degradado, igual que su hermano. */
   add('accent.sobreGradiente / banda (stop 0)', t.accent.sobreGradiente, t.accent.gradient.colors[0], undefined, 3)
   add('accent.sobreGradiente / banda (stop final)', t.accent.sobreGradiente, t.accent.gradient.colors[t.accent.gradient.colors.length - 1], undefined, 3)
+  /* 🔴 **S116-B lote 5 · `controlLleno` / `sobreControlLleno` — EL PAR DE LA
+     SELECCIÓN, que existía desde el lote 2 y NUNCA ESTUVO MEDIDO.**
+     `SelectorOpcion` lo montaba en su modo entidad y hoy se le suman el día
+     y la hora elegidos. *Un par que nadie declara es un par cuyo verde no
+     dice nada: el gate sólo mide lo que está en esta lista, y por eso la
+     lista tiene que crecer con el código.* ⚠️ **Se invierte por tema** —en
+     claro ciruela con letra blanca, en oscuro `rosaSobreCiruela` con letra
+     `ciruelaNoche`—, así que medirlo con un blanco fijo habría acertado en
+     claro por casualidad. */
+  add('SELECCIÓN · su letra sobre el relleno de control', t.accent.sobreControlLleno, t.accent.controlLleno)
   add('CTA oficio (light): papel / tealDark', palette.light0, palette.tealDark)
   add('CTA oficio (dark): textDark0 / tealDark', palette.textDark0, palette.tealDark)
 
