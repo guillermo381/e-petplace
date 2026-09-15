@@ -38,6 +38,7 @@ import {
   EstadoVacio,
   Icono,
   Interruptor,
+  SelectorHora,
   SelectorOpcion,
   Separador,
   Tarjeta,
@@ -62,6 +63,7 @@ import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
 import { FiltroMascotas } from '@/components/filtro-pills';
 import { DiaSinHorarios, GrillaElegir, PieReserva, SelectorDia, SinQuienReservar } from '@/components/reserva-piezas';
+import { grillaDeHoras } from '@/lib/reserva/grilla-de-horas';
 import { formatearPrecio } from '@epetplace/i18n';
 import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
@@ -664,10 +666,31 @@ export default function PaseoCuando() {
                   <View style={{ paddingHorizontal: spacing[5] }}>
                     <Texto variante="apoyo">{t('explorar.cuandoHora')}</Texto>
                   </View>
-                  <GrillaElegir
-                    opciones={inicios.map((h) => ({ codigo: h, etiqueta: h }))}
+                  {/* ⭐ **EL EJE DE LA HORA PASA A `SelectorHora`** (S116-C
+                      lote 5). El catálogo lo dice: `GrillaElegir` **hace TRES
+                      trabajos** —horas, duraciones y el QUÉ de grooming— y por
+                      eso no se promovió verbatim; *«se promueve el TRABAJO, no
+                      el archivo»*. Con esto pasa de tres a dos, y **las
+                      duraciones siguen en él**, que es lo correcto.
+
+                      🔴 **Y ACÁ APARECEN LAS HORAS APAGADAS, que antes no
+                      existían.** El motor sólo devuelve las que tienen lugar
+                      («slot sin cupo NO se pinta»), así que la pieza nunca
+                      podía dibujar una apagada: `grillaDeHoras` arma la grilla
+                      entre la primera y la última hora ofrecida y **apaga los
+                      huecos de adentro**. Su límite —por qué no se inventan los
+                      bordes de la jornada— está escrito en la lib.
+
+                      ⚠️ **La pieza ya no deja tocar la apagada**, y su contrato
+                      avisa que con eso *«se cierra el camino por el que se
+                      explicaría por qué no hay»* ⇒ `etiquetaSinLugar` es esa
+                      explicación, y el día entero sin horas lo dice
+                      `DiaSinHorarios`, que ya estaba. */}
+                  <SelectorHora
+                    horas={grillaDeHoras(inicios)}
                     elegida={hora}
                     onElegir={setHora}
+                    etiquetaSinLugar={t('agendarV5.sinLugar')}
                   />
                 </View>
               )}

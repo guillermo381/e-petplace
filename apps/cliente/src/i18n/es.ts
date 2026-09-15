@@ -5170,4 +5170,12 @@ export const clienteEs = {
     expediente: 'Entra al expediente de tu mascota',
   },
 
+  /* ⭐ **S116-C lote 5 · ④ AGENDAR.** */
+  agendarV5: {
+    /* 🔴 La pieza apaga la hora sin lugar **y no la deja tocar**, y su contrato
+       avisa que con eso «se cierra el camino por el que se explicaría por qué
+       no hay». Esta frase es esa explicación. */
+    sinLugar: 'Sin lugar a esa hora',
+  },
+
 } as const;

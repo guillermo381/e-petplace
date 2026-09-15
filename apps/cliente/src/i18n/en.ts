@@ -3707,4 +3707,9 @@ export const clienteEn = {
     expediente: "It goes into your pet's record",
   },
 
+  /* S116-C lote 5 · ④ AGENDAR — el espejo. */
+  agendarV5: {
+    sinLugar: 'No room at that time',
+  },
+
 } as const satisfies Espejo<typeof clienteEs>;
