@@ -231,6 +231,70 @@ export const ALTO_ETIQUETA_FLOTANTE = Math.round(
  *  campo: **−16**. */
 export const ALTO_CAJA_CAMPO_V5 = ALTO_ETIQUETA_FLOTANTE + ALTO_LINEA_CAMPO + spacing[2] * 2 // 54
 
+/** N11″ · **el INTERIOR de la caja: los dos renglones, etiqueta y valor.**
+ *
+ * 🔴 **Nace de un defecto del founder en el aparato, y el número es la
+ * mitad de la cura:** *«la etiqueta chica y el valor comparten renglón en
+ * vez de tener el suyo»*. **Medido: con la etiqueta arriba, el input
+ * pasaba de 23 dp a 11.** La causa era un `flex: 1` heredado —ver la nota
+ * en `Campo`— y **el remedio completo son dos cosas**: quitarle el `flex`
+ * al input **y darle a la columna un alto EXPLÍCITO**, para que los dos
+ * renglones existan por construcción y no por lo que sobre.
+ *
+ * *Un `justifyContent: 'center'` sobre un alto que nadie fijó reparte lo
+ * que haya; si el alto está fijo en la suma de sus dos hijos, no hay nada
+ * que repartir — y ése es exactamente el estado que la orden pide.* */
+export const ALTO_INTERIOR_CAMPO_V5 = ALTO_ETIQUETA_FLOTANTE + ALTO_LINEA_CAMPO // 38
+
+/* ═══════════════════════════════════════════════════════════════════
+ * 🔴 **LOS TRES DE ARRIBA SON dp FIJOS Y EL TEXTO NO LO ES — ésa era la
+ *    causa raíz, y la encontró el teléfono del founder, no el emulador.**
+ *
+ * En React Native `fontSize` **escala con la preferencia de tamaño de
+ * letra del sistema** (`allowFontScaling`, encendido por defecto). Los
+ * altos de caja de arriba **no**. ⇒ con la letra del sistema agrandada el
+ * texto crece y la caja no, **y el valor se aplasta contra la etiqueta**.
+ *
+ * **Medido en el emulador, mismo campo, mismo texto:**
+ *   · escala **1,0** → etiqueta 12,3 dp · valor **23,0 dp** · limpio
+ *   · escala **1,3** → etiqueta 16,7 dp · valor **6,7 dp** · **se pisan**
+ *
+ * *Mi verificación anterior no estaba mal hecha: estaba hecha con la
+ * escala 1,0, que es la única que un emulador recién creado tiene. El
+ * founder mira su teléfono, y su teléfono tiene otra.*
+ *
+ * ⚠️ **La salida FÁCIL está prohibida:** `allowFontScaling={false}`
+ * congelaría el texto y el defecto desaparecería de la pantalla —
+ * *ignorando la preferencia de accesibilidad de la persona, que es
+ * exactamente lo que esa preferencia existe para que no pase.*
+ *
+ * ⇒ **Las medidas se DERIVAN de la escala en cada render.** Con 1,0 dan
+ * los mismos números de siempre (14 · 24 · 38 · 54), así que nada se
+ * mueve donde hoy está bien.
+ * ═══════════════════════════════════════════════════════════════════ */
+export interface MedidasCampoV5 {
+  /** Alto del renglón de la etiqueta flotada. */
+  etiqueta: number
+  /** Alto del renglón del valor. */
+  linea: number
+  /** Los dos renglones: el interior de la caja. */
+  interior: number
+  /** El interior más el aire de arriba y abajo. */
+  caja: number
+}
+
+/** Las medidas del campo v5 **para la escala de letra vigente**.
+ *
+ *  ⚠️ **Se llama EN EL RENDER, no en el módulo.** Una constante calculada
+ *  al importar se congela con la escala que hubiera en ese momento — *que
+ *  es el mismo defecto de un piso más arriba, y más difícil de ver.* */
+export function medidasCampoV5(escalaDeLetra: number): MedidasCampoV5 {
+  const etiqueta = Math.round(TAMANO_ETIQUETA_FLOTANTE * typography.leading.snug * escalaDeLetra)
+  const linea = Math.round(typography.size.base * typography.leading.normal * escalaDeLetra)
+  const interior = etiqueta + linea
+  return { etiqueta, linea, interior, caja: interior + spacing[2] * 2 }
+}
+
 /** N11″ · el disco del glifo a la izquierda. El par `accent.glifo` /
  *  `accent.glifoBg` ya nombra al CAMPO entre sus cuatro empleos («fila ·
  *  campo · acceso · paso»), así que el color no se elige acá: se pide. */

@@ -1,85 +1,57 @@
-# S116-B · LOTE 10 — tanda de reparación
+# S116-B · LOTE 10 — la causa raíz: el texto escala con el sistema y mis altos no
 
-**Rama `pista/s116-b-05`.**
-
-**Gates:** `verify:diseno` VERDE (81 reglas) · `verify:contrast` 461/0 · `verify:catalogo-v5` VERDE (33 piezas) · `verify:reduced-motion` VERDE · `verify:isotipo-path` VERDE · `tsc` 0 en las cuatro.
+**Rama `pista/s116-b-05`.** Gates: `verify:etiqueta-dentro` VERDE · `verify:diseno` VERDE (80) · `verify:contrast` 504/0 · `tsc` 0 en las cuatro.
 
 ---
 
-## ① LA ONDA VUELVE DE GIT
+## ⚠️ LO PRIMERO: QUÉ VERIFIQUÉ Y QUÉ NO
 
-`git checkout c7b665f9 -- OndaAcceso.tsx` — **el commit anterior a «sin junturas» según la historia del propio archivo**, no de memoria.
+**Verificado en píxeles: 05 (registro).** **NO verificado: 03, el alta y el pago** — el aparato dejó de tomar bundles nuevos a mitad de la sesión y **lo detecté con un marcador**, no con una suposición. *Reportar las cuatro como verificadas sería exactamente el error que este lote vino a corregir.* El detalle está en ⑤.
 
-Sobre esa versión se aplica **una sola cosa: el inset CRUDO**.
+## ① EL INSTRUMENTO ANTERIOR MEDÍA ALGO VERDADERO AL LADO DE LO QUE IMPORTABA
 
-> **La versión buena ya tenía la forma correcta; le sobraba una medición y le faltaba un número.**
+Mi «cero solape» sobre los `bounds` **era cierto**. *Un `bounds` declara la caja que un nodo PIDE; no dice dónde cae la tinta.* Con el instrumento nuevo —contar tinta por fila sobre la imagen— aparece el defecto real, **y no es un solape: es un RECORTE**.
 
-La reescritura del lote 8 —el fondo en la raíz— **rompió más de lo que arregló**. Y lo que sí hacía falta era **de una línea, no de anatomía**: el valor. `useInsetQueFalta` mide *cuánto de la barra queda debajo del contenedor* — correcto para un pie, y el que hacía subir la franja entera acá.
-
-⚠️ **Lo único que NO se revirtió es la rueda compartida:** es orden aparte de la mesa y **nada tuvo que ver con la regresión**. El revert la trajo de vuelta adentro y hubo que sacarla otra vez — *un revert trae todo lo que había, incluso lo que después se mudó a propósito.*
-
----
-
-## ② EL PATH DERIVADO SALE DE LA PANTALLA
-
-`Isotipo` revertido (se va la prop `dibujo` del lote 9) y **la cabecera v5 pasa a no llevar isotipo**, que es lo que pone el sketch.
-
-**Mi cura del lote 9 estaba mal y la retiro con su razón:** cambié el `Encabezado` al path derivado creyendo que curaba `D-1110`. El path es una **silueta de un solo color** — buena para un papel de un tinte, y **no es la marca que la gente reconoce**, que tiene su magenta y su contorno.
-
-> **Que un dibujo sea el correcto para imprimir no lo vuelve el correcto para mirar.**
-
-El path queda **sólo para los PDF**. Donde una pantalla necesite la nariz va **`IsotipoV5`**, con el asset del ilustrador tal cual.
-
----
-
-## ③ `Confeti`
-
-- **Se apaga antes del botón, y eso es lo que lo hace legal:** *un confeti que cruza la pantalla entera pasa por encima del CTA que la persona vino a tocar.* **Celebrar no puede costar el acto que se está celebrando.**
-- **Sin `withRepeat`:** una celebración que se repite deja de serlo — *y además dejaría la ventana permanentemente no-idle*, la deuda que esta casa ya se cobró con el halo del asistente.
-- **Distribución determinística, no sorteada:** *el mismo «¡Listo!» se ve igual dos veces, y eso se puede capturar y comparar.* Un confeti sorteado hace que ninguna captura sirva de referencia.
-- En `Confirmacion` entra **encendido por default en el cliente** y **apagado en memorial por Ley 8, no por prop**: *una pantalla que confirma una despedida no tira papelitos*, y dejar eso en una prop es esperar que nadie se olvide.
-- ✅ **No se exporta, y lo decidió `R17`:** lo exporté pensando en una futura pantalla de celebración y **la regla contestó lo correcto** — una exportación sin consumidor obliga a una entrada de galería para algo que sólo se ve adentro del «¡Listo!».
-
----
-
-## ④ EL CARRITO VUELVE (revierte `D-1108`)
-
-Slot derecho de la cabecera **raíz**, con su contador.
-
-🔴 **Y la adenda se cumple sola:** *«no en checkout»* **no se recuerda** — el carrito se dibuja **sólo en `variante="raiz"`**, y carrito/pago/confirmación son **empujadas**. Una de ellas que pase `carrito` **no lo dibuja aunque quiera**. *Una lista de excepciones hay que mantenerla; esto no.*
-
-⚠️ **`D-1108` no está depositada en el repo** — busqué su literal y no existe. **Se revierte contra la descripción de la mesa, no contra su ficha.**
-
----
-
-## ⑤ EL CORTE ENTRE LAS DOS ESPERAS (adenda)
-
-Al catálogo, §: **corta → `EsperaDeMarca`** (ocupa un hueco, no cambia la pantalla) · **larga → `EsperaLarga`** (toma la pantalla, dice qué pasa, ofrece salida). **Corte en ~2 s**, el mismo umbral que la Ley 13 ya usa para el spinner.
-
-> ⚠️ **Y el corte no es el tiempo que tarda: es el que la persona VA A ESPERAR.** *Una operación de 5 s que casi siempre resuelve en 300 ms es corta; una de 2 s que siempre tarda 2 s es larga.*
-
----
-
-## 🔴 ⑥ EL `lazy` DE LA GALERÍA SE RETIRA — MI CURA DEL LOTE 9 LA DEJÓ PEOR
-
-**Medido en el emulador: el `import()` del paquete NUNCA resuelve.** La ruta abre al instante y se queda en la espera **minutos**, con la rueda girando y el catálogo sin llegar jamás.
-
-> **Cambié siete segundos en blanco por una espera infinita bien dibujada** — y lo segundo es peor: *el blanco al menos termina.*
-
-⇒ vuelve el import estático. **La deuda de los 7 s queda abierta y con su causa medida**, que es más de lo que tenía: *el bundling ocurre antes de que React renderice nada, así que ninguna espera dibujada puede cubrirlo desde adentro de la ruta.* Sólo partir el catálogo de verdad, o que el bundler lo tenga listo antes.
-
----
-
-## ⑦ LAS CAPTURAS — lo que hay y lo que no
-
-| pieza | estado |
+| con la letra del sistema en **1,3** | tinta del valor |
 |---|---|
-| **`EsperaLarga`** | ✅ **montada en aparato real**, tres botones. `capturas-s116-b/espera-larga-montada.png`. *La rueda giró de verdad: perro → ave entre dos capturas separadas 90 s, con el halo respirando.* |
-| **el isotipo v5** | ✅ a 24 / 32 / 48 / 96 — `capturas-s116-b/isotipo-v5-tamanos.png` |
-| **la onda · el confeti · el carrito** | ❌ **no se llegó** |
+| antes | **6,7 dp** — un renglón de 20 recortado a un tercio |
+| después | **23,7 dp** |
 
-🔴 **Y el obstáculo es nuevo, mío, y del propio instrumento: DENTRO de la galería el scroll se traba.** Medido: **360 swipes por el borde derecho, cero movimiento**, parado en la sección de revisión de vacunas. *Es la misma clase que `PantallaConPie` ya tenía nombrada —«un pie que captura el toque deja sin scroll el tercio inferior»— sólo que acá lo captura una sección con campos.*
+*Eso es literalmente «cortado por arriba»: la mitad superior de las letras no se dibuja.* 📷 `lote10-05-recorte-ANTES.png` · `lote10-05-recorte-DESPUES.png` · `lote10-03-recorte-ANTES.png`.
 
-**Consecuencia, y por eso va como hallazgo y no como excusa: ninguna pieza que viva debajo de esa sección se puede gatear.** La galería abre —eso se corrigió— pero **no se puede recorrer entera**, y ése es el próximo trabajo de su dueño, que soy yo.
+## ② LA CAUSA RAÍZ, Y EXPLICA POR QUÉ MI EMULADOR DECÍA LIMPIO Y SU TELÉFONO NO
 
-⚠️ **Lo que la primera captura del isotipo me enseñó, y vale para todo esto:** monté un bloque blanco que parecía un defecto de la pieza **y era de mi montaje** (`qlmanage` devuelve lienzo cuadrado y yo lo aplasté). *Un defecto del instrumento se lee igual que uno de la pieza, y sólo se separan midiendo los dos.*
+🔴 **En React Native `fontSize` escala con la preferencia de tamaño de letra del sistema** (`allowFontScaling`, encendida por defecto). **Los altos de caja que yo fijé, no.**
+
+**Medido en el mismo campo, mismo texto, cambiando SÓLO la preferencia:**
+- escala **1,0** → etiqueta 12,3 dp · valor **23,0 dp** · limpio
+- escala **1,3** → etiqueta 16,7 dp · valor **6,7 dp** · **recortado**
+
+*Mi verificación anterior no estaba mal hecha: estaba hecha con la escala 1,0, que es la única que un emulador recién creado tiene. El founder mira su teléfono, y su teléfono tiene otra.* **El defecto no era invisible: era invisible DESDE ACÁ.**
+
+⚠️ **La salida fácil está prohibida y se declara:** `allowFontScaling={false}` haría desaparecer el defecto de la pantalla **ignorando la preferencia de accesibilidad de la persona** — que es exactamente lo que esa preferencia existe para que no pase.
+
+## ③ LA CURA — dos cosas, y ninguna sola alcanza
+
+1. **Las medidas se DERIVAN de la escala en cada render** (`medidasCampoV5(PixelRatio.getFontScale())`). Con 1,0 dan los mismos números de siempre (14 · 24 · 38 · 54), así que **nada se mueve donde hoy está bien**. Se leen en el render y no en el módulo: *una constante calculada al importar se congela con la escala de ese momento, que es el mismo defecto un piso más arriba y más difícil de ver.*
+2. **El alto pasa de JAULA a PISO** (`minHeight` en vez de `height`), en `Campo` y en `CampoFecha`. 🔴 **Con `height` fijo, si el contenido no entra lo que sobra se CORTA — y lo que sobra es siempre el texto que la persona está escribiendo.** Permiso explícito de la mesa: *la prioridad es que el texto se lea entero; el resto se acomoda.*
+
+## ④ EL INSTRUMENTO NUEVO — `scripts/tinta-campo.mjs`
+
+Mide **tinta, no bounds**, y **mide DOS cosas porque el defecto real resultó ser la segunda**: el hueco entre los renglones **y** que el valor tenga su altura entera.
+
+⏪ **Su primera versión clasificaba por oscuridad** —rótulo en tinta 65 %, valor en tinta plena— **y dio un número sin sentido**: el disco del glifo y el borde de la caja caen en la misma banda que el rótulo. *Una clasificación por color sobre una imagen con más de dos cosas adentro no clasifica: reparte.*
+
+⚠️ **Y su primera versión con hueco daba VERDE sobre el defecto**: el hueco ya existía antes de la cura (12 px); lo que faltaba era altura. *Es la tercera vez en esta ley que un instrumento mide algo verdadero al lado de lo que importa.* Rojo probado: ✗ con 6,7 dp · ✓ con 23,7.
+
+## ⑤ 🔴 LO QUE NO PUDE VERIFICAR, Y CÓMO LO SUPE
+
+Al medir 03 el defecto **persistía tras dos recargas completas**, con el mismo componente que en 05 ya estaba curado. Antes de escribir una segunda causa, **puse un marcador visible** (fondo amarillo en la caja) y conté sus píxeles: **0**.
+
+⇒ **El aparato estaba corriendo un bundle viejo.** Todas las mediciones de 03 de esa tanda eran sobre otro código. **Cuarta vez hoy con esta clase**, y la única que se detectó *antes* de sacar una conclusión, porque esta vez el instrumento tenía su propio control.
+
+**Queda pendiente y es lo primero de la próxima tanda:** verificar en píxeles **03, el alta y el pago**, con la letra del sistema en 1,3 y el marcador confirmado antes de medir.
+
+## ⑥ AL BUZÓN
+- **C** — el campo ahora **puede crecer** si la persona tiene la letra del sistema grande. Las pantallas con pie fijo o spacer `flex: 1` tienen que tolerarlo; si alguna no, es composición, no pieza.
+- **mesa** — la escala de letra del sistema **no estaba en ningún gate**. Todo lo que fije un alto en dp y contenga texto tiene el mismo defecto latente; esto cura los dos campos, no la clase.

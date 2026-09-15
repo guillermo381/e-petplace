@@ -32,6 +32,12 @@ const DOCS = [
   'docs/MODELO_FISCAL.md',
   'docs/MODELO_ECONOMICO.md',
   'docs/PROVEEDOR_FISCAL.md',
+  // S116-B lote 16 · entra al corpus el mismo día que nace, y no después:
+  // el punto ciego declarado de este gate es «un documento fuera del corpus
+  // no se mide», y una guía llena de censos es exactamente lo que no puede
+  // quedar afuera. *Escribir el documento y no agregarlo acá es publicar
+  // números con la vigilancia apagada.*
+  'docs/GUIA_REDISENO_PRESTADOR.md',
 ];
 
 /** Una sección "se declara medida" si dice alguna de éstas. */

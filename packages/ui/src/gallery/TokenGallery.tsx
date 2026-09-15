@@ -1292,6 +1292,46 @@ const normalizar = (t: string) =>
 
 const FiltroDeSeccion = createContext<string | undefined>(undefined)
 
+/**
+ * La hoja de la dirección tal como la monta el cliente (S116-B lote 16,
+ * buzón de C). Se replica el MONTAJE, no el diseño: `PinMovible` real y la
+ * capa de bloqueo con el mismo código que `direccion-hogar-form`, porque lo
+ * que se mide es a dónde va el dedo que arranca sobre el mapa.
+ */
+function MuestraMapaEnHoja() {
+  const [punto, setPunto] = useState({ lat: -0.1807, lon: -78.4678 })
+  const [desbloqueado, setDesbloqueado] = useState(false)
+  return (
+    <View style={{ gap: spacing[3] }}>
+      <Texto variante="apoyo">Dirección</Texto>
+      <Texto variante="cuerpo">Av. Shyris N34-120, Quito</Texto>
+      <Boton
+        variante="secundario"
+        bloque
+        etiqueta={desbloqueado ? 'Confirmar el punto' : 'Ajustar el punto en el mapa'}
+        onPress={() => setDesbloqueado((v) => !v)}
+      />
+      <View>
+        <PinMovible
+          lat={punto.lat}
+          lon={punto.lon}
+          onMover={(lat, lon) => setPunto({ lat, lon })}
+          etiqueta="Mové el mapa para ajustar el punto de entrega"
+        />
+        {!desbloqueado ? (
+          <View accessible={false} importantForAccessibility="no-hide-descendants" style={{ position: 'absolute', inset: 0 }} />
+        ) : null}
+      </View>
+      <Texto variante="apoyo">
+        {desbloqueado ? 'Ajustá el mapa hasta que el pin quede sobre tu puerta' : 'El mapa está fijo'}
+      </Texto>
+      {Array.from({ length: 10 }, (_, i) => (
+        <Texto key={i} variante="cuerpo">{`Campo ${i + 1} — hay que poder llegar hasta acá arrastrando desde el mapa.`}</Texto>
+      ))}
+    </View>
+  )
+}
+
 function Seccion({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   const { theme } = useTheme()
   const solo = useContext(FiltroDeSeccion)
@@ -3849,7 +3889,7 @@ function GaleriaInterna({ encabezado }: { encabezado?: ReactNode }) {
   const { mostrar } = useAviso()
   const [cargandoDemo, setCargandoDemo] = useState(false)
   const [tabActivo, setTabActivo] = useState('hoy')
-  const [hoja, setHoja] = useState<'ninguna' | HojaAltura | 'form' | 'confirmar' | 'scroll'>('ninguna')
+  const [hoja, setHoja] = useState<'ninguna' | HojaAltura | 'form' | 'confirmar' | 'scroll' | 'mapa'>('ninguna')
   const esDark = mode === 'dark'
   const esMemorial = mode === 'memorial'
   // Capturados fuera de los callbacks: el narrowing de `in` no sobrevive closures
@@ -9663,11 +9703,12 @@ function GaleriaInterna({ encabezado }: { encabezado?: ReactNode }) {
             <Boton variante="secundario" tamaño="sm" etiqueta="Formulario" onPress={() => setHoja('form')} />
             <Boton variante="secundario" tamaño="sm" etiqueta="Confirmación" onPress={() => setHoja('confirmar')} />
             <Boton variante="secundario" tamaño="sm" etiqueta="Scroll largo" onPress={() => setHoja('scroll')} />
+            <Boton variante="secundario" tamaño="sm" etiqueta="Con mapa adentro" onPress={() => setHoja('mapa')} />
           </Fila>
 
           <Hoja
             visible={hoja === 'contenido' || hoja === 'media' || hoja === 'completa'}
-            altura={hoja === 'ninguna' || hoja === 'form' || hoja === 'confirmar' || hoja === 'scroll' ? 'contenido' : hoja}
+            altura={hoja === 'ninguna' || hoja === 'form' || hoja === 'confirmar' || hoja === 'scroll' || hoja === 'mapa' ? 'contenido' : hoja}
             titulo="Detalle rápido"
             conCerrar
             onCerrar={() => setHoja('ninguna')}
@@ -9692,6 +9733,17 @@ function GaleriaInterna({ encabezado }: { encabezado?: ReactNode }) {
               <Boton variante="destructivo" etiqueta="Cancelar el paseo" bloque onPress={() => setHoja('ninguna')} />
               <Boton variante="ghost" etiqueta="Volver" bloque onPress={() => setHoja('ninguna')} />
             </View>
+          </Hoja>
+
+          {/* 🔴 EL CASO DEL BUZÓN DE C (S116-B lote 16) — la hoja de la
+              dirección, con su mapa adentro y sus DOS estados. **No es una
+              maqueta**: monta `PinMovible` y la capa de bloqueo tal como los
+              monta `direccion-hogar-form`, porque lo que se juzga es si el
+              dedo que arranca SOBRE EL MAPA scrollea la hoja — y eso no se
+              puede ensayar con un rectángulo de color.
+              ⚠️ Se juzga ARRASTRANDO desde el mapa, en los dos estados. */}
+          <Hoja visible={hoja === 'mapa'} altura="completa" titulo="¿A dónde vamos?" conCerrar onCerrar={() => setHoja('ninguna')}>
+            <MuestraMapaEnHoja />
           </Hoja>
 
           <Hoja visible={hoja === 'scroll'} altura="media" titulo="Scroll interno" onCerrar={() => setHoja('ninguna')}>

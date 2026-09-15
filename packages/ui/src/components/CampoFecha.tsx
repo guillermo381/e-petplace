@@ -33,7 +33,7 @@
  */
 
 import { useRef, useState } from 'react'
-import { Pressable, Text, View } from 'react-native'
+import { PixelRatio, Pressable, Text, useWindowDimensions, View } from 'react-native'
 import type { ScrollView as GHScrollView } from 'react-native-gesture-handler'
 import Animated, { cubicBezier } from 'react-native-reanimated'
 
@@ -43,8 +43,7 @@ import { spacing } from '../tokens/spacing'
 import {
   estiloDeCaja,
   ALTO_CAJA_CAMPO,
-  ALTO_CAJA_CAMPO_V5,
-  ALTO_LINEA_CAMPO,
+  medidasCampoV5,
   formaV5,
 } from './caja-de-campo'
 import { motion } from '../tokens/motion'
@@ -235,6 +234,10 @@ export function CampoFecha({
   tituloHoja = tituloHoja ?? t('campoFecha.tituloHoja')
   const [abierta, setAbierta] = useState(false)
   const v5 = formaV5(theme)
+  /* Las medidas siguen la escala de letra del sistema — el mismo porqué
+     medido que en `Campo` (ver `caja-de-campo.ts`). */
+  useWindowDimensions()
+  const medidas = medidasCampoV5(PixelRatio.getFontScale())
   /* N11″ — ver el porqué del doble disparo junto a `EtiquetaFlotante`. */
   const flotando = valor !== undefined || abierta
   const [modoEtapa, setModoEtapa] = useState(false)
@@ -328,7 +331,10 @@ export function CampoFecha({
                «receta Campo» y era literal: la copia. */
             ...estiloDeCaja(theme, { error: !!error, enfocado: abierta }),
             justifyContent: 'center',
-            height: v5 ? ALTO_CAJA_CAMPO_V5 : ALTO,
+            /* N11″ · el alto es un PISO en v5 — el mismo porqué medido que en
+               `Campo`: con `height` fijo, lo que no entra se recorta, y lo que
+               no entra es el valor. */
+            ...(v5 ? { minHeight: medidas.caja, paddingVertical: spacing[2] } : { height: ALTO }),
             paddingHorizontal: spacing[3],
             paddingVertical: 0,
             transitionTimingFunction: cubicBezier(...motion.easing.easeOut.bezier),
@@ -342,7 +348,7 @@ export function CampoFecha({
               exactamente lo que hace `Campo` al enfocar un campo vacío.*
               ⚠️ Y la caja ya se pinta como elegida en ese estado: `enfocado:
               abierta` estaba puesto desde antes — no hizo falta agregarlo. */}
-          {v5 ? <EtiquetaFlotante label={label} flotando={flotando} /> : null}
+          {v5 ? <EtiquetaFlotante label={label} flotando={flotando} alto={medidas.etiqueta} /> : null}
 
           {/* ☠️ **EL PLACEHOLDER DE FECHA MUERE con v5.** `texto` caía al
               placeholder cuando no había valor —«Elegí una fecha»— y ese
@@ -355,7 +361,7 @@ export function CampoFecha({
               style={{
                 fontFamily: typography.family.sans.regular, // ser vivo: DM Sans, jamás mono
                 fontSize: typography.size.base,
-                lineHeight: v5 ? ALTO_LINEA_CAMPO : undefined,
+                lineHeight: v5 ? medidas.linea : undefined,
                 color: valor ? theme.text.primary : theme.text.tertiary,
               }}
             >
@@ -365,7 +371,7 @@ export function CampoFecha({
             /* El cuerpo reserva su renglón aunque esté vacío: si no, la caja
                se centraría sobre la etiqueta sola y el rótulo no quedaría
                donde va a quedar cuando haya fecha. */
-            <View style={{ height: ALTO_LINEA_CAMPO }} />
+            <View style={{ minHeight: medidas.linea }} />
           )}
         </Animated.View>
       </Pressable>

@@ -763,6 +763,9 @@ if [ "$TOCA_CLIENTE" != "0" ]; then
   arnes_cliente "verify:etiqueta-dentro" "scripts/verify-etiqueta-dentro.mjs" \
     "node scripts/verify-etiqueta-dentro.mjs" "N11 doble prima" \
     "la etiqueta vive DENTRO del campo --- tercera vuelta de esta ley"
+  arnes_cliente "verify:alto-con-texto" "scripts/verify-alto-con-texto.mjs" \
+    "node scripts/verify-alto-con-texto.mjs" "lote 11" \
+    "un alto fijo sobre texto se desincroniza de la letra del sistema"
   arnes_cliente "verify:auth-receptor" "scripts/verify-auth-receptor.mjs" \
     "node scripts/verify-auth-receptor.mjs" "D-1098" \
     "un metodo resuelto se llama CON su receptor"

@@ -1,61 +1,45 @@
-# S116-B · LOTE 9 — el isotipo v5, la galería que deja de tardar en blanco, y una corrección grande mía
+# S116-B · LOTE 9 — la etiqueta y el valor, cada uno con su renglón
 
-**Rama `pista/s116-b-05`.**
-
-**Gates:** `verify:diseno` VERDE (81 reglas) · `verify:contrast` 461/0 · `verify:catalogo-v5` VERDE (33 piezas) · `verify:reduced-motion` VERDE · `verify:isotipo-path` VERDE · `tsc` 0 en las cuatro.
+**Rama `pista/s116-b-05`.** Gates: `verify:etiqueta-dentro` VERDE (④ en 0) · `verify:diseno` VERDE (80) · `verify:contrast` 504/0 · `verify:catalogo-v5` VERDE (49) · `tsc` 0 en las cuatro.
 
 ---
 
-## 🔴 ⓪ LA CORRECCIÓN VA PRIMERA, PORQUE DESMIENTE TRES PARTES MÍOS
+## ① EL DEFECTO NO ERA UN SOLAPE DE PÍXELES: EL INPUT SE APLASTABA
 
-**La galería SÍ se alcanza.** Con el catálogo cargando aparte y esperando **40 s en vez de 5**, `cliente:///gallery` **abrió** (capturado: la lámina S82 en oscuro, la ruta entera).
+**Lo primero fue medirlo, y la medición corrigió el enunciado.** Con la etiqueta arriba:
 
-En los lotes **5b, 6, 7 y 8** declaré **siete caminos medidos como fallidos**, con tabla. **La hipótesis del founder era la correcta:** lo que fotografié no fue *«no navegó»* — fue **«todavía no dibujó»**.
+| | antes | después |
+|---|---|---|
+| etiqueta «Tu nombre» | 883–920 (12,3 dp) | 863–900 (12,3 dp) |
+| **`EditText` con valor** | 920–953 · **11,0 dp** | 900–969 · **23,0 dp** |
+| solape | 0 px | 0 px |
 
-> **Declarar un camino muerto por medir antes de tiempo es peor que no medirlo:** manda a todos a buscar una puerta que existe.
+**Los bounds nunca se solapaban: el input estaba aplastado a la mitad de su alto**, y el texto quedaba recortado contra la etiqueta. *El síntoma que se ve —«la etiqueta tapa el texto»— y la causa —«el valor no tiene dónde dibujarse»— son el mismo píxel visto desde dos lados.*
 
-Y tiene una consecuencia que corrige a otro: **la firma del founder en S106** —que retiró la entrada de Cuenta *«porque se alcanza por deep link con cable»*— **era cierta**. En el lote 6 escribí que esa premisa era falsa «medido». **El que estaba equivocado era yo**, y lo repetí cuatro lotes seguidos con más tabla cada vez. *Una medición equivocada que se repite gana autoridad sin ganar verdad.*
+## ② LA CAUSA: UN `flex: 1` QUE CAMBIÓ DE EJE SIN CAMBIAR DE LÍNEA
 
-⚠️ **Lo que sigue sin lograrse, y ahora por otra causa:** dentro de la galería **el scroll deja de avanzar** después de la lámina (≈300 swipes sin movimiento), así que **no llegué a la sección de la onda**. Es un obstáculo nuevo y distinto del anterior — *y esta vez lo digo como lo que es: no sé por qué todavía.*
+Hasta el lote 6 el `TextInput` era **hijo directo de la FILA**, así que su `flex: 1` repartía el **ancho**. **El lote 6 lo metió dentro de una COLUMNA** para alojar la etiqueta — y ahí el mismo `flex: 1` pasó a repartir el **ALTO**, peleándole el renglón a la etiqueta.
 
----
+🔴 ***El `flex` no se movió ni cambió de valor: le cambiaron el padre.*** Es la clase de defecto que **no se ve leyendo el diff, porque la línea no está en el diff** — y por eso lo encontró un dedo en un teléfono y no una relectura.
 
-## ① `D-1110` — EL ISOTIPO v5 EN LA MARCA MÁS VISTA
+**La cura son dos cosas, y una sola no alcanza:**
+1. **`flex` sólo en multilínea** — ahí el alto sí se reparte y es lo que se quiere. Sin multilínea, el ancho ya lo da la columna: en un contenedor columna los hijos se estiran solos.
+2. **Alto EXPLÍCITO del interior: `ALTO_INTERIOR_CAMPO_V5` = 38** (etiqueta 14 + línea 24). *Con el alto fijo en la suma de sus dos hijos no hay nada que `center` reparta, así que la etiqueta no puede comerle lugar al valor pase lo que pase.* ⏪ Había un `minHeight` de **una sola línea**, y eso dejaba la decisión al reparto — de ahí salió el defecto.
 
-Cambiado **en la pieza**: sale en **cuatro de las cinco tabs** y lo montan **79 archivos** del cliente. *La pieza es el único lugar donde una marca puede cambiar de una vez.*
+## ③ LA MEDICIÓN QUE LA ORDEN PIDE — cero solape en las tres
 
-`Isotipo` gana **`dibujo?: 'legado' | 'v5'`**, con **default `'legado'`** — y el default es lo que protege a los que no se nombraron:
+| pantalla | etiqueta | valor | solape |
+|---|---|---|---|
+| **05** · registro, texto largo | 863–900 | 900–969 (**23,0 dp**) | **0 px** |
+| **alta** · datos básicos | 650–687 | 687–757 (**23,3 dp**) | **0 px** |
+| **`CampoFecha`** · antiparasitario | 1264–1301 | 1301–1370 (**23,0 dp**) | **0 px** |
 
-> 🔴 **Las dos marcas de agua (210 y 1000) llaman a esta misma pieza.** Cambiar el default las habría movido de arrastre, y la mesa dijo literal que son **otra decisión**. **Siguen en `'legado'`, intactas.**
+Las cajas **se tocan y no se pisan**: el borde inferior de la etiqueta es el borde superior del valor.
 
-El v5 se recorta a **`ISOTIPO_V5_CAJA`** y no al lienzo cuadrado del archivo: *con el cuadrado, un isotipo de 32 px dibujaría 32 px de aire y una marca diminuta adentro.* Usa el mismo `d` que los ocho papeles, sostenido por `verify:isotipo-path`.
+⚠️ **`CampoFecha` ya cumplía sin tocarlo** — su cuerpo es un `<Text>` sin `flex`, así que nunca entró en la pelea. Se midió igual: *una pieza hermana que «debería estar bien» y no se mide es una suposición con forma de verificación.*
 
-**Mirado a 24 / 32 / 48 / 96** — `capturas-s116-b/isotipo-v5-tamanos.png`. Es vector: no tiene resolución.
+## ④ LAS CAPTURAS — tres estados × tres pantallas
+`lote9-05-a-vacio` · `lote9-05-b-foco-vacio` · `lote9-05-c-foco-texto` · `lote9-03-a-vacio` · `lote9-03-b-foco` · `lote9-alta-a-vacio` · `lote9-alta-b-foco-vacio` · `lote9-alta-c-foco-texto`.
 
-⚠️ **Y la primera captura que monté estaba mal, no la pieza:** salía un bloque blanco debajo de la marca. **Era mi montaje** — `qlmanage` devuelve lienzo cuadrado y yo lo aplasté a la proporción de la caja. Lo separó re-renderizar con el viewBox completo. *Un defecto del instrumento se lee igual que un defecto de la pieza, y sólo se separan midiendo los dos.*
-
----
-
-## ② LA HOJA DE ATAJOS
-
-**Ya estaba construida en el lote 8** (`HojaAsistente`, montada por `BotonAsistente`). Acá sólo se ajusta la voz del campo a la que la mesa escribió: **«Escribe tu pregunta»**.
-
-Los cuatro atajos son los **censados del objeto** — `apps/cliente/src/lib/nexo/atajos.ts:57`. **Cierra arrastrando o tocando fuera porque es una `Hoja` de la casa**: no hubo que escribir nada para eso.
-
----
-
-## ③ LA GALERÍA CARGA APARTE Y CON LA ESPERA DE LA CASA
-
-**La causa era de bundling, no de render:** el módulo importaba `TokenGallery` de forma **estática**, así que **Metro tenía que empaquetar el catálogo entero antes de poder mostrar la ruta** — y durante esos segundos *la navegación ya ocurrió y no hay nada dibujado*.
-
-`lazy` + `Suspense`: la ruta aparece **al instante** con la espera de la casa, y el catálogo llega cuando llega.
-
-> *La espera no acelera nada — hace que los segundos SE VEAN, que es lo que faltaba.*
-
-✅ **`EsperaLarga` estrena consumidor, y no es el que esperábamos:** *no fue una pantalla de producto, fue el instrumento de gate* — el que tardaba una eternidad en blanco. **El gate del catálogo lo cazó solo** (decía 0 consumidores y el objeto decía 1).
-
----
-
-## ④ `D-1111` — DECLARADA, NO CURADA
-
-Dos ruedas con el mismo nombre. **A midió que ninguna pantalla monta las dos**, y la mesa mandó declararla. *Queda escrita para que el día que alguien monte las dos, la causa esté esperando y no haya que volver a encontrarla.*
+## ⑤ LO QUE SIGUE EN LA COLA
+El buzón de C (la capa del mapa y el fling de la Hoja) queda **sin empezar** — entra después de esto, como estaba ordenado. El punto 3 de ese buzón (la onda) **no tiene nada que curar en la pieza**: es corrección de atribución del píxel y se apaga por config nativa, lote 8 de A.
