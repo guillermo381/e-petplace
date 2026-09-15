@@ -5058,4 +5058,116 @@ export const clienteEs = {
     historialCitasFallo: 'No pudimos traer las citas anteriores. Los pedidos sí están.',
   },
 
+  /* ⭐ **S116-C lote 5 · EXPLORAR v5** — la banda con su buscador, la grilla de
+     oficios cabalgando la costura, y «cerca de ti» con negocios reales. */
+  explorarV5: {
+    titulo: 'Explorar',
+    /** El antetítulo dice DÓNDE estás parado: es lo que vuelve «cerca» un dato
+     *  y no una promesa. Sin dirección guardada no se dibuja (ley del nulo). */
+    buscarEtiqueta: 'Buscar',
+    cercaDeTi: 'Cerca de ti',
+    /* La distancia y el oficio en una línea: es lo que separa una fila de su
+       vecina cuando los nombres se parecen. */
+    lineaOficioDistancia: '{{oficio}} · a {{km}} km',
+    lineaOficioSinDistancia: '{{oficio}}',
+    desde: 'desde',
+    ver: 'Ver',
+    /* 🔴 Un oficio sin nadie cerca NO se esconde: se toca y esto es lo que
+       dice. La segunda línea es una PROMESA de la casa — su productor no
+       existe todavía y está pedido en el buzón. */
+    sinNadieTitulo: 'Todavía no hay {{oficio}} cerca de ti',
+    sinNadieDetalle: 'Te avisamos apenas llegue el primero a tu zona.',
+    sinNadieCerrar: 'Entendido',
+    vozSinDisponibles: 'Todavía no hay nadie cerca',
+    /* El vacío de la lista, distinto del oficio sin nadie: acá no hay NINGUNO
+       de ningún oficio. */
+    vacioTitulo: 'Todavía no hay negocios cerca',
+    vacioDetalle: 'Estamos sumando a los primeros de tu zona.',
+    /* La búsqueda que no encuentra: dice qué buscó, no «no hay nada». */
+    sinResultados: 'Nada coincide con «{{texto}}»',
+    sinResultadosDetalle: 'Prueba con el nombre del negocio o del servicio.',
+    error: 'No pudimos cargar los negocios',
+    /* La tarjeta destacada de la casa. Sin promo viva NO se dibuja. */
+    destacadaCta: 'Ver la promoción',
+    /* 🔴 **UNA PALABRA POR DISCO — contrato de `GrillaOficios`.** Los títulos
+       del riel de servicios son la voz LARGA («Estética y baño»), y la pieza
+       declara que *«si necesita dos, el disco NO crece: se cambia la palabra»*.
+       Estas son esas palabras. *No reemplazan a las largas: conviven, porque
+       la ficha del oficio sí tiene lugar para la frase entera.* */
+    oficioPaseo: 'Paseo',
+    oficioGrooming: 'Estética',
+    oficioVeterinaria: 'Salud',
+    oficioAdiestramiento: 'Escuela',
+    oficioGuarderia: 'Guardería',
+    oficioHotel: 'Hotel',
+  },
+
+  /* ⭐ **S116-C lote 5 · ② LA PANTALLA DEL OFICIO** — lo que hay en un oficio,
+     antes de elegir cuándo. */
+  oficioV5: {
+    /* La tarjeta destacada es **el acto principal del oficio**, no una promo:
+       la promo de la casa no tiene productor (ver el buzón de A). */
+    destacadaTitulo: 'Agenda {{oficio}}',
+    destacadaDetalle: 'Eliges el día y la hora, y te mostramos quién puede.',
+    destacadaCta: 'Agendar',
+    queNecesitas: 'Qué necesitas',
+    quienLoHace: 'Quién lo hace',
+    sinSubservicios: 'Todavía no hay servicios publicados',
+    sinSubserviciosDetalle: 'Cuando alguien publique el suyo, aparece acá.',
+    sinPrestadores: 'Todavía no hay nadie cerca',
+    sinPrestadoresDetalle: 'Te avisamos apenas llegue el primero a tu zona.',
+    error: 'No pudimos cargar este servicio',
+    /* El precio de un subservicio varía por negocio: **siempre «desde»**
+       (escalera del precio honesto, S57). */
+    subservicioDesde: 'desde {{precio}}',
+  },
+
+  /* ⭐ **S116-C lote 5 · ③ EL DETALLE DEL SERVICIO.** */
+  servicioV5: {
+    duracion: '{{min}} min',
+    dondeYCuando: 'Dónde y cuándo',
+    direccion: 'Dirección',
+    horario: 'Horario',
+    /* ⚠️ El horario de atención NO está en la vista pública: se dice que se ve
+       al elegir el día, que es donde el motor sí lo sabe. */
+    horarioAlAgendar: 'Lo ves al elegir el día',
+    incluye: 'Incluye',
+    agendar: 'Agendar',
+    total: 'Total',
+    desde: 'desde',
+    error: 'No pudimos cargar este servicio',
+    sinOferta: 'Este servicio ya no está disponible',
+    sinOfertaDetalle: 'Puede que el negocio lo haya retirado. Mira los demás.',
+    verOtros: 'Ver los demás',
+  },
+
+  /* ⭐ **S116-C lote 5 · «INCLUYE» — lo que el PRODUCTO garantiza en cada
+     oficio, no lo que promete un negocio.**
+
+     🔴 **No hay columna de «qué incluye» en ninguna tabla** (medido: ni en
+     `prestador_servicios` ni en la vista pública). ⇒ estas líneas describen lo
+     que la casa construyó y se cumple SIEMPRE: el paseo tiene GPS porque el
+     motor lo graba, y manda su parte porque cerrar sin él no se puede.
+     *Escribir acá una promesa del negocio sería afirmar algo que nadie mide.*
+     El día que un prestador pueda agregar las suyas, vienen del motor y éstas
+     quedan de piso. */
+  incluyeV5: {
+    paseoGps: 'GPS en vivo durante la salida',
+    paseoFotos: 'Fotos y novedades mientras pasea',
+    paseoParte: 'Parte al terminar, con el recorrido completo',
+    groomingEstado: 'Te contamos cómo llegó y cómo quedó',
+    groomingFotos: 'Fotos del antes y el después',
+    groomingParte: 'Parte al terminar, con lo que se hizo',
+    vetHistoria: 'Queda en la historia clínica de tu mascota',
+    vetParte: 'Parte con el diagnóstico y las indicaciones',
+    vetReceta: 'La receta, si hace falta',
+    adiestramientoBitacora: 'Bitácora de lo que se trabajó',
+    adiestramientoClips: 'Clips cortos de la sesión',
+    adiestramientoParte: 'Parte con el avance y qué seguir en casa',
+    guarderiaDia: 'Te contamos cómo pasó el día',
+    guarderiaFotos: 'Fotos durante la estadía',
+    /* Lo que vale para TODOS: es la promesa de la plataforma. */
+    expediente: 'Entra al expediente de tu mascota',
+  },
+
 } as const;

@@ -118,6 +118,8 @@ export {
   // S91 (pedido de C): la ficha PÚBLICA, por la vista y jamás por la tabla.
   obtenerPerfilesPublicos,
   obtenerPerfilesPublicosPorCuenta,
+} from './wrappers/prestador';
+export {
   type PerfilPublico,
   type ServicioPublico,
   type NombreReservador,
