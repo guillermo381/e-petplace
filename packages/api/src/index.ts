@@ -593,6 +593,11 @@ export {
 // Cierra el «motor sin puerta» de S77: el tercer brazo de
 // `cita_update_prestador` vivía sin un solo escritor. `dar_de_baja_empleado`
 // produce las citas sin persona; ésta es la única vía de volver a ruteárselas.
+// ── S116 · EXPLORAR — quiénes hay, sin pedir todavía un horario ───────────
+// Lo escribió C en territorio de A y lo declaró (buzón); A lo revisó, lo
+// corrigió en un punto y lo adoptó. Ver la cabecera del archivo.
+export { listarIdsPrestadoresPublicos, type CodigoErrorExplorar } from './wrappers/explorar';
+
 // ── S88-A · LA CAMPANA (lámina firmada) ───────────────────────────────────
 // Hoy devuelve lista vacía y eso es CORRECTO: `in_app` no tiene transporte
 // hasta que la pantalla exista (ley de secuencia de la lámina).
