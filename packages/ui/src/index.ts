@@ -408,7 +408,7 @@ export { PaseoDeHuellas } from './brand/PaseoDeHuellas'
 // al isotipo · `HuellaDeLlegada` (~400) reusa el motivo de `EsperaDeMarca`
 // UNA vez como celebración. **No componen entre sí**: dónde y en qué orden
 // se montan lo dice la letra que no viajó.
-export { RespiroDeMarca, HuellaDeLlegada } from './brand/RitualDeEntrada'
+export { RespiroDeMarca } from './brand/RitualDeEntrada'
 // LockupMarca — S104-B: el NOMBRE de la casa, en un solo lugar. Nace del
 // censo que halló TRES variantes vivas (`e-PetPlace` 95 · `ePetPlace` 3 ·
 // `e.petplace` 1, y esa última era el wordmark de la primera pantalla).

@@ -50,7 +50,6 @@
 - **props:** `fondo` · `costura` · `arranque` · `scroll` · `children` · **`pie`** · **`materialDelPie`**
 - 🔴 **La hoja CRECE HASTA EL PIE siempre** (`flexGrow` en la hoja **y** en el `contentContainer`). ⏪ Con `minHeight: 400` sin `flexGrow`, el contenido corto dejaba asomar el ciruela entre la hoja y el pie: *un mínimo garantiza que no sea más chica, no que llegue abajo*. **El defecto sólo existe cuando sobra pantalla — justo la pantalla con la que nadie prueba.**
 - **tokens:** `radius.cabeceraV5` · `theme.bg.base` (el lienzo) · `theme.accent.gradient`
-- **consumidores:** 7
 - 🔴 **LA HOJA ES OPACA, COLOR LIENZO, SIEMPRE (lote 13).** El founder vio *el wordmark del fondo a través de la hoja, bajo «Email»*. ⚠️ **El color nunca fue el problema y por eso no alcanzaba mirarlo:** los tres temas traen `bg.base` sin alfa. **Lo que dejaba pasar el fondo era el ORDEN DE PINTADO en Android** — una `elevation` de cualquier cosa montada en el fondo sube su capa por encima de sus hermanos. *Un fondo opaco tapado por un hermano que se pinta después sigue siendo opaco y se ve transparente igual.* ⇒ la cura son **dos `zIndex` explícitos** (fondo `0`, hoja `1`), no un color.
 - 🔴 **EL DEGRADADO LO PINTA ESTA PIEZA, no la `Cabecera`** — y no es un detalle de implementación: al scrollear *«el fondo se queda y su CONTENIDO se desvanece»*. **Si el degradado viniera dentro del nodo que se desvanece, se apagaría con él** y la pantalla quedaría blanca detrás de la hoja.
 - ⚠️ **El desvanecido se acopla al SCROLL, no a un `withTiming`:** la opacidad es una función de **dónde está la hoja**. *Una transición temporal se desincroniza del dedo en cuanto alguien scrollea rápido, y el fondo se apaga cuando ya no lo tapa nada.*
@@ -60,7 +59,6 @@
 ### `FilaAccionesCostura`
 - **props:** `accesos[]` (`clave` · `icono` · `palabra` · `onPress`)
 - **tokens:** `medidas.margen` · `theme.elevacion.elevada` · `theme.bg.card`
-- **consumidores:** 0
 - 🔴 **De DOS a CUATRO.** Con uno no hay fila (es un botón); con cinco los círculos bajan del área táctil.
 - 🔴 **UNA palabra por acceso. Si necesita dos, el círculo NO crece: se cambia la palabra.** La pieza la dibuja en **una línea con `numberOfLines={1}`**, así que dos palabras **se ven cortadas** — *y eso es la señal, no un defecto que haya que disimular: cuatro círculos de distinto ancho dejan de ser una fila.*
 - ⚠️ **El desplazamiento es `DISCO / 2`, no un número:** por eso sigue siendo media mitad el día que el disco cambie de tamaño. *Una pantalla que escribe `marginTop: -32` no sabe por qué es 32.*
@@ -69,7 +67,6 @@
 ### `OndaAcceso`
 - **props:** `frase` (dos líneas) · `lado` (`izq`|`der`) · `especies?`
 - **tokens:** `palette.magentaAccion` · `motion.v5.personajePrimeraMs` · `motion.v5.personajeCadaMs` · `motion.v5.personajeFundidoMs` · `spacing`
-- **consumidores:** 2 · su lugar es el pie del acceso y del alta
 - **exporta:** `ALTO_ONDA_ACCESO` — 🔴 **la única forma que tiene el contenido de no quedar debajo del magenta**, porque la pieza ya no ocupa lugar. ⚠️ Es la parte **FIJA y no incluye el inset** (mismo trato que `AIRE_RAIZ`): lo dibujado es `ALTO_ONDA_ACCESO + insets.bottom`, y *un token que se llevara el inset adentro sería falso en cuanto cambie el aparato*.
 - 🔴 **La ola es un `Path`, no un `borderRadius`:** un radio da un DOMO —simétrico, una sola inflexión— y *una ola tiene dos*. El `viewBox` de 100 con `preserveAspectRatio="none"` la estira con la pantalla en vez de repetirla.
 - 🔴 **La frase llega YA PARTIDA en dos líneas.** Dónde corta es una decisión de redacción; un `numberOfLines={2}` la tomaría por su cuenta con el ancho de cada teléfono.
@@ -85,14 +82,12 @@
 ### `FilaBeneficio`
 - **props:** `glifo` · `titulo` · `apoyo`
 - **tokens:** `accent.glifo` · `accent.glifoBg` · `radius.chipV5`
-- **consumidores:** 1 · C la monta una vez por beneficio en la propuesta, una tarjeta cada una
 - 🔴 **NO ANUNCIA TOQUE, y no es «una celda con el `onPress` apagado»:** ni `Pressable`, ni `accessibilityRole`, ni chevrón, ni hundido — **no están apagados: no están.** *Una celda de navegación dice «acá se entra» con todo su cuerpo; quitarle el toque deja una puerta que no abre, y quien la toque concluye que la app está rota.* Para el lector de pantalla la diferencia es total: una celda se anuncia «botón», y acá no hay botón que anunciar.
 - ⚠️ **Cuatro tarjetas, no una lista con divisores:** *una lista dice «estos ítems van juntos»; cuatro tarjetas dicen «cada uno vale por sí mismo»*, que es lo que una pantalla de propuesta necesita.
 
 ### `EsperaLarga`
 - **props:** `titulo` · `apoyo` · `pie?`
 - **tokens:** `motion.coach.respiracionMs` · `motion.v5.asistenteHalo*` · `bg.base`
-- **consumidores:** 11 · su lugar es toda espera larga: el pago, el carné, lo que dure. ⏪ Tuvo uno —la galería, tras un `lazy` que puse y retiré— y **se fue porque ese `import()` nunca resolvía**: la ruta quedaba en la espera para siempre. *De paso la pieza quedó probada en aparato durante minutos, con su rueda girando y su halo respirando: el defecto de una fue el banco de pruebas de la otra*
 - **consume:** `lib/rueda-de-caras` (la misma de 00, 02 y la onda) y el halo del asistente. **Nada se redibuja.**
 - 🔴 **NO SABE CUÁNTO FALTA Y NO LO FINGE — por eso muere la línea de progreso.** *Una barra que avanza sin saber hacia dónde es una promesa que nadie puede cumplir, y cuando se queda quieta al 80 % lo que comunica es que algo se rompió.* Lo que esta pieza comunica es otra cosa: **que hay alguien acá**.
 - 🔴 **ES LA ÚNICA PIEZA DE LA CASA CON MOVIMIENTO SIN FIN**, firmado. En el asistente el halo respira tres veces y descansa **porque una animación infinita deja la ventana no-idle**; acá esa razón no aplica: *la espera es lo que dura, y una pantalla de espera detenida a los 24 s dice lo contrario de lo que vino a decir.* ⚠️ **Consecuencia declarada: mientras esté, `uiautomator` no reporta `idle`.**
@@ -111,7 +106,6 @@
 
 ### `AbanicoAsistente`
 - **props:** `atajos[]` (`glifo` · `texto` · `onPress`) · `vozPreguntar` · `onPreguntar` · `onCerrar`
-- **consumidores:** 0 en pantallas — **lo monta `BotonAsistente`, no una app**. *Si cada pantalla lo montara, abrir el asistente sería un acto distinto en cada una.*
 - ☠️ **Reemplaza a `HojaAsistente`, que murió en el lote 11** (lápida en `components/HojaAsistente.LAPIDA.md`). 🔴 **Una hoja modal tapa la pantalla desde la que se la abrió — y el contexto de lo que se va a preguntar ES esa pantalla.** *Preguntar sobre algo no puede empezar por esconderlo.* Segunda razón, de gesto: una hoja pide dos manos o un pulgar que viaje; **el abanico nace donde está el dedo**.
 - 🔴 **LOS ATAJOS DEL ORBE, CENSADOS DEL OBJETO:** `apps/cliente/src/lib/nexo/atajos.ts:57` — `['peso','vacuna','antiparasitario','foto']`. ⚠️ La mesa los nombró de memoria como «agregar recuerdo, carné de vacunas»; **`peso` y `antiparasitario` no estaban en esa lista y sí en el código.**
 - ✅ **Reusa el MOTION del orbe y no su geometría:** `coach.escalonadoMs` al abrir y `coach.cierreMs` al cerrar, con su regla — **se abre escalonado y se recoge de golpe**, *porque escalonar la salida hace esperar a quien ya decidió irse*. El arco de pata NO se reusa: el sketch pide una columna, y heredar el arco sería una coreografía que nadie pidió.
@@ -128,7 +122,6 @@ La banda ciruela de arriba. **Va en TODAS las pantallas del cliente**, no solo e
 - 🔴 **`presentacion="fondo"` (S116-B)**: sin radio inferior ni sombra, porque **deja de ser una tarjeta apoyada** — *una sombra sobre el fondo no despega nada: no hay nada debajo.* **Es prop y no un tercer valor de `variante`** porque `raíz`/`empujada` siguen vivas: una dice QUÉ ES, la otra CÓMO SE PINTA (mismo criterio que `Boton.superficie`). **Default `tarjeta`: los consumidores no cambian nada** — se la pasa `HojaContenido`.
 - ⚠️ **No tiene un alto fijo y no se puede exportar uno:** mide `inset + padding + CONTENIDO + padding`, y el contenido es variable por diseño. Se exportan `ALTO_CABECERA_RAIZ_FIJO` / `ALTO_CABECERA_EMPUJADA_FIJO` (**sólo el padding**) como piso de arranque para medir con `onLayout`. *Un alto único sería correcto para una combinación y falso para las otras siete.*
 - **tokens:** `gradients` · `medidas` · `palette` · `radius` · `spacing` · `elevacion` · `theme.accent`
-- **consumidores:** 8
 - **captura:** `docs/loop/capturas-s116-b-lote2/piezas-v5-montadas.png`
 - ⚠️ **El degradado lo resuelve el TEMA, no un `if memorial`** — memorial cae a ciruela noche plana solo.
 
@@ -136,8 +129,7 @@ La banda ciruela de arriba. **Va en TODAS las pantallas del cliente**, no solo e
 El círculo translúcido de las acciones **sobre la banda ciruela** (la flecha de volver, el carrito).
 - **props:** `children` · `onPress?` · `etiqueta?`
 - **tokens:** `medidas.cabeceraEmpujada.flecha` · `radius.chipV5` · blanco al 16 %
-- **consumidores:** 1
-- ⚠️ **Y EL CERO ES EL DATO, no un olvido:** `Cabecera` la monta *dentro de `packages/ui`*, que no cuenta como consumidor. **Deja de ser cero el día que el carrito de la Despensa migre de su copia a esta pieza** — que es exactamente lo que esta entrada existe para habilitar.
+- ⚠️ **Todavía sin consumidores en las apps:** `Cabecera` la monta *dentro de `packages/ui`*, que no cuenta. **Deja de estar sin nadie el día que el carrito de la Despensa migre de su copia a esta pieza** — que es exactamente lo que esta entrada existe para habilitar.
 - 🔴 **NACE COMO PIEZA (lote 12) PORQUE ESTAR EXPUESTO NO ALCANZÓ.** Vivía dentro de `Cabecera.tsx` y desde el lote 2 estaba disponible como `Cabecera.Disco`, **con un comentario que pedía literalmente lo que después pasó** —*«que quien monte la acción derecha use EL de la cabecera y no dibuje otro»*—. **C lo copió igual** para el carrito de la Despensa.
 
   > **Exponer no es publicar.** Una propiedad estática no entra al índice del paquete, no tiene entrada de catálogo, no tiene fila en la galería y no aparece en un autocompletado de `@epetplace/ui`. **Para quien no leyó ese archivo es indistinguible de una pieza privada** — y la salida barata siempre es volver a dibujarla.
@@ -150,7 +142,6 @@ El círculo translúcido de las acciones **sobre la banda ciruela** (la flecha d
 El botón flotante que abre NEXO. Va en **toda raíz**.
 - **props:** `onPress` · `visible` · `etiqueta`
 - **tokens:** `medidas` · `palette` · `radius` · `shadows` · `spacing` · `theme.accent`
-- **consumidores:** 1
 - 🔴 **FLOTA SOBRE EL CONTENIDO, así que la pantalla tiene que dejarle aire:**
 
   ```tsx
@@ -165,14 +156,12 @@ El botón flotante que abre NEXO. Va en **toda raíz**.
 Filas con círculo de elección — **no chips**. Para elegir una de varias cosas que se leen como texto.
 - **props:** `opciones[]` (`clave` · `texto` · `apoyo` · `derecha`) · `elegida` · `onElegir` · `agregar`
 - **tokens:** `medidas` · `palette` · `radius` · `spacing` · `elevacion` · `theme.bg` · `theme.border`
-- **consumidores:** 0
 - ⚠️ **`derecha` es TEXTO, no nodo, a propósito:** una pantalla no puede meter un botón ahí.
 
 ### `Confirmacion`
 La pantalla de «¡Listo!» a lienzo completo.
 - **props:** `titulo` · `apoyo` · `dato` · `lineaExtra` · `primario` · `secundario` · `especies` · `exclamacion`
 - **tokens:** `medidas` · `radius` · `spacing` · `motion` · `elevacion` · `theme.accent` · `theme.bg` · `theme.mode`
-- **consumidores:** 2
 - 🔴 **El trío VIENE ENCENDIDO en el cliente (S116-B) — no lo pidas.** Era opt-in y **nadie pasaba `especies`**: cero en `apps/`. ⚠️ **No es un booleano como la pata: el trío necesita saber QUÉ caras**, así que el default no es «true», es **completar** — lo que le pases va PRIMERO (la especie de la mascota) y la casa pone el resto hasta tres, **sin repetir la protagonista**. *Un trío con el mismo gato tres veces no es una familia: es un error de render que nadie reporta porque «se ve bien».* Apagalo con `trio={false}`; memorial y prestador ya quedan afuera solos.
 - ⚠️ **`lineaExtra` es STRING, no nodo** — es el slot fiscal de S115 y `R74`/`R84` mantienen la plata fuera de las piezas.
 - ⚠️ **Memorial no monta trío ni destellos, y lo decide el TEMA**, no el consumidor. Con `useReducedMotion` la pantalla **aparece hecha**.
@@ -182,7 +171,6 @@ Las seis caras del founder. **`TrioPersonajes` es la mitad de `Confirmacion`.**
 - 🔴 **El trío entra en FUNDIDO ESCALONADO (S116-B).** Tenía cero movimiento: el check de `Confirmacion` crecía y *los tres personajes aparecían de golpe debajo*. Es `FadeIn` y no una entrada con desplazamiento —la letra §2 dice **fundido**— y el escalonado usa `stagger.normal`: *tres caras a la vez son una imagen; de a una es que llegaron.*
 - **props:** `especie` (`perro`|`gato`|`conejo`|`ave`|`roedor`|`otro`) · `tamano` (`grande`|`hogar`|`selector`|`fila`) · `elegido` · `fondo` · (trío: `especies` de exactamente 3)
 - **tokens:** `medidas` · `palette` · `radius` · `theme.bg`
-- **consumidores:** 6 · 0
 - 🔴 **El `ave` usa la nariz como cara** hasta que llegue su archivo — el único que entró trae el wordmark encima. Enmienda firmada de la letra §1.10.
 - ⚠️ **Ninguna es vector**; el `roedor` tiene fondo blanco opaco.
 
@@ -190,7 +178,6 @@ Las seis caras del founder. **`TrioPersonajes` es la mitad de `Confirmacion`.**
 Las ocho casillas del código de verificación. **No es un campo de texto con espacios.**
 - **props:** `largo` (**obligatoria, sin default**) · `valor` · `onCambio` · `etiqueta` · `error` · `tono` · `deshabilitado`
 - **tokens:** `estiloDeCaja` (la misma anatomía que `Campo`) · `typography.escala.cifraChica` · `motion`
-- **consumidores:** 4
 - 🔴 **UN input invisible cubre la fila entera; las ocho cajas son PRESENTACIÓN.** *N inputs con foco entre ellos es el camino que parece obvio y es el malo.* Consecuencias que salen gratis: el tap funciona **caiga donde caiga** (no hay «caja equivocada» que tocar), el pegado del código entero anda solo, y **el lector de pantalla ve UN campo, no ocho**.
 - ⚠️ **El área táctil 44 ya está resuelta por diseño**, no con `hitSlop`: el input cubre toda la fila aunque cada casilla mida menos.
 - 🔴 **El dígito va en Baloo cifra (S116-B)** y choca con la Ley 3 en apariencia — la casa ya resolvió este caso (MATIZ S53): *a escala display el dato viste sans; el dato sigue siendo de máquina, el traje cambia con la escala.* **`tabular-nums` se conserva**: ocho casillas de ancho igual necesitan que el 1 ocupe lo mismo que el 8, o la fila late al escribir.
@@ -202,7 +189,6 @@ Las ocho casillas del código de verificación. **No es un campo de texto con es
 Entrar con una cuenta que no es nuestra (Google hoy; Apple tiene su lugar y **no se puede montar**).
 - **props:** `marca` (`google` | `apple`) · `onPress` · `etiqueta` · `alto`
 - **tokens:** `medidas.secundarioAlto`
-- **consumidores:** 2
 - 🔴 **El botón lo entrega su DUEÑO entero** — tipografía, caja y padding incluidos — y la casa sólo le da lugar. *La marca ajena no se redibuja, no se re-colorea y no se estira.* El asset es el oficial de Google, bajado de su página de branding; su procedencia y su licencia están en `assets/marcas-ajenas/PROCEDENCIA.md`.
 - ⚠️ **SE ESCALA, NO SE ESTIRA.** El asset es 180×40 con relación fija; `alto` lo agranda por igual en los dos ejes (52 ⇒ 234×52). **Un `width:'100%'` deformaría la tipografía de otro**, que es lo que sus guidelines prohíben. *Si tu fila es de ancho completo, el que se estira es el contenedor y este botón va centrado adentro.*
 - ⚠️ **Por qué el botón entero y no sólo el logo:** poner su logo en un botón nuestro **también está permitido, pero exige Google Sans Medium 14/20**, que la casa no tiene. *Un botón «casi» conforme a las guidelines de otro no es un atajo: es un incumplimiento con mejor aspecto.*
@@ -213,7 +199,6 @@ Entrar con una cuenta que no es nuestra (Google hoy; Apple tiene su lugar y **no
 El recuadro de fecha (mes sobre día) y la barra de progreso de un flujo.
 - **props:** `mes` · `dia` — `total` · `actual` · `etiqueta`
 - **tokens:** `radius` · `spacing` · `palette` · `theme.accent`
-- **consumidores:** 0 · 0
 
 ### `IsotipoV5` · `LogoV5`
 La marca v5 por imagen. **Las dos se dimensionan por ANCHO** — el logo lleva wordmark y fijarle el alto lo deja ilegible; el isotipo lo necesita para poder pedirle *«la mitad del ancho»*.
@@ -221,7 +206,6 @@ La marca v5 por imagen. **Las dos se dimensionan por ANCHO** — el logo lleva w
 - 🔴 **`protagonista`** para 00, donde el ISOTIPO es la pantalla: **50 % del ancho**. **`portada`** para 01 · 03 · 05, donde preside el LOGO: **46 %** — *más chico a propósito, porque lleva el wordmark: al mismo ancho su nariz se vería la mitad. Igualar las fracciones habría igualado las CAJAS y desigualado las marcas.*
 - ⚠️ **SON FRACCIONES DEL ANCHO, NO PÍXELES, y no es un detalle:** *«cerca de la mitad del ancho del teléfono» no es un tamaño, es una proporción.* Un px fijo la cumple en el aparato donde se midió y la incumple en los demás — en un teléfono chico tapa la pantalla, en una tablet queda perdido. La pieza resuelve con `useWindowDimensions`; **vos no pasás números.**
 - ⏪ Lo que había, medido: el `splash` del isotipo usaba **`avatarHogar` (78)** —*el tamaño de un avatar de ficha para el protagonista de la primera pantalla*— y `LogoV5` tenía un **200 escrito a mano adentro de la pieza**, debajo de un comentario que decía «salen de `medidas`, no de números sueltos».
-- **consumidores:** 1 · 4
 - ⚠️ **No reemplazan a `Isotipo` todavía** — aquél sigue vivo con sus 18 consumidores.
 
 ---
@@ -234,7 +218,6 @@ La marca v5 por imagen. **Las dos se dimensionan por ANCHO** — el logo lleva w
 La acción de la pantalla. **Una primaria por pantalla** (Ley 5).
 - **props:** `etiqueta` (**no children**) · `onPress` · `variante` · `superficie` (`clara`|`muro`|**`oscura`**) · `tamano` (`sm`|`md`|`lg`) · `bloque` · `cargando` · `deshabilitado` · `iconoIzq` · `chevron` · `razonDeshabilitado`
 - **tokens:** `medidas` · `radius` · `shadows` · `elevacion` · `motion` · `typography` · `theme.accent`
-- **consumidores:** 233
 - 🔴 **`razonDeshabilitado` no es opcional en la práctica:** `verify:razon-muda` cuenta los botones apagados sin razón. *Un botón que se apaga sin decir por qué manda a la persona a adivinar.*
 - ⚠️ En la casa v5 la etiqueta es **PJS 700 16** (`escala.cta`); el `ghost` conserva su peso — sin superficie que las distinga, **el peso ES la jerarquía**.
 - 🔴 **`superficie="oscura"` (S116-B)** para el degradado de entrada y la cabecera ciruela: el primario conserva su magenta y **todo lo demás pasa a blanco**. *Va como superficie y no como variante porque la superficie es ORTOGONAL a la variante — lo dice la propia pieza.* Memorial queda afuera: su acción es tinta (Ley 21).
@@ -243,7 +226,6 @@ La acción de la pantalla. **Una primaria por pantalla** (Ley 5).
 Entrada de texto con su pie.
 - **props:** `label` · `ayuda` · `error` · `tono` (`alarma`|`estado`) · `etiquetaVisible` · `deshabilitado` · **`razonDeshabilitado`** · `sinPie` · `secure` · `multilinea` · `iconoIzq` · `iconoDer`
 - **tokens:** `medidas` · `motion` · `spacing` · `typography` · `theme.status` · `theme.text`
-- **consumidores:** 79 (+ `CampoFecha`, `CampoCodigo`, `CampoClaveAcceso`, `CampoIdentificacion`)
 - ⚠️ **El halo del foco entra en la transición (S116-B).** La lista decía sólo `borderColor` **desde antes de que el halo existiera**, así que el borde llegaba suave y *el halo aparecía de golpe*: dos mitades del mismo estado entrando distinto. **Nadie lo decidió** — la lista se quedó donde estaba cuando la cosa que describe creció.
 - ⚠️ **El error NO pinta la caja de rojo:** lo dice el pie. Y el placeholder va en `secondary` (**5,24:1**), no en `tertiary` — *un placeholder no es decoración: es lo que la persona lee para saber qué escribir.*
 - 🔴 **`razonDeshabilitado` (S116-B):** un campo apagado dice POR QUÉ, igual que `Boton`. Se dibuja en el pie con precedencia **`error` › `razonDeshabilitado` › `ayuda`** — *mientras está apagado, la ayuda de cómo llenarlo no sirve; lo que la persona necesita saber es por qué no puede.*
@@ -252,14 +234,12 @@ Entrada de texto con su pie.
 La superficie que agrupa.
 - **props:** `tinte` · `elevacion` (`plana`|`reposo`|`elevada`) · `relleno` (`normal`|`amplio`|`ninguno`) · `luz`
 - **tokens:** `radius` · `shadows` · `elevacion` · `spacing` · `theme.bg` · `theme.border` · `theme.capa`
-- **consumidores:** 140
 - ⚠️ **Tarjetas anidadas: nunca.** Y en claro la superficie en reposo conserva su hairline.
 
 ### `SelectorOpcion` · `FiltroPills` — *el chip*
 `SelectorOpcion` elige (una o varias); `FiltroPills` filtra.
 - **props:** `opciones[]` · `seleccionada`/`seleccionadas` · `onSelect` · `disposicion` (`fila`|`tira`|`grilla`) · `multiple` · `adorno` · `entidad` · `marcaPata` · `cargando` (por chip)
 - **tokens:** `radius` · `spacing` · `motion` · `elevacion` · `theme.accent` · `theme.capa`
-- **consumidores:** 56 · 16
 - 🔴 **La pata VIENE ENCENDIDA en el cliente (S116-B) — no la pidas.** Era `marcaPata = false` y **nadie la pasaba**: medido, cero ocurrencias en `apps/`. *Una firma visual que hay que pedir explícitamente no es la firma de la casa: es una opción que nadie eligió, y por eso ninguna captura la mostró nunca.* **Pasá `marcaPata={false}` sólo si tu pantalla es la excepción**; el prestador no la recibe (la decide la casa). En el chip lleno pasa a `rosaSobreCiruela` — *pintada del mismo ciruela que el relleno se volvía invisible, y los tres gates daban verde.*
 - 🔴 **Y desde S116-B PISA de verdad:** tenía cero movimiento — *una pata que aparece de golpe no pisó nada, se materializó encima*. Ahora entra, **se pasa a 1,12 y vuelve**: el excedente es lo que la hace leer como PESO. Va con `easeOut` y **no con `spring`**, aunque spring sea la curva de la confirmación táctil: *algo que se apoya no rebota, se detiene.*
 - ⚠️ **Los chips NO son tabs.** Para vistas exclusivas va `SelectorSegmentado`, salvo que convivan tres ejes hermanos (ahí manda la gramática de la pantalla).
@@ -268,7 +248,6 @@ La superficie que agrupa.
 `CeldaNavegacion` entra a una sección (glifo + título + chevrón); `Celda` muestra un dato.
 - **props:** `icono` · `titulo` · `detalle` · `onPress` · `registro` · `chevron` — `subtitulo` · `inicio` · `densidad` · `tituloEntero` · `elegida`
 - **tokens:** `radius` · `spacing` · `motion` · `typography` · `theme.accent` · `theme.bg`
-- **consumidores:** 50 · 90
 - ⚠️ **El contorno transparente murió como acción de fila.** Información despliega; acción lleva. El glifo va en círculo rosa tinte.
 
 ### EL CONTADOR — *un disco, dos portadores* (`disco-contador`)
@@ -289,7 +268,6 @@ La superficie que agrupa.
 Verde al día · ámbar pendiente · rosa informativo.
 - **props:** `estado` (`alDia`|`atencion`|`proximo`|`info`) · `capa` · `tamano`
 - **tokens:** `radius` · `spacing` · `theme.status` · `theme.capa` · `typography`
-- **consumidores:** 45
 - 🔴 **No se tocó una línea en el lote 2 y aun así está en v5:** lee `theme.status`, y los tokens del lote 1 la alcanzaron sola. *Es el dividendo de que la pieza lea del tema y no escriba hex.*
 - ⚠️ **Ningún estado se dice solo con color** — siempre lleva palabra.
 
@@ -297,14 +275,12 @@ Verde al día · ámbar pendiente · rosa informativo.
 Sumar y restar unidades.
 - **props:** `valor` · `min` · `max` · `onCambio` · `onBorrar` · `editable` · `tamano` (`normal`|`compacto`|`menudo`|`ancho`) · `salida`
 - **tokens:** `radius` · `spacing` · `motion` · `theme.accent` · `theme.border`
-- **consumidores:** 8
 - ⚠️ El «+» es círculo magenta lleno con el trazo invertido; el «−» queda blanco con borde fino. **La papelera aparece SOLO cuando bajar de 1 saca el ítem de la lista** — si no, prometería un borrado que no ocurre.
 
 ### `Icono` — *los glifos*
 El set b′. **Nombre tipado: cero strings mágicos.**
 - **props:** `nombre` (canónico **o** nombre del mock) · `tamano` · `registro` (`capa`|`aa`|`tinta`) · `tinta` · `huella` · `activa` · `montaje`
 - **tokens:** `medidas` · `palette` · `theme.capa` · `theme.status` · `theme.accent`
-- **consumidores:** 60
 - 🔴 **En la casa v5 NINGÚN glifo lleva huella** (letra §1.1). Lo decide `resolverHuella`, no la pantalla — y lo vigila `verify:huella-por-casa`.
 - ⚠️ **C puede montar los nombres del mock** (`buscar`, `agenda`, `chat`, `camara`…): 14 alias resuelven al canónico, y un alias mal escrito **rompe el compilador**.
 - ⚠️ `Volver`/`Avanzar`/`Flecha` **no son del registry**: son `Chevron`, otra pieza.
@@ -313,7 +289,6 @@ El set b′. **Nombre tipado: cero strings mágicos.**
 Toda la tipografía.
 - **props:** `variante` (`titulo`|`seccion`|`cuerpo`|`apoyo`|`enfasis`|`antetitulo`|`dato`|`datoMd`|`voz`) · `color` (+ **`acentoSobreOscuro`**) · `numberOfLines` · `centrado` · `tabular`
 - **tokens:** `typography` · `theme.text` · `theme.status`
-- **consumidores:** 231
 - 🔴 **En la casa v5, `titulo` y `seccion` son Baloo 2 800** (28/31 y 22/26); `cuerpo`/`apoyo`/`enfasis` son Plus Jakarta Sans. **No hay que pasar nada: la pieza resuelve por casa.**
 - ⚠️ **`dato` y `datoMd` siguen en JetBrains Mono** (Ley 3: metadata de máquina) y **`voz` sigue en DM Sans 300** — la letra no nombra una variante de voz, y cambiarla sería decidir algo que nadie firmó.
 - 🔴 **`acentoSobreOscuro` (S116-B)** = el rosa sobre ciruela, para el acento de un claim sobre el degradado. **Resuelve a la paleta, no al tema**, igual que `sobreVideo`: la superficie ciruela es oscura aunque el tema sea claro. En memorial cae a `inverso` — *un acento rosa es fiesta, y §4 dice «la misma estructura sin la fiesta»*.
@@ -324,26 +299,22 @@ La cara de la mascota — **el último peldaño de la escalera de la cara**.
 - **props:** `nombre` · `fotoUrl` · `fotoDeEspecie` · `especie` · `tamano` (`xs`|`sm`|`entidad`|`md`|`lg`) · `capa`
 - 🔴 **`caraDePersonaje(especie)` (S116-B)** exporta la tabla especie→cara para que no viva en dos lugares. **Devuelve `undefined` cuando no hay cara propia** —ésas van al monograma— así que la pantalla que necesite una cara sí o sí **escribe su fallback a la vista**. *Un `?? 'otro'` adentro borraría ese criterio para todos.*
 - **tokens:** `palette` · `typography` · `theme.capaBg` · `theme.text`
-- **consumidores:** 30
 
 ### `BarraTabs`
 Las cinco tabs. **El activo es el círculo elevado.**
 - **props:** `items` · `activo` · `onCambiar` · `onRepetir` · **`onMontaje`** · `estadoPorHuella` · `acento`
 - **tokens:** `medidas` · `radius` · `spacing` · `motion` · `typography` · `theme.accent`
-- **consumidores:** 3
 - ⚠️ **Geometría 66/9, firmada — la letra se enmendó, no la pieza.** El anillo es **ausencia de material**, así que muestra el fondo real de la pantalla, sea cual sea.
 - ⚠️ **`onMontaje` es el enganche del contador de montajes** que C tiene que cablear.
 
 ### `EsperaDeMarca`
 La espera de la casa: la nariz respirando. **Única animación de espera legal**, y siempre con voz honesta debajo.
 - **tokens:** `motion` · `theme.accent` · `theme.capa`
-- **consumidores:** 10
 - ⚠️ En memorial **queda quieta**.
 
 ### `NarizNotificacion`
 La silueta de la marca para la bandeja de Android.
 - **props:** `tamano` · `color`
-- **consumidores:** 0
 - 🔴 **NO es lo que Android monta** — eso es `assets/marca/nariz-notificacion.svg`, y **comparten el mismo `d`**. Esta pieza existe para poder VERLA y gatearla. *Si alguien toca una y no la otra, el founder firma una silueta y la bandeja muestra otra.*
 
 ---
@@ -396,6 +367,25 @@ import { glifoDeOficio, esOficio, type Oficio } from '@epetplace/ui'
 ---
 
 ## ⑤ CÓMO SE MANTIENE
+
+### 🔴 LOS CONSUMIDORES NO SE ESCRIBEN ACÁ — SE PIDEN
+
+```
+node scripts/verify-catalogo-v5.mjs
+```
+
+El gate **los mide contra el árbol de hoy y los imprime**. Este documento ya no publica ninguno, y el gate **falla si alguna entrada vuelve a publicar un número, aunque ese día sea correcto**.
+
+**Por qué, medido (`D-1114`, firma de la mesa 14-sep-2026):** el número **vencía en cada merge**, y no por descuido —
+
+> **el número correcto no existía en ninguna de las dos ramas.** B es dueño del catálogo y C monta las piezas: **en la rama de B el gate está verde porque los consumidores de C no existen ahí, y en la de C el catálogo es el viejo.** *El desajuste nace en `main`, que es el único lugar donde nadie estaba mirando.*
+
+Lo pagaba la conducción, curándolo a mano en territorio ajeno: **dos merges seguidos, 2 y 6 desajustes, en aumento** — *cuanto más monta C las piezas nuevas, más se mueve.*
+
+**Es la TERCERA vez que esta casa cura esta clase de la misma manera:** el contador de piezas de `packages/ui` (publicaba **53 cuando eran 171**, con su nota «re-medido» al lado) y el de migraciones (**cuatro caídas: 9 → 77 → 138 → 186**). *Las dos veces la cura no fue corregirlo otra vez: fue sacarlo del documento y declarar el comando.*
+
+⚠️ **Y una diferencia que conviene no perder:** este número **tenía gate**, así que no envejecía en silencio — se cobraba en el merge siguiente. *El daño nunca fue desinformar: era que una persona curara a mano lo que una máquina deriva.*
+
 
 **Cada pieza que nace o muere actualiza este archivo EN EL MISMO COMMIT.** Lo mantiene **B**.
 

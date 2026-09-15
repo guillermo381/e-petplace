@@ -40,11 +40,13 @@
  * pantalla inservible; quitar el fundido no le saca información a nadie.*
  */
 
-import { type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { View, type ScrollViewProps } from 'react-native'
 import Animated, {
   Extrapolation,
   interpolate,
+  runOnJS,
+  useAnimatedReaction,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useReducedMotion,
@@ -112,6 +114,20 @@ export function HojaContenido({ fondo, costura, arranque, children, scroll, pie,
     y.value = e.contentOffset.y
   })
 
+  /* 🔴 **LO QUE NO SE VE, NO SE TOCA (`D-1118`).** El fondo vive DESPUÉS de la
+     hoja para recibir toques (cura de C, `D-1113`), así que cuando se
+     desvanece **sus hijos siguen siendo tocables, invisibles, por encima de la
+     hoja**. *Un botón que no se ve y que igual se activa es peor que uno que
+     no responde: el primero hace algo que nadie pidió.* Opacidad y toque se
+     mueven juntos. */
+  const [fondoALaVista, setFondoALaVista] = useState(true)
+  useAnimatedReaction(
+    () => y.value < RECORRIDO_DEL_FUNDIDO,
+    (ahora, antes) => {
+      if (ahora !== antes) runOnJS(setFondoALaVista)(ahora)
+    },
+  )
+
   /* El fondo se apaga a medida que la hoja lo tapa. `clamp` para que el
      over-scroll hacia abajo no lo vuelva a encender más allá de 1. */
   const estiloFondo = useAnimatedStyle(() => ({
@@ -133,31 +149,30 @@ export function HojaContenido({ fondo, costura, arranque, children, scroll, pie,
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
 
-      {/* 🔴 ACÁ REINSERTÓ B EL BLOQUE DEL FONDO EN EL LOTE 13, y se retira en
-          el merge — **no porque su diagnóstico esté mal, sino porque el bloque
-          ya vive más abajo** (la cura de C, `D-1113`): tomarlo habría montado
-          el slot `fondo` DOS VECES.
+      {/* ☠️ **`D-1118` CERRADA — MURIÓ EL PAR DE `zIndex`, Y CON ÉL LA IDEA DE
+          QUE ESTO SE ARREGLABA ELIGIENDO QUIÉN VA ARRIBA.**
 
-          **SU HALLAZGO SE CONSERVA Y ES BUENO:** el founder vio *el wordmark del
-          fondo a través de la hoja, bajo «Email»*, y la causa que B midió es
-          orden de pintado — *en Android una `elevation` de cualquier cosa
-          montada en el fondo sube su capa por encima de sus hermanos*. **La
-          mitad que sobrevive es el `zIndex: 1` de la hoja**, unas líneas abajo.
+          Las dos mitades viven en LA MISMA CAPA: la hoja tiene que **tapar** al
+          fondo y el fondo tiene que **recibir el toque**. *Quien esté arriba
+          gana las dos a la vez* — por eso mi `zIndex: 1` curó el wordmark y
+          **mató las flechas de volver de 03, 04 y 05** (medido por C en el
+          aparato: el toque no llega, y el «atrás» de Android sí funciona, o sea
+          que la navegación estaba sana), y sacarlo las revive y devuelve el
+          wordmark.
 
-          ⚠️ **LO QUE QUEDA ABIERTO, y no se resuelve leyendo código (`D-1118`):**
-          el par de B era `zIndex: 0` acá + `zIndex: 1` en la hoja, con el fondo
-          ANTES; la cura de C necesita el fondo DESPUÉS para ganar el toque. **Si
-          el `zIndex` de Android reordena también el despacho de toques, la
-          flecha de volver vuelve a morir** — y eso lo dice un aparato, no una
-          lectura. Va a B con la pregunta exacta. */}
+          ⚠️ **Y el volcado de accesibilidad decía lo contrario**, que es la
+          parte que hay que recordar: mostraba la flecha como ÚLTIMO nodo —o
+          sea arriba— **y el toque igual no le llegaba**. *En Android el orden
+          de despacho lo decide la capa, no el árbol que reporta el lector: un
+          volcado correcto no prueba que ese nodo reciba el toque.*
+
+          ⇒ **La cura no ordena capas: quita el solape.** Está abajo, en el
+          `height: arranque` del bloque del fondo. */}
+
       {/* ③ LA HOJA. Sube con el scroll y desliza sobre el fondo: no la
           movemos nosotros —eso duplicaría el scroll— la mueve su propio
           `paddingTop`, que es contenido del ScrollView. */}
       <Animated.ScrollView
-        /* La otra mitad del par: la hoja va SIEMPRE por encima del fondo.
-           *Sin esto, el orden depende de que nadie monte en el fondo algo con
-           sombra — y eso es una condición que ningún gate mira.* */
-        style={{ zIndex: 1 }}
         onScroll={alScrollear}
         scrollEventThrottle={16}
         bounces={false}
@@ -195,10 +210,12 @@ export function HojaContenido({ fondo, costura, arranque, children, scroll, pie,
                slot `bg.base` — la hoja es del color del lienzo, no blanca.
                ⚠️ **El color nunca fue el problema y por eso no alcanzaba
                mirarlo:** los tres temas traen `bg.base` sin alfa. Lo que
-               dejaba pasar el fondo era el ORDEN DE PINTADO en Android, que
-               se cura arriba con los dos `zIndex`. *Un fondo opaco tapado por
-               un hermano que se pinta después sigue siendo opaco y se ve
-               transparente igual.* */
+               dejaba pasar el fondo era que **el fondo se dibuja DESPUÉS**
+               (necesita estar arriba para recibir toques) **y se extendía por
+               debajo de la hoja**. *Un fondo opaco tapado por un hermano que
+               se pinta después sigue siendo opaco y se ve transparente igual.*
+               ⇒ se cura **recortando el fondo a su zona** (`D-1118`), no con
+               capas: ver el bloque del fondo. */
             backgroundColor: theme.bg.base,
             borderTopLeftRadius: radius.cabeceraV5,
             borderTopRightRadius: radius.cabeceraV5,
@@ -267,8 +284,43 @@ export function HojaContenido({ fondo, costura, arranque, children, scroll, pie,
          * duplicar la cabecera— y porque bloquea dos pantallas de entrada en
          * 🔴. Va pedido con su medición en
          * `docs/loop/buzon/S116-C-para-B-el-fondo-no-se-podia-tocar.md`. */
-        pointerEvents="box-none"
-        style={[{ position: 'absolute', top: 0, left: 0, right: 0 }, estiloFondo]}
+        /* 🔴 **`D-1118` · EL TOQUE SE APAGA CON LA OPACIDAD.** Con el fondo
+         * desvanecido, `box-none` seguiría entregando sus hijos: la flecha
+         * invisible se comería el toque de la hoja que está abajo. */
+        pointerEvents={fondoALaVista ? 'box-none' : 'none'}
+        style={[
+          {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            /* 🔴 **`D-1118` · EL RECORTE ES LA CURA DEL PINTADO, Y REEMPLAZA AL
+             * `zIndex` QUE MATÓ LAS FLECHAS.**
+             *
+             * El problema tenía dos mitades que viven en la MISMA capa: la hoja
+             * tiene que TAPAR al fondo, y el fondo tiene que RECIBIR el toque.
+             * *Quien esté arriba gana las dos a la vez* — por eso el `zIndex: 1`
+             * de la hoja curó el wordmark y mató las flechas, y sacarlo las
+             * revive y devuelve el wordmark. **No se resuelve eligiendo quién va
+             * arriba: se resuelve haciendo que no se superpongan.**
+             *
+             * La hoja empieza en `arranque`. **Si el fondo no se dibuja más allá
+             * de ahí, no hay solape que ordenar** — y el píxel resultante es
+             * IDÉNTICO al de estar debajo, porque lo que se recorta es
+             * exactamente lo que la hoja tapaba.
+             *
+             * ⚠️ **Y explica por qué el defecto no necesitaba teclado**: el
+             * solape era permanente (fondo `0..alto de su contenido` contra hoja
+             * `arranque..`); con el teclado se NOTABA porque el campo subía a esa
+             * franja. *Curar «el caso del teclado» habría dejado vivo el resto.*
+             *
+             * ⚠️ Sin `arranque` el fondo no tiene zona propia y no se dibuja —
+             * que es lo correcto: la hoja arranca arriba y lo tapaba entero. */
+            height: arranque,
+            overflow: 'hidden',
+          },
+          estiloFondo,
+        ]}
       >
         {fondo}
       </Animated.View>

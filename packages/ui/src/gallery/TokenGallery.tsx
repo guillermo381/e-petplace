@@ -19,7 +19,7 @@ import { ThemeProvider, useTheme } from '../ThemeProvider'
 import { Isotipo } from '../brand/Isotipo'
 import { MarcaDeAgua } from '../brand/MarcaDeAgua'
 import { PaseoDeHuellas } from '../brand/PaseoDeHuellas'
-import { RespiroDeMarca, HuellaDeLlegada } from '../brand/RitualDeEntrada'
+import { RespiroDeMarca } from '../brand/RitualDeEntrada'
 import { LockupMarca } from '../brand/LockupMarca'
 import { PantallaDeCandado, type EstadoCandado } from '../components/PantallaDeCandado'
 import { HojaConfirmacionDestructiva } from '../components/HojaConfirmacionDestructiva'
@@ -6233,9 +6233,8 @@ function GaleriaInterna({ encabezado }: { encabezado?: ReactNode }) {
             </View>
 
             <View>
-              <Texto variante="apoyo">HuellaDeLlegada — el motivo de `EsperaDeMarca` usado UNA vez como celebración. 300 (`estandar`): la orden pedía ~400 y R51 lo bajó al vocabulario cerrado de N10.</Texto>
+              <Texto variante="apoyo">☠️ `HuellaDeLlegada` murió (`D-1121`): se quedó sin consumidores cuando la nariz reemplazó a la pata en las tres pantallas de acceso. ⚠️ Lo que murió es ESE USO — el motivo sigue vivo en `EsperaDeMarca`.</Texto>
               <View style={{ alignItems: 'center', paddingVertical: spacing[5] }}>
-                <HuellaDeLlegada tamano={48} />
               </View>
             </View>
           </View>

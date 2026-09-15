@@ -41,9 +41,9 @@ if (!existsSync(CAT)) { console.log(`✗ no existe ${CAT}`); process.exit(1) }
 const cat = readFileSync(CAT, 'utf8')
 const index = readFileSync(INDEX, 'utf8')
 
-/** Cada entrada del catálogo abre con `### \`Nombre\`` y publica su cuenta
- *  de consumidores en una línea `**consumidores:** N`. Las dos cosas se
- *  leen del documento; los hechos, del objeto. */
+/** Cada entrada del catálogo abre con `### \`Nombre\``. **Ya no publica su
+ *  cuenta de consumidores** (`D-1114`): el número lo mide este gate contra el
+ *  árbol de hoy y lo imprime. */
 /* ⚠️ **Se parte a mano y NO con un lookahead:** `$` bajo el flag `m` es
  * fin de LÍNEA, así que el cuerpo de cada entrada quedaba en una sola
  * línea y el gate daba 20 rojos idénticos sobre un catálogo correcto.
@@ -73,20 +73,34 @@ const contar = n => {
 
 let fallos = 0
 let piezas = 0
+const medidos = []
 for (const { nombres, cuerpo } of entradas) {
-  const linea = cuerpo.match(/\*\*consumidores:\*\*\s*([^\n]+)/)
-  if (!linea) {
-    console.log(`  ✗ ${nombres.join(' · ')}: su entrada no publica «**consumidores:** N»`)
+  /* 🔴 **`D-1114` · EL CATÁLOGO YA NO PUBLICA CONTEOS, Y ESTE GATE LO EXIGE.**
+   *
+   * ⏪ Acá se comparaba `**consumidores:** N` contra el objeto. **Funcionaba —
+   * y ése era el problema**: el número vencía EN CADA MERGE, porque *en la rama
+   * de B los consumidores de C no existen, y en la de C el catálogo es el
+   * viejo*. El desajuste **nace en `main`**, donde ninguna de las dos pistas
+   * estaba mirando, y lo pagaba la conducción curándolo a mano en territorio
+   * ajeno: **dos merges seguidos, 2 y 6 desajustes, en aumento**.
+   *
+   * ⇒ Firma de la mesa (14-sep-2026): **el catálogo publica el COMANDO**. Es la
+   * TERCERA vez que esta casa cura esta clase igual —el contador de piezas de
+   * `packages/ui` y el de migraciones ya salieron del canon— *y las dos veces
+   * la conclusión fue que corregir un número derivado no lo arregla: lo vuelve
+   * a vencer.*
+   *
+   * ⚠️ **Falla aunque el número esté BIEN**, igual que `verify:contador-piezas`:
+   * *un contador correcto hoy es falso en tres merges, y el que lo escribió
+   * gastó una corrida en dejarlo así.* */
+  const publicado = cuerpo.match(/\*\*consumidores:\*\*\s*[^\n]*\d/)
+  if (publicado) {
+    console.log(`  ✗ ${nombres.join(' · ')}: su entrada PUBLICA un conteo de consumidores`)
+    console.log(`      el catálogo declara el comando, no el número (D-1114) —`)
+    console.log(`      y esto falla aunque el número sea correcto hoy`)
     fallos++
-    continue
   }
-  const dichos = [...linea[1].matchAll(/\d+/g)].map(m => +m[0])
-  if (dichos.length !== nombres.length) {
-    console.log(`  ✗ ${nombres.join(' · ')}: nombra ${nombres.length} pieza(s) y publica ${dichos.length} cuenta(s)`)
-    fallos++
-    continue
-  }
-  nombres.forEach((nombre, i) => {
+  nombres.forEach((nombre) => {
     piezas++
     if (!new RegExp(`\\b${nombre}\\b`).test(index)) {
       console.log(`  ✗ ${nombre}: está en el catálogo y NO se exporta desde packages/ui`)
@@ -94,13 +108,23 @@ for (const { nombres, cuerpo } of entradas) {
       fallos++
       return
     }
-    const real = contar(nombre)
-    if (dichos[i] !== real) {
-      console.log(`  ✗ ${nombre}: el catálogo dice ${dichos[i]} consumidores y el objeto dice ${real}`)
-      fallos++
-    }
+    medidos.push([nombre, contar(nombre)])
   })
 }
+
+/* El gate no compara el número: LO PRODUCE. Quien quiera el dato lo lee acá,
+   que es el único lugar donde está medido contra el árbol de HOY. */
+console.log()
+console.log('  consumidores MEDIDOS (apps que importan la pieza desde @epetplace/ui):')
+for (const [n, c] of medidos.sort((a, b) => b[1] - a[1])) {
+  if (c > 0) console.log(`    ${String(c).padStart(3)} · ${n}`)
+}
+const sinNadie = medidos.filter(([, c]) => c === 0).map(([n]) => n)
+if (sinNadie.length) {
+  console.log(`    ---  sin consumidores todavía: ${sinNadie.join(' · ')}`)
+  console.log('         (no es un rojo: una pieza puede existir antes que su pantalla)')
+}
+console.log()
 
 // ④ la regla final tiene que seguir ahí — es el único contenido no medible
 // que este gate puede vigilar, y es el que le da autoridad al documento.
@@ -116,6 +140,6 @@ if (fallos) {
   console.log('  no desinforma a un lector, desinforma a cada pantalla.')
   process.exit(1)
 }
-console.log(`verify:catalogo-v5 — VERDE · ${piezas} piezas en ${entradas.length} entradas, todas exportadas y con su cuenta al día`)
+console.log(`verify:catalogo-v5 — VERDE · ${piezas} piezas en ${entradas.length} entradas, todas exportadas · los conteos se MIDEN arriba, no se publican (D-1114)`)
 console.log('  ⚠️ Su verde dice «las piezas existen y los números son de hoy»,')
 console.log('     jamás «las descripciones son ciertas». Eso lo sostiene quien lo escribe.')
