@@ -763,6 +763,13 @@ if [ "$TOCA_CLIENTE" != "0" ]; then
   arnes_cliente "verify:auth-receptor" "scripts/verify-auth-receptor.mjs" \
     "node scripts/verify-auth-receptor.mjs" "D-1098" \
     "un metodo resuelto se llama CON su receptor"
+  # S116-A lote 8 · la costura del splash. Va al hook y no al cierre porque
+  # corre sin red, en milisegundos, y su modo de falla es SILENCIOSO: el que
+  # cambie el magenta de la marca o la fraccion de la nariz no va a ir a mirar
+  # la config nativa, y la app va a seguir arrancando igual.
+  arnes_cliente "verify:costura-splash" "scripts/verify-costura-splash.mjs" \
+    "node scripts/verify-costura-splash.mjs" "lote 8, punto 2" \
+    "el splash nativo y el splash JS dejaron de decir el mismo color o el mismo tamano"
 fi
 
 echo "✓ gate verde"
