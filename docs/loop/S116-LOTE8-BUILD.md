@@ -17,6 +17,17 @@
   los mire. Los dos tienen su montaje listo para esa sesión:
   `docs/loop/capturas-s116-a-lote8/iconos-y-splash.png` y
   `monocromo-dos-candidatas.png`.
+- 🔴 **EL LOTE 8 SE CONSTRUYE AL FINAL, Y SOLO LA APP DEL CLIENTE** (firma del
+  founder, 15-sep-2026). **La próxima sesión de diseño NO TOCA NADA NATIVO** —
+  su salida es JS, viaja por OTA, y **no abre el tren**.
+  ⇒ dos consecuencias que conviene leer juntas:
+  · **el prestador queda FUERA de esta build.** Su `ios.icon` de plantilla, su
+    bundle id ausente y su ícono sin rediseñar **siguen abiertos y no se curan
+    acá** (§⑥). *No es olvido: es alcance.*
+  · **«al final» ordena el resto de este documento**: los pasos de §⑤ no
+    arrancan mientras haya diseño por delante, y las tres cuentas de §④ sólo
+    hacen falta cuando ese final llegue. *Una cuenta de Apple sacada tres
+    semanas antes de que exista la decisión de construir es plata quieta.*
 
 ⚠️ **Y lo que esta firma NO cambia, para que nadie lo lea de más:** los gates
 nuevos (`verify:costura-splash`, `verify:icono-notificacion`) y el ensanche de
@@ -60,8 +71,9 @@ arranca el mismo día, aunque su resultado se use al final.
 imágenes listas y **no corrió un solo build**. Este documento es lo que la mesa
 lee para decidir cuándo se construye.
 
-> **Alcance: `apps/cliente`.** El prestador no se tocó, y su caso está al final
-> con lo que le falta — que no es poco.
+> **Alcance: `apps/cliente`, y desde el 15-sep eso es FIRMA, no una descripción
+> de lo que alcanzó a hacerse** (§⓿). El prestador no se tocó, y su caso está al
+> final con lo que le falta — que no es poco.
 
 ---
 
