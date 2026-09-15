@@ -1763,24 +1763,27 @@ export default function Hogar() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      {/* @override-s82c — LA MARCA DE AGUA (ítem 4 de la lámina
-          posición-consolidada): el isotipo en tinta al 6%, CENTRADO EN
-          PANTALLA (fijo — no scrollea, como en la lámina: el agua vive
-          fuera del cuerpo). OVERRIDE LOCAL de esta pantalla: NO se
-          generaliza — la promoción es de B después del gate (guard R10).
-          CHOQUE DECLARADO, no resuelto en silencio (regla S63): la Ley 4
-          dice isotipo UNO por pantalla y el techo ya lleva el suyo — la
-          lámina del founder ordena el agua igual; el gate resuelve.
-          Calibración DE LÁMINA: opacidad .06 y ~340 de ancho (size 210 ×
-          ratio del viewBox) — números de acuerdo, no tokens. */}
-      <View
-        pointerEvents="none"
-        style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, alignItems: 'center', justifyContent: 'center' }}
-      >
-        <View style={{ opacity: 0.06 }}>
-          <Isotipo size={210} variant="tinta" color={theme.text.primary} />
-        </View>
-      </View>
+      {/* ☠️ **LA MARCA DE AGUA MURIÓ (firma del founder, recorrido 5 · lote 3c).**
+          Era el isotipo VIEJO en tinta al 6 %, `size 210`, centrado y fijo
+          detrás del cuerpo.
+
+          **Se retira por la MISMA razón por la que el founder rechazó el
+          isotipo derivado en las cabeceras (lote 10):** *el dibujo no
+          representa la marca.* **No es una decisión de dosis ni de opacidad
+          — es que ese dibujo no se muestra más en el cliente**, y bajarle el
+          alfa habría sido dejarlo puesto con menos discusión.
+
+          ⚠️ **Y lo que se va con ella queda escrito, porque era una tensión
+          viva, no un adorno:** su propio comentario declaraba un **choque con
+          la Ley 4** —*«isotipo UNO por pantalla y el techo ya lleva el suyo»*—
+          que se había dejado abierto *«para que el gate resuelva»*. **El gate
+          resolvió, y resolvió que no va.** *Una tensión que se cierra sacando
+          una de las dos partes no deja deuda: deja una ley que vuelve a valer.*
+
+          ⚠️ **NO se rellena el lugar.** Queda un fondo liso `bg.base`, y eso
+          es lo que la pantalla tenía antes de la lámina. *Si el fondo pide
+          algo, lo va a pedir mirándolo vacío — poner otra textura ahora sería
+          contestar una pregunta que nadie hizo todavía.* */}
     <ScrollView
       style={{ flex: 1 }}
       contentContainerStyle={{ paddingBottom: AIRE_RAIZ + insets.bottom }}
