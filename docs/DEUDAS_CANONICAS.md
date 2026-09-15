@@ -35774,3 +35774,27 @@ const colorScheme = FORZAR_CLARO ? 'light' : colorSchemeDelSistema;
 ⚠️ **Y lo que los censos NO miden, declarado:** que un valor que SÍ sale del tema esté **bien elegido**. *Un slot declarado en los dos temas con dos colores que no contrastan pasa los dos censos y se ve mal igual* — eso lo dice `verify:contrast` sobre los pares, y el ojo sobre la pantalla.
 
 **☠️ MUERTE:** cuando el oscuro declare sus 69 slots calibrados contra el v5, `FORZAR_CLARO` se quite, y el founder mire el Hogar en oscuro y lo firme.
+
+---
+
+**☠️ MUERTE:** cuando el founder mire un A4 generado y firme cuál va — o diga que ninguna, y entonces el isotipo actual se queda con su rechazo escrito al lado.
+
+---
+
+**☠️ MUERTE:** cuando el archivo no exista y su lápida esté al lado, con esa distinción escrita.
+
+---
+
+### ⭐ ENMIENDA DE B (lote 3c) — **la ficha se escribió DOS VECES el mismo día, y las dos decían lo mismo**
+
+A la abrió en `main` y yo en mi rama, **con el mismo número y la misma conclusión**. *No fue colisión de numeración: fue que las dos pistas midieron el mismo defecto y llegaron al mismo lugar.* **Rige la de arriba** (la de A); esto conserva sólo lo que mi censo agrega:
+
+**CALIBRAR EL OSCURO ES UNA DECISIÓN + UN RECORRIDO, NO UNA LISTA DE VALORES.**
+
+**① Una decisión de mesa: ¿`magentaLuz` es el acento del oscuro?** `accent.cta`, `accent.activoLleno` y el orbe resuelven ahí — el «rosa pálido» que vio el founder. **No es un bug de ninguna pieza: las piezas leen el tema y el tema contesta eso.**
+
+**② Y después, recorrer las pantallas.** *El censo por código encuentra la CLASE —`'inverso'` sobre superficie fija— y no encuentra el TONO que quedó feo.*
+
+⚠️ **Con su número, que es lo que cierra la pregunta:** los **12** usos de `palette.` del cliente, **ninguno es un claro fijo** (el único `white` es el logo de DeUna, legítimo). *No hay una pila de valores hardcodeados esperando — hay una decisión de acento y unas pantallas que nadie caminó.*
+
+✅ **Y las cinco líneas que sí eran un bug ya están curadas** (lote 16): `Cabecera:209·213·217` y `bienvenida.tsx:155·165` pasaron de `'inverso'` a **`sobreGradiente`** (`text.onGradient`, que existía en los tres temas y **no tenía puerta desde `Texto`**).

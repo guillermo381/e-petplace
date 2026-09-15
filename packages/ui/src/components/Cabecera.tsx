@@ -43,10 +43,32 @@ import { useTheme } from '../ThemeProvider'
  */
 export type CabeceraProps = {
   variante: 'raiz' | 'empujada'
-  /** Mayúsculas chiquitas en rosa sobre ciruela: la fecha, el barrio,
-   *  «ACTIVIDAD». La pieza **no** lo pone en mayúsculas: el token
-   *  `antetitulo` ya trae `textTransform` (letra §2). */
+  /** La línea de arriba del título: el barrio, «ACTIVIDAD», la fecha. La
+   *  pieza **no** la pone en mayúsculas: el token `antetitulo` ya trae su
+   *  `textTransform` (letra §2). */
   antetitulo?: string
+  /** 🔴 **EN QUÉ VOZ HABLA EL ANTETÍTULO (pedido de C, lote 3f).**
+   *
+   *  `'rotulo'` (default) es lo de siempre: **sans bold 11 en MAYÚSCULAS con
+   *  tracking** — un rótulo que clasifica lo que viene abajo.
+   *  `'dato'` lo monta en la receta `dato`: **mono, minúsculas, sin
+   *  tracking** — la Ley 3, para cuando esa línea no clasifica sino que
+   *  **dice un dato de máquina**.
+   *
+   *  **Nació de un caso real, no de simetría:** al absorber el techo del
+   *  Hogar, la fecha —*«lunes, 14 de septiembre»*, mono minúscula, y así
+   *  está en la lámina— cayó en el único slot que hay encima del título y
+   *  **salió «LUNES, 14 DE SEPTIEMBRE»**.
+   *
+   *  ⚠️ **Es una unión cerrada y NO un `ReactNode`, y la razón es de C:**
+   *  *un slot libre ahí deja que cada pantalla elija su tipografía encima de
+   *  la banda, y eso es justo lo que la cabecera cerró.*
+   *
+   *  ⚠️ **Y no es que `antetitulo` estuviera mal:** nació como **rótulo** y
+   *  lo dice su propio comentario. *Lo que apareció después es un segundo
+   *  uso —una línea de contexto que es un dato— que cuando se escribió no
+   *  existía.* */
+  antetituloVoz?: 'rotulo' | 'dato'
   titulo: string
   /** Una línea de apoyo. En raíz va en blanco al 70 %; en empujada es el
    *  subtítulo. */
@@ -72,6 +94,32 @@ export type CabeceraProps = {
    *  vez no compilan: *«un lugar para UN botón»* — dos acentos en la
    *  cabecera es la Ley 5 rota. */
   carrito?: { cantidad: number; onPress: () => void; etiqueta: string }
+  /** 🔴 **La campana con su contador (lote 3b).** Hermana del carrito y en el
+   *  mismo slot: **el censo encontró DOS acciones-con-contador en raíz**, y la
+   *  campana vivía dibujada a mano en el techo local del Hogar — el techo que
+   *  este lote borra. Se dibuja **sólo en `raiz`**, igual que el carrito.
+   *  ⚠️ **Prop propia y no un `accionDerecha` genérico**: *un `ReactNode`
+   *  suelto deja que cada pantalla arme su disco, y ahí vuelve la copia que
+   *  `DiscoVidrio` acaba de terminar.* */
+  avisos?: { cantidad: number; onPress: () => void; etiqueta: string }
+  /** 🔴 **EL CONTENIDO PROPIO DENTRO DE LA BANDA (`D-1106`, lote 3b).**
+   *
+   *  Lo pedían **los dos techos locales que quedaban**, y el censo los midió:
+   *  · **el Hogar** — fecha en mono, saludo y **la fila de mascotas ADENTRO
+   *    del degradado** (su propio código lo declara: *«HeroMarca no tiene
+   *    slots para fecha-antes-del-saludo ni para la fila de mascotas»*);
+   *  · **el Expediente** — el hero de la mascota, con su flecha de volver
+   *    **dibujada con un `Path` a mano**.
+   *
+   *  Va **debajo del título y dentro de la banda**, así que hereda su color y
+   *  su inset. *La alternativa era que cada pantalla siguiera copiando el
+   *  degradado, la curva y la safe area — que es literalmente lo que las dos
+   *  venían haciendo, con «COPIANDO NIVEL de la primitiva» escrito al lado.*
+   *
+   *  ⚠️ **Es un slot, no una pieza nueva:** el contenido lo arma la pantalla
+   *  porque es suyo —una fila de mascotas no es de la cabecera—; lo que deja
+   *  de ser suyo es **el techo**. */
+  contenido?: ReactNode
   /** Cuando la pantalla es un paso de un flujo. Se dibuja bajo el título
    *  con la pieza `BarraPasos`, que la cabecera no redibuja. */
   pasos?: { total: number; actual: number; etiqueta: string }
@@ -136,10 +184,13 @@ export const ALTO_CABECERA_EMPUJADA_FIJO =
 export function Cabecera({
   variante,
   antetitulo,
+  antetituloVoz = 'rotulo',
   titulo,
   apoyo,
   accionDerecha,
   carrito,
+  avisos,
+  contenido,
   pasos,
   onVolver,
   etiquetaVolver,
@@ -177,21 +228,43 @@ export function Cabecera({
      cabecera dejara de pintarlo. ⇒ como `fondo` es un `View` transparente.
      *Quien la monte como fondo tiene que darle una superficie debajo; hoy
      el único que lo hace es `HojaContenido`, que es para lo que nació.* */
-  const estiloSuperficie = {
-        paddingTop: insets.top + (esRaiz ? spacing[3] : spacing[2]),
-        paddingHorizontal: m.lados,
-        paddingBottom: m.bottom,
-        /* Como FONDO no lleva radio ni sombra: no está apoyada sobre
-           nada — es lo que está debajo de todo. La hoja que se le monta
-           encima pone su propio radio, que es el que se ve. */
-        borderBottomLeftRadius: esFondo ? 0 : radius.cabeceraV5,
-        borderBottomRightRadius: esFondo ? 0 : radius.cabeceraV5,
-        gap: spacing[3],
-        /* Apenas perceptible: despega, no levanta. */
-        boxShadow: esFondo ? undefined : theme.elevacion.reposo,
-  }
+  /* 🔴 **LA CURVA INVERTIDA ES INEXPRESABLE COMO FONDO (lote 3c, firma del
+     founder).** ⏪ Antes esto era UN objeto con dos ternarios —
+     `borderBottomLeftRadius: esFondo ? 0 : …` y `boxShadow: esFondo ? … `—.
+     **Daba el píxel correcto y aun así estaba mal**, y la diferencia es la
+     que el founder pidió:
 
-  const contenido = (
+     > **Un ternario documenta la regla; dos objetos la hacen imposible.** En
+     > el ternario el radio SIGUE ESTANDO en el estilo del fondo —vale `0`—,
+     > así que alcanza con que alguien lo cambie, lo copie o agregue el
+     > tercer caso *«fondo pero con un bordercito»* para que vuelva. **Acá el
+     > estilo del fondo NO TIENE la clave**: no hay qué cambiar.
+
+     La estructura firmada es **fondo ciruela sin radio + hoja con las
+     esquinas de ARRIBA redondeadas**. *La curva de abajo es de una tarjeta
+     apoyada sobre algo; el fondo no está apoyado sobre nada — es lo que está
+     debajo de todo.* */
+  const base = {
+    paddingTop: insets.top + (esRaiz ? spacing[3] : spacing[2]),
+    paddingHorizontal: m.lados,
+    paddingBottom: m.bottom,
+    gap: spacing[3],
+  }
+  /** Como TARJETA: apoyada, con su curva de abajo y su sombra apenas
+   *  perceptible — despega, no levanta. */
+  const estiloTarjeta = {
+    ...base,
+    borderBottomLeftRadius: radius.cabeceraV5,
+    borderBottomRightRadius: radius.cabeceraV5,
+    boxShadow: theme.elevacion.reposo,
+  }
+  /** Como FONDO: **`base` y nada más.** El radio y la sombra no están
+   *  puestos en cero — **no existen en este objeto**. */
+  const estiloSuperficie = esFondo ? base : estiloTarjeta
+
+  /* El armado interno de la banda. Se llama `cuerpo` desde el lote 3b: el
+     nombre `contenido` pasó a ser el SLOT público. */
+  const cuerpo = (
     <>
       <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing[3] }}>
         {!esRaiz && onVolver !== undefined ? (
@@ -205,32 +278,59 @@ export function Cabecera({
         ) : null}
 
         <View style={{ flex: 1, gap: spacing[1] }}>
+          {/* 🔴 **`sobreGradiente`, NO `inverso` (lote 16, censo del oscuro).**
+              Los tres textos van sobre la banda, que es el **degradado del
+              tema** — ciruela en claro, ciruela noche en oscuro: **oscura en
+              los tres temas**. `'inverso'` es *«al revés del tema»*, así que
+              en oscuro daba TINTA sobre ciruela y **el título de la cabecera
+              desaparecía en toda pantalla del cliente**.
+              ⚠️ **El slot `text.onGradient` ya existía en los tres temas** y no
+              tenía puerta desde `Texto`. *El valor correcto estaba escrito
+              desde hacía sesiones; lo que faltaba era poder pedirlo.* */}
           {antetitulo !== undefined ? (
-            <Texto variante="antetitulo" color="inverso">
+            <Texto variante={antetituloVoz === 'dato' ? 'dato' : 'antetitulo'} color="sobreGradiente">
               {antetitulo}
             </Texto>
           ) : null}
-          <Texto variante={esRaiz ? 'titulo' : 'seccion'} color="inverso">
+          <Texto variante={esRaiz ? 'titulo' : 'seccion'} color="sobreGradiente">
             {titulo}
           </Texto>
           {apoyo !== undefined ? (
-            <Texto variante="apoyo" color="inverso">
+            <Texto variante="apoyo" color="sobreGradiente">
               {apoyo}
             </Texto>
           ) : null}
         </View>
 
-        {/* El carrito gana el slot cuando está; si no, lo que la pantalla
-            mande. **En `empujada` el carrito no se dibuja pase lo que
-            pase** — ver su nota en las props. */}
-        {esRaiz && carrito !== undefined ? (
-          <DiscoVidrio onPress={carrito.onPress} etiqueta={carrito.etiqueta}>
-            <GlifoConContador nombre="carrito" cuenta={carrito.cantidad} dentroDeTocable />
-          </DiscoVidrio>
+        {/* 🔴 **EL SLOT DERECHO ADMITE LOS DOS DISCOS (lote 3b).** El censo
+            encontró **dos** acciones-con-contador vivas en raíz —el carrito de
+            las cinco tabs y la campana del Hogar— y hasta hoy sólo cabía una.
+            *La campana se dibujaba en el techo local del Hogar, y ése es
+            exactamente el techo que este lote viene a borrar.*
+            ⚠️ **En `empujada` no se dibuja NINGUNO de los dos**: las pantallas
+            de checkout son empujadas, así que *la regla «ahí no se muestra» no
+            se recuerda — se cumple sola.* */}
+        {esRaiz && (carrito !== undefined || avisos !== undefined) ? (
+          <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+            {avisos !== undefined ? (
+              <DiscoVidrio onPress={avisos.onPress} etiqueta={avisos.etiqueta}>
+                <GlifoConContador nombre="campana" cuenta={avisos.cantidad} dentroDeTocable />
+              </DiscoVidrio>
+            ) : null}
+            {carrito !== undefined ? (
+              <DiscoVidrio onPress={carrito.onPress} etiqueta={carrito.etiqueta}>
+                <GlifoConContador nombre="carrito" cuenta={carrito.cantidad} dentroDeTocable />
+              </DiscoVidrio>
+            ) : null}
+          </View>
         ) : accionDerecha !== undefined ? (
           <View>{accionDerecha}</View>
         ) : null}
       </View>
+
+      {/* El contenido propio va DENTRO de la banda y debajo del título:
+          hereda el degradado, la curva y el inset que la pantalla copiaba. */}
+      {contenido !== undefined ? <View>{contenido}</View> : null}
 
       {pasos !== undefined ? <BarraPasos {...pasos} /> : null}
     </>
@@ -239,7 +339,7 @@ export function Cabecera({
   /* Las dos ramas, explícitas: un componente elegido por variable no se
      puede tipar sin ensanchar las props de las dos (el gate lo frenó). */
   return esFondo ? (
-    <View style={estiloSuperficie}>{contenido}</View>
+    <View style={estiloSuperficie}>{cuerpo}</View>
   ) : (
     <LinearGradient
       colors={grad.colors as unknown as readonly [string, string, ...string[]]}
@@ -248,7 +348,7 @@ export function Cabecera({
       end={{ x: 0.2, y: 1 }}
       style={estiloSuperficie}
     >
-      {contenido}
+      {cuerpo}
     </LinearGradient>
   )
 }

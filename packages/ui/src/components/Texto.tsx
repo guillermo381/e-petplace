@@ -167,7 +167,41 @@ export type TextoVariante = 'titulo' | 'seccion' | 'cuerpo' | 'apoyo' | 'enfasis
  * veía) · en oscuro, sobre `magentaLuz`, tinta da **7,91** y blanco **2,31**.
  * *«Blanco siempre» es cierto sobre MAGENTA y falso como regla: en oscuro el
  * CTA no es magenta.* */
-export type TextoColor = 'primary' | 'secondary' | 'tertiary' | 'danger' | 'success' | 'warning' | 'sobreVideo' | 'warm' | 'inverso' | 'acentoSobreOscuro' | 'sobreCta'
+/* 🔴 **`sobreMagenta` (S116-B lote 15) — el par de una superficie que NO
+ * cambia con el tema.**
+ *
+ * **Medido en el aparato, tema oscuro:** la frase de `OndaAcceso` salía en
+ * **tinta sobre la franja magenta** —`3,29`, el mismo número que el founder
+ * rechazó en el lote 11— porque pedía `'inverso'`, y `text.inverse` es
+ * **blanco en claro y TINTA EN OSCURO**.
+ *
+ * > ⚠️ **`'inverso'` no significa «sobre fondo oscuro»: significa «al revés
+ * > del tema».** Sobre una superficie que es magenta en los DOS temas, eso da
+ * > el color correcto en claro **por casualidad** y el equivocado en oscuro.
+ *
+ * ⇒ Cuando la superficie no cambia, **el color tampoco puede cambiar**: blanco
+ * fijo, medido **5,13** contra `magentaAccion`. *Es la misma ley que `sobreCta`
+ * vista del otro lado — aquélla resuelve POR CASA porque el CTA cambia de
+ * color; ésta es fija porque la franja no.* */
+/* 🔴 **`sobreGradiente` (lote 16) — EL SLOT QUE YA EXISTÍA Y NADIE USABA.**
+ *
+ * `theme.text.onGradient` vive en los **tres** temas desde hace sesiones, y el
+ * de memorial hasta lo dice con todas las letras: *«sobre la cabecera ciruela
+ * noche»*. **No tenía puerta desde `Texto`**, así que quien necesitaba texto
+ * sobre la banda usaba `'inverso'` — que es *«al revés del tema»* y en oscuro
+ * da TINTA sobre ciruela.
+ *
+ * > ⚠️ **Esto NO es un color fijo con otro nombre: LEE EL TEMA.** Que hoy los
+ * > tres resuelvan blanco es una decisión **de cada tema** —la banda es oscura
+ * > en los tres—, no una casualidad del consumidor. *El día que un tema quiera
+ * > otra cosa sobre su banda, lo cambia en su archivo y las 173 pantallas lo
+ * > heredan.*
+ *
+ * ⇒ **`sobreCta` · `sobreMagenta` · `sobreGradiente` son la misma familia y se
+ * eligen por la SUPERFICIE, no por el tema**: el CTA cambia de color (por
+ * casa), la franja de la onda no cambia nunca (fijo), y la banda cambia de
+ * tono pero sigue siendo oscura (por tema). */
+export type TextoColor = 'primary' | 'secondary' | 'tertiary' | 'danger' | 'success' | 'warning' | 'sobreVideo' | 'warm' | 'inverso' | 'acentoSobreOscuro' | 'sobreCta' | 'sobreMagenta' | 'sobreGradiente'
 
 export type TextoProps = {
   children: ReactNode
@@ -446,12 +480,16 @@ export function Texto({ children, variante = 'cuerpo', color, numberOfLines, cen
             ? (theme.mode === 'memorial' ? theme.text.inverse : palette.rosaSobreCiruela)
           : c === 'sobreCta'
             ? theme.accent.ctaTexto
+          : c === 'sobreGradiente'
+            ? theme.text.onGradient
+          : c === 'sobreMagenta'
+            ? palette.white
           : c === 'inverso'
             /* El slot del tema se llama `inverse` (inglés, como todo el
                shape del tema) y la prop `inverso` (español, como toda la
                API pública de la casa). Se traduce acá, en un solo lugar. */
             ? theme.text.inverse
-            : theme.text[c as Exclude<TextoColor, 'danger' | 'success' | 'warning' | 'sobreVideo' | 'inverso' | 'acentoSobreOscuro' | 'sobreCta'>]
+            : theme.text[c as Exclude<TextoColor, 'danger' | 'success' | 'warning' | 'sobreVideo' | 'inverso' | 'acentoSobreOscuro' | 'sobreCta' | 'sobreMagenta' | 'sobreGradiente'>]
 
   return (
     <Text

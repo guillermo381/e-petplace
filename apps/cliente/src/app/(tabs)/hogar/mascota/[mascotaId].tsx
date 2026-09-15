@@ -49,7 +49,6 @@ import {
   Hoja,
   Huella,
   Icono,
-  Isotipo,
   PieRevelar,
   Separador,
   ChipEntidad,
@@ -1112,18 +1111,21 @@ export default function PerfilDeMascota() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      {/* @override-s82c — r5 ítem 1: LA MARCA DE AGUA del fondo,
-          escalada a SALIRSE por los cuatro lados al 4% ("una forma
-          completa es una marca; cortada es papel — así la Ley 4 no
-          muerde", letra founder). Fija, detrás de todo. */}
-      <View
-        pointerEvents="none"
-        style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}
-      >
-        <View style={{ opacity: 0.04 }}>
-          <Isotipo size={1000} variant="tinta" color={theme.text.primary} />
-        </View>
-      </View>
+      {/* ☠️ **LA MARCA DE AGUA MURIÓ (firma del founder, recorrido 5 · lote 3c).**
+          Era el isotipo VIEJO en tinta al 4 %, `size 1000`, escalado para
+          **salirse por los cuatro lados** — y esa escala tenía su letra: *«una
+          forma completa es una marca; cortada es papel — así la Ley 4 no
+          muerde»*.
+
+          🔴 **Ese argumento es justamente el que cae.** Sangrarlo lo volvía
+          papel para la Ley 4, **pero seguía siendo el dibujo viejo**, y lo que
+          el founder rechazó —acá y en las cabeceras del lote 10— **es el
+          dibujo, no su encuadre**. *Recortar una marca que no representa a la
+          casa no la convierte en textura: la convierte en esa misma marca, más
+          difícil de señalar.*
+
+          ⚠️ **NO se rellena.** Queda `bg.base` liso. *El fondo del expediente
+          nunca pidió una textura: la recibió con una lámina.* */}
       {/* r10-1 · EL HUECO BLANCO: había DOS botones de atrás. CORRECCIÓN
           DE DIAGNÓSTICO (medida, no asumida): la banda NO era el header
           nativo — el Stack del hogar YA tiene headerShown:false desde

@@ -56,10 +56,10 @@ export const clienteEn = {
     titulo: 'Nexo',
     autor: 'Nexo',
     // S116-C lote 7 — the four fingers of the assistant sheet.
-    atajo_peso: 'Log its weight',
-    atajo_vacuna: 'Upload its card',
-    atajo_antiparasitario: 'Log a dewormer',
-    atajo_foto: 'Save a memory',
+    atajo_peso: 'Weight',
+    atajo_vacuna: 'Vaccine',
+    atajo_antiparasitario: 'Dewormer',
+    atajo_foto: 'Memory',
     placeholder: 'Ask Nexo',
     /* La fila de arriba del abanico. **Es voz propia y no reusa
        `placeholder`**: ese nombre describe un campo de texto que murió con

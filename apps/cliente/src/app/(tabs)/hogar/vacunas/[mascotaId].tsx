@@ -82,7 +82,6 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   FilaDato,
-  Isotipo,
   PieRevelar,
   Texto,
   radius,
@@ -295,7 +294,11 @@ export default function PlanDeVacunas() {
               paddingTop: spacing[2],
             }}
           >
-            <Isotipo size={32} variant={esMemorial ? 'blanco' : 'gradiente'} />
+            {/* ☠️ **LA MARCA SE FUE (firma del founder, lote 3e).** Eran 32 px
+                del isotipo viejo, al lado del título. **La cabecera ya
+                identifica la casa**, y *«la marca aparece donde preside y en
+                ningún lado donde compita con un texto»*. **No se achica: se
+                va.** */}
             <View style={{ flex: 1, gap: spacing[1] }}>
               <Texto variante="titulo">{t('planVacunas.titulo', { nombre })}</Texto>
               {identidad.length > 0 ? <Texto variante="dato">{identidad.join(' · ')}</Texto> : null}

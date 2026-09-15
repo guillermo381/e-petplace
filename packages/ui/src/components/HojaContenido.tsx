@@ -40,8 +40,8 @@
  * pantalla inservible; quitar el fundido no le saca información a nadie.*
  */
 
-import { useState, type ReactNode } from 'react'
-import { View, type ScrollViewProps } from 'react-native'
+import { useState, type ReactNode, type RefObject } from 'react'
+import { View, type ScrollView, type ScrollViewProps } from 'react-native'
 import Animated, {
   Extrapolation,
   interpolate,
@@ -51,6 +51,7 @@ import Animated, {
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
+  type AnimatedRef,
 } from 'react-native-reanimated'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -85,6 +86,26 @@ export interface HojaContenidoProps {
    *  pieza (ver arriba) y dejarla abierta permitiría el rebote que la
    *  orden prohíbe. */
   scroll?: Omit<ScrollViewProps, 'bounces' | 'overScrollMode' | 'onScroll'>
+  /** 🔴 **EL REF DEL SCROLL — de C (lote 3b), REVISADO Y ACEPTADO.**
+   *
+   *  **Nace de una pérdida silenciosa, no de un gusto:** al mudar pantallas a
+   *  esta pieza, **seis tenían un `ref` en su `ScrollView`** para llevar el ojo
+   *  a un lugar (la ficha rechazada del carné, el campo que faltó en un
+   *  checkout). Ese `ref` **no entra por `scroll`** —`ref` no es una prop de
+   *  `ScrollViewProps`— y sin esta puerta **el `scrollTo` deja de hacer nada
+   *  sin que nada falle**: el botón responde, el estado cambia, y la pantalla
+   *  no se mueve.
+   *
+   *  ✅ **Lo reviso y me lo quedo tal cual, y digo por qué:** es **un pase, no
+   *  una capacidad** —va derecho al `Animated.ScrollView` de adentro— y
+   *  **deja cerrado exactamente lo que tiene que quedar cerrado**: `bounces`,
+   *  `overScrollMode` y `onScroll` siguen fuera de `scroll`, *porque del
+   *  último depende el fundido del fondo*. **Ensancha la puerta sin soltar la
+   *  llave.**
+   *
+   *  ⚠️ La unión de tipos es por los dos orígenes reales —`useAnimatedRef` de
+   *  Reanimated y `useRef` de RN—, y el cast de abajo es su precio. */
+  scrollRef?: AnimatedRef<Animated.ScrollView> | RefObject<ScrollView | null>
   /** 🔴 **EL PIE FIJO (S116-B, firma de la mesa).** Lo que se queda abajo
    *  mientras la hoja scrollea: el CTA de la pantalla, o la `OndaAcceso`.
    *
@@ -103,7 +124,7 @@ export interface HojaContenidoProps {
   materialDelPie?: MaterialDelPie
 }
 
-export function HojaContenido({ fondo, costura, arranque, children, scroll, pie, materialDelPie }: HojaContenidoProps) {
+export function HojaContenido({ fondo, costura, arranque, children, scroll, scrollRef, pie, materialDelPie }: HojaContenidoProps) {
   const { theme } = useTheme()
   const insets = useSafeAreaInsets()
   const { contenedor, medirContenedor, medirPie, altoPie, insetFaltante } = usePieFijo()
@@ -173,6 +194,10 @@ export function HojaContenido({ fondo, costura, arranque, children, scroll, pie,
           movemos nosotros —eso duplicaría el scroll— la mueve su propio
           `paddingTop`, que es contenido del ScrollView. */}
       <Animated.ScrollView
+        /* El cast: la unión de los dos orígenes de ref (`useAnimatedRef` y
+           `useRef`) no coincide con el tipo interno, y el pase es correcto en
+           runtime. */
+        ref={scrollRef as never}
         onScroll={alScrollear}
         scrollEventThrottle={16}
         bounces={false}
