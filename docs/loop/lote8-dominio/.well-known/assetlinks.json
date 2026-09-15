@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.epetplace.cliente",
+      "sha256_cert_fingerprints": [
+        "PENDIENTE-FIRMA-DE-PLAY-APP-SIGNING",
+        "PENDIENTE-FIRMA-DEL-KEYSTORE-DE-EAS"
+      ]
+    }
+  }
+]

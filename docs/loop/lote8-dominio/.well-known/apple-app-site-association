@@ -1,0 +1,15 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["PENDIENTE-TEAM-ID.PENDIENTE-BUNDLE-ID"],
+        "components": [
+          {
+            "/": "/auth/callback*",
+            "comment": "La vuelta del correo de confirmacion y del alta con Google."
+          }
+        ]
+      }
+    ]
+  }
+}

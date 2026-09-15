@@ -8,6 +8,10 @@
     "scheme": "cliente",
     "userInterfaceStyle": "automatic",
     "ios": {
+      "associatedDomains": [
+        "applinks:www.epetplace.com",
+        "applinks:epetplace.com"
+      ],
       "infoPlist": {
         "NSMicrophoneUsageDescription": "Para que el veterinario pueda escucharte durante tu videoconsulta.",
         "NSCameraUsageDescription": "Para la foto de tu mascota y para tus videoconsultas con el veterinario."
@@ -21,6 +25,17 @@
         "backgroundColor": "#26062E"
       },
       "predictiveBackGestureEnabled": false,
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            { "scheme": "https", "host": "www.epetplace.com", "pathPrefix": "/auth/callback" },
+            { "scheme": "https", "host": "epetplace.com", "pathPrefix": "/auth/callback" }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.FOREGROUND_SERVICE",
