@@ -14,7 +14,7 @@ import {
   Boton,
   Campo,
   Celda,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -133,7 +133,7 @@ export default function PerfilCuenta() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('cuenta.perfil')} atras onAtras={() => router.back()} />
+      <Cabecera variante="empujada" titulo={t('cuenta.perfil')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
 
       {estado === 'cargando' ? (
         <View style={{ padding: spacing[5] }}>

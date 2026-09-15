@@ -50,7 +50,7 @@ import { View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Boton,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -139,11 +139,11 @@ export default function VitrinaDeRefugio() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <MarcaDeAgua />
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo={t('vitrinaRefugio.titulo')}
-        atras
-        onAtras={() => (router.canGoBack() ? router.back() : router.replace('/adoptar'))}
+        onVolver={() => (router.canGoBack() ? router.back() : router.replace('/adoptar'))}
+        etiquetaVolver={t('comun.volver')}
       />
 
       {estado.fase === 'cargando' ? (

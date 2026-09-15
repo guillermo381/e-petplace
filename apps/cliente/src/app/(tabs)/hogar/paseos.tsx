@@ -36,7 +36,7 @@ import {
   Boton,
   Celda,
   CeldaNavegacion,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -475,7 +475,7 @@ export default function MisPaseos() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('plan.hubTitulo')} atras onAtras={() => router.back()} />
+      <Cabecera variante="empujada" titulo={t('plan.hubTitulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
 
       {planes === 'cargando' ? (
         <View style={{ padding: spacing[5] }}>

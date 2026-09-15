@@ -33,7 +33,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -269,7 +269,7 @@ export default function PreferenciasCuenta() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('cuenta.preferencias')} atras onAtras={() => router.back()} />
+      <Cabecera variante="empujada" titulo={t('cuenta.preferencias')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
 
       <ScrollView contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[5] }}>
         <Tarjeta>

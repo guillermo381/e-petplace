@@ -44,7 +44,7 @@ import {
   Boton,
   Campo,
   Celda,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -100,11 +100,11 @@ export default function BuscarRefugios() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <MarcaDeAgua />
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo={t('buscarRefugios.titulo')}
-        atras
-        onAtras={() => (router.canGoBack() ? router.back() : router.replace('/adoptar'))}
+        onVolver={() => (router.canGoBack() ? router.back() : router.replace('/adoptar'))}
+        etiquetaVolver={t('comun.volver')}
       />
       <EvitaTeclado>
         <View style={{ padding: spacing[5], paddingBottom: spacing[3] }}>

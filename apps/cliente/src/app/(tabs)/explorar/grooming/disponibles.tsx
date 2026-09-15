@@ -27,7 +27,7 @@ import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Boton,
   Celda,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -128,7 +128,7 @@ export default function GroomingDisponibles() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('grooming.quienTitulo')} atras onAtras={() => router.back()} />
+      <Cabecera variante="empujada" titulo={t('grooming.quienTitulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[3] }}>
         {/* la ventana elegida, en voz de máquina — la duración no viaja:
             es de cada groomer (servicio × talla) */}

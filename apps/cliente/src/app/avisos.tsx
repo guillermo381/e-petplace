@@ -32,7 +32,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -133,7 +133,7 @@ export default function Avisos() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('avisos.titulo')} atras onAtras={() => router.back()} />
+      <Cabecera variante="empujada" titulo={t('avisos.titulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
 
       <ScrollView contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6] }}>
         {estado === 'cargando' ? (

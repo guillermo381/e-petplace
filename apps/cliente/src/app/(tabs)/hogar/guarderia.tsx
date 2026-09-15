@@ -31,7 +31,7 @@ import { router } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -329,7 +329,7 @@ export default function LogGuarderia() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('logGuarderia.titulo')} atras onAtras={alAtras} />
+      <Cabecera variante="empujada" titulo={t('logGuarderia.titulo')} onVolver={alAtras}  etiquetaVolver={t('comun.volver')} />
 
       <ScrollView contentContainerStyle={{ padding: spacing[5], gap: spacing[5], paddingBottom: insets.bottom + spacing[8] }}>
         {mascotas.fase === 'cargando' ? (

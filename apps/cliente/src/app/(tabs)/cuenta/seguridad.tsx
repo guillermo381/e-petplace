@@ -70,7 +70,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
   Campo,
-  Encabezado,
+  Cabecera,
   EvitaTeclado,
   Interruptor,
   Texto,
@@ -212,11 +212,11 @@ export default function Seguridad() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo={t('seguridad.tituloPantalla')}
-        atras
-        onAtras={() => router.back()}
+        onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
       />
 
       <EvitaTeclado>

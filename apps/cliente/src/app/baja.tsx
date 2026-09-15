@@ -17,7 +17,7 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Boton, Encabezado, Texto, spacing, useTheme } from '@epetplace/ui';
+import { Boton, Cabecera, Texto, spacing, useTheme } from '@epetplace/ui';
 import { darDeBajaCorreo } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
@@ -45,7 +45,7 @@ export default function Baja() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('baja.titulo')} />
+      <Cabecera variante="empujada" titulo={t('baja.titulo')} />
       <View
         style={{
           flex: 1,

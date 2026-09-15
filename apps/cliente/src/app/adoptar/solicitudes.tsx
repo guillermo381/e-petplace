@@ -24,7 +24,7 @@ import { leerEscalera } from '@epetplace/domain';
 import {
   AvatarMascota,
   Boton,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -85,11 +85,11 @@ export default function MisSolicitudes() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo={t('misSolicitudes.titulo')}
-        atras
-        onAtras={() => router.back()}
+        onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
       />
       <ScrollView
         contentContainerStyle={{

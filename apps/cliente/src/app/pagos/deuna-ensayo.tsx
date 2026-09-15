@@ -25,10 +25,10 @@
  * **Cero escrituras:** todo vive en memoria. Compatible con la veda 76(g).
  */
 
-import { useState } from 'react';
+import {useState } from 'react';
 import { Linking, ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Boton, Encabezado, EstadoVacio, Tarjeta, Texto, spacing, useTheme } from '@epetplace/ui';
+import { Cabecera, Boton, Encabezado, EstadoVacio, Tarjeta, Texto, spacing, useTheme } from '@epetplace/ui';
 
 import { EsperaDeUna } from '@/components/espera-deuna';
 import { ENSAYO, useEstadoDeUna, type GuionDeEnsayo } from '@/lib/pagos/deuna-estado';
@@ -47,7 +47,7 @@ export default function DeUnaEnsayo() {
   if (!__DEV__) {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" titulo="—" atras onAtras={() => router.back()} />
+        <Cabecera variante="empujada" titulo="—" onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
         <EstadoVacio registro="pantalla" titulo="—" descripcion="—" />
       </View>
     );

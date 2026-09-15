@@ -19,7 +19,7 @@ import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
-  Boton, Encabezado, EstadoVacio, EsqueletoGrupo, Hoja, Separador, Texto, spacing, useTheme,
+  Boton, Cabecera, EstadoVacio, EsqueletoGrupo, Hoja, Separador, Texto, spacing, useTheme,
 } from '@epetplace/ui';
 import { listarTarjetasVerificadas, borrarTarjetaGuardada, type TarjetaVerificada } from '@epetplace/api';
 import { FilaMedioDePago, VozVencida, desempatarMedios, nombreDeMarca, vencida } from '@/components/fila-medio-de-pago';
@@ -126,11 +126,11 @@ export default function MediosDePago() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo={t('cuenta.medios')}
-        atras
-        onAtras={() => router.back()}
+        onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
       />
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + spacing[6], gap: spacing[4] }}>
         <View style={{ paddingHorizontal: spacing[5] }}>

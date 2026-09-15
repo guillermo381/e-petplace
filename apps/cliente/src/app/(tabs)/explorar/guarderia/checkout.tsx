@@ -39,7 +39,7 @@ import { Linking, ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  Boton, Celda, Encabezado, EsperaLarga, EstadoVacio, Icono, Tarjeta, Texto,
+  Boton, Celda, Cabecera, EsperaLarga, EstadoVacio, Icono, Tarjeta, Texto,
   spacing, useAviso, useTheme,
 } from '@epetplace/ui';
 import {
@@ -697,7 +697,7 @@ export default function CheckoutGuarderia() {
   if (esPaquete || esMensual || holdDia === null) {
     return (
       <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" atras titulo={t('checkout.titulo')} onAtras={() => router.back()} />
+        <Cabecera variante="empujada" titulo={t('checkout.titulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
         <ScrollView
           ref={scrollRef}
           contentContainerStyle={{ padding: spacing[5], gap: spacing[4], paddingBottom: insets.bottom + spacing[8] }}

@@ -34,7 +34,7 @@ import {
   Campo,
   Celda,
   CeldaNavegacion,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -254,7 +254,7 @@ export default function FamiliaCuenta() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('cuenta.familia')} atras onAtras={() => router.back()} />
+      <Cabecera variante="empujada" titulo={t('cuenta.familia')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
 
       {familia === 'cargando' ? (
         <View style={{ padding: spacing[5] }}>

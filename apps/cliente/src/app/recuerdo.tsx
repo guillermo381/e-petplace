@@ -40,7 +40,7 @@ import {
   Boton,
   Campo,
   CampoFecha,
-  Encabezado,
+  Cabecera,
   EvitaTeclado,
   Icono,
   Texto,
@@ -150,11 +150,11 @@ export default function Recuerdo() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo={t('recuerdo.titulo', { mascota: nombre })}
-        atras
-        onAtras={() => router.back()}
+        onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
       />
       <EvitaTeclado>
         <ScrollView

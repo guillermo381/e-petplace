@@ -38,7 +38,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Linking } from 'react-native';
 import {
-  Encabezado,
+  Cabecera,
   HojaTraerPapeles,
   Hoja,
   PantallaDocumentos,
@@ -198,11 +198,11 @@ export default function RutaDocumentos() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo={t('documentos.titulo')}
-        atras
-        onAtras={() => router.back()}
+        onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
       />
       {/* ⭐ **LA PIEZA DE B, con la bóveda viva** (fase 3 · C2).
           Acá vivía una composición propia con dos secciones a mano. *La pieza

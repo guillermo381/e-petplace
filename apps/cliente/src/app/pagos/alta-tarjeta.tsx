@@ -21,7 +21,7 @@ import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { WebView } from 'react-native-webview';
-import { Encabezado, EsperaLarga, useTheme, useAviso } from '@epetplace/ui';
+import { Cabecera, EsperaLarga, useTheme, useAviso } from '@epetplace/ui';
 import { obtenerAltaTarjeta, type EstadoAlta } from '@epetplace/api';
 import { obtenerIdiomaActual } from '@epetplace/i18n';
 
@@ -94,11 +94,11 @@ export default function AltaTarjeta() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo={t('cuenta.gateAltaTarjeta')}
-        atras
-        onAtras={() => void cerrarLeyendoElServidor()}
+        onVolver={() => void cerrarLeyendoElServidor()}
+        etiquetaVolver={t('comun.volver')}
       />
 
       <View style={{ flex: 1 }}>

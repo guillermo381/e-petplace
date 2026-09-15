@@ -39,11 +39,12 @@
  * la versión del documento.
  */
 
-import { useCallback, useState } from 'react';
+import {useCallback, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  Cabecera,
   Boton,
   Encabezado,
   Esqueleto,
@@ -224,7 +225,7 @@ export default function Postular() {
           con `solicitud_ya_viva` — *ofrecerle el camino a un rebote es peor que
           no ofrecerle camino*. Desde ahí se sigue a la conversación. */}
       {estado.fase === 'enviada' ? (
-        <Encabezado variante="navegacion" titulo={t('postular.enviadaTitulo')} />
+        <Cabecera variante="empujada" titulo={t('postular.enviadaTitulo')} />
       ) : (
         <Encabezado
           variante="navegacion"

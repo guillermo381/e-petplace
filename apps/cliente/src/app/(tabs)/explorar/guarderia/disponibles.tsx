@@ -51,7 +51,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Celda,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -272,11 +272,11 @@ export default function QuienPuedeGuarderia() {
           veces en la misma pantalla le enseña a la familia a no leer.*
           Censado contra «Groomers disponibles», su hermana: `Encabezado` de
           navegación + **una sola línea de contexto**. */}
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo={t('hubGuarderia.lugaresTitulo')}
-        atras
-        onAtras={() => router.back()}
+        onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
       />
 
       <ScrollView contentContainerStyle={{ padding: spacing[5], gap: spacing[3], paddingBottom: insets.bottom + spacing[8] }}>

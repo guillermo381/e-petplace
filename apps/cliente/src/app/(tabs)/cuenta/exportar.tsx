@@ -19,11 +19,11 @@
  * TESIS: tus datos son tuyos, y te damos la copia cuando la pidas.
  */
 
-import { useState } from 'react';
+import {useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Boton, Encabezado, Texto, spacing, useTheme } from '@epetplace/ui';
+import { Cabecera, Boton, Texto, spacing, useTheme } from '@epetplace/ui';
 import { exportarMisDatos } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
@@ -51,7 +51,7 @@ export default function ExportarDatos() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('exportarDatos.titulo')} atras onAtras={() => router.back()} />
+      <Cabecera variante="empujada" titulo={t('exportarDatos.titulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
       <ScrollView
         contentContainerStyle={{
           padding: spacing[5],

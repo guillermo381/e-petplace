@@ -9,6 +9,9 @@ import type { Espejo } from '@epetplace/i18n';
 import type { clienteEs } from './es';
 
 export const clienteEn = {
+  comun: {
+    volver: 'Back',
+  },
   tabs: {
     hogar: 'Home',
     explorar: 'Explore',

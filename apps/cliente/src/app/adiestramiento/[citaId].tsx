@@ -43,7 +43,7 @@ import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Boton,
   ClipSesion,
-  Encabezado,
+  Cabecera,
   Entrada,
   Esqueleto,
   EsqueletoGrupo,
@@ -121,11 +121,11 @@ export default function ParteAdiestramientoPantalla() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo={t('adiestramiento.parteTitulo')}
-        atras
-        onAtras={() => router.back()}
+        onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
       />
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[5] }}>
         {parte === 'cargando' ? (

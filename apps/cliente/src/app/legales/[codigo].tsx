@@ -51,7 +51,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
   DocumentoLegalLectura,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -167,11 +167,11 @@ export default function LecturaDeDocumento() {
       <MarcaDeAgua />
       {/* «Una pantalla con su título» — el founder lo dijo por oposición al
           modal, así que el título va en el Encabezado y no adentro del scroll. */}
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo={estado.fase === 'listo' ? tituloDe(estado.doc.codigo, t) : t('legales.titulo')}
-        atras
-        onAtras={() => (router.canGoBack() ? router.back() : router.replace('/hogar'))}
+        onVolver={() => (router.canGoBack() ? router.back() : router.replace('/hogar'))}
+        etiquetaVolver={t('comun.volver')}
       />
 
       {estado.fase === 'cargando' ? (

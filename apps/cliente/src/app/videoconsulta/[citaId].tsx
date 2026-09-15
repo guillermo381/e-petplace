@@ -34,7 +34,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import {
   Boton,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -130,12 +130,12 @@ export default function DetalleVideoconsulta() {
   }
 
   const cabecera = (
-    <Encabezado
-      variante="navegacion"
+    <Cabecera
+      variante="empujada"
       titulo={t('veterinaria.citaTeleTitulo')}
-      atras
-      onAtras={() => router.back()}
-    />
+      onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
+      />
   );
 
   if (estado.fase === 'cargando') {

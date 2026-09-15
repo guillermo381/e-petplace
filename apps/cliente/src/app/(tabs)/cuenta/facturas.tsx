@@ -76,7 +76,7 @@ import {
   Boton,
   Celda,
   Texto,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -154,7 +154,7 @@ export default function FacturasScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('facturas.titulo')} atras onAtras={() => router.back()} />
+      <Cabecera variante="empujada" titulo={t('facturas.titulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
 
       <ScrollView
         contentContainerStyle={{

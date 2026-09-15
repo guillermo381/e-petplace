@@ -8,6 +8,13 @@
  */
 
 export const clienteEs = {
+  /** ⭐ S116-C lote 3b · LA ÚNICA CLAVE COMPARTIDA DEL LOTE, y existe por un
+   *  número: **71 pantallas** migran a `Cabecera` y su flecha necesita nombre
+   *  para el lector. *Elegir una clave del namespace de cada pantalla habrían
+   *  sido 71 decisiones para decir la misma palabra.* */
+  comun: {
+    volver: 'Volver',
+  },
   tabs: {
     hogar: 'Hogar',
     explorar: 'Explorar',

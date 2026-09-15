@@ -28,7 +28,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useFocusEffect } from 'expo-router';
 import {
   Boton,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -209,7 +209,7 @@ export default function HubGrooming() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('grooming.hubTitulo')} atras onAtras={() => router.back()} />
+      <Cabecera variante="empujada" titulo={t('grooming.hubTitulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
       <ScrollView
         ref={scrollRef}
         contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[4] }}

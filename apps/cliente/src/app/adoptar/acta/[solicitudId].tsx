@@ -43,7 +43,7 @@ import {
   Campo,
   CodigoFirmaInput,
   DocumentoLegalLectura,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -272,11 +272,11 @@ export default function ActaDeAdopcion() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <MarcaDeAgua />
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo={t('acta.titulo')}
-        atras
-        onAtras={() => (router.canGoBack() ? router.back() : router.replace('/adoptar/solicitudes'))}
+        onVolver={() => (router.canGoBack() ? router.back() : router.replace('/adoptar/solicitudes'))}
+        etiquetaVolver={t('comun.volver')}
       />
 
       {estado.fase === 'cargando' ? (

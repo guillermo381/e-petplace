@@ -36,7 +36,7 @@ import {
   Boton,
   Campo,
   CampoFecha,
-  Encabezado,
+  Cabecera,
   FilaConfirmacionVacuna,
   Hoja,
   HojaScroll,
@@ -429,7 +429,7 @@ function camposDe(
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('carnet.titulo')} atras onAtras={() => router.back()} />
+      <Cabecera variante="empujada" titulo={t('carnet.titulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
 
       {/* B2 · captura */}
       {fase.t === 'captura' && (

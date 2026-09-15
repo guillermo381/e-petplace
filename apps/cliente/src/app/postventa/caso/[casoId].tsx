@@ -29,11 +29,12 @@
  * la máquina puede tapar esa puerta*.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Keyboard, ScrollView, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
+  Cabecera,
   BarraEscribir,
   BurbujaMensaje,
   CabeceraCaso,
@@ -492,7 +493,7 @@ export default function PantallaDelCaso() {
   if (caso === 'cargando') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" titulo={t('postventa.tituloCaso')} atras onAtras={() => router.back()} />
+        <Cabecera variante="empujada" titulo={t('postventa.tituloCaso')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
         <View style={{ padding: spacing[5] }}>
           <EsqueletoGrupo>
             <Esqueleto alto={64} />

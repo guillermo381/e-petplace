@@ -22,7 +22,7 @@
  * la voz de otro.
  */
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import {useCallback, useMemo, useRef, useState } from 'react';
 import { Platform, Pressable, RefreshControl, ScrollView, Text, View, useWindowDimensions, type LayoutChangeEvent } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
@@ -32,6 +32,7 @@ import { Image } from 'expo-image';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  Cabecera,
   AvatarMascota,
   Boton,
   CitaEnVivo,
@@ -308,7 +309,7 @@ export default function DetallePaseo() {
   if (detalle === 'cargando') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" titulo={t('atencion.titulo')} atras onAtras={() => router.back()} />
+        <Cabecera variante="empujada" titulo={t('atencion.titulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
         <View style={{ padding: spacing[5] }}>
           <EsqueletoGrupo etiqueta={t('atencion.cargando')}>
             <View style={{ gap: spacing[3] }}>

@@ -25,7 +25,7 @@
  * muerto es la remoción de la pasada.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {useCallback, useEffect, useRef, useState } from 'react';
 import { Linking, Platform, Pressable, ScrollView, Share, StatusBar, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -36,6 +36,7 @@ import { TallaPelajeHoja } from '@/components/talla-pelaje-hoja';
 import Svg, { Path } from 'react-native-svg';
 import Animated from 'react-native-reanimated';
 import {
+  Cabecera,
   BarrasSemana,
   Boton,
   Celda,
@@ -801,7 +802,7 @@ export default function PerfilDeMascota() {
   if (perfil === 'cargando') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" titulo="" atras onAtras={() => router.back()} />
+        <Cabecera variante="empujada" titulo="" onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
         <View style={{ padding: spacing[5] }}>
           <EsqueletoGrupo etiqueta={t('hogar.cargando')}>
             <View style={{ alignItems: 'center', gap: spacing[3] }}>

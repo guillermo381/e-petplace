@@ -48,7 +48,7 @@ import {
   Boton,
   BurbujaMensaje,
   CabeceraHilo,
-  Encabezado,
+  Cabecera,
   EventoDelHilo,
   Icono,
   PastillaNuevoMensaje,
@@ -547,11 +547,11 @@ export default function HiloSolicitud() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo={estado.fase === 'listo' ? estado.hilo.mascotaNombre : t('hiloAdopcion.titulo')}
-        atras
-        onAtras={() => router.back()}
+        onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
       />
 
       {estado.fase === 'cargando' ? (

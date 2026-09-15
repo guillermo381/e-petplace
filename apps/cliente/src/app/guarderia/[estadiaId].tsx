@@ -59,7 +59,7 @@ import {
   Boton,
   Campo,
   ClipSesion,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -420,15 +420,15 @@ export default function DuranteGuarderia() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
-        atras
+      <Cabecera
+        variante="empujada"
         /* 🔴 SIN MASCOTA CAE A «Guardería», NO a «Su día» — el recorrido lo
            destapó: el cabezal y la sección de fotos decían **la misma frase
            dos veces en la misma pantalla**. *Chanel: si dice lo mismo, sobra
            uno.* Y el que se queda es el de la sección, porque rotula algo. */
         titulo={params.mascotaNombre ?? t('hubGuarderia.titulo')}
-        onAtras={() => router.back()}
+        onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
       />
 
       <ScrollView

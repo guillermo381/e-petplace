@@ -24,7 +24,7 @@ import {
   AvatarMascota,
   Boton,
   Celda,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -114,7 +114,7 @@ export default function PaseoDisponibles() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('explorar.quienTitulo')} atras onAtras={() => router.back()} />
+      <Cabecera variante="empujada" titulo={t('explorar.quienTitulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[3] }}>
         {/* la ventana elegida, en voz de máquina — con el PARA QUIÉN
             visible (S61-A3, rasgo 1).

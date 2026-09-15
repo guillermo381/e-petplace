@@ -42,7 +42,7 @@ import {
   Boton,
   ControlLlamada,
   sobreVideo,
-  Encabezado,
+  Cabecera,
   EsperaDeMarca,
   EstadoVacio,
   HojaConfirmacionDestructiva,
@@ -220,12 +220,12 @@ export default function Videollamada() {
   }, [fase, sinEntrada, router]);
 
   const cabecera = (
-    <Encabezado
-      variante="navegacion"
+    <Cabecera
+      variante="empujada"
       titulo={t('veterinaria.vcTitulo')}
-      atras
-      onAtras={() => router.back()}
-    />
+      onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
+      />
   );
 
   // El módulo nativo no está: binario horneado antes de esta build. Se dice.

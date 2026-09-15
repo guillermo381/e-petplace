@@ -54,7 +54,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import {
   AvatarMascota,
-  Encabezado,
+  Cabecera,
   ThemeProvider,
   useTheme,
   spacing,
@@ -340,7 +340,7 @@ export default function LaminaFusion() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo="Lámina S74" atras onAtras={() => router.back()} />
+      <Cabecera variante="empujada" titulo="Lámina S74" onVolver={() => router.back()}  etiquetaVolver="Volver" />
       <ScrollView contentContainerStyle={{ padding: spacing[5], gap: spacing[6], paddingBottom: insets.bottom + spacing[8] }}>
         <Text style={{ fontFamily: typography.family.sans.regular, fontSize: 14, color: theme.text.secondary }}>
           Dos preguntas, sobre la geometría ya curada, en claro y en oscuro. 1: cuánta sombra

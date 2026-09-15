@@ -31,7 +31,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
-  Encabezado,
+  Cabecera,
   EstadoVacio,
   Separador,
   Tarjeta,
@@ -138,11 +138,11 @@ export default function PlacaSinActivar() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo={t('placa.titulo')}
-        atras
-        onAtras={() => router.back()}
+        onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
       />
       <ScrollView
         contentContainerStyle={{

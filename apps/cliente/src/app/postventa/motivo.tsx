@@ -42,11 +42,12 @@
  * mejor que la familia hasta que tenga con qué.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import {useCallback, useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
+  Cabecera,
   Boton,
   Campo,
   Encabezado,
@@ -205,12 +206,12 @@ export default function PostventaMotivo() {
   if (motivos === 'cargando') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado
-          variante="navegacion"
+        <Cabecera
+          variante="empujada"
           titulo={t('postventa.tituloMotivo')}
-          atras
-          onAtras={() => router.back()}
-        />
+          onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
+      />
         <View style={{ padding: spacing[5] }}>
           <EsqueletoGrupo>
             <Esqueleto alto={44} />

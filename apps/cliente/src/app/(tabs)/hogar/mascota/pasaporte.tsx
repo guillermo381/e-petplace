@@ -20,12 +20,13 @@
  * pantalla que existe para dar una URL y arranca pidiendo permiso para
  * dársela no está protegiendo nada.* Emitir es idempotente del lado del motor.
  */
-import { useCallback, useEffect, useState } from 'react';
+import {useCallback, useEffect, useState } from 'react';
 import { Modal, Pressable, Share, View } from 'react-native';
 import { Image } from 'expo-image';
 import { WebView } from 'react-native-webview';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
+  Cabecera,
   AccionesPasaporte,
   ConfiguracionPasaporte,
   Encabezado,
@@ -183,11 +184,11 @@ export default function Pasaporte() {
             normal—; el tercero, el del QR a pantalla completa, sí lo tenía.
             *Un callejón no se ve como defecto: se ve como que la app se
             colgó.* */}
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo={t('pasaporte.titulo')}
-        atras
-        onAtras={() => router.back()}
+        onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
       />
         <EstadoVacio titulo={t('pasaporte.enMemoria', { nombre: m.nombre })} />
       </View>

@@ -44,11 +44,12 @@
  * CHANEL: sin «borrar todo» (sería mentira), sin cifras, sin final mudo.
  */
 
-import { useState } from 'react';
+import {useState } from 'react';
 import { Linking, ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  Cabecera,
   Boton,
   CeldaNavegacion,
   Encabezado,
@@ -108,7 +109,7 @@ export default function CerrarCuenta() {
   if (resultado !== null) {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" titulo={t('cerrarCuenta.titulo')} />
+        <Cabecera variante="empujada" titulo={t('cerrarCuenta.titulo')} />
         <ScrollView
           contentContainerStyle={{
             padding: spacing[5],

@@ -22,10 +22,11 @@
  * tampoco se dibuja, y si alguien llega igual, se va con la voz serena de la
  * casa (`A3.9`).
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
+  Cabecera,
   AvisoAnticipacion,
   BurbujaMensaje,
   Campo,
@@ -276,7 +277,7 @@ export default function Nexo() {
   if (contexto === 'error') {
     return (
       <View style={{ flex: 1 }}>
-        <Encabezado variante="navegacion" titulo={t('nexo.titulo')} />
+        <Cabecera variante="empujada" titulo={t('nexo.titulo')} />
         <EstadoVacio titulo={t('nexo.sinContexto')} descripcion={t('nexo.sinContextoDetalle')} />
       </View>
     );

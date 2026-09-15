@@ -94,7 +94,7 @@ import {
   Boton,
   Chevron,
   CodigoAEscala,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -422,11 +422,11 @@ export default function DespensaEnCamino() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo={t('despensa.enCaminoTitulo')}
-        atras
-        onAtras={() => router.back()}
+        onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
       />
 
       {detalle === 'cargando' ? (

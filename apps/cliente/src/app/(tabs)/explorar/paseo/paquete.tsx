@@ -27,7 +27,7 @@ import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Boton,
   Celda,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -79,7 +79,7 @@ export default function PaqueteComprar() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('paquete.pantallaTitulo')} atras onAtras={() => router.back()} />
+      <Cabecera variante="empujada" titulo={t('paquete.pantallaTitulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[3] }}>
         {lista === 'cargando' ? (
           <EsqueletoGrupo>

@@ -27,11 +27,12 @@
  * mitad propia construida e inerte, con su pedido al lado.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import {useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  Cabecera,
   Boton,
   Encabezado,
   Esqueleto,
@@ -405,7 +406,7 @@ export default function LugarGuarderia() {
   if (estado.fase === 'cargando') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" titulo={t('lugarGuarderia.titulo')} atras onAtras={alAtras} />
+        <Cabecera variante="empujada" titulo={t('lugarGuarderia.titulo')} onVolver={alAtras}  etiquetaVolver={t('comun.volver')} />
         <View style={{ padding: spacing[5] }}>
           <EsqueletoGrupo>
             <Esqueleto alto={64} />

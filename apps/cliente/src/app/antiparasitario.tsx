@@ -46,7 +46,7 @@ import {
   Boton,
   Campo,
   CampoFecha,
-  Encabezado,
+  Cabecera,
   EvitaTeclado,
   SelectorOpcion,
   Texto,
@@ -168,11 +168,11 @@ export default function RegistrarAntiparasitario() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo={t('antiparasitario.titulo', { mascota: nombre })}
-        atras
-        onAtras={() => router.back()}
+        onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
       />
       <EvitaTeclado>
         <ScrollView

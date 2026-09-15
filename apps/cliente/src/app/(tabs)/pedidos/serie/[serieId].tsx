@@ -35,7 +35,7 @@ import { ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  Encabezado, Esqueleto, EsqueletoGrupo, EstadoVacio, spacing, useAviso, useTheme,
+  Cabecera, Esqueleto, EsqueletoGrupo, EstadoVacio, spacing, useAviso, useTheme,
 } from '@epetplace/ui';
 import { alternarRecurrencia } from '@epetplace/api';
 
@@ -96,11 +96,11 @@ export default function SerieDePedidos() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo={t('serie.titulo')}
-        atras
-        onAtras={() => router.back()}
+        onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
       />
       <ScrollView
         contentContainerStyle={{

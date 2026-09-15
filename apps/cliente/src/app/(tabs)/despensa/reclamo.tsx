@@ -31,7 +31,7 @@ import { router, useFocusEffect } from 'expo-router';
 import {
   Boton,
   Campo,
-  Encabezado,
+  Cabecera,
   EstadoVacio,
   EvitaTeclado,
   SelectorOpcion,
@@ -130,11 +130,11 @@ export default function DespensaReclamo() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo={t('despensa.reclamoTitulo')}
-        atras
-        onAtras={() => router.back()}
+        onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
       />
 
       <EvitaTeclado>

@@ -46,10 +46,11 @@
  * apagado dice qué falta · error dice qué pasó · voz de familia.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Linking, Pressable, View } from 'react-native';
 import { router, useNavigation } from 'expo-router';
 import {
+  Cabecera,
   Boton,
   Casilla,
   Campo,
@@ -1014,8 +1015,8 @@ export default function DespensaCheckout() {
            veces. La única salida es Tus pedidos. */
         /* Ni en el éxito ni en la espera hay atrás: volver al checkout de una
            compra ya disparada sería una puerta a pagar dos veces. */
-        <Encabezado
-          variante="navegacion"
+        <Cabecera
+          variante="empujada"
           /* 🔴 El título del HEADER es corto a propósito: «Estamos confirmando tu
              pago» **se truncaba en pantalla** («…tu pa…»), y un título cortado
              en el momento en que la familia acaba de entregar su tarjeta es

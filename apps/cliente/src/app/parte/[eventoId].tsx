@@ -31,7 +31,7 @@ import {
   Boton,
   Celda,
   CeldaNavegacion,
-  Encabezado,
+  Cabecera,
   Entrada,
   Esqueleto,
   EsqueletoGrupo,
@@ -115,7 +115,7 @@ export default function ParteConsultaScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={[]}>
-      <Encabezado variante="navegacion" titulo={titulo} atras onAtras={() => router.back()} />
+      <Cabecera variante="empujada" titulo={titulo} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
 
       {estado === 'cargando' ? (
         <View style={{ padding: spacing[4], gap: spacing[4] }}>

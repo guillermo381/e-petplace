@@ -35,7 +35,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
   Celda,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -74,7 +74,7 @@ export default function PagosCuenta() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('cuenta.pagos')} atras onAtras={() => router.back()} />
+      <Cabecera variante="empujada" titulo={t('cuenta.pagos')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
 
       <ScrollView contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[5] }}>
         {pagos === 'cargando' ? (

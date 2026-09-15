@@ -68,13 +68,14 @@
  *    ahí junto a los otros cómputos del expediente.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import {useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  Cabecera,
   Boton,
   Encabezado,
   Entrada,
@@ -200,7 +201,7 @@ export default function PlanDeVacunas() {
   if (perfil === 'cargando') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" titulo="" atras onAtras={() => router.back()} />
+        <Cabecera variante="empujada" titulo="" onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
         <View style={{ padding: spacing[5], gap: spacing[5] }}>
           <EsqueletoGrupo etiqueta={t('planVacunas.cargando')}>
             <View style={{ flexDirection: 'row', gap: spacing[4] }}>

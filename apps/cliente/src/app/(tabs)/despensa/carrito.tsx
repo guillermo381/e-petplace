@@ -40,7 +40,7 @@ import { router, useFocusEffect } from 'expo-router';
 import {
   Boton,
   Celda,
-  Encabezado,
+  Cabecera,
   Hoja,
   EstadoVacio,
   SelectorDestinoItem,
@@ -352,11 +352,11 @@ export default function DespensaCarrito() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo={t('despensa.carritoTitulo')}
-        atras
-        onAtras={() => router.back()}
+        onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
       />
 
       {items.length === 0 ? (

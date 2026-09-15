@@ -63,7 +63,7 @@ import {
   AceptacionDeDocumentos,
   Boton,
   Campo,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -186,7 +186,7 @@ export default function DocumentosGuarderia() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" atras titulo={t('documentosGuarderia.titulo')} onAtras={() => router.back()} />
+      <Cabecera variante="empujada" titulo={t('documentosGuarderia.titulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
 
       <ScrollView contentContainerStyle={{ padding: spacing[5], gap: spacing[4], paddingBottom: insets.bottom + spacing[8] }}>
         {carga.fase === 'cargando' ? (

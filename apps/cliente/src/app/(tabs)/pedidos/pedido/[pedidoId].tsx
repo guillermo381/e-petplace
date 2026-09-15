@@ -45,7 +45,7 @@ import {
   Celda,
   CeldaNavegacion,
   CodigoAEscala,
-  Encabezado,
+  Cabecera,
   EscaleraEstados,
   Esqueleto,
   EsqueletoGrupo,
@@ -307,11 +307,11 @@ export default function DespensaPedido() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo={t('despensa.pedidoTitulo')}
-        atras
-        onAtras={() => router.back()}
+        onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
       />
 
       <ScrollView

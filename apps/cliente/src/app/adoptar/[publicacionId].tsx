@@ -60,7 +60,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import {
   Boton,
   Convivencia,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -419,11 +419,11 @@ export default function PantallaFichaAdoptable() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo={estado.fase === 'listo' ? estado.ficha.nombre : t('fichaAdoptable.titulo')}
-        atras
-        onAtras={() => (router.canGoBack() ? router.back() : router.replace('/adoptar'))}
+        onVolver={() => (router.canGoBack() ? router.back() : router.replace('/adoptar'))}
+        etiquetaVolver={t('comun.volver')}
       />
 
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}>

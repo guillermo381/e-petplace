@@ -58,7 +58,7 @@ import { router, useFocusEffect } from 'expo-router';
 import {
   Boton,
   Celda,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -192,7 +192,7 @@ export default function LogVeterinaria() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('logVet.titulo')} atras onAtras={() => router.back()} />
+      <Cabecera variante="empujada" titulo={t('logVet.titulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
 
       <ScrollView
         ref={scrollRef}

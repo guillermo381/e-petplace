@@ -12,7 +12,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -55,7 +55,7 @@ export default function DireccionCuenta() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('direccion.titulo')} atras onAtras={() => router.back()} />
+      <Cabecera variante="empujada" titulo={t('direccion.titulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
 
       {estado === 'cargando' ? (
         <View style={{ padding: spacing[5] }}>

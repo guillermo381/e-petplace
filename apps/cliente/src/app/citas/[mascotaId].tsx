@@ -42,7 +42,7 @@ import {
   Celda,
   CeldaNavegacion,
   CitaEnVivo,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -532,7 +532,7 @@ export default function CitasDeMascota() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={[]}>
-      <Encabezado variante="navegacion" titulo={titulo} atras onAtras={() => router.back()} />
+      <Cabecera variante="empujada" titulo={titulo} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
       <ScrollView contentContainerStyle={{ padding: spacing[4], gap: spacing[4], paddingBottom: insets.bottom + spacing[8] }}>
         {/* Presupuestos pendientes — ARRIBA del detalle de la cita. Aparecen
             aunque no haya cita activa (el presupuesto vive por su cuenta). */}

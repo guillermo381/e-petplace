@@ -26,7 +26,7 @@ import {
   Boton,
   Campo,
   Celda,
-  Encabezado,
+  Cabecera,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -308,7 +308,7 @@ export default function BitacoraFamilia() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('adiestramiento.bitacoraTab')} atras onAtras={() => router.back()} />
+      <Cabecera variante="empujada" titulo={t('adiestramiento.bitacoraTab')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[4] }}>
         {/* §7 — registrar cuesta segundos, cero gamificación (LOYALTY §5) */}
         {
