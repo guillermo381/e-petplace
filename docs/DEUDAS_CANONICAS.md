@@ -35616,3 +35616,161 @@ Y el costo es el de la casa: **`L-223` dice que el peaje está en la PETICIÓN, 
 **El cuerpo salió y la lápida quedó en su lugar** (`brand/RitualDeEntrada.tsx`). **Y al retirarla apareció `LLEGADA`, que era su única lectora**: murió con ella. *Una pieza sin consumidores casi nunca está sola — arrastra la constante, el token o el helper que existían sólo para ella, y ésos no aparecen en ningún censo de consumidores porque no son piezas.*
 
 **☠️ MUERTE — MUERTA.**
+
+---
+
+## `D-1122` ☠️ — LA MARCA DE AGUA DE LOS PAPELES TIENE QUE SER EL **LOGO COMPLETO**, no el isotipo — medido, con una opción que rinde
+
+**Estado:** **CERRADA** — medida, aprobada por el founder, cableada y desplegada (14-sep-2026) · **Dueño: A**.
+**Origen:** recorrido 5 del founder (14-sep-2026): rechaza el isotipo derivado en los seis papeles, igual que lo rechazó en pantalla. **Pide el logo completo: la nariz con «e-PetPlace» debajo y su bajada.**
+
+> **No se cableó nada.** Lo que sigue es la medición y una recomendación; *lo que hoy está cableado ya tiene su veredicto —el founder dijo que no— y lo que venga tiene que pasar por su ojo antes de entrar.*
+
+### ① ¿Rinde el logo como vector consumible por `pdf-lib`? **NO**, y con estos números
+
+`packages/ui/assets/marca/logo.svg`, medido:
+
+| | logo | isotipo (el que ya falló) |
+|---|--:|--:|
+| `<path>` | **1.310** | 268 |
+| `<clipPath>` | **1.090** | 229 |
+| con `transform` | 197 | 38 |
+| colores de `fill` | **133** | 28 |
+| caracteres de todos los `d` | **408.486** | 70.889 |
+
+**`drawSvgPath` toma UN `d` con UN relleno.** Aplanado a un solo path —1.113 subpaths, 271.072 caracteres— **salen dos rectángulos grises**, igual que con el isotipo: *el dibujo no vive en los paths, vive en los 1.090 clips.*
+
+⚠️ **Y `<text>` = 0**: el texto **ya está trazado a paths**. Eso contesta la duda que B había dejado abierta (*«es probable pero no está probado»*) — **pero no ayuda**: son paths de un trazado de bitmap, no letras vectoriales limpias.
+
+### ② `embedPng` — y acá hay una salida, con su número
+
+| fuente | píxeles | **dpi a 380 pt de ancho** |
+|---|--:|--:|
+| `logo@3x.png` (lo que existe hoy) | 600 | **113,7** |
+| **rasterizando el propio `logo.svg`** | **1.706** | **323,2** |
+
+🔴 **La clave, y es lo que da vuelta la opción ②:** el SVG es un **trazado vectorial** — aunque haya nacido de un bitmap, **sus paths son matemáticos**, así que rasterizarlo a 1.706 px da una imagen **nítida**, no una ampliación. *El techo de 113 dpi no era del logo: era del PNG que alguien exportó a 600 px.*
+
+**300 dpi pedía 1.583 px. Se rasterizó a 2.000 y el dibujo ocupa 1.706 ⇒ 323 dpi, por encima del piso de impresión.**
+
+### La recomendación: **el logo rasterizado a 323 dpi, EN GRIS**
+
+**Y el gris no es un gusto: es la letra de `papel.ts`**, que dice *«EN TINTA CON OPACIDAD — no en color (el matiz muere impreso: verdeVital, teal y oro caen al MISMO gris)»*. El logo a color al 6 % deja un rosa pálido; **en gris queda neutro y se lee igual de bien** — nariz, wordmark y bajada, los tres.
+
+### ⚠️ EL LÍMITE DE MI PROPIA MEDICIÓN, declarado
+
+**Mi inspección tope es ~205 dpi** (`qlmanage` sobre un A4). ⇒ **NO puedo distinguir 113 de 323 dpi mirando una pantalla**: las dos se ven nítidas en mi render. **La decisión entre las dos la toma el NÚMERO, no mi ojo** — y el número dice que 113 está por debajo del piso de impresión y 323 por encima.
+
+*Lo que mi ojo sí puede decir, y dice: el logo completo al 6 % se lee, no pelea con el contenido, y llena la página mejor que el isotipo solo.*
+
+### Lo que esto NO resuelve
+
+- **El pasaporte no entra**, y por tercera vez lo confirmo del objeto: `pasaporte` devuelve **HTML**, `pasaporte-html.ts` **no importa `papel.ts`** —sólo lo nombra en un comentario de su cabecera— y tiene **cero** referencias a isotipo, svg o path. *Los papeles con marca de agua son SEIS, y el pasaporte no es uno de ellos.*
+- **Los otros cinco papeles no se generaron.** Comparten `marcaDeAgua` por construcción, pero *compartir una función no es haber corrido su camino*.
+- **El PNG hay que depositarlo:** hoy el rasterizado vive en un scratchpad. Si el founder aprueba, entra al árbol como asset y `papel.ts` pasa de `drawSvgPath` a `embedPng`, **con el peso declarado** (~278 KB, contra 5 KB del path actual — *y eso multiplica por seis, uno por cada papel que lo embeba*).
+
+### ✅ APROBADA Y CABLEADA (14-sep-2026) — con las tres condiciones corridas
+
+**Firma del founder:** el logo completo, rasterizado del propio SVG a 323 dpi, **en gris al 6 %**, como marca de agua de los seis papeles.
+
+#### ① LOS SEIS, generados y mirados — no uno
+
+*«Compartir la función no es haber corrido el camino»* ⇒ cada uno se pidió por **su propia puerta**:
+
+| papel | cómo se corrió | bytes |
+|---|---|--:|
+| **carnet de vacunas** | camino real de la app (Thor, folio `F-2026-000076`) | 392.649 |
+| **historia clínica** | camino real de la app (Thor) | 197.947 |
+| **ficha de identidad** | camino real de la app (Thor) | 259.917 |
+| **receta** | camino real de la app (Thor, ref = la cita con medicación prescrita) | 194.307 |
+| **certificado de salud** | **su propio compositor** — ver abajo | 194.899 |
+| **RIDE fiscal** | **su compositor con el canónico REAL** de una factura autorizada | 197.242 |
+
+⚠️ **Los dos últimos no pasaron por su HTTP, y la razón de cada uno es distinta y vale escribirla:**
+- **El certificado no tiene camino real: `certificado_salud` tiene CERO filas en toda la base.** *Nadie emitió uno nunca.* Se corrió `componerCertificado` con fixture — **y es el que más importaba mirar, porque monta la marca en su propio punto de montaje**, no por `Papel`. Sale con el logo.
+- **El RIDE rebotó `401` con la sesión que tengo**: esa factura no es de esta cuenta. Se corrió `rideDesdeCanonico` con **el canónico real de una factura autorizada** traído de `documentos_fiscales` — o sea su render entero, sólo sin el guard de sesión.
+
+#### ② EL PESO — y la respuesta a «¿se puede compartir desde un solo lugar?»: **NO, y está medido**
+
+🔴 **Primero, el hallazgo que decidió la forma: un binario NO viaja.** Con el PNG como archivo en `_shared/` y `Deno.readFile`, la edge desplegada devuelve **500**. *El deploy sube el SOURCE de la función; un `.png` al lado no es source.* ⇒ el asset viaja como **base64 en un `.ts`**.
+
+| | número |
+|---|--:|
+| PNG en gris | **176.448 bytes** |
+| su base64 en el `.ts` | **235.264 caracteres** |
+| **los seis lo llevan adentro** | **~1,3 MB repartidos en seis despliegues** |
+| lo que crece cada PDF | **+187.796 bytes** (el carnet: 204.855 → 392.651) |
+
+**`_shared/` se empaqueta DENTRO de cada función que lo importa: compartir el archivo en el REPO no comparte los bytes en el DESPLIEGUE.**
+
+**La única vía que daría UNA sola copia —hostearlo en Storage y buscarlo en cada render— se descartó con su razón:** agrega un viaje de red **por documento** y **un modo de falla nuevo** — si el fetch se cae, o el papel sale sin marca (falla silenciosa) o no sale (*un documento que no se imprime porque falló un adorno*). ⇒ **los bytes se pagan una vez por DESPLIEGUE; el fetch se pagaría una vez por DOCUMENTO, y con un modo de falla encima.**
+
+⚠️ **Y un número que sorprende, medido:** achicar el PNG a los 1.583 px de los 300 dpi exactos lo **engorda** a 210.564 bytes — *el remuestreo mete ruido que comprime peor*. **El original de 1.706 px es a la vez más nítido y más liviano que su versión recortada.**
+
+#### ③ EL PATH, RETIRADO CON LÁPIDA
+
+☠️ En `_shared/papel.ts`, con los dos que vivieron ahí tachados: ~~el del Manual de Marca~~ (S90 → S116) y ~~el `isotipo-v5`~~ (S116, que duró unas horas). **Y los dos brazos que `verify:isotipo-path` tenía sobre el papel se retiran enteros**, no se dejan en verde: *un brazo que vigila una copia que ya no existe da verde por ausencia y se lee como «están sincronizados».* El gate sigue midiendo la pieza de `packages/ui`, donde el path v5 **sí** está vivo.
+
+**☠️ MUERTE — MUERTA.** Las seis desplegadas y el carnet real de Thor verificado bajando de la edge viva.
+
+---
+
+## `D-1123` 🟠 — EL CLIENTE **FUERZA EL TEMA CLARO** hasta después de F&F, y el censo dice dónde está el trabajo del día que se calibre
+
+**Estado:** el forzado **HECHO** · el oscuro **abierto, con su lista** · **Dueño: B** (los temas son de `packages/ui`) · **📅 revisión: después de Friends & Family.**
+**Origen:** recorrido 5 del founder (14-sep-2026) — teléfono en oscuro, el Hogar **barra blanca, acento rosa pálido, tarjeta ciruela sobre ciruela**.
+
+> **Firma de la mesa:** el cliente fuerza el claro. **El tema oscuro sigue existiendo, isomorfo y sin calibrar, como dice la letra.**
+
+### El forzado: en el ÚNICO lugar donde el tema se resuelve
+
+`apps/cliente/src/app/_layout.tsx` — la lectura del sistema queda **intacta al lado**:
+
+```tsx
+const colorSchemeDelSistema = useColorScheme();
+const FORZAR_CLARO = true; // ← se quita esta línea y su uso, y el oscuro vuelve
+const colorScheme = FORZAR_CLARO ? 'light' : colorSchemeDelSistema;
+```
+
+*El día que se calibre, esto vuelve quitando una línea — no hay que reconstruir la resolución del tema, que es exactamente lo que un forzado esparcido por las pantallas haría imposible.*
+
+### 🔴 EL CENSO — y da vuelta la pregunta
+
+**Lo que la mesa pidió contar: los valores del cliente fijos al claro. Son SIETE, y sólo DOS son de un token que cambia con el tema.**
+
+| archivo:línea | token |
+|---|---|
+| `apps/cliente/src/app/index.tsx:75` | `palette.magentaAccion` (fondo del splash) |
+| `apps/cliente/src/components/logo-franquicia.tsx:47` | `palette.white` (la marca de DeUna) |
+
+**En TODO el cliente hay 12 menciones de `palette.*`, y cinco son el nombre del archivo.** ⇒ **el cliente no es el problema: lee el tema casi en todos lados.**
+
+### ⇒ El problema está en el TEMA OSCURO, y acá está su lista
+
+**`packages/ui/src/themes/dark.ts` contra `light.ts`, slot por slot:**
+
+| | |
+|---|--:|
+| slots en `light` | **69** |
+| slots en `dark` | **44** |
+| **declarados SÓLO en light** | **25** |
+| con valor distinto | 40 |
+| **el claro usa un token v5 y el oscuro NO** | **30** |
+
+**Y explica los tres síntomas del founder, uno por uno:**
+
+- **«acento rosa pálido»** ⇒ `accent.cta` · `brand` · `active` · `hito` · `marcaEleccion` · `atmosfera` · `activoLleno`: **claro `magentaAccion`, oscuro `magentaLuz`.**
+- **«tarjeta ciruela sobre ciruela»** ⇒ `capaBg.identidad` · `cuidado` · `comunidad` · `comunidadAmplia`: **claro `rosaTinte`, oscuro `rosaSobreCiruela`** — *el tinte de la tarjeta y el fondo de la pantalla salen del mismo lado.*
+- **«barra blanca»** ⇒ entre los **25 que el oscuro no declara** están `overlay` · `hundido` · `border` · `secondary` · `apoyada` · `default` · `presente` · `subtle`. *Un slot que el tema no declara no falla: cae a lo que haya, y lo que hay es del claro.*
+
+**Los ocho glifos de oficio son el caso más limpio:** `vet · grooming · walking · boarding · store · insurance · wearable · adoption` — **claro `tintaV5`, oscuro `light0`**. *El rediseño les dio su tinta nueva y el oscuro se quedó con la vieja.*
+
+### Los dos censos quedan como comandos, no como esta lista
+
+`node scripts/censo-tema-claro.cjs` · `node scripts/censo-tema-oscuro.cjs`
+
+*Porque esta lista es derivada y va a envejecer —la casa ya lo pagó cinco veces— y porque el día que alguien calibre necesita el número de ESE día, no el de hoy.*
+
+⚠️ **Y lo que los censos NO miden, declarado:** que un valor que SÍ sale del tema esté **bien elegido**. *Un slot declarado en los dos temas con dos colores que no contrastan pasa los dos censos y se ve mal igual* — eso lo dice `verify:contrast` sobre los pares, y el ojo sobre la pantalla.
+
+**☠️ MUERTE:** cuando el oscuro declare sus 69 slots calibrados contra el v5, `FORZAR_CLARO` se quite, y el founder mire el Hogar en oscuro y lo firme.

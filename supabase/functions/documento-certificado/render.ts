@@ -22,7 +22,7 @@ import { PDFDocument, StandardFonts, rgb } from './deps.ts';
 // plantilla compartida. Montarla acá es exactamente lo que el punto de
 // montaje de abajo pedía; dibujarla a ojo sería el «cada uno la suya» que
 // §6 del método evita. (El verify local la resuelve con el mismo hook.)
-import { marcaDeAgua, AIRE_BAJO_FILETE } from '../_shared/papel.ts';
+import { marcaDeAgua, embebeMarcaDeAgua, AIRE_BAJO_FILETE } from '../_shared/papel.ts';
 
 const TINTA = rgb(0.133, 0.118, 0.098); // #221E19 — 16.56:1 sobre blanco
 const TINTA_SUAVE = rgb(0.435, 0.427, 0.416); // #6F6D6A — 5.16:1, AA
@@ -100,6 +100,11 @@ export async function componerCertificado(d: DatosCertificado): Promise<Uint8Arr
   const sans = await pdf.embedFont(StandardFonts.Helvetica);
   const sansBold = await pdf.embedFont(StandardFonts.HelveticaBold);
   const mono = await pdf.embedFont(StandardFonts.Courier);
+  /* La marca de agua pasó de path a IMAGEN (`D-1122`), y embeber es
+     asíncrono mientras `banda()` es síncrona ⇒ se embebe acá, una vez, y
+     `banda()` sólo dibuja. *Este render monta la marca en su propio punto de
+     montaje —eso no cambió—; lo que cambia es de dónde sale el dibujo.* */
+  const marca = await embebeMarcaDeAgua(pdf);
 
   const A4: [number, number] = [595.28, 841.89];
   const MX = 56; // ≈20 mm
@@ -125,7 +130,7 @@ export async function componerCertificado(d: DatosCertificado): Promise<Uint8Arr
     // Una sola llamada, después de la banda y antes de todo contenido, para
     // que quede DEBAJO del texto. El dibujo y su opacidad viven en
     // `_shared/papel.ts` — un solo lugar para ajustarla tras el gate impreso.
-    marcaDeAgua(page);
+    marcaDeAgua(page, marca);
   };
   const nuevaPagina = () => {
     page = pdf.addPage(A4);

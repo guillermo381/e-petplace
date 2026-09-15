@@ -41,6 +41,7 @@
 
 import { PDFDocument, StandardFonts, rgb } from 'npm:pdf-lib@1.17.1';
 import { QUIET, matrizQr } from './qr.ts';
+import { MARCA_AGUA_LOGO_B64 } from './marca-agua-logo.ts';
 import type { PDFFont, PDFPage } from 'npm:pdf-lib@1.17.1';
 
 export const TINTA = rgb(0.133, 0.118, 0.098); // #221E19 — 16.56 sobre blanco
@@ -53,24 +54,51 @@ export const A4: [number, number] = [595.28, 841.89];
 export const MX = 56.7; // 20 mm
 const BANDA_ALTO = 34;
 
-/* EL ISOTIPO v5 COMO PATH — fuente única: packages/ui/src/brand/isotipo-v5-path.ts
-   (S116-B, `D-1107`). Es UNA silueta de UN color, que es exactamente lo que
-   `drawSvgPath` sabe dibujar: toma un `d` y un relleno — no resuelve clips, no
-   compone capas, no tiene z-order. *El SVG del ilustrador trae 268 paths y 229
-   clipPaths y NO le sirve: aplanado a un solo `d` salen rectángulos.*
+/* ══════════════════════════════════════════════════════════════════════
+   ☠️ **ACÁ VIVÍA EL ISOTIPO COMO PATH, Y MURIÓ EN EL RECORRIDO 5 (`D-1122`).**
 
-   ⚠️ EL LIENZO DEL ARCHIVO ES CUADRADO (1254×1254) Y EL DIBUJO OCUPA UNA BANDA
-   ADENTRO. Por eso el encuadre usa la CAJA MEDIDA del contenido y no el
-   viewBox: con el cuadrado la marca queda flotando con un aire arriba y abajo
-   que nadie puede explicar después. *Un viewBox no dice dónde está el dibujo:
-   dice cuál es el papel.*
+   Vivieron dos: ~~el del Manual de Marca~~ (S90 → S116) y ~~el `isotipo-v5`~~
+   (S116, que duró unas horas). **El founder rechazó el segundo en pantalla y
+   después en papel**, y la razón es la misma las dos veces: *el isotipo solo
+   no es la marca — la marca es la nariz CON «e-PetPlace» y su bajada.*
 
-   ⚠️ Y el aspecto CAMBIÓ: 627×372 = 1,685 contra el 471,82×324 = 1,456 del
-   viejo. Quien reemplace números sueltos acá sin mirar la página va a dejar la
-   marca estirada — y a 6 % de opacidad eso no se ve hasta que se imprime. */
-const ISO_CAJA = { x: 339, y: 393, ancho: 627, alto: 372 };
-const ISOTIPO_PATH_D =
-  'M 384.941406 645.476562 C 402.046875 653.03125 426.664062 660.0625 446.941406 660.0625 L 468.824219 660.0625 C 499.714844 660.0625 540.070312 635.195312 526.328125 599.835938 C 512.589844 564.46875 466.855469 570.96875 449.675781 598.078125 C 448.9375 599.242188 448.519531 600.519531 447.851562 601.722656 C 446.6875 601.523438 446.558594 599.160156 447.851562 598.988281 C 450.535156 567.457031 487.175781 546.382812 517.347656 552.300781 C 547.519531 558.214844 570.613281 588.386719 566.382812 620.863281 C 566.035156 623.5 565.351562 625.09375 564.558594 627.246094 C 556.957031 661.566406 517.449219 681.027344 485.234375 681.027344 C 480.3125 681.5 474.632812 681.691406 469.734375 681.027344 C 468.550781 681.027344 467.265625 681.171875 466.089844 681.027344 C 470.363281 684.570312 471.550781 694.117188 476.191406 698.273438 C 480.832031 702.429688 482.664062 709.164062 487.285156 713.613281 C 491.910156 718.070312 495.191406 723.757812 500.050781 728.199219 C 504.902344 732.636719 508.394531 737.066406 513.726562 740.960938 C 519.070312 744.84375 523.777344 748.953125 529.703125 752.335938 C 535.628906 755.71875 541.28125 757.949219 547.949219 760.53125 C 554.601562 763.117188 563.320312 765.070312 570.941406 764.886719 C 578.566406 764.703125 587.628906 764.640625 594.027344 761.53125 C 600.429688 758.425781 607.46875 757.292969 612.65625 752.808594 C 617.851562 748.324219 622.136719 745.296875 626.558594 740.277344 C 642.023438 713.121094 650.085938 682.53125 652.089844 650.945312 C 656.585938 684.964844 664.1875 720.113281 683.089844 749.390625 C 707.855469 772.160156 752.867188 767.523438 779.054688 748.707031 C 805.25 729.902344 823.320312 707.085938 839.003906 680.113281 C 802.121094 685.265625 762.933594 674.246094 743.90625 641.191406 C 724.867188 608.148438 742.199219 567.003906 777.066406 554.386719 C 811.941406 541.78125 853.976562 563.046875 859.0625 600.8125 C 848.175781 579.207031 821.917969 570.027344 799.597656 578.734375 C 777.269531 587.4375 766.691406 616.515625 782.402344 636.433594 C 798.109375 656.351562 821.851562 660.871094 846.296875 660.972656 C 870.742188 661.074219 896.800781 652.46875 918.328125 645.476562 C 945.1875 624.273438 964.828125 587.96875 964.828125 554.324219 L 964.828125 541.5625 C 964.828125 452.769531 868.863281 393.894531 788.855469 393.894531 L 770.621094 393.894531 C 767.328125 393.894531 763.863281 393.582031 760.589844 393.894531 C 741.808594 395.652344 720.648438 400.949219 702.859375 404.539062 C 685.058594 408.128906 669.488281 422.40625 651.242188 420.261719 C 633.007812 418.113281 619.257812 405.789062 600.730469 402.398438 C 582.203125 399.007812 561.613281 393.894531 541.765625 393.894531 L 519.882812 393.894531 C 457.089844 393.894531 399.128906 423.089844 362.375 475.246094 C 325.628906 527.414062 335.429688 603.179688 384.941406 645.476562 Z M 771.53125 417.59375 C 773.585938 417.253906 776.191406 416.679688 778.828125 416.679688 C 794.964844 416.679688 815.351562 418.839844 829.949219 422.085938 C 844.558594 425.324219 859.0625 431.949219 870.988281 438.484375 C 882.914062 445.011719 893.910156 455.457031 902.601562 463.398438 C 911.289062 471.335938 930.109375 490.714844 913.769531 496.894531 C 911.289062 497.835938 909.820312 497.816406 907.386719 496.894531 C 895.453125 492.382812 891.101562 476.960938 879.351562 470.234375 C 867.597656 463.507812 858.351562 454.042969 844.402344 449.570312 C 830.460938 445.085938 815.453125 439.195312 799.597656 438.757812 C 783.742188 438.328125 762.222656 438.421875 746.914062 441.292969 C 731.597656 444.164062 717.675781 448.628906 703.132812 453.125 C 688.578125 457.617188 675.859375 465.3125 660.296875 465.902344 C 656.121094 466.496094 651.6875 466.707031 647.53125 465.902344 C 635.558594 464.957031 625.203125 460.371094 614.085938 456.496094 C 602.980469 452.621094 592.359375 449.203125 580.769531 446.050781 C 569.183594 442.90625 556.820312 440.972656 544.492188 439.476562 C 532.171875 437.984375 514.714844 438.375 502.558594 439.46875 C 490.40625 440.5625 477.714844 444.117188 466.980469 447.65625 C 456.242188 451.183594 447.359375 456.679688 438.507812 462.03125 C 429.664062 467.390625 420.746094 474.382812 413.890625 481.171875 C 407.042969 487.964844 397.90625 503.953125 388.359375 494.390625 C 378.8125 484.816406 393.445312 475.191406 399.300781 467.5 C 405.152344 459.816406 414.765625 453.277344 422.960938 447.398438 C 431.148438 441.511719 440.046875 434.9375 450.316406 430.984375 C 460.570312 427.035156 471.429688 423.078125 483.109375 420.9375 C 494.800781 418.804688 509.925781 416.507812 522.617188 416.679688 C 535.308594 416.855469 550.617188 418.140625 562.746094 420.316406 C 574.863281 422.503906 585.988281 424.792969 597.402344 428.511719 C 608.828125 432.222656 618.847656 434.949219 629.914062 439.761719 C 640.976562 444.574219 654.988281 446.398438 666.878906 443.316406 C 678.777344 440.234375 687.414062 436.425781 698.792969 432.378906 C 710.179688 428.332031 721.285156 425.714844 733.257812 423.078125 C 745.238281 420.453125 758.933594 418.277344 771.53125 417.59375 Z';
+   🔴 **Y por qué no se reemplazó un path por otro, que es lo que se intentó
+   primero:** el logo del ilustrador **no es un path**. Medido: **1.310
+   `<path>`, 1.090 `<clipPath>`, 197 con `transform`, 133 colores de relleno y
+   408.486 caracteres de `d`**. `drawSvgPath` toma UN `d` con UN relleno ⇒
+   aplanado a un solo path **salen dos rectángulos**: *el dibujo vive en los
+   clips, no en los paths.*
+
+   ⇒ **la marca de agua pasa a ser una IMAGEN.** Lo que lo hace posible sin
+   perder calidad: el SVG es un TRAZADO VECTORIAL —aunque nació de un bitmap,
+   sus paths son matemáticos— así que **rasterizarlo da una imagen nítida, no
+   una ampliación**. *El techo de 113 dpi que tenía el `@3x` no era del logo:
+   era del PNG que alguien exportó a 600 px.*
+
+   Su historia completa, con los números de las dos opciones: `D-1122`.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/** EL ASSET DE LA MARCA DE AGUA — el logo completo, en GRIS.
+ *
+ *  **1.706 × 1.233 px ⇒ 323 dpi** al ancho de la marca (380 pt), por encima
+ *  del piso de impresión de 300. **176.448 bytes.**
+ *
+ *  ⚠️ **GRIS y no color, y no es gusto: es la letra de esta misma cabecera** —
+ *  *el matiz muere impreso*. A color al 6 % el logo deja un rosa pálido; en
+ *  gris queda neutro y se lee igual: nariz, wordmark y bajada.
+ *
+ *  ⚠️ **Y 1.706 px no es «más grande por las dudas»: es que ACHICARLO ENGORDA.**
+ *  Medido: bajarlo a los 1.583 px que piden los 300 dpi exactos lo lleva a
+ *  **210.564 bytes** —el remuestreo mete ruido que comprime peor—. *El original
+ *  es a la vez más nítido y más liviano que su versión recortada.* */
+/* El asset viaja en base64 y NO como archivo: el binario en `_shared/` NO
+   llega a la función desplegada — medido, da 500. El porqué, el peso y las dos
+   opciones descartadas viven en la cabecera de `marca-agua-logo.ts`. */
+const MARCA_AGUA_BYTES = Uint8Array.from(
+  atob(MARCA_AGUA_LOGO_B64),
+  (c) => c.charCodeAt(0),
+);
+
 
 export function fechaLarga(iso: string | null): string {
   if (!iso) return '—';
@@ -96,18 +124,30 @@ export const AIRE_BAJO_FILETE = 10;
  *  Exportada para que el certificado (render de D) la monte en su punto de
  *  montaje sin redibujarla — «cada uno la suya» es lo que §6 evita. */
 // deno-lint-ignore no-explicit-any
-export function marcaDeAgua(page: any): void {
+/** Embebe el logo UNA VEZ por documento. **Se separa del dibujo porque
+ *  embeber es asíncrono y dibujar no**: los dos consumidores llaman a
+ *  `marcaDeAgua` desde funciones síncronas (`nuevaPagina` acá, `banda` en el
+ *  certificado), y volverlas asíncronas rippleaba por todo el render.
+ *
+ *  ⚠️ **Una imagen de pdf-lib pertenece a SU documento** — por eso esto no se
+ *  puede cachear entre documentos, y por eso se embebe una vez por papel y no
+ *  una vez por página. */
+// deno-lint-ignore no-explicit-any
+export async function embebeMarcaDeAgua(pdf: any): Promise<any> {
+  return await pdf.embedPng(MARCA_AGUA_BYTES);
+}
+
+/** LA MARCA DE AGUA: el logo completo al centro, en gris, al 6 %.
+ *  Se dibuja ANTES del contenido de la página. */
+// deno-lint-ignore no-explicit-any
+export function marcaDeAgua(page: any, marca: any): void {
   const ancho = 380;
-  const escala = ancho / ISO_CAJA.ancho;
-  const alto = ISO_CAJA.alto * escala;
-  /* El `d` trae sus coordenadas en el lienzo cuadrado, así que centrar exige
-     descontar dónde arranca el dibujo adentro de ese lienzo — si no, se centra
-     el PAPEL del archivo y el dibujo queda corrido. */
-  page.drawSvgPath(ISOTIPO_PATH_D, {
-    x: (A4[0] - ancho) / 2 - ISO_CAJA.x * escala,
-    y: (A4[1] + alto) / 2 + ISO_CAJA.y * escala, // drawSvgPath: y es el tope
-    scale: escala,
-    color: TINTA,
+  const alto = ancho * marca.height / marca.width;
+  page.drawImage(marca, {
+    x: (A4[0] - ancho) / 2,
+    y: (A4[1] - alto) / 2,
+    width: ancho,
+    height: alto,
     opacity: OPACIDAD_MARCA_AGUA,
   });
 }
@@ -125,9 +165,15 @@ export class Papel {
   page!: PDFPage;
   y = 0;
 
+  /** El logo embebido, UNA vez por documento (ver `embebeMarcaDeAgua`). */
+  // deno-lint-ignore no-explicit-any
+  marca!: any;
+
   static async crear(): Promise<Papel> {
     const p = new Papel();
     p.pdf = await PDFDocument.create();
+    /* Va ANTES de la primera página: `nuevaPagina()` ya la dibuja. */
+    p.marca = await embebeMarcaDeAgua(p.pdf);
     p.f = {
       sans: await p.pdf.embedFont(StandardFonts.Helvetica),
       sansBold: await p.pdf.embedFont(StandardFonts.HelveticaBold),
@@ -141,7 +187,7 @@ export class Papel {
   nuevaPagina(): void {
     this.page = this.pdf.addPage(A4);
     // La marca de agua va PRIMERO: el contenido siempre queda encima.
-    marcaDeAgua(this.page);
+    marcaDeAgua(this.page, this.marca);
     this.page.drawRectangle({ x: 0, y: A4[1] - BANDA_ALTO, width: A4[0], height: BANDA_ALTO, color: TINTA });
     this.page.drawText('e-PetPlace', {
       x: MX, y: A4[1] - 22, size: 12, font: this.f.sansBold, color: PAPEL,
