@@ -35715,6 +35715,68 @@ Y el costo es el de la casa: **`L-223` dice que el peaje está en la PETICIÓN, 
 
 ---
 
+## `D-1124` 🔴 — PLACES RESPONDE 403 PORQUE **LA EDGE Y EL APK COMPARTEN UNA CLAVE RESTRINGIDA A «ANDROID APPS»**
+
+**Estado:** ABIERTA · **la cura es FIRMA DEL FOUNDER** (la consola de Google es suya, `D-289`) · **A cablea el secret cuando la clave exista.**
+**Origen:** C lo midió contra el objeto (`buzon/S116-C-para-A-places-responde-403.md`); A midió la causa el 15-sep-2026.
+
+### Lo medido, en orden, y ninguna hipótesis quedó viva por descarte
+
+| # | qué se midió | resultado |
+|---|---|---|
+| ① | **desde dónde se llama** | **SOLO la edge `lugares`**, server-side. Cero llamadas a `places.googleapis` en `apps/` y `packages/`; la única puerta es `functions.invoke('lugares')` |
+| ② | **la clave existe** | sí — la edge devuelve `google_rechazo` (502) y no `sin_configuracion` (503), que es su rama de secret ausente |
+| ③ | **clave inválida / vencida / rotada** | ☠️ **DESCARTADA**: Places (New) devuelve **400 `API_KEY_INVALID`**, no 403. Probado dos veces: clave inventada y clave bien formada de otro proyecto. *Y una clave de Google Cloud no vence: no existe ese estado* |
+| ④ | **la misma clave, reproducida** | 🔴 **403 `PERMISSION_DENIED` · `API_KEY_ANDROID_APP_BLOCKED` — «Requests from this Android client application `<empty>` are blocked»** |
+| ⑤ | **¿es la misma clave que la del mapa?** | 🔴 **SÍ.** El `sha256` de `epetplace-maps-key` (llavero) **coincide con el digest del secret `GOOGLE_PLACES_API_KEY`** |
+
+⇒ **LA CAUSA: la clave tiene restricción de aplicación «Android apps».** Una llamada
+server-side no lleva paquete ni SHA-1, así que Google la rechaza **antes de mirar
+nada más**. *No es cuota —eso es 429—, no es la clave vencida —eso es 400—, y la
+app no tiene la culpa: el 403 es correcto y la restricción está haciendo su trabajo.*
+
+⚠️ **LO QUE ESTA MEDICIÓN NO CIERRA:** el bloqueo por restricción dispara **primero**.
+Si se levanta, puede aparecer **un segundo muro** —`SERVICE_DISABLED` si «Places API
+(New)» no está habilitada, o billing— que desde acá **no se puede ver**. *Se dice para
+que nadie lea «ya sabemos por qué» como «con esto alcanza».*
+
+### 🔴 POR QUÉ LA CURA OBVIA ES LA PELIGROSA
+
+La misma clave **viaja horneada en el APK** (`GOOGLE_MAPS_API_KEY`, env secret de EAS
+→ `app.config.ts`). **Hoy está a salvo justamente por esa restricción.**
+
+> **Quitarle la restricción «Android apps» para que la edge funcione convierte la
+> clave que cualquiera puede extraer del APK en una clave sin restricción.**
+> *La factura llega después, y no la vería ningún gate.*
+
+### LA CURA — ES FIRMA DEL FOUNDER, con el paso exacto
+
+**NO se rota nada.** La clave del mapa **se deja como está**. Se crea una **SEGUNDA**:
+
+1. **Google Cloud Console → APIs y servicios → Credenciales → «Crear credenciales» → «Clave de API».** Nombrarla, por ejemplo, `places-server-edge`.
+2. **Restricciones de aplicación: «Ninguna»** — *las IP de salida de Supabase no son estables, así que restringir por IP rompe el día que roten sin avisar.*
+3. **Restricciones de API: «Restringir clave» → SOLO «Places API (New)».** *Ésta es la defensa que reemplaza a la otra: la clave sirve para una sola cosa.*
+4. **APIs y servicios → Biblioteca → «Places API (New)»: confirmar HABILITADA**, y que el proyecto tenga **facturación activa**. (Es el segundo muro de la advertencia de arriba.)
+5. **El valor NO va por chat.** Va al llavero (`epetplace-places-key`) y A lo cablea con `npx supabase secrets set GOOGLE_PLACES_API_KEY=…` desde `supabase/`.
+
+⚠️ **Y lo que NO hay que hacer, escrito para que nadie lo haga de buena fe:** tocar la
+clave del mapa. *Si alguien «arregla» el 403 aflojándole las restricciones, arregla
+Places y abre el APK.*
+
+### La mitad que es de producto y vota C
+
+Hoy `sin_configuracion` **habla** y `google_rechazo` **calla** (`direccion-hogar-form.tsx`):
+*«red/google mientras se tipea: silencio — se sigue a mano»*. **Para la familia son la
+misma cosa: escribió y no pasó nada.** ⇒ voto de C, que A comparte: **que el 403 hable
+con la misma voz** —«la búsqueda no está disponible, escribila a mano y marcá el
+punto»—. *Un fallo que no habla se lee como «esta app no hace eso».*
+✅ **Y ya no bloquea el pago:** C curó el montaje en su tanda 6 — el punto se puede
+marcar a mano y la dirección se guarda sin Places.
+
+**☠️ MUERTE:** la edge `lugares` responde 200 con una clave propia, y la del mapa sigue restringida a Android.
+
+---
+
 ## `D-1123` 🟠 — EL CLIENTE **FUERZA EL TEMA CLARO** hasta después de F&F, y el censo dice dónde está el trabajo del día que se calibre
 
 **Estado:** el forzado **HECHO** · el oscuro **abierto, con su lista** · **Dueño: B** (los temas son de `packages/ui`) · **📅 revisión: después de Friends & Family.**
