@@ -772,4 +772,13 @@ if [ "$TOCA_CLIENTE" != "0" ]; then
     "el splash nativo y el splash JS dejaron de decir el mismo color o el mismo tamano"
 fi
 
+# S116-A lote 8 · el icono de la push. NO va bajo TOCA_CLIENTE: mide las DOS
+# casas, y el defecto que caza no esta en el codigo sino en un PNG --- lo puede
+# meter cualquier commit que toque assets, de cualquier pista.
+if [ "$TOCA_APPS" != "0" ]; then
+  arnes_cliente "verify:icono-notificacion" "scripts/verify-icono-notificacion.mjs" \
+    "node scripts/verify-icono-notificacion.mjs" "D-1093" \
+    "Android dibuja el ALFA del icono: uno con fondo opaco sale como un cuadrado blanco"
+fi
+
 echo "✓ gate verde"
