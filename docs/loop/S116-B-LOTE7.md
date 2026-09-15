@@ -1,85 +1,75 @@
-# S116-B · LOTE 7 — las tres del cierre, y el control del path
+# S116-B · LOTE 7 — el gate de N11″ y el censo de la etiqueta afuera
 
-**Rama `pista/s116-b-05`** (la misma: las piezas viven ahí sin mergear).
-
-**Gates:** `verify:diseno` VERDE — **81 reglas, nace `R91`** · `verify:contrast` 461/0 · `verify:catalogo-v5` VERDE · `verify:reduced-motion` VERDE · **`verify:isotipo-path` VERDE (nace)** · `tsc` 0 en las cuatro superficies.
+**Rama `pista/s116-b-05`.** Gates: `verify:etiqueta-dentro` **NUEVO, verde con sus CUATRO rojos probados** · `verify:diseno` VERDE (80) · `verify:contrast` 504/0 · `verify:catalogo-v5` VERDE (47) · `verify:boton-alto` VERDE · `verify:techos-locales` VERDE · `tsc` 0 en las cuatro.
 
 ---
 
-## ① TARJETAPRODUCTO — las tres curas YA ESTABAN
+## ① FRENO DECLARADO: la enmienda N11″ NO ESTÁ DEPOSITADA
 
-**Medido antes de tocar nada:**
+**Medido el 15-sep-2026 en los tres lugares donde podía estar:**
 
-| lo que el pedido pide | dónde ya estaba |
+| dónde | qué dice |
 |---|---|
-| nombre a dos líneas con elipsis | `numberOfLines={2}` — línea 549 |
-| el botón siempre con su alto | `<Mutacion alto={ALTO_STEPPER_ANCHO}>` |
-| que no ceda el bloque del control | `flexShrink: 0` — línea 741 |
+| `docs/DIRECCION_DISENO_S99.md` de este worktree | **N11′** — *«la etiqueta va AFUERA Y ARRIBA»* |
+| el mismo archivo en `origin/main` (`a3b8a257`) | **N11′** |
+| el mismo archivo en `pista/s116-a-08` (`47fddabc`) | **N11′** |
 
-Las tres se pusieron en **S100d-B con medición de aparato**: el stepper salía a **18,1 dp de sus 36** y `overflow:'hidden'` lo tijereteaba por la mitad.
+Cero ocurrencias de N11″ en los tres. **No me frenó** —el gate se escribe contra el código, que sí tiene el comportamiento— pero **el gate no cita como firmada una letra que no puedo leer**: se funda en el lote 6, que está medido y commiteado.
 
-⇒ **lo que faltaba no era la cura: era que nadie la estuviera mirando.** Y **su modo de falla es el silencio** — quitar cualquiera de las tres compila, se ve bien con nombres cortos, y recorta el control con los largos. El propio comentario de la pieza lo decía: *«esto se midió sobre el bundle viejo y la cura no se vio correr»*.
+⚠️ Y es la ironía exacta que el propio N11′ dejó escrita: *«UNA FIRMA QUE VIVE EN UN PARTE NO ESTÁ FIRMADA… una decisión que no queda escrita en la letra se vuelve a proponer»*. **Si A ya la depositó, es en un commit que no alcanzo; el dato lleva su hora para que se pueda re-medir.**
 
-### Nace `R91` — «ninguna celda corta contenido en silencio»
+## ② EL GATE — `verify:etiqueta-dentro`, cuatro reglas solo-baja
 
-Es la frase del founder hecha exigible. **Su fixture saca UNA sola de las tres** —`flexShrink: 0`, la que más fácil se pierde porque no tiene efecto visible con nombres cortos y parece un estilo sobrante—. *Un fixture que las saca todas prueba que el gate ve un archivo vacío; sacar una prueba que ve la regresión que de verdad puede pasar.*
+🔴 **Existe porque es la TERCERA vuelta de esta ley** (N11 adentro → N11′ afuera → N11″ adentro flotando) **y ninguna dejó instrumento.** *Una ley que se reabre cada vez que alguien la mira de nuevo no está firmada: está en discusión permanente.*
 
-⚠️ **Lo que su verde dice:** «las tres siguen puestas». **JAMÁS** «nada se corta»: `overflow:'hidden'` sigue ahí y **debe** seguir. Lo que la regla sostiene es **quién cede** — el texto, que tiene tope de líneas y degrada legiblemente, y no el control con el que se compra.
+⚠️ **Lo que el gate NO hace, dicho primero: no sostiene la ley — la sostiene LA PIEZA.** Lo que sostiene el gate es que **nadie la saque por las dos puertas de atrás**: dibujarse un rótulo propio, o apagar el de la pieza.
 
-🔴 **Y la auto-prueba me cazó DOS veces escribiéndola:** primero la regla leía el disco en vez del corpus (*un gate que lee el disco no se puede probar en rojo*); después ignoraba el fixture, que llega **por argumento**, y daba verde contra su propio rojo — **«REGLA DECORATIVA»**, dijo el gate. *Las dos veces lo dijo el instrumento, no yo.*
+| regla | baseline | rojo probado |
+|---|--:|---|
+| ① rótulo propio encima de un `<Campo>` | **0** | `<Texto variante="apoyo">Nombre</Texto>` → ✗ 1 |
+| ② `etiquetaVisible={false}` | 6 | uno nuevo → ✗ 7 |
+| ③ `placeholder` dentro de un `<Campo>` | 26 | uno nuevo → ✗ 27 |
+| ④ dos estilos de campo en la misma pantalla | 6 | uno nuevo → ✗ 7 |
 
----
+**Los cuatro con exit 1 y el árbol restaurado byte a byte** (`git status` limpio tras cada prueba).
 
-## ② LA HOJA CRECE HASTA EL PIE
+### 🔴 La regla ① nace protegiendo un CERO, y eso lo decidió MEDIR
 
-**La causa: `minHeight: 400` sin `flexGrow`.** Un mínimo garantiza que no sea **más chica** que 400 y **no dice nada sobre llegar abajo**.
+El censo crudo dio **8 candidatos** —`<Texto>` pegado a un `<Campo>`—. **Al resolver las llaves contra el diccionario, ninguno era un rótulo:**
 
-> *Con contenido largo nadie lo notaba: el defecto sólo existe cuando SOBRA pantalla — que es justo la pantalla con la que nadie prueba.*
+- «Opcional. Si no podemos ubicarte a ti.» · «Escribe el correo con el que entras y te enviamos un código de {{n}} dígitos.» · «Código verificado. Ahora elige tu nueva contraseña.» · «Se une como familiar autorizado: va a poder ver…» · **«DATOS»** (antetítulo de SECCIÓN, no de campo).
 
-Son **dos mitades**: `flexGrow` en la hoja **y** en el `contentContainer` del scroll — *un hijo no puede crecer dentro de un contenedor que mide lo que su contenido*. El `contentContainerStyle` del consumidor **se compone, no se pisa**; lo que no es negociable es el crecimiento, porque de él depende que no asome el fondo.
+*Un gate que marcara los 8 habría nacido con ocho rojos falsos, y un gate ruidoso se apaga.* ⇒ el discriminador **resuelve el texto y lo mide**: ≤3 palabras, sin puntuación final, variante que no sea `antetitulo`/`seccion`. ⚠️ **Si la llave no resuelve, NO se marca y se cuenta aparte** — *un rojo que el autor no puede reproducir es lo que enseña a ignorar un gate.*
 
----
+### ⚠️ Por qué es trinquete y no el TIPO, que sería mejor
 
-## ③ LA PASTILLA SE CORRE — y medirlo eligió cuál de las dos salidas sirve
+La forma final de ③ es **hacerla inexpresable**: `placeholder` sólo legal con `etiquetaVisible={false}`, por unión discriminada, y ahí lo sostiene el compilador sin gate. **Hoy no se puede: hay 26 vivos y el typecheck quedaría en rojo hasta que C los limpie** — frenar a otra pista para ganar prolijidad. ⇒ **el trinquete los baja, y el día que lleguen a 0 este gate MUERE y lo reemplaza el tipo.** *Su condición de muerte está escrita, que es lo que separa un andamio de una deuda.*
 
-El founder ofreció dos: que el aire cubra el ancho, **o** que la pastilla se corra.
+### La excepción por nombre, declarada VACÍA
 
-**`AIRE_RAIZ` es un `paddingBottom`: protege lo que está DEBAJO de una línea. Pero el asistente FLOTA SOBRE EL SCROLL**, así que cualquier cosa pegada al borde derecho pasa por su esquina **en algún punto del recorrido**, no sólo al final.
+N11′ dejó vivo un costo que N11″ no contesta: *«en español el rótulo pesa el doble — "Instrucciones de entrega" encogida es nota al pie»*. El día que ese campo exista, **entra a `EXCEPCION_ROTULO_LARGO` por nombre y con su razón** — no con un disable suelto ni relajando el discriminador. **Hoy está vacía porque ese campo no existe** (medido). *Se escribe vacía a propósito: la puerta tiene que existir ANTES de que alguien la necesite, o se abre a martillazos.*
 
-> **Ningún padding inferior puede proteger a algo que viaja.**
+## ③ EL CENSO — y resultó ser trabajo MÍO, no de C
 
-⇒ la pastilla de `CitaEnVivo` pasa a la **izquierda**, y se decide **en la pieza**: *si cada pantalla eligiera el lado, la misma señal aparecería en dos lugares distintos según dónde esté montada.* Verifiqué antes de moverla que **no había razón firmada para la derecha**.
+**Tras el lote 6 ninguna pantalla del cliente tiene la etiqueta afuera: la pieza la dibuja adentro para toda la casa v5.** Lo que sigue afuera son **las piezas hermanas que no toqué** — `CampoFecha` (2 usos de `EtiquetaDeCampo`) y `CampoCodigo` (3).
 
-Nace **`COLUMNA_ASISTENTE` (112)** — margen 20 + disco 52 + halo 2×16 + respiro 8 — para que la próxima pieza que toque esa esquina no lo teclee.
+🔴 **Y eso rompe N11 literal: *«dos estilos de campo jamás conviven en la misma región de una pantalla»*.** En `carnet.tsx` conviven en **líneas consecutivas**.
 
----
+| pantalla | `Campo` (adentro) | pieza con la etiqueta AFUERA |
+|---|---|---|
+| `app/carnet.tsx` | 634, 635 | **`CampoFecha`:636** ← consecutivas |
+| `app/antiparasitario.tsx` | 203 | `CampoFecha`:283 · 292 |
+| `app/recuerdo.tsx` | 213 | `CampoFecha`:224 |
+| `app/(tabs)/hogar/mascota/despedida.tsx` | 117 | `CampoFecha`:142 |
+| `components/alta/PasoDatosBasicos.tsx` | 250, 298 | `CampoFecha`:291 |
+| `app/recuperar.tsx` | 263, 355 | `CampoCodigo`:319 † |
 
-## ④ EL CONTROL DEL PATH (`D-1107`) — lo que la mesa pidió confirmar
+† **`CampoCodigo` es un caso aparte:** su etiqueta afuera es la **exención vieja declarada** (*«una caja de UN dígito no tiene lugar para un rótulo»*), que N11′ celebró como *«la excepción de ayer es la norma de hoy»*. **Hoy la norma volvió a cambiar y esa exención quedó descolgada** — entra al conteo para que la mesa la vea, no para acusarla.
 
-**`verify:isotipo-path`, VERDE:**
+⚠️ **El dueño de la cura soy YO.** El encargo pedía el censo *«para C»* y lo que encontró es trabajo de `packages/ui`: meter la etiqueta flotante en `CampoFecha` —que no es un `TextInput` sino un selector con hoja— **no es trivial y no estaba pedido en este lote**. *Se instrumenta (regla ④) para que no crezca mientras espera, que es lo único honesto que se puede hacer con una deuda que uno mismo abrió.*
 
-```
-✓  el archivo exporta UN `ISOTIPO_V5_PATH`
-✓  es UNA sola cadena `d`
-✓  NO trae markup: ni `<path`, ni `<g`, ni `clip`
-✓  arranca en un `M` y cierra en `Z` — 5083 caracteres
-✓  tiene subpaths (los huecos del dibujo) dentro de UN path — 2 subpaths
-✓  el SVG del ilustrador NO se entregó tal cual
-   — la fuente tiene 268 paths y 229 clipPaths; lo entregado, 1 path y 0 clips
-✓  declara su viewBox
-✓  declara la caja MEDIDA del contenido
-```
+## ④ AL BUZÓN
 
-**El número de A queda confirmado por el control**: 268 paths · 229 clipPaths en la fuente, y **eso es exactamente lo que `pdf-lib` no puede consumir** — su `drawSvgPath` toma UN `d` y lo dibuja: no resuelve clips, no compone capas, no tiene z-order.
-
-🔴 **Y el control encontró algo de paso: el path no tenía NINGÚN `Z`.** Cerraba implícito por el relleno. Cerré los dos subpaths explícitamente **y verifiqué que el dibujo no cambió: 0 píxeles distintos de 250.000** entre el antes y el después. *Un cierre implícito funciona hasta que alguien lo dibuje con algo que no rellene.*
-
-⚠️ **Lo que su verde dice:** «es UNA silueta consumible por `pdf-lib`». **JAMÁS** «el dibujo es el correcto» — eso lo dijo el ojo sobre el rasterizado. *Un gate no puede mirar.*
-
----
-
-## ⑤ LO QUE QUEDA ABIERTO AL CERRAR LA RAMA
-
-- **La captura de `OndaAcceso` con teclado** sigue sin poder tomarse: 0 consumidores acá, `/gallery` inalcanzable y el prestador instalado no es dev build (los tres medidos en el parte del lote 5b). **C tiene el consumidor en 03.**
-- **Cablear las edges** al `ISOTIPO_V5_PATH`: `supabase/functions/` no es territorio de B.
-- **`R53`**: su declaración muere cuando las cuatro pantallas migren al slot `pie`, no antes.
+- **A** — **la enmienda N11″ no está en `DIRECCION_DISENO_S99` en ninguno de los tres lugares medidos.** Si ya la depositaste, es en un commit que no alcanzo desde acá.
+- **C** — los **26 `placeholder`** del cliente ya no se dibujan en la casa v5 (los apagó el lote 6). Bajarlos es pasar el gate; el listado con archivo y línea sale de `node scripts/verify-etiqueta-dentro.mjs` cuando la regla ③ se pone en rojo.
+- **mesa** — la exención de `CampoCodigo` quedó descolgada por el cambio de norma: **o vuelve a ser excepción escrita, o `CampoCodigo` también lleva la etiqueta adentro.**

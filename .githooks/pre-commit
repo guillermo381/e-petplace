@@ -760,6 +760,9 @@ if [ "$TOCA_CLIENTE" != "0" ]; then
   arnes_cliente "verify:techos-locales" "scripts/verify-techos-locales.mjs" \
     "node scripts/verify-techos-locales.mjs" "lote 3b" \
     "ninguna pantalla del cliente dibuja su propia cabecera"
+  arnes_cliente "verify:etiqueta-dentro" "scripts/verify-etiqueta-dentro.mjs" \
+    "node scripts/verify-etiqueta-dentro.mjs" "N11 doble prima" \
+    "la etiqueta vive DENTRO del campo --- tercera vuelta de esta ley"
   arnes_cliente "verify:auth-receptor" "scripts/verify-auth-receptor.mjs" \
     "node scripts/verify-auth-receptor.mjs" "D-1098" \
     "un metodo resuelto se llama CON su receptor"
