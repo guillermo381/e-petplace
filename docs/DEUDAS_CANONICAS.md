@@ -35350,7 +35350,7 @@ El bloque del fondo pasa **después** del `ScrollView`, con **`pointerEvents="bo
 
 ---
 
-## `D-1114` 🟡 — LOS CONTEOS DEL CATÁLOGO SE VENCEN **EN CADA MERGE**, y ninguna pista puede verlo sola
+## `D-1114` ☠️ — LOS CONTEOS DEL CATÁLOGO SE VENCEN **EN CADA MERGE**, y ninguna pista puede verlo sola
 
 **Estado:** ABIERTA · **FIRMADA POR LA MESA** (14-sep-2026) · **Dueño: B**, próxima tanda · **la midió A**, que es quien pagaba el costo en cada tanda.
 **Origen:** A, tras curarlo **dos veces seguidas** en dos merges consecutivos (14-sep-2026).
@@ -35389,7 +35389,13 @@ El bloque del fondo pasa **después** del `ScrollView`, con **`pointerEvents="bo
 
 ⚠️ **Y un hallazgo de paso que no es de esta ficha, para B:** `EsperaLarga` tiene **11** consumidores y `EsperaDeMarca` **6** — *dos piezas de espera conviviendo*. Puede ser correcto (esperas de distinta duración) o puede ser una mudanza a medias; **A no lo decide**.
 
-**☠️ MUERTE:** cuando el catálogo no publique un solo conteo y el gate los diga en su salida — verificado por un merge de B+C que no obligue a nadie a editar el documento.
+### ✅ EJECUTADA POR B (lote 14) — cero conteos publicados
+
+**Medido: `- **consumidores:** N` aparece ahora en el catálogo CERO veces.** En su lugar, la puerta del documento declara el comando y **por qué** — citando los dos precedentes de la casa: *el contador de `packages/ui` decía **53 cuando eran 171**, el de wrappers **26 cuando eran 122***.
+
+**Y B resolvió la advertencia que esta ficha le dejó** —*«el catálogo se lee de un vistazo, y "corré este comando" no reemplaza a un número que está ahí»*—: **el gate sigue midiendo y dice el número en su salida**, que es donde un derivado no envejece. Las entradas que necesitan decir algo sobre su uso lo dicen **en prosa y con su condición** (*«todavía sin consumidores en las apps … deja de estar sin nadie el día que el carrito migre»*), que es una afirmación que no caduca sola.
+
+**☠️ MUERTE — MUERTA. Esta tanda fue la primera en siete que no obligó a nadie a editar conteos a mano.**
 
 ---
 
@@ -35493,7 +35499,7 @@ Se toca «vacuna» → navega a `/carnet` **con el abanico abierto detrás**; al
 
 ---
 
-## `D-1118` 🟠 — EL `zIndex` DE B Y EL ORDEN DE C SE PISAN EN `HojaContenido`, y quién gana lo dice un aparato
+## `D-1118` ☠️ — EL `zIndex` DE B Y EL ORDEN DE C SE PISAN EN `HojaContenido`, y quién gana lo dice un aparato
 
 **Estado:** ABIERTA · **Dueño: B** (`HojaContenido` es suyo) · **A resolvió el merge sin decidir el fondo.**
 **Origen:** A, mergeando el lote 13 de B sobre la cura de C (14-sep-2026).
@@ -35521,7 +35527,23 @@ Se toca «vacuna» → navega a `/carnet` **con el abanico abierto detrás**; al
 
 ⚠️ **Y hay una lectura cómoda que conviene descartar de entrada:** *«con el fondo después ya pinta arriba, así que el problema de B no existe»* — **es falso en la dirección peligrosa**: el fondo DESPUÉS pinta encima, que es exactamente el síntoma que el founder vio. Lo que hoy lo tapa es que `estiloFondo` lo lleva a opacidad 0 justo cuando la hoja llega — **y eso depende del scroll, no del orden.** *Con la hoja quieta y algo opaco en el fondo, el síntoma vuelve.*
 
-**☠️ MUERTE:** cuando las dos cosas estén verdes EN APARATO a la vez — la flecha de 03 vuelve y el wordmark no atraviesa la hoja — con la forma que B elija.
+### ✅ CONTESTADA POR EL APARATO Y CURADA EL MISMO DÍA — y las dos mitades del proceso valen
+
+**① C midió, y la respuesta fue la peor de las dos:** `origin/main @ ba205d8d`, emulador, bundle fresco. Toque en el centro del nodo `Volver` de 03 y de 05, **cinco lecturas del árbol a 1,2 s: la pantalla no se mueve.** Repetido con dos formas de toque. **El «atrás» de Android sí funciona** ⇒ la navegación está sana y **lo que no llega es el toque**. ⇒ **el `zIndex` de Android reordena también el despacho.**
+
+🔴 **Y C dejó un hallazgo de instrumento que vale más que el veredicto:** *el árbol de accesibilidad **NO refleja el `zIndex`*** — el botón aparece **último, o sea arriba**, y el toque igual no le llega. **Un volcado que muestra el nodo correcto arriba no prueba que ese nodo reciba el toque.** *Es exactamente la clase de instrumento que da verde por la razón equivocada, y sólo se descubre tocando.*
+
+**② B curó 13 minutos después, y no eligió un lado: mató la disyuntiva.**
+
+| | antes | ahora |
+|---|---|---|
+| orden | el par `zIndex` 0/1, fondo ANTES | **muere el par**; el fondo queda DESPUÉS (el orden de C) |
+| toque | `box-none` fijo | **`pointerEvents={fondoALaVista ? 'box-none' : 'none'}`** — *el toque se apaga con la opacidad* |
+| pintado | `zIndex: 1` en la hoja | **recorte del fondo a su zona** (`height: arranque` + `overflow: 'hidden'`) |
+
+⇒ **«lo que no se ve, no se toca»**, que es la regla que faltaba: la mitad del toque y la mitad del pintado dejan de competir porque **pasan a depender del mismo hecho** —si el fondo está a la vista— en vez de dos mecanismos que se pisan. *La cura no fue elegir entre las dos curas: fue encontrar el hecho del que las dos podían colgar.*
+
+**☠️ MUERTE — MUERTA**, con capturas de B en el aparato (`lote14-d1118-flecha-vuelve.png` · `lote14-d1118-hoja-opaca.png`).
 
 ---
 
@@ -35576,7 +35598,7 @@ Y el costo es el de la casa: **`L-223` dice que el peaje está en la PETICIÓN, 
 
 ---
 
-## `D-1121` 🟢 — `HuellaDeLlegada` QUEDA CON **CERO CONSUMIDORES**: lápida de B
+## `D-1121` ☠️ — `HuellaDeLlegada` QUEDA CON **CERO CONSUMIDORES**: lápida de B
 
 **Estado:** ABIERTA · **Dueño: B** (`brand/RitualDeEntrada.tsx` es suyo) · **próxima tanda** · **la declaró C**, que la dejó sin consumidores y no la mató.
 **Origen:** el censo de C en el lote 10 (14-sep-2026), verificado por A.
@@ -35589,4 +35611,8 @@ Y el costo es el de la casa: **`L-223` dice que el peaje está en la PETICIÓN, 
 
 ⚠️ **Y lo que la lápida tiene que decir, porque no es obvio:** su motivo —el de `EsperaDeMarca`— **sigue vivo y en uso**. Lo que muere es *este* uso (la celebración de una vez), no el gesto. *Una lápida que no distingue las dos cosas hace que el próximo no reuse el motivo por creerlo retirado.*
 
-**☠️ MUERTE:** cuando el archivo no exista y su lápida esté al lado, con esa distinción escrita.
+### ✅ MUERTA (B, lote 14) — y se llevó una pieza más por Ley 37
+
+**El cuerpo salió y la lápida quedó en su lugar** (`brand/RitualDeEntrada.tsx`). **Y al retirarla apareció `LLEGADA`, que era su única lectora**: murió con ella. *Una pieza sin consumidores casi nunca está sola — arrastra la constante, el token o el helper que existían sólo para ella, y ésos no aparecen en ningún censo de consumidores porque no son piezas.*
+
+**☠️ MUERTE — MUERTA.**
