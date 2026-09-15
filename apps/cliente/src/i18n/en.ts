@@ -3602,4 +3602,30 @@ export const clienteEn = {
     entrar: 'Sign in',
   },
 
+  /* S116-C lote 6 · ACTIVIDAD — el espejo. */
+  actividad: {
+    titulo: 'Activity',
+    chipEnCurso: 'In progress',
+    chipHistorial: 'History',
+    vacioCursoTitulo: "You don't have anything in progress yet",
+    vacioCursoDetalle: 'Appointments and orders will show up here while they happen.',
+    vacioHistorialTitulo: 'Nothing to look back on yet',
+    vacioHistorialDetalle: 'Whatever has finished is kept here.',
+    errorTitulo: "We couldn't load your activity",
+    errorDetalle: 'It may be the connection. Try again in a moment.',
+    parcialFallo: "Something is missing: we couldn't bring all of it.",
+    estadoAgendado: 'Scheduled',
+    estadoPorCoordinar: 'Date pending',
+    estadoReservando: 'Holding',
+    estadoAtendida: 'Seen',
+    estadoSinCerrar: 'Not closed',
+    estadoNoSeRealizo: "Didn't happen",
+    estadoSinConfirmar: 'Not confirmed',
+    estadoCancelada: 'Cancelled',
+    filaCita: '{{mascota}} · {{cuando}}',
+    verCita: "See {{mascota}}'s appointment",
+    historialCitasCargando: 'Looking for past appointments…',
+    historialCitasFallo: "We couldn't bring the past appointments. Your orders are here.",
+  },
+
 } as const satisfies Espejo<typeof clienteEs>;

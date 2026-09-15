@@ -110,7 +110,7 @@ import {
 } from '@epetplace/api';
 import { calcularVozHogar, type VozEstadoHogar } from '@epetplace/domain';
 
-import { fechaCortaHumana, fechaYHoraHumana, formatearPrecio, diaSemanaCorto, fechaCortaMono, fechaLargaHumana } from '@epetplace/i18n';
+import { fechaCortaHumana, fechaYHoraHumana, formatearPrecio, diaSemanaCorto, fechaConDiaHumana, fechaCortaMono, fechaLargaHumana } from '@epetplace/i18n';
 
 import { InvitacionAvisos } from '@/components/invitacion-avisos';
 import { ventanaVencida } from '@/lib/despensa/ventana';
@@ -150,20 +150,15 @@ type TraductorHogar = ReturnType<typeof useTraduccion>['t'];
    en `verify-diseno.mjs`. Las menciones `⏪` que quedan abajo son
    historia: explican por qué la tarjeta bajó con su aire. */
 
-/** r4-defecto 3: la fecha del techo — "jueves 23 de julio", mono
- *  minúsculas (Ley 3). Candidata al RIEL (fechaConDiaMono) declarada:
- *  el formateo por idioma es del riel; nace acá porque el riel no
- *  tiene la forma con día de semana y packages no es territorio de
- *  esta ronda. */
-function fechaConDiaMono(d: Date, idioma: 'es' | 'en'): string {
-  return new Intl.DateTimeFormat(idioma === 'en' ? 'en-US' : 'es-EC', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  })
-    .format(d)
-    .toLowerCase();
-}
+/* ☠️ **`fechaConDiaMono` MURIÓ ACÁ Y VIVE EN EL RIEL** como
+   `fechaConDiaHumana` (S116-C lote 6, `@epetplace/i18n`).
+
+   **La subió su SEGUNDO consumidor, y ella misma lo había pedido:** su nota
+   decía *«Candidata al RIEL declarada: el formateo por idioma es del riel;
+   nace acá porque el riel no tiene la forma con día de semana y packages no
+   es territorio de esta ronda»*. Actividad necesita el mismo antetítulo del
+   día ⇒ **se subió ANTES de copiarla**. *Una candidata declarada que igual se
+   clona es una nota que no sirvió para nada.* */
 
 // Saludo por franja horaria (S52-P2a, voz del lote): la app saluda
 // como una persona — mañana/tarde/noche del reloj del dispositivo.
@@ -1786,7 +1781,7 @@ export default function Hogar() {
               // que apareció después fue un segundo uso que no existía cuando se
               // escribió.* Vuelve la Ley 3 y vuelve la lámina: la fecha en mono,
               // en minúsculas, SOBRE el saludo.
-              antetitulo={fechaConDiaMono(hoy, idioma)}
+              antetitulo={fechaConDiaHumana(hoy, idioma)}
               antetituloVoz="dato"
               titulo={`${saludoPorFranja(hoy.getHours(), t)}${nombrePerfil ? `, ${nombrePerfil.trim().split(' ')[0]}` : ''}`}
               carrito={{

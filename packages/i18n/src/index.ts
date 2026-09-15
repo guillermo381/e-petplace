@@ -23,6 +23,11 @@ export {
      refugio formatearan la hora distinto, el mismo mensaje diría dos cosas. */
   etiquetaDeDiaDeMensaje,
   fechaCortaMono,
+  /* S116-C lote 6 · las dos que sube Actividad: la del antetítulo (subió del
+     Hogar, donde ya se declaraba candidata) y la que le da al `BadgeFecha` de
+     B su mes y su día ya en el idioma de quien mira. */
+  fechaConDiaHumana,
+  mesYDiaHumanos,
   fechaDiaSemanaHumana,
   fechaLargaHumana,
   horaCortaDeMensaje,

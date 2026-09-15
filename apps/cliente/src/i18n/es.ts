@@ -5005,4 +5005,53 @@ export const clienteEs = {
     entrar: 'Entrar',
   },
 
+  /* ⭐ **S116-C lote 6 · ACTIVIDAD — la cuarta tab gana su pantalla.**
+     Letra §1.5 y firma 5(b) del plan: *«Actividad = citas + pedidos +
+     postventa, en curso / historial»*. La voz nace acá entera; las de los
+     pedidos se REUSAN de `despensa.*` —son las mismas siete narrativas y la
+     misma escalera— porque *dos diccionarios para el mismo estado divergen el
+     día que alguien cambie uno.* */
+  actividad: {
+    titulo: 'Actividad',
+    chipEnCurso: 'En curso',
+    chipHistorial: 'Historial',
+    /* El vacío HONESTO que pidió el founder, sin relleno: dice qué no hay y
+       ofrece el único camino que existe de verdad. */
+    vacioCursoTitulo: 'Todavía no tienes nada en curso',
+    vacioCursoDetalle: 'Acá van a aparecer las citas y los pedidos mientras pasan.',
+    vacioHistorialTitulo: 'Todavía no hay nada para mirar atrás',
+    vacioHistorialDetalle: 'Lo que ya terminó se guarda acá.',
+    errorTitulo: 'No pudimos cargar tu actividad',
+    errorDetalle: 'Puede ser la conexión. Vuelve a intentarlo en un momento.',
+    /* 🔴 UNA FUENTE CAÍDA NO SE DIBUJA COMO «no hay nada». Son dos hechos
+       distintos y el vacío es el que la familia cree. */
+    parcialFallo: 'Falta una parte: no pudimos traer todo lo tuyo.',
+    /* ── LAS PASTILLAS DE LA CITA ──────────────────────────────────────────
+       Las de los pedidos salen de `despensa.*`. Éstas nacen acá porque el hub
+       de citas nunca tuvo voces del PASADO: su lector (`obtenerHistorialCitas
+       Mascota`, S114-A) llevaba **cero consumidores**. */
+    estadoAgendado: 'Agendado',
+    estadoPorCoordinar: 'Falta la fecha',
+    estadoReservando: 'Reservando',
+    estadoAtendida: 'Atendida',
+    /* 🔴 UNA CITA PASADA QUE SIGUE `confirmada` NO ES «no ocurrió»: es que la
+       app NO SABE. El prestador puede haberla hecho y no haberla cerrado.
+       *Decir «No se realizó» sería inventar un hecho, y decir «Atendida»
+       también — los dos lados del mismo error* (`L-139`). Son 142 de 379 en
+       la familia del gate, así que no es un borde raro: es la fila más común
+       del historial. */
+    estadoSinCerrar: 'Sin cerrar',
+    estadoNoSeRealizo: 'No se realizó',
+    estadoSinConfirmar: 'Sin confirmar',
+    estadoCancelada: 'Cancelada',
+    /* La fila de una cita: la mascota primero, porque con dos animales es lo
+       que separa una fila de su vecina. */
+    filaCita: '{{mascota}} · {{cuando}}',
+    verCita: 'Ver la cita de {{mascota}}',
+    /* ⚠️ El historial de citas se pide POR MASCOTA (el lector unificado no
+       existe — pedido a A). Mientras carga, la pantalla lo dice. */
+    historialCitasCargando: 'Buscando las citas anteriores…',
+    historialCitasFallo: 'No pudimos traer las citas anteriores. Los pedidos sí están.',
+  },
+
 } as const;

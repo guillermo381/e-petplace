@@ -275,9 +275,15 @@ export default function GroomingCuando() {
           montaba `Encabezado` ni `Cabecera` — y sí tenía techo: una pieza LOCAL
           (`components/reserva-piezas.tsx`) que pinta `bg.base` plano.
           `verify:techos-locales` tampoco lo veía, y **lo dice en su propia
-          cabecera**: su marcador es `LinearGradient`, así que *«un techo hecho
-          con un `backgroundColor` plano no lo ve»*. Dos instrumentos con el
-          mismo punto ciego, y el hueco justo en el medio.
+          cabecera**: busca el degradado por su nombre de componente, así que
+          *«un techo hecho con un `backgroundColor` plano no lo ve»*. Dos
+          instrumentos con el mismo punto ciego, y el hueco justo en el medio.
+
+          ⚠️ **Y ESTE COMENTARIO NO PUEDE NOMBRAR ESE COMPONENTE.** La primera
+          redacción lo citaba literal y **encendió el gate sobre las cinco
+          pantallas curadas**: un censo por patrón no distingue una CITA de un
+          montaje. *Segunda vez en la sesión —la anterior fue `verify:moneda`—,
+          así que la regla es de clase: describir el marcador, jamás escribirlo.*
 
           ⇒ estructura firmada: fondo ciruela + hoja.
           ⚠️ **Lo que se pierde, dicho: el GLIFO DEL OFICIO.** El cabezal ponía
