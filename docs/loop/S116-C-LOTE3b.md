@@ -216,22 +216,40 @@ el hub de paseos y en el pago.
 
 ---
 
-## ⑦ LO QUE QUEDÓ ABIERTO Y ES DEL FOUNDER
+## ⑦ LA PANTALLA 04, USADA DE PUNTA A PUNTA
 
-🔴 **La pantalla 04 NO quedó usada de punta a punta, y no es por falta de
-intento.** Con el código `71356743` la app respondió **«Ese código ya no sirve»**
-— vencido antes de que yo llegara. *El rebote es el correcto y su voz también:
-capturado.* **Toqué «Enviar otro código», así que hay uno FRESCO en
-`guillo381+s116c2@gmail.com`**; con ese número cierro el canje, el cambio de
-clave y la entrada.
+✅ **Cerrada.** El recorrido completo, con el código que el founder pasó:
 
-⚠️ **Y hay una siembra temporal VIVA en el árbol, sin commitear:**
-`recuperar.tsx:116-117` arranca en el paso `'codigo'` con el correo puesto.
-**Es un instrumento, no una cura**: sin eso la única forma de llegar al paso del
-código es tocar «Enviar el código», que **emite uno nuevo y mata el que me
-pasaron**. Se revierte en el mismo acto en que el canje cierre; **no entra a
-ningún commit**.
+1. **Canje** — el primer código (`71356743`) rebotó con **«Ese código ya no
+   sirve»**: había vencido antes de que yo llegara. *El rebote es correcto y su
+   voz también* — capturado, porque **un camino de error ejercido vale tanto
+   como el feliz**, y éste además probó la cura anti-bucle: al pedir otro, el
+   campo se limpia solo (si quedara lleno, ocho cajas llenas se leen como «ya
+   está» sobre un código que el servidor va a rechazar seguro).
+2. Con el código fresco: **«Código verificado. Ahora elige tu nueva
+   contraseña.»**
+3. **Contraseña cambiada** y sesión abierta — cayó en el Hogar de la cuenta.
+4. 🔴 **Y no me quedé ahí, que es donde el gate se habría quedado corto:**
+   **cerré sesión y volví a entrar por la 03 con la contraseña nueva.** *Que la
+   sesión de recuperación quede abierta prueba que el canje funcionó; sólo
+   volver a entrar prueba que la contraseña CAMBIÓ.* Entró.
 
-La clave nueva vive en el llavero (`epetplace-s116c2-clave`), se lee al momento
-de usarla y **no se imprime**. La cuenta de prueba principal **no se rota**, por
-firma.
+**La clave nueva vive en el llavero (`epetplace-s116c2-clave`)**, se lee al
+momento de usarla y **no se imprime en ningún lado, ni enmascarada**. La cuenta
+de prueba principal **NO se rota**, por firma del founder.
+
+☠️ **La siembra temporal ya no existe.** Para llegar al paso del código sin
+tocar «Enviar el código» —que emite uno nuevo y mata el que me pasaron— sembré
+`recuperar.tsx:116-117` en el paso `'codigo'` con el correo puesto. **Era un
+instrumento, no una cura**: revertido con `git checkout` y verificado línea por
+línea. **No entró a ningún commit.**
+
+---
+
+## ⑧ LO QUE QUEDA ABIERTO Y ES DE B
+
+1. **La fuente mono en dos `Celda`** (pago y próxima salida del plan) — la prop
+   en sans no existe.
+2. **El mono del `antetitulo` del Hogar** — la fecha en mayúsculas.
+3. **`scrollRef` y el retiro de `R14`** — los hice yo, en su territorio, con su
+   razón escrita. Si prefiere otra forma, se revierten.
