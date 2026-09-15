@@ -43,10 +43,32 @@ import { useTheme } from '../ThemeProvider'
  */
 export type CabeceraProps = {
   variante: 'raiz' | 'empujada'
-  /** Mayúsculas chiquitas en rosa sobre ciruela: la fecha, el barrio,
-   *  «ACTIVIDAD». La pieza **no** lo pone en mayúsculas: el token
-   *  `antetitulo` ya trae `textTransform` (letra §2). */
+  /** La línea de arriba del título: el barrio, «ACTIVIDAD», la fecha. La
+   *  pieza **no** la pone en mayúsculas: el token `antetitulo` ya trae su
+   *  `textTransform` (letra §2). */
   antetitulo?: string
+  /** 🔴 **EN QUÉ VOZ HABLA EL ANTETÍTULO (pedido de C, lote 3f).**
+   *
+   *  `'rotulo'` (default) es lo de siempre: **sans bold 11 en MAYÚSCULAS con
+   *  tracking** — un rótulo que clasifica lo que viene abajo.
+   *  `'dato'` lo monta en la receta `dato`: **mono, minúsculas, sin
+   *  tracking** — la Ley 3, para cuando esa línea no clasifica sino que
+   *  **dice un dato de máquina**.
+   *
+   *  **Nació de un caso real, no de simetría:** al absorber el techo del
+   *  Hogar, la fecha —*«lunes, 14 de septiembre»*, mono minúscula, y así
+   *  está en la lámina— cayó en el único slot que hay encima del título y
+   *  **salió «LUNES, 14 DE SEPTIEMBRE»**.
+   *
+   *  ⚠️ **Es una unión cerrada y NO un `ReactNode`, y la razón es de C:**
+   *  *un slot libre ahí deja que cada pantalla elija su tipografía encima de
+   *  la banda, y eso es justo lo que la cabecera cerró.*
+   *
+   *  ⚠️ **Y no es que `antetitulo` estuviera mal:** nació como **rótulo** y
+   *  lo dice su propio comentario. *Lo que apareció después es un segundo
+   *  uso —una línea de contexto que es un dato— que cuando se escribió no
+   *  existía.* */
+  antetituloVoz?: 'rotulo' | 'dato'
   titulo: string
   /** Una línea de apoyo. En raíz va en blanco al 70 %; en empujada es el
    *  subtítulo. */
@@ -162,6 +184,7 @@ export const ALTO_CABECERA_EMPUJADA_FIJO =
 export function Cabecera({
   variante,
   antetitulo,
+  antetituloVoz = 'rotulo',
   titulo,
   apoyo,
   accionDerecha,
@@ -265,7 +288,7 @@ export function Cabecera({
               tenía puerta desde `Texto`. *El valor correcto estaba escrito
               desde hacía sesiones; lo que faltaba era poder pedirlo.* */}
           {antetitulo !== undefined ? (
-            <Texto variante="antetitulo" color="sobreGradiente">
+            <Texto variante={antetituloVoz === 'dato' ? 'dato' : 'antetitulo'} color="sobreGradiente">
               {antetitulo}
             </Texto>
           ) : null}
