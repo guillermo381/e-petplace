@@ -74,8 +74,17 @@ export interface BadgeProps {
    *  por casa), y memorial NO SE CELEBRA — con `superficie="muro"` en
    *  memorial la pieza conserva papel (lo de siempre), jamás oro. Los
    *  pares oro/muro viven en `verify:diseno` (clase fill, mín 3).
-   *  Las tres condiciones firmadas siguen intactas: jamás un número ·
-   *  jamás rojo de alarma · jamás anima.
+   *  ⏪ **DEROGADA A MEDIAS POR FIRMA DEL FOUNDER (S116, recorrido 4 ·
+   *  `D-1119`):** ~~«jamás un número»~~ — **la campana y el carrito llevan
+   *  su número**, disco magenta con la cifra en blanco. **Las otras dos
+   *  siguen enteras: jamás rojo de alarma · jamás anima** — *la firma
+   *  cambió el CONTENIDO del badge, no su temperatura.*
+   *
+   *  ⚠️ **Y la semántica nueva no es la que medía la huella:** el número
+   *  son **no leídos POR AVISO**; la huella se apagaba VISITANDO
+   *  (`MODELO_NOTIFICACIONES` §②: *«leído y visto son cosas distintas»*).
+   *  **Quien cablee esto no puede reusar `hay_novedades(app)`**: contesta
+   *  la pregunta vieja.
    *  Alcance declarado: rige la forma `huella` (la campana del muro).
    *  El contador sobre el muro NO tiene consumidor hoy — la pill no
    *  cambia con esta prop, y si un día vive ahí, gana su regla con su

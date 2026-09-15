@@ -1144,6 +1144,20 @@ pregunta si hay algo **posterior** a ella. **Entrar a `/avisos` deposita la
 visita. El estado leído POR AVISO no cambia** — *leído y visto son cosas
 distintas, y la campana distingue las dos.*
 
+> 🔴 **ENMENDADA POR FIRMA DEL FOUNDER (S116, recorrido 4 · `D-1119`): LA
+> CAMPANA LLEVA NÚMERO, y el número son NO LEÍDOS POR AVISO.** Lo de arriba
+> **sigue siendo cierto y no se borra** —la visita se registra igual y la
+> huella medía *lo posterior a la visita*— **pero ya no es lo que se dibuja.**
+>
+> ⚠️ **Y las dos preguntas NO son la misma, que es lo que hay que no perder:**
+> la huella se apagaba **VISITANDO**; el número sólo baja **LEYENDO**. ⇒ **quien
+> cablee el contador no puede reusar `hay_novedades(app)`**: esa RPC seguiría en
+> `true` con todos los avisos leídos, y en `false` con avisos sin leer si ya se
+> visitó. *Dos preguntas sobre la misma campana, y la firma nueva elige la otra.*
+>
+> El conteo sale hoy de traer la lista y filtrarla en el teléfono, con un techo
+> de 100 — es `D-1120`, y su cura es una función que cuente.
+
 **La visita lleva el eje APP** (`notificacion_campana_visita(user_id, app)`):
 visitar la campana del cliente **no** apaga la huella del prestador. Las dos
 RPCs (`registrar_visita_campana(app)` · `hay_novedades(app)`) son la única

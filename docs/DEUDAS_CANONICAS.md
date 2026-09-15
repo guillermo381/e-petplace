@@ -35482,3 +35482,103 @@ Se toca «vacuna» → navega a `/carnet` **con el abanico abierto detrás**; al
 **Mientras tanto se declara con `SALTAR_GATE` y su medición**, en cada commit que lo arrastre.
 
 **☠️ MUERTE:** cuando `R32` resuelva el `gap` por árbol de montaje y este archivo dé verde **sin que nadie le haya agregado un token**.
+
+---
+
+## `D-1118` 🟠 — EL `zIndex` DE B Y EL ORDEN DE C SE PISAN EN `HojaContenido`, y quién gana lo dice un aparato
+
+**Estado:** ABIERTA · **Dueño: B** (`HojaContenido` es suyo) · **A resolvió el merge sin decidir el fondo.**
+**Origen:** A, mergeando el lote 13 de B sobre la cura de C (14-sep-2026).
+
+> **Dos curas medidas, las dos correctas, y en el mismo lugar.** B mueve el bloque del fondo **ANTES** del `ScrollView` con `zIndex: 0`; C lo había movido **DESPUÉS** con `pointerEvents="box-none"`. *Tomar cualquiera de los dos lados entero pierde algo real.*
+
+### Lo que cada uno arregla
+
+| | qué vio | qué hizo |
+|---|---|---|
+| **C** (`D-1113`, lote 7) | la flecha de volver de 03 y 05 **no respondía** — volcado de `uiautomator`: la hermana posterior gana el toque | el fondo pasa **DESPUÉS** del scroll, con `box-none` |
+| **B** (lote 13) | el founder vio *el wordmark del fondo a través de la hoja, bajo «Email»* — una `elevation` adentro del fondo sube su capa | el fondo **ANTES**, con el par `zIndex` 0/1 |
+
+### Cómo se resolvió el merge, y qué NO se decidió
+
+**Se tomó el orden de C** —el bloque ya vivía más abajo— **porque tomar el de B habría montado el slot `fondo` DOS VECES**: eso no era una decisión de diseño, era el único desenlace que no duplica una pieza.
+
+**Sobrevive el `zIndex: 1` de la hoja** (auto-mergeado). **La mitad que no sobrevive es el `zIndex: 0` del fondo**, que era la otra mitad del par de B.
+
+### 🔴 La pregunta abierta, y por qué A no la contesta
+
+**¿El `zIndex` de Android reordena también el despacho de toques, o sólo el pintado?** Si reordena el toque, poner el fondo en `zIndex: 0` lo devuelve «antes» **y la flecha de volver muere otra vez** — el 🔴 que `D-1113` curó.
+
+*Eso no se resuelve leyendo código, y menos leyendo documentación de una versión que puede no ser la que corre.* **Lo dice un aparato**: montar 03, tocar la flecha, y mirar si vuelve.
+
+⚠️ **Y hay una lectura cómoda que conviene descartar de entrada:** *«con el fondo después ya pinta arriba, así que el problema de B no existe»* — **es falso en la dirección peligrosa**: el fondo DESPUÉS pinta encima, que es exactamente el síntoma que el founder vio. Lo que hoy lo tapa es que `estiloFondo` lo lleva a opacidad 0 justo cuando la hoja llega — **y eso depende del scroll, no del orden.** *Con la hoja quieta y algo opaco en el fondo, el síntoma vuelve.*
+
+**☠️ MUERTE:** cuando las dos cosas estén verdes EN APARATO a la vez — la flecha de 03 vuelve y el wordmark no atraviesa la hoja — con la forma que B elija.
+
+---
+
+## `D-1119` ☠️ — LA CAMPANA LLEVA NÚMERO: la letra de S89 queda **derogada por firma del founder**
+
+**Estado:** **DEROGADA Y REEMPLAZADA** (14-sep-2026) · **firma del founder en el recorrido 4** · A la deposita donde la letra vieja vive.
+
+> **Lo viejo, tachado y no borrado:** ~~*«jamás un número · jamás rojo de alarma · jamás anima»*~~ (S89, `Badge.tsx`, forma `huella`) ⇒ **la campana y el carrito llevan su número**, en un disco magenta con la cifra en blanco.
+
+### La semántica nueva, declarada — que es lo que faltaba
+
+**El número son NO LEÍDOS POR AVISO**, no «hay algo nuevo».
+
+⚠️ **Y eso NO es lo mismo que medía la huella.** `MODELO_NOTIFICACIONES` §② dice, con firma: *«la campana registra la última visita y la huella pregunta si hay algo posterior a ella. Entrar a `/avisos` deposita la visita. **El estado leído POR AVISO no cambia** — leído y visto son cosas distintas»*.
+
+⇒ **la huella se apagaba VISITANDO; el número sólo baja LEYENDO.** *Son dos preguntas distintas sobre la misma campana, y la firma nueva elige la segunda.* **Quien mantenga esto no puede reusar `hay_novedades(app)`**: esa RPC contesta la pregunta vieja y seguiría en `true` con todos los avisos leídos, o en `false` con avisos sin leer si ya se visitó.
+
+**Lo que NO se deroga:** *jamás rojo de alarma* y *jamás anima* **siguen rigiendo**. El disco es magenta de marca, no rojo de error, y no se mueve. *La firma cambió el contenido del badge, no su temperatura.*
+
+**☠️ MUERTE:** ya está. Vive para que nadie reabra la letra de S89 sobre la campana creyendo que sigue vigente — y para que quien toque el contador sepa **qué está contando**.
+
+---
+
+## `D-1120` 🟡 — EL CONTEO DE NO LEÍDOS SALE DE **TRAER LA LISTA Y FILTRARLA**: el motor necesita una función que cuente
+
+**Estado:** ABIERTA · **Dueño: A** · **próxima tanda.**
+**Origen:** A, al mergear el lote 10 de C (14-sep-2026).
+
+### Lo medido
+
+`apps/cliente/src/app/(tabs)/hogar/index.tsx:1001`:
+
+```ts
+void obtenerMisAvisos(100).then((r) => {
+  if (vigente) setNoLeidos(r.ok ? r.data.filter((a) => !a.leida).length : 0);
+});
+```
+
+⇒ **para dibujar un número se traen hasta 100 avisos enteros y se cuentan en el teléfono.**
+
+### Por qué es del motor y no de la pantalla
+
+**C hizo lo correcto con lo que tenía** —y declaró el techo en el propio código: *«con un techo de 50 el número mentiría CALLADO justo cuando más importa»*, por eso lo subió a 100—. **Pero un techo sigue siendo un techo**: con 101 avisos sin leer el número miente, y miente en silencio.
+
+Y el costo es el de la casa: **`L-223` dice que el peaje está en la PETICIÓN, no en los datos** — traer 100 filas no cuesta mucho más que traer una. *Lo que no se puede arreglar desde la pantalla es la CORRECTITUD del número, no su velocidad.*
+
+**La cura es una función que cuente en el servidor** —`contar_avisos_sin_leer(app)`— con la semántica que `D-1119` acaba de fijar: **no leídos por aviso, no «hay novedades»**. Y su wrapper exportado desde la puerta única, *que es la mitad que ya olvidé una vez esta sesión*.
+
+⚠️ **El fallo cae a 0 y eso se conserva:** *un contador que no se pudo leer no inventa pendientes.* C lo escribió así y es la regla correcta.
+
+**☠️ MUERTE:** cuando el número salga de una función que cuenta y el techo de 100 desaparezca del cliente.
+
+---
+
+## `D-1121` 🟢 — `HuellaDeLlegada` QUEDA CON **CERO CONSUMIDORES**: lápida de B
+
+**Estado:** ABIERTA · **Dueño: B** (`brand/RitualDeEntrada.tsx` es suyo) · **próxima tanda** · **la declaró C**, que la dejó sin consumidores y no la mató.
+**Origen:** el censo de C en el lote 10 (14-sep-2026), verificado por A.
+
+**Medido:** los únicos montajes que quedan son **la galería** y las **lápidas en prosa** de `login.tsx` y `recuperar.tsx`. *Cero pantallas.*
+
+**C hizo lo correcto:** dejó la pieza sin consumidores por su propio cambio —la nariz reemplaza a la pata en las tres pantallas de acceso— **y no la borró, porque `packages/ui` no es su territorio**; lo declaró en el código y en su parte.
+
+⇒ **es `L-318` con el signo dado vuelta**: no es un motor sin puerta, es **una puerta sin nadie que entre**. *Una pieza viva sin consumidores no falla — se queda ahí, entra a los censos, suma a los contadores y alguien la lee como parte del sistema.*
+
+⚠️ **Y lo que la lápida tiene que decir, porque no es obvio:** su motivo —el de `EsperaDeMarca`— **sigue vivo y en uso**. Lo que muere es *este* uso (la celebración de una vez), no el gesto. *Una lápida que no distingue las dos cosas hace que el próximo no reuse el motivo por creerlo retirado.*
+
+**☠️ MUERTE:** cuando el archivo no exista y su lápida esté al lado, con esa distinción escrita.
