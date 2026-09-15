@@ -35590,3 +35590,30 @@ Y el costo es el de la casa: **`L-223` dice que el peaje está en la PETICIÓN, 
 ⚠️ **Y lo que la lápida tiene que decir, porque no es obvio:** su motivo —el de `EsperaDeMarca`— **sigue vivo y en uso**. Lo que muere es *este* uso (la celebración de una vez), no el gesto. *Una lápida que no distingue las dos cosas hace que el próximo no reuse el motivo por creerlo retirado.*
 
 **☠️ MUERTE:** cuando el archivo no exista y su lápida esté al lado, con esa distinción escrita.
+
+---
+
+## `D-1122` 🟡 — EL OSCURO DEL CLIENTE: **UNA decisión + un recorrido**, no una lista de valores
+
+**Estado:** ABIERTA · **FIRMADA POR EL FOUNDER** (14-sep-2026) · **Dueño: mesa** (la decisión) + **B** (lo que salga del recorrido) · **disparo: DESPUÉS de F&F**.
+**Origen:** recorrido 5 del founder con el teléfono en oscuro; censo de B en el lote 15, ejecución en el lote 16.
+
+### Lo que se hizo YA, y por qué no cierra la ficha
+
+**El cliente va en claro SIEMPRE** (`apps/cliente/src/app/_layout.tsx`, con lápida y fecha de revisión). ⚠️ **El tema oscuro sigue existiendo y sigue siendo isomorfo:** lo que se apagó es **quién lo elige**, no el tema — los tres siguen portando los mismos slots, la galería lo sigue montando y `verify:contrast` sigue midiendo los tres. *Apagar un tema borrándolo sería perder el trabajo; apagar su elección es una línea.*
+
+**Y las cinco líneas del censo se curaron igual, aunque hoy nadie las vea en oscuro:** `Cabecera:209·213·217` y `bienvenida.tsx:155·165` pasaron de `'inverso'` a **`sobreGradiente`** (`text.onGradient`, que ya existía en los tres temas y no tenía puerta desde `Texto`).
+
+> **Un valor fijo que hoy acierta por casualidad es el que mañana nadie encuentra** (firma del founder). *El forzado de claro las volvía invisibles: las cinco habrían pasado el próximo censo por estar en una pantalla que nadie mira en oscuro.*
+
+### 🔴 LO QUE FALTA NO ES UNA LISTA — ES UNA DECISIÓN Y UN RECORRIDO
+
+**Esto es la conclusión del censo, y es lo que la ficha existe para dejar escrito:**
+
+**① UNA decisión de mesa: ¿`magentaLuz` es el acento del oscuro?** Hoy los temas resuelven `accent.cta`, `accent.activoLleno` y el orbe del asistente a **`magentaLuz`**, un rosa claro. El founder lo vio y lo llamó *«rosa pálido en vez de magenta»*. **No es un bug de ninguna pieza: las piezas leen el tema y el tema contesta eso.** Es una decisión de dirección de arte, y **cambiarla mueve todos esos slots a la vez**.
+
+**② Y después, RECORRER las pantallas en oscuro.** Lo demás que aparezca va a salir de caminar, no de grepear: *el censo por código encuentra la clase —`'inverso'` sobre superficie fija— y no encuentra el tono que quedó feo.*
+
+⚠️ **Por qué NO es una lista de valores sueltos, dicho con el número:** el censo del lote 15 miró los **12** usos de `palette.` del cliente y **ninguno es un claro fijo** (el único `white` es el logo de DeUna, legítimo). *No hay una pila de valores hardcodeados esperando ser corregidos — hay una decisión de acento y unas pantallas que nadie caminó.*
+
+**☠️ MUERTE:** cuando la mesa decida ① y el recorrido de ② esté hecho, con el forzado de claro retirado del `_layout` — que es **una línea**, y para eso se dejó así.

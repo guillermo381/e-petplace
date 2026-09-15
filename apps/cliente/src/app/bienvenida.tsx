@@ -152,7 +152,10 @@ export default function Bienvenida() {
           lejos. `titulo` es la variante de display del cliente. */}
       <View style={{ flex: 1, justifyContent: 'center', gap: spacing[4] }}>
         <Entrada orden={1}>
-          <Texto variante="titulo" color="inverso">
+          {/* `sobreGradiente` y no `inverso` (lote 16): esta pantalla es
+              ciruela en los dos temas, y `'inverso'` daba TINTA en oscuro —
+              medido: el titular desaparecía. */}
+          <Texto variante="titulo" color="sobreGradiente">
             {`${t('bienvenida.titular')} `}
             <Texto variante="titulo" color="acentoSobreOscuro">
               {t('bienvenida.titularAcento')}
@@ -162,7 +165,7 @@ export default function Bienvenida() {
         {/* ③ UNA sola línea de apoyo. *Dos líneas acá convierten una promesa
             en un folleto.* */}
         <Entrada orden={2}>
-          <Texto variante="cuerpo" color="inverso">
+          <Texto variante="cuerpo" color="sobreGradiente">
             {t('bienvenida.apoyo')}
           </Texto>
         </Entrada>

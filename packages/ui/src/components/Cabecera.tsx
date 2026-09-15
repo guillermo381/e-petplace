@@ -205,16 +205,25 @@ export function Cabecera({
         ) : null}
 
         <View style={{ flex: 1, gap: spacing[1] }}>
+          {/* 🔴 **`sobreGradiente`, NO `inverso` (lote 16, censo del oscuro).**
+              Los tres textos van sobre la banda, que es el **degradado del
+              tema** — ciruela en claro, ciruela noche en oscuro: **oscura en
+              los tres temas**. `'inverso'` es *«al revés del tema»*, así que
+              en oscuro daba TINTA sobre ciruela y **el título de la cabecera
+              desaparecía en toda pantalla del cliente**.
+              ⚠️ **El slot `text.onGradient` ya existía en los tres temas** y no
+              tenía puerta desde `Texto`. *El valor correcto estaba escrito
+              desde hacía sesiones; lo que faltaba era poder pedirlo.* */}
           {antetitulo !== undefined ? (
-            <Texto variante="antetitulo" color="inverso">
+            <Texto variante="antetitulo" color="sobreGradiente">
               {antetitulo}
             </Texto>
           ) : null}
-          <Texto variante={esRaiz ? 'titulo' : 'seccion'} color="inverso">
+          <Texto variante={esRaiz ? 'titulo' : 'seccion'} color="sobreGradiente">
             {titulo}
           </Texto>
           {apoyo !== undefined ? (
-            <Texto variante="apoyo" color="inverso">
+            <Texto variante="apoyo" color="sobreGradiente">
               {apoyo}
             </Texto>
           ) : null}

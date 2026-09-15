@@ -472,6 +472,14 @@ function paresDe(t: Theme, nombre: string): Pair[] {
      tema»* — sobre una superficie que es magenta en los DOS temas eso acierta
      en claro por casualidad. Por eso el par se mide UNA vez, fijo. */
   add('sobreMagenta: blanco / magentaAccion', palette.white, palette.magentaAccion)
+  /* 🔴 **S116-B lote 16 · `sobreGradiente` — el texto de la banda.** El slot
+     `text.onGradient` existía en los TRES temas y no tenía puerta desde
+     `Texto`: la `Cabecera` pedía `'inverso'` y en oscuro **su título salía en
+     tinta sobre ciruela, en toda pantalla del cliente**. Se mide contra los
+     DOS extremos del degradado de cada tema — *medir sólo el claro dejaría sin
+     verificar justo el tono donde el texto se apoya más.* */
+  add('sobreGradiente / banda (stop 0)', t.text.onGradient, t.accent.gradient.colors[0])
+  add('sobreGradiente / banda (stop final)', t.text.onGradient, t.accent.gradient.colors[t.accent.gradient.colors.length - 1])
   add('CTA oficio (light): papel / tealDark', palette.light0, palette.tealDark)
   add('CTA oficio (dark): textDark0 / tealDark', palette.textDark0, palette.tealDark)
 

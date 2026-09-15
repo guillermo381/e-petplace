@@ -77,7 +77,12 @@ export default function RootLayout() {
   // y lo pasa controlado al provider (packages/ui no importa Appearance).
   // useColorScheme re-renderiza al cambiar el tema con la app abierta.
   // El override memorial queda ENCIMA (subtree <ThemeProvider memorial>).
+  /* ⚠️ **QUEDA DECLARADO A PROPÓSITO aunque hoy nadie lo lea** (ver la lápida
+     del provider, más abajo): es **la mitad que hay que volver a enchufar**
+     cuando el oscuro se calibre. *Borrarlo convertiría el regreso de una línea
+     en dos, y la segunda es la que alguien va a olvidar.* */
   const colorScheme = useColorScheme();
+  void colorScheme;
 
   // Infraestructura S43-B2: DM Sans + JetBrains Mono cargadas antes de
   // renderizar (los nombres coinciden con typography.family de @epetplace/ui)
@@ -162,7 +167,36 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ProveedorI18n recursos={recursos}>
-        <EpetThemeProvider mode={colorScheme === 'dark' ? 'dark' : 'light'}>
+        {/* ═══════════════════════════════════════════════════════════════
+            ☠️ **EL CLIENTE VA EN CLARO SIEMPRE — LÁPIDA CON FECHA.**
+            **Firma del founder, 14-sep-2026 · REVISAR DESPUÉS DE F&F.**
+
+            ⏪ La línea era:
+                `mode={colorScheme === 'dark' ? 'dark' : 'light'}`
+            y leía el tema del sistema desde S48 (`D-305`).
+
+            **Por qué se apaga, con su medición:** el recorrido 5 del founder
+            fue con el teléfono en oscuro y el censo del lote 15 encontró que
+            **el oscuro del cliente nunca se calibró** — el titular de la
+            bienvenida y el de la cabecera salían ilegibles, y el acento
+            resuelve a `magentaLuz` (rosa pálido) en superficies pensadas para
+            magenta. *No es una lista de bugs: es que nadie recorrió esas
+            pantallas en oscuro.*
+
+            🔴 **EL TEMA OSCURO SIGUE EXISTIENDO Y SIGUE SIENDO ISOMORFO.** Lo
+            que se apaga es **quién lo elige**, no el tema: los tres temas
+            siguen portando los mismos slots, la galería lo sigue montando con
+            su selector, y `verify:contrast` sigue midiendo los tres. *Apagar
+            un tema borrándolo sería perder el trabajo; apagar su elección es
+            una línea.*
+
+            ⇒ **PARA VOLVER ATRÁS ALCANZA CON RESTAURAR LA LÍNEA DE ARRIBA.**
+            Eso es todo lo que hay que deshacer, y por eso vive acá —donde el
+            tema se resuelve— y no repartido por las pantallas: *un forzado
+            hecho pantalla por pantalla no se puede quitar, se tiene que
+            cazar.*
+            ═══════════════════════════════════════════════════════════════ */}
+        <EpetThemeProvider mode="light">
           {/* S83-B34 — LA ATMOSFERA DEL CLIENTE (firma founder: el glow es
               de las DOS casas). Va en el RAÍZ, misma casa que en el
               prestador y el mismo lugar que el AmbientGlow del portal
