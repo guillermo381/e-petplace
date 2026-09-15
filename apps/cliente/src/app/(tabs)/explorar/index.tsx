@@ -80,6 +80,7 @@ import {
   obtenerDireccionHogar,
   listarIdsPrestadoresPublicos,
   obtenerPerfilesPublicos,
+  resolverUrlsFotos,
   type ServiciosPais,
   type DireccionHogar,
   type PerfilPublico,
@@ -143,6 +144,21 @@ export default function Explorar() {
   const [busqueda, setBusqueda] = useState('');
   /** El oficio que se tocó sin tener a nadie cerca. `null` = la hoja cerrada. */
   const [sinNadie, setSinNadie] = useState<Oficio | null>(null);
+  /**
+   * 🔴 **LAS URLS FIRMADAS DE LOS LOGOS — y el defecto lo dijo la PIEZA.**
+   *
+   * `v_prestadores_publicos.foto_url` guarda **un PATH**, no una URL: desde S47
+   * el bucket es privado. Pasarlo crudo a `AvatarMascota` hace que **el avatar
+   * caiga al monograma como si no hubiera foto** — y eso es exactamente lo que
+   * se veía: «C» y «S» sobre negocios que SÍ tienen logo.
+   *
+   * *No lo cazó un gate ni la captura: lo cazó `AvatarMascota` avisando por
+   * consola con el path que recibió.* Una pieza que explica su propio mal uso
+   * vale más que un lint.
+   *
+   * Por LOTE y no una por una: `resolverUrlsFotos` firma en un viaje y cachea.
+   */
+  const [logos, setLogos] = useState<Map<string, string>>(new Map());
 
   useFocusEffect(
     useCallback(() => {
@@ -172,6 +188,15 @@ export default function Explorar() {
         const ps = await obtenerPerfilesPublicos(ids.data);
         if (!vigente) return;
         setPerfiles(ps.ok ? ps.data : 'error');
+        if (!ps.ok) return;
+        /* Segunda ola, NO encadenada al render: la lista se dibuja con el
+           monograma y el logo entra cuando llega. *Esperar las firmas para
+           pintar la lista pagaría un viaje antes del primer píxel.* */
+        const paths = ps.data
+          .map((x) => x.foto_url)
+          .filter((x): x is string => typeof x === 'string' && x !== '');
+        if (paths.length === 0) return;
+        void resolverUrlsFotos(paths).then((m) => { if (vigente) setLogos(m); });
       });
       /* El gate corta ANTES de la petición: una lectura para decidir algo que
          no se va a dibujar es un viaje pagado para nada. */
@@ -462,8 +487,12 @@ export default function Explorar() {
                 onElegir={(clave) => {
                   const oficio = clave as Oficio;
                   if (!conAlguien.has(oficio)) { setSinNadie(oficio); return; }
-                  const ficha = fichasActivas.find((f) => oficioDeFicha(f.clave) === oficio);
-                  ficha?.onPress?.();
+                  /* ⭐ **AHORA LLEVA A LA PANTALLA DEL OFICIO, no al hub.**
+                     ⏪ Llevaba a `/hogar/<oficio>`, que es **el log de lo tuyo**:
+                     alguien que toca «Paseo» en Explorar está preguntando qué
+                     hay, no qué compró. *El hub no se pierde — sigue siendo la
+                     casa del servicio y se entra desde el Hogar.* */
+                  router.push({ pathname: '/explorar/oficio/[oficio]', params: { oficio } });
                 }}
               />
             )
@@ -607,7 +636,16 @@ export default function Explorar() {
                          la casa ya usa para una cara con su respaldo de
                          iniciales. **Sin foto no queda un hueco**: dibuja el
                          monograma del nombre. */
-                      retrato={<AvatarMascota nombre={r.perfil.nombre_comercial} fotoUrl={r.perfil.foto_url ?? undefined} tamano="md" />}
+                      retrato={
+                        <AvatarMascota
+                          nombre={r.perfil.nombre_comercial}
+                          /* La URL FIRMADA, jamás el path. Sin firma todavía,
+                             `undefined` ⇒ monograma, que es el estado honesto
+                             mientras el lote viaja. */
+                          fotoUrl={r.perfil.foto_url === null ? undefined : logos.get(r.perfil.foto_url)}
+                          tamano="md"
+                        />
+                      }
                       /* La distancia entra a la línea **sólo si existe**: sin
                          dirección guardada la fila dice el oficio y nada más,
                          en vez de afirmar una cercanía que nadie midió. */

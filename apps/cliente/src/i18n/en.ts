@@ -3656,4 +3656,55 @@ export const clienteEn = {
     oficioHotel: 'Hotel',
   },
 
+  /* S116-C lote 5 · ② LA PANTALLA DEL OFICIO — el espejo. */
+  oficioV5: {
+    destacadaTitulo: 'Book {{oficio}}',
+    destacadaDetalle: 'Pick the day and time, and we show you who can.',
+    destacadaCta: 'Book',
+    queNecesitas: 'What you need',
+    quienLoHace: 'Who does it',
+    sinSubservicios: 'No services published yet',
+    sinSubserviciosDetalle: 'When someone publishes theirs, it shows up here.',
+    sinPrestadores: 'Nobody nearby yet',
+    sinPrestadoresDetalle: "We'll let you know as soon as the first one arrives.",
+    error: "We couldn't load this service",
+    subservicioDesde: 'from {{precio}}',
+  },
+
+  /* S116-C lote 5 · ③ EL DETALLE DEL SERVICIO — el espejo. */
+  servicioV5: {
+    duracion: '{{min}} min',
+    dondeYCuando: 'Where and when',
+    direccion: 'Address',
+    horario: 'Hours',
+    horarioAlAgendar: "You'll see it when you pick the day",
+    incluye: 'Includes',
+    agendar: 'Book',
+    total: 'Total',
+    desde: 'from',
+    error: "We couldn't load this service",
+    sinOferta: 'This service is no longer available',
+    sinOfertaDetalle: 'The business may have withdrawn it. Take a look at the others.',
+    verOtros: 'See the others',
+  },
+
+  /* S116-C lote 5 · «INCLUDES» — el espejo. */
+  incluyeV5: {
+    paseoGps: 'Live GPS during the walk',
+    paseoFotos: 'Photos and updates while walking',
+    paseoParte: 'A report at the end, with the full route',
+    groomingEstado: 'We tell you how they arrived and how they look',
+    groomingFotos: 'Before and after photos',
+    groomingParte: 'A report at the end, with what was done',
+    vetHistoria: "It goes into your pet's medical history",
+    vetParte: 'A report with the diagnosis and instructions',
+    vetReceta: 'The prescription, if needed',
+    adiestramientoBitacora: 'A log of what was worked on',
+    adiestramientoClips: 'Short clips from the session',
+    adiestramientoParte: 'A report with progress and what to keep doing at home',
+    guarderiaDia: 'We tell you how the day went',
+    guarderiaFotos: 'Photos during the stay',
+    expediente: "It goes into your pet's record",
+  },
+
 } as const satisfies Espejo<typeof clienteEs>;

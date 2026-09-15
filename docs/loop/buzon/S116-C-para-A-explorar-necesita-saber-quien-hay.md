@@ -47,3 +47,26 @@ vos podés levantar:
   PRUEBA S97 - NO REAL», «Wizard». *Hoy las ve la familia en «Cerca de ti».*
   No las toco —son datos, y los datos son tuyos— pero **antes del F&F alguien
   las tiene que sacar o marcar.**
+
+---
+
+## ADENDA (lote 5, ② y ③) — **un logo que no se puede firmar**
+
+Medido en el aparato, montando los logos con `resolverUrlsFotos`:
+
+```
+[fotos] no se pudo firmar
+  4f572081-26a5-4d3b-9d80-25ea751fdc9c/logo-negocio-1784948544536.webp
+  = Either the object does not exist or you do not have access to it
+```
+
+Es el logo de **Clínica Aurora**. `v_prestadores_publicos.foto_url` lo entrega,
+así que **la vista promete una foto que la familia no puede leer**. Puede ser
+que el objeto no exista (residuo) o que la policy del bucket no alcance a un
+cliente que no es su dueño. *Las dos son tuyas: yo sólo puedo caer al
+monograma, que es lo que hace.*
+
+⚠️ Y una que aprendí acá y conviene que esté escrita: **`foto_url` de esa vista
+es un PATH, no una URL.** Pasarlo crudo a `AvatarMascota` hace que el avatar
+caiga al monograma **como si no hubiera foto**, en silencio. *Lo cazó la pieza
+avisando por consola con el path que recibió — no un gate ni la captura.*
