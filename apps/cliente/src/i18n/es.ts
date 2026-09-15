@@ -4611,6 +4611,12 @@ export const clienteEs = {
    *  «Se perdió» y «Ya apareció» son hechos, no alarmas — *quien marca esto ya
    *  está bastante mal como para que la app se lo grite*. */
   pasaporte: {
+    /* 🔴 **UNA PALABRA, y por eso no alcanzaba `entrada`.** La fila de
+       accesos de la costura pinta una etiqueta de UNA línea: «Pasaporte y
+       QR» sale cortada. La larga sigue viva en la celda, donde hay lugar
+       para el «y QR» — *no se acorta la que ya funciona: nace la que la
+       fila necesita.* */
+    palabra: 'Pasaporte',
     titulo: 'Pasaporte y QR',
     entrada: 'Pasaporte y QR',
     entradaDetalle: 'Su chapita y la página de quien la encuentre',

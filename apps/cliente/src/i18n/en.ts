@@ -3309,6 +3309,12 @@ export const clienteEn = {
     noSePudo: "It couldn't be saved. Check your connection and try again.",
   },
   pasaporte: {
+    /* 🔴 **UNA PALABRA, y por eso no alcanzaba `entrada`.** La fila de
+       accesos de la costura pinta una etiqueta de UNA línea: «Pasaporte y
+       QR» sale cortada. La larga sigue viva en la celda, donde hay lugar
+       para el «y QR» — *no se acorta la que ya funciona: nace la que la
+       fila necesita.* */
+    palabra: 'Passport',
     titulo: 'Passport & QR',
     entrada: 'Passport & QR',
     entradaDetalle: 'Their tag and the page whoever finds them will see',

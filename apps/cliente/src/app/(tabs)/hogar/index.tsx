@@ -34,7 +34,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StatusBar, Text, View } from 'react-native';
 import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { router, useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -47,13 +46,11 @@ import {
   Celda,
   CeldaNavegacion,
   CitaEnVivo,
-  DiscoVidrio,
   Esqueleto,
   EsqueletoGrupo,
   Cabecera,
   Personaje,
   EstadoVacio,
-  GlifoConContador,
   Hoja,
   Icono,
   HojaScroll,
@@ -63,6 +60,7 @@ import {
   SelectorOpcion,
   Separador,
   Tarjeta,
+  HojaContenido,
   Huella,
   Isotipo,
   Texto,
@@ -118,6 +116,7 @@ import { diaSemanaCorto, fechaCortaMono, fechaLargaHumana } from '@epetplace/i18
 import { InvitacionAvisos } from '@/components/invitacion-avisos';
 import { ventanaVencida } from '@/lib/despensa/ventana';
 import { unidadesEnCarrito, useCarrito } from '@/lib/despensa/carrito';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 import { useTraduccion } from '@/i18n';
 import { ADOPCION_ALCANZABLE } from '@/lib/gate-adopcion';
 import { vozServicio } from '@/lib/voz-servicio';
@@ -143,8 +142,14 @@ type TraductorHogar = ReturnType<typeof useTraduccion>['t'];
  *  que el techo deja bajo las mascotas; si alguien agranda el solape
  *  por encima del respiro, tapa el saludo/nombres y el lint lo para.
  *  Verificado por construcción: 56 > 32. */
-const RESPIRO_BANDA = spacing[14]; // el aire al pie del degradado
-const SOLAPE_RECO = spacing[8]; // cuánto sube la tarjeta sobre la banda
+/* ☠️ **`SOLAPE_RECO` y `RESPIRO_BANDA` MURIERON con el techo local
+   (S116-C lote 3b).** Eran los dos números del solape: cuánto subía la
+   tarjeta de «Ponte al día» para pegarse a la banda, y cuánto aire dejaba
+   la banda al pie para que no tapara el saludo. **Hoy el solape es la
+   COSTURA y la pone `HojaContenido`.** Con ellos se jubiló `R14`, que era
+   la regla que vigilaba que uno fuera menor que el otro — su lápida está
+   en `verify-diseno.mjs`. Las menciones `⏪` que quedan abajo son
+   historia: explican por qué la tarjeta bajó con su aire. */
 
 /** r4-defecto 3: la fecha del techo — "jueves 23 de julio", mono
  *  minúsculas (Ley 3). Candidata al RIEL (fechaConDiaMono) declarada:
@@ -595,122 +600,37 @@ function EventoVida({
   );
 }
 
-/**
- * S88-D · LA ESQUINA DE LA CAMPANA (lámina firmada `LAMINA_ESQUINA_CAMPANA`):
- * la campana va INLINE en la fila del techo, jamás absoluta — el layout la
- * cuenta. El `gap: spacing[5]` (20dp) ES el número congelado de la lámina
- * (10+10, los hitSlop de los dos vecinos) y R32 lo lee estáticamente: esta
- * fila vive EXTRAÍDA (precedente de C, `IdentidadDelTecho`) para que el gap
- * sea legible al lado del montaje — el techo del Hogar tiene absolutos (la
- * luz de la esquina, el Coach) que a ±25 líneas pintarían rojo.
+/* ☠️ **`FilaCampanaTecho` MURIÓ (S116-C lote 3b · `D-1106`).** Era la fila del
+ * techo local: isotipo a la izquierda + carrito + campana, los dos en
+ * `DiscoVidrio` con `GlifoConContador`. **Los dos discos son hoy props de
+ * `Cabecera`** (`carrito` y `avisos`), que nacieron en el lote 3b para esto
+ * exacto — su propia nota lo dice: *«la campana se dibujaba en el techo local
+ * del Hogar, y ése es el techo que este lote viene a borrar»*.
  *
- * EL COACH NO SE MUEVE (D-401, letra de la lámina): sigue absoluto en su
- * esquina — acá se le RESERVA el espacio con un hueco de su tamaño (44),
- * separado de la campana por el gap del guard. La campana queda a su
- * IZQUIERDA, como firma la lámina.
+ * ⚠️ **Lo que se pierde en el camino y no es un olvido: el isotipo del techo.**
+ * El lote 10 firmó que las cabeceras raíz del cliente no lo llevan, y es la
+ * misma razón por la que en este mismo lote murió el `isotipo="gradiente"` de
+ * la Despensa. *La marca de agua del fondo sigue viva; el isotipo del techo
+ * era el segundo, y la Ley 4 pide uno.*
  *
- * Sobre el techo saturado la huella del Badge va en PAPEL
- * (`superficie="muro"` — la regla medida de B: el acento del tema puede
- * ser invisible sobre su propio techo; en el cliente el gradiente lleva
- * los íconos CLAROS desde S59). Memorial: techo plano → registro 'clara'
- * (la huella degrada a tinta en el tema) y el trazo a tinta.
- */
-function FilaCampanaTecho({
-  esMemorial,
-  noLeidos,
-  onAvisos,
-}: {
-  esMemorial: boolean;
-  /** ⭐ **S116-C lote 10 · CUÁNTOS, NO SI HAY.** Recorrido 4: *«campana con
-   *  el número de no leídos y carrito con el número de ítems, en todas las
-   *  raíces»*.
-   *
-   *  🔴 **ESTO RETIRA UNA LETRA FIRMADA Y LO DIGO ACÁ, NO SÓLO EN EL PARTE.**
-   *  `LAMINA_CAMPANA` (S89) manda la HUELLA y **prohíbe el número** con su
-   *  razón escrita —*«el número invita a vaciarlo»*—, y el wrapper la
-   *  sostiene desde el dato: `hayNovedades()` devuelve un **booleano a
-   *  propósito**, *«la forma del dato hace imposible el defecto del
-   *  contador»*. La orden de hoy pide justo eso. **Manda la firma nueva**, y
-   *  la vieja queda tachada donde vive — *dos letras firmadas que se
-   *  contradicen son peores que una equivocada.*
-   *
-   *  ⚠️ **Y CAMBIA LA SEMÁNTICA, que es la mitad que no se ve:** S89 medía
-   *  **lo NUEVO** (se apaga al VISITAR /avisos); *no leídos* mide **`leida`
-   *  por aviso** (se apaga al LEER cada uno). Son dos hechos distintos, y el
-   *  número que la orden nombra es el segundo. */
-  noLeidos: number;
-  onAvisos: () => void;
-}) {
-  const { t } = useTraduccion();
-  const unidades = unidadesEnCarrito(useCarrito());
-  return (
-    /* ⚠️ **`spacing[5]` = 20 dp y NO es estética: es el mínimo de la lámina de
-       la esquina** (2 × hitSlop 10). Lo puse en `spacing[3]` al juntar los dos
-       discos y **R32 lo cazó con su número** — medido en el árbol, el hueco
-       quedaba en 32 px ≈ 11 dp: *dos zonas táctiles a menos de eso se pisan, el
-       toque abre lo que no era y la persona cree que se equivocó ella.* */
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[5] }}>
-      <View style={{ flex: 1 }}>
-        <Isotipo size={28} variant="blanco" />
-      </View>
-      {/* ⭐ **EL CARRITO Y LA CAMPANA, EN EL DISCO DE B — y con su número.**
-
-          ✅ **Lo que el lote 12 de B destrabó:** `DiscoVidrio` salió como pieza
-          (antes era privado de `Cabecera`), que era la salida que voté en mi
-          buzón del lote 9. Con él el techo del Hogar deja de dibujar su propio
-          círculo y usa el mismo que la banda ciruela. ⇒ **las cinco raíces
-          dicen lo mismo con la misma pieza**: glífo + disco con el número.
-
-          🔴 **Y LA COMBINACIÓN SE ELIGIÓ MIDIENDO LAS DOS, no razonando.** Monté
-          las dos que la casa permite hoy y capturé el techo con cada una:
-
-          ① `DiscoVidrio` + **`GlifoConContador`** (ésta) — el número sale
-             **blanco sobre magenta, nítido**; el glífo sale en tinta de capa,
-             **apagado sobre el ciruela** (`GlifoConContador:124` dibuja
-             `<Icono>` sin `tinta`, e `Icono` cae a `registro='capa'`).
-          ② `DiscoVidrio` + `Badge forma="contador"` + `Icono tinta` — el glífo
-             sale **blanco y perfecto**, y el número queda **casi ilegible**:
-             `Badge` rinde `Insignia estado="atencion"`, cuyos colores son de
-             `theme.status`, **pensados para lienzo y no para un techo ciruela**.
-
-          ⇒ **gana ①, porque lo que la orden pide es EL NÚMERO** y en ② el
-          número es justo lo que se pierde. *Entre dos defectos se elige el que
-          no rompe lo que se vino a hacer.*
-
-          ⚠️ **La cura de verdad es de `packages/ui` y es una línea:** `tinta` en
-          `GlifoConContador`, que es la mitad (a) de mi buzón del lote 9 — B
-          entregó la (b), el disco, y **el disco arregla el fondo, no el trazo**.
-          Va al buzón con las DOS capturas, para que no se discuta de memoria. */}
-      <DiscoVidrio
-        onPress={() => router.push('/despensa/carrito')}
-        etiqueta={t('despensa.abrirCarrito', { count: unidades })}
-      >
-        <GlifoConContador nombre="carrito" cuenta={unidades} dentroDeTocable />
-      </DiscoVidrio>
-      <DiscoVidrio
-        onPress={onAvisos}
-        /* Con 0 la voz es sólo «Avisos»: *un «0 sin leer» es ruido con forma
-           de dato* — la misma regla que el disco ya aplica al no dibujarse. */
-        etiqueta={
-          noLeidos > 0
-            ? t('avisos.abrirConNoLeidos', { count: noLeidos })
-            : t('avisos.titulo')
-        }
-      >
-        <GlifoConContador nombre="campana" cuenta={noLeidos} dentroDeTocable />
-      </DiscoVidrio>
-      {/* ☠️ El hueco que le guardaba el lugar al destello murió con él
-          (Ley 37): *un espacio reservado para una pieza que ya no existe es
-          aire que nadie puede explicar.* */}
-    </View>
-  );
-}
+ * ⚠️ **Y con ella se va el guard visible de R32**: el `gap: spacing[5]` (20 dp
+ * = los dos hitSlop) que R32 leía acá **ahora lo pone la pieza**
+ * (`Cabecera`, `gap: spacing[2]` entre los dos discos, con su propio alto de
+ * 44). *No desaparece la regla: cambia quién la sostiene, y pasa a sostenerla
+ * el único lugar donde se monta.* Medido al mover: los dos discos siguen
+ * siendo `DiscoVidrio` + `GlifoConContador`, la misma combinación que este
+ * archivo eligió midiendo las dos que la casa permite. */
 
 export default function Hogar() {
   const router = useRouter();
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const insets = useSafeAreaInsets();
+  /* El arranque de la hoja = el alto REAL de la banda, medido una vez
+     (`lib/alto-de-cabecera`). Arranca en la parte fija de la pieza para que no
+     haya un parpadeo en el primer cuadro. */
+  const cabecera = useAltoDeCabecera('raiz');
+  const carrito = useCarrito();
   const { mostrar } = useAviso();
   /** `D-1057`: el sistema tiene los avisos apagados. Se relee al foco. */
   const sinAvisos = useSinAvisos();
@@ -1763,300 +1683,254 @@ export default function Hogar() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      {/* @override-s82c — LA MARCA DE AGUA (ítem 4 de la lámina
-          posición-consolidada): el isotipo en tinta al 6%, CENTRADO EN
-          PANTALLA (fijo — no scrollea, como en la lámina: el agua vive
-          fuera del cuerpo). OVERRIDE LOCAL de esta pantalla: NO se
-          generaliza — la promoción es de B después del gate (guard R10).
-          CHOQUE DECLARADO, no resuelto en silencio (regla S63): la Ley 4
-          dice isotipo UNO por pantalla y el techo ya lleva el suyo — la
-          lámina del founder ordena el agua igual; el gate resuelve.
-          Calibración DE LÁMINA: opacidad .06 y ~340 de ancho (size 210 ×
-          ratio del viewBox) — números de acuerdo, no tokens. */}
-      <View
-        pointerEvents="none"
-        style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, alignItems: 'center', justifyContent: 'center' }}
-      >
-        <View style={{ opacity: 0.06 }}>
-          <Isotipo size={210} variant="tinta" color={theme.text.primary} />
-        </View>
-      </View>
-    <ScrollView
-      style={{ flex: 1 }}
-      contentContainerStyle={{ paddingBottom: AIRE_RAIZ + insets.bottom }}
-    >
-      {/* @override-s82c — EL TECHO DEL HOGAR, local (r4: la lámina no
-          había llegado completa — las mascotas van ADENTRO del
-          degradado, la fecha en mono SOBRE el saludo). HeroMarca no
-          tiene slots para fecha-antes-del-saludo ni para la fila de
-          mascotas: se compone local COPIANDO NIVEL de la primitiva
-          (gradiente firma + curva 44/26 del patrón v2 + safe area
-          absorbida + memorial plano) — CANDIDATA a B: HeroMarca gana
-          slots fecha/contenido-de-techo. A4 (§9bis.2, FIRMADA): la luz
-          de la esquina es el ÚNICO adorno. El respiro del pie
-          (RESPIRO_BANDA) es MAYOR que el solape de la tarjeta
-          (SOLAPE_RECO) — guard R12: la tarjeta nunca tapa contenido. */}
-      <View>
-        {(() => {
-          const relleno = {
-            paddingTop: insets.top + spacing[5],
-            paddingBottom: RESPIRO_BANDA,
-            paddingHorizontal: spacing[5],
-            borderBottomLeftRadius: 44,
-            borderBottomRightRadius: 26,
-            overflow: 'hidden' as const,
-          };
-          const textoTecho = esMemorial ? theme.text.primary : theme.text.onGradient;
-          const contenido = (
-            <>
-              {/* A4 — la luz de la esquina (blanco 7% desbordando por la
-                  esquina superior derecha; centro fuera del lienzo).
-                  Memorial: sin adorno (el color se apaga, Ley 8). */}
-              {!esMemorial ? (
-                <View
-                  style={{
-                    position: 'absolute',
-                    top: -40,
-                    right: -70,
-                    width: 290,
-                    height: 290,
-                    borderRadius: radius.full,
-                    backgroundColor: 'rgba(255,255,255,0.075)',
-                  }}
-                />
-              ) : null}
-              {/* S88-D · la fila del techo con la campana (extraída — R32;
-                  antes acá vivía el Isotipo solo, que se mudó adentro). */}
-              <FilaCampanaTecho
-                esMemorial={esMemorial}
-                noLeidos={noLeidos}
-                onAvisos={() => router.push('/avisos')}
-              />
-              {/* r4-3: la fecha en mono SOBRE el saludo (Ley 3, minúsculas) */}
-              <Text
-                style={{
-                  fontFamily: typography.family.mono.regular,
-                  fontSize: typography.size.sm,
-                  letterSpacing: typography.tracking.mono,
-                  color: textoTecho,
-                  marginTop: spacing[4],
-                }}
-              >
-                {fechaConDiaMono(hoy, idioma)}
-              </Text>
-              <Text
-                accessibilityRole="header"
-                style={{
-                  fontFamily: typography.family.sans.light,
-                  fontSize: typography.size.lg,
-                  lineHeight: Math.round(typography.size.lg * typography.leading.snug),
-                  color: textoTecho,
-                  marginTop: spacing[1],
-                }}
-              >
-                {`${saludoPorFranja(hoy.getHours(), t)}${nombrePerfil ? `, ${nombrePerfil.trim().split(' ')[0]}` : ''}`}
-              </Text>
-              {/* r4-1: LAS MASCOTAS EN EL HEADER — squircle 112/36 (32%,
-                  S61-A10), punto de estado 26 con aro de papel 4, nombre
-                  debajo; fila horizontal + el "+" de 72 (→ agregar). */}
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ gap: spacing[4], alignItems: 'flex-start', paddingTop: spacing[5] }}
-              >
-                {mascotas.map((m) => {
-                  /* Mismo criterio que `vozDe`: sin punto de estado para quien
-                     ya no está. *Dos lugares que dibujan el mismo hecho tienen
-                     que callarse por la misma razón.* */
-                  const enMemoria = mascotaEnMemorial(m.estado_vida);
-                  const s = enMemoria ? undefined : senalesPorMascota.get(m.id);
-                  const v = s
-                    ? calcularVozHogar(
-                        {
-                          tieneEmergenciaActiva: s.tiene_emergencia_activa,
-                          vacunasTotal: s.vacunas_total,
-                          ultimaVacunaAplicada: s.ultima_vacuna_aplicada,
-                          proximaVacuna: s.proxima_vacuna,
-                          ultimaAtencionCerrada: s.ultima_atencion_cerrada,
-                        },
-                        hoy,
-                      ).voz
-                    : null;
-                  return (
-                    <Pressable
-                      key={m.id}
-                      accessibilityRole="button"
-                      accessibilityLabel={m.nombre}
-                      onPress={() => router.push({ pathname: '/hogar/mascota/[mascotaId]', params: { mascotaId: m.id } })}
-                      style={{ alignItems: 'center', gap: spacing[2] }}
-                    >
-                      <View>
-                        <View
-                          style={{
-                            width: 112,
-                            height: 112,
-                            borderRadius: 36,
-                            borderCurve: 'continuous',
-                            overflow: 'hidden',
-                            backgroundColor: esMemorial ? theme.bg.overlay : 'rgba(255,255,255,0.17)',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
+      {/* ⭐ **LA ESTRUCTURA DE LA CASA — S116-C lote 3b · `D-1106`.** El techo
+          propio del Hogar MURIÓ. Era el que el censo de B nombraba con su
+          propio comentario al lado —*«HeroMarca no tiene slots para
+          fecha-antes-del-saludo ni para la fila de mascotas: se compone local
+          COPIANDO NIVEL de la primitiva»*— y hoy los slots existen: el ciruela
+          es **el fondo** de la pantalla, el contenido vive en una hoja de
+          lienzo que desliza encima (`HojaContenido`) y la banda la pinta
+          `Cabecera` en `presentacion="fondo"`.
+
+          CÓMO SE REPARTIÓ EL TECHO VIEJO, pieza por pieza:
+          · **la fecha** → `antetitulo` · **el saludo** → `titulo` (que trae su
+            `accessibilityRole="header"` de fábrica, el que el `<Text>` local
+            ponía a mano) · **la fila de mascotas** → el slot `contenido`, que
+            nació para ella · **la campana y el carrito** → las props `avisos`
+            y `carrito`, que nacieron para estos dos discos exactos.
+
+          ☠️ **Y mueren tres cosas de la copia:**
+          · **`FilaCampanaTecho`** entera — los dos discos son props. Con ella
+            se va **el isotipo del techo**, y no por descuido: el lote 10 firmó
+            que las cabeceras raíz del cliente no llevan isotipo, y es la misma
+            razón por la que en este lote murió el `isotipo="gradiente"` de la
+            Despensa.
+          · **la rama de memorial** — el techo local pintaba `bg.card` con el
+            texto en tinta; el degradado del tema ya resuelve memorial plano
+            (`#26062E`, ciruela noche), así que la banda es oscura en los tres
+            temas y el texto va `onGradient` en los tres. *Una rama por tema
+            menos es una rama menos que puede divergir.*
+          · **la luz de la esquina** — adorno de una banda propia; la banda de
+            la casa tiene el suyo.
+
+          🔴 **LO QUE ESTE MOVIMIENTO CUESTA, MEDIDO Y DECLARADO: la fecha
+          cambia de voz.** Vivía en mono minúsculas (Ley 3, *«la fecha en mono
+          SOBRE el saludo»*); `antetitulo` es sans **bold 11 en mayúsculas con
+          tracking 2** —lo dice su escala en `typography`—, así que va a leerse
+          «JUEVES 23 DE JULIO». **Es el único slot que la pieza tiene encima del
+          título**, y las dos alternativas eran peores: bajar la fecha a `apoyo`
+          invierte el orden que la lámina fijó, y meterla en `contenido` obliga
+          a un `titulo=""` —un header vacío para el lector de pantalla— con el
+          saludo dibujado a mano abajo. *Uso el slot y reporto lo que cuesta;
+          si la mesa quiere el mono de vuelta, es una prop de B —un antetítulo
+          con registro de dato— y no un `<Text>` local acá.* Nota en el buzón.
+
+          ⚠️ **`AIRE_RAIZ` SIN `insets.bottom`, a propósito (R53):** la hoja ya
+          paga `insets.bottom + spacing[6]` en su propio render. Sumarlo acá lo
+          pagaría dos veces. */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        scroll={{ contentContainerStyle: { paddingBottom: AIRE_RAIZ } }}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="raiz"
+              presentacion="fondo"
+              antetitulo={fechaConDiaMono(hoy, idioma)}
+              titulo={`${saludoPorFranja(hoy.getHours(), t)}${nombrePerfil ? `, ${nombrePerfil.trim().split(' ')[0]}` : ''}`}
+              carrito={{
+                cantidad: unidadesEnCarrito(carrito),
+                onPress: () => router.push('/despensa/carrito'),
+                etiqueta: t('despensa.abrirCarrito', { count: unidadesEnCarrito(carrito) }),
+              }}
+              avisos={{
+                cantidad: noLeidos,
+                onPress: () => router.push('/avisos'),
+                /* Con 0 la voz es sólo «Avisos»: *un «0 sin leer» es ruido con
+                   forma de dato* — la misma regla que el disco ya aplica al no
+                   dibujar el número. */
+                etiqueta: noLeidos > 0 ? t('avisos.abrirConNoLeidos', { count: noLeidos }) : t('avisos.titulo'),
+              }}
+              contenido={
+                  /* r4-1: LAS MASCOTAS EN EL HEADER — squircle 112/36 (32%,
+                     S61-A10), punto de estado 26 con aro de papel 4, nombre
+                     debajo; fila horizontal + el "+" de 72 (→ agregar). */
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ gap: spacing[4], alignItems: 'flex-start', paddingTop: spacing[5] }}
+                  >
+                    {mascotas.map((m) => {
+                      /* Mismo criterio que `vozDe`: sin punto de estado para quien
+                         ya no está. *Dos lugares que dibujan el mismo hecho tienen
+                         que callarse por la misma razón.* */
+                      const enMemoria = mascotaEnMemorial(m.estado_vida);
+                      const s = enMemoria ? undefined : senalesPorMascota.get(m.id);
+                      const v = s
+                        ? calcularVozHogar(
+                            {
+                              tieneEmergenciaActiva: s.tiene_emergencia_activa,
+                              vacunasTotal: s.vacunas_total,
+                              ultimaVacunaAplicada: s.ultima_vacuna_aplicada,
+                              proximaVacuna: s.proxima_vacuna,
+                              ultimaAtencionCerrada: s.ultima_atencion_cerrada,
+                            },
+                            hoy,
+                          ).voz
+                        : null;
+                      return (
+                        <Pressable
+                          key={m.id}
+                          accessibilityRole="button"
+                          accessibilityLabel={m.nombre}
+                          onPress={() => router.push({ pathname: '/hogar/mascota/[mascotaId]', params: { mascotaId: m.id } })}
+                          style={{ alignItems: 'center', gap: spacing[2] }}
                         >
-                          {fotos[m.id] !== undefined ? (
-                            <Image
-                              source={{ uri: fotos[m.id] }}
-                              style={{ width: 112, height: 112 }}
-                              contentFit="cover"
-                              accessibilityIgnoresInvertColors
-                            />
-                          ) : (
-                            <Svg width={52} height={52} viewBox="0 0 24 24">
-                              <Huella color={textoTecho} escala={0.9} x={1.2} y={1.2} />
-                            </Svg>
-                          )}
-                        </View>
-                        {/* r6-3 (propuesta al gate): el punto GANA GLIFO —
-                            un color sin leyenda no comunica. Check = al
-                            día · el NÚMERO = la cuenta de SUS filas en
-                            Ponte al día (un sistema, no dos). 26 − aro 4
-                            = ~18 de glifo. Solo con señal (L-139). */}
-                        {(() => {
-                          const n = pendientesDe(m.id);
-                          if (v === null && n === 0) return null;
-                          const alDia = n === 0 && v === 'alDia';
-                          const bg = n > 0 ? theme.status.warning : alDia ? theme.status.success : theme.text.tertiary;
-                          return (
+                          <View>
                             <View
                               style={{
-                                position: 'absolute',
-                                right: -2,
-                                bottom: -2,
-                                width: 26,
-                                height: 26,
-                                borderRadius: radius.full,
-                                backgroundColor: bg,
-                                borderWidth: 4,
-                                borderColor: esMemorial ? theme.bg.card : theme.bg.base,
+                                width: 112,
+                                height: 112,
+                                borderRadius: 36,
+                                borderCurve: 'continuous',
+                                overflow: 'hidden',
+                                backgroundColor: esMemorial ? theme.bg.overlay : 'rgba(255,255,255,0.17)',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                               }}
                             >
-                              {n > 0 ? (
-                                <Text style={{ fontFamily: typography.family.sans.medium, fontSize: 12, color: theme.bg.card }}>
-                                  {n > 9 ? '9+' : String(n)}
-                                </Text>
-                              ) : alDia ? (
-                                <Svg width={12} height={12} viewBox="0 0 24 24">
-                                  <Path d="M5 12.5l4.5 4.5L19 7.5" stroke={theme.bg.card} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                              {fotos[m.id] !== undefined ? (
+                                <Image
+                                  source={{ uri: fotos[m.id] }}
+                                  style={{ width: 112, height: 112 }}
+                                  contentFit="cover"
+                                  accessibilityIgnoresInvertColors
+                                />
+                              ) : (
+                                <Svg width={52} height={52} viewBox="0 0 24 24">
+                                  <Huella color={theme.text.onGradient} escala={0.9} x={1.2} y={1.2} />
                                 </Svg>
-                              ) : null}
+                              )}
                             </View>
-                          );
-                        })()}
-                      </View>
-                      <Text
-                        style={{
-                          fontFamily: typography.family.sans.medium,
-                          fontSize: typography.size.sm,
-                          color: textoTecho,
-                        }}
-                      >
-                        {m.nombre}
-                      </Text>
-                      {/* ⭐ **LA VACUNA QUE VENCE ANTES** (1.1 · C7) — bajo el
-                          nombre, y **sólo si la hay**: sin próxima registrada
-                          no se dibuja nada. *Una línea que dice «sin datos»
-                          bajo cada nombre convierte la tira en un tablero de
-                          faltantes.* La señal ya trae `proxima_vacuna` con su
-                          nombre y su fecha; no hace falta pedir nada.
-                          🔴 **La plaga vencida NO ESTÁ**: la señal del Hogar
-                          no trae desparasitaciones (medido en
-                          `hogar.ts:14-24`), y el perfil —que sí las tiene— es
-                          un viaje POR MASCOTA. Pedido a A, con su medición. */}
-                      {(() => {
-                        if (enMemoriaDe(m.id)) return null;
-                        const sen = senalesPorMascota.get(m.id);
-                        const pv = sen?.proxima_vacuna ?? null;
-                        const pd = sen?.proxima_desparasitacion ?? null;
-                        /* 🔴 **`null` NO ES «al día»**: quiere decir que ninguna
-                           fila declaró próxima (letra de A). *Dibujar «al día»
-                           sobre un silencio es afirmar lo que nadie midió*, así
-                           que sin dato no se dibuja la línea. */
-                        if (pv === null && pd === null) return null;
-                        const partes = [
-                          pv !== null
-                            ? t('hogar.proximaVacunaCorta', { nombre: pv.nombre, fecha: fechaCortaMono(pv.fecha.slice(0, 10), idioma) })
-                            : null,
-                          pd !== null
-                            ? t('hogar.proximaPlagaCorta', { plaga: pd.plaga, fecha: fechaCortaMono(pd.fecha.slice(0, 10), idioma) })
-                            : null,
-                        ].filter((x): x is string => x !== null);
-                        return (
+                            {/* r6-3 (propuesta al gate): el punto GANA GLIFO —
+                                un color sin leyenda no comunica. Check = al
+                                día · el NÚMERO = la cuenta de SUS filas en
+                                Ponte al día (un sistema, no dos). 26 − aro 4
+                                = ~18 de glifo. Solo con señal (L-139). */}
+                            {(() => {
+                              const n = pendientesDe(m.id);
+                              if (v === null && n === 0) return null;
+                              const alDia = n === 0 && v === 'alDia';
+                              const bg = n > 0 ? theme.status.warning : alDia ? theme.status.success : theme.text.tertiary;
+                              return (
+                                <View
+                                  style={{
+                                    position: 'absolute',
+                                    right: -2,
+                                    bottom: -2,
+                                    width: 26,
+                                    height: 26,
+                                    borderRadius: radius.full,
+                                    backgroundColor: bg,
+                                    borderWidth: 4,
+                                    borderColor: esMemorial ? theme.bg.card : theme.bg.base,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                  }}
+                                >
+                                  {n > 0 ? (
+                                    <Text style={{ fontFamily: typography.family.sans.medium, fontSize: 12, color: theme.bg.card }}>
+                                      {n > 9 ? '9+' : String(n)}
+                                    </Text>
+                                  ) : alDia ? (
+                                    <Svg width={12} height={12} viewBox="0 0 24 24">
+                                      <Path d="M5 12.5l4.5 4.5L19 7.5" stroke={theme.bg.card} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                                    </Svg>
+                                  ) : null}
+                                </View>
+                              );
+                            })()}
+                          </View>
                           <Text
-                            numberOfLines={1}
                             style={{
-                              fontFamily: typography.family.sans.regular,
-                              fontSize: typography.size.xs,
-                              color: textoTecho,
-                              opacity: 0.75,
-                              maxWidth: 104,
-                              textAlign: 'center',
+                              fontFamily: typography.family.sans.medium,
+                              fontSize: typography.size.sm,
+                              color: theme.text.onGradient,
                             }}
                           >
-                            {partes.join(' · ')}
+                            {m.nombre}
                           </Text>
-                        );
-                      })()}
+                          {/* ⭐ **LA VACUNA QUE VENCE ANTES** (1.1 · C7) — bajo el
+                              nombre, y **sólo si la hay**: sin próxima registrada
+                              no se dibuja nada. *Una línea que dice «sin datos»
+                              bajo cada nombre convierte la tira en un tablero de
+                              faltantes.* La señal ya trae `proxima_vacuna` con su
+                              nombre y su fecha; no hace falta pedir nada.
+                              🔴 **La plaga vencida NO ESTÁ**: la señal del Hogar
+                              no trae desparasitaciones (medido en
+                              `hogar.ts:14-24`), y el perfil —que sí las tiene— es
+                              un viaje POR MASCOTA. Pedido a A, con su medición. */}
+                          {(() => {
+                            if (enMemoriaDe(m.id)) return null;
+                            const sen = senalesPorMascota.get(m.id);
+                            const pv = sen?.proxima_vacuna ?? null;
+                            const pd = sen?.proxima_desparasitacion ?? null;
+                            /* 🔴 **`null` NO ES «al día»**: quiere decir que ninguna
+                               fila declaró próxima (letra de A). *Dibujar «al día»
+                               sobre un silencio es afirmar lo que nadie midió*, así
+                               que sin dato no se dibuja la línea. */
+                            if (pv === null && pd === null) return null;
+                            const partes = [
+                              pv !== null
+                                ? t('hogar.proximaVacunaCorta', { nombre: pv.nombre, fecha: fechaCortaMono(pv.fecha.slice(0, 10), idioma) })
+                                : null,
+                              pd !== null
+                                ? t('hogar.proximaPlagaCorta', { plaga: pd.plaga, fecha: fechaCortaMono(pd.fecha.slice(0, 10), idioma) })
+                                : null,
+                            ].filter((x): x is string => x !== null);
+                            return (
+                              <Text
+                                numberOfLines={1}
+                                style={{
+                                  fontFamily: typography.family.sans.regular,
+                                  fontSize: typography.size.xs,
+                                  color: theme.text.onGradient,
+                                  opacity: 0.75,
+                                  maxWidth: 104,
+                                  textAlign: 'center',
+                                }}
+                              >
+                                {partes.join(' · ')}
+                              </Text>
+                            );
+                          })()}
+                        </Pressable>
+                      );
+                    })}
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={t('hogar.agregarMascotaCelda')}
+                      onPress={() => router.push('/hogar/agregar')}
+                      style={{
+                        width: 72,
+                        height: 72,
+                        borderRadius: radius.full,
+                        backgroundColor: esMemorial ? theme.bg.overlay : 'rgba(255,255,255,0.17)',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginTop: spacing[5],
+                      }}
+                    >
+                      <Svg width={28} height={28} viewBox="0 0 24 24">
+                        <Path d="M12 5v14M5 12h14" stroke={theme.text.onGradient} strokeWidth={1.9} strokeLinecap="round" fill="none" />
+                      </Svg>
                     </Pressable>
-                  );
-                })}
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t('hogar.agregarMascotaCelda')}
-                  onPress={() => router.push('/hogar/agregar')}
-                  style={{
-                    width: 72,
-                    height: 72,
-                    borderRadius: radius.full,
-                    backgroundColor: esMemorial ? theme.bg.overlay : 'rgba(255,255,255,0.17)',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginTop: spacing[5],
-                  }}
-                >
-                  <Svg width={28} height={28} viewBox="0 0 24 24">
-                    <Path d="M12 5v14M5 12h14" stroke={textoTecho} strokeWidth={1.9} strokeLinecap="round" fill="none" />
-                  </Svg>
-                </Pressable>
-              </ScrollView>
-            </>
-          );
-          return esMemorial ? (
-            <View style={[relleno, { backgroundColor: theme.bg.card }]}>{contenido}</View>
-          ) : (
-            <LinearGradient
-              colors={[...theme.accent.gradient.colors] as [string, string, ...string[]]}
-              locations={[...theme.accent.gradient.locations] as [number, number, ...number[]]}
-              start={{ x: 0.13, y: 0 }}
-              end={{ x: 0.87, y: 1 }}
-              style={relleno}
-            >
-              {contenido}
-            </LinearGradient>
-          );
-        })()}
-        {/* ☠️ EL DESTELLO DEL COACH MURIÓ ACÁ (S113-C · lote 0). Vivió en esta
-            esquina desde S53-B2b y se retira en el MISMO acto en que Nexo se
-            monta en el shell: **Nexo es su única puerta**, y desde ahí la
-            almohadilla abre la misma `CoachHoja`, ahora en las cinco pestañas
-            y no sólo en el Hogar. *Dos puertas al mismo cuarto son dos
-            lugares donde aprender lo mismo* (N25 ②).
-
-            Censo antes de retirar: `coachAbierto` · `setCoachAbierto` ·
-            `pressedCoach` · `CoachHoja` · `coach.abrir` tenían **un solo
-            consumidor cada uno, y era éste**. Ninguno queda huérfano. */}
-      </View>
+                  </ScrollView>
+              }
+            />
+          </View>
+        }
+      >
       {/* ⭐ **LA BÚSQUEDA VIVE EN EL ORBE** (firma del founder, 2.2.3 · ①).
           Acá había una caja de texto y **no se entendía que era un buscador**:
           un campo sin rótulo en medio del Hogar se lee como cualquier otra
@@ -2863,7 +2737,35 @@ export default function Hogar() {
         />
       )}
 
-    </ScrollView>
+      </HojaContenido>
+      {/* 🔴 **EL AGUA VA DESPUÉS DE LA HOJA, Y ES LA CURA DE HABERLA METIDO
+          ADENTRO (S116-C lote 3b).** Su propia lámina la manda **FIJA**
+          —*«centrada en pantalla, no scrollea: el agua vive fuera del
+          cuerpo»*—, y al mudarla dentro de `HojaContenido` pasó a ser un hijo
+          del scroll: **se iba con el contenido**. Tampoco puede ir ANTES, que
+          es donde vivía: `HojaContenido` pinta su degradado en absoluto sobre
+          todo el alto y la hoja es opaca, así que ahí quedaba tapada entera.
+          ⇒ hermana posterior, `pointerEvents="none"`: se queda quieta, no toma
+          ningún toque, y sobre el ciruela su tinta al 4-6 % es imperceptible
+          —que es lo correcto: el agua es del papel—. */}
+      {/* @override-s82c — LA MARCA DE AGUA (ítem 4 de la lámina
+          posición-consolidada): el isotipo en tinta al 6%, CENTRADO EN
+          PANTALLA (fijo — no scrollea, como en la lámina: el agua vive
+          fuera del cuerpo). OVERRIDE LOCAL de esta pantalla: NO se
+          generaliza — la promoción es de B después del gate (guard R10).
+          CHOQUE DECLARADO, no resuelto en silencio (regla S63): la Ley 4
+          dice isotipo UNO por pantalla y el techo ya lleva el suyo — la
+          lámina del founder ordena el agua igual; el gate resuelve.
+          Calibración DE LÁMINA: opacidad .06 y ~340 de ancho (size 210 ×
+          ratio del viewBox) — números de acuerdo, no tokens. */}
+      <View
+        pointerEvents="none"
+        style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, alignItems: 'center', justifyContent: 'center' }}
+      >
+        <View style={{ opacity: 0.06 }}>
+          <Isotipo size={210} variant="tinta" color={theme.text.primary} />
+        </View>
+      </View>
     </View>
   );
 }
