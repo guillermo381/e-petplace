@@ -35715,9 +35715,9 @@ Y el costo es el de la casa: **`L-223` dice que el peaje está en la PETICIÓN, 
 
 ---
 
-## `D-1124` 🔴 — PLACES RESPONDE 403 PORQUE **LA EDGE Y EL APK COMPARTEN UNA CLAVE RESTRINGIDA A «ANDROID APPS»**
+## `D-1124` ☠️ — PLACES RESPONDE 403 PORQUE **LA EDGE Y EL APK COMPARTEN UNA CLAVE RESTRINGIDA A «ANDROID APPS»**
 
-**Estado:** ABIERTA · **la cura es FIRMA DEL FOUNDER** (la consola de Google es suya, `D-289`) · **A cablea el secret cuando la clave exista.**
+**Estado:** ✅ **CERRADA el 15-sep-2026** (nació y murió el mismo día) · la clave la creó el founder, A redesplegó y verificó contra el objeto.
 **Origen:** C lo midió contra el objeto (`buzon/S116-C-para-A-places-responde-403.md`); A midió la causa el 15-sep-2026.
 
 ### Lo medido, en orden, y ninguna hipótesis quedó viva por descarte
@@ -35773,7 +35773,31 @@ punto»—. *Un fallo que no habla se lee como «esta app no hace eso».*
 ✅ **Y ya no bloquea el pago:** C curó el montaje en su tanda 6 — el punto se puede
 marcar a mano y la dirección se guarda sin Places.
 
-**☠️ MUERTE:** la edge `lugares` responde 200 con una clave propia, y la del mapa sigue restringida a Android.
+### ✅ CERRADA — 15-sep-2026, verificada contra el objeto
+
+**El founder cableó la clave nueva** (restricción de aplicación «Ninguna» ·
+restricción de API sólo «Places API (New)») y A redesplegó `lugares`.
+
+| qué se verificó | resultado |
+|---|---|
+| **la clave del secret CAMBIÓ** | el `sha256` del secret **ya NO coincide** con el de `epetplace-maps-key` ⇒ son dos claves distintas. *La del mapa no se tocó* |
+| **la función se redesplegó** | `lugares` **ACTIVE, versión 53** (leído de `functions list`, no del texto del deploy) |
+| **buscar**, con sesión real de la cuenta de prueba | **HTTP 200 · 5 predicciones** para «Avenida Amazonas» con sesgo a Quito — la primera es la de Quito, y las otras cuatro son las Amazonas de Machachi, Cayambe, Cuenca y la genérica |
+| **resolver** (la sesión cierra con Details, ley §2.2) | **HTTP 200** · `Av. Río Amazonas, Quito, Ecuador` · ciudad `Quito` · `lat -0.177432` · `lon -78.4859388` |
+
+🟢 **EL SEGUNDO MURO NO APARECIÓ.** La ficha anticipaba que el bloqueo por
+restricción disparaba *primero* y que al levantarlo podía aparecer
+`SERVICE_DISABLED` o billing. **No apareció ninguno**: la API estaba habilitada y
+el proyecto factura. *Se anticipó bien y no se cumplió — que es el resultado
+bueno, y se dice igual: una advertencia que no se cobra no se borra, se cierra.*
+
+⚠️ **Lo que sigue abierto y NO lo cierra esta verificación:** la mitad de
+producto — **`google_rechazo` sigue callando**. Hoy no molesta porque no hay
+rechazo; el día que Places falle por cualquier razón (red, cuota, la clave
+rotada), la persona va a escribir y no va a pasar nada. **Es de C** y su voto ya
+está escrito arriba.
+
+**☠️ MUERTE:** ~~la edge `lugares` responde 200 con una clave propia, y la del mapa sigue restringida a Android.~~ **CUMPLIDA.**
 
 ---
 
