@@ -2146,6 +2146,10 @@ export const clienteEs = {
     puntoAyuda: 'Ajusta el mapa hasta que el pin quede sobre tu puerta. Es lo que el repartidor va a buscar.',
     ponerPunto: 'Poner el punto en el mapa',
     faltaPunto: 'Falta el punto en el mapa: es lo que encuentra tu casa cuando la dirección no alcanza.',
+    /* ⭐ S116-C lote 6 · la salida a mano, dicha ANTES de que haga falta. El
+       diccionario ya la prometía en `sinResultados` («ponlo a mano en el
+       mapa») y en el alta no existía el mapa. */
+    puntoAMano: '¿No aparece tu dirección? Ponla igual y marca el punto en el mapa.',
     // 🔴 S100d·bis · LAS DOS PUERTAS EXPLÍCITAS. Antes el campo y el mapa
     // estaban siempre puestos, y llegar a los botones obligaba a arrastrar
     // sobre el mapa — que MUEVE el punto. El founder: «me desacomoda la

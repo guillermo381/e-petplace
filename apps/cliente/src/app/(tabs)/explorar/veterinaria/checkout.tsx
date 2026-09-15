@@ -168,7 +168,19 @@ export default function VeterinariaCheckout() {
                   >
                     {t('direccion.voz')}
                   </Text>
+                {/* 🔴 **`exigirPunto` — LA APP SE ALINEA CON EL MOTOR (S116-C lote 6).**
+                    **Medido contra la base, no razonado:** `guardar_direccion_hogar`
+                    sin `p_lat`/`p_lon` devuelve `23514 · chk_direccion_con_punto`;
+                    con el punto, guarda. **La tabla lo EXIGE.**
+                    ⇒ sin esta prop el checkout **no pedía lo que la base reclama**:
+                    la familia escribía su dirección, tocaba Guardar y **no pasaba
+                    nada** —o pasaba un error de Postgres crudo— y **sin dirección
+                    guardada no se puede pagar.** *Es `L-528` en su forma más cara:
+                    una pantalla MÁS PERMISIVA que su motor también es un defecto, y
+                    su modo de falla es el silencio.*
+                    La despensa y la guardería ya la pasaban; estas tres no. */}
                   <DireccionHogarForm
+                    exigirPunto
                     inicial={direccionHogar}
                     onGuardada={(d) => {
                       setDireccionHogar(d);
