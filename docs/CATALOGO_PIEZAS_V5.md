@@ -84,6 +84,68 @@
 - ⚠️ **Sin `onPressFoto` el retrato se MIRA**: pasa a `accessibilityRole="image"` y deja de anunciarse como botón. *Un botón deshabilitado sigue diciendo que es un botón, y sin razón visible eso es peor que no serlo* — es el caso de memorial.
 - ⚠️ **Hay un TIPO con este nombre en `@epetplace/api`** (lo que devuelve `obtenerPerfilMascota`). Quien importe los dos en un archivo, lo renombra en el import: `import type { IdentidadMascota as PerfilDeMascota } from '@epetplace/api'`.
 
+
+---
+
+## S116-B lote 5 · EXPLORAR Y SERVICIOS
+
+### `GrillaOficios`
+- **props:** `oficios[]` (`clave` · `glifo` · `etiqueta` · `disponible`) · `onElegir` · `vozSinDisponibles?`
+- **tokens:** `bg.card` · `elevacion.elevada` · `accent.glifo` (vía `Icono registro="glifo"`)
+- 🔴 **Un oficio sin nadie cerca SE MARCA, NO SE ESCONDE** (firma de la mesa, y es lo contrario de lo que hace casi toda vitrina). *Un oficio que desaparece le enseña a la familia que el producto no lo tiene, y el día que llegue el primer prestador nadie va a volver a buscarlo.*
+- 🔴 **Y por eso sigue siendo TOCABLE — no lleva `disabled`.** *Un control apagado no puede explicar por qué lo está*, y lo que la pantalla tiene que poder decir —«todavía no hay nadie cerca»— es justo lo que un botón muerto se lleva puesto. La pieza lo dibuja apagado y avisa por `accessibilityHint`; **`vozSinDisponibles` es obligatoria cuando hay alguno**: un estado que sólo existe como color más pálido es invisible para quien no ve el color.
+- ⚠️ **Un tercio de ancho por ítem, NO el ancho del disco.** Con `width: DISCO` entran CUATRO en una pantalla de 360 y la grilla deja de ser de tres: *la cantidad por fila pasaría a depender del teléfono, que es lo que una grilla existe para evitar.*
+- ⚠️ **El desplazamiento es `DISCO / 2`, derivado.** Misma regla que `FilaAccionesCostura`, y **sólo la primera fila pisa la costura.**
+- ⚠️ **Es la hermana ancha de `FilaAccionesCostura` y no se fusionan:** aquélla es una FILA de hasta cuatro que caben en una línea; ésta es una GRILLA que crece hacia abajo. *Fusionarlas obligaría a una pieza a decidir si envuelve según cuántos le pasan, y el corte de la palabra dejaría de ser la señal que es.*
+
+### `TarjetaPrestador`
+- **props:** `nombre` · `retrato` · `lineaOficio` · `calificacion?` · `vozResenas?` · `desde?` · `vozDesde` · `vozVer` · `onPress`
+- **tokens:** `Tarjeta` · `PrecioText registro="cifra"` (Baloo) · `Icono nombre="calificacion"`
+- 🔴 **No es `FichaPrestador` y no se fusionan.** Aquélla es **la vitrina** —carrusel, clip, mapa de zona, historia, cohorte— y existe para que el espejo del prestador y lo que ve la familia **no puedan divergir**. Esto es una fila de resultados. *Meterle a la vitrina un modo compacto la volvería una pieza con dos anatomías, que es el defecto del que la vitrina nació.*
+- 🔴 **Toda la tarjeta se toca y el «Ver» NO es un segundo destino.** *Dos áreas táctiles con dos destinos en una fila es cómo se toca lo que no se quería tocar.* El «Ver» existe para decir que la fila se toca, así que va `apoyada` y **queda fuera del árbol de accesibilidad**: el lector anuncia la fila una vez, con el nombre del negocio.
+- 🔴 **Sin reseñas la línea NO EXISTE**, ni como «0 reseñas». *Un negocio nuevo no está peor calificado: está sin calificar, y un cero con una estrella al lado dice lo primero.*
+- ⚠️ **Sin `desde` no se dibuja el bloque ni el «Ver»:** *una fila que ofrece «Ver» sin decir desde cuánto obliga a entrar para averiguar el precio, que es lo que esta lista existe para evitar.*
+- ⚠️ El rótulo «desde» es de la pieza, no de la pantalla (escalera del precio honesto, S57): acá el precio varía siempre.
+
+### `GrillaSubservicios`
+- **props:** `subservicios[]` (`clave` · `glifo` · `nombre`) · `onElegir`
+- 🔴 **El alto igual por fila NO se pide: se DERIVA.** Cada fila es `row` + `alignItems: 'stretch'`, así que las dos tarjetas miden lo que la más alta **por construcción**. *Un alto fijo acierta hasta el primer nombre de tres líneas; un alto medido llega un frame tarde y la grilla salta.*
+- ⚠️ **Se arma por FILAS y no con `flexWrap`:** con `flexWrap` los hijos no se estiran entre sí y la fila queda despareja. *El envoltorio que parece equivalente rompe justo lo que esta pieza promete.*
+- ⚠️ **Acá el nombre PUEDE ser de dos líneas**, al revés que la fila de la costura: la tarjeta tiene media pantalla y los subservicios se llaman como se llaman. *Forzar una palabra obligaría a inventarle nombres al catálogo.*
+- ⚠️ La tarjeta huérfana de una fila impar lleva un hueco del mismo ancho al lado: **sola y del doble de ancho se leería como una destacada, y no lo es.**
+
+### `SelectorHora`
+- **props:** `horas[]` (`codigo` · `etiqueta` · `disponible`) · `elegida` · `onElegir` · `etiquetaSinLugar`
+- 🔴 **No es una promoción literal de `GrillaElegir`.** Su antecesor vive local en el cliente y **hace TRES trabajos** —horas, duraciones y el QUÉ de grooming—; por eso tiene props de columnas y de voz. *Promoverlo verbatim con el nombre `SelectorHora` habría puesto en `packages/ui` un nombre que miente sobre dos de sus tres usos.* **Se promueve el TRABAJO, no el archivo.** Cuando el eje de la hora migre, `GrillaElegir` pasa de tres trabajos a dos.
+- 🔴 **Apagada y NO elegible**, por orden del encargo. ⚠️ **Eso cierra el camino por el que se explicaría por qué no hay** —es lo que llevó a la rueda de días a dejar el día cerrado tocable—, así que **si todas las horas de un día están apagadas, la pantalla tiene que decirlo**: el chip ya no puede.
+- ⚠️ **Sin preselección.** *Elegir por la familia una hora que no pidió es cómo se reserva lo que no se quería.*
+- ⚠️ La hora va en mono: dato de máquina (Ley 3), que es lo que su antecesor ya declaraba al separar `voz='mono'` de `voz='sans'`.
+
+### `SelectorDia` — ⭐ **gana la anatomía v5; la rueda sigue viva**
+- 🔴 **Un trabajo, una pieza (Ley 19): la tira NO nace aparte.** Lo que cambia es **de qué casa es la anatomía**, y esa pregunta ya tiene su slot: **`accent.formaV5`**. Cliente: tira de cuadrados con el nombre corto arriba, el número en Baloo, el elegido en ciruela y **la pata pisando**. Prestador y memorial: la rueda de siempre.
+- 🔴 **Los NUEVE montajes vivos no se tocan** —seis del cliente, tres del prestador— y cada uno recibe la anatomía de su casa. *No es una prop de variante inventada: es la decisión que la casa ya tomó, aplicada donde corresponde.*
+- ⚠️ **La física firmada de la rueda queda INTACTA** (S82-C r12; su cabecera dice que no se recalibra sin otro gate). *Un reemplazo habría cambiado la portada del prestador sin que nadie la mirara.*
+- ⚠️ **En la tira el día cerrado NO se elige, al revés que en la rueda.** La rueda lo dejó tocable porque la voz que explica el vacío sólo se monta para el día elegido; **acá manda el encargo**, y la contrapartida es de quien monta: el porqué tiene que decirse en otro lado.
+- ⚠️ **El número pasa a Baloo y no contradice a la rueda: hereda su razón.** La rueda lo puso en sans *«porque un día que ELEGÍS es una elección, no un dato leído»* — sigue siendo cierto; lo que cambió es que la casa v5 **tiene una voz propia para las cifras** y no la tenía cuando la rueda se calibró.
+
+### `PieReserva` — ⭐ **gana el rótulo y la cifra; no nace un pie nuevo**
+- **props nuevas:** `rotuloTotal?`
+- 🔴 **La cifra pasa a Baloo cuando la casa lo es (`formaV5`).** ⏪ La línea decía *«el precio es dato de máquina a escala chica: mono (Ley 3)»* — **y ese criterio quedó atrás, no equivocado**: la Ley 3 manda mono para metadata chica de máquina, y la letra v5 le dio a la casa una voz para las cifras que **no existía cuando esto se escribió**. *La ley no se deroga: ahora hay un registro para esto.* El prestador conserva el mono (`formaV5: false`).
+- ⚠️ **`cifraChica` (22) y no `cifra` (44):** 44 es la cifra que preside una pantalla; acá comparte el renglón con el CTA y a ese tamaño lo empuja fuera.
+- ⚠️ **`rotuloTotal` sin default:** un pie cuyo precio varía por prestador **no dice «Total» — dice «desde»**, y rotularlo así afirmaría un total que la pantalla todavía no sabe.
+
+### `FilaIncluye`
+- **props:** `items[]` (líneas ya en voz de familia)
+- ⚠️ **El verde acá no rompe la regla del semáforo:** no dice «está bien», dice **«esto sí entra»**, y contrasta contra lo que no está en la lista. *Misma función que el check de «Al día»: afirmar, no calificar.* Sale de `status.successText` —el registro de TEXTO— porque acompaña texto.
+- 🔴 **Lo que NO incluye no se dibuja tachado, y no hay estado negativo.** *Una lista que enumera lo que no entra le enseña a la familia todo lo que le falta a lo que está por comprar.* Si hace falta decir una exclusión, es una frase de la pantalla.
+- ⚠️ El check es **gráfica y no un glifo del registry**: no significa una acción ni una sección — es el bullet de esta lista. Queda fuera del árbol de accesibilidad.
+
+### `PrecioText` — ⭐ **gana el registro `cifra`**
+- 🔴 **Nace de un hueco que la pieza tenía y su cabecera no podía ver:** la letra v5 dice *«Baloo 2 800 para display, títulos y CIFRAS»* y `typography.escala` la declara desde el lote 2 — **pero los tres registros seguían en PJS**, o sea en la escala v4. *La voz única del precio se quedó una letra atrás, y como no falla nada nadie lo iba a notar hasta que una pantalla pidiera la cifra de la casa.*
+- ⚠️ **No cambia ninguno de los otros tres.** Migrarlos es decisión de mesa con su gate: toca los 53 sitios que esta pieza unificó.
+
+---
+
 ### `FiltroPills` — ⭐ **es la fila de pestañas del perfil; no nace una pieza nueva**
 - El encargo del lote 4 pedía «`FilaPestañas` si no existe». **Existe**: `FiltroPills`, promovida en S85-B7, ya es la fila de chips con el elegido marcado y **la pata que pisa** (`MarcaEleccion`), y el chip activo en ciruela está declarado en `palette.ts:63` como su empleo. *Un componente por caso real, y este caso ya tiene el suyo.*
 

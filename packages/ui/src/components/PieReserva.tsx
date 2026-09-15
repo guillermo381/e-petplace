@@ -62,6 +62,12 @@ export type PieReservaProps = {
   /** Ya formateado con su moneda. `null` = no hay qué totalizar y el
    *  bloque de precio no se monta (jamás un placeholder). */
   total: string | null
+  /** ⭐ **S116-B lote 5 · el rótulo chico sobre la cifra («Total»).**
+   *  Opcional y **sin default a propósito**: un pie cuyo precio varía por
+   *  prestador NO dice «Total» —dice «desde»—, y rotularlo así afirmaría un
+   *  total que la pantalla todavía no sabe. Sin rótulo, el pie es el de
+   *  siempre. La palabra viene del diccionario de quien monta. */
+  rotuloTotal?: string | null
   /** Del dato, no del oficio: true cuando el precio agregado varía. */
   totalDesde?: boolean
   /** Día y hora elegidos. Segunda línea del precio: sin total, no vive. */
@@ -80,6 +86,7 @@ export type PieReservaProps = {
 
 export function PieReserva({
   total,
+  rotuloTotal = null,
   totalDesde = false,
   cuando = null,
   etiqueta,
@@ -90,6 +97,7 @@ export function PieReserva({
   onRazon,
 }: PieReservaProps) {
   const { theme } = useTheme()
+  const esV5 = 'formaV5' in theme.accent && theme.accent.formaV5 === true
   return (
     <View
       style={{
@@ -106,13 +114,49 @@ export function PieReserva({
     >
       {total !== null ? (
         <View>
-          {/* El precio es dato de máquina a escala chica: mono (Ley 3). */}
+          {/* ⭐ **S116-B lote 5 · EL RÓTULO, arriba y chico.** Opcional y sin
+              default: *el pie de un oficio con precio por prestador no dice
+              «Total» —dice «desde»— y rotularlo así sería afirmar un total
+              que la pantalla todavía no sabe.* Quien monta trae la palabra
+              de su diccionario; sin ella, el pie es el de siempre. */}
+          {rotuloTotal !== null ? (
+            <Texto variante="apoyo" color="tertiary">
+              {rotuloTotal}
+            </Texto>
+          ) : null}
+          {/* 🔴 **LA CIFRA PASA A BALOO cuando la casa lo es** (`formaV5`).
+              ⏪ Esta línea decía *«el precio es dato de máquina a escala
+              chica: mono (Ley 3)»* — **y ese criterio quedó atrás, no
+              equivocado.** La Ley 3 manda mono para metadata chica de
+              máquina; la letra v5 le dio a la casa **una voz propia para las
+              cifras** (`escala.cifra` 44 · `cifraChica` 22) que no existía
+              cuando esto se escribió, y un total que decide una compra dejó
+              de ser metadata el día que la escala lo nombró. *La ley no se
+              deroga: lo que cambió es que ahora hay un registro para esto.*
+
+              ⚠️ **`cifraChica` (22) y no `cifra` (44), declarado:** 44 es la
+              cifra que PRESIDE una pantalla; acá comparte el renglón con el
+              CTA y a ese tamaño lo empuja fuera. *El registro nombra la voz,
+              no el tamaño más grande que esa voz tenga.*
+
+              El prestador **conserva el mono**: su tema tiene `formaV5:
+              false` por la letra §5, y su único consumidor —el taller de
+              guardería— no pidió rediseño. */}
           <Text
-            style={{
-              fontFamily: typography.family.mono.medium,
-              fontSize: typography.size.lg,
-              color: theme.text.primary,
-            }}
+            style={
+              esV5
+                ? {
+                    fontFamily: typography.escala.cifraChica.familia,
+                    fontSize: typography.escala.cifraChica.size,
+                    lineHeight: typography.escala.cifraChica.lineHeight,
+                    color: theme.text.primary,
+                  }
+                : {
+                    fontFamily: typography.family.mono.medium,
+                    fontSize: typography.size.lg,
+                    color: theme.text.primary,
+                  }
+            }
           >
             {total}
           </Text>

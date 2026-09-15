@@ -53,6 +53,23 @@ export {
   type PastillaDeIdentidad,
 } from './components/IdentidadMascota'
 
+/* ══ S116-B lote 5 · EXPLORAR Y SERVICIOS ════════════════════════════════
+   Las piezas del recorrido: la grilla de oficios que pisa la costura, la
+   fila de «Cerca de ti», la grilla de subservicios del oficio, y el eje de
+   la hora. **Lo que ya tenía pieza NO nació de nuevo y se ensanchó donde
+   estaba**: la tira de días es la anatomía v5 de `SelectorDia` (la rueda
+   sigue viva donde `formaV5` es false) y el pie de precio es `PieReserva`
+   con su rótulo y su cifra. */
+export { GrillaOficios, type GrillaOficiosProps, type OficioDeGrilla } from './components/GrillaOficios'
+export { TarjetaPrestador, type TarjetaPrestadorProps } from './components/TarjetaPrestador'
+export {
+  GrillaSubservicios,
+  type GrillaSubserviciosProps,
+  type Subservicio,
+} from './components/GrillaSubservicios'
+export { SelectorHora, type SelectorHoraProps, type HoraOpcion } from './components/SelectorHora'
+export { FilaIncluye, type FilaIncluyeProps } from './components/FilaIncluye'
+
 /* S116-B lote 5 · la franja del pie de 03 y 05. Exporta su ALTO porque
    quien la monte al pie de una hoja que scrollea tiene que reservarle el
    lugar — mismo criterio que los dos altos de `Cabecera`. */

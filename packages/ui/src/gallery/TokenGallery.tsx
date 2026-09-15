@@ -233,6 +233,12 @@ import { BotonMarcaAjena } from '../components/BotonMarcaAjena'
 import { HojaContenido } from '../components/HojaContenido'
 import { FilaAccionesCostura } from '../components/FilaAccionesCostura'
 import { FilaMascotas } from '../components/FilaMascotas'
+import { GrillaOficios } from '../components/GrillaOficios'
+import { TarjetaPrestador } from '../components/TarjetaPrestador'
+import { GrillaSubservicios } from '../components/GrillaSubservicios'
+import { SelectorHora } from '../components/SelectorHora'
+import { FilaIncluye } from '../components/FilaIncluye'
+import { glifoDeOficio } from '../components/glifo-de-oficio'
 import { IdentidadMascota } from '../components/IdentidadMascota'
 import { OndaAcceso, ALTO_ONDA_ACCESO } from '../components/OndaAcceso'
 import { FilaBeneficio } from '../components/FilaBeneficio'
@@ -1438,6 +1444,147 @@ function MaquetaExpediente4({ memorial = false }: { memorial?: boolean }) {
           />
         </View>
       </HojaContenido>
+    </View>
+  )
+}
+
+
+/* ── S116-B lote 5 · EXPLORAR Y SERVICIOS ────────────────────────────────
+   La grilla de oficios se juzga SOBRE LA COSTURA, no suelta: su gesto entero
+   es la relación con el borde entre el ciruela y la hoja. */
+function MaquetaExplorar5() {
+  return (
+    <View style={{ height: 700, borderRadius: radius.lg, overflow: 'hidden' }}>
+      <HojaContenido
+        arranque={190}
+        fondo={
+          <Cabecera
+            variante="raiz"
+            presentacion="fondo"
+            titulo="¿Qué necesita hoy?"
+            apoyo="Quito · a 5 km a la redonda"
+          />
+        }
+      >
+        <View style={{ gap: spacing[5] }}>
+          <GrillaOficios
+            vozSinDisponibles="Todavía no hay nadie cerca"
+            onElegir={() => {}}
+            oficios={[
+              { clave: 'paseo', glifo: glifoDeOficio('paseo'), etiqueta: 'Paseo', disponible: true },
+              { clave: 'veterinaria', glifo: glifoDeOficio('veterinaria'), etiqueta: 'Salud', disponible: true },
+              { clave: 'grooming', glifo: glifoDeOficio('grooming'), etiqueta: 'Estética', disponible: true },
+              { clave: 'guarderia', glifo: glifoDeOficio('guarderia'), etiqueta: 'Guardería', disponible: true },
+              { clave: 'adiestramiento', glifo: glifoDeOficio('adiestramiento'), etiqueta: 'Escuela', disponible: false },
+              { clave: 'hotel', glifo: glifoDeOficio('hotel'), etiqueta: 'Hotel', disponible: false },
+            ]}
+          />
+          <View style={{ paddingHorizontal: spacing[5], gap: spacing[3] }}>
+            <Texto variante="seccion">Cerca de ti</Texto>
+            <TarjetaPrestador
+              nombre="Clínica Aurora"
+              retrato={<AvatarMascota nombre="Aurora" tamano="md" />}
+              lineaOficio="Veterinaria · a 1,2 km"
+              calificacion={4.8}
+              vozResenas="126 reseñas"
+              desde={18}
+              vozDesde="desde"
+              vozVer="Ver"
+              onPress={() => {}}
+            />
+            {/* SIN calificación y SIN precio: los dos bloques desaparecen. */}
+            <TarjetaPrestador
+              nombre="Paseos Andrés, el que recién abre y tiene un nombre largo"
+              retrato={<AvatarMascota nombre="Andrés" tamano="md" />}
+              lineaOficio="Paseo · a 600 m"
+              calificacion={null}
+              desde={null}
+              vozDesde="desde"
+              vozVer="Ver"
+              onPress={() => {}}
+            />
+          </View>
+        </View>
+      </HojaContenido>
+    </View>
+  )
+}
+
+function MaquetaOficio5() {
+  return (
+    <View style={{ gap: spacing[4] }}>
+      <GrillaSubservicios
+        onElegir={() => {}}
+        subservicios={[
+          { clave: 'consulta', glifo: 'veterinaria', nombre: 'Consulta general' },
+          { clave: 'vacuna', glifo: 'vacuna', nombre: 'Vacunación' },
+          { clave: 'lab', glifo: 'laboratorio', nombre: 'Laboratorio' },
+          { clave: 'urg', glifo: 'urgencias', nombre: 'Urgencia' },
+          { clave: 'tele', glifo: 'telemedicina', nombre: 'Consulta por video con tu veterinario' },
+        ]}
+      />
+    </View>
+  )
+}
+
+function MaquetaAgendar5() {
+  const [dia, setDia] = useState('2026-09-15')
+  const [hora, setHora] = useState<string | null>(null)
+  return (
+    <View style={{ gap: spacing[4] }}>
+      <SelectorDia
+        dias={[
+          { iso: '2026-09-14', dia: 'dom', numero: '14' },
+          { iso: '2026-09-15', dia: 'lun', numero: '15' },
+          { iso: '2026-09-16', dia: 'mar', numero: '16' },
+          { iso: '2026-09-17', dia: 'mié', numero: '17' },
+          { iso: '2026-09-18', dia: 'jue', numero: '18' },
+          { iso: '2026-09-19', dia: 'vie', numero: '19' },
+        ]}
+        elegido={dia}
+        cerrados={new Set(['2026-09-14', '2026-09-18'])}
+        etiquetaCerrado="cerrado"
+        onElegir={setDia}
+      />
+      <View style={{ paddingHorizontal: spacing[5] }}>
+        <SelectorHora
+          elegida={hora}
+          onElegir={setHora}
+          etiquetaSinLugar="sin lugar"
+          horas={[
+            { codigo: '09:00', etiqueta: '09:00', disponible: true },
+            { codigo: '09:30', etiqueta: '09:30', disponible: false },
+            { codigo: '10:00', etiqueta: '10:00', disponible: true },
+            { codigo: '10:30', etiqueta: '10:30', disponible: true },
+            { codigo: '11:00', etiqueta: '11:00', disponible: false },
+            { codigo: '11:30', etiqueta: '11:30', disponible: true },
+          ]}
+        />
+      </View>
+    </View>
+  )
+}
+
+function MaquetaDetalle5() {
+  return (
+    <View style={{ borderRadius: radius.lg, overflow: 'hidden' }}>
+      <View style={{ padding: spacing[5] }}>
+        <FilaIncluye
+          items={[
+            'Paseo de 60 minutos con GPS en vivo',
+            'Fotos y novedades durante la salida',
+            'Parte al terminar, con el recorrido completo y todo lo que pasó',
+          ]}
+        />
+      </View>
+      <PieReserva
+        total="$ 18.00"
+        rotuloTotal="Total"
+        etiqueta="Reservar"
+        habilitado
+        onPress={() => {}}
+        insetBottom={0}
+      />
     </View>
   )
 }
@@ -4217,6 +4364,22 @@ function GaleriaInterna({ encabezado }: { encabezado?: ReactNode }) {
                 sin radio— y, con el teclado arriba, que no queda NADA. */}
             <OndaAcceso frase={['Mascotas', 'más felices']} lado="der" />
           </View>
+        </Seccion>
+
+        <Seccion titulo="⭐ GATE S116-B lote 5 — EXPLORAR · qué decide: (a) que los seis oficios se lean como TRES columnas y la primera fila pise la costura; (b) que Escuela y Hotel se lean APAGADOS pero tocables —si parecen rotos o si desaparecen, está mal—; (c) que la fila de «Cerca de ti» se toque entera y el «Ver» NO compita con un CTA; (d) que la segunda tarjeta, sin calificación y sin precio, NO deje huecos ni ceros">
+          <MaquetaExplorar5 />
+        </Seccion>
+
+        <Seccion titulo="⭐ GATE S116-B lote 5 — LA PANTALLA DEL OFICIO · qué decide, y es UNA sola cosa: que las dos tarjetas de cada fila midan LO MISMO, incluida la fila donde una tiene un nombre de dos líneas y la otra de una. La quinta va sola y NO se estira a pantalla completa: sola y del doble de ancho se leería como una destacada">
+          <MaquetaOficio5 />
+        </Seccion>
+
+        <Seccion titulo="⭐ GATE S116-B lote 5 — AGENDAR · qué decide: (a) que la tira de días se lea como tira y no como rueda, con el número en Baloo y la pata pisando al elegido; (b) que domingo y jueves se vean SIN LUGAR y no se puedan elegir; (c) que las horas sin lugar se distingan de las libres sin parecer rotas; (d) que NINGUNA hora venga preelegida. ⚠️ Se juzga TOCANDO">
+          <MaquetaAgendar5 />
+        </Seccion>
+
+        <Seccion titulo="⭐ GATE S116-B lote 5 — EL DETALLE Y SU PIE · qué decide: (a) que los checks afirmen sin parecer un semáforo —si se lee como «todo bien» en vez de «esto entra», está mal—; (b) que «Total» se lea CHICO arriba y la cifra en Baloo abajo; (c) que la cifra y el CTA convivan en un renglón sin empujarse">
+          <MaquetaDetalle5 />
         </Seccion>
 
         <Seccion titulo="⭐ GATE S116-B lote 4 — EL TECHO DEL HOGAR · qué decide: (a) que se lea CUÁL está elegida sin tocar nada —el aro magenta contra el aro apenas insinuado— y que al elegir otra la fila NO se mueva ni un píxel; (b) que la línea de abajo sea la de la elegida y cambie con ella; (c) que Bruma, que está en memoria, se elija igual pero SIN color de marca; (d) que el «+» se lea como control y no como una mascota más. ⚠️ Se juzga TOCANDO: quieta, esta sección sólo prueba el aro">
