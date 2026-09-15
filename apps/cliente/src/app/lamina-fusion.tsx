@@ -60,6 +60,7 @@ import {
   spacing,
   radius,
   typography,
+  HojaContenido,
 } from '@epetplace/ui'
 import {
   getEstadoOnboardingDueno,
@@ -67,6 +68,7 @@ import {
   resolverUrlsFotos,
 } from '@epetplace/api'
 import { router } from 'expo-router'
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera'
 
 // Geometría de producción, copiada literal (réplica de lámina).
 const ALTO = 44
@@ -305,6 +307,7 @@ function BloqueTema({ rotulo, mascotas }: { rotulo: string; mascotas: MascotaLam
 }
 
 export default function LaminaFusion() {
+  const cabecera = useAltoDeCabecera('empujada')
   const insets = useSafeAreaInsets()
   const { theme } = useTheme()
   const [mascotas, setMascotas] = useState<MascotaLamina[] | null>(null)
@@ -340,8 +343,25 @@ export default function LaminaFusion() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Cabecera variante="empujada" titulo="Lámina S74" onVolver={() => router.back()}  etiquetaVolver="Volver" />
-      <ScrollView contentContainerStyle={{ padding: spacing[5], gap: spacing[6], paddingBottom: insets.bottom + spacing[8] }}>
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela + hoja
+          con la curva arriba. **Vale también para las herramientas de sesión**:
+          si esta pantalla se viera distinta de las de producto, dejaría de
+          servir para mirar piezas de producto. */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        scroll={{ contentContainerStyle: { padding: spacing[5], gap: spacing[6] } }}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo="Lámina S74"
+              onVolver={() => router.back()}
+              etiquetaVolver="Volver"
+              presentacion="fondo"
+            />
+          </View>
+        }
+      >
         <Text style={{ fontFamily: typography.family.sans.regular, fontSize: 14, color: theme.text.secondary }}>
           Dos preguntas, sobre la geometría ya curada, en claro y en oscuro. 1: cuánta sombra
           necesita el chip para despegar del 2D (1/2/3 — el 1 es la de hoy). 2: la materia — la
@@ -361,7 +381,7 @@ export default function LaminaFusion() {
             </ThemeProvider>
           </>
         )}
-      </ScrollView>
+      </HojaContenido>
     </View>
   )
 }

@@ -43,6 +43,7 @@ import { ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
   Boton, Celda, Confirmacion, Cabecera, EsperaLarga, EstadoVacio, Icono,
   PantallaConPie, Separador, Tarjeta, Texto, spacing, useAviso, useTheme,
 } from '@epetplace/ui';
@@ -61,8 +62,10 @@ import { SeccionFacturacion, useFacturacion } from '@/components/seccion-factura
 import { AvisoNoCargo } from '@/components/aviso-no-cargo';
 import { useTraduccion } from '@/i18n';
 import { formatearPrecio } from '@epetplace/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 export default function CheckoutPlanPaseo() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { t } = useTraduccion();
   const { theme } = useTheme();
   const router = useRouter();
@@ -256,11 +259,25 @@ export default function CheckoutPlanPaseo() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Cabecera variante="empujada" titulo={t('checkout.titulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')} />
-      <PantallaConPie
-        contentContainerStyle={{ padding: spacing[4], gap: spacing[4], paddingBottom: insets.bottom + spacing[4] }}
-        pie={
-          <Boton
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`) + la hoja encima, con la curva ARRIBA.
+          ☠️ **Y muere el `PantallaConPie`**: su pie pasa al slot `pie` de la
+          hoja. *Las dos piezas reservan el alto medido del pie; montadas una
+          dentro de otra serían dos pies y dos reservas* — lo dice el contrato
+          de `HojaContenido`. El `insets.bottom` del relleno también se va: lo
+          paga la hoja (`R53`). */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        scroll={{ contentContainerStyle: { padding: spacing[4], gap: spacing[4], } }}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada" titulo={t('checkout.titulo')} onVolver={() => router.back()}  etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+        pie={<Boton
             variante="primario"
             bloque
             /* El sufijo «(simulado)» **sale del mismo mapa que la banda**: no
@@ -333,7 +350,7 @@ export default function CheckoutPlanPaseo() {
         {simula('plan_paseo') ? <Texto variante="apoyo">{t('checkout.simuladoAviso')}</Texto> : null}
 
         {rebote !== null ? <Texto variante="cuerpo">{rebote}</Texto> : null}
-      </PantallaConPie>
+      </HojaContenido>
     </SafeAreaView>
   );
 }

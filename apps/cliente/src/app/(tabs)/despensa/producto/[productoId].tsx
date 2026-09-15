@@ -55,6 +55,7 @@ import { Pressable, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
+  HojaContenido,
   AvisoAlergia,
   Boton,
   COLA_PRESENCIA_COACH,
@@ -69,7 +70,6 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   nombreCurado,
-  PantallaConPie,
   PrecioText,
   SelectorOpcion,
   Separador,
@@ -112,6 +112,7 @@ import {
   vozAlergeno,
 } from '@/lib/despensa/composicion';
 import { useTraduccion } from '@/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 type Fase<T> = T | 'cargando' | 'error';
 
@@ -271,6 +272,7 @@ function RotuloPlegable({
 }
 
 export default function DespensaProducto() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const { mostrar } = useAviso();
@@ -762,95 +764,82 @@ export default function DespensaProducto() {
           genérico en una pila de fichas no dice de cuál está saliendo. *Si la
           mesa lo prefiere invisible, es una prop de `Cabecera` y es de B — pero
           no la pido: el truco del color no era esa prop.* */}
-      <Cabecera
-        variante="empujada"
-        titulo={
-          ficha !== 'cargando' && ficha !== 'error'
-            ? nombreCurado(ficha.nombre)
-            : t('despensa.tituloProducto')
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela + hoja,
+          y ☠️ **muere el `PantallaConPie`**: su pie pasa al slot `pie` de la
+          hoja, que reserva el alto MEDIDO igual que él. *Las dos piezas hacen
+          la misma cuenta; montadas una dentro de otra la hacen dos veces.*
+          🔴 **El `COLA_PRESENCIA_COACH` se queda**: el disco flotante no es el
+          pie y su alto no lo reserva ninguna de las dos piezas. */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={
+                ficha !== 'cargando' && ficha !== 'error'
+                  ? nombreCurado(ficha.nombre)
+                  : t('despensa.tituloProducto')
+              }
+              onVolver={() => router.back()}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
         }
-        onVolver={() => router.back()}
-        etiquetaVolver={t('comun.volver')}
-      />
-
-      {/* 🔴 G-02 · EL CONTENIDO TAPADO — CURADO EN LA RAÍZ (S100b-C, L1).
-          Acá vivía un `ScrollView` que estimaba el alto del pie con un
-          `96` TECLEADO. Medido: el pie de esta pantalla mide **128 dp**
-          cuando el carrito tiene algo (`spacing[3]` + botón 48 + gap 8 +
-          botón 48 + `spacing[3]`), y **más todavía** cuando el CTA apagado
-          dice qué falta. La reserva y el pie salían de dos cuentas
-          distintas y tenían que coincidir — *la forma exacta del defecto
-          que esta casa ya tiene nombrada*.
-
-          🔴 Y LA CONDICIÓN DE REPRODUCCIÓN EXPLICA POR QUÉ SOBREVIVIÓ A
-          TODOS LOS GATES, medida en el aparato de C: **con el carrito
-          VACÍO el pie tiene UN botón y los 96 dp alcanzan justo**. El
-          defecto solo aparece llegando a la ficha con algo ya adentro del
-          carrito — *un camino que no es el primero que camina nadie*.
-
-          ⇒ `PantallaConPie` (B, S100b): el pie se mide a sí mismo y esa
-          MISMA medida reserva el scroll. No hay dos cuentas: hay una. El
-          `insets.bottom` también es de la pieza, así que sale de acá. */}
-      <PantallaConPie
-        /* ⚠️ EL PIE VA COMO FRAGMENTO, NO ENVUELTO EN UN `View` — y no es
-           estilo: `PantallaConPie` lleva `pointerEvents="box-none"` para
-           que el gesto de scroll ATRAVIESE la banda del pie, y `box-none`
-           cubre UNA SOLA CAPA. Un `View` propio acá volvería a capturar
-           todo su rectángulo y **reabriría la zona muerta de gesto en el
-           tercio inferior** — justo donde el pulgar sostiene el teléfono.
-           (Aviso de B con el caso; si alguna vez hace falta agrupar de
-           verdad, ese `View` lleva su propio `pointerEvents="box-none"`.) */
         pie={
-          conCta ? (
-            <>
-              {/* ⏪ S100d-bis · **EL FLOTANTE SE FUE DEL PIE, Y NO POR
-                  COMPOSICIÓN: PORQUE EL PIE ERA LA CAUSA DEL DEFECTO.**
-                  B lo midió con el founder mirando: la banda del pie es
-                  **opaca y de ancho completo**, así que el disco no
-                  flotaba — *ocupaba una franja que tapaba el contenido*.
-                  El blanco de la tarjeta terminaba en **619,4 dp** y la
-                  banda arrancaba en **619,0**: lo que B y yo leímos como
-                  «stepper cortado» era la banda encima.
-                  ⇒ ahora es **overlay hermano del scroll**, abajo de este
-                  bloque. *La instrucción de montarlo como `pie` fue de B y
-                  la corrigió B; lo que a mí me toca es que el montaje
-                  cambió de lugar, no de intención.* */}
-              {faltaParaAgregar !== null ? (
-                <Texto variante="apoyo">{faltaParaAgregar}</Texto>
-              ) : null}
-              <Boton
-                etiqueta={
-                  variante !== null
-                    ? t('despensa.agregarConPrecio', {
-                        precio: formatearPrecio((variante.precio * cantidad)),
-                      })
-                    : t('despensa.agregar')
-                }
-                bloque
-                deshabilitado={faltaParaAgregar !== null}
-                onPress={() => void agregar()}
-              />
-              {/* ☠️ S100d-C · punto ⑫ — **ACÁ VIVÍA EL «Ver carrito (N)» EN
-                  GHOST, Y MUERE.** Su nota decía que no se eliminaba
-                  *«sería un callejón hasta que aterrice el ícono de carrito
-                  de G-14»* — el ícono aterrizó, y ahora lo reemplaza el
-                  flotante de arriba, que además está donde llega el pulgar.
-                  *La condición que lo mantenía vivo era explícita y se
-                  cumplió: por eso se puede cobrar sin discutirla.* */}
-            </>
-          ) : undefined
+            conCta ? (
+              <>
+                {/* ⏪ S100d-bis · **EL FLOTANTE SE FUE DEL PIE, Y NO POR
+                    COMPOSICIÓN: PORQUE EL PIE ERA LA CAUSA DEL DEFECTO.**
+                    B lo midió con el founder mirando: la banda del pie es
+                    **opaca y de ancho completo**, así que el disco no
+                    flotaba — *ocupaba una franja que tapaba el contenido*.
+                    El blanco de la tarjeta terminaba en **619,4 dp** y la
+                    banda arrancaba en **619,0**: lo que B y yo leímos como
+                    «stepper cortado» era la banda encima.
+                    ⇒ ahora es **overlay hermano del scroll**, abajo de este
+                    bloque. *La instrucción de montarlo como `pie` fue de B y
+                    la corrigió B; lo que a mí me toca es que el montaje
+                    cambió de lugar, no de intención.* */}
+                {faltaParaAgregar !== null ? (
+                  <Texto variante="apoyo">{faltaParaAgregar}</Texto>
+                ) : null}
+                <Boton
+                  etiqueta={
+                    variante !== null
+                      ? t('despensa.agregarConPrecio', {
+                          precio: formatearPrecio((variante.precio * cantidad)),
+                        })
+                      : t('despensa.agregar')
+                  }
+                  bloque
+                  deshabilitado={faltaParaAgregar !== null}
+                  onPress={() => void agregar()}
+                />
+                {/* ☠️ S100d-C · punto ⑫ — **ACÁ VIVÍA EL «Ver carrito (N)» EN
+                    GHOST, Y MUERE.** Su nota decía que no se eliminaba
+                    *«sería un callejón hasta que aterrice el ícono de carrito
+                    de G-14»* — el ícono aterrizó, y ahora lo reemplaza el
+                    flotante de arriba, que además está donde llega el pulgar.
+                    *La condición que lo mantenía vivo era explícita y se
+                    cumplió: por eso se puede cobrar sin discutirla.* */}
+              </>
+            ) : undefined
         }
-        contentContainerStyle={{
-          paddingTop: spacing[4],
-          // Solo el aire del final de MI contenido: la reserva del PIE la
-          // suma la pieza. Acá vivía `+ 96`.
-          // 🔴 S100d-bis · **el disco flotante NO es el pie**, así que su
-          // alto no lo reserva nadie: lo suma acá con la constante que la
-          // propia pieza exporta. *Un número tecleado que tenga que
-          // coincidir con el tamaño de un disco de otro paquete es la
-          // clase de deuda que `PantallaConPie` vino a matar.*
-          paddingBottom: spacing[8] + COLA_PRESENCIA_COACH,
-          gap: spacing[5],
+        scroll={{
+          contentContainerStyle: {
+            paddingTop: spacing[4],
+            // Solo el aire del final de MI contenido: la reserva del PIE la
+            // suma la pieza. Acá vivía `+ 96`.
+            // 🔴 S100d-bis · **el disco flotante NO es el pie**, así que su
+            // alto no lo reserva nadie: lo suma acá con la constante que la
+            // propia pieza exporta. *Un número tecleado que tenga que
+            // coincidir con el tamaño de un disco de otro paquete es la
+            // clase de deuda que `PantallaConPie` vino a matar.*
+            paddingBottom: spacing[8] + COLA_PRESENCIA_COACH,
+            gap: spacing[5],
+          },
         }}
       >
         {ficha === 'cargando' ? (
@@ -1662,7 +1651,7 @@ export default function DespensaProducto() {
             ) : null}
           </>
         )}
-      </PantallaConPie>
+      </HojaContenido>
 
       {/* ☠️ AQUÍ VIVÍA EL CARRITO FLOTANTE — **murió porque el shell lo monta**
           (N28). Ver la lápida gemela en la vitrina: eran DOS discos vivos a la

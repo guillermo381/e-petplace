@@ -50,6 +50,7 @@ import {useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Linking, Pressable, View } from 'react-native';
 import { router, useNavigation } from 'expo-router';
 import {
+  HojaContenido,
   Cabecera,
   Boton,
   Casilla,
@@ -63,7 +64,6 @@ import {
   Hoja,
   Icono,
   Interruptor,
-  PantallaConPie,
   SelectorOpcion,
   SelectorVentana,
   Separador,
@@ -114,6 +114,7 @@ import { EsperaDeUna } from '@/components/espera-deuna';
 import { topeDeEspera, useEstadoDeUna } from '@/lib/pagos/deuna-estado';
 import { urlWhatsApp } from '@/lib/contacto';
 import { useTraduccion } from '@/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 /* 🔴 S101-B · FASE 3 — NACE `confirmando`.
    La v1 tenía TRES fases y **la espera no tenía dónde vivir**: el único camino
@@ -137,6 +138,7 @@ const CADENCIAS = [7, 15, 30, 60] as const;
    diciendo cosas distintas sobre el mismo rechazo del mismo banco.* */
 
 export default function DespensaCheckout() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const { mostrar } = useAviso();
@@ -1008,50 +1010,51 @@ export default function DespensaCheckout() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      {fase === 'exito' || fase === 'confirmando' ? (
-        /* En el éxito NO hay atrás: el pedido ya vive en el motor y volver
-           al checkout de una compra hecha sería una puerta a pagar dos
-           veces. La única salida es Tus pedidos. */
-        /* Ni en el éxito ni en la espera hay atrás: volver al checkout de una
-           compra ya disparada sería una puerta a pagar dos veces. */
-        <Cabecera
-          variante="empujada"
-          /* 🔴 El título del HEADER es corto a propósito: «Estamos confirmando tu
-             pago» **se truncaba en pantalla** («…tu pa…»), y un título cortado
-             en el momento en que la familia acaba de entregar su tarjeta es
-             peor que uno breve. La frase entera vive en el CUERPO, que es
-             donde hay lugar para decirla. */
-          titulo={fase === 'confirmando' ? t('pago.esperaTituloCorto') : t('despensa.exitoTitulo')}
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela + hoja.
+          ☠️ Muere el `PantallaConPie` (su pie pasa al slot `pie`) y ☠️ muere el
+          `EvitaTeclado`: la hoja trae su propio `ScrollView` y anidar dos
+          rompe el gesto — *es la misma nota que ya está escrita en el login*.
+          ⚠️ **Las DOS cabeceras conviven en el slot `fondo`**: la de éxito no
+          tiene vuelta atrás a propósito —volver a una compra hecha es una
+          puerta a pagar dos veces— y esa distinción es de contenido. */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        scroll={{ keyboardShouldPersistTaps: 'handled', contentContainerStyle: { paddingTop: spacing[4], gap: spacing[5] } }}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+        {fase === 'exito' || fase === 'confirmando' ? (
+          /* En el éxito NO hay atrás: el pedido ya vive en el motor y volver
+             al checkout de una compra hecha sería una puerta a pagar dos
+             veces. La única salida es Tus pedidos. */
+          /* Ni en el éxito ni en la espera hay atrás: volver al checkout de una
+             compra ya disparada sería una puerta a pagar dos veces. */
+          <Cabecera
+            variante="empujada"
+            /* 🔴 El título del HEADER es corto a propósito: «Estamos confirmando tu
+               pago» **se truncaba en pantalla** («…tu pa…»), y un título cortado
+               en el momento en que la familia acaba de entregar su tarjeta es
+               peor que uno breve. La frase entera vive en el CUERPO, que es
+               donde hay lugar para decirla. */
+            titulo={fase === 'confirmando' ? t('pago.esperaTituloCorto') : t('despensa.exitoTitulo')}
+            presentacion="fondo"
+          />
+        ) : (
+          <Cabecera
+            variante="empujada"
+            titulo={t('despensa.checkoutTitulo')}
+            onVolver={() => {
+              if (fase === 'resumen') {
+                void volverAEditar();
+                return;
+              }
+              router.back();
+            }}
+            etiquetaVolver={t('comun.volver')}
+            presentacion="fondo"
         />
-      ) : (
-        <Cabecera
-          variante="empujada"
-          titulo={t('despensa.checkoutTitulo')}
-          onVolver={() => {
-            if (fase === 'resumen') {
-              void volverAEditar();
-              return;
-            }
-            router.back();
-          }}
-        etiquetaVolver={t('comun.volver')}
-      />
-      )}
-
-      <EvitaTeclado>
-      {/* 🔴 H-105 · EL PIE RESERVA SU PROPIO LUGAR (pieza de B).
-          Esta pantalla YA derivaba su reserva con un `onLayout` propio, así
-          que su solape ③ —«Instrucciones de entrega» debajo del CTA— **no lo
-          explicaba la estimación**, que era la causa del carrito. Se monta la
-          pieza igual, y por dos razones: deja UNA sola anatomía de pie en la
-          despensa (el `barAlto` a mano era el segundo mecanismo, y dos
-          mecanismos divergen), y mete el pie DENTRO del `EvitaTeclado`, que es
-          la hipótesis viva de ese solape — antes el CTA vivía afuera y no se
-          movía con el teclado. **Lo confirma el aparato, no yo**: queda pedido
-          a B, que lo tiene. */}
-      <PantallaConPie
-        scrollProps={{ keyboardShouldPersistTaps: 'handled' }}
-        contentContainerStyle={{ paddingTop: spacing[4], gap: spacing[5] }}
+        )}
+          </View>
+        }
         pie={pieDelCta}
       >
         {fase === 'armado' ? (
@@ -1747,8 +1750,7 @@ export default function DespensaCheckout() {
             </View>
           </>
         ) : null}
-      </PantallaConPie>
-      </EvitaTeclado>
+      </HojaContenido>
 
       {/* ☠️ LA HOJA DE ELECCIÓN SALIÓ DE ACÁ: vive dentro de
           `SeccionMedioDePago`, junto a la fila que la abre. *Una hoja que vive

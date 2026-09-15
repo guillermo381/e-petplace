@@ -49,6 +49,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
   Cabecera,
   AIRE_RAIZ,
   Boton,
@@ -98,6 +99,7 @@ import { cruzarConVigilados } from '@/lib/despensa/composicion';
 import { useTraduccion } from '@/i18n';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 import { formatearPrecio } from '@epetplace/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 type Fase<T> = T | 'cargando' | 'error';
 
@@ -153,6 +155,7 @@ const FILTROS_VITRINA = { limite: 50 } as const;
 const LUGAR_CONTROL_FILTRO = spacing[12];
 
 export default function DespensaDescubrir() {
+  const cabecera = useAltoDeCabecera('raiz');
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const { t } = useTraduccion();
@@ -839,15 +842,29 @@ export default function DespensaDescubrir() {
           pasa a la prop `carrito`, que la pieza trae. *Todo el hilo del lote 3i
           —que la canasta volviera acá porque de acá había salido— se cumple
           igual; lo que cambia es que ya no lo dibuja esta pantalla.* */}
-      <Cabecera
-        variante="raiz"
-        titulo={t('despensa.titulo')}
-        carrito={{
-          cantidad: unidades,
-          onPress: () => router.push('/despensa/carrito'),
-          etiqueta: t('despensa.abrirCarrito', { count: unidades }),
-        }}
-      />
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="raiz"
+              titulo={t('despensa.titulo')}
+              carrito={{
+              cantidad: unidades,
+              onPress: () => router.push('/despensa/carrito'),
+              etiqueta: t('despensa.abrirCarrito', { count: unidades }),
+              }}
+              presentacion="fondo"
+            />
+          </View>
+        }
+      >
 
       {/* ═══════════════════════════════════════════════════════════════
           🔴 S100d-C · puntos ⑧ ⑨ ⑫ · **EL CARRITO FLOTANTE ENTRA Y LA
@@ -899,9 +916,7 @@ export default function DespensaDescubrir() {
           el blanco terminando en 619,4 y la banda arrancando en 619,0).
           **Sin pie que medir, la pieza sería un `ScrollView` con una capa
           de más.** La cola la pone la constante que exporta el disco. */}
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{
+      <View style={{
           /* 🔴 S100d-C · punto ③ · 8 → 0. **EL AIRE ESTABA PAGADO TRES
              VECES, y mi predecesora solo pudo ver dos.**
 
@@ -976,15 +991,14 @@ export default function DespensaDescubrir() {
              barra y el botón que sí están*. **Un aire que sobrevive a su pieza
              no es aire de más: es aire puesto en el lugar equivocado.**
 
-             ⇒ se adopta `AIRE_RAIZ + insets.bottom`, **la misma cuenta que Hogar
+             ⇒ se adopta `AIRE_RAIZ`, **la misma cuenta que Hogar
              y Cuenta** (`hogar/index.tsx:1704`). *Tres pantallas raíz con tres
              reservas distintas es la divergencia que `AIRE_RAIZ` nació para
              matar.* El inset se suma acá porque `AIRE_RAIZ` declara ser sólo la
              parte FIJA — lo dice su propia cabecera. */
-          paddingBottom: AIRE_RAIZ + insets.bottom,
+          paddingBottom: AIRE_RAIZ,
           gap: spacing[5],
-        }}
-      >
+        }}>
         {mascotas === 'cargando' ? (
           cargandoLista
         ) : mascotas === 'error' ? (
@@ -1385,7 +1399,7 @@ export default function DespensaDescubrir() {
                 ninguna puerta prestada: solo mercadería.* */}
           </>
         )}
-      </ScrollView>
+      </View>
 
       {/* ☠️ **S100b-D · MURIÓ LA BARRA FIJA «VER CARRITO (N)»** — es
           exactamente el *«botón de texto»* que G-14 nombra, y con la canasta
@@ -1442,6 +1456,7 @@ export default function DespensaDescubrir() {
         vozFamilia={etiquetaFamilia}
         vozEspecie={etiquetaEspecie}
       />
+      </HojaContenido>
     </View>
   );
 }

@@ -219,13 +219,23 @@ export default function Videollamada() {
     else router.replace('/hogar');
   }, [fase, sinEntrada, router]);
 
+  /* 🔴 **FONDO SÍ, HOJA NO — declarado, no olvidado (S116-C lote 3b).** La
+     cabecera-tarjeta muere acá también: `presentacion="fondo"`, sin la curva
+     invertida. Lo que NO entra es la hoja, y la razón es del contenido: *el
+     camino feliz de esta pantalla es una SALA DE VIDEO a `flex: 1`*, y una
+     pieza así dentro del scroll de la hoja se queda sin alto propio y colapsa
+     a cero. **No es una pantalla de hoja: es una sala.** Las ramas de carga y
+     de error comparten esta misma cabecera —es una sola constante— así que o
+     entran las cuatro o no entra ninguna; parten la constante el día que la
+     mesa lo prefiera. */
   const cabecera = (
     <Cabecera
       variante="empujada"
       titulo={t('veterinaria.vcTitulo')}
       onVolver={() => router.back()}
-        etiquetaVolver={t('comun.volver')}
-      />
+      etiquetaVolver={t('comun.volver')}
+      presentacion="fondo"
+    />
   );
 
   // El módulo nativo no está: binario horneado antes de esta build. Se dice.

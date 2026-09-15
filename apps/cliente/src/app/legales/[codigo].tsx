@@ -49,6 +49,7 @@ import { Platform, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaContenido,
   Boton,
   DocumentoLegalLectura,
   Cabecera,
@@ -67,6 +68,7 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 /** Los códigos que ESTA pantalla acepta. `acta_adopcion` **queda afuera a
  *  propósito**: el motor rebota `documento_no_aceptable` porque **aceptar y
@@ -82,6 +84,7 @@ type Estado =
   | { fase: 'listo'; doc: DocumentoVigente };
 
 export default function LecturaDeDocumento() {
+  const cabecera = useAltoDeCabecera('empujada');
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
@@ -167,12 +170,26 @@ export default function LecturaDeDocumento() {
       <MarcaDeAgua />
       {/* «Una pantalla con su título» — el founder lo dijo por oposición al
           modal, así que el título va en el Encabezado y no adentro del scroll. */}
-      <Cabecera
-        variante="empujada"
-        titulo={estado.fase === 'listo' ? tituloDe(estado.doc.codigo, t) : t('legales.titulo')}
-        onVolver={() => (router.canGoBack() ? router.back() : router.replace('/hogar'))}
-        etiquetaVolver={t('comun.volver')}
-      />
+      {/* ⭐ **LA ESTRUCTURA FIRMADA — S116-C lote 3b.** Fondo ciruela
+          (`presentacion="fondo"`, sin radio inferior ni sombra) + la hoja de
+          lienzo encima, que lleva la curva ARRIBA y desliza al scrollear.
+          **Vale también para los estados de carga y error**: son la misma
+          pantalla en otro momento, y una cabecera-tarjeta acá sería la curva
+          invertida justo donde nadie la mira dos veces. */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={estado.fase === 'listo' ? tituloDe(estado.doc.codigo, t) : t('legales.titulo')}
+              onVolver={() => (router.canGoBack() ? router.back() : router.replace('/hogar'))}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
+      >
 
       {estado.fase === 'cargando' ? (
         <View style={{ padding: spacing[5] }}>
@@ -227,6 +244,7 @@ export default function LecturaDeDocumento() {
           }
         />
       )}
+      </HojaContenido>
     </View>
   );
 }
