@@ -38,6 +38,7 @@ import { router } from 'expo-router';
 import {
   Boton,
   Celda,
+  Confirmacion,
   Encabezado,
   EsperaLarga,
   EstadoVacio,
@@ -78,6 +79,7 @@ type Fase = 'resumen' | 'confirmando' | 'exito' | 'holdVencido' | 'reservaCancel
 
 export function CheckoutReserva({
   citaId,
+  mascotaId,
   expiraEn,
   precio,
   prestadorNombre,
@@ -85,7 +87,6 @@ export function CheckoutReserva({
   fecha,
   hora,
   duracion,
-  exitoIcono,
   resumenEtiqueta,
   exitoTitulo,
   exitoDetalle,
@@ -95,6 +96,10 @@ export function CheckoutReserva({
   exitoExtra,
 }: {
   citaId: string;
+  /** ⭐ **S116-C lote 13 · lo pide «Ver la cita» de la confirmación.**
+   *  `/citas/[mascotaId]` es la única puerta al detalle y esta máquina no lo
+   *  tenía; viaja desde `lib/reserva/*`, donde ya existía. */
+  mascotaId: string;
   expiraEn: string;
   precio: number;
   prestadorNombre: string;
@@ -102,10 +107,11 @@ export function CheckoutReserva({
   fecha: string;
   hora: string;
   duracion: string;
-  /** El ícono b′ del éxito — el oficio firma su cierre. */
-  /* S107-C: entra `guarderia`. La unión es cerrada A PROPÓSITO — un slot
-     libre dejaría pasar cualquier glifo y la Ley 12 pide objeto del oficio. */
-  exitoIcono: 'paseo' | 'grooming' | 'training' | 'veterinaria' | 'guarderia';
+  /* ☠️ **`exitoIcono` MURIÓ — S116-C lote 13.** El éxito pasa a
+     `Confirmacion`, que trae su propio check y su trío; un glífo de oficio
+     al lado del check serían **dos signos para el mismo hecho**. *El oficio
+     lo dice el dato, que ahora lleva servicio y prestador.* Los cinco
+     consumidores dejan de pasarlo. */
   /** CURA S60-C1: la VOZ resuelve por el OFICIO — la máquina no conoce
    *  keys de ningún servicio; cada consumidor trae las suyas ya
    *  traducidas (Ley 17.3: una acción, un nombre, todo el flujo). */
@@ -376,61 +382,79 @@ export function CheckoutReserva({
   }
 
   if (fase === 'exito') {
+    /* ⭐ **S116-C lote 13 · LA CONFIRMACIÓN DE LA CASA, TAMBIÉN PARA LA CITA.**
+       Recorrido 5: *«el pedido de la Despensa ya usa la confirmación de la casa
+       y la quiere igual acá»*.
+
+       ☠️ **Muere el `EstadoVacio` + glífo 48 + un botón.** Era una pantalla de
+       TEXTO donde la Despensa celebra — y **son el mismo hecho**: la plata pasó
+       y algo quedó agendado. *Dos cierres distintos para el mismo momento no son
+       dos decisiones: son una que nadie volvió a mirar.*
+
+       🔴 **ESTO ALCANZA A LAS CINCO PUERTAS DE UNA VEZ** — paseo, grooming,
+       veterinaria, adiestramiento y guardería montan esta máquina. *Por eso la
+       conversión entra acá y no cinco veces: es la misma razón por la que la
+       máquina existe.*
+
+       ── EL DATO, y por qué se reparte así ────────────────────────────────
+       El encargo pide *«el dato (servicio, prestador, día y hora)»* y la pieza
+       tiene **UN** par `{etiqueta, valor}`. ⇒ la etiqueta lleva **qué y con
+       quién**, el valor lleva **cuándo**: *lo que la persona vuelve a mirar de
+       una confirmación es la hora, así que la hora va donde la pieza pone el
+       énfasis.* Los cuatro hechos entran, ninguno se inventa.
+
+       ⚠️ **`exitoDetalle` baja a `apoyo` y `exitoIcono` MUERE**: la pieza trae su
+       check y su trío, y un glífo de oficio al lado del check sería **dos signos
+       para el mismo hecho**. *El oficio ya lo dice el dato.*
+
+       ⚠️ **La línea fiscal pasa de nodo a `lineaExtra`** — el slot que la pieza
+       creó para eso. Muere `LineaFacturaEnCamino` como montaje local acá. */
     const cuerpo = (
       <>
-        <EstadoVacio
-          icono={<Icono nombre={exitoIcono} tamano={48} />}
+        <Confirmacion
+          exclamacion={t('checkout.exitoExclamacion')}
           titulo={exitoTitulo}
-          descripcion={exitoDetalle}
-          accion={
-            <Boton
-              variante="primario"
-              etiqueta={t('checkout.volverHogar')}
-              onPress={() => {
-                // D-329: dismissTo solo busca en el stack ACTUAL
-                // (Explorar) — /hogar vive en otro tab y el CTA no
-                // navegaba. Se vacía el stack de Explorar (si hay
-                // algo que vaciar — deep link entra directo) y recién
-                // ahí se cambia de tab.
-                if (router.canDismiss()) router.dismissAll();
-                router.navigate('/hogar');
-              }}
-            />
-          }
+          apoyo={exitoDetalle}
+          dato={{
+            etiqueta: [servicioNombre, prestadorNombre].filter((v) => v.length > 0).join(' · '),
+            valor: [fecha, hora].filter((v) => v.length > 0).join(' · '),
+          }}
+          lineaExtra={t('checkout.exitoFactura')}
+          primario={{
+            texto: t('checkout.exitoVerCita'),
+            onPress: () => {
+              /* La misma salida de tab que el botón viejo (`D-329`): `dismissTo`
+                 sólo busca en el stack ACTUAL, y `/citas` vive fuera de Explorar. */
+              if (router.canDismiss()) router.dismissAll();
+              router.navigate({ pathname: '/citas/[mascotaId]', params: { mascotaId, citaId } });
+            },
+          }}
+          secundario={{
+            texto: t('checkout.exitoExplorarMas'),
+            onPress: () => {
+              if (router.canDismiss()) router.dismissAll();
+              router.navigate('/explorar');
+            },
+          }}
         />
-        {/* 🔴 EL MOMENTO EN QUE TODAVÍA MIRA. Va DESPUÉS del botón a propósito:
-            la acción principal es volver, y esto es una nota al pie — no compite
-            con ella. *Arriba del botón se leería como un paso más que hay que
-            hacer, y no hay nada que hacer: sólo esperar el correo.* */}
-        <LineaFacturaEnCamino />
         {exitoExtra}
       </>
     );
-    /* S106-C t3 · **DOS LAYOUTS**, y su razón sigue viva: el éxito era un
-       `EstadoVacio` centrado en un `View` que no scrollea, y con un bloque extra
-       abajo deja de entrar en un teléfono chico — *lo que se pierde es el final,
-       que es el botón de volver*.
-       ⏪ **ENMIENDA S115-C:** la rama del `View` decía «sin `exitoExtra` el
-       render es byte por byte el de antes». **Dejó de ser cierto**: ahora el
-       cuerpo lleva SIEMPRE la línea de la factura, así que la condición vieja
-       habría mandado al layout sin scroll un contenido más alto — *justo el caso
-       que esta rama existe para evitar*. **Scrollea siempre**: sigue centrado
-       cuando cabe y el botón no se pierde nunca. Los cuatro oficios cambian de
-       contenedor (no de composición) y por eso se declara. */
+    /* S106-C t3 · **SCROLLEA SIEMPRE**: el cuerpo lleva la confirmación entera y
+       un bloque extra abajo, y en un teléfono chico lo que se pierde sin scroll
+       es el final — que son las acciones. */
     return (
       <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        {(
-          <ScrollView
-            contentContainerStyle={{
-              flexGrow: 1,
-              justifyContent: 'center',
-              padding: spacing[4],
-              gap: spacing[5],
-            }}
-          >
-            {cuerpo}
-          </ScrollView>
-        )}
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: 'center',
+            padding: spacing[4],
+            gap: spacing[5],
+          }}
+        >
+          {cuerpo}
+        </ScrollView>
       </SafeAreaView>
     );
   }

@@ -1387,6 +1387,13 @@ export const clienteEs = {
   },
   // S54-B3.3 — checkout mono-ítem con forma de carrito
   checkout: {
+    /* ⭐ S116-C lote 13 · la confirmación de la casa entra a la cita.
+       El título de cada oficio («Paseo confirmado», «¡Cita reservada!»…) se
+       CONSERVA y pasa a `titulo`; lo que nace acá es lo que la pieza suma. */
+    exitoExclamacion: '¡Listo!',
+    exitoFactura: 'La factura te llega aparte por correo.',
+    exitoVerCita: 'Ver la cita',
+    exitoExplorarMas: 'Explorar más servicios',
     mapaNoDisponible: 'El mapa no está disponible en esta versión de la app.',
     titulo: 'Confirmar y pagar',
     resumen: 'Tu paseo',
@@ -1658,6 +1665,7 @@ export const clienteEs = {
   // S63-A Bloque 3 — la reserva de adiestramiento del dueño + el parte
   // (LOTE S63, gate founder pendiente)
   adiestramiento: {
+    programaExitoDato: '{{n}} sesiones · la primera',
     titulo: 'Adiestramiento',
     quienTitulo: 'Quién puede',
     paraQuien: 'Para quién',
@@ -4274,6 +4282,7 @@ export const clienteEs = {
      «gestionar» ambiguo que la disimule hace creer que pausar y cancelar son lo
      mismo, y la familia descubre cuál tiene el día que quiere irse.* */
   checkoutPlan: {
+    exitoVerPlan: 'Ver el plan',
     /* ═══ ⭐ S109-C · LOS TRES DESENLACES DEL COBRO DEL PLAN ════════════════
        🔴 **`sigueEnCaminoVoz` NO dice «no entró», y esa es la línea que impide
        que la familia pague dos veces.** `esperando_pago` significa que el cobro
@@ -4302,6 +4311,7 @@ export const clienteEs = {
      viene de un correo: *un código de seis dígitos sin decir qué se está
      pagando le pide a alguien que mueva plata a ciegas.* */
   linkMensual: {
+    exitoVerGuarderia: 'Ver la guardería',
     concepto: 'Mensualidad de guardería',
     periodo: 'Período que estás pagando',
     exitoTitulo: 'Listo, tu mes quedó pagado',

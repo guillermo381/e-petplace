@@ -33,11 +33,11 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Linking, View } from 'react-native';
+import { Linking, ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
-  Boton, Celda, Esqueleto, EstadoVacio, Icono, Tarjeta, Texto, spacing, useTheme,
+  Boton, Celda, Confirmacion, Esqueleto, EstadoVacio, Icono, Tarjeta, Texto, spacing, useTheme,
 } from '@epetplace/ui';
 import { obtenerMisPlanesGuarderia, type PlanGuarderia } from '@epetplace/api';
 import { fechaLargaHumana, obtenerIdiomaActual } from '@epetplace/i18n';
@@ -108,22 +108,31 @@ export default function PagarMensualidad() {
   }, [espera]);
 
   if (pagado) {
+    /* ⭐ **S116-C lote 13 · LA CONFIRMACIÓN DE LA CASA.** ☠️ Muere el
+       `EstadoVacio` + glífo 48 + un botón.
+
+       ⚠️ **Esta pantalla se abre desde un CORREO**, así que quien llega puede
+       no tener la app en la cabeza. *Con más razón cierra como cierran las
+       demás: si el único cierre que esta persona ve en todo el producto es
+       distinto de los otros, no tiene con qué reconocerlo.* */
     return (
       <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <View style={{ flex: 1, justifyContent: 'center', padding: spacing[4] }}>
-          <EstadoVacio
-            icono={<Icono nombre="guarderia" tamano={48} />}
+        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: spacing[4] }}>
+          <Confirmacion
+            exclamacion={t('checkout.exitoExclamacion')}
             titulo={t('linkMensual.exitoTitulo')}
-            descripcion={t('linkMensual.exitoDetalle')}
-            accion={
-              <Boton
-                variante="primario"
-                etiqueta={t('checkout.volverHogar')}
-                onPress={() => router.replace('/hogar/guarderia')}
-              />
-            }
+            apoyo={t('linkMensual.exitoDetalle')}
+            lineaExtra={t('checkout.exitoFactura')}
+            primario={{
+              texto: t('linkMensual.exitoVerGuarderia'),
+              onPress: () => router.replace('/hogar/guarderia'),
+            }}
+            secundario={{
+              texto: t('checkout.exitoExplorarMas'),
+              onPress: () => router.replace('/explorar'),
+            }}
           />
-        </View>
+        </ScrollView>
       </SafeAreaView>
     );
   }

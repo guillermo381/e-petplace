@@ -15,11 +15,11 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  Boton, Celda, Encabezado, EsperaLarga, EstadoVacio, Icono,
+  Boton, Celda, Confirmacion, Encabezado, EsperaLarga, EstadoVacio, Icono,
   PantallaConPie, Separador, Tarjeta, Texto, spacing, useAviso, useTheme,
 } from '@epetplace/ui';
 import { comprarPaqueteSalidas, PRESETS_PAQUETE, type PresetPaquete } from '@epetplace/api';
@@ -216,36 +216,37 @@ export default function CheckoutPaquetePaseo() {
   }
 
   if (exito !== null) {
-    /* ⭐ **LA INVITACIÓN A LA PRIMERA SALIDA VIVE ACÁ**, con sus dos caminos
-       parejos y cero presión — es la misma que estaba en la segunda Hoja de
-       `paquete.tsx`, mudada al único lugar donde ahora se sabe que la compra
-       terminó. *Dejarla allá la habría dejado esperando un evento que ya no
-       ocurre.* */
+    /* ⭐ **S116-C lote 13 · LA CONFIRMACIÓN DE LA CASA.** ☠️ Muere el
+       `EstadoVacio` + glífo 48 + dos botones sueltos.
+
+       ⚠️ **LA INVITACIÓN A LA PRIMERA SALIDA NO SE PIERDE: es la acción
+       PRIMARIA.** Vivía acá con sus dos caminos parejos y cero presión, y la
+       pieza tiene exactamente esa forma — primaria y secundaria. *Lo que
+       cambia es la casa que las envuelve, no la oferta.*
+
+       El `dato` dice **cuántas salidas** compró: es lo que la persona vuelve a
+       mirar de un paquete. */
     return (
       <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <View style={{ flex: 1, justifyContent: 'center', padding: spacing[4], gap: spacing[4] }}>
-          <EstadoVacio
-            icono={<Icono nombre="paseo" tamano={48} />}
+        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: spacing[4] }}>
+          <Confirmacion
+            exclamacion={t('checkout.exitoExclamacion')}
             titulo={t('paquete.exito', { n: exito })}
-            descripcion={t('paquete.primeraVoz')}
-            accion={
-              <Boton
-                variante="primario"
-                etiqueta={t('paquete.primeraReservar')}
-                onPress={() => router.dismissTo('/explorar/paseo')}
-              />
-            }
-          />
-          <Boton
-            variante="secundario"
-            bloque
-            etiqueta={t('paquete.primeraDespues')}
-            onPress={() => {
-              if (router.canDismiss()) router.dismissAll();
-              router.navigate('/hogar/paseos');
+            apoyo={t('paquete.primeraVoz')}
+            lineaExtra={t('checkout.exitoFactura')}
+            primario={{
+              texto: t('paquete.primeraReservar'),
+              onPress: () => router.dismissTo('/explorar/paseo'),
+            }}
+            secundario={{
+              texto: t('paquete.primeraDespues'),
+              onPress: () => {
+                if (router.canDismiss()) router.dismissAll();
+                router.navigate('/hogar/paseos');
+              },
             }}
           />
-        </View>
+        </ScrollView>
       </SafeAreaView>
     );
   }

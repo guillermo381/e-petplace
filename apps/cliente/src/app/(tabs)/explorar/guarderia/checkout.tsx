@@ -898,6 +898,7 @@ export default function CheckoutGuarderia() {
   return (
     <CheckoutReserva
       citaId={holdDia.citaId}
+      mascotaId={texto('mascotaId')}
       expiraEn={holdDia.expiraEn}
       precio={holdDia.precio}
       prestadorNombre={texto('prestadorNombre')}
@@ -906,7 +907,6 @@ export default function CheckoutGuarderia() {
       /* Sin hora: la estadía ocupa el día entre las dos ventanas. */
       hora={t('checkoutGuarderia.sinHora')}
       duracion={t('checkoutGuarderia.duracion')}
-      exitoIcono="guarderia"
       resumenEtiqueta={t('checkout.resumen')}
       exitoTitulo={t('checkoutGuarderia.exitoTitulo')}
       exitoDetalle={t('checkoutGuarderia.exitoDetalle')}

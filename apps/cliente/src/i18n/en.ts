@@ -1095,6 +1095,10 @@ export const clienteEn = {
   },
   // S54-B3.3 — single-item checkout with cart shape
   checkout: {
+    exitoExclamacion: 'All set!',
+    exitoFactura: 'Your invoice arrives separately by email.',
+    exitoVerCita: 'View the appointment',
+    exitoExplorarMas: 'Explore more services',
     mapaNoDisponible: 'The map isn’t available in this version of the app.',
     titulo: 'Confirm and pay',
     resumen: 'Your walk',
@@ -1277,6 +1281,7 @@ export const clienteEn = {
   // S63-A Bloque 3 — training booking, owner side + the session report
   // (LOTE S63, founder gate pending)
   adiestramiento: {
+    programaExitoDato: '{{n}} sessions · first one',
     titulo: 'Training',
     quienTitulo: 'Who can',
     paraQuien: 'For whom',
@@ -3097,6 +3102,7 @@ export const clienteEn = {
     exitoDetalle: 'We’ll let you know when they head out to pick him up.',
   },
   checkoutPlan: {
+    exitoVerPlan: 'View the plan',
     /* ⭐ S109-C · Ver la nota del espejo en `es.ts`: «still on its way» NO es
        «didn't go through» — decirlo como rechazo invita a pagar dos veces. */
     canceladoVoz: 'That plan was cancelled. You weren’t charged.',
@@ -3113,6 +3119,7 @@ export const clienteEn = {
     exitoDetalle: 'You pay ${{precio}} a month and your walks are booked. You manage it from Account › Recurring payments and subscriptions.',
   },
   linkMensual: {
+    exitoVerGuarderia: 'View daycare',
     concepto: 'Daycare monthly plan',
     periodo: 'Period you’re paying',
     exitoTitulo: 'Done — your month is paid',

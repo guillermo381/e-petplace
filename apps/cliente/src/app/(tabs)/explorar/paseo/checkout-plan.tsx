@@ -39,11 +39,11 @@
  */
 
 import { useCallback, useState, useEffect } from 'react';
-import { View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  Boton, Celda, Encabezado, EsperaLarga, EstadoVacio, Icono,
+  Boton, Celda, Confirmacion, Encabezado, EsperaLarga, EstadoVacio, Icono,
   PantallaConPie, Separador, Tarjeta, Texto, spacing, useAviso, useTheme,
 } from '@epetplace/ui';
 import { contratarPlanPaseo } from '@epetplace/api';
@@ -217,26 +217,38 @@ export default function CheckoutPlanPaseo() {
   }
 
   if (fase === 'exito') {
+    /* ⭐ **S116-C lote 13 · LA CONFIRMACIÓN DE LA CASA.** ☠️ Muere el
+       `EstadoVacio` + glífo 48 + un botón. *La misma razón que en la cita: la
+       plata pasó y algo quedó agendado — es el mismo hecho que celebra la
+       Despensa, y hasta hoy se contaba con otra pantalla.*
+
+       El `dato` lleva **qué se contrató** y su precio; el detalle de familia baja
+       a `apoyo`. **«Ver el plan» va al hub de paseos**, que es donde el plan
+       vive — no hay una pantalla de plan aparte. */
     return (
       <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <View style={{ flex: 1, justifyContent: 'center', padding: spacing[4] }}>
-          <EstadoVacio
-            icono={<Icono nombre="paseo" tamano={48} />}
+        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: spacing[4] }}>
+          <Confirmacion
+            exclamacion={t('checkout.exitoExclamacion')}
             titulo={t('checkoutPlan.exitoTitulo')}
-            /* El comprobante en palabras de familia: qué compró, no un id. */
-            descripcion={t('checkoutPlan.exitoDetalle', { precio: precio.toFixed(2) })}
-            accion={
-              <Boton
-                variante="primario"
-                etiqueta={t('checkout.volverHogar')}
-                onPress={() => {
-                  if (router.canDismiss()) router.dismissAll();
-                  router.navigate('/hogar/paseos');
-                }}
-              />
-            }
+            apoyo={t('checkoutPlan.exitoDetalle', { precio: precio.toFixed(2) })}
+            lineaExtra={t('checkout.exitoFactura')}
+            primario={{
+              texto: t('checkoutPlan.exitoVerPlan'),
+              onPress: () => {
+                if (router.canDismiss()) router.dismissAll();
+                router.navigate('/hogar/paseos');
+              },
+            }}
+            secundario={{
+              texto: t('checkout.exitoExplorarMas'),
+              onPress: () => {
+                if (router.canDismiss()) router.dismissAll();
+                router.navigate('/explorar');
+              },
+            }}
           />
-        </View>
+        </ScrollView>
       </SafeAreaView>
     );
   }
