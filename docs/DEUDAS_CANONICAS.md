@@ -35619,9 +35619,9 @@ Y el costo es el de la casa: **`L-223` dice que el peaje está en la PETICIÓN, 
 
 ---
 
-## `D-1122` 🟠 — LA MARCA DE AGUA DE LOS PAPELES TIENE QUE SER EL **LOGO COMPLETO**, no el isotipo — medido, con una opción que rinde
+## `D-1122` ☠️ — LA MARCA DE AGUA DE LOS PAPELES TIENE QUE SER EL **LOGO COMPLETO**, no el isotipo — medido, con una opción que rinde
 
-**Estado:** ABIERTA — **medida, NO cableada** · **Dueño: A** · **espera que el founder la vea.**
+**Estado:** **CERRADA** — medida, aprobada por el founder, cableada y desplegada (14-sep-2026) · **Dueño: A**.
 **Origen:** recorrido 5 del founder (14-sep-2026): rechaza el isotipo derivado en los seis papeles, igual que lo rechazó en pantalla. **Pide el logo completo: la nariz con «e-PetPlace» debajo y su bajada.**
 
 > **No se cableó nada.** Lo que sigue es la medición y una recomendación; *lo que hoy está cableado ya tiene su veredicto —el founder dijo que no— y lo que venga tiene que pasar por su ojo antes de entrar.*
@@ -35669,4 +35669,46 @@ Y el costo es el de la casa: **`L-223` dice que el peaje está en la PETICIÓN, 
 - **Los otros cinco papeles no se generaron.** Comparten `marcaDeAgua` por construcción, pero *compartir una función no es haber corrido su camino*.
 - **El PNG hay que depositarlo:** hoy el rasterizado vive en un scratchpad. Si el founder aprueba, entra al árbol como asset y `papel.ts` pasa de `drawSvgPath` a `embedPng`, **con el peso declarado** (~278 KB, contra 5 KB del path actual — *y eso multiplica por seis, uno por cada papel que lo embeba*).
 
-**☠️ MUERTE:** cuando el founder mire un A4 generado y firme cuál va — o diga que ninguna, y entonces el isotipo actual se queda con su rechazo escrito al lado.
+### ✅ APROBADA Y CABLEADA (14-sep-2026) — con las tres condiciones corridas
+
+**Firma del founder:** el logo completo, rasterizado del propio SVG a 323 dpi, **en gris al 6 %**, como marca de agua de los seis papeles.
+
+#### ① LOS SEIS, generados y mirados — no uno
+
+*«Compartir la función no es haber corrido el camino»* ⇒ cada uno se pidió por **su propia puerta**:
+
+| papel | cómo se corrió | bytes |
+|---|---|--:|
+| **carnet de vacunas** | camino real de la app (Thor, folio `F-2026-000076`) | 392.649 |
+| **historia clínica** | camino real de la app (Thor) | 197.947 |
+| **ficha de identidad** | camino real de la app (Thor) | 259.917 |
+| **receta** | camino real de la app (Thor, ref = la cita con medicación prescrita) | 194.307 |
+| **certificado de salud** | **su propio compositor** — ver abajo | 194.899 |
+| **RIDE fiscal** | **su compositor con el canónico REAL** de una factura autorizada | 197.242 |
+
+⚠️ **Los dos últimos no pasaron por su HTTP, y la razón de cada uno es distinta y vale escribirla:**
+- **El certificado no tiene camino real: `certificado_salud` tiene CERO filas en toda la base.** *Nadie emitió uno nunca.* Se corrió `componerCertificado` con fixture — **y es el que más importaba mirar, porque monta la marca en su propio punto de montaje**, no por `Papel`. Sale con el logo.
+- **El RIDE rebotó `401` con la sesión que tengo**: esa factura no es de esta cuenta. Se corrió `rideDesdeCanonico` con **el canónico real de una factura autorizada** traído de `documentos_fiscales` — o sea su render entero, sólo sin el guard de sesión.
+
+#### ② EL PESO — y la respuesta a «¿se puede compartir desde un solo lugar?»: **NO, y está medido**
+
+🔴 **Primero, el hallazgo que decidió la forma: un binario NO viaja.** Con el PNG como archivo en `_shared/` y `Deno.readFile`, la edge desplegada devuelve **500**. *El deploy sube el SOURCE de la función; un `.png` al lado no es source.* ⇒ el asset viaja como **base64 en un `.ts`**.
+
+| | número |
+|---|--:|
+| PNG en gris | **176.448 bytes** |
+| su base64 en el `.ts` | **235.264 caracteres** |
+| **los seis lo llevan adentro** | **~1,3 MB repartidos en seis despliegues** |
+| lo que crece cada PDF | **+187.796 bytes** (el carnet: 204.855 → 392.651) |
+
+**`_shared/` se empaqueta DENTRO de cada función que lo importa: compartir el archivo en el REPO no comparte los bytes en el DESPLIEGUE.**
+
+**La única vía que daría UNA sola copia —hostearlo en Storage y buscarlo en cada render— se descartó con su razón:** agrega un viaje de red **por documento** y **un modo de falla nuevo** — si el fetch se cae, o el papel sale sin marca (falla silenciosa) o no sale (*un documento que no se imprime porque falló un adorno*). ⇒ **los bytes se pagan una vez por DESPLIEGUE; el fetch se pagaría una vez por DOCUMENTO, y con un modo de falla encima.**
+
+⚠️ **Y un número que sorprende, medido:** achicar el PNG a los 1.583 px de los 300 dpi exactos lo **engorda** a 210.564 bytes — *el remuestreo mete ruido que comprime peor*. **El original de 1.706 px es a la vez más nítido y más liviano que su versión recortada.**
+
+#### ③ EL PATH, RETIRADO CON LÁPIDA
+
+☠️ En `_shared/papel.ts`, con los dos que vivieron ahí tachados: ~~el del Manual de Marca~~ (S90 → S116) y ~~el `isotipo-v5`~~ (S116, que duró unas horas). **Y los dos brazos que `verify:isotipo-path` tenía sobre el papel se retiran enteros**, no se dejan en verde: *un brazo que vigila una copia que ya no existe da verde por ausencia y se lee como «están sincronizados».* El gate sigue midiendo la pieza de `packages/ui`, donde el path v5 **sí** está vivo.
+
+**☠️ MUERTE — MUERTA.** Las seis desplegadas y el carnet real de Thor verificado bajando de la edge viva.
