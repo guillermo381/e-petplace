@@ -31,7 +31,6 @@ import {
   BurbujaMensaje,
   Campo,
   ChipsSugerencia,
-  Encabezado,
   EstadoVacio,
   EvitaTeclado,
   Icono,
@@ -323,7 +322,7 @@ export default function Nexo() {
   if (enMemorial) {
     return (
       <View style={{ flex: 1 }}>
-        <Encabezado variante="navegacion" titulo={nombreVivo ?? t('nexo.titulo')} />
+        <Cabecera variante="empujada" titulo={nombreVivo ?? t('nexo.titulo')} />
         <EstadoVacio titulo={t('nexo.enMemorial')} />
       </View>
     );
@@ -332,7 +331,7 @@ export default function Nexo() {
   return (
     <EvitaTeclado>
       <View style={{ flex: 1 }}>
-        <Encabezado variante="navegacion" titulo={nombreVivo ?? t('nexo.titulo')} />
+        <Cabecera variante="empujada" titulo={nombreVivo ?? t('nexo.titulo')} />
         <ScrollView
           ref={scroll}
           onContentSizeChange={() => scroll.current?.scrollToEnd({ animated: true })}

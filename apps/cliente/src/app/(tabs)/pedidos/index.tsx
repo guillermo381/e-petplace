@@ -28,6 +28,7 @@ import { Image } from 'expo-image';
 import { router, useFocusEffect } from 'expo-router';
 import { GLIFO_NODO } from '@/lib/despensa/escalera';
 import {
+  Cabecera,
   Boton,
   CeldaNavegacion,
   FiltroPills,
@@ -58,8 +59,8 @@ import {
   type VocesEscalera,
 } from '@/lib/despensa/escalera';
 import { ventanaVencida } from '@/lib/despensa/ventana';
+import { unidadesEnCarrito, useCarrito } from '@/lib/despensa/carrito';
 import { useTraduccion } from '@/i18n';
-import { AccionCarrito } from '@/components/accion-carrito';
 
 type Fase<T> = T | 'cargando' | 'error';
 
@@ -69,6 +70,7 @@ const TOPE_VIVOS = 2;
 
 export default function DespensaPedidos() {
   const { theme } = useTheme();
+  const unidadesCarrito = unidadesEnCarrito(useCarrito());
   const { t, idioma } = useTraduccion();
 
   const [pedidos, setPedidos] = useState<Fase<PedidoEnLista[]>>('cargando');
@@ -366,7 +368,17 @@ export default function DespensaPedidos() {
           casa no tiene flecha de atrás. *Un «atrás» en la raíz de un tab
           ofrece un camino que no existe* (Ley 23), y encima `router.back()`
           desde acá saltaría a cualquier pantalla anterior. */}
-      <Encabezado variante="portada" saludo={t('despensa.tusPedidos')} accionDer={<AccionCarrito />} />
+      {/* ⭐ **S116-C lote 3b · LA PORTADA PASA A `Cabecera variante="raiz"`.**
+          `saludo` → `titulo` y **el carrito deja de ser un `ReactNode` en
+          `accionDer` y pasa a la prop `carrito`**, que la pieza ya trae. ☠️ Con
+          eso muere el montaje de `AccionCarrito` acá: *un `ReactNode` suelto
+          deja que cada pantalla arme su disco, y ahí vuelve la copia que
+          `DiscoVidrio` acaba de terminar* (la razón es de B, en el catálogo). */}
+      <Cabecera
+        variante="raiz"
+        titulo={t('despensa.tusPedidos')}
+        carrito={{ cantidad: unidadesCarrito, onPress: () => router.push('/despensa/carrito'), etiqueta: t('despensa.abrirCarrito', { count: unidadesCarrito }) }}
+      />
 
       <ScrollView
         contentContainerStyle={{

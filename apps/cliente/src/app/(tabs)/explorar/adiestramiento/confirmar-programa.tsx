@@ -17,9 +17,9 @@ import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
+  Cabecera,
   Boton,
   Celda,
-  Encabezado,
   EsperaLarga,
   Confirmacion,
   EstadoVacio,
@@ -252,11 +252,11 @@ export default function ConfirmarPrograma() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo={t('adiestramiento.resumenProgramaTitulo')}
-        atras
-        onAtras={() => router.back()}
+        onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
       />
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[4] }}>
         {/* el QUÉ comprado, con su gente */}

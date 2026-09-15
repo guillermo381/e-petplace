@@ -19,6 +19,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import {
+  Cabecera,
   AIRE_RAIZ,
   Celda,
   CeldaNavegacion,
@@ -39,8 +40,8 @@ import { obtenerAdoptables, obtenerServiciosPais, type ServiciosPais } from '@ep
 
 // S58 (D-361): adiestramiento migró al set b′ — la estrella murió
 // (violaba el set); el silbato canónico vive en el registry.
+import { unidadesEnCarrito, useCarrito } from '@/lib/despensa/carrito';
 import { useTraduccion } from '@/i18n';
-import { AccionCarrito } from '@/components/accion-carrito';
 import { ADOPCION_ALCANZABLE } from '@/lib/gate-adopcion';
 
 // El soft launch es Ecuador (DEFINICION_SOFTLAUNCH); el país del
@@ -65,6 +66,7 @@ function TituloBloque({ texto }: { texto: string }) {
 }
 
 export default function Explorar() {
+  const unidadesCarrito = unidadesEnCarrito(useCarrito());
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
@@ -199,7 +201,17 @@ export default function Explorar() {
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <ScrollView contentContainerStyle={{ paddingBottom: AIRE_RAIZ + insets.bottom }}>
-        <Encabezado variante="portada" saludo={t('explorar.titulo')} accionDer={<AccionCarrito />} />
+        {/* ⭐ **S116-C lote 3b · LA PORTADA PASA A `Cabecera variante="raiz"`.**
+            `saludo` → `titulo` y **el carrito deja de ser un `ReactNode` en
+            `accionDer` y pasa a la prop `carrito`**, que la pieza ya trae. ☠️ Con
+            eso muere el montaje de `AccionCarrito` acá: *un `ReactNode` suelto
+            deja que cada pantalla arme su disco, y ahí vuelve la copia que
+            `DiscoVidrio` acaba de terminar* (la razón es de B, en el catálogo). */}
+        <Cabecera
+          variante="raiz"
+          titulo={t('explorar.titulo')}
+          carrito={{ cantidad: unidadesCarrito, onPress: () => router.push('/despensa/carrito'), etiqueta: t('despensa.abrirCarrito', { count: unidadesCarrito }) }}
+        />
 
         <View style={{ paddingHorizontal: spacing[4], gap: spacing[6], marginTop: spacing[2] }}>
           {/* ── Servicios activos ── */}

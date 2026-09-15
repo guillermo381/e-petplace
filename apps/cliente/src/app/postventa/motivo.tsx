@@ -50,7 +50,6 @@ import {
   Cabecera,
   Boton,
   Campo,
-  Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -227,12 +226,12 @@ export default function PostventaMotivo() {
   if (motivos === 'error' || preparados === null) {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado
-          variante="navegacion"
+        <Cabecera
+          variante="empujada"
           titulo={t('postventa.tituloMotivo')}
-          atras
-          onAtras={() => router.back()}
-        />
+          onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
+      />
         <EstadoVacio titulo={t('postventa.errorCatalogo')} />
       </View>
     );
@@ -240,12 +239,12 @@ export default function PostventaMotivo() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-          variante="navegacion"
+      <Cabecera
+          variante="empujada"
           titulo={t('postventa.tituloMotivo')}
-          atras
-          onAtras={() => router.back()}
-        />
+          onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
+      />
       <EvitaTeclado>
         <ScrollView
           contentContainerStyle={{

@@ -39,7 +39,6 @@ import {
   BurbujaMensaje,
   CabeceraCaso,
   CARA_EN_HILO,
-  Encabezado,
   EscaleraCaso,
   EsqueletoGrupo,
   Esqueleto,
@@ -508,7 +507,7 @@ export default function PantallaDelCaso() {
   if (caso === 'error' || caso === 'noEsTuyo') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" titulo={t('postventa.tituloCaso')} atras onAtras={() => router.back()} />
+        <Cabecera variante="empujada" titulo={t('postventa.tituloCaso')} onVolver={() => router.back()} etiquetaVolver={t('comun.volver')} />
         <EstadoVacio titulo={t(caso === 'noEsTuyo' ? 'postventa.casoNoEsTuyo' : 'postventa.casoNoSePudo')} />
       </View>
     );
@@ -528,7 +527,7 @@ export default function PantallaDelCaso() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('postventa.tituloCaso')} atras onAtras={() => router.back()} />
+      <Cabecera variante="empujada" titulo={t('postventa.tituloCaso')} onVolver={() => router.back()} etiquetaVolver={t('comun.volver')} />
       {/* ═══ §3 · EL SEGUIMIENTO, ENTERO Y SIN NADA ENCIMA ═══════════════════
           ⏪ **Todo esto vivía adentro del `encabezado` de `SuperficieChat`**, o
           sea dentro de una lista invertida: el seguimiento scrolleaba con la

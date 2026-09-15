@@ -52,7 +52,6 @@ import {
   Cabecera,
   Boton,
   CeldaNavegacion,
-  Encabezado,
   Tarjeta,
   Texto,
   spacing,
@@ -168,7 +167,7 @@ export default function CerrarCuenta() {
   if (paso === 'confirmar') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" titulo={t('cerrarCuenta.titulo')} atras onAtras={() => setPaso('info')} />
+        <Cabecera variante="empujada" titulo={t('cerrarCuenta.titulo')} onVolver={() => setPaso('info')} etiquetaVolver={t('comun.volver')} />
         <ScrollView
           contentContainerStyle={{
             padding: spacing[5],
@@ -210,7 +209,7 @@ export default function CerrarCuenta() {
   // ── PASO 1 · QUÉ SE VA / QUÉ QUEDA ─────────────────────────────────────
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('cerrarCuenta.titulo')} atras onAtras={() => router.back()} />
+      <Cabecera variante="empujada" titulo={t('cerrarCuenta.titulo')} onVolver={() => router.back()} etiquetaVolver={t('comun.volver')} />
       <ScrollView
         contentContainerStyle={{
           padding: spacing[5],

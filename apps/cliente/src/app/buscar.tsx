@@ -27,8 +27,8 @@ import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  Cabecera,
   Campo,
-  Encabezado,
   PieDeCampo,
   ResultadosBusqueda,
   spacing,
@@ -102,11 +102,11 @@ export default function PantallaBuscar() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo={t('busqueda.entrada')}
-        atras
-        onAtras={() => router.back()}
+        onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
       />
       <View style={{ paddingHorizontal: spacing[5], paddingTop: spacing[3] }}>
         {/* 🔴 **El teclado sale solo.** *Quien entró acá vino a escribir;

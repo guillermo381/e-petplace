@@ -65,7 +65,6 @@ import {
      pieza mientras retiraba `PieRevelar`. *Un import muerto es la puerta
      por la que alguien vuelve a montar la tabla que se decidió no tener.* */
   Chevron,
-  Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -83,6 +82,7 @@ import {
   useAviso,
   usePresionado,
   useTheme,
+  Cabecera,
 } from '@epetplace/ui';
 import {
   precioPorKg,
@@ -747,16 +747,30 @@ export default function DespensaProducto() {
           escrito esta misma mañana —«el día que otra superficie monte
           esto, `nombreCurado` tiene que subir con ella»— y se cobró doce
           horas después, en la pantalla de al lado.* */}
-      <Encabezado
-        variante="navegacion"
+      {/* ⭐ **S116-C lote 3b · MIGRA, Y `tituloVisible` MUERE CON SU RAZÓN.**
+
+          🔴 **Medido antes de decidir:** `tituloVisible={false}` no ocultaba
+          nada — pintaba el título del color del fondo (`Encabezado:247`,
+          `color: theme.bg.base`). *Un texto del color del fondo no está oculto:
+          está invisible y ocupando su lugar, y el lector de pantalla lo sigue
+          leyendo.* Lo que la pantalla quería —que el nombre del producto no se
+          diga dos veces— se cumple igual sin él, porque **la ficha ya lo dice
+          grande abajo**.
+
+          ⚠️ **El nombre SE CONSERVA en el título** y no se cambia por uno
+          genérico: es la puerta que la persona toca para volver, y un título
+          genérico en una pila de fichas no dice de cuál está saliendo. *Si la
+          mesa lo prefiere invisible, es una prop de `Cabecera` y es de B — pero
+          no la pido: el truco del color no era esa prop.* */}
+      <Cabecera
+        variante="empujada"
         titulo={
           ficha !== 'cargando' && ficha !== 'error'
             ? nombreCurado(ficha.nombre)
             : t('despensa.tituloProducto')
         }
-        tituloVisible={false}
-        atras
-        onAtras={() => router.back()}
+        onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
       />
 
       {/* 🔴 G-02 · EL CONTENIDO TAPADO — CURADO EN LA RAÍZ (S100b-C, L1).

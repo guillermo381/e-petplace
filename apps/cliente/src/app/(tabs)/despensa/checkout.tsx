@@ -55,7 +55,6 @@ import {
   Casilla,
   Campo,
   CeldaNavegacion,
-  Encabezado,
   Confirmacion,
   EsperaLarga,
   EstadoVacio,
@@ -1025,18 +1024,18 @@ export default function DespensaCheckout() {
           titulo={fase === 'confirmando' ? t('pago.esperaTituloCorto') : t('despensa.exitoTitulo')}
         />
       ) : (
-        <Encabezado
-          variante="navegacion"
+        <Cabecera
+          variante="empujada"
           titulo={t('despensa.checkoutTitulo')}
-          atras
-          onAtras={() => {
+          onVolver={() => {
             if (fase === 'resumen') {
               void volverAEditar();
               return;
             }
             router.back();
           }}
-        />
+        etiquetaVolver={t('comun.volver')}
+      />
       )}
 
       <EvitaTeclado>

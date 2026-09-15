@@ -820,7 +820,7 @@ export default function PerfilDeMascota() {
   if (perfil === 'error') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" titulo="" atras onAtras={() => router.back()} />
+        <Cabecera variante="empujada" titulo="" onVolver={() => router.back()} etiquetaVolver={t('comun.volver')} />
         <View style={{ flex: 1, justifyContent: 'center', padding: spacing[5] }}>
           <EstadoVacio
             titulo={t('perfil.error')}

@@ -77,7 +77,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Cabecera,
   Boton,
-  Encabezado,
   Entrada,
   Esqueleto,
   EsqueletoGrupo,
@@ -234,7 +233,7 @@ export default function PlanDeVacunas() {
   if (perfil === 'error') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" titulo="" atras onAtras={() => router.back()} />
+        <Cabecera variante="empujada" titulo="" onVolver={() => router.back()} etiquetaVolver={t('comun.volver')} />
         <View style={{ flex: 1, justifyContent: 'center', padding: spacing[5] }}>
           <EstadoVacio
             titulo={t('planVacunas.errorTitulo')}
@@ -271,7 +270,7 @@ export default function PlanDeVacunas() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo="" atras onAtras={() => router.back()} />
+      <Cabecera variante="empujada" titulo="" onVolver={() => router.back()} etiquetaVolver={t('comun.volver')} />
       <ScrollView
         contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}
         showsVerticalScrollIndicator={false}

@@ -14,6 +14,7 @@ import * as Updates from 'expo-updates';
 import { abrirAltaDeTarjeta } from '@/lib/pagos/alta-tarjeta';
 import { MAPA_NATIVO_DISPONIBLE } from '@/lib/mapa-nativo';
 import {
+  Cabecera,
   AIRE_RAIZ,
   Boton,
   Celda,
@@ -30,8 +31,8 @@ import {
 } from '@epetplace/ui';
 import { cerrarSesion } from '@epetplace/api';
 
+import { unidadesEnCarrito, useCarrito } from '@/lib/despensa/carrito';
 import { useTraduccion } from '@/i18n';
-import { AccionCarrito } from '@/components/accion-carrito';
 import { escucharConteos, leerConteos } from '@/lib/medicion/montajes';
 
 /**
@@ -105,6 +106,7 @@ function TituloBloque({ texto }: { texto: string }) {
 const HAY_CONFIG_PAGOS = Boolean(process.env.EXPO_PUBLIC_PAGOS_ALTA_URL);
 
 export default function Cuenta() {
+  const unidadesCarrito = unidadesEnCarrito(useCarrito());
   const router = useRouter();
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
@@ -259,7 +261,17 @@ export default function Cuenta() {
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <ScrollView contentContainerStyle={{ paddingBottom: AIRE_RAIZ + insets.bottom }}>
-        <Encabezado variante="portada" saludo={t('cuenta.titulo')} accionDer={<AccionCarrito />} />
+        {/* ⭐ **S116-C lote 3b · LA PORTADA PASA A `Cabecera variante="raiz"`.**
+            `saludo` → `titulo` y **el carrito deja de ser un `ReactNode` en
+            `accionDer` y pasa a la prop `carrito`**, que la pieza ya trae. ☠️ Con
+            eso muere el montaje de `AccionCarrito` acá: *un `ReactNode` suelto
+            deja que cada pantalla arme su disco, y ahí vuelve la copia que
+            `DiscoVidrio` acaba de terminar* (la razón es de B, en el catálogo). */}
+        <Cabecera
+          variante="raiz"
+          titulo={t('cuenta.titulo')}
+          carrito={{ cantidad: unidadesCarrito, onPress: () => router.push('/despensa/carrito'), etiqueta: t('despensa.abrirCarrito', { count: unidadesCarrito }) }}
+        />
 
         <View style={{ paddingHorizontal: spacing[4], gap: spacing[6], marginTop: spacing[2] }}>
           <Tarjeta relleno="ninguno">

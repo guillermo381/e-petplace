@@ -34,7 +34,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Cabecera,
   Boton,
-  Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -420,7 +419,7 @@ export default function LugarGuarderia() {
   if (estado.fase === 'roto') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" titulo={t('lugarGuarderia.titulo')} atras onAtras={alAtras} />
+        <Cabecera variante="empujada" titulo={t('lugarGuarderia.titulo')} onVolver={alAtras} etiquetaVolver={t('comun.volver')} />
         <EstadoVacio
           registro="pantalla"
           titulo={t('lugarGuarderia.noCargoTitulo')}

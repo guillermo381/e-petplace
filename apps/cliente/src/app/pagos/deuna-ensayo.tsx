@@ -55,11 +55,11 @@ export default function DeUnaEnsayo() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo="Ensayo · código Deuna"
-        atras
-        onAtras={() => router.back()}
+        onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
       />
       <ScrollView contentContainerStyle={{ padding: spacing[5], gap: spacing[4] }}>
         {/* El selector de guion es del ANDAMIO — sin voz de i18n a propósito:

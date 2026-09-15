@@ -29,7 +29,6 @@ import {
   Cabecera,
   AccionesPasaporte,
   ConfiguracionPasaporte,
-  Encabezado,
   EsperaDeMarca,
   EsperaLarga,
   EstadoVacio,
@@ -202,11 +201,11 @@ export default function Pasaporte() {
             normal—; el tercero, el del QR a pantalla completa, sí lo tenía.
             *Un callejón no se ve como defecto: se ve como que la app se
             colgó.* */}
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo={t('pasaporte.titulo')}
-        atras
-        onAtras={() => router.back()}
+        onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
       />
       <View style={{ padding: spacing[5], gap: spacing[5] }}>
         {token === null ? (
@@ -349,12 +348,12 @@ export default function Pasaporte() {
                 `atras` dibuja el chevron que esta app ya usa en todas sus
                 pantallas — *un control que la persona reconoce de memoria no
                 necesita que le expliquen qué hace, y no hay texto que recortar.* */}
-            <Encabezado
-              variante="navegacion"
+            <Cabecera
+              variante="empujada"
               titulo={t('pasaporte.verPasaporte')}
-              atras
-              onAtras={() => setViendo(false)}
-            />
+              onVolver={() => setViendo(false)}
+        etiquetaVolver={t('comun.volver')}
+      />
             <WebView source={{ uri: urlPublica(token) }} style={{ flex: 1 }} />
           </View>
         </Modal>

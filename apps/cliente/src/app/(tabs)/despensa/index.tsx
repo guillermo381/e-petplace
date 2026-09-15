@@ -49,6 +49,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  Cabecera,
   AIRE_RAIZ,
   Boton,
   Campo,
@@ -827,46 +828,24 @@ export default function DespensaDescubrir() {
           pantalla, abajo — el porqué vive ahí, junto a la pieza que la
           reemplaza, para que nadie lea una mitad sin la otra.
           ═══════════════════════════════════════════════════════════════ */}
-      <Encabezado
-        variante="portada"
-        saludo={t('despensa.titulo')}
-        isotipo="gradiente"
-        /* 🔴 **LA CANASTA VUELVE — S116-C lote 3i. Y vuelve acá porque de acá
-           salió.**
+      {/* ⭐ **S116-C lote 3b · LA PORTADA PASA A `Cabecera variante="raiz"`.**
 
-           ── LA CADENA, MEDIDA DE TRES COMMITS ────────────────────────────
-           ① **S100d-C** la sacó de este slot **«EN EL MISMO COMMIT»** en que
-              entraba el carrito flotante — su razón de irse era que había otra
-              puerta.
-           ② **S112-C** mató el carrito flotante y le pasó el trabajo a la
-              burbuja del shell.
-           ③ **mi lote 3** reemplazó esa burbuja por el asistente, y la rama
-              del carrito se fue con ella.
+          ☠️ **MUERE EL `isotipo="gradiente"`**, y no lo decido yo: el lote 10
+          firmó que **las cabeceras raíz del cliente no llevan isotipo**, y el
+          censo de B lo nombra como lo único que esta pantalla perdía al migrar.
 
-           ⇒ **ninguno de los tres dejó una puerta, y el tercero fui yo.** Peor:
-           declaré en la cabecera del shell que *«el carrito sigue alcanzable
-           por la tab Despensa»* **sin recorrerlo** — medido hoy, `grep` de
-           `/despensa/carrito` en `apps/` daba **CERO** navegaciones. *Una
-           afirmación sobre un camino que nadie caminó es exactamente lo que la
-           pregunta 11 de la vara existe para cazar, y la escribí yo.*
-
-           **Vuelve al techo y no como flotante** porque la firma de S100d-bis
-           —*«mientras tenga productos debe estar visible en TODA la app»*—
-           choca con el retiro del orbe, y esa contradicción **es de la mesa**.
-           Lo que no se puede es seguir sin ninguna: sin carrito no se compra.
-
-           `dentroDeTocable` porque el `Pressable` es el que se activa: dos
-           voces para un gesto es lo que ese brazo existe para impedir. */
-        accionDer={
-          <Pressable
-            onPress={() => router.push('/despensa/carrito')}
-            accessibilityRole="button"
-            accessibilityLabel={t('despensa.abrirCarrito', { count: unidades })}
-            hitSlop={8}
-          >
-            <GlifoConContador nombre="carrito" cuenta={unidades} dentroDeTocable />
-          </Pressable>
-        }
+          ☠️ **Y muere mi `Pressable` + `GlifoConContador` de aquí**: el carrito
+          pasa a la prop `carrito`, que la pieza trae. *Todo el hilo del lote 3i
+          —que la canasta volviera acá porque de acá había salido— se cumple
+          igual; lo que cambia es que ya no lo dibuja esta pantalla.* */}
+      <Cabecera
+        variante="raiz"
+        titulo={t('despensa.titulo')}
+        carrito={{
+          cantidad: unidades,
+          onPress: () => router.push('/despensa/carrito'),
+          etiqueta: t('despensa.abrirCarrito', { count: unidades }),
+        }}
       />
 
       {/* ═══════════════════════════════════════════════════════════════

@@ -37,7 +37,6 @@ import {
   Boton,
   CitaEnVivo,
   Cronometro,
-  Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -327,7 +326,7 @@ export default function DetallePaseo() {
     const esError = detalle === 'error';
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" titulo={t('atencion.titulo')} atras onAtras={() => router.back()} />
+        <Cabecera variante="empujada" titulo={t('atencion.titulo')} onVolver={() => router.back()} etiquetaVolver={t('comun.volver')} />
         <View style={{ flex: 1, justifyContent: 'center', padding: spacing[5] }}>
           <EstadoVacio
             titulo={esError ? t('atencion.errorTitulo') : t('atencion.noEncontradoTitulo')}
@@ -761,8 +760,8 @@ export default function DetallePaseo() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
+      <Cabecera
+        variante="empujada"
         titulo={
           detalle.iniciada_en !== null
             ? t(esGrooming ? 'grooming.vivoTituloConFecha' : 'paseo.tituloConFecha', {
@@ -770,8 +769,8 @@ export default function DetallePaseo() {
               })
             : t(esGrooming ? 'grooming.vivoTitulo' : 'paseo.titulo')
         }
-        atras
-        onAtras={() => router.back()}
+        onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
       />
       <ScrollView
         contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[4] }}

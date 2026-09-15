@@ -46,7 +46,6 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import {
   Cabecera,
   Boton,
-  Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -227,16 +226,16 @@ export default function Postular() {
       {estado.fase === 'enviada' ? (
         <Cabecera variante="empujada" titulo={t('postular.enviadaTitulo')} />
       ) : (
-        <Encabezado
-          variante="navegacion"
+        <Cabecera
+          variante="empujada"
           titulo={
             typeof nombre === 'string' && nombre.length > 0
               ? t('postular.tituloCon', { nombre })
               : t('postular.titulo')
           }
-          atras
-          onAtras={() => router.back()}
-        />
+          onVolver={() => router.back()}
+        etiquetaVolver={t('comun.volver')}
+      />
       )}
 
       <ScrollView
