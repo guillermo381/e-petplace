@@ -139,6 +139,42 @@ export async function hayNovedades(app: AppCampana): Promise<ResultadoWrapper<bo
 }
 
 /**
+ * CUÁNTOS AVISOS SIN LEER — el número del disco de la campana (`D-1120`).
+ *
+ * ── QUÉ CUENTA, y NO es lo que contaba la huella ─────────────────────────
+ * **No leídos POR AVISO.** Es la semántica que `D-1119` fijó con la firma del
+ * founder al derogar el *«jamás un número»* de S89. La huella de al lado
+ * pregunta otra cosa —*¿hay algo posterior a mi última visita?*— y por eso
+ * **{@link hayNovedades} NO sirve para esto**: seguiría en `true` con todo
+ * leído, o en `false` con avisos sin leer si ya se visitó la campana.
+ * *Leído y visto son cosas distintas, y la campana distingue las dos.*
+ *
+ * ── POR QUÉ NO RECIBE `app`, aunque la ficha lo proponía ─────────────────
+ * Medido antes de escribirlo: **`notificacion_intencion` no tiene columna de
+ * app** —el eje vive en la VISITA, no en el aviso— y `obtenerMisAvisos`
+ * tampoco filtra por casa. Un parámetro acá no cambiaría ninguna fila y se
+ * leería como si filtrara. **Y la razón fuerte es de producto: este número
+ * tiene que contar EXACTAMENTE lo que la lista muestra**, o el badge dice 3
+ * con cinco en pantalla — una mentira nueva en lugar de la vieja.
+ *
+ * ⚠️ **Reemplaza a `obtenerMisAvisos(100).filter(!leida)`**, que traía hasta
+ * cien avisos enteros para dibujar un número y **mentía en silencio con 101**.
+ * El fallo cae a 0 **en la pantalla, no acá**: el motor rebota `sin_sesion`
+ * porque *cero y «no pude leer» son cosas distintas*, y quien decide mostrar 0
+ * ante un fallo es la superficie — *un contador que no se pudo leer no inventa
+ * pendientes.*
+ */
+export async function contarAvisosSinLeer(): Promise<ResultadoWrapper<number, CodigoCampana>> {
+  if ((await uidActual()) === null) return falla('sin_sesion');
+  const { data, error } = await getClient().rpc('contar_avisos_sin_leer');
+  if (error) {
+    return error.message.startsWith('auth_required') ? falla('sin_sesion') : falla('error_desconocido');
+  }
+  if (typeof data !== 'number') return falla('datos_inconsistentes');
+  return { ok: true, data };
+}
+
+/**
  * Deposita la visita a la campana. **Se llama AL ENTRAR a /avisos** — ese es
  * el acto que la letra nombra («entrar a /avisos deposita la visita»); la
  * huella del techo se apaga con esto, no con leer avisos.

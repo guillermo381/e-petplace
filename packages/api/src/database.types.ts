@@ -26811,6 +26811,7 @@ export type Database = {
         Returns: Json
       }
       guarderia_recurrente_vivo: { Args: never; Returns: boolean }
+      contar_avisos_sin_leer: { Args: never; Returns: number }
       hay_avisos_sin_leer: { Args: never; Returns: boolean }
       hay_novedades: { Args: { p_app: string }; Returns: boolean }
       hoy_local: { Args: never; Returns: string }

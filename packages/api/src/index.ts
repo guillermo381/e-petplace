@@ -598,6 +598,8 @@ export {
 // hasta que la pantalla exista (ley de secuencia de la lámina).
 export {
   obtenerMisAvisos,
+  // `D-1120` · el número del disco sale del SERVIDOR, no de contar la lista.
+  contarAvisosSinLeer,
   hayAvisosSinLeer,
   hayNovedades,
   registrarVisitaCampana,
