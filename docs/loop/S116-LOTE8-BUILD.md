@@ -1,5 +1,61 @@
 # LOTE 8 · LA BUILD DE OCTUBRE — lo que lleva, cómo se produce, y qué espera una firma
 
+## ⓿ 🔴 FIRMA DEL FOUNDER (15-sep-2026) — **NADA VIAJA POR BUILD TODAVÍA**
+
+> **Todo sigue por OTA hasta una próxima sesión de diseño que revise el splash y
+> la miniatura.**
+
+**Qué significa, en concreto:**
+
+- **`pista/s116-a-08` queda ARMADA Y SIN MERGEAR.** No entra a `main`, no se
+  construye, no se despliega. El trabajo está hecho y esperando.
+- **Todo lo que la app entregue hasta entonces sale por OTA**, o sea: sólo JS.
+  Nada de este lote llega a un aparato — *y no porque falte trabajo, sino porque
+  la decisión de construir no está tomada.*
+- **El splash y el ícono se revisan en SESIÓN DE DISEÑO antes de construir.**
+  Están cableados y medidos; lo que falta no es ingeniería: es que el founder
+  los mire. Los dos tienen su montaje listo para esa sesión:
+  `docs/loop/capturas-s116-a-lote8/iconos-y-splash.png` y
+  `monocromo-dos-candidatas.png`.
+
+⚠️ **Y lo que esta firma NO cambia, para que nadie lo lea de más:** los gates
+nuevos (`verify:costura-splash`, `verify:icono-notificacion`) y el ensanche de
+los dos del 3b **también viven en esta rama**, así que **tampoco rigen todavía**.
+Hasta que la rama se mergee, el hook que corre es el de `main`.
+
+### La lista de lo que viaja por BUILD
+
+Es la de §① de este documento — los seis renglones de la tabla — **más un
+séptimo que la firma agrega:**
+
+| | |
+|---|---|
+| **⑦** | **el splash y el ícono se revisan en sesión de diseño antes de construir** |
+
+*No es un ítem técnico: es una precondición de mesa, y por eso entra a la misma
+lista que los otros seis en vez de vivir en una nota al pie.*
+
+### Las firmas del founder que siguen ABIERTAS
+
+| | qué es | estado |
+|---|---|---|
+| **Apple Developer** | la cuenta (USD 99/año) | 🔴 abierta |
+| **Google Play Developer** | la cuenta (USD 25, una vez) | 🔴 abierta |
+| **D-U-N-S** | sólo si la cuenta de Apple es de EMPRESA; lo emite un tercero | 🔴 abierta |
+| **¿APK o tienda?** | **la decisión que ordena a las tres de arriba** | 🔴 abierta |
+
+🔴 **La cuarta no es una cuenta más: es la que decide si las otras tres hacen
+falta.** Si la build de octubre es **APK interno para F&F**, ninguna de las tres
+es necesaria y el camino es corto. Si es **tienda**, las tres son precondición y
+el canon ya midió **3 a 6 semanas de calendario** (S81).
+*Mientras esa pregunta no se conteste, las otras tres no se pueden ni priorizar.*
+
+⚠️ **El D-U-N-S es el único cuya demora no depende de nosotros** — por eso, si la
+respuesta llega a ser «tienda» y la cuenta va a nombre de una empresa, ése
+arranca el mismo día, aunque su resultado se use al final.
+
+---
+
 **Estado: PREPARADA, NO CONSTRUIDA.** Esta tanda dejó la configuración y las
 imágenes listas y **no corrió un solo build**. Este documento es lo que la mesa
 lee para decidir cuándo se construye.
@@ -151,6 +207,10 @@ serlo diez minutos después, sin que nada avisara.*
 
 ## ⑤ EL ORDEN
 
+0. 🔴 **LA SESIÓN DE DISEÑO — splash y miniatura.** Firma del founder del
+   15-sep: **nada viaja por build hasta que esos dos se revisen.** Es el paso
+   cero de verdad: mientras no ocurra, los ocho de abajo no arrancan y **el
+   producto sigue entregando por OTA**. (Ver §⓿.)
 1. **La mesa contesta: ¿APK interno para F&F, o tienda?** Todo lo demás depende.
 2. **Migración de llaves (`D-784`)** — precondición firmada, va primero.
 3. El bundle id de iOS, si iOS entra.
