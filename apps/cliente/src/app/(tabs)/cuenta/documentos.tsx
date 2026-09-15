@@ -226,74 +226,82 @@ export default function DocumentosDelHogar() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: {
-          gap: spacing[5],
-        } }}
+
       >
-        {mascotas === 'cargando' ? (
-          <View style={{ padding: spacing[5] }}>
-            <EsqueletoGrupo>
-              <View style={{ gap: spacing[3] }}>
-                <Esqueleto alto={56} />
-                <Esqueleto alto={56} />
-              </View>
-            </EsqueletoGrupo>
-          </View>
-        ) : mascotas === 'error' ? (
-          <View style={{ padding: spacing[5] }}>
-            <EstadoVacio
-              registro="pantalla"
-              titulo={t('documentos.errorTitulo')}
-              descripcion={t('documentos.errorDetalle')}
-            />
-          </View>
-        ) : lista.length === 0 ? (
-          <View style={{ padding: spacing[5] }}>
-            <EstadoVacio
-              registro="pantalla"
-              titulo={t('documentos.vacioTitulo')}
-              descripcion={t('documentos.vacioDetalle')}
-            />
-          </View>
-        ) : (
-          <>
-            <View style={{ paddingTop: spacing[4], paddingHorizontal: spacing[5] }}>
-              <Texto variante="apoyo" color="secondary">
-                {t('documentos.ley')}
-              </Texto>
-            </View>
-
-            {/* El filtro con PATA — solo si hay a quién filtrar (con una
-                mascota, una hilera de un chip es ruido). */}
-            {lista.length > 1 ? (
-              <FiltroMascotas mascotas={lista} elegida={elegida} onElegir={setElegida} />
-            ) : null}
-
-            {visibles.map((m) => (
-              <View key={m.id}>
-                <TituloBloque texto={m.nombre} />
-                <View style={{ paddingHorizontal: spacing[5] }}>
-                  <Tarjeta relleno="ninguno" elevacion="reposo">
-                    {papeles.map((papel, i) => (
-                      <View key={papel.tipo}>
-                        {i > 0 ? <Separador /> : null}
-                        <FilaDocumento
-                          icono={papel.icono}
-                          nombre={t(`documentos.nombre${papel.claveVoz}`)}
-                          apoyo={t('documentos.descargar')}
-                          cargando={bajando === `${m.id}:${papel.tipo}`}
-                          onPress={() => {
-                            void bajar(m.id, papel.tipo);
-                          }}
-                        />
-                      </View>
-                    ))}
-                  </Tarjeta>
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ gap: spacing[5] }}>
+          {mascotas === 'cargando' ? (
+            <View style={{ padding: spacing[5] }}>
+              <EsqueletoGrupo>
+                <View style={{ gap: spacing[3] }}>
+                  <Esqueleto alto={56} />
+                  <Esqueleto alto={56} />
                 </View>
+              </EsqueletoGrupo>
+            </View>
+          ) : mascotas === 'error' ? (
+            <View style={{ padding: spacing[5] }}>
+              <EstadoVacio
+                registro="pantalla"
+                titulo={t('documentos.errorTitulo')}
+                descripcion={t('documentos.errorDetalle')}
+              />
+            </View>
+          ) : lista.length === 0 ? (
+            <View style={{ padding: spacing[5] }}>
+              <EstadoVacio
+                registro="pantalla"
+                titulo={t('documentos.vacioTitulo')}
+                descripcion={t('documentos.vacioDetalle')}
+              />
+            </View>
+          ) : (
+            <>
+              <View style={{ paddingTop: spacing[4], paddingHorizontal: spacing[5] }}>
+                <Texto variante="apoyo" color="secondary">
+                  {t('documentos.ley')}
+                </Texto>
               </View>
-            ))}
-          </>
-        )}
+
+              {/* El filtro con PATA — solo si hay a quién filtrar (con una
+                  mascota, una hilera de un chip es ruido). */}
+              {lista.length > 1 ? (
+                <FiltroMascotas mascotas={lista} elegida={elegida} onElegir={setElegida} />
+              ) : null}
+
+              {visibles.map((m) => (
+                <View key={m.id}>
+                  <TituloBloque texto={m.nombre} />
+                  <View style={{ paddingHorizontal: spacing[5] }}>
+                    <Tarjeta relleno="ninguno" elevacion="reposo">
+                      {papeles.map((papel, i) => (
+                        <View key={papel.tipo}>
+                          {i > 0 ? <Separador /> : null}
+                          <FilaDocumento
+                            icono={papel.icono}
+                            nombre={t(`documentos.nombre${papel.claveVoz}`)}
+                            apoyo={t('documentos.descargar')}
+                            cargando={bajando === `${m.id}:${papel.tipo}`}
+                            onPress={() => {
+                              void bajar(m.id, papel.tipo);
+                            }}
+                          />
+                        </View>
+                      ))}
+                    </Tarjeta>
+                  </View>
+                </View>
+              ))}
+            </>
+          )}
+        </View>
       </HojaContenido>
 
       <HojaReceta

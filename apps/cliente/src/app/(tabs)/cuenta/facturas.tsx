@@ -175,87 +175,94 @@ export default function FacturasScreen() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: {
-          padding: spacing[5],
-          gap: spacing[4],
-        } }}
-      >
-        {docs === 'cargando' ? (
-          <EsqueletoGrupo>
-            <View style={{ gap: spacing[3] }}>
-              <Esqueleto forma="bloque" ancho="100%" alto={96} />
-              <Esqueleto forma="bloque" ancho="100%" alto={96} />
-            </View>
-          </EsqueletoGrupo>
-        ) : docs === 'error' ? (
-          <EstadoVacio
-            titulo={t('facturas.errorTitulo')}
-            accion={
-              <Boton
-                variante="secundario"
-                etiqueta={t('facturas.reintentar')}
-                onPress={() => {
-                  setDocs('cargando');
-                  setIntento((n) => n + 1);
-                }}
-              />
-            }
-          />
-        ) : docs.length === 0 ? (
-          <EstadoVacio titulo={t('facturas.vacioTitulo')} descripcion={t('facturas.vacio')} />
-        ) : (
-          <>
-            {docs.map((d) => {
-              /* La nota de crédito manda sobre el estado: es OTRO papel, no un
-                 estado de la factura (la pieza cambia su guijarro por eso). */
-              const estado = d.tipo === 'nota_credito' ? 'notaCredito' : ESTADO_TARJETA[d.estadoVisible];
 
-              if (estado === null) {
-                /* 🔴 EL ACCIONABLE LLEVA A RESOLVERLO. Decir «faltan tus datos»
-                   y no dar el camino es la mitad de la ayuda: la persona sabe
-                   qué falta y no dónde ponerlo (Ley 17.5 — el vacío invita a
-                   actuar, cero finales mudos). */
-                if (d.estadoVisible === 'faltan_tus_datos') {
-                  return (
-                    <Tarjeta key={d.id}>
-                      <View style={{ gap: spacing[3] }}>
-                        <View style={{ gap: spacing[1] }}>
-                          <Texto variante="seccion">{t('facturaTrabada.faltanDatosTitulo')}</Texto>
-                          <Texto variante="apoyo">{t('facturaTrabada.faltanDatosDetalle')}</Texto>
-                          {d.numero === null ? null : <Texto variante="dato">{d.numero}</Texto>}
+      >
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[5], gap: spacing[4] }}>
+          {docs === 'cargando' ? (
+            <EsqueletoGrupo>
+              <View style={{ gap: spacing[3] }}>
+                <Esqueleto forma="bloque" ancho="100%" alto={96} />
+                <Esqueleto forma="bloque" ancho="100%" alto={96} />
+              </View>
+            </EsqueletoGrupo>
+          ) : docs === 'error' ? (
+            <EstadoVacio
+              titulo={t('facturas.errorTitulo')}
+              accion={
+                <Boton
+                  variante="secundario"
+                  etiqueta={t('facturas.reintentar')}
+                  onPress={() => {
+                    setDocs('cargando');
+                    setIntento((n) => n + 1);
+                  }}
+                />
+              }
+            />
+          ) : docs.length === 0 ? (
+            <EstadoVacio titulo={t('facturas.vacioTitulo')} descripcion={t('facturas.vacio')} />
+          ) : (
+            <>
+              {docs.map((d) => {
+                /* La nota de crédito manda sobre el estado: es OTRO papel, no un
+                   estado de la factura (la pieza cambia su guijarro por eso). */
+                const estado = d.tipo === 'nota_credito' ? 'notaCredito' : ESTADO_TARJETA[d.estadoVisible];
+
+                if (estado === null) {
+                  /* 🔴 EL ACCIONABLE LLEVA A RESOLVERLO. Decir «faltan tus datos»
+                     y no dar el camino es la mitad de la ayuda: la persona sabe
+                     qué falta y no dónde ponerlo (Ley 17.5 — el vacío invita a
+                     actuar, cero finales mudos). */
+                  if (d.estadoVisible === 'faltan_tus_datos') {
+                    return (
+                      <Tarjeta key={d.id}>
+                        <View style={{ gap: spacing[3] }}>
+                          <View style={{ gap: spacing[1] }}>
+                            <Texto variante="seccion">{t('facturaTrabada.faltanDatosTitulo')}</Texto>
+                            <Texto variante="apoyo">{t('facturaTrabada.faltanDatosDetalle')}</Texto>
+                            {d.numero === null ? null : <Texto variante="dato">{d.numero}</Texto>}
+                          </View>
+                          <Boton
+                            variante="secundario"
+                            etiqueta={t('facturaTrabada.faltanDatosAccion')}
+                            onPress={() => router.push('/cuenta/datos-facturacion')}
+                          />
                         </View>
-                        <Boton
-                          variante="secundario"
-                          etiqueta={t('facturaTrabada.faltanDatosAccion')}
-                          onPress={() => router.push('/cuenta/datos-facturacion')}
-                        />
-                      </View>
+                      </Tarjeta>
+                    );
+                  }
+                  return (
+                    <Tarjeta key={d.id} relleno="ninguno">
+                      <Celda titulo={t('facturas.anulada')} metadataMono={d.numero ?? undefined} />
                     </Tarjeta>
                   );
                 }
-                return (
-                  <Tarjeta key={d.id} relleno="ninguno">
-                    <Celda titulo={t('facturas.anulada')} metadataMono={d.numero ?? undefined} />
-                  </Tarjeta>
-                );
-              }
 
-              return (
-                <TarjetaFactura
-                  key={d.id}
-                  estado={estado}
-                  numero={d.numero ?? undefined}
-                  monto={d.tipo === 'nota_credito' ? d.total : undefined}
-                  /* Las acciones existen SOLO si el archivo existe: la pieza
-                     oculta el botón cuando el handler falta, así que un XML
-                     ausente no ofrece un botón que iba a fallar (Ley 23). */
-                  onDescargarPdf={d.tieneRide ? () => descargar(d.id, 'ride') : undefined}
-                  onDescargarXml={d.tieneXml ? () => descargar(d.id, 'xml') : undefined}
-                />
-              );
-            })}
-          </>
-        )}
+                return (
+                  <TarjetaFactura
+                    key={d.id}
+                    estado={estado}
+                    numero={d.numero ?? undefined}
+                    monto={d.tipo === 'nota_credito' ? d.total : undefined}
+                    /* Las acciones existen SOLO si el archivo existe: la pieza
+                       oculta el botón cuando el handler falta, así que un XML
+                       ausente no ofrece un botón que iba a fallar (Ley 23). */
+                    onDescargarPdf={d.tieneRide ? () => descargar(d.id, 'ride') : undefined}
+                    onDescargarXml={d.tieneXml ? () => descargar(d.id, 'xml') : undefined}
+                  />
+                );
+              })}
+            </>
+          )}
+        </View>
       </HojaContenido>
     </View>
   );

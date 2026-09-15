@@ -449,290 +449,297 @@ export default function DuranteGuarderia() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: {
-          padding: spacing[5],
-          gap: spacing[4],
-          } }}
-      >
-        {/* ── ① EL MOMENTO DEL DÍA — preside ── */}
-        {estadia.fase === 'cargando' ? (
-          <EsqueletoGrupo>
-            <Esqueleto alto={72} />
-          </EsqueletoGrupo>
-        ) : estadia.fase === 'noEsTuya' ? (
-          <EstadoVacio registro="seccion" titulo={t('duranteGuarderia.noEsTuya')} />
-        ) : estadia.fase === 'noPudimos' ? (
-          <EstadoVacio
-            registro="seccion"
-            titulo={t('duranteGuarderia.sinEstadoTitulo')}
-            descripcion={t('duranteGuarderia.sinEstadoDetalle')}
-          />
-        ) : (
-          <Tarjeta>
-            <View style={{ gap: spacing[2] }}>
-              <Texto variante="titulo">{vozDelEstado(estadia.e)}</Texto>
-              <Texto variante="apoyo">{estadia.e.prestadorNombre}</Texto>
-            </View>
-          </Tarjeta>
-        )}
 
-        {/* ── ② DÓNDE VA — sólo mientras viaja, y sólo si hay punto ── */}
-        {estadia.fase === 'listo' && tramoVivo != null ? (
+      >
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[5], gap: spacing[4] }}>
+          {/* ── ① EL MOMENTO DEL DÍA — preside ── */}
+          {estadia.fase === 'cargando' ? (
+            <EsqueletoGrupo>
+              <Esqueleto alto={72} />
+            </EsqueletoGrupo>
+          ) : estadia.fase === 'noEsTuya' ? (
+            <EstadoVacio registro="seccion" titulo={t('duranteGuarderia.noEsTuya')} />
+          ) : estadia.fase === 'noPudimos' ? (
+            <EstadoVacio
+              registro="seccion"
+              titulo={t('duranteGuarderia.sinEstadoTitulo')}
+              descripcion={t('duranteGuarderia.sinEstadoDetalle')}
+            />
+          ) : (
+            <Tarjeta>
+              <View style={{ gap: spacing[2] }}>
+                <Texto variante="titulo">{vozDelEstado(estadia.e)}</Texto>
+                <Texto variante="apoyo">{estadia.e.prestadorNombre}</Texto>
+              </View>
+            </Tarjeta>
+          )}
+
+          {/* ── ② DÓNDE VA — sólo mientras viaja, y sólo si hay punto ── */}
+          {estadia.fase === 'listo' && tramoVivo != null ? (
+            <Tarjeta>
+              <View style={{ gap: spacing[3] }}>
+                <Texto variante="seccion">{t('duranteGuarderia.dondeVa')}</Texto>
+                {/* 🔴 S109-D · EL MAPA PUEDE NO ESTAR, Y SE DICE EN PALABRAS.
+                         El flag lo decide `lib/mapa-nativo`. *Un rectángulo gris sin
+                         explicación y una app caída son la misma falta de respeto:
+                         la pantalla tiene que seguir siendo útil sin el mapa.* */}
+                {!MAPA_NATIVO_DISPONIBLE ? (
+                  <Texto variante="apoyo">{t('duranteGuarderia.mapaNoDisponible')}</Texto>
+                ) : punto === null ? (
+                  /* `null` no es error: es «todavía no lo vemos». **No se muestra
+                     un punto viejo** — un mapa que miente sobre dónde está un
+                     animal es peor que un mapa ausente. */
+                  <Texto variante="apoyo">{t('duranteGuarderia.sinPunto')}</Texto>
+                ) : (
+                  <>
+                    <MapaRecorrido
+                      modo="vivo"
+                      mirada="espectador"
+                      alto={220}
+                      /* 🔴 **UN SOLO PUNTO — la garantía es estructural.** Una
+                         polilínea de un punto no dibuja nada: no hay forma de que
+                         un descuido futuro pinte la traza sin agregar puntos a
+                         mano. *Las paradas de una ruta son las casas de otras
+                         familias*, y el tramo es del VIAJE: lo comparten todos
+                         los animales a bordo. */
+                      puntos={[{ lat: punto.lat, lng: punto.lon, t: punto.vistoEn }]}
+                      centroInicial={{ lat: punto.lat, lng: punto.lon }}
+                      marcadorVivo={<MarcaDeMapa variante="moto" />}
+                    />
+                    {/* Frescura honesta: jamás «en tiempo real». */}
+                    <Texto variante="apoyo">
+                      {t('duranteGuarderia.vistoA', {
+                        hora: new Date(punto.vistoEn).toLocaleTimeString(undefined, {
+                          hour: '2-digit', minute: '2-digit',
+                        }),
+                      })}
+                    </Texto>
+                  </>
+                )}
+              </View>
+            </Tarjeta>
+          ) : null}
+
+          {/* ── ④ EL ACTA — ✅ EL BOTÓN DE CONFORMAR NACIÓ CON SU LECTOR
+                 (29-ago). *La condición estaba escrita acá: «el botón nace CON el
+                 lector del contenido, no antes». Se cumplió y por eso existe.*
+
+                 🔴 **EL MAPEO DE CONFORMIDAD NO ES UN PASO DIRECTO, y esconde un
+                 defecto silencioso:** `sin_conformidad` **existe en los dos
+                 vocabularios con sentidos OPUESTOS**.
+
+                 | motor | significa | pieza |
+                 |---|---|---|
+                 | `sin_conformidad` | **todavía no la miró** | `pendiente` (sereno) |
+                 | `conforme` | aceptó | `conforme` (success) |
+                 | `con_reserva` | aceptó **señalando algo** | `sin_conformidad` (warning) |
+
+                 *Pasarlo directo pintaría un WARNING sobre un dueño que
+                 simplemente no abrió el acta — y el warning existe para decir
+                 que alguien señaló un problema.* ── */}
+          {estadia.fase === 'listo' && acta !== null ? (
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="seccion">{t('duranteGuarderia.actaTitulo')}</Texto>
+              <ActaDeEntrega
+                modo="leer"
+                direccion={acta.direccion}
+                /* 🔴 EL LECTOR DEVUELVE **HECHOS, NO VOZ** — los ítems se componen
+                   acá, con el idioma de la casa. *El motor no sabe cómo se llama
+                   «carnet a la vista» en esta letra, y no debe saberlo.* */
+                /* 🔴 EL CARNET SÓLO EN LA RECOGIDA — **la segunda puerta al
+                   mismo defecto**, y la encontró B midiendo el consumidor de su
+                   propia cura. *Yo curé el lado del prestador y la pieza, y este
+                   lector quedó abierto:* componía el ítem **sin condicionar por
+                   dirección**, así que en devolución iba a seguir dibujando la
+                   casilla que el founder rechazó (⑤).
+
+                   El criterio legal §4 lo dice: el acta espejo lleva estado con
+                   fotos, incidentes, objetos devueltos y conformidad. **El carnet
+                   se verifica al RECIBIR.**
+
+                   ⚠️ Y el modo de falla era silencioso: no rompe nada, **dibuja de
+                   más**, y se ve como si funcionara. Es la ley de la jornada de
+                   S107 — *el censo casi siempre encuentra una segunda puerta al
+                   mismo defecto*, y curar sólo la reportada es media cura. */
+                items={[
+                  ...(acta.direccion === 'recogida'
+                    ? [
+                        {
+                          clave: 'carnet',
+                          etiqueta: t('duranteGuarderia.actaCarnet'),
+                          marcado: acta.carnetVerificado,
+                        },
+                      ]
+                    : []),
+                  ...(acta.objetos !== null && acta.objetos.length > 0
+                    ? [{ clave: 'objetos', etiqueta: acta.objetos, marcado: true }]
+                    : []),
+                ]}
+                rotuloItems={t('duranteGuarderia.actaItems')}
+                observaciones={acta.observaciones ?? undefined}
+                rotuloObservaciones={t('duranteGuarderia.actaObservaciones')}
+                conformidad={
+                  (acta.conformidad === 'conforme'
+                    ? 'conforme'
+                    : acta.conformidad === 'con_reserva'
+                      ? 'sin_conformidad'
+                      : 'pendiente') satisfies Conformidad
+                }
+                vozConformidad={t(
+                  acta.conformidad === 'conforme'
+                    ? 'duranteGuarderia.actaConforme'
+                    : acta.conformidad === 'con_reserva'
+                      ? 'duranteGuarderia.actaConReserva'
+                      : 'duranteGuarderia.actaPendiente',
+                )}
+                onConformar={
+                  acta.conformidad === 'sin_conformidad' ? () => setConformando(true) : undefined
+                }
+                etiquetaConformar={t('duranteGuarderia.actaConformar')}
+              />
+              {/* 🔴 LAS DOS HORAS, SIEMPRE — firma de A. `cerradaEn` es la hora de
+                  la PUERTA; `recibidaEn`, cuándo llegó al servidor. *La diferencia
+                  entre ellas es la cola offline: esconderla haría que un acta
+                  levantada SIN SEÑAL parezca levantada tarde.* */}
+              {acta.cerradaEn !== null ? (
+                <Texto variante="apoyo">
+                  {t('duranteGuarderia.actaCerradaEn', { hora: horaCorta(acta.cerradaEn) })}
+                </Texto>
+              ) : null}
+              {acta.recibidaEn !== null ? (
+                <Texto variante="apoyo">
+                  {t('duranteGuarderia.actaRecibidaEn', { hora: horaCorta(acta.recibidaEn) })}
+                </Texto>
+              ) : null}
+            </View>
+          ) : null}
+
+          {/* ── ③ SU DÍA — las fotos y los clips ── */}
           <Tarjeta>
             <View style={{ gap: spacing[3] }}>
-              <Texto variante="seccion">{t('duranteGuarderia.dondeVa')}</Texto>
-              {/* 🔴 S109-D · EL MAPA PUEDE NO ESTAR, Y SE DICE EN PALABRAS.
-                       El flag lo decide `lib/mapa-nativo`. *Un rectángulo gris sin
-                       explicación y una app caída son la misma falta de respeto:
-                       la pantalla tiene que seguir siendo útil sin el mapa.* */}
-              {!MAPA_NATIVO_DISPONIBLE ? (
-                <Texto variante="apoyo">{t('duranteGuarderia.mapaNoDisponible')}</Texto>
-              ) : punto === null ? (
-                /* `null` no es error: es «todavía no lo vemos». **No se muestra
-                   un punto viejo** — un mapa que miente sobre dónde está un
-                   animal es peor que un mapa ausente. */
-                <Texto variante="apoyo">{t('duranteGuarderia.sinPunto')}</Texto>
+              <Texto variante="seccion">{t('duranteGuarderia.suDia')}</Texto>
+
+              {/* ── QUÉ LE PASÓ (la bitácora) va ANTES de las fotos: *las
+                  conductas son lo que la familia vino a saber; las fotos son
+                  cómo lo ve.* Una anotación sin chips igual se muestra: el
+                  cuidador pudo escribir sólo texto. */}
+              {bitacora.fase === 'error' ? (
+                <Texto variante="apoyo">{t('duranteGuarderia.bitacoraNoCargo')}</Texto>
+              ) : bitacora.fase === 'listo' && bitacora.lista.length > 0 ? (
+                <View style={{ gap: spacing[3] }}>
+                  {bitacora.lista.map((a) => (
+                    <View key={a.eventoId} style={{ gap: spacing[2] }}>
+                      <Texto variante="apoyo">
+                        {a.prestadorId !== null
+                          ? t('duranteGuarderia.bitacoraDelCuidador', { hora: horaCorta(a.anotadaEn) })
+                          : t('duranteGuarderia.bitacoraTuya', { hora: horaCorta(a.anotadaEn) })}
+                      </Texto>
+                      {a.chips.length > 0 && (
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
+                          {a.chips.map((c) => (
+                            <Insignia
+                              key={c.codigo}
+                              capa="cuidado"
+                              etiqueta={
+                                /* La voz la resolvió el motor en los dos idiomas;
+                                   acá sólo se elige. `nombreFamiliaEn` puede ser
+                                   null ⇒ cae al español, que es la voz base de la
+                                   casa — jamás el código. */
+                                obtenerIdiomaActual() === 'en' && c.nombreFamiliaEn !== null
+                                  ? c.nombreFamiliaEn
+                                  : c.nombreFamilia
+                              }
+                              tamaño="sm"
+                            />
+                          ))}
+                        </View>
+                      )}
+                      {a.texto !== null && a.texto.length > 0 && <Texto variante="cuerpo">{a.texto}</Texto>}
+                    </View>
+                  ))}
+                </View>
+              ) : null}
+
+              {media.fase === 'cargando' ? (
+                <EsqueletoGrupo>
+                  <Esqueleto alto={LADO_THUMB} />
+                </EsqueletoGrupo>
+              ) : media.fase === 'error' ? (
+                <Texto variante="apoyo">{t('duranteGuarderia.mediaNoCargo')}</Texto>
+              ) : media.lista.length === 0 ? (
+                <Texto variante="apoyo">{t('duranteGuarderia.sinMediaTodavia')}</Texto>
               ) : (
                 <>
-                  <MapaRecorrido
-                    modo="vivo"
-                    mirada="espectador"
-                    alto={220}
-                    /* 🔴 **UN SOLO PUNTO — la garantía es estructural.** Una
-                       polilínea de un punto no dibuja nada: no hay forma de que
-                       un descuido futuro pinte la traza sin agregar puntos a
-                       mano. *Las paradas de una ruta son las casas de otras
-                       familias*, y el tramo es del VIAJE: lo comparten todos
-                       los animales a bordo. */
-                    puntos={[{ lat: punto.lat, lng: punto.lon, t: punto.vistoEn }]}
-                    centroInicial={{ lat: punto.lat, lng: punto.lon }}
-                    marcadorVivo={<MarcaDeMapa variante="moto" />}
-                  />
-                  {/* Frescura honesta: jamás «en tiempo real». */}
                   <Texto variante="apoyo">
-                    {t('duranteGuarderia.vistoA', {
-                      hora: new Date(punto.vistoEn).toLocaleTimeString(undefined, {
-                        hour: '2-digit', minute: '2-digit',
-                      }),
-                    })}
+                    {media.lista.length === 1
+                      ? t('duranteGuarderia.cuentaUna')
+                      : t('duranteGuarderia.cuenta', { n: media.lista.length })}
                   </Texto>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
+                    {fotos.map((m, i) => (
+                      <Pressable
+                        key={m.mediaId}
+                        onPress={() => setVisor(i)}
+                        accessibilityRole="button"
+                        accessibilityLabel={t('duranteGuarderia.verFoto', {
+                          i: i + 1,
+                          total: fotos.length,
+                        })}
+                      >
+                        <Image
+                          source={{ uri: m.archivoUrl }}
+                          contentFit="cover"
+                          transition={0}
+                          style={{ width: LADO_THUMB, height: LADO_THUMB, borderRadius: radius.md }}
+                        />
+                      </Pressable>
+                    ))}
+                  </View>
+                  {/* LOS CLIPS, con la pieza de la casa (`ClipSesion`, S63): trae
+                      su póster, su duración y su reproductor. *La misma pieza que
+                      el parte de adiestramiento y el durante del prestador — un
+                      clip del mismo negocio no puede verse distinto según quién
+                      lo mire.* Van DESPUÉS de las fotos y no intercalados porque
+                      su tamaño es de tarjeta, no de miniatura: mezclarlos rompería
+                      la grilla sin ganar nada. */}
+                  {clips.map((m) => (
+                    <ClipSesion key={m.mediaId} uri={m.archivoUrl} duracionSegundos={m.duracionS} />
+                  ))}
                 </>
               )}
             </View>
           </Tarjeta>
-        ) : null}
 
-        {/* ── ④ EL ACTA — ✅ EL BOTÓN DE CONFORMAR NACIÓ CON SU LECTOR
-               (29-ago). *La condición estaba escrita acá: «el botón nace CON el
-               lector del contenido, no antes». Se cumplió y por eso existe.*
-
-               🔴 **EL MAPEO DE CONFORMIDAD NO ES UN PASO DIRECTO, y esconde un
-               defecto silencioso:** `sin_conformidad` **existe en los dos
-               vocabularios con sentidos OPUESTOS**.
-
-               | motor | significa | pieza |
-               |---|---|---|
-               | `sin_conformidad` | **todavía no la miró** | `pendiente` (sereno) |
-               | `conforme` | aceptó | `conforme` (success) |
-               | `con_reserva` | aceptó **señalando algo** | `sin_conformidad` (warning) |
-
-               *Pasarlo directo pintaría un WARNING sobre un dueño que
-               simplemente no abrió el acta — y el warning existe para decir
-               que alguien señaló un problema.* ── */}
-        {estadia.fase === 'listo' && acta !== null ? (
-          <View style={{ gap: spacing[2] }}>
-            <Texto variante="seccion">{t('duranteGuarderia.actaTitulo')}</Texto>
-            <ActaDeEntrega
-              modo="leer"
-              direccion={acta.direccion}
-              /* 🔴 EL LECTOR DEVUELVE **HECHOS, NO VOZ** — los ítems se componen
-                 acá, con el idioma de la casa. *El motor no sabe cómo se llama
-                 «carnet a la vista» en esta letra, y no debe saberlo.* */
-              /* 🔴 EL CARNET SÓLO EN LA RECOGIDA — **la segunda puerta al
-                 mismo defecto**, y la encontró B midiendo el consumidor de su
-                 propia cura. *Yo curé el lado del prestador y la pieza, y este
-                 lector quedó abierto:* componía el ítem **sin condicionar por
-                 dirección**, así que en devolución iba a seguir dibujando la
-                 casilla que el founder rechazó (⑤).
-
-                 El criterio legal §4 lo dice: el acta espejo lleva estado con
-                 fotos, incidentes, objetos devueltos y conformidad. **El carnet
-                 se verifica al RECIBIR.**
-
-                 ⚠️ Y el modo de falla era silencioso: no rompe nada, **dibuja de
-                 más**, y se ve como si funcionara. Es la ley de la jornada de
-                 S107 — *el censo casi siempre encuentra una segunda puerta al
-                 mismo defecto*, y curar sólo la reportada es media cura. */
-              items={[
-                ...(acta.direccion === 'recogida'
-                  ? [
-                      {
-                        clave: 'carnet',
-                        etiqueta: t('duranteGuarderia.actaCarnet'),
-                        marcado: acta.carnetVerificado,
-                      },
-                    ]
-                  : []),
-                ...(acta.objetos !== null && acta.objetos.length > 0
-                  ? [{ clave: 'objetos', etiqueta: acta.objetos, marcado: true }]
-                  : []),
-              ]}
-              rotuloItems={t('duranteGuarderia.actaItems')}
-              observaciones={acta.observaciones ?? undefined}
-              rotuloObservaciones={t('duranteGuarderia.actaObservaciones')}
-              conformidad={
-                (acta.conformidad === 'conforme'
-                  ? 'conforme'
-                  : acta.conformidad === 'con_reserva'
-                    ? 'sin_conformidad'
-                    : 'pendiente') satisfies Conformidad
-              }
-              vozConformidad={t(
-                acta.conformidad === 'conforme'
-                  ? 'duranteGuarderia.actaConforme'
-                  : acta.conformidad === 'con_reserva'
-                    ? 'duranteGuarderia.actaConReserva'
-                    : 'duranteGuarderia.actaPendiente',
-              )}
-              onConformar={
-                acta.conformidad === 'sin_conformidad' ? () => setConformando(true) : undefined
-              }
-              etiquetaConformar={t('duranteGuarderia.actaConformar')}
-            />
-            {/* 🔴 LAS DOS HORAS, SIEMPRE — firma de A. `cerradaEn` es la hora de
-                la PUERTA; `recibidaEn`, cuándo llegó al servidor. *La diferencia
-                entre ellas es la cola offline: esconderla haría que un acta
-                levantada SIN SEÑAL parezca levantada tarde.* */}
-            {acta.cerradaEn !== null ? (
-              <Texto variante="apoyo">
-                {t('duranteGuarderia.actaCerradaEn', { hora: horaCorta(acta.cerradaEn) })}
-              </Texto>
-            ) : null}
-            {acta.recibidaEn !== null ? (
-              <Texto variante="apoyo">
-                {t('duranteGuarderia.actaRecibidaEn', { hora: horaCorta(acta.recibidaEn) })}
-              </Texto>
-            ) : null}
-          </View>
-        ) : null}
-
-        {/* ── ③ SU DÍA — las fotos y los clips ── */}
-        <Tarjeta>
-          <View style={{ gap: spacing[3] }}>
-            <Texto variante="seccion">{t('duranteGuarderia.suDia')}</Texto>
-
-            {/* ── QUÉ LE PASÓ (la bitácora) va ANTES de las fotos: *las
-                conductas son lo que la familia vino a saber; las fotos son
-                cómo lo ve.* Una anotación sin chips igual se muestra: el
-                cuidador pudo escribir sólo texto. */}
-            {bitacora.fase === 'error' ? (
-              <Texto variante="apoyo">{t('duranteGuarderia.bitacoraNoCargo')}</Texto>
-            ) : bitacora.fase === 'listo' && bitacora.lista.length > 0 ? (
-              <View style={{ gap: spacing[3] }}>
-                {bitacora.lista.map((a) => (
-                  <View key={a.eventoId} style={{ gap: spacing[2] }}>
-                    <Texto variante="apoyo">
-                      {a.prestadorId !== null
-                        ? t('duranteGuarderia.bitacoraDelCuidador', { hora: horaCorta(a.anotadaEn) })
-                        : t('duranteGuarderia.bitacoraTuya', { hora: horaCorta(a.anotadaEn) })}
-                    </Texto>
-                    {a.chips.length > 0 && (
-                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
-                        {a.chips.map((c) => (
-                          <Insignia
-                            key={c.codigo}
-                            capa="cuidado"
-                            etiqueta={
-                              /* La voz la resolvió el motor en los dos idiomas;
-                                 acá sólo se elige. `nombreFamiliaEn` puede ser
-                                 null ⇒ cae al español, que es la voz base de la
-                                 casa — jamás el código. */
-                              obtenerIdiomaActual() === 'en' && c.nombreFamiliaEn !== null
-                                ? c.nombreFamiliaEn
-                                : c.nombreFamilia
-                            }
-                            tamaño="sm"
-                          />
-                        ))}
-                      </View>
-                    )}
-                    {a.texto !== null && a.texto.length > 0 && <Texto variante="cuerpo">{a.texto}</Texto>}
-                  </View>
-                ))}
-              </View>
-            ) : null}
-
-            {media.fase === 'cargando' ? (
-              <EsqueletoGrupo>
-                <Esqueleto alto={LADO_THUMB} />
-              </EsqueletoGrupo>
-            ) : media.fase === 'error' ? (
-              <Texto variante="apoyo">{t('duranteGuarderia.mediaNoCargo')}</Texto>
-            ) : media.lista.length === 0 ? (
-              <Texto variante="apoyo">{t('duranteGuarderia.sinMediaTodavia')}</Texto>
-            ) : (
-              <>
-                <Texto variante="apoyo">
-                  {media.lista.length === 1
-                    ? t('duranteGuarderia.cuentaUna')
-                    : t('duranteGuarderia.cuenta', { n: media.lista.length })}
-                </Texto>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
-                  {fotos.map((m, i) => (
-                    <Pressable
-                      key={m.mediaId}
-                      onPress={() => setVisor(i)}
-                      accessibilityRole="button"
-                      accessibilityLabel={t('duranteGuarderia.verFoto', {
-                        i: i + 1,
-                        total: fotos.length,
-                      })}
-                    >
-                      <Image
-                        source={{ uri: m.archivoUrl }}
-                        contentFit="cover"
-                        transition={0}
-                        style={{ width: LADO_THUMB, height: LADO_THUMB, borderRadius: radius.md }}
-                      />
-                    </Pressable>
-                  ))}
-                </View>
-                {/* LOS CLIPS, con la pieza de la casa (`ClipSesion`, S63): trae
-                    su póster, su duración y su reproductor. *La misma pieza que
-                    el parte de adiestramiento y el durante del prestador — un
-                    clip del mismo negocio no puede verse distinto según quién
-                    lo mire.* Van DESPUÉS de las fotos y no intercalados porque
-                    su tamaño es de tarjeta, no de miniatura: mezclarlos rompería
-                    la grilla sin ganar nada. */}
-                {clips.map((m) => (
-                  <ClipSesion key={m.mediaId} uri={m.archivoUrl} duracionSegundos={m.duracionS} />
-                ))}
-              </>
-            )}
-          </View>
-        </Tarjeta>
-
-        {/* ══ S114-C · LA PUERTA (§1) — la última fila, después de todo lo
-            que cuenta cómo fue la estadía (el acta, las fotos, los clips y
-            la bitácora). `entregadaEn` es su cierre: mientras la mascota
-            está en la guardería no hay puerta — no se reclama algo que está
-            ocurriendo. */}
-        {puerta.hay && (
-          <View style={{ marginTop: spacing[2] }}>
-                {/* `enMemorial` es el PISO de la pieza y no su decisión: el
-                    veredicto ya devolvió `hay: false` en memorial, así que
-                    acá nunca llega encendido. **Se pasa igual, con la misma
-                    definición única**, porque un piso que depende de que el
-                    llamador se acuerde es el guard que esta tanda vino a
-                    curar. */}
-            <LineaAlgoSalioDistinto
-              estado={puerta.estado}
-              sujeto="mascota"
-              enMemorial={esMemorial(estadoVida)}
-              onPress={abrirLaPuerta}
-            />
-          </View>
-        )}
+          {/* ══ S114-C · LA PUERTA (§1) — la última fila, después de todo lo
+              que cuenta cómo fue la estadía (el acta, las fotos, los clips y
+              la bitácora). `entregadaEn` es su cierre: mientras la mascota
+              está en la guardería no hay puerta — no se reclama algo que está
+              ocurriendo. */}
+          {puerta.hay && (
+            <View style={{ marginTop: spacing[2] }}>
+                  {/* `enMemorial` es el PISO de la pieza y no su decisión: el
+                      veredicto ya devolvió `hay: false` en memorial, así que
+                      acá nunca llega encendido. **Se pasa igual, con la misma
+                      definición única**, porque un piso que depende de que el
+                      llamador se acuerde es el guard que esta tanda vino a
+                      curar. */}
+              <LineaAlgoSalioDistinto
+                estado={puerta.estado}
+                sujeto="mascota"
+                enMemorial={esMemorial(estadoVida)}
+                onPress={abrirLaPuerta}
+              />
+            </View>
+          )}
+        </View>
       </HojaContenido>
 
       {/* LA HOJA DE LA CONFORMIDAD — dos caminos parejos, sin default oscuro.

@@ -110,149 +110,156 @@ export default function MisSolicitudes() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: {
-          padding: spacing[5],
-          gap: spacing[4],
-          } }}
-      >
-        {estado.fase === 'cargando' ? (
-          <EsqueletoGrupo>
-            <Esqueleto alto={88} />
-            <Esqueleto alto={88} />
-          </EsqueletoGrupo>
-        ) : estado.fase === 'error' ? (
-          <EstadoVacio
-            titulo={t('misSolicitudes.errorTitulo')}
-            descripcion={t('misSolicitudes.errorDetalle')}
-            accion={
-              <Boton
-                variante="secundario"
-                etiqueta={t('misSolicitudes.reintentar')}
-                onPress={() => setIntento((n) => n + 1)}
-              />
-            }
-          />
-        ) : estado.lista.length === 0 ? (
-          /* Vacío con camino (Ley 17.5): quien todavía no postuló tiene a dónde
-             ir, y es la misma vidriera de la que vino. */
-          <EstadoVacio
-            registro="seccion"
-            titulo={t('misSolicitudes.vacioTitulo')}
-            descripcion={t('misSolicitudes.vacioDetalle')}
-            accion={
-              <Boton
-                variante="primario"
-                etiqueta={t('misSolicitudes.verAdoptables')}
-                onPress={() => router.replace('/adoptar')}
-              />
-            }
-          />
-        ) : (
-          estado.lista.map((s) => {
-            const foto = s.mascotaFotoUrl === null ? null : (estado.caras.get(s.mascotaFotoUrl) ?? null);
-            const cara = caraDeMascota({ especie: s.mascotaEspecie, razaSlug: null, fotoUri: foto });
-            /* El último mensaje NO automático: es lo último que una PERSONA
-               dijo. *La automática arriba haría parecer que el refugio contestó
-               cuando el reloj de los cinco días la ignora a propósito.* */
-            const ultimo = [...s.mensajes].reverse().find((m) => !m.automatica) ?? null;
-            return (
-              <Tarjeta
-                key={s.solicitudId}
-                relleno="normal"
-                elevacion="reposo"
-                interactiva
-                accessibilityRole="button"
-                /* La etiqueta accesible la exige el TIPO cuando la tarjeta es
-                   interactiva (patrón Boton): quien no ve la pantalla tiene que
-                   saber a dónde lleva el toque, no sólo que hay uno. */
-                etiqueta={t('misSolicitudes.abrirHilo', { nombre: s.mascotaNombre })}
-                onPress={() =>
-                  router.push({
-                    pathname: '/adoptar/solicitud/[solicitudId]',
-                    params: { solicitudId: s.solicitudId },
-                  })
-                }
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-                  <AvatarMascota nombre={s.mascotaNombre} fotoUrl={cara ?? undefined} tamano="md" />
-                  <View style={{ flex: 1, gap: spacing[1] }}>
-                    <Texto variante="cuerpo">{s.mascotaNombre}</Texto>
-                    {ultimo !== null ? (
-                      <Texto variante="apoyo" color="tertiary" numberOfLines={1}>
-                        {ultimo.cuerpo}
-                      </Texto>
-                    ) : null}
-                  </View>
-                </View>
-                {/* LA TIRA, debajo y en ancho completo: N24 — el control no
-                    cambia el tamaño de lo que lo contiene, y una escalera
-                    metida a la derecha del nombre le comería el renglón. */}
-                {/* ⏪ **LA ESCALERA CAMBIÓ DE CONTRATO** (B1): `estado` →
-                    `etapa` + `final`, porque son **dos hechos a la vez** — una
-                    declinada tiene la fila congelada donde llegó **y** su
-                    etiqueta. La derivación vive en `leerEscalera`
-                    (`packages/domain`) y no acá: *si esta lista y el hilo
-                    mostraran etapas distintas para la misma solicitud, una de
-                    las dos estaría mintiendo y no habría forma de saber cuál.*
 
-                    🔴 **Con memorial no se dibuja nada**, ni siquiera en la
-                    lista: es la misma decisión, y acá pesa igual. */}
-                {(() => {
-                  const esc = leerEscalera(s.estado, { huboMensajes: s.mensajes.length > 0 });
-                  if (esc.etapa === null) return null;
-                  return (
-                    <View style={{ marginTop: spacing[3] }}>
-                      <EscaleraSolicitud
-                        etapa={esc.etapa}
-                        final={
-                          esc.final === null
-                            ? undefined
-                            : {
-                                tipo: esc.final,
-                                etiqueta:
-                                  esc.final === 'declinada'
-                                    ? t('hiloAdopcion.estado_declinada')
-                                    : esc.final === 'desistida'
-                                      ? t('hiloAdopcion.estado_desistida')
-                                      : t('hiloAdopcion.estado_otra_familia', {
-                                          nombre: s.mascotaNombre,
-                                        }),
-                              }
-                        }
-                        voces={{
-                          enviada: t('hiloAdopcion.etapa_enviada'),
-                          en_conversacion: t('hiloAdopcion.etapa_en_conversacion'),
-                          aceptada: t('hiloAdopcion.etapa_aceptada'),
-                          acta_firmada: t('hiloAdopcion.etapa_acta_firmada'),
-                          una_vida_nueva: t('hiloAdopcion.etapa_una_vida_nueva'),
-                        }}
-                        vozEstado={t('hiloAdopcion.estasEn', {
-                          etapa: t(
-                            `hiloAdopcion.etapa_${esc.etapa}` as 'hiloAdopcion.etapa_enviada',
-                          ),
-                        })}
-                        /* 🔴 **EN LA LISTA VA SIEMPRE COLAPSADA Y NO SE ABRE.**
-                           Una tarjeta de lista es un resumen: desplegar cinco
-                           pasos ahí adentro le roba el renglón a la vista previa
-                           del último mensaje, que es lo que hace escaneable la
-                           lista. *El detalle vive en el hilo, a un toque.* */
-                        abierta={false}
-                        onAlternar={() =>
-                          router.push({
-                            pathname: '/adoptar/solicitud/[solicitudId]',
-                            params: { solicitudId: s.solicitudId },
-                          })
-                        }
-                        etiquetaAlternar={t('misSolicitudes.abrirHilo', { nombre: s.mascotaNombre })}
-                        acento="control"
-                      />
+      >
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[5], gap: spacing[4] }}>
+          {estado.fase === 'cargando' ? (
+            <EsqueletoGrupo>
+              <Esqueleto alto={88} />
+              <Esqueleto alto={88} />
+            </EsqueletoGrupo>
+          ) : estado.fase === 'error' ? (
+            <EstadoVacio
+              titulo={t('misSolicitudes.errorTitulo')}
+              descripcion={t('misSolicitudes.errorDetalle')}
+              accion={
+                <Boton
+                  variante="secundario"
+                  etiqueta={t('misSolicitudes.reintentar')}
+                  onPress={() => setIntento((n) => n + 1)}
+                />
+              }
+            />
+          ) : estado.lista.length === 0 ? (
+            /* Vacío con camino (Ley 17.5): quien todavía no postuló tiene a dónde
+               ir, y es la misma vidriera de la que vino. */
+            <EstadoVacio
+              registro="seccion"
+              titulo={t('misSolicitudes.vacioTitulo')}
+              descripcion={t('misSolicitudes.vacioDetalle')}
+              accion={
+                <Boton
+                  variante="primario"
+                  etiqueta={t('misSolicitudes.verAdoptables')}
+                  onPress={() => router.replace('/adoptar')}
+                />
+              }
+            />
+          ) : (
+            estado.lista.map((s) => {
+              const foto = s.mascotaFotoUrl === null ? null : (estado.caras.get(s.mascotaFotoUrl) ?? null);
+              const cara = caraDeMascota({ especie: s.mascotaEspecie, razaSlug: null, fotoUri: foto });
+              /* El último mensaje NO automático: es lo último que una PERSONA
+                 dijo. *La automática arriba haría parecer que el refugio contestó
+                 cuando el reloj de los cinco días la ignora a propósito.* */
+              const ultimo = [...s.mensajes].reverse().find((m) => !m.automatica) ?? null;
+              return (
+                <Tarjeta
+                  key={s.solicitudId}
+                  relleno="normal"
+                  elevacion="reposo"
+                  interactiva
+                  accessibilityRole="button"
+                  /* La etiqueta accesible la exige el TIPO cuando la tarjeta es
+                     interactiva (patrón Boton): quien no ve la pantalla tiene que
+                     saber a dónde lleva el toque, no sólo que hay uno. */
+                  etiqueta={t('misSolicitudes.abrirHilo', { nombre: s.mascotaNombre })}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/adoptar/solicitud/[solicitudId]',
+                      params: { solicitudId: s.solicitudId },
+                    })
+                  }
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+                    <AvatarMascota nombre={s.mascotaNombre} fotoUrl={cara ?? undefined} tamano="md" />
+                    <View style={{ flex: 1, gap: spacing[1] }}>
+                      <Texto variante="cuerpo">{s.mascotaNombre}</Texto>
+                      {ultimo !== null ? (
+                        <Texto variante="apoyo" color="tertiary" numberOfLines={1}>
+                          {ultimo.cuerpo}
+                        </Texto>
+                      ) : null}
                     </View>
-                  );
-                })()}
-              </Tarjeta>
-            );
-          })
-        )}
+                  </View>
+                  {/* LA TIRA, debajo y en ancho completo: N24 — el control no
+                      cambia el tamaño de lo que lo contiene, y una escalera
+                      metida a la derecha del nombre le comería el renglón. */}
+                  {/* ⏪ **LA ESCALERA CAMBIÓ DE CONTRATO** (B1): `estado` →
+                      `etapa` + `final`, porque son **dos hechos a la vez** — una
+                      declinada tiene la fila congelada donde llegó **y** su
+                      etiqueta. La derivación vive en `leerEscalera`
+                      (`packages/domain`) y no acá: *si esta lista y el hilo
+                      mostraran etapas distintas para la misma solicitud, una de
+                      las dos estaría mintiendo y no habría forma de saber cuál.*
+
+                      🔴 **Con memorial no se dibuja nada**, ni siquiera en la
+                      lista: es la misma decisión, y acá pesa igual. */}
+                  {(() => {
+                    const esc = leerEscalera(s.estado, { huboMensajes: s.mensajes.length > 0 });
+                    if (esc.etapa === null) return null;
+                    return (
+                      <View style={{ marginTop: spacing[3] }}>
+                        <EscaleraSolicitud
+                          etapa={esc.etapa}
+                          final={
+                            esc.final === null
+                              ? undefined
+                              : {
+                                  tipo: esc.final,
+                                  etiqueta:
+                                    esc.final === 'declinada'
+                                      ? t('hiloAdopcion.estado_declinada')
+                                      : esc.final === 'desistida'
+                                        ? t('hiloAdopcion.estado_desistida')
+                                        : t('hiloAdopcion.estado_otra_familia', {
+                                            nombre: s.mascotaNombre,
+                                          }),
+                                }
+                          }
+                          voces={{
+                            enviada: t('hiloAdopcion.etapa_enviada'),
+                            en_conversacion: t('hiloAdopcion.etapa_en_conversacion'),
+                            aceptada: t('hiloAdopcion.etapa_aceptada'),
+                            acta_firmada: t('hiloAdopcion.etapa_acta_firmada'),
+                            una_vida_nueva: t('hiloAdopcion.etapa_una_vida_nueva'),
+                          }}
+                          vozEstado={t('hiloAdopcion.estasEn', {
+                            etapa: t(
+                              `hiloAdopcion.etapa_${esc.etapa}` as 'hiloAdopcion.etapa_enviada',
+                            ),
+                          })}
+                          /* 🔴 **EN LA LISTA VA SIEMPRE COLAPSADA Y NO SE ABRE.**
+                             Una tarjeta de lista es un resumen: desplegar cinco
+                             pasos ahí adentro le roba el renglón a la vista previa
+                             del último mensaje, que es lo que hace escaneable la
+                             lista. *El detalle vive en el hilo, a un toque.* */
+                          abierta={false}
+                          onAlternar={() =>
+                            router.push({
+                              pathname: '/adoptar/solicitud/[solicitudId]',
+                              params: { solicitudId: s.solicitudId },
+                            })
+                          }
+                          etiquetaAlternar={t('misSolicitudes.abrirHilo', { nombre: s.mascotaNombre })}
+                          acento="control"
+                        />
+                      </View>
+                    );
+                  })()}
+                </Tarjeta>
+              );
+            })
+          )}
+        </View>
       </HojaContenido>
     </SafeAreaView>
   );

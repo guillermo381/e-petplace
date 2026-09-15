@@ -365,7 +365,7 @@ export default function DespensaCarrito() {
           apagado: está de más.* */}
       <HojaContenido
         arranque={cabecera.arranque}
-        scroll={{ contentContainerStyle: { paddingTop: spacing[4], gap: spacing[5] } }}
+
         fondo={
           <View onLayout={cabecera.alMedir}>
             <Cabecera
@@ -402,205 +402,215 @@ export default function DespensaCarrito() {
           )
         }
       >
-        {items.length === 0 ? (
-        <EstadoVacio
-          titulo={t('despensa.carritoVacioTitulo')}
-          descripcion={t('despensa.carritoVacioDetalle')}
-          accion={
-            <Boton
-              variante="secundario"
-              etiqueta={t('despensa.carritoVacioIr')}
-              onPress={() => router.back()}
-            />
-          }
-        />
-        ) : (
-        <>
-            {items.map((item, i) => (
-              <View key={item.oferta_id} style={{ gap: spacing[3] }}>
-                {i > 0 ? <Separador /> : null}
-                <Celda
-                  inicio={<LienzoProducto lado={56} fotoUrl={item.foto_url} />}
-                  titulo={item.nombre}
-                  subtitulo={[item.marca, item.presentacion]
-                    .filter((x) => x !== null && x !== '')
-                    .join(' · ')}
-                  metadataMono={formatearPrecio(item.precio)}
-                />
-
-                {/* 🔴 A-01 · LO QUE LE PASÓ A ESTE ÍTEM MIENTRAS ESTABA GUARDADO.
-                    Va PEGADO al producto y no en un aviso general de la
-                    pantalla: *«uno de tus productos ya no está» obliga a la
-                    familia a adivinar cuál*, que es la misma clase de defecto
-                    que la voz `sin_stock` del motor —«uno de los productos»—
-                    tiene hoy en la caja. Acá se puede nombrar, así que se nombra.
-                    El motivo se dice con su palabra: «se agotó» y «ya no está a
-                    la venta» son dos hechos distintos y la familia hace cosas
-                    distintas con cada uno. */}
-                {problemaDe(item.oferta_id) !== null ? (
-                  <View style={{ paddingHorizontal: spacing[5] }}>
-                    <Texto variante="apoyo" color="warning">
-                      {problemaDe(item.oferta_id) === 'agotado'
-                        ? t('despensa.itemSeAgoto')
-                        : t('despensa.itemYaNoEsta')}
-                    </Texto>
-                  </View>
-                ) : precioNuevoDe(item) !== null ? (
-                  <View style={{ paddingHorizontal: spacing[5] }}>
-                    <Texto variante="apoyo">
-                      {t('despensa.itemPrecioCambio', {
-                        precio: formatearPrecio((precioNuevoDe(item) ?? 0)),
-                      })}
-                    </Texto>
-                  </View>
-                ) : null}
-
-                <View
-                  style={{
-                    paddingHorizontal: spacing[5],
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  {/* 🔴 G-08 · EL MENOS EN 1 ES LA PAPELERA, y el botón «Quitar»
-                      MURIÓ con él. Eran DOS controles para la misma intención:
-                      stepper (144 dp) + un botón aparte (89.6 dp), medidos por B.
-                      El estándar es de eBay `[SPEC]` y trae su matiz: *la
-                      papelera solo se usa cuando el stepper está pegado a un
-                      tile que va a desaparecer* — o sea ACÁ, en el carrito. En
-                      la grilla no se pasa `onBorrar`: allá bajar de 1 devuelve
-                      la tarjeta a su «+», el producto sigue existiendo, y una
-                      papelera prometería un borrado que no ocurre.
-                      Y el menos en 1 BORRA, no se deshabilita: *«I tried minus
-                      because I thought you could get it down to zero»*. Sin
-                      diálogo de confirmación — acción inmediata. */}
-                  <StepperCantidad
-                    valor={item.cantidad}
-                    min={1}
-                    max={99}
-                    /* 🔴 PUNTO 20 (S100d) · SUBIR ACÁ TAMBIÉN CONSULTA EL TOPE.
-                       El founder: *«pedí 3 y hay 1»*. Medido en S100d: de las
-                       TRES puertas que suben cantidad, solo la ficha topeaba —
-                       la vitrina y ésta escribían el carrito sin preguntar
-                       nada. ⇒ la mala noticia llegaba recién en la caja.
-                       La regla vive en `tope-de-compra.ts`, una sola vez para
-                       las tres (no puede vivir en `StepperCantidad`: el dato es
-                       una consulta al motor y la pieza es presentacional).
-                       ⚠️ Bajar no consulta: soltar unidades siempre se puede, y
-                       preguntarle al motor por permiso para llevar MENOS es un
-                       viaje que no decide nada. */
-                    /* 🔴 S100d·bis · EL NÚMERO SE PUEDE TIPEAR.
-                       Medido antes de encenderlo: `editable` no estaba
-                       encendido en NINGUNA superficie ⇒ la pieza de B era
-                       *motor sin puerta*. Acá está la puerta del carrito.
-
-                       ⚠️ Y el aviso NO hizo falta cablearlo aparte: el campo
-                       emite por el MISMO `onCambio` (`StepperCantidad:436`),
-                       así que tipear 50 con 12 en stock entra por
-                       `ajustarCantidadConTope` igual que tocar el «+» — el
-                       motor acota y la voz sale. *Un segundo camino para el
-                       mismo hecho habría sido un segundo lugar donde olvidar
-                       la voz.* */
-                    editable
-                    onCambio={(n) => void ajustarCantidadConTope(item, n)}
-                    onBorrar={() => quitarDelCarrito(item.oferta_id)}
-                    etiqueta={t('despensa.cantidadDe', { nombre: item.nombre })}
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ paddingTop: spacing[4], gap: spacing[5] }}>
+          {items.length === 0 ? (
+          <EstadoVacio
+            titulo={t('despensa.carritoVacioTitulo')}
+            descripcion={t('despensa.carritoVacioDetalle')}
+            accion={
+              <Boton
+                variante="secundario"
+                etiqueta={t('despensa.carritoVacioIr')}
+                onPress={() => router.back()}
+              />
+            }
+          />
+          ) : (
+          <>
+              {items.map((item, i) => (
+                <View key={item.oferta_id} style={{ gap: spacing[3] }}>
+                  {i > 0 ? <Separador /> : null}
+                  <Celda
+                    inicio={<LienzoProducto lado={56} fotoUrl={item.foto_url} />}
+                    titulo={item.nombre}
+                    subtitulo={[item.marca, item.presentacion]
+                      .filter((x) => x !== null && x !== '')
+                      .join(' · ')}
+                    metadataMono={formatearPrecio(item.precio)}
                   />
-                </View>
 
-                {/* EL DESTINO (§6.3) — la firma. null es legal y se ata después.
-                    Con las mascotas en error NO se finge una familia vacía:
-                    se dice, y el destino se puede atar después (§4).
-                    G-10: por ÍTEM solo cuando la compra va repartida; si no,
-                    la pregunta vive una sola vez debajo de la lista. */}
-                {repartir ? (
-                  <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
-                    {mascotas === 'error' ? (
+                  {/* 🔴 A-01 · LO QUE LE PASÓ A ESTE ÍTEM MIENTRAS ESTABA GUARDADO.
+                      Va PEGADO al producto y no en un aviso general de la
+                      pantalla: *«uno de tus productos ya no está» obliga a la
+                      familia a adivinar cuál*, que es la misma clase de defecto
+                      que la voz `sin_stock` del motor —«uno de los productos»—
+                      tiene hoy en la caja. Acá se puede nombrar, así que se nombra.
+                      El motivo se dice con su palabra: «se agotó» y «ya no está a
+                      la venta» son dos hechos distintos y la familia hace cosas
+                      distintas con cada uno. */}
+                  {problemaDe(item.oferta_id) !== null ? (
+                    <View style={{ paddingHorizontal: spacing[5] }}>
                       <Texto variante="apoyo" color="warning">
-                        {t('despensa.errorMascotasDestino')}
+                        {problemaDe(item.oferta_id) === 'agotado'
+                          ? t('despensa.itemSeAgoto')
+                          : t('despensa.itemYaNoEsta')}
                       </Texto>
-                    ) : null}
-                    <SelectorDestinoItem
-                      mascotas={destinosPara(item)}
-                      destino={item.destino}
-                      onCambiar={(d) => fijarDestino(item.oferta_id, d)}
-                      rotulo={t('despensa.paraQuien')}
-                      etiquetaDonacion={t('despensa.donarEste')}
-                      detalleDonacion={t('despensa.donacionDetalle')}
-                      onExplicarDonacion={() => setHojaDonacion(true)}
-                      /* S100d · punto 15: al ELEGIR la donación, el
-                         agradecimiento se abre solo. La pieza avisa; la Hoja
-                         la monta la pantalla — la misma ley que ya rige para
-                         la «i», y por eso esto es una prop y no un modal
-                         adentro del selector. */
-                      onDonacionElegida={() => setHojaDonacion(true)}
+                    </View>
+                  ) : precioNuevoDe(item) !== null ? (
+                    <View style={{ paddingHorizontal: spacing[5] }}>
+                      <Texto variante="apoyo">
+                        {t('despensa.itemPrecioCambio', {
+                          precio: formatearPrecio((precioNuevoDe(item) ?? 0)),
+                        })}
+                      </Texto>
+                    </View>
+                  ) : null}
+
+                  <View
+                    style={{
+                      paddingHorizontal: spacing[5],
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    {/* 🔴 G-08 · EL MENOS EN 1 ES LA PAPELERA, y el botón «Quitar»
+                        MURIÓ con él. Eran DOS controles para la misma intención:
+                        stepper (144 dp) + un botón aparte (89.6 dp), medidos por B.
+                        El estándar es de eBay `[SPEC]` y trae su matiz: *la
+                        papelera solo se usa cuando el stepper está pegado a un
+                        tile que va a desaparecer* — o sea ACÁ, en el carrito. En
+                        la grilla no se pasa `onBorrar`: allá bajar de 1 devuelve
+                        la tarjeta a su «+», el producto sigue existiendo, y una
+                        papelera prometería un borrado que no ocurre.
+                        Y el menos en 1 BORRA, no se deshabilita: *«I tried minus
+                        because I thought you could get it down to zero»*. Sin
+                        diálogo de confirmación — acción inmediata. */}
+                    <StepperCantidad
+                      valor={item.cantidad}
+                      min={1}
+                      max={99}
+                      /* 🔴 PUNTO 20 (S100d) · SUBIR ACÁ TAMBIÉN CONSULTA EL TOPE.
+                         El founder: *«pedí 3 y hay 1»*. Medido en S100d: de las
+                         TRES puertas que suben cantidad, solo la ficha topeaba —
+                         la vitrina y ésta escribían el carrito sin preguntar
+                         nada. ⇒ la mala noticia llegaba recién en la caja.
+                         La regla vive en `tope-de-compra.ts`, una sola vez para
+                         las tres (no puede vivir en `StepperCantidad`: el dato es
+                         una consulta al motor y la pieza es presentacional).
+                         ⚠️ Bajar no consulta: soltar unidades siempre se puede, y
+                         preguntarle al motor por permiso para llevar MENOS es un
+                         viaje que no decide nada. */
+                      /* 🔴 S100d·bis · EL NÚMERO SE PUEDE TIPEAR.
+                         Medido antes de encenderlo: `editable` no estaba
+                         encendido en NINGUNA superficie ⇒ la pieza de B era
+                         *motor sin puerta*. Acá está la puerta del carrito.
+
+                         ⚠️ Y el aviso NO hizo falta cablearlo aparte: el campo
+                         emite por el MISMO `onCambio` (`StepperCantidad:436`),
+                         así que tipear 50 con 12 en stock entra por
+                         `ajustarCantidadConTope` igual que tocar el «+» — el
+                         motor acota y la voz sale. *Un segundo camino para el
+                         mismo hecho habría sido un segundo lugar donde olvidar
+                         la voz.* */
+                      editable
+                      onCambio={(n) => void ajustarCantidadConTope(item, n)}
+                      onBorrar={() => quitarDelCarrito(item.oferta_id)}
+                      etiqueta={t('despensa.cantidadDe', { nombre: item.nombre })}
                     />
                   </View>
-                ) : null}
 
-                {/* §5.2 — especie no registrada: se ofrece, la compra sigue. */}
-                {especieNoRegistrada(item) && item.destino === null ? (
-                  <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
-                    <Texto variante="apoyo">
-                      {t('despensa.especieNoRegistrada')}
+                  {/* EL DESTINO (§6.3) — la firma. null es legal y se ata después.
+                      Con las mascotas en error NO se finge una familia vacía:
+                      se dice, y el destino se puede atar después (§4).
+                      G-10: por ÍTEM solo cuando la compra va repartida; si no,
+                      la pregunta vive una sola vez debajo de la lista. */}
+                  {repartir ? (
+                    <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
+                      {mascotas === 'error' ? (
+                        <Texto variante="apoyo" color="warning">
+                          {t('despensa.errorMascotasDestino')}
+                        </Texto>
+                      ) : null}
+                      <SelectorDestinoItem
+                        mascotas={destinosPara(item)}
+                        destino={item.destino}
+                        onCambiar={(d) => fijarDestino(item.oferta_id, d)}
+                        rotulo={t('despensa.paraQuien')}
+                        etiquetaDonacion={t('despensa.donarEste')}
+                        detalleDonacion={t('despensa.donacionDetalle')}
+                        onExplicarDonacion={() => setHojaDonacion(true)}
+                        /* S100d · punto 15: al ELEGIR la donación, el
+                           agradecimiento se abre solo. La pieza avisa; la Hoja
+                           la monta la pantalla — la misma ley que ya rige para
+                           la «i», y por eso esto es una prop y no un modal
+                           adentro del selector. */
+                        onDonacionElegida={() => setHojaDonacion(true)}
+                      />
+                    </View>
+                  ) : null}
+
+                  {/* §5.2 — especie no registrada: se ofrece, la compra sigue. */}
+                  {especieNoRegistrada(item) && item.destino === null ? (
+                    <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
+                      <Texto variante="apoyo">
+                        {t('despensa.especieNoRegistrada')}
+                      </Texto>
+                      <Boton
+                        variante="secundario"
+                        etiqueta={t('despensa.registrarla')}
+                        onPress={() => router.push('/hogar/agregar')}
+                      />
+                    </View>
+                  ) : null}
+                </View>
+              ))}
+
+              {/* 🔴 G-10 · LA PREGUNTA ÚNICA. Vive acá abajo —una sola vez para
+                  toda la compra— y NO nace contestada: `destino` sale del primer
+                  ítem, que arranca en `null`. Al elegir, la respuesta se aplica a
+                  todos los ítems; §4 se cumple porque quien decide es la familia,
+                  una vez, en vez de N veces la misma cosa. */}
+              {!repartir && destinoComun !== null ? (
+                <View style={{ paddingHorizontal: spacing[5], gap: spacing[3] }}>
+                  {mascotas === 'error' ? (
+                    <Texto variante="apoyo" color="warning">
+                      {t('despensa.errorMascotasDestino')}
                     </Texto>
-                    <Boton
-                      variante="secundario"
-                      etiqueta={t('despensa.registrarla')}
-                      onPress={() => router.push('/hogar/agregar')}
-                    />
-                  </View>
-                ) : null}
-              </View>
-            ))}
-
-            {/* 🔴 G-10 · LA PREGUNTA ÚNICA. Vive acá abajo —una sola vez para
-                toda la compra— y NO nace contestada: `destino` sale del primer
-                ítem, que arranca en `null`. Al elegir, la respuesta se aplica a
-                todos los ítems; §4 se cumple porque quien decide es la familia,
-                una vez, en vez de N veces la misma cosa. */}
-            {!repartir && destinoComun !== null ? (
-              <View style={{ paddingHorizontal: spacing[5], gap: spacing[3] }}>
-                {mascotas === 'error' ? (
-                  <Texto variante="apoyo" color="warning">
-                    {t('despensa.errorMascotasDestino')}
-                  </Texto>
-                ) : null}
-                <SelectorDestinoItem
-                  mascotas={destinoComun}
-                  destino={items[0].destino}
-                  onCambiar={(d) => {
-                    for (const it of items) fijarDestino(it.oferta_id, d);
-                  }}
-                  rotulo={t('despensa.paraQuien')}
-                  etiquetaDonacion={t('despensa.donarEste')}
-                  detalleDonacion={t('despensa.donacionDetalle')}
-                  onExplicarDonacion={() => setHojaDonacion(true)}
-                  onDonacionElegida={() => setHojaDonacion(true)}
-                />
-                {/* El reparto SE OFRECE solo cuando hay algo que repartir.
-                    Con un producto la opción no existe: ofrecer «repartir» un
-                    solo ítem es un control que no puede hacer nada.
-                    EJECUTA (no navega) ⇒ label sin chevron: `ghost`. Ley 19.7
-                    — el contorno transparente murió como acción de fila; el
-                    único sólido de esta pantalla es «Continuar». */}
-                {items.length > 1 ? (
-                  <Boton
-                    variante="ghost"
-                    etiqueta={t('despensa.repartirEntreMascotas')}
-                    onPress={() => setRepartirPedido(true)}
+                  ) : null}
+                  <SelectorDestinoItem
+                    mascotas={destinoComun}
+                    destino={items[0].destino}
+                    onCambiar={(d) => {
+                      for (const it of items) fijarDestino(it.oferta_id, d);
+                    }}
+                    rotulo={t('despensa.paraQuien')}
+                    etiquetaDonacion={t('despensa.donarEste')}
+                    detalleDonacion={t('despensa.donacionDetalle')}
+                    onExplicarDonacion={() => setHojaDonacion(true)}
+                    onDonacionElegida={() => setHojaDonacion(true)}
                   />
-                ) : null}
-              </View>
-            ) : null}
+                  {/* El reparto SE OFRECE solo cuando hay algo que repartir.
+                      Con un producto la opción no existe: ofrecer «repartir» un
+                      solo ítem es un control que no puede hacer nada.
+                      EJECUTA (no navega) ⇒ label sin chevron: `ghost`. Ley 19.7
+                      — el contorno transparente murió como acción de fila; el
+                      único sólido de esta pantalla es «Continuar». */}
+                  {items.length > 1 ? (
+                    <Boton
+                      variante="ghost"
+                      etiqueta={t('despensa.repartirEntreMascotas')}
+                      onPress={() => setRepartirPedido(true)}
+                    />
+                  ) : null}
+                </View>
+              ) : null}
 
-            {/* La honestidad del total: lo dice el motor, no esta pantalla. */}
-            <View style={{ paddingHorizontal: spacing[5] }}>
-              <Texto variante="apoyo">{t('despensa.totalLoDiceElMotor')}</Texto>
-            </View>
-        </>
-        )}
+              {/* La honestidad del total: lo dice el motor, no esta pantalla. */}
+              <View style={{ paddingHorizontal: spacing[5] }}>
+                <Texto variante="apoyo">{t('despensa.totalLoDiceElMotor')}</Texto>
+              </View>
+          </>
+          )}
+        </View>
       </HojaContenido>
 
       {/* G-09 · LO QUE LA «i» ABRE. El texto es el MISMO de siempre y no se

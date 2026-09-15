@@ -350,404 +350,414 @@ export default function LogGuarderia() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: { padding: spacing[5], gap: spacing[5], } }}
+
       >
-        {mascotas.fase === 'cargando' ? (
-          <EsqueletoGrupo>
-            <Esqueleto alto={56} />
-            <Esqueleto alto={120} />
-          </EsqueletoGrupo>
-        ) : mascotas.fase === 'error' ? (
-          <EstadoVacio
-            registro="seccion"
-            titulo={t('logGuarderia.noCargoTitulo')}
-            descripcion={t('logGuarderia.noCargoDetalle')}
-            accion={
-              <Boton
-                variante="secundario"
-                etiqueta={t('hogar.reintentar')}
-                onPress={() => setIntento((n) => n + 1)}
-              />
-            }
-          />
-        ) : (
-          <>
-            {mascotas.lista.length > 1 ? (
-              <View style={{ marginHorizontal: -spacing[5] }}>
-                <FiltroMascotas mascotas={mascotas.lista} elegida={elegida} onElegir={setElegida} />
-              </View>
-            ) : null}
-
-            {/* ═══ 🔴 DOS BLOQUES CONSTRUIDOS E INERTES — su causa la manda
-                    el SERVER, y por eso no se deducen acá ═══════════════════
-
-                ① **ESPECIE SIN OFERTA** (hoy: gato). Firma del founder:
-                *«Todavía no tenemos guarderías para gatos. Estamos trabajando
-                en eso»* — **y es distinto de «no tienes estadías»: una es una
-                carencia NUESTRA, la otra un estado suyo.**
-                🔴 **No se deduce de una lista vacía.** Hoy no hay forma de
-                distinguirlas: el catálogo dice que el gato es elegible y quien
-                sabe que nadie lo recibe es el filtro de ofertas. *Deducirlo
-                sería inventar un diagnóstico a partir de un silencio.*
-                ⇒ llega con `especie_sin_oferta` del resumen de A.
-
-                ② **PAQUETE CON SALDO** — botón «Reservar estadía de tu
-                paquete» + «7 de 10 disponibles», directo al selector de fecha
-                de ESA guardería (sin elegir lugar ni pagar: las dos ya están
-                hechas).
-                ⏪ **ESTABA VENCIDO Y DECÍA LO CONTRARIO DE LO QUE PASA:**
-                *«no existe lector de saldo… y tampoco existe la compra que lo
-                crearía»*. **Los dos existen** —`obtenerMisPaquetesGuarderia`
-                y `comprarPaqueteGuarderia`— y esta pantalla ya los monta,
-                acá abajo. *Un comentario que sobrevive a su propia carencia
-                manda a la próxima pista a construir algo que ya está.*
-                ═════════════════════════════════════════════════════════════ */}
-
-            {/* LOS CHIPS DE LA LISTA — la estructura de las cuatro hermanas.
-                Se montan ya: **son navegación, no dato**, y el día que la
-                lista llegue no hay que reacomodar la pantalla. */}
-            {/* ⭐ **EL PAQUETE CON SALDO — arriba de las pestañas** (firma del
-                founder). *Es una acción, y las pestañas son un filtro: una
-                acción debajo de un filtro parece filtrada por él.*
-
-                🔴 **Y va DEBAJO de los chips de mascota, no encima, por una
-                razón de motor:** con más de una mascota elegible
-                `reservar_dia_de_paquete_guarderia` **rebota
-                `mascota_no_determinada`** — *el bono es del hogar y a cuál
-                animal se le agenda el martes lo decide la familia cada vez.*
-                Los chips ya están arriba; poner el botón encima lo dejaría
-                **sin sujeto**, y tendría que preguntar la mascota de nuevo en
-                una Hoja propia. **Se declaró a la mesa y así quedó.** */}
-            {/* ── EL PLAN MENSUAL CONTRATADO ─────────────────────────────
-                ⏪ **Decía: «Informa, NO navega: no hay pantalla de plan y un
-                chevron prometería una que no existe (Ley 19.7)».** La condición
-                que ese comentario ponía **se cumplió**: S108-C construyó
-                `/cuenta/recurrentes`, y con ella el chevron deja de prometer
-                nada. *Una fila que se hunde sin llevar a ningún lado es una
-                promesa rota — pero una que no se hunde teniendo a dónde ir es
-                una puerta escondida*, y ésta es la puerta por la que la familia
-                corta un cobro que se repite.
-
-                🔴 Y la cancelación vive en UN SOLO LUGAR, no acá: *un
-                interruptor de plata repartido por las pantallas donde cada cosa
-                se contrató es un interruptor que no se encuentra el día que se
-                necesita.* Esta fila LLEVA; no decide.
-
-                Va ARRIBA del paquete porque es el compromiso que se cobra solo
-                todos los meses: lo que se renueva sin que nadie lo toque tiene
-                que verse antes que lo que se gasta a pulso. ── */}
-            {planes.map((pl) => (
-              <Tarjeta key={pl.suscripcionId} relleno="ninguno">
-                <CeldaNavegacion
-                  icono="mes"
-                  titulo={t('logGuarderia.planTitulo')}
-                  /* `CeldaNavegacion` no tiene subtítulo: el lugar y el precio
-                     van juntos en el detalle, que es voz de la pantalla. */
-                  detalle={`${pl.prestadorNombre} · ${t('logGuarderia.planDetalle', { precio: formatearPrecio(pl.precioMensual) })}`}
-                  onPress={() => router.push('/cuenta/recurrentes')}
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[5], gap: spacing[5] }}>
+          {mascotas.fase === 'cargando' ? (
+            <EsqueletoGrupo>
+              <Esqueleto alto={56} />
+              <Esqueleto alto={120} />
+            </EsqueletoGrupo>
+          ) : mascotas.fase === 'error' ? (
+            <EstadoVacio
+              registro="seccion"
+              titulo={t('logGuarderia.noCargoTitulo')}
+              descripcion={t('logGuarderia.noCargoDetalle')}
+              accion={
+                <Boton
+                  variante="secundario"
+                  etiqueta={t('hogar.reintentar')}
+                  onPress={() => setIntento((n) => n + 1)}
                 />
-              </Tarjeta>
-            ))}
-
-            {paquetesPorLugar.map((pq) => (
-              /* ⏪ **ERA UN `Boton` PRIMARIO Y COMPETÍA CON EL PIE.** Dos
-                 amarillos peleando en la misma pantalla: *cuando todo grita,
-                 nada dirige.* Firma del founder: **fondo blanco con chevron**
-                 — la anatomía de FILA, que dice «hay un camino acá» sin
-                 robarle el CTA al pie.
-
-                 🔴 Es `CeldaNavegacion`, la fila canónica de la casa (Ley
-                 19.7: el contorno transparente muere como acción de fila; por
-                 superficie UN sólido, y el sólido es el del pie). El saldo va
-                 en `detalle`, que es su lugar — no una línea suelta debajo. */
-              <Tarjeta key={pq.bonoId} relleno="ninguno">
-                <CeldaNavegacion
-                  /* ⭐ **S108-C · LA REANUDACIÓN, y es la misma fila con otra
-                     voz.** Firma del founder: *si cierro la app entre el cobro y
-                     el agendamiento, al volver me recibe ahí.*
-
-                     Un paquete pagado **sin una sola estadía usada** es
-                     exactamente ese caso: la compra salió, el primer día no se
-                     llegó a elegir. *Con la voz genérica de saldo, la familia
-                     volvía a una lista que no le decía que le faltaba algo —
-                     un paquete pagado sin primer día no puede quedar mudo.*
-
-                     🔴 Y **no hace falta una pantalla nueva ni un estado
-                     guardado**: el hecho vive en el dato (`quedan === total`),
-                     así que la reanudación es cierta aunque la app se haya
-                     matado, aunque se cambie de teléfono, y sin nada que
-                     limpiar después. *Un flujo que se retoma leyendo el mundo
-                     no se puede desincronizar del mundo.* */
-                  titulo={
-                    pq.quedan === pq.total
-                      ? t('logGuarderia.paqueteListoPrimerDia')
-                      : t('logGuarderia.reservarDePaquete')
-                  }
-                  detalle={
-                    pq.quedan === pq.total
-                      ? t('logGuarderia.paqueteListoPrimerDiaDetalle', { n: pq.total })
-                      : pq.quedan === 1
-                        ? t('logGuarderia.saldoUna', { total: pq.total })
-                        : t('logGuarderia.saldo', { n: pq.quedan, total: pq.total })
-                  }
-                  onPress={() => {
-                    if (elegida === null) return;
-                    router.push({
-                      pathname: '/explorar/guarderia',
-                      params: {
-                        prestadorId: pq.prestadorId,
-                        mascotaId: elegida,
-                        ...(mascota !== null ? { mascotaNombre: mascota.nombre } : {}),
-                        modalidad: 'paquete',
-                        bonoId: pq.bonoId,
-                      },
-                    });
-                  }}
-                />
-              </Tarjeta>
-            ))}
-
-            {/* ═══ ⭐ LOS QUE NO ESTÁN LISTOS, Y LO DICEN (S108-C · paso 1 + T4)
-                🔴 **Van DESPUÉS del saldo usable y ANTES del historial**: son
-                acciones pendientes, no archivo. *Un pendiente al fondo de una
-                lista es un pendiente que nadie ve.* ══════════════════════ */}
-            {paquetesPendientes.map((pq) => (
-              <Tarjeta key={pq.bonoId} relleno="ninguno">
-                <CeldaNavegacion
-                  icono="pagos"
-                  titulo={t('logGuarderia.paqueteFaltaPagar')}
-                  /* El saldo se nombra igual —**la familia compró esos días**, lo
-                     que falta es el cobro— y ahora **con el tiempo que le
-                     queda**: *un pendiente sin su reloj es un pendiente que se
-                     vence mientras alguien lo mira.* Sin ventana declarada no se
-                     inventa una cuenta regresiva. */
-                  detalle={
-                    pq.pagoExpiraEn === null
-                      ? t('logGuarderia.paqueteFaltaPagarDetalle', { n: pq.total })
-                      : t('logGuarderia.paqueteFaltaPagarConReloj', {
-                          n: pq.total,
-                          tiempo: restanteMmSs(pq.pagoExpiraEn),
-                        })
-                  }
-                  onPress={() =>
-                    router.push({
-                      pathname: '/explorar/guarderia/checkout',
-                      params: {
-                        modalidad: 'paquete',
-                        bonoId: pq.bonoId,
-                        prestadorId: pq.prestadorId,
-                        ...(elegida !== null ? { mascotaId: elegida } : {}),
-                        ...(mascota !== null ? { mascotaNombre: mascota.nombre } : {}),
-                      },
-                    })
-                  }
-                />
-              </Tarjeta>
-            ))}
-
-            {/* ⭐ **T4 · EL VENCIDO HABLA Y OFRECE VOLVER A COMPRARLO.**
-                *Un vencimiento que sólo desaparece de una lista deja a la
-                familia sin saber qué pasó con algo que ella tocó.* */}
-            {paquetesNoPagados.map((pq) => (
-              <Tarjeta key={pq.bonoId} relleno="ninguno">
-                <CeldaNavegacion
-                  icono="guarderia"
-                  titulo={t('logGuarderia.paqueteNoPagadoATiempo')}
-                  detalle={t('logGuarderia.paqueteNoPagadoATiempoDetalle')}
-                  onPress={() =>
-                    router.push({
-                      pathname: '/explorar/guarderia',
-                      params: {
-                        prestadorId: pq.prestadorId,
-                        ...(elegida !== null ? { mascotaId: elegida } : {}),
-                        ...(mascota !== null ? { mascotaNombre: mascota.nombre } : {}),
-                        modalidad: 'paquete',
-                      },
-                    })
-                  }
-                />
-              </Tarjeta>
-            ))}
-
-            {/* Las etiquetas son las MISMAS keys que sus hermanas (`plan.seg*`)
-                — *dos cadenas nuevas que dijeran lo mismo son dos lugares donde
-                la voz puede divergir.* */}
-            <FiltroPills
-              activo={pestana}
-              onCambio={(c) => setPestana(c)}
-              opciones={[
-                { codigo: 'proximas' as const, etiqueta: t('plan.segProximos'), icono: 'hoy', capa: null },
-                { codigo: 'historial' as const, etiqueta: t('plan.segHistorial'), icono: 'guarderia', capa: null },
-              ]}
-            />
-
-            {/* 🔴 DOS VACÍOS DISTINTOS, Y LA DIFERENCIA NO ES DE ESTILO.
-
-                ⏪ **S112-C · ACÁ VIVÍA EL RAZONAMIENTO DE LOS DOS VACÍOS, Y SE
-                CONTRADECÍA CON EL COMENTARIO DE ABAJO EN CINCO LÍNEAS**: éste
-                decía *«el lector NO existe»* y el siguiente *«el lector existe,
-                así que decir sin estadías ES la verdad»*. **Gana el de abajo,
-                que es el que describe el código.**
-
-                *El razonamiento sigue siendo correcto y por eso se conserva su
-                regla, no su diagnóstico:* decir «sin estadías» sobre un lector
-                que no existe sería mentir con cara de dato. Lo que venció es el
-                hecho, no la ley. */}
-            {/* LA LISTA — el vacío de la firma del founder ya es el que se
-                pinta: **el lector existe, así que decir «sin estadías» ES la
-                verdad.** *El vacío honesto de «todavía no podemos mostrarte»
-                murió con su razón.* */}
-            {estadias.fase === 'cargando' ? (
-              <EsqueletoGrupo>
-                <Esqueleto alto={64} />
-                <Esqueleto alto={64} />
-              </EsqueletoGrupo>
-            ) : estadias.fase === 'error' ? (
-              <EstadoVacio
-                registro="seccion"
-                titulo={t('logGuarderia.estadiasNoCargoTitulo')}
-                descripcion={t('logGuarderia.estadiasNoCargoDetalle')}
-                accion={
-                  <Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setIntento((n) => n + 1)} />
-                }
-              />
-            ) : estadias.fase === 'sinSujeto' ? (
-              <EstadoVacio
-                registro="seccion"
-                titulo={t('logGuarderia.elegiMascotaTitulo')}
-                descripcion={t('logGuarderia.elegiMascotaDetalle')}
-              />
-            ) : (() => {
-              /* 🔴 `esProxima` LO DECIDE EL SERVER — la pantalla no compara
-                 fechas. *Si se compararan en dos superficies podrían discrepar
-                 sobre qué es «hoy», y una familia vería su estadía del lado
-                 equivocado.* */
-              const visibles = estadias.lista.filter((e) =>
-                pestana === 'proximas' ? e.esProxima : !e.esProxima,
-              );
-              if (visibles.length === 0) {
-                return (
-                  <EstadoVacio
-                    registro="seccion"
-                    icono={<Icono nombre="guarderia" tamano={48} />}
-                    titulo={t('logGuarderia.vacioTitulo')}
-                    descripcion={t('logGuarderia.vacioDetalle')}
-                  />
-                );
               }
-              return visibles.map((e) => (
-                /* ⭐ `FilaCita`, LA PIEZA DE SUS CUATRO HERMANAS.
-                   ⏪ **Acá vivía una `Celda`** porque medí que `FilaCitaOficio`
-                   no conocía guardería. **B lo resolvió y mi dato quedó
-                   vencido** — y no era hueco de datos: `metadataMono` nunca
-                   exigió una hora, así que **no nació ninguna prop**; sólo
-                   faltaba el oficio en el vocabulario cerrado.
+            />
+          ) : (
+            <>
+              {mascotas.lista.length > 1 ? (
+                <View style={{ marginHorizontal: -spacing[5] }}>
+                  <FiltroMascotas mascotas={mascotas.lista} elegida={elegida} onElegir={setElegida} />
+                </View>
+              ) : null}
 
-                   🔴 **LA FILA DESPLIEGA, NO NAVEGA.** `onPress` y `direccion`
-                   son obligatorios, y una estadía sin `estadiaId` **no tiene a
-                   dónde llevar**: la cita se compró y el prestador todavía no
-                   la ejecutó. *Un chevron que promete una pantalla vacía es
-                   justo lo que 19.7 vino a matar.* ⇒ despliega, y la acción de
-                   entrar al durante vive adentro, sólo cuando existe.
+              {/* ═══ 🔴 DOS BLOQUES CONSTRUIDOS E INERTES — su causa la manda
+                      el SERVER, y por eso no se deducen acá ═══════════════════
 
-                   ⚠️ **LAS DOS VENTANAS NO VAN ACÁ — límite declarado por B:**
-                   *no son metadata, son contenido, y su lugar es el despliegue
-                   con `FichaFranja`.* **Y el log no las necesita**: la familia
-                   ya reservó; las ventanas importan al ELEGIR, y ahí están, en
-                   la vitrina de «quién puede». */
-                <FilaCita
-                  key={e.citaId}
-                  oficio="guarderia"
-                  cara={false}
-                  direccion={abierta === e.citaId ? 'arriba' : 'abajo'}
-                  titulo={e.prestadorNombre}
-                  /* ⭐ **«Con tu paquete» — letra firmada.** Va pegada al
-                     subtítulo y no en un slot nuevo: `FilaCita` no tiene uno
-                     para marcas, y **pedirle una prop a B por una cadena sería
-                     agrandar una pieza compartida por un caso de un oficio.**
+                  ① **ESPECIE SIN OFERTA** (hoy: gato). Firma del founder:
+                  *«Todavía no tenemos guarderías para gatos. Estamos trabajando
+                  en eso»* — **y es distinto de «no tienes estadías»: una es una
+                  carencia NUESTRA, la otra un estado suyo.**
+                  🔴 **No se deduce de una lista vacía.** Hoy no hay forma de
+                  distinguirlas: el catálogo dice que el gato es elegible y quien
+                  sabe que nadie lo recibe es el filtro de ofertas. *Deducirlo
+                  sería inventar un diagnóstico a partir de un silencio.*
+                  ⇒ llega con `especie_sin_oferta` del resumen de A.
 
-                     🔴 El dato es un CAMPO PROPIO del lector (`dePaquete`), no
-                     una deducción de `precio === null`: *deducir el origen de
-                     un silencio es cómo una marca empieza a mentir sin que
-                     nadie lo note* — y el día que el día suelto también venga
-                     sin precio, la marca se vuelve falsa sola. */
-                  subtitulo={
-                    e.dePaquete
-                      ? `${e.mascotaNombre} · ${t('logGuarderia.conTuPaquete')}`
-                      : e.mascotaNombre
-                  }
-                  /* ⚠️ SIN HORA, y no es un olvido: **una estadía no tiene
-                     hora** — tiene día y franja. *Un `00:00` se leería como
-                     medianoche.* */
-                  /* ⭐ **«Con tu paquete» — letra firmada.** El dato es un
-                     campo propio del lector (`dePaquete`), **no una deducción
-                     de `precio === null`**: *deducir el origen de un silencio
-                     es cómo una marca empieza a mentir sin que nadie lo note*,
-                     y el día que el día suelto también venga sin precio la
-                     marca se vuelve falsa sola. */
-                  metadataMono={fechaCortaMono(e.fecha, idioma)}
-                  /* 🔴 `D-990` · QUE LA FAMILIA SE ENTERE SIN TENER QUE ENTRAR.
-                     La voz de «no se pudo recoger» existía desde S107-C, pero
-                     **sólo dentro del durante** — y la familia no tiene ninguna
-                     razón para entrar ahí si no sabe que pasó algo. *Una voz
-                     correcta en una pantalla a la que nadie va es la mitad que
-                     no se ve.*
+                  ② **PAQUETE CON SALDO** — botón «Reservar estadía de tu
+                  paquete» + «7 de 10 disponibles», directo al selector de fecha
+                  de ESA guardería (sin elegir lugar ni pagar: las dos ya están
+                  hechas).
+                  ⏪ **ESTABA VENCIDO Y DECÍA LO CONTRARIO DE LO QUE PASA:**
+                  *«no existe lector de saldo… y tampoco existe la compra que lo
+                  crearía»*. **Los dos existen** —`obtenerMisPaquetesGuarderia`
+                  y `comprarPaqueteGuarderia`— y esta pantalla ya los monta,
+                  acá abajo. *Un comentario que sobrevive a su propia carencia
+                  manda a la próxima pista a construir algo que ya está.*
+                  ═════════════════════════════════════════════════════════════ */}
 
-                     Va en `fin`, que es el slot de DATOS de la pieza, y como
-                     `Insignia` porque es ESTADO y no acción (19.4). `atencion`
-                     y no `danger`: es un hecho del día, no una alarma. */
-                  fin={
-                    e.estadoEstadia === 'no_recogida' ? (
-                      <Insignia estado="atencion" etiqueta={t('logGuarderia.noRecogidaChip')} />
-                    ) : undefined
-                  }
-                  mascota={{ nombre: e.mascotaNombre, fotoUrl: undefined }}
-                  onPress={() => setAbierta(abierta === e.citaId ? null : e.citaId)}
-                  acciones={
-                    /* 🔴 EL RECORTE FIRMADO, ENTERO Y NADA MÁS (firma ②): «no se
-                       pudo recoger · el día se cobró y no se repone». **Ni una
-                       palabra de mora, aviso ni protocolo** — `LETRA_GUARDERIA`
-                       §6 sigue frenada por riesgo penal.
+              {/* LOS CHIPS DE LA LISTA — la estructura de las cuatro hermanas.
+                  Se montan ya: **son navegación, no dato**, y el día que la
+                  lista llegue no hay que reacomodar la pantalla. */}
+              {/* ⭐ **EL PAQUETE CON SALDO — arriba de las pestañas** (firma del
+                  founder). *Es una acción, y las pestañas son un filtro: una
+                  acción debajo de un filtro parece filtrada por él.*
 
-                       ✅ Y la segunda frase se escribe porque se MIDIÓ que es
-                       cierta, no porque esté firmada: `marcar_no_recogida_
-                       guarderia` no toca `bono`, `saldo`, `reverso`,
-                       `reembolso`, `precio` ni `cupo` — cero ocurrencias de las
-                       siete sobre su cuerpo. *No devuelve plata y no repone el
-                       día: es cierta por construcción.*
+                  🔴 **Y va DEBAJO de los chips de mascota, no encima, por una
+                  razón de motor:** con más de una mascota elegible
+                  `reservar_dia_de_paquete_guarderia` **rebota
+                  `mascota_no_determinada`** — *el bono es del hogar y a cuál
+                  animal se le agenda el martes lo decide la familia cada vez.*
+                  Los chips ya están arriba; poner el botón encima lo dejaría
+                  **sin sujeto**, y tendría que preguntar la mascota de nuevo en
+                  una Hoja propia. **Se declaró a la mesa y así quedó.** */}
+              {/* ── EL PLAN MENSUAL CONTRATADO ─────────────────────────────
+                  ⏪ **Decía: «Informa, NO navega: no hay pantalla de plan y un
+                  chevron prometería una que no existe (Ley 19.7)».** La condición
+                  que ese comentario ponía **se cumplió**: S108-C construyó
+                  `/cuenta/recurrentes`, y con ella el chevron deja de prometer
+                  nada. *Una fila que se hunde sin llevar a ningún lado es una
+                  promesa rota — pero una que no se hunde teniendo a dónde ir es
+                  una puerta escondida*, y ésta es la puerta por la que la familia
+                  corta un cobro que se repite.
 
-                       🔴 Y NO SE OFRECE «Ver su día»: no hubo día. Sin viaje,
-                       sin fotos y sin acta, ese botón lleva a una pantalla que
-                       repite esta misma frase sobre un expediente vacío
-                       (Ley 23). */
-                    abierta === e.citaId && e.estadoEstadia === 'no_recogida' ? (
-                      <Texto variante="apoyo">
-                        {t('logGuarderia.noRecogidaDetalle', { nombre: e.mascotaNombre })}
-                      </Texto>
-                    ) : abierta === e.citaId && e.estadiaId !== null ? (
-                      <Boton
-                        variante="secundario"
-                        bloque
-                        etiqueta={t('logGuarderia.verSuDia')}
-                        onPress={() =>
-                          router.push({
-                            pathname: '/guarderia/[estadiaId]',
-                            params: {
-                              estadiaId: e.estadiaId ?? '',
-                              mascotaId: e.mascotaId,
-                              mascotaNombre: e.mascotaNombre,
-                              fecha: e.fecha,
-                            },
+                  🔴 Y la cancelación vive en UN SOLO LUGAR, no acá: *un
+                  interruptor de plata repartido por las pantallas donde cada cosa
+                  se contrató es un interruptor que no se encuentra el día que se
+                  necesita.* Esta fila LLEVA; no decide.
+
+                  Va ARRIBA del paquete porque es el compromiso que se cobra solo
+                  todos los meses: lo que se renueva sin que nadie lo toque tiene
+                  que verse antes que lo que se gasta a pulso. ── */}
+              {planes.map((pl) => (
+                <Tarjeta key={pl.suscripcionId} relleno="ninguno">
+                  <CeldaNavegacion
+                    icono="mes"
+                    titulo={t('logGuarderia.planTitulo')}
+                    /* `CeldaNavegacion` no tiene subtítulo: el lugar y el precio
+                       van juntos en el detalle, que es voz de la pantalla. */
+                    detalle={`${pl.prestadorNombre} · ${t('logGuarderia.planDetalle', { precio: formatearPrecio(pl.precioMensual) })}`}
+                    onPress={() => router.push('/cuenta/recurrentes')}
+                  />
+                </Tarjeta>
+              ))}
+
+              {paquetesPorLugar.map((pq) => (
+                /* ⏪ **ERA UN `Boton` PRIMARIO Y COMPETÍA CON EL PIE.** Dos
+                   amarillos peleando en la misma pantalla: *cuando todo grita,
+                   nada dirige.* Firma del founder: **fondo blanco con chevron**
+                   — la anatomía de FILA, que dice «hay un camino acá» sin
+                   robarle el CTA al pie.
+
+                   🔴 Es `CeldaNavegacion`, la fila canónica de la casa (Ley
+                   19.7: el contorno transparente muere como acción de fila; por
+                   superficie UN sólido, y el sólido es el del pie). El saldo va
+                   en `detalle`, que es su lugar — no una línea suelta debajo. */
+                <Tarjeta key={pq.bonoId} relleno="ninguno">
+                  <CeldaNavegacion
+                    /* ⭐ **S108-C · LA REANUDACIÓN, y es la misma fila con otra
+                       voz.** Firma del founder: *si cierro la app entre el cobro y
+                       el agendamiento, al volver me recibe ahí.*
+
+                       Un paquete pagado **sin una sola estadía usada** es
+                       exactamente ese caso: la compra salió, el primer día no se
+                       llegó a elegir. *Con la voz genérica de saldo, la familia
+                       volvía a una lista que no le decía que le faltaba algo —
+                       un paquete pagado sin primer día no puede quedar mudo.*
+
+                       🔴 Y **no hace falta una pantalla nueva ni un estado
+                       guardado**: el hecho vive en el dato (`quedan === total`),
+                       así que la reanudación es cierta aunque la app se haya
+                       matado, aunque se cambie de teléfono, y sin nada que
+                       limpiar después. *Un flujo que se retoma leyendo el mundo
+                       no se puede desincronizar del mundo.* */
+                    titulo={
+                      pq.quedan === pq.total
+                        ? t('logGuarderia.paqueteListoPrimerDia')
+                        : t('logGuarderia.reservarDePaquete')
+                    }
+                    detalle={
+                      pq.quedan === pq.total
+                        ? t('logGuarderia.paqueteListoPrimerDiaDetalle', { n: pq.total })
+                        : pq.quedan === 1
+                          ? t('logGuarderia.saldoUna', { total: pq.total })
+                          : t('logGuarderia.saldo', { n: pq.quedan, total: pq.total })
+                    }
+                    onPress={() => {
+                      if (elegida === null) return;
+                      router.push({
+                        pathname: '/explorar/guarderia',
+                        params: {
+                          prestadorId: pq.prestadorId,
+                          mascotaId: elegida,
+                          ...(mascota !== null ? { mascotaNombre: mascota.nombre } : {}),
+                          modalidad: 'paquete',
+                          bonoId: pq.bonoId,
+                        },
+                      });
+                    }}
+                  />
+                </Tarjeta>
+              ))}
+
+              {/* ═══ ⭐ LOS QUE NO ESTÁN LISTOS, Y LO DICEN (S108-C · paso 1 + T4)
+                  🔴 **Van DESPUÉS del saldo usable y ANTES del historial**: son
+                  acciones pendientes, no archivo. *Un pendiente al fondo de una
+                  lista es un pendiente que nadie ve.* ══════════════════════ */}
+              {paquetesPendientes.map((pq) => (
+                <Tarjeta key={pq.bonoId} relleno="ninguno">
+                  <CeldaNavegacion
+                    icono="pagos"
+                    titulo={t('logGuarderia.paqueteFaltaPagar')}
+                    /* El saldo se nombra igual —**la familia compró esos días**, lo
+                       que falta es el cobro— y ahora **con el tiempo que le
+                       queda**: *un pendiente sin su reloj es un pendiente que se
+                       vence mientras alguien lo mira.* Sin ventana declarada no se
+                       inventa una cuenta regresiva. */
+                    detalle={
+                      pq.pagoExpiraEn === null
+                        ? t('logGuarderia.paqueteFaltaPagarDetalle', { n: pq.total })
+                        : t('logGuarderia.paqueteFaltaPagarConReloj', {
+                            n: pq.total,
+                            tiempo: restanteMmSs(pq.pagoExpiraEn),
                           })
-                        }
-                      />
-                    ) : undefined
+                    }
+                    onPress={() =>
+                      router.push({
+                        pathname: '/explorar/guarderia/checkout',
+                        params: {
+                          modalidad: 'paquete',
+                          bonoId: pq.bonoId,
+                          prestadorId: pq.prestadorId,
+                          ...(elegida !== null ? { mascotaId: elegida } : {}),
+                          ...(mascota !== null ? { mascotaNombre: mascota.nombre } : {}),
+                        },
+                      })
+                    }
+                  />
+                </Tarjeta>
+              ))}
+
+              {/* ⭐ **T4 · EL VENCIDO HABLA Y OFRECE VOLVER A COMPRARLO.**
+                  *Un vencimiento que sólo desaparece de una lista deja a la
+                  familia sin saber qué pasó con algo que ella tocó.* */}
+              {paquetesNoPagados.map((pq) => (
+                <Tarjeta key={pq.bonoId} relleno="ninguno">
+                  <CeldaNavegacion
+                    icono="guarderia"
+                    titulo={t('logGuarderia.paqueteNoPagadoATiempo')}
+                    detalle={t('logGuarderia.paqueteNoPagadoATiempoDetalle')}
+                    onPress={() =>
+                      router.push({
+                        pathname: '/explorar/guarderia',
+                        params: {
+                          prestadorId: pq.prestadorId,
+                          ...(elegida !== null ? { mascotaId: elegida } : {}),
+                          ...(mascota !== null ? { mascotaNombre: mascota.nombre } : {}),
+                          modalidad: 'paquete',
+                        },
+                      })
+                    }
+                  />
+                </Tarjeta>
+              ))}
+
+              {/* Las etiquetas son las MISMAS keys que sus hermanas (`plan.seg*`)
+                  — *dos cadenas nuevas que dijeran lo mismo son dos lugares donde
+                  la voz puede divergir.* */}
+              <FiltroPills
+                activo={pestana}
+                onCambio={(c) => setPestana(c)}
+                opciones={[
+                  { codigo: 'proximas' as const, etiqueta: t('plan.segProximos'), icono: 'hoy', capa: null },
+                  { codigo: 'historial' as const, etiqueta: t('plan.segHistorial'), icono: 'guarderia', capa: null },
+                ]}
+              />
+
+              {/* 🔴 DOS VACÍOS DISTINTOS, Y LA DIFERENCIA NO ES DE ESTILO.
+
+                  ⏪ **S112-C · ACÁ VIVÍA EL RAZONAMIENTO DE LOS DOS VACÍOS, Y SE
+                  CONTRADECÍA CON EL COMENTARIO DE ABAJO EN CINCO LÍNEAS**: éste
+                  decía *«el lector NO existe»* y el siguiente *«el lector existe,
+                  así que decir sin estadías ES la verdad»*. **Gana el de abajo,
+                  que es el que describe el código.**
+
+                  *El razonamiento sigue siendo correcto y por eso se conserva su
+                  regla, no su diagnóstico:* decir «sin estadías» sobre un lector
+                  que no existe sería mentir con cara de dato. Lo que venció es el
+                  hecho, no la ley. */}
+              {/* LA LISTA — el vacío de la firma del founder ya es el que se
+                  pinta: **el lector existe, así que decir «sin estadías» ES la
+                  verdad.** *El vacío honesto de «todavía no podemos mostrarte»
+                  murió con su razón.* */}
+              {estadias.fase === 'cargando' ? (
+                <EsqueletoGrupo>
+                  <Esqueleto alto={64} />
+                  <Esqueleto alto={64} />
+                </EsqueletoGrupo>
+              ) : estadias.fase === 'error' ? (
+                <EstadoVacio
+                  registro="seccion"
+                  titulo={t('logGuarderia.estadiasNoCargoTitulo')}
+                  descripcion={t('logGuarderia.estadiasNoCargoDetalle')}
+                  accion={
+                    <Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setIntento((n) => n + 1)} />
                   }
                 />
-              ));
-            })()}
-          </>
-        )}
+              ) : estadias.fase === 'sinSujeto' ? (
+                <EstadoVacio
+                  registro="seccion"
+                  titulo={t('logGuarderia.elegiMascotaTitulo')}
+                  descripcion={t('logGuarderia.elegiMascotaDetalle')}
+                />
+              ) : (() => {
+                /* 🔴 `esProxima` LO DECIDE EL SERVER — la pantalla no compara
+                   fechas. *Si se compararan en dos superficies podrían discrepar
+                   sobre qué es «hoy», y una familia vería su estadía del lado
+                   equivocado.* */
+                const visibles = estadias.lista.filter((e) =>
+                  pestana === 'proximas' ? e.esProxima : !e.esProxima,
+                );
+                if (visibles.length === 0) {
+                  return (
+                    <EstadoVacio
+                      registro="seccion"
+                      icono={<Icono nombre="guarderia" tamano={48} />}
+                      titulo={t('logGuarderia.vacioTitulo')}
+                      descripcion={t('logGuarderia.vacioDetalle')}
+                    />
+                  );
+                }
+                return visibles.map((e) => (
+                  /* ⭐ `FilaCita`, LA PIEZA DE SUS CUATRO HERMANAS.
+                     ⏪ **Acá vivía una `Celda`** porque medí que `FilaCitaOficio`
+                     no conocía guardería. **B lo resolvió y mi dato quedó
+                     vencido** — y no era hueco de datos: `metadataMono` nunca
+                     exigió una hora, así que **no nació ninguna prop**; sólo
+                     faltaba el oficio en el vocabulario cerrado.
+
+                     🔴 **LA FILA DESPLIEGA, NO NAVEGA.** `onPress` y `direccion`
+                     son obligatorios, y una estadía sin `estadiaId` **no tiene a
+                     dónde llevar**: la cita se compró y el prestador todavía no
+                     la ejecutó. *Un chevron que promete una pantalla vacía es
+                     justo lo que 19.7 vino a matar.* ⇒ despliega, y la acción de
+                     entrar al durante vive adentro, sólo cuando existe.
+
+                     ⚠️ **LAS DOS VENTANAS NO VAN ACÁ — límite declarado por B:**
+                     *no son metadata, son contenido, y su lugar es el despliegue
+                     con `FichaFranja`.* **Y el log no las necesita**: la familia
+                     ya reservó; las ventanas importan al ELEGIR, y ahí están, en
+                     la vitrina de «quién puede». */
+                  <FilaCita
+                    key={e.citaId}
+                    oficio="guarderia"
+                    cara={false}
+                    direccion={abierta === e.citaId ? 'arriba' : 'abajo'}
+                    titulo={e.prestadorNombre}
+                    /* ⭐ **«Con tu paquete» — letra firmada.** Va pegada al
+                       subtítulo y no en un slot nuevo: `FilaCita` no tiene uno
+                       para marcas, y **pedirle una prop a B por una cadena sería
+                       agrandar una pieza compartida por un caso de un oficio.**
+
+                       🔴 El dato es un CAMPO PROPIO del lector (`dePaquete`), no
+                       una deducción de `precio === null`: *deducir el origen de
+                       un silencio es cómo una marca empieza a mentir sin que
+                       nadie lo note* — y el día que el día suelto también venga
+                       sin precio, la marca se vuelve falsa sola. */
+                    subtitulo={
+                      e.dePaquete
+                        ? `${e.mascotaNombre} · ${t('logGuarderia.conTuPaquete')}`
+                        : e.mascotaNombre
+                    }
+                    /* ⚠️ SIN HORA, y no es un olvido: **una estadía no tiene
+                       hora** — tiene día y franja. *Un `00:00` se leería como
+                       medianoche.* */
+                    /* ⭐ **«Con tu paquete» — letra firmada.** El dato es un
+                       campo propio del lector (`dePaquete`), **no una deducción
+                       de `precio === null`**: *deducir el origen de un silencio
+                       es cómo una marca empieza a mentir sin que nadie lo note*,
+                       y el día que el día suelto también venga sin precio la
+                       marca se vuelve falsa sola. */
+                    metadataMono={fechaCortaMono(e.fecha, idioma)}
+                    /* 🔴 `D-990` · QUE LA FAMILIA SE ENTERE SIN TENER QUE ENTRAR.
+                       La voz de «no se pudo recoger» existía desde S107-C, pero
+                       **sólo dentro del durante** — y la familia no tiene ninguna
+                       razón para entrar ahí si no sabe que pasó algo. *Una voz
+                       correcta en una pantalla a la que nadie va es la mitad que
+                       no se ve.*
+
+                       Va en `fin`, que es el slot de DATOS de la pieza, y como
+                       `Insignia` porque es ESTADO y no acción (19.4). `atencion`
+                       y no `danger`: es un hecho del día, no una alarma. */
+                    fin={
+                      e.estadoEstadia === 'no_recogida' ? (
+                        <Insignia estado="atencion" etiqueta={t('logGuarderia.noRecogidaChip')} />
+                      ) : undefined
+                    }
+                    mascota={{ nombre: e.mascotaNombre, fotoUrl: undefined }}
+                    onPress={() => setAbierta(abierta === e.citaId ? null : e.citaId)}
+                    acciones={
+                      /* 🔴 EL RECORTE FIRMADO, ENTERO Y NADA MÁS (firma ②): «no se
+                         pudo recoger · el día se cobró y no se repone». **Ni una
+                         palabra de mora, aviso ni protocolo** — `LETRA_GUARDERIA`
+                         §6 sigue frenada por riesgo penal.
+
+                         ✅ Y la segunda frase se escribe porque se MIDIÓ que es
+                         cierta, no porque esté firmada: `marcar_no_recogida_
+                         guarderia` no toca `bono`, `saldo`, `reverso`,
+                         `reembolso`, `precio` ni `cupo` — cero ocurrencias de las
+                         siete sobre su cuerpo. *No devuelve plata y no repone el
+                         día: es cierta por construcción.*
+
+                         🔴 Y NO SE OFRECE «Ver su día»: no hubo día. Sin viaje,
+                         sin fotos y sin acta, ese botón lleva a una pantalla que
+                         repite esta misma frase sobre un expediente vacío
+                         (Ley 23). */
+                      abierta === e.citaId && e.estadoEstadia === 'no_recogida' ? (
+                        <Texto variante="apoyo">
+                          {t('logGuarderia.noRecogidaDetalle', { nombre: e.mascotaNombre })}
+                        </Texto>
+                      ) : abierta === e.citaId && e.estadiaId !== null ? (
+                        <Boton
+                          variante="secundario"
+                          bloque
+                          etiqueta={t('logGuarderia.verSuDia')}
+                          onPress={() =>
+                            router.push({
+                              pathname: '/guarderia/[estadiaId]',
+                              params: {
+                                estadiaId: e.estadiaId ?? '',
+                                mascotaId: e.mascotaId,
+                                mascotaNombre: e.mascotaNombre,
+                                fecha: e.fecha,
+                              },
+                            })
+                          }
+                        />
+                      ) : undefined
+                    }
+                  />
+                ));
+              })()}
+            </>
+          )}
+        </View>
       </HojaContenido>
 
       {/* EL CTA AL PIE — el de sus cuatro hermanas: lleva al flujo con la

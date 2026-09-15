@@ -349,7 +349,7 @@ export default function LaminaFusion() {
           servir para mirar piezas de producto. */}
       <HojaContenido
         arranque={cabecera.arranque}
-        scroll={{ contentContainerStyle: { padding: spacing[5], gap: spacing[6] } }}
+
         fondo={
           <View onLayout={cabecera.alMedir}>
             <Cabecera
@@ -362,25 +362,35 @@ export default function LaminaFusion() {
           </View>
         }
       >
-        <Text style={{ fontFamily: typography.family.sans.regular, fontSize: 14, color: theme.text.secondary }}>
-          Dos preguntas, sobre la geometría ya curada, en claro y en oscuro. 1: cuánta sombra
-          necesita el chip para despegar del 2D (1/2/3 — el 1 es la de hoy). 2: la materia — la
-          foto con su fondo vs el recorte con fondo transparente.
-        </Text>
-        {mascotas === null ? null : mascotas.length === 0 ? (
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[5], gap: spacing[6] }}>
           <Text style={{ fontFamily: typography.family.sans.regular, fontSize: 14, color: theme.text.secondary }}>
-            No pudimos cargar las mascotas de tu familia — la lámina necesita la sesión con Thor y Zeus.
+            Dos preguntas, sobre la geometría ya curada, en claro y en oscuro. 1: cuánta sombra
+            necesita el chip para despegar del 2D (1/2/3 — el 1 es la de hoy). 2: la materia — la
+            foto con su fondo vs el recorte con fondo transparente.
           </Text>
-        ) : (
-          <>
-            <ThemeProvider mode="light">
-              <BloqueTema rotulo="claro" mascotas={mascotas} />
-            </ThemeProvider>
-            <ThemeProvider mode="dark">
-              <BloqueTema rotulo="oscuro" mascotas={mascotas} />
-            </ThemeProvider>
-          </>
-        )}
+          {mascotas === null ? null : mascotas.length === 0 ? (
+            <Text style={{ fontFamily: typography.family.sans.regular, fontSize: 14, color: theme.text.secondary }}>
+              No pudimos cargar las mascotas de tu familia — la lámina necesita la sesión con Thor y Zeus.
+            </Text>
+          ) : (
+            <>
+              <ThemeProvider mode="light">
+                <BloqueTema rotulo="claro" mascotas={mascotas} />
+              </ThemeProvider>
+              <ThemeProvider mode="dark">
+                <BloqueTema rotulo="oscuro" mascotas={mascotas} />
+              </ThemeProvider>
+            </>
+          )}
+        </View>
       </HojaContenido>
     </View>
   )

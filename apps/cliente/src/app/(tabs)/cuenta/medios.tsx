@@ -151,84 +151,94 @@ export default function MediosDePago() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: { gap: spacing[4] } }}
+
       >
-        <View style={{ paddingHorizontal: spacing[5] }}>
-          <Texto variante="apoyo">{t('cuenta.mediosSub')}</Texto>
-        </View>
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ gap: spacing[4] }}>
+          <View style={{ paddingHorizontal: spacing[5] }}>
+            <Texto variante="apoyo">{t('cuenta.mediosSub')}</Texto>
+          </View>
 
-        {estado === 'cargando' ? (
-          <EsqueletoGrupo><View /></EsqueletoGrupo>
-        ) : estado === 'error' ? (
-          /* Ley 13: un fallo JAMÁS se disfraza de vacío. */
-          <EstadoVacio
-            titulo={t('cuenta.errorCargar')}
-            accion={
-              <Boton
-                variante="secundario"
-                etiqueta={t('cuenta.reintentar')}
-                onPress={() => { setEstado('cargando'); void leer(); }}
-              />
-            }
-          />
-        ) : medios.length === 0 ? (
-          <EstadoVacio titulo={t('cuenta.mediosVacioTitulo')} descripcion={t('cuenta.mediosVacio')} />
-        ) : (
-          <>
-            <View>
-              {medios.map((m) => (
-                <FilaMedioDePago
-                  /* 🔴 LA CLAVE ES EL TOKEN, y con la fuente invertida no es un
-                     detalle: `id` puede ser `null`, y **dos huérfanas
-                     compartirían la misma clave `null`** — React reusaría una
-                     fila para otra tarjeta. *En la pantalla donde se borra, eso
-                     es una fila que dice una cosa y borra otra.* */
-                  key={m.token}
-                  tarjeta={m}
-                  /* Mismo desempate que en la hoja del checkout: la lista es
-                     donde la persona BORRA, así que distinguir dos filas
-                     idénticas acá no es comodidad — es lo que evita que borre
-                     la que no era. */
-                  desempate={desempates.get(m.token) ?? null}
-                  fin={
-                    <Boton
-                      variante="secundario"
-                      tamaño="sm"
-                      etiqueta={t('cuenta.medioBorrar')}
-                      onPress={() => setABorrar(m)}
-                    />
-                  }
+          {estado === 'cargando' ? (
+            <EsqueletoGrupo><View /></EsqueletoGrupo>
+          ) : estado === 'error' ? (
+            /* Ley 13: un fallo JAMÁS se disfraza de vacío. */
+            <EstadoVacio
+              titulo={t('cuenta.errorCargar')}
+              accion={
+                <Boton
+                  variante="secundario"
+                  etiqueta={t('cuenta.reintentar')}
+                  onPress={() => { setEstado('cargando'); void leer(); }}
                 />
-              ))}
+              }
+            />
+          ) : medios.length === 0 ? (
+            <EstadoVacio titulo={t('cuenta.mediosVacioTitulo')} descripcion={t('cuenta.mediosVacio')} />
+          ) : (
+            <>
+              <View>
+                {medios.map((m) => (
+                  <FilaMedioDePago
+                    /* 🔴 LA CLAVE ES EL TOKEN, y con la fuente invertida no es un
+                       detalle: `id` puede ser `null`, y **dos huérfanas
+                       compartirían la misma clave `null`** — React reusaría una
+                       fila para otra tarjeta. *En la pantalla donde se borra, eso
+                       es una fila que dice una cosa y borra otra.* */
+                    key={m.token}
+                    tarjeta={m}
+                    /* Mismo desempate que en la hoja del checkout: la lista es
+                       donde la persona BORRA, así que distinguir dos filas
+                       idénticas acá no es comodidad — es lo que evita que borre
+                       la que no era. */
+                    desempate={desempates.get(m.token) ?? null}
+                    fin={
+                      <Boton
+                        variante="secundario"
+                        tamaño="sm"
+                        etiqueta={t('cuenta.medioBorrar')}
+                        onPress={() => setABorrar(m)}
+                      />
+                    }
+                  />
+                ))}
+              </View>
+              <VozVencida visible={hayVencida} />
+            </>
+          )}
+
+          {/* 🔴 Los dos avisos van DESPUÉS de la lista y en voz de apoyo: explican
+              lo que la persona está viendo, no compiten con ello. Y se dibujan
+              también con la lista vacía — *«no tenés ninguna» y «no pudimos
+              preguntar» son dos cosas muy distintas.* */}
+          {estado === 'listo' && sinVerificar ? (
+            <View style={{ paddingHorizontal: spacing[5] }}>
+              <Texto variante="apoyo">{t('cuenta.mediosSinVerificar')}</Texto>
             </View>
-            <VozVencida visible={hayVencida} />
-          </>
-        )}
+          ) : null}
+          {estado === 'listo' && ocultas > 0 ? (
+            <View style={{ paddingHorizontal: spacing[5] }}>
+              <Texto variante="apoyo">{t('cuenta.mediosOcultas')}</Texto>
+            </View>
+          ) : null}
 
-        {/* 🔴 Los dos avisos van DESPUÉS de la lista y en voz de apoyo: explican
-            lo que la persona está viendo, no compiten con ello. Y se dibujan
-            también con la lista vacía — *«no tenés ninguna» y «no pudimos
-            preguntar» son dos cosas muy distintas.* */}
-        {estado === 'listo' && sinVerificar ? (
-          <View style={{ paddingHorizontal: spacing[5] }}>
-            <Texto variante="apoyo">{t('cuenta.mediosSinVerificar')}</Texto>
-          </View>
-        ) : null}
-        {estado === 'listo' && ocultas > 0 ? (
-          <View style={{ paddingHorizontal: spacing[5] }}>
-            <Texto variante="apoyo">{t('cuenta.mediosOcultas')}</Texto>
-          </View>
-        ) : null}
+          {voz ? (
+            <View style={{ paddingHorizontal: spacing[5] }}>
+              <Texto variante="apoyo">{voz}</Texto>
+            </View>
+          ) : null}
 
-        {voz ? (
-          <View style={{ paddingHorizontal: spacing[5] }}>
-            <Texto variante="apoyo">{voz}</Texto>
+          <View style={{ paddingHorizontal: spacing[5], gap: spacing[3] }}>
+            <Separador />
+            <Boton etiqueta={t('cuenta.medioAgregar')} bloque onPress={() => void agregar()} />
           </View>
-        ) : null}
-
-        <View style={{ paddingHorizontal: spacing[5], gap: spacing[3] }}>
-          <Separador />
-          <Boton etiqueta={t('cuenta.medioAgregar')} bloque onPress={() => void agregar()} />
         </View>
       </HojaContenido>
 

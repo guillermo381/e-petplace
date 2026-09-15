@@ -332,9 +332,17 @@ export default function DespensaPedido() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: {
-          paddingTop: spacing[4],
-          // 🔴 SIN `insets.bottom`, y es CONCESIÓN MEDIDA, no gusto.
+
+      >
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ paddingTop: spacing[4], // 🔴 SIN `insets.bottom`, y es CONCESIÓN MEDIDA, no gusto.
           // B midió que **el navegador ya acota**: el `ScrollView` de una
           // pantalla de tab termina en `y = 699.0 dp`, el filo exacto de la
           // barra —que a su vez ya pintó el inset del sistema—. Sumarlo acá
@@ -343,561 +351,559 @@ export default function DespensaPedido() {
           // *Yo lo había defendido como «aire de cola» y C tenía razón: era
           // una línea vieja, no una posición.* Se unifica en las tres
           // pantallas — dos reglas para lo mismo divergen.
-          paddingBottom: spacing[8],
-          gap: spacing[5],
-        } }}
-      >
-        {detalle === 'cargando' ? (
-          <EsqueletoGrupo>
-            <View style={{ gap: spacing[3], paddingHorizontal: spacing[5] }}>
-              <Esqueleto forma="bloque" ancho="100%" alto={160} />
-              <Esqueleto forma="bloque" ancho="100%" alto={96} />
-            </View>
-          </EsqueletoGrupo>
-        ) : detalle === 'error' ? (
-          /* 🔴 S100d · DOS FALLOS DISTINTOS, DOS SALIDAS DISTINTAS.
-             ═══════════════════════════════════════════════════════════════
-             Antes había UNA sola rama: «Revisa tu conexión» + Reintentar,
-             para todo. Ante un pedido que no está, ese botón **no puede
-             funcionar nunca** — y *un botón que no puede funcionar es peor
-             que ninguno: promete una salida que no existe.*
+          paddingBottom: spacing[8], gap: spacing[5] }}>
+          {detalle === 'cargando' ? (
+            <EsqueletoGrupo>
+              <View style={{ gap: spacing[3], paddingHorizontal: spacing[5] }}>
+                <Esqueleto forma="bloque" ancho="100%" alto={160} />
+                <Esqueleto forma="bloque" ancho="100%" alto={96} />
+              </View>
+            </EsqueletoGrupo>
+          ) : detalle === 'error' ? (
+            /* 🔴 S100d · DOS FALLOS DISTINTOS, DOS SALIDAS DISTINTAS.
+               ═══════════════════════════════════════════════════════════════
+               Antes había UNA sola rama: «Revisa tu conexión» + Reintentar,
+               para todo. Ante un pedido que no está, ese botón **no puede
+               funcionar nunca** — y *un botón que no puede funcionar es peor
+               que ninguno: promete una salida que no existe.*
 
-             ⚠️ EL REINTENTAR **SE CONSERVA** en el otro brazo, y no es un
-             detalle: ahí sí sirve. *Quitarlo de los dos habría sido curar de
-             más* — cambiar un callejón por otro (pedido de D, dueño de esta
-             pantalla).
+               ⚠️ EL REINTENTAR **SE CONSERVA** en el otro brazo, y no es un
+               detalle: ahí sí sirve. *Quitarlo de los dos habría sido curar de
+               más* — cambiar un callejón por otro (pedido de D, dueño de esta
+               pantalla).
 
-             ⚠️ Y LA VOZ NO NOMBRA EL CASO «era de otra cuenta» aunque sea
-             uno de los dos que caen acá: con la vista cerrada por
-             `security_invoker` **no debería poder pasar**, y mencionarlo lo
-             reabre como pregunta en la cabeza de quien lee. *Una voz que se
-             defiende de algo que no ocurre le enseña al lector que ocurre.* */
-          noDisponible ? (
-            <EstadoVacio
-              titulo={t('despensa.pedidoNoDisponibleTitulo')}
-              descripcion={t('despensa.pedidoNoDisponibleDetalle')}
-              accion={
-                <Boton
-                  variante="secundario"
-                  etiqueta={t('despensa.pedidoNoDisponibleVolver')}
-                  onPress={() => router.replace('/pedidos')}
-                />
-              }
-            />
-          ) : (
-            <EstadoVacio
-              titulo={t('despensa.errorPedidoTitulo')}
-              descripcion={t('despensa.errorVitrinaDetalle')}
-              accion={
-                <Boton
-                  variante="secundario"
-                  etiqueta={t('hogar.reintentar')}
-                  onPress={() => setReintento((n) => n + 1)}
-                />
-              }
-            />
-          )
-        ) : (
-          <>
-            {/* 0 · LA CELEBRACIÓN — solo con el pedido ENTREGADO, y una
-                sola vez por pedido (la pieza lo recuerda).
-
-                🔴 EL TERCER ACTO VA VACÍO, Y ES LA DECISIÓN MÁS IMPORTANTE
-                DE ESTE LOTE. La letra dice que si «¿para quién fue?» está
-                respondido, la compra deposita un evento en el expediente de
-                esa mascota — y eso es cierto, pero NO para todo ítem: el
-                motor gatea el depósito por `f.entra_al_expediente`, o sea
-                que **la familia del producto decide** (alimento sí, juguete
-                no — BIO_EXPEDIENTE E2bis).
-
-                ⇒ Decir «quedó en el expediente de Thor» por cada ítem con
-                destino sería FALSO para un juguete, y falso de la peor
-                manera: **verosímil** (L-139). El lector de la familia
-                (`LineaDePedido`) no trae hoy ni la familia del producto ni
-                si el evento se depositó, así que la pantalla **no puede
-                saberlo** — y lo que no se sabe no se afirma.
-
-                El slot existe y espera su dato (H-07, dueño A). *Un acto
-                que no tiene nada verdadero que decir no se llena con algo
-                lindo: se deja callado.* */}
-            {detalle.pedido.narrativa === 'entregado' ? (
-              <CelebracionEntrega
-                pedidoId={detalle.pedido.pedido_id}
-                titulo={t('despensa.celebracionLlego')}
-                cierre={(() => {
-                  // ⏪ EL TERCER ACTO YA NO VA VACÍO: `sedimentado` llegó.
-                  //
-                  // 🔴 SE LEE `sedimentado`, JAMÁS `destino`. Un ítem con
-                  // destino NO garantiza depósito —el motor lo gatea por
-                  // `f.entra_al_expediente`, la familia del producto decide—
-                  // así que contar destinos habría dicho «quedó en la
-                  // historia de Thor» de un juguete. Este booleano lo dice
-                  // el servidor por la EXISTENCIA de la fila.
-                  //
-                  // Y su contrato se respeta entero: **`true` habilita a
-                  // decirlo; `false` habilita a CALLAR.** Sin ninguno en
-                  // `true` el acto no existe — no se dice «no quedó en el
-                  // expediente», porque ese `false` tapa tres causas
-                  // distintas (familia que no entra · sin destino · mascota
-                  // no legible por quien mira) y no las distingue.
-                  const sedimentados = detalle.items.filter((i) => i.sedimentado);
-                  if (sedimentados.length === 0) return undefined;
-                  // Los nombres que SÍ podemos nombrar. Si el destino no es
-                  // legible, la mascota no se nombra — pero el hecho sí se
-                  // cuenta: sedimentó igual.
-                  const nombres = [
-                    ...new Set(
-                      sedimentados
-                        .map((i) => i.destino?.mascota_id)
-                        .filter((id): id is string => typeof id === 'string')
-                        .map((id) => nombrePorId[id])
-                        .filter((n): n is string => typeof n === 'string' && n !== ''),
-                    ),
-                  ];
-                  return nombres.length === 1
-                    ? t('despensa.celebracionSedimento', { nombre: nombres[0] })
-                    : t('despensa.celebracionSedimentoVarias');
-                })()}
+               ⚠️ Y LA VOZ NO NOMBRA EL CASO «era de otra cuenta» aunque sea
+               uno de los dos que caen acá: con la vista cerrada por
+               `security_invoker` **no debería poder pasar**, y mencionarlo lo
+               reabre como pregunta en la cabeza de quien lee. *Una voz que se
+               defiende de algo que no ocurre le enseña al lector que ocurre.* */
+            noDisponible ? (
+              <EstadoVacio
+                titulo={t('despensa.pedidoNoDisponibleTitulo')}
+                descripcion={t('despensa.pedidoNoDisponibleDetalle')}
+                accion={
+                  <Boton
+                    variante="secundario"
+                    etiqueta={t('despensa.pedidoNoDisponibleVolver')}
+                    onPress={() => router.replace('/pedidos')}
+                  />
+                }
               />
-            ) : null}
+            ) : (
+              <EstadoVacio
+                titulo={t('despensa.errorPedidoTitulo')}
+                descripcion={t('despensa.errorVitrinaDetalle')}
+                accion={
+                  <Boton
+                    variante="secundario"
+                    etiqueta={t('hogar.reintentar')}
+                    onPress={() => setReintento((n) => n + 1)}
+                  />
+                }
+              />
+            )
+          ) : (
+            <>
+              {/* 0 · LA CELEBRACIÓN — solo con el pedido ENTREGADO, y una
+                  sola vez por pedido (la pieza lo recuerda).
 
-            {/* ═══ 🔴 S100c-D · N21: LAS CUATRO CARTAS ═══════════════════
-                FIRMA DEL FOUNDER: *«como toda la pantalla está sin fondo,
-                todo está escrito directamente sobre el fondo, sin tener
-                bordes blancos, se pierde… el código se pierde porque queda
-                entre colores»*.
+                  🔴 EL TERCER ACTO VA VACÍO, Y ES LA DECISIÓN MÁS IMPORTANTE
+                  DE ESTE LOTE. La letra dice que si «¿para quién fue?» está
+                  respondido, la compra deposita un evento en el expediente de
+                  esa mascota — y eso es cierto, pero NO para todo ítem: el
+                  motor gatea el depósito por `f.entra_al_expediente`, o sea
+                  que **la familia del producto decide** (alimento sí, juguete
+                  no — BIO_EXPEDIENTE E2bis).
 
-                **Medido por B con aparato:** esta pantalla tenía **4 grupos
-                rotulados y CERO superficies**, y **88,5 % de su área útil
-                era un solo color** — el peor de las siete de la despensa.
-                *La frase del founder es literalmente el código*, que vivía
-                en un `View` con padding.
+                  ⇒ Decir «quedó en el expediente de Thor» por cada ítem con
+                  destino sería FALSO para un juguete, y falso de la peor
+                  manera: **verosímil** (L-139). El lector de la familia
+                  (`LineaDePedido`) no trae hoy ni la familia del producto ni
+                  si el evento se depositó, así que la pantalla **no puede
+                  saberlo** — y lo que no se sabe no se afirma.
 
-                🔴 **Y LO QUE NO ERA EL DEFECTO, porque la cura obvia habría
-                sido la equivocada:** *no falta contraste, falta superficie*.
-                Nuestro fondo/carta da **1,10** y el de Laika **1,119** —
-                *cuando ponemos carta, separamos igual que la referencia*.
-                Subir el contraste no habría curado nada.
+                  El slot existe y espera su dato (H-07, dueño A). *Un acto
+                  que no tiene nada verdadero que decir no se llena con algo
+                  lindo: se deja callado.* */}
+              {detalle.pedido.narrativa === 'entregado' ? (
+                <CelebracionEntrega
+                  pedidoId={detalle.pedido.pedido_id}
+                  titulo={t('despensa.celebracionLlego')}
+                  cierre={(() => {
+                    // ⏪ EL TERCER ACTO YA NO VA VACÍO: `sedimentado` llegó.
+                    //
+                    // 🔴 SE LEE `sedimentado`, JAMÁS `destino`. Un ítem con
+                    // destino NO garantiza depósito —el motor lo gatea por
+                    // `f.entra_al_expediente`, la familia del producto decide—
+                    // así que contar destinos habría dicho «quedó en la
+                    // historia de Thor» de un juguete. Este booleano lo dice
+                    // el servidor por la EXISTENCIA de la fila.
+                    //
+                    // Y su contrato se respeta entero: **`true` habilita a
+                    // decirlo; `false` habilita a CALLAR.** Sin ninguno en
+                    // `true` el acto no existe — no se dice «no quedó en el
+                    // expediente», porque ese `false` tapa tres causas
+                    // distintas (familia que no entra · sin destino · mascota
+                    // no legible por quien mira) y no las distingue.
+                    const sedimentados = detalle.items.filter((i) => i.sedimentado);
+                    if (sedimentados.length === 0) return undefined;
+                    // Los nombres que SÍ podemos nombrar. Si el destino no es
+                    // legible, la mascota no se nombra — pero el hecho sí se
+                    // cuenta: sedimentó igual.
+                    const nombres = [
+                      ...new Set(
+                        sedimentados
+                          .map((i) => i.destino?.mascota_id)
+                          .filter((id): id is string => typeof id === 'string')
+                          .map((id) => nombrePorId[id])
+                          .filter((n): n is string => typeof n === 'string' && n !== ''),
+                      ),
+                    ];
+                    return nombres.length === 1
+                      ? t('despensa.celebracionSedimento', { nombre: nombres[0] })
+                      : t('despensa.celebracionSedimentoVarias');
+                  })()}
+                />
+              ) : null}
 
-                ── QUÉ **NO** LLEVA CARTA, y sale de MEDIR la referencia ──
-                N21 excluye *«el encabezado de la pantalla · el pie con su
-                CTA»*, y `referencia-rappi-seguimiento-escalera-y-rango.jpeg`
-                lo confirma en esta misma pantalla: **la escalera y el rango
-                van sobre el fondo pelado**, y las cartas empiezan recién en
-                el código. ⇒ quedan afuera **la escalera** (que además es una
-                FIGURA, no texto sobre fondo), **la puerta a «en camino»**
-                (navega) y **la salida** (es la acción de la pantalla).
-                **Cuatro cartas, no seis** — N21 pide una superficie por
-                GRUPO, jamás una por elemento. ═══════════════════════════ */}
+              {/* ═══ 🔴 S100c-D · N21: LAS CUATRO CARTAS ═══════════════════
+                  FIRMA DEL FOUNDER: *«como toda la pantalla está sin fondo,
+                  todo está escrito directamente sobre el fondo, sin tener
+                  bordes blancos, se pierde… el código se pierde porque queda
+                  entre colores»*.
 
-            {/* 1 · EL RECORRIDO — la escalera completa con su desvío.
-                🔴 S100-D · ACÁ ARRIBA IBA EL NÚMERO DE ORDEN, Y SE FUE.
-                `P-20260816-3f6580` es un identificador de máquina: lo
-                necesita SOPORTE, no la familia. Presidiendo la pantalla
-                le pedía al dueño que se hiciera cargo de un dato que no
-                puede usar, y encima en el lugar donde debía estar lo
-                único que le importa (dónde está su pedido).
-                **No se pierde: viaja entero adentro del enlace de
-                soporte** (`abrirWhatsApp`), que es donde sirve — el mismo
-                criterio de la lista, que ya lo excluía por Chanel («la
-                fila no dice el número de orden — dato de máquina»). El
-                pedido se nombra por su FECHA, que es como lo nombra
-                quien lo hizo. */}
-            <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
-              {(() => {
-                /* 🔴 S100d · LA VENTANA QUE YA PASÓ. La ventana **se
-                   conserva y se le agrega la voz** —es el dato contra el
-                   que se mide el atraso—, y la voz **no atribuye culpa**:
-                   la app sabe que la hora pasó, no sabe por qué.
-                   Va pegada al mismo renglón porque `EscaleraEstados` da
-                   UNA línea de detalle por paso: *separarlas en dos pasos
-                   inventaría un escalón que el pedido no tiene.* */
-                const detalleActual =
-                  detalle.pedido.promesa_desde !== null && detalle.pedido.promesa_hasta !== null
-                    ? [
-                        t('despensa.promesaCorta', {
-                          dia: diaHumano(detalle.pedido.promesa_desde),
-                          desde: horaLocal(detalle.pedido.promesa_desde),
-                          hasta: horaLocal(detalle.pedido.promesa_hasta),
-                        }),
-                        ventanaVencida(detalle.pedido.promesa_hasta, detalle.pedido.narrativa)
-                          ? t('despensa.ventanaTardando')
-                          : null,
-                      ]
-                        .filter((x): x is string => x !== null)
-                        .join(' · ')
-                    : undefined;
-                const escalera = escaleraDePedido(
-                  detalle.pedido.narrativa,
-                  voces,
-                  detalleActual,
-                );
-                const { pasos, desvio } = escalera;
-                // 🔴 S100b-D · EL DETALLE TAMBIÉN QUEDABA MUDO, y era la
-                // MISMA causa que en la lista (ver `escaleraMuda`). Con
-                // `pagando` la pieza no dibuja —su regla de existencia es
-                // correcta— así que la zona 1, que es *el lugar donde el
-                // dueño busca en qué anda su pedido*, no renderizaba nada.
-                // El hallazgo llegó por la lista; **la segunda superficie
-                // solo aparece midiendo las dos**, y por eso el criterio
-                // vive en una función y no en un `if` por pantalla.
-                if (escaleraMuda(escalera)) {
+                  **Medido por B con aparato:** esta pantalla tenía **4 grupos
+                  rotulados y CERO superficies**, y **88,5 % de su área útil
+                  era un solo color** — el peor de las siete de la despensa.
+                  *La frase del founder es literalmente el código*, que vivía
+                  en un `View` con padding.
+
+                  🔴 **Y LO QUE NO ERA EL DEFECTO, porque la cura obvia habría
+                  sido la equivocada:** *no falta contraste, falta superficie*.
+                  Nuestro fondo/carta da **1,10** y el de Laika **1,119** —
+                  *cuando ponemos carta, separamos igual que la referencia*.
+                  Subir el contraste no habría curado nada.
+
+                  ── QUÉ **NO** LLEVA CARTA, y sale de MEDIR la referencia ──
+                  N21 excluye *«el encabezado de la pantalla · el pie con su
+                  CTA»*, y `referencia-rappi-seguimiento-escalera-y-rango.jpeg`
+                  lo confirma en esta misma pantalla: **la escalera y el rango
+                  van sobre el fondo pelado**, y las cartas empiezan recién en
+                  el código. ⇒ quedan afuera **la escalera** (que además es una
+                  FIGURA, no texto sobre fondo), **la puerta a «en camino»**
+                  (navega) y **la salida** (es la acción de la pantalla).
+                  **Cuatro cartas, no seis** — N21 pide una superficie por
+                  GRUPO, jamás una por elemento. ═══════════════════════════ */}
+
+              {/* 1 · EL RECORRIDO — la escalera completa con su desvío.
+                  🔴 S100-D · ACÁ ARRIBA IBA EL NÚMERO DE ORDEN, Y SE FUE.
+                  `P-20260816-3f6580` es un identificador de máquina: lo
+                  necesita SOPORTE, no la familia. Presidiendo la pantalla
+                  le pedía al dueño que se hiciera cargo de un dato que no
+                  puede usar, y encima en el lugar donde debía estar lo
+                  único que le importa (dónde está su pedido).
+                  **No se pierde: viaja entero adentro del enlace de
+                  soporte** (`abrirWhatsApp`), que es donde sirve — el mismo
+                  criterio de la lista, que ya lo excluía por Chanel («la
+                  fila no dice el número de orden — dato de máquina»). El
+                  pedido se nombra por su FECHA, que es como lo nombra
+                  quien lo hizo. */}
+              <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
+                {(() => {
+                  /* 🔴 S100d · LA VENTANA QUE YA PASÓ. La ventana **se
+                     conserva y se le agrega la voz** —es el dato contra el
+                     que se mide el atraso—, y la voz **no atribuye culpa**:
+                     la app sabe que la hora pasó, no sabe por qué.
+                     Va pegada al mismo renglón porque `EscaleraEstados` da
+                     UNA línea de detalle por paso: *separarlas en dos pasos
+                     inventaría un escalón que el pedido no tiene.* */
+                  const detalleActual =
+                    detalle.pedido.promesa_desde !== null && detalle.pedido.promesa_hasta !== null
+                      ? [
+                          t('despensa.promesaCorta', {
+                            dia: diaHumano(detalle.pedido.promesa_desde),
+                            desde: horaLocal(detalle.pedido.promesa_desde),
+                            hasta: horaLocal(detalle.pedido.promesa_hasta),
+                          }),
+                          ventanaVencida(detalle.pedido.promesa_hasta, detalle.pedido.narrativa)
+                            ? t('despensa.ventanaTardando')
+                            : null,
+                        ]
+                          .filter((x): x is string => x !== null)
+                          .join(' · ')
+                      : undefined;
+                  const escalera = escaleraDePedido(
+                    detalle.pedido.narrativa,
+                    voces,
+                    detalleActual,
+                  );
+                  const { pasos, desvio } = escalera;
+                  // 🔴 S100b-D · EL DETALLE TAMBIÉN QUEDABA MUDO, y era la
+                  // MISMA causa que en la lista (ver `escaleraMuda`). Con
+                  // `pagando` la pieza no dibuja —su regla de existencia es
+                  // correcta— así que la zona 1, que es *el lugar donde el
+                  // dueño busca en qué anda su pedido*, no renderizaba nada.
+                  // El hallazgo llegó por la lista; **la segunda superficie
+                  // solo aparece midiendo las dos**, y por eso el criterio
+                  // vive en una función y no en un `if` por pantalla.
+                  if (escaleraMuda(escalera)) {
+                    return (
+                      <View style={{ gap: spacing[2], alignItems: 'flex-start' }}>
+                        {/* LA MISMA FORMA QUE EN LA LISTA, y a propósito: quien
+                            vio la insignia en su fila encuentra **la misma
+                            figura** al abrir. *Dos formas distintas para el
+                            mismo hecho le piden al dueño que las relacione.*
+                            El nombre del estado sale del CATÁLOGO —dato, no un
+                            `switch`— y la voz que lo explica, del riel. */}
+                        <Insignia estado="info" etiqueta={detalle.pedido.narrativa_nombre} />
+                        <Texto variante="apoyo">{t('despensa.estadoSinRecorrido')}</Texto>
+                      </View>
+                    );
+                  }
                   return (
-                    <View style={{ gap: spacing[2], alignItems: 'flex-start' }}>
-                      {/* LA MISMA FORMA QUE EN LA LISTA, y a propósito: quien
-                          vio la insignia en su fila encuentra **la misma
-                          figura** al abrir. *Dos formas distintas para el
-                          mismo hecho le piden al dueño que las relacione.*
-                          El nombre del estado sale del CATÁLOGO —dato, no un
-                          `switch`— y la voz que lo explica, del riel. */}
-                      <Insignia estado="info" etiqueta={detalle.pedido.narrativa_nombre} />
-                      <Texto variante="apoyo">{t('despensa.estadoSinRecorrido')}</Texto>
+                    <EscaleraEstados
+                      pasos={conIconos(pasos, GLIFO_NODO)}
+                      desvio={desvio}
+                      registro="completa"
+                      acento="control"
+                    />
+                  );
+                })()}
+              </View>
+
+              {/* 1bis · LA PUERTA A EN CAMINO — solo mientras la moto va.
+                  Navega ⇒ chevron y sin caja (19.7: el contorno transparente
+                  murió como acción de fila). Y solo con `en_camino`: antes no
+                  hay a quién seguir, y un mapa quieto en el local durante media
+                  hora se lee como que algo se colgó. */}
+              {/* 🔴 S100d · «SEGUIR EL PEDIDO» GANA CARTA Y GANA OCRE — firma
+                  del founder: *«hay que ponerle un fondo blanco… es uno de los
+                  más importantes… ponerle la letra en el OCRE»*.
+
+                  **LA CARTA (N21):** era una celda **sin superficie propia**, y
+                  eso dejó de ser gratis cuando el fondo pasó a `#F6F6F6`: *una
+                  acción sobre fondo neutro y sin superficie no es discreta —
+                  desaparece.*
+
+                  🔴 **EL OCRE VA COMO RELLENO Y NO COMO LETRA, Y LO DECIDE UN
+                  NÚMERO, no el gusto:**
+                    ocre sobre carta blanca …… **1,70**  (piso de texto **4,5**)
+                    letra TINTA sobre ocre ……… **8,40**  ← el par firmado
+                  **La letra en ocre está a menos de la mitad del piso más
+                  permisivo de la casa** ⇒ pedirla sería pedir que no se lea.
+                  ⏪ **Y el fondo NO lo causó, lo empeora** (censo de B): ya
+                  fallaba a **1,62** sobre el papel anterior y a **1,70** sobre
+                  blanco. *Atribuirle a un cambio reciente un defecto que ya
+                  estaba es la forma más barata de arreglar lo que no era.*
+                  *El founder pidió que se DESTAQUE y nombró el ocre; el ocre
+                  cumple las dos cosas del otro lado del par — de relleno, con
+                  la letra en tinta.* Y así destaca **más** que una letra de
+                  color: es el único sólido de esta pantalla.
+
+                  **Y es legal por 19.7, no a pesar de ella:** *«por superficie
+                  UN sólido, la primaria»* — «Tengo un problema» es
+                  `secundario`, así que el lugar del sólido estaba libre, y
+                  mientras la moto va **ésta es la acción primaria del pedido**.
+                  *La ley prohíbe el segundo sólido, no el primero.* */}
+              {detalle.pedido.narrativa === 'en_camino' ? (
+                <View style={{ paddingHorizontal: spacing[4] }}>
+                  <Tarjeta relleno="amplio">
+                    <View style={{ gap: spacing[2] }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+                        <Icono nombre="ubicacion" tamano={18} />
+                        <Texto variante="seccion">{t('despensa.enCaminoEntrada')}</Texto>
+                      </View>
+                      <Texto variante="apoyo">{t('despensa.enCaminoEntradaDetalle')}</Texto>
+                      {/* 🔴 `primario` Y NO `acento` — ME EQUIVOQUÉ Y SE CUENTA.
+                          Monté `acento` creyendo que era el CTA oro RELLENO, y
+                          su receta es la contraria:
+                            `acento:   { fondo: 'transparent', texto: accent.cta }`  ← letra OCRE
+                            `primario: { fondo: accent.cta, texto: accent.ctaTexto }` ← relleno OCRE
+                          ⇒ **había montado exactamente el par que acababa de
+                          medir como imposible** (1,70 sobre carta blanca), con
+                          el comentario correcto escrito encima.
+                          *Medí el par, escribí la razón, y después elegí la
+                          variante por su NOMBRE en vez de por su receta —
+                          «acento» sonaba a «el del acento».* Lo cazó el censo
+                          de ocre de B, no yo.
+                          El par que rige: **ctaTexto sobre ocre = 9,96**. */}
+                      <Boton
+                        variante="primario"
+                        etiqueta={t('despensa.enCaminoCta')}
+                        onPress={() =>
+                          router.push({
+                            pathname: '/pedidos/en-camino/[pedidoId]',
+                            params: { pedidoId: detalle.pedido.pedido_id },
+                          })
+                        }
+                      />
+                    </View>
+                  </Tarjeta>
+                </View>
+              ) : null}
+
+              {/* 2 · EL CÓDIGO — lo que la familia dice en la puerta (o
+                  muestra en el mostrador). Se LEE, jamás llega por push. */}
+              {codigo !== null ? (
+                /* 🔴 CARTA ①, y es LA del founder: *«el código se pierde
+                   porque queda entre colores»*. La referencia le da carta
+                   propia con su regla adentro
+                   (`referencia-rappi-mapa-rango-y-codigo.png`), y la regla
+                   NO se pliega bajo una «i» (N22): *un dato que cambia la
+                   decisión no se pliega* — y cuándo darlo ES la decisión. */
+                <View style={{ paddingHorizontal: spacing[4] }}>
+                  <Tarjeta relleno="amplio">
+                    <View style={{ gap: spacing[1] }}>
+                      <CodigoAEscala
+                        codigo={codigo}
+                        etiqueta={
+                          detalle.pedido.metodo_entrega === 'retiro'
+                            ? t('despensa.codigoMostrador')
+                            : t('despensa.codigoPuerta')
+                        }
+                      />
+                      <Texto variante="apoyo">
+                        {detalle.pedido.metodo_entrega === 'retiro'
+                          ? t('despensa.codigoMostradorDetalle')
+                          : t('despensa.codigoPuertaDetalle')}
+                      </Texto>
+                    </View>
+                  </Tarjeta>
+                </View>
+              ) : null}
+
+              {/* 3 · QUÉ PEDISTE — con lote cuando ya se empacó y el destino
+                  de cada ítem cuando la fuente lo dice. */}
+              {/* 🔴 CARTA ② — el grupo que el rótulo anuncia. N21: *«si el
+                  bloque tiene un rótulo que lo nombra, ese rótulo está
+                  declarando un grupo ⇒ el grupo va en carta. Un rótulo sin
+                  superficie es un grupo que se anunció y no se dibujó»*.
+                  `relleno="ninguno"` porque adentro van `Celda` a sangre con
+                  sus `Separador` — el mismo patrón que la lista de Cuenta,
+                  que ya cumplía N21 antes de que N21 existiera. */}
+              <View style={{ paddingHorizontal: spacing[4] }}>
+              <Tarjeta relleno="ninguno">
+              <View style={{ gap: spacing[2], paddingVertical: spacing[3] }}>
+                <View style={{ paddingHorizontal: spacing[4] }}>
+                  <Texto variante="seccion">{t('despensa.quePediste')}</Texto>
+                </View>
+                {detalle.items.map((linea, i) => {
+                  const destino = destinoDe(linea);
+                  return (
+                    <View key={linea.item_id}>
+                      {i > 0 ? <Separador /> : null}
+                      <Celda
+                        titulo={linea.nombre_producto}
+                        subtitulo={[
+                          t('despensa.lineaCantidad', { n: linea.cantidad }),
+                          linea.lote !== null ? t('despensa.lineaLote', { lote: linea.lote }) : null,
+                          destino !== null
+                            ? destino.donacion
+                              ? t('despensa.lineaDonacion')
+                              : destino.mascota_id !== null && nombrePorId[destino.mascota_id]
+                                ? t('despensa.lineaPara', { nombre: nombrePorId[destino.mascota_id] })
+                                : null
+                            : null,
+                        ]
+                          .filter((x): x is string => x !== null)
+                          .join(' · ')}
+                        metadataMono={formatearPrecio(linea.subtotal)}
+                      />
+                      {/* §4 — el ítem sin destino se ata cuando el dueño quiera. */}
+                      {destino === null && elegibles.length > 0 ? (
+                        <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[2] }}>
+                          <Boton
+                            variante="secundario"
+                            etiqueta={t('despensa.paraQuienFue')}
+                            onPress={() => {
+                              setMascotaElegida(null);
+                              setAtandoItem(linea.item_id);
+                            }}
+                          />
+                        </View>
+                      ) : null}
                     </View>
                   );
-                }
-                return (
-                  <EscaleraEstados
-                    pasos={conIconos(pasos, GLIFO_NODO)}
-                    desvio={desvio}
-                    registro="completa"
-                    acento="control"
-                  />
-                );
-              })()}
-            </View>
-
-            {/* 1bis · LA PUERTA A EN CAMINO — solo mientras la moto va.
-                Navega ⇒ chevron y sin caja (19.7: el contorno transparente
-                murió como acción de fila). Y solo con `en_camino`: antes no
-                hay a quién seguir, y un mapa quieto en el local durante media
-                hora se lee como que algo se colgó. */}
-            {/* 🔴 S100d · «SEGUIR EL PEDIDO» GANA CARTA Y GANA OCRE — firma
-                del founder: *«hay que ponerle un fondo blanco… es uno de los
-                más importantes… ponerle la letra en el OCRE»*.
-
-                **LA CARTA (N21):** era una celda **sin superficie propia**, y
-                eso dejó de ser gratis cuando el fondo pasó a `#F6F6F6`: *una
-                acción sobre fondo neutro y sin superficie no es discreta —
-                desaparece.*
-
-                🔴 **EL OCRE VA COMO RELLENO Y NO COMO LETRA, Y LO DECIDE UN
-                NÚMERO, no el gusto:**
-                  ocre sobre carta blanca …… **1,70**  (piso de texto **4,5**)
-                  letra TINTA sobre ocre ……… **8,40**  ← el par firmado
-                **La letra en ocre está a menos de la mitad del piso más
-                permisivo de la casa** ⇒ pedirla sería pedir que no se lea.
-                ⏪ **Y el fondo NO lo causó, lo empeora** (censo de B): ya
-                fallaba a **1,62** sobre el papel anterior y a **1,70** sobre
-                blanco. *Atribuirle a un cambio reciente un defecto que ya
-                estaba es la forma más barata de arreglar lo que no era.*
-                *El founder pidió que se DESTAQUE y nombró el ocre; el ocre
-                cumple las dos cosas del otro lado del par — de relleno, con
-                la letra en tinta.* Y así destaca **más** que una letra de
-                color: es el único sólido de esta pantalla.
-
-                **Y es legal por 19.7, no a pesar de ella:** *«por superficie
-                UN sólido, la primaria»* — «Tengo un problema» es
-                `secundario`, así que el lugar del sólido estaba libre, y
-                mientras la moto va **ésta es la acción primaria del pedido**.
-                *La ley prohíbe el segundo sólido, no el primero.* */}
-            {detalle.pedido.narrativa === 'en_camino' ? (
-              <View style={{ paddingHorizontal: spacing[4] }}>
-                <Tarjeta relleno="amplio">
-                  <View style={{ gap: spacing[2] }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
-                      <Icono nombre="ubicacion" tamano={18} />
-                      <Texto variante="seccion">{t('despensa.enCaminoEntrada')}</Texto>
-                    </View>
-                    <Texto variante="apoyo">{t('despensa.enCaminoEntradaDetalle')}</Texto>
-                    {/* 🔴 `primario` Y NO `acento` — ME EQUIVOQUÉ Y SE CUENTA.
-                        Monté `acento` creyendo que era el CTA oro RELLENO, y
-                        su receta es la contraria:
-                          `acento:   { fondo: 'transparent', texto: accent.cta }`  ← letra OCRE
-                          `primario: { fondo: accent.cta, texto: accent.ctaTexto }` ← relleno OCRE
-                        ⇒ **había montado exactamente el par que acababa de
-                        medir como imposible** (1,70 sobre carta blanca), con
-                        el comentario correcto escrito encima.
-                        *Medí el par, escribí la razón, y después elegí la
-                        variante por su NOMBRE en vez de por su receta —
-                        «acento» sonaba a «el del acento».* Lo cazó el censo
-                        de ocre de B, no yo.
-                        El par que rige: **ctaTexto sobre ocre = 9,96**. */}
-                    <Boton
-                      variante="primario"
-                      etiqueta={t('despensa.enCaminoCta')}
-                      onPress={() =>
-                        router.push({
-                          pathname: '/pedidos/en-camino/[pedidoId]',
-                          params: { pedidoId: detalle.pedido.pedido_id },
-                        })
-                      }
-                    />
-                  </View>
-                </Tarjeta>
-              </View>
-            ) : null}
-
-            {/* 2 · EL CÓDIGO — lo que la familia dice en la puerta (o
-                muestra en el mostrador). Se LEE, jamás llega por push. */}
-            {codigo !== null ? (
-              /* 🔴 CARTA ①, y es LA del founder: *«el código se pierde
-                 porque queda entre colores»*. La referencia le da carta
-                 propia con su regla adentro
-                 (`referencia-rappi-mapa-rango-y-codigo.png`), y la regla
-                 NO se pliega bajo una «i» (N22): *un dato que cambia la
-                 decisión no se pliega* — y cuándo darlo ES la decisión. */
-              <View style={{ paddingHorizontal: spacing[4] }}>
-                <Tarjeta relleno="amplio">
-                  <View style={{ gap: spacing[1] }}>
-                    <CodigoAEscala
-                      codigo={codigo}
-                      etiqueta={
-                        detalle.pedido.metodo_entrega === 'retiro'
-                          ? t('despensa.codigoMostrador')
-                          : t('despensa.codigoPuerta')
-                      }
-                    />
-                    <Texto variante="apoyo">
-                      {detalle.pedido.metodo_entrega === 'retiro'
-                        ? t('despensa.codigoMostradorDetalle')
-                        : t('despensa.codigoPuertaDetalle')}
-                    </Texto>
-                  </View>
-                </Tarjeta>
-              </View>
-            ) : null}
-
-            {/* 3 · QUÉ PEDISTE — con lote cuando ya se empacó y el destino
-                de cada ítem cuando la fuente lo dice. */}
-            {/* 🔴 CARTA ② — el grupo que el rótulo anuncia. N21: *«si el
-                bloque tiene un rótulo que lo nombra, ese rótulo está
-                declarando un grupo ⇒ el grupo va en carta. Un rótulo sin
-                superficie es un grupo que se anunció y no se dibujó»*.
-                `relleno="ninguno"` porque adentro van `Celda` a sangre con
-                sus `Separador` — el mismo patrón que la lista de Cuenta,
-                que ya cumplía N21 antes de que N21 existiera. */}
-            <View style={{ paddingHorizontal: spacing[4] }}>
-            <Tarjeta relleno="ninguno">
-            <View style={{ gap: spacing[2], paddingVertical: spacing[3] }}>
-              <View style={{ paddingHorizontal: spacing[4] }}>
-                <Texto variante="seccion">{t('despensa.quePediste')}</Texto>
-              </View>
-              {detalle.items.map((linea, i) => {
-                const destino = destinoDe(linea);
-                return (
-                  <View key={linea.item_id}>
-                    {i > 0 ? <Separador /> : null}
-                    <Celda
-                      titulo={linea.nombre_producto}
-                      subtitulo={[
-                        t('despensa.lineaCantidad', { n: linea.cantidad }),
-                        linea.lote !== null ? t('despensa.lineaLote', { lote: linea.lote }) : null,
-                        destino !== null
-                          ? destino.donacion
-                            ? t('despensa.lineaDonacion')
-                            : destino.mascota_id !== null && nombrePorId[destino.mascota_id]
-                              ? t('despensa.lineaPara', { nombre: nombrePorId[destino.mascota_id] })
-                              : null
-                          : null,
-                      ]
-                        .filter((x): x is string => x !== null)
-                        .join(' · ')}
-                      metadataMono={formatearPrecio(linea.subtotal)}
-                    />
-                    {/* §4 — el ítem sin destino se ata cuando el dueño quiera. */}
-                    {destino === null && elegibles.length > 0 ? (
-                      <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[2] }}>
-                        <Boton
-                          variante="secundario"
-                          etiqueta={t('despensa.paraQuienFue')}
-                          onPress={() => {
-                            setMascotaElegida(null);
-                            setAtandoItem(linea.item_id);
-                          }}
-                        />
-                      </View>
-                    ) : null}
-                  </View>
-                );
-              })}
-            </View>
-            </Tarjeta>
-            </View>
-
-            {/* 4 · A DÓNDE VA (despacho) — el snapshot congelado.
-                🔴 CARTA ③ — rótulo *«A dónde te lo llevamos»* ⇒ grupo. */}
-            {detalle.pedido.metodo_entrega !== 'retiro' && detalle.entrega.direccion !== null ? (
-              <View style={{ paddingHorizontal: spacing[4] }}>
-              <Tarjeta relleno="amplio">
-              <View style={{ gap: spacing[1] }}>
-                {/* 🔴 S100d · PUNTO 23 — la otra mitad. El rótulo que nombra
-                    una DIRECCIÓN entraba sin glifo, y es exactamente el mismo
-                    pedido que el founder hizo en el checkout (punto 17). *Un
-                    rótulo de ubicación sin su marca obliga a leer la carta
-                    entera para saber de qué habla; con la gota se reconoce
-                    antes de leerla.* Va del lado del rótulo y NO del texto de
-                    la dirección: marca el GRUPO, que es lo que N21 pide. */}
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
-                  <Icono nombre="ubicacion" tamano={18} />
-                  <Texto variante="seccion">{t('despensa.aDonde')}</Texto>
-                </View>
-                <Texto variante="cuerpo">{detalle.entrega.direccion}</Texto>
-                {detalle.entrega.referencias !== null ? (
-                  <Texto variante="apoyo">{detalle.entrega.referencias}</Texto>
-                ) : null}
-                {/* La instrucción que decide la entrega fallida (§9.3) —
-                    de vuelta al leer desde el cableo del 12-ago. */}
-                {detalle.entrega.instrucciones !== null ? (
-                  <Texto variante="apoyo">
-                    {t('despensa.instruccionDicha', { texto: detalle.entrega.instrucciones })}
-                  </Texto>
-                ) : null}
+                })}
               </View>
               </Tarjeta>
               </View>
-            ) : null}
 
-            {/* 5 · LA PLATA — transportada del motor, jamás sumada acá.
-                🔴 CARTA ④ — rótulo *«El total de tu pedido»* ⇒ grupo. Y es
-                el que más lo pide: **cuatro filas de números que se leen
-                como una sola cosa.** */}
-            <View style={{ paddingHorizontal: spacing[4] }}>
-            <Tarjeta relleno="amplio">
-            <View style={{ gap: spacing[2] }}>
-              <Texto variante="seccion">{t('despensa.resumen')}</Texto>
-              <FilaMonto etiqueta={t('despensa.subtotal')} monto={formatearPrecio(detalle.subtotal)} />
-              <FilaMonto etiqueta={t('despensa.impuesto')} monto={formatearPrecio(detalle.impuesto_total)} />
-              <FilaMonto
-                etiqueta={
-                  detalle.pedido.metodo_entrega === 'retiro'
-                    ? t('despensa.envioRetiro')
-                    : t('despensa.envio')
-                }
-                monto={formatearPrecio(detalle.costo_envio)}
-              />
-              <Separador />
-              <FilaMonto etiqueta={t('despensa.total')} monto={formatearPrecio(detalle.pedido.total)} destacada />
+              {/* 4 · A DÓNDE VA (despacho) — el snapshot congelado.
+                  🔴 CARTA ③ — rótulo *«A dónde te lo llevamos»* ⇒ grupo. */}
+              {detalle.pedido.metodo_entrega !== 'retiro' && detalle.entrega.direccion !== null ? (
+                <View style={{ paddingHorizontal: spacing[4] }}>
+                <Tarjeta relleno="amplio">
+                <View style={{ gap: spacing[1] }}>
+                  {/* 🔴 S100d · PUNTO 23 — la otra mitad. El rótulo que nombra
+                      una DIRECCIÓN entraba sin glifo, y es exactamente el mismo
+                      pedido que el founder hizo en el checkout (punto 17). *Un
+                      rótulo de ubicación sin su marca obliga a leer la carta
+                      entera para saber de qué habla; con la gota se reconoce
+                      antes de leerla.* Va del lado del rótulo y NO del texto de
+                      la dirección: marca el GRUPO, que es lo que N21 pide. */}
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+                    <Icono nombre="ubicacion" tamano={18} />
+                    <Texto variante="seccion">{t('despensa.aDonde')}</Texto>
+                  </View>
+                  <Texto variante="cuerpo">{detalle.entrega.direccion}</Texto>
+                  {detalle.entrega.referencias !== null ? (
+                    <Texto variante="apoyo">{detalle.entrega.referencias}</Texto>
+                  ) : null}
+                  {/* La instrucción que decide la entrega fallida (§9.3) —
+                      de vuelta al leer desde el cableo del 12-ago. */}
+                  {detalle.entrega.instrucciones !== null ? (
+                    <Texto variante="apoyo">
+                      {t('despensa.instruccionDicha', { texto: detalle.entrega.instrucciones })}
+                    </Texto>
+                  ) : null}
+                </View>
+                </Tarjeta>
+                </View>
+              ) : null}
 
-              {/* 🔴 S100c-D · LA FACTURA — el founder la pidió como acceso de
-                  la casa de Pedidos, y **vive acá y no en una casa aparte**
-                  por lo que dio la medición.
+              {/* 5 · LA PLATA — transportada del motor, jamás sumada acá.
+                  🔴 CARTA ④ — rótulo *«El total de tu pedido»* ⇒ grupo. Y es
+                  el que más lo pide: **cuatro filas de números que se leen
+                  como una sola cosa.** */}
+              <View style={{ paddingHorizontal: spacing[4] }}>
+              <Tarjeta relleno="amplio">
+              <View style={{ gap: spacing[2] }}>
+                <Texto variante="seccion">{t('despensa.resumen')}</Texto>
+                <FilaMonto etiqueta={t('despensa.subtotal')} monto={formatearPrecio(detalle.subtotal)} />
+                <FilaMonto etiqueta={t('despensa.impuesto')} monto={formatearPrecio(detalle.impuesto_total)} />
+                <FilaMonto
+                  etiqueta={
+                    detalle.pedido.metodo_entrega === 'retiro'
+                      ? t('despensa.envioRetiro')
+                      : t('despensa.envio')
+                  }
+                  monto={formatearPrecio(detalle.costo_envio)}
+                />
+                <Separador />
+                <FilaMonto etiqueta={t('despensa.total')} monto={formatearPrecio(detalle.pedido.total)} destacada />
 
-                  **Lo medido contra la base viva (18-ago-2026):**
-                    `facturas` = 6 filas · **con `archivo_url` = 0** · **con
-                    `pdf_url` = 0** · con `clave_acceso` = 1 · 5 son del
-                    founder · policy `facturas_owner` · lectores = **cero**.
+                {/* 🔴 S100c-D · LA FACTURA — el founder la pidió como acceso de
+                    la casa de Pedidos, y **vive acá y no en una casa aparte**
+                    por lo que dio la medición.
 
-                  ⇒ **Ninguna factura tiene documento adjunto.** Una pantalla
-                  «Facturas» con una fila por pedido y un botón que no abre
-                  nada es **una puerta que rebota** (Ley 23), y encima sobre
-                  el papel que la gente usa para su contabilidad. *Lo honesto
-                  no es una casa vacía: es el número donde tiene sentido.*
+                    **Lo medido contra la base viva (18-ago-2026):**
+                      `facturas` = 6 filas · **con `archivo_url` = 0** · **con
+                      `pdf_url` = 0** · con `clave_acceso` = 1 · 5 son del
+                      founder · policy `facturas_owner` · lectores = **cero**.
 
-                  Va DENTRO de la carta del total y no en una quinta: es el
-                  comprobante de esa misma plata, y N21 pide una superficie
-                  por GRUPO, jamás una por elemento.
+                    ⇒ **Ninguna factura tiene documento adjunto.** Una pantalla
+                    «Facturas» con una fila por pedido y un botón que no abre
+                    nada es **una puerta que rebota** (Ley 23), y encima sobre
+                    el papel que la gente usa para su contabilidad. *Lo honesto
+                    no es una casa vacía: es el número donde tiene sentido.*
 
-                  **El día que `archivo_url` o `pdf_url` se pueblen**, acá
-                  entra el camino a abrirlo — y recién entonces «Facturas»
-                  como acceso propio tiene objeto. A devolvió las DOS urls a
-                  propósito, sin elegir por mí: *elegir una a ciegas sería
-                  decidir la pantalla con una moneda.* */}
-              {factura === null ? null : (
-                <>
-                  <Separador />
-                  <FilaMonto
-                    etiqueta={t('despensa.facturaNumero')}
-                    monto={factura.numero_factura}
+                    Va DENTRO de la carta del total y no en una quinta: es el
+                    comprobante de esa misma plata, y N21 pide una superficie
+                    por GRUPO, jamás una por elemento.
+
+                    **El día que `archivo_url` o `pdf_url` se pueblen**, acá
+                    entra el camino a abrirlo — y recién entonces «Facturas»
+                    como acceso propio tiene objeto. A devolvió las DOS urls a
+                    propósito, sin elegir por mí: *elegir una a ciegas sería
+                    decidir la pantalla con una moneda.* */}
+                {factura === null ? null : (
+                  <>
+                    <Separador />
+                    <FilaMonto
+                      etiqueta={t('despensa.facturaNumero')}
+                      monto={factura.numero_factura}
+                    />
+                  </>
+                )}
+              </View>
+              </Tarjeta>
+              </View>
+
+              {/* 6 · LA SALIDA — cancelar HASTA preparado; después, hablar.
+                  El corte es un hecho operativo, no un reloj (§8.3).
+                  SIN CARTA por N21: *«el pie fijo con su CTA no lleva
+                  carta»* — es la acción de la pantalla, no un grupo de
+                  datos que se lea junto. */}
+              {!detalle.pedido.es_terminal &&
+              (detalle.pedido.narrativa === 'pagando' || detalle.pedido.narrativa === 'confirmado') ? (
+                <View style={{ paddingHorizontal: spacing[5] }}>
+                  <Boton
+                    variante="secundario"
+                    bloque
+                    etiqueta={t('despensa.cancelarPedido')}
+                    onPress={() => setHojaCancelar(true)}
                   />
-                </>
+                </View>
+              ) : detalle.pedido.narrativa !== 'cancelado' ? (
+                <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
+                  {/* ══ S114-C · DOS PUERTAS QUE NO COMPITEN ═══════════════
+                      **Ratificación con corrección de la mesa (7-sep).** Mi
+                      primera lectura las trató como el mismo sistema —y por
+                      eso las hizo excluyentes: donde había puerta, la otra
+                      desaparecía—. **No son dos sistemas de postventa: son
+                      dos cosas distintas**, y la letra lo dice sola cuando
+                      aclara que *«¿dónde está mi pedido?» NO es un caso*.
+
+                      ① **«¿Algo salió distinto?» es la ÚNICA puerta de
+                         reclamo.** Todo lo que la letra llama caso entra por
+                         ahí, sin excepción y sin solapamiento.
+                      ② **WhatsApp queda SÓLO para lo que explícitamente no es
+                         un caso** — y por eso lo que cambió no fue su
+                         condición: fue su NOMBRE.
+
+                      🔴 *Lo que estaba mal no era que convivieran: era que se
+                      llamaban parecido.* «Tengo un problema» y «¿Algo salió
+                      distinto?» le piden a la familia que adivine cuál le
+                      toca, **y la que elija mal la deja sin lo que la letra ya
+                      le prometió.** Con «Necesito ayuda con este pedido» cada
+                      una dice de qué es, y pueden estar juntas sin que nadie
+                      tenga que elegir a ciegas. */}
+                  <Boton
+                    variante="secundario"
+                    bloque
+                    etiqueta={t('despensa.necesitoAyudaPedido')}
+                    onPress={() => void abrirWhatsApp(detalle.pedido.numero_orden)}
+                  />
+                  {/* §8.4 — el botón dice A DÓNDE va y EN QUÉ HORARIO. */}
+                  <Texto variante="apoyo">{t('despensa.problemaDetalle')}</Texto>
+                </View>
+              ) : null}
+
+              {/* ══ S114-C · LA PUERTA DEL RECLAMO, GOBERNADA SOLA ═════════
+                  🔴 **Vive AFUERA del ternario de arriba, y ése es el punto.**
+                  Estaba adentro de su rama del medio, así que un pedido
+                  `cancelado` no la veía **y `cancelado_vendedor` es un motivo
+                  de clase 1 del catálogo**: la familia a la que el vendedor le
+                  canceló el pedido se quedaba sin puerta.
+
+                  ① de la mesa dice *«todo lo que la letra llama caso entra por
+                  ahí, sin excepción»*. Una excepción escondida en la forma de
+                  un `else` es igual de excepción — y ésta no se veía porque el
+                  ternario decide por narrativa y la puerta decide por cierre.
+                  **Ahora la gobierna `puerta.hay` y nada más.** */}
+              {puerta.hay && (
+                <View style={{ paddingHorizontal: spacing[5], marginTop: spacing[2] }}>
+                  {/* `false` con su razón, no por omisión: **un pedido no
+                      tiene UNA mascota** (ver la nota del veredicto, arriba),
+                      así que la regla de memorial no aplica y elegir una para
+                      aplicársela sería inventarle un sujeto. */}
+                  <LineaAlgoSalioDistinto
+                    /* 🔴 `hogar` y SIN `enMemorial`: firma del founder — el
+                       pedido es del HOGAR, tiene N destinos por línea y puede
+                       tener donación, así que «la mascota» en singular no existe
+                       acá. La unión de B lo vuelve inexpresable: con `hogar`, la
+                       prop de memorial es `never`. ⏪ Antes acá iba un `false`
+                       suelto, que decía lo mismo por casualidad y no por ley. */
+                    sujeto="hogar"
+                    estado={puerta.estado}
+                    onPress={abrirLaPuerta}
+                  />
+                </View>
               )}
-            </View>
-            </Tarjeta>
-            </View>
-
-            {/* 6 · LA SALIDA — cancelar HASTA preparado; después, hablar.
-                El corte es un hecho operativo, no un reloj (§8.3).
-                SIN CARTA por N21: *«el pie fijo con su CTA no lleva
-                carta»* — es la acción de la pantalla, no un grupo de
-                datos que se lea junto. */}
-            {!detalle.pedido.es_terminal &&
-            (detalle.pedido.narrativa === 'pagando' || detalle.pedido.narrativa === 'confirmado') ? (
-              <View style={{ paddingHorizontal: spacing[5] }}>
-                <Boton
-                  variante="secundario"
-                  bloque
-                  etiqueta={t('despensa.cancelarPedido')}
-                  onPress={() => setHojaCancelar(true)}
-                />
-              </View>
-            ) : detalle.pedido.narrativa !== 'cancelado' ? (
-              <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
-                {/* ══ S114-C · DOS PUERTAS QUE NO COMPITEN ═══════════════
-                    **Ratificación con corrección de la mesa (7-sep).** Mi
-                    primera lectura las trató como el mismo sistema —y por
-                    eso las hizo excluyentes: donde había puerta, la otra
-                    desaparecía—. **No son dos sistemas de postventa: son
-                    dos cosas distintas**, y la letra lo dice sola cuando
-                    aclara que *«¿dónde está mi pedido?» NO es un caso*.
-
-                    ① **«¿Algo salió distinto?» es la ÚNICA puerta de
-                       reclamo.** Todo lo que la letra llama caso entra por
-                       ahí, sin excepción y sin solapamiento.
-                    ② **WhatsApp queda SÓLO para lo que explícitamente no es
-                       un caso** — y por eso lo que cambió no fue su
-                       condición: fue su NOMBRE.
-
-                    🔴 *Lo que estaba mal no era que convivieran: era que se
-                    llamaban parecido.* «Tengo un problema» y «¿Algo salió
-                    distinto?» le piden a la familia que adivine cuál le
-                    toca, **y la que elija mal la deja sin lo que la letra ya
-                    le prometió.** Con «Necesito ayuda con este pedido» cada
-                    una dice de qué es, y pueden estar juntas sin que nadie
-                    tenga que elegir a ciegas. */}
-                <Boton
-                  variante="secundario"
-                  bloque
-                  etiqueta={t('despensa.necesitoAyudaPedido')}
-                  onPress={() => void abrirWhatsApp(detalle.pedido.numero_orden)}
-                />
-                {/* §8.4 — el botón dice A DÓNDE va y EN QUÉ HORARIO. */}
-                <Texto variante="apoyo">{t('despensa.problemaDetalle')}</Texto>
-              </View>
-            ) : null}
-
-            {/* ══ S114-C · LA PUERTA DEL RECLAMO, GOBERNADA SOLA ═════════
-                🔴 **Vive AFUERA del ternario de arriba, y ése es el punto.**
-                Estaba adentro de su rama del medio, así que un pedido
-                `cancelado` no la veía **y `cancelado_vendedor` es un motivo
-                de clase 1 del catálogo**: la familia a la que el vendedor le
-                canceló el pedido se quedaba sin puerta.
-
-                ① de la mesa dice *«todo lo que la letra llama caso entra por
-                ahí, sin excepción»*. Una excepción escondida en la forma de
-                un `else` es igual de excepción — y ésta no se veía porque el
-                ternario decide por narrativa y la puerta decide por cierre.
-                **Ahora la gobierna `puerta.hay` y nada más.** */}
-            {puerta.hay && (
-              <View style={{ paddingHorizontal: spacing[5], marginTop: spacing[2] }}>
-                {/* `false` con su razón, no por omisión: **un pedido no
-                    tiene UNA mascota** (ver la nota del veredicto, arriba),
-                    así que la regla de memorial no aplica y elegir una para
-                    aplicársela sería inventarle un sujeto. */}
-                <LineaAlgoSalioDistinto
-                  /* 🔴 `hogar` y SIN `enMemorial`: firma del founder — el
-                     pedido es del HOGAR, tiene N destinos por línea y puede
-                     tener donación, así que «la mascota» en singular no existe
-                     acá. La unión de B lo vuelve inexpresable: con `hogar`, la
-                     prop de memorial es `never`. ⏪ Antes acá iba un `false`
-                     suelto, que decía lo mismo por casualidad y no por ley. */
-                  sujeto="hogar"
-                  estado={puerta.estado}
-                  onPress={abrirLaPuerta}
-                />
-              </View>
-            )}
-          </>
-        )}
+            </>
+          )}
+        </View>
       </HojaContenido>
 
       {/* La confirmación de cancelar — una decisión con consecuencias

@@ -124,64 +124,71 @@ export default function AyudaCuenta() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: {
-          padding: spacing[5],
-          gap: spacing[4],
-        } }}
+
       >
-        {/* ① EL SOPORTE PRESIDE — es lo que la persona vino a buscar, y es el
-            destino de las tres compuertas de pago que hablan hacia soporte. */}
-        <Tarjeta>
-          <View style={{ gap: spacing[3] }}>
-            <Texto variante="seccion">{t('cuenta.soporteTitulo')}</Texto>
-            <Texto variante="apoyo">{t('cuenta.soporteCuerpo')}</Texto>
-            <Boton
-              etiqueta={t('cuenta.soporteBoton')}
-              bloque
-              onPress={() => void abrirWhatsApp()}
-            />
-            {sinWhatsApp ? (
-              <Texto variante="dato" seleccionable>
-                {t('cuenta.soporteFallback', { numero: WHATSAPP_EQUIPO_HUMANO })}
-              </Texto>
-            ) : null}
-          </View>
-        </Tarjeta>
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[5], gap: spacing[4] }}>
+          {/* ① EL SOPORTE PRESIDE — es lo que la persona vino a buscar, y es el
+              destino de las tres compuertas de pago que hablan hacia soporte. */}
+          <Tarjeta>
+            <View style={{ gap: spacing[3] }}>
+              <Texto variante="seccion">{t('cuenta.soporteTitulo')}</Texto>
+              <Texto variante="apoyo">{t('cuenta.soporteCuerpo')}</Texto>
+              <Boton
+                etiqueta={t('cuenta.soporteBoton')}
+                bloque
+                onPress={() => void abrirWhatsApp()}
+              />
+              {sinWhatsApp ? (
+                <Texto variante="dato" seleccionable>
+                  {t('cuenta.soporteFallback', { numero: WHATSAPP_EQUIPO_HUMANO })}
+                </Texto>
+              ) : null}
+            </View>
+          </Tarjeta>
 
-        {/* ② MIS CASOS — §: «Mis casos en Cuenta > Ayuda, con los abiertos
-            arriba». Va DESPUÉS del soporte y ANTES de los legales: quien entra
-            acá viene a resolver algo, y un caso abierto es lo más cerca de
-            resuelto que tiene. */}
-        <Tarjeta>
-          <CeldaNavegacion
-            icono="caso"
-            titulo={t('cuenta.misCasosTitulo')}
-            detalle={t('cuenta.misCasosDetalle')}
-            onPress={() => router.push('/postventa/mis-casos')}
-          />
-        </Tarjeta>
-
-        {/* ③ LOS LEGALES — se navegan (N21: el grupo rotulado va en carta).
-
-            🔴 **UNA fila, no dos.** ⏪ Nacieron dos («Términos» y
-            «Privacidad», cada una a su documento) y **A las corrigió con la
-            fuente de B: la app conoce UN índice.** *Con dos enlaces sueltos,
-            el día que nazca el aviso de IA o la letra de custodia hay que
-            volver a tocar esta pantalla — y la que no se toca se queda
-            vieja.* */}
-        <Tarjeta>
-          <View style={{ gap: spacing[2] }}>
+          {/* ② MIS CASOS — §: «Mis casos en Cuenta > Ayuda, con los abiertos
+              arriba». Va DESPUÉS del soporte y ANTES de los legales: quien entra
+              acá viene a resolver algo, y un caso abierto es lo más cerca de
+              resuelto que tiene. */}
+          <Tarjeta>
             <CeldaNavegacion
-              icono="documento"
-              titulo={t('cuenta.legalesTitulo')}
-              onPress={() => void abrirLegal(urlLegales(idioma))}
+              icono="caso"
+              titulo={t('cuenta.misCasosTitulo')}
+              detalle={t('cuenta.misCasosDetalle')}
+              onPress={() => router.push('/postventa/mis-casos')}
             />
-            {/* 🔴 QUÉ SE ESTÁ LEYENDO, dicho en voz alta. Sin esta línea la
-                fila promete los documentos DE LA APP y entrega los DEL SITIO
-                — que se excluye a sí mismo de ella con todas las letras. */}
-            <Texto variante="apoyo">{t('cuenta.legalEstado')}</Texto>
-          </View>
-        </Tarjeta>
+          </Tarjeta>
+
+          {/* ③ LOS LEGALES — se navegan (N21: el grupo rotulado va en carta).
+
+              🔴 **UNA fila, no dos.** ⏪ Nacieron dos («Términos» y
+              «Privacidad», cada una a su documento) y **A las corrigió con la
+              fuente de B: la app conoce UN índice.** *Con dos enlaces sueltos,
+              el día que nazca el aviso de IA o la letra de custodia hay que
+              volver a tocar esta pantalla — y la que no se toca se queda
+              vieja.* */}
+          <Tarjeta>
+            <View style={{ gap: spacing[2] }}>
+              <CeldaNavegacion
+                icono="documento"
+                titulo={t('cuenta.legalesTitulo')}
+                onPress={() => void abrirLegal(urlLegales(idioma))}
+              />
+              {/* 🔴 QUÉ SE ESTÁ LEYENDO, dicho en voz alta. Sin esta línea la
+                  fila promete los documentos DE LA APP y entrega los DEL SITIO
+                  — que se excluye a sí mismo de ella con todas las letras. */}
+              <Texto variante="apoyo">{t('cuenta.legalEstado')}</Texto>
+            </View>
+          </Tarjeta>
+        </View>
       </HojaContenido>
     </View>
   );

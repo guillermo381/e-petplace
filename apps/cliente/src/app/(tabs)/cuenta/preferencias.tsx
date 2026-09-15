@@ -290,200 +290,210 @@ export default function PreferenciasCuenta() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: { padding: spacing[5], gap: spacing[5] } }}
+
       >
-        <Tarjeta>
-          <SelectorOpcion
-            acento="control"
-            etiqueta={t('cuenta.idioma')}
-            opciones={[
-              { codigo: 'es', etiqueta: t('cuenta.idiomaEs') },
-              { codigo: 'en', etiqueta: t('cuenta.idiomaEn') },
-            ]}
-            seleccionada={idioma}
-            onSelect={(codigo) => void alElegirIdioma(codigo)}
-          />
-        </Tarjeta>
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[5], gap: spacing[5] }}>
+          <Tarjeta>
+            <SelectorOpcion
+              acento="control"
+              etiqueta={t('cuenta.idioma')}
+              opciones={[
+                { codigo: 'es', etiqueta: t('cuenta.idiomaEs') },
+                { codigo: 'en', etiqueta: t('cuenta.idiomaEn') },
+              ]}
+              seleccionada={idioma}
+              onSelect={(codigo) => void alElegirIdioma(codigo)}
+            />
+          </Tarjeta>
 
-        {/* ── COMPARTIR SUS FOTOS · la SEGUNDA vía de la autorización ─────
-             ⭐ El consentimiento se da en la confirmación de la reserva —ya
-             pagó, así que aceptar no puede parecer un requisito—; **acá vive
-             el interruptor para cambiarlo después**.
+          {/* ── COMPARTIR SUS FOTOS · la SEGUNDA vía de la autorización ─────
+               ⭐ El consentimiento se da en la confirmación de la reserva —ya
+               pagó, así que aceptar no puede parecer un requisito—; **acá vive
+               el interruptor para cambiarlo después**.
 
-             🔴 **El correo de `privacidad@` NO se retira porque exista esta
-             pantalla** (firma del founder): la frase del check ofrece **las
-             dos vías**. *Un canal de contacto no se cierra porque aparezca un
-             control — quien no encuentra la pantalla sigue teniendo cómo.*
+               🔴 **El correo de `privacidad@` NO se retira porque exista esta
+               pantalla** (firma del founder): la frase del check ofrece **las
+               dos vías**. *Un canal de contacto no se cierra porque aparezca un
+               control — quien no encuentra la pantalla sigue teniendo cómo.*
 
-             ⚠️ **`null` NO es `false`.** El lector devuelve `null` cuando la
-             familia **nunca eligió**, y eso se pinta apagado **sin decir que
-             dijo que no** — *mostrar «no autorizaste» a quien nunca fue
-             preguntado es inventarle una respuesta.*
+               ⚠️ **`null` NO es `false`.** El lector devuelve `null` cuando la
+               familia **nunca eligió**, y eso se pinta apagado **sin decir que
+               dijo que no** — *mostrar «no autorizaste» a quien nunca fue
+               preguntado es inventarle una respuesta.*
 
-             🔴 Escribe por `fijarRedesAutorizadas`, la puerta PROPIA: usar el
-             aceptador de documentos como interruptor **le firmaba a la familia
-             un contrato que no leyó** (medido por A: aceptaciones 10 → 11 al
-             prender el switch). ── */}
-        {familiaId !== null ? (
+               🔴 Escribe por `fijarRedesAutorizadas`, la puerta PROPIA: usar el
+               aceptador de documentos como interruptor **le firmaba a la familia
+               un contrato que no leyó** (medido por A: aceptaciones 10 → 11 al
+               prender el switch). ── */}
+          {familiaId !== null ? (
+            <View style={{ gap: spacing[3] }}>
+              <Text
+                accessibilityRole="header"
+                style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}
+              >
+                {t('cuenta.imagenTitulo')}
+              </Text>
+              <Tarjeta>
+                <View style={{ gap: spacing[2] }}>
+                  <Interruptor
+                    etiqueta={t('imagenes.enPreferencias')}
+                    encendido={redes === true}
+                    onCambio={(v) => {
+                      const antes = redes;
+                      setRedes(v);
+                      void fijarRedesAutorizadas({ familiaId, autorizadas: v }).then((r) => {
+                        /* Si el server rebota, la perilla VUELVE: dejarla puesta
+                           sobre un guardado que falló muestra un permiso que
+                           nadie tiene. */
+                        if (!r.ok) setRedes(antes);
+                      });
+                    }}
+                  />
+                  <Texto variante="apoyo">{t('imagenes.revocar')}</Texto>
+                </View>
+              </Tarjeta>
+            </View>
+          ) : null}
+
           <View style={{ gap: spacing[3] }}>
             <Text
               accessibilityRole="header"
               style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}
             >
-              {t('cuenta.imagenTitulo')}
+              {t('cuenta.notificaciones')}
             </Text>
-            <Tarjeta>
-              <View style={{ gap: spacing[2] }}>
-                <Interruptor
-                  etiqueta={t('imagenes.enPreferencias')}
-                  encendido={redes === true}
-                  onCambio={(v) => {
-                    const antes = redes;
-                    setRedes(v);
-                    void fijarRedesAutorizadas({ familiaId, autorizadas: v }).then((r) => {
-                      /* Si el server rebota, la perilla VUELVE: dejarla puesta
-                         sobre un guardado que falló muestra un permiso que
-                         nadie tiene. */
-                      if (!r.ok) setRedes(antes);
-                    });
-                  }}
-                />
-                <Texto variante="apoyo">{t('imagenes.revocar')}</Texto>
-              </View>
-            </Tarjeta>
-          </View>
-        ) : null}
-
-        <View style={{ gap: spacing[3] }}>
-          <Text
-            accessibilityRole="header"
-            style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}
-          >
-            {t('cuenta.notificaciones')}
-          </Text>
-          <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
-            {t('cuenta.notifLey')}
-          </Text>
-
-          {/* Lámina §5: el permiso del SO negado SE DICE — los chips de
-              Push no van a fingir. `no_medible` no afirma nada (L-197). */}
-          {permisoPush === 'negado' ? (
             <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
-              {t('cuenta.notifPermisoNegado')}
+              {t('cuenta.notifLey')}
             </Text>
-          ) : null}
 
-          {estado === 'cargando' ? (
-            <EsqueletoGrupo>
-              <View style={{ gap: spacing[3] }}>
-                <Esqueleto forma="bloque" ancho="100%" alto={120} />
-                <Esqueleto forma="bloque" ancho="100%" alto={120} />
-                <Esqueleto forma="bloque" ancho="100%" alto={120} />
-              </View>
-            </EsqueletoGrupo>
-          ) : estado === 'error' || catalogo === null ? (
-            <EstadoVacio
-              registro="seccion"
-              titulo={t('cuenta.errorCargar')}
-              accion={<Boton variante="secundario" etiqueta={t('cuenta.reintentar')} onPress={() => { setEstado('cargando'); setIntento((n) => n + 1); }} />}
-            />
-          ) : (
-            catalogo.categorias
-              // Enmienda de lámina (firma founder, S88): una categoría
-              // con CERO tipos vivos NO se dibuja — un interruptor para
-              // algo que nunca va a llegar es un toggle que no controla
-              // nada (Ley 23). Derivado del catálogo: el día que nazca
-              // el primer tipo (hoy, el primer digest de «Resúmenes»),
-              // la fila aparece sola.
-              // PARA MI AUDIENCIA, no vivos a secas (el freno de C, S88):
-              // esta pantalla declaró 'cliente' arriba — filtrar por el
-              // booleano ciego dejaría ese parámetro decorativo. Medido
-              // al curar: hoy los dos coinciden para cliente (0 filas de
-              // diferencia); el defecto era latente, no visible.
-              .filter((cat) => cat.tieneTiposVivosParaMi)
-              .map((cat) => {
-              const canales = catalogo.canales.map((c) => c.codigo);
-              const encendida = filaEncendida({
-                canales,
-                persistidas,
-                categoria: cat.codigo,
-                defaultCategoria: cat.defaultHabilitada,
-              });
-              const porque = cat.apagableExistencia ? null : vozPorque(cat.codigo);
-              const ejemplo = vozEjemplo(cat.codigo);
-              const seleccionadas = canales.filter((canal) => {
-                const efectiva = preferenciaEfectiva({
-                  persistida: persistidas[`${cat.codigo}:${canal}`],
-                  canal,
+            {/* Lámina §5: el permiso del SO negado SE DICE — los chips de
+                Push no van a fingir. `no_medible` no afirma nada (L-197). */}
+            {permisoPush === 'negado' ? (
+              <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
+                {t('cuenta.notifPermisoNegado')}
+              </Text>
+            ) : null}
+
+            {estado === 'cargando' ? (
+              <EsqueletoGrupo>
+                <View style={{ gap: spacing[3] }}>
+                  <Esqueleto forma="bloque" ancho="100%" alto={120} />
+                  <Esqueleto forma="bloque" ancho="100%" alto={120} />
+                  <Esqueleto forma="bloque" ancho="100%" alto={120} />
+                </View>
+              </EsqueletoGrupo>
+            ) : estado === 'error' || catalogo === null ? (
+              <EstadoVacio
+                registro="seccion"
+                titulo={t('cuenta.errorCargar')}
+                accion={<Boton variante="secundario" etiqueta={t('cuenta.reintentar')} onPress={() => { setEstado('cargando'); setIntento((n) => n + 1); }} />}
+              />
+            ) : (
+              catalogo.categorias
+                // Enmienda de lámina (firma founder, S88): una categoría
+                // con CERO tipos vivos NO se dibuja — un interruptor para
+                // algo que nunca va a llegar es un toggle que no controla
+                // nada (Ley 23). Derivado del catálogo: el día que nazca
+                // el primer tipo (hoy, el primer digest de «Resúmenes»),
+                // la fila aparece sola.
+                // PARA MI AUDIENCIA, no vivos a secas (el freno de C, S88):
+                // esta pantalla declaró 'cliente' arriba — filtrar por el
+                // booleano ciego dejaría ese parámetro decorativo. Medido
+                // al curar: hoy los dos coinciden para cliente (0 filas de
+                // diferencia); el defecto era latente, no visible.
+                .filter((cat) => cat.tieneTiposVivosParaMi)
+                .map((cat) => {
+                const canales = catalogo.canales.map((c) => c.codigo);
+                const encendida = filaEncendida({
+                  canales,
+                  persistidas,
+                  categoria: cat.codigo,
                   defaultCategoria: cat.defaultHabilitada,
                 });
-                // Push con permiso del SO negado no se pinta encendido:
-                // no llega, y un chip activo sería la pantalla mintiendo
-                // sobre algo que puede medir (lámina §5).
-                if (canal === 'push' && permisoPush === 'negado') return false;
-                return efectiva;
-              });
-              return (
-                <Tarjeta key={cat.codigo}>
-                  <View style={{ gap: spacing[3] }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
-                      <Text style={{ flex: 1, fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: theme.text.primary }}>
-                        {vozFila(cat.codigo, cat.descripcion)}
-                      </Text>
-                      {/* Anatomía (b): la no apagable NO dibuja el toggle
-                          que el motor va a rebotar (Ley 23). */}
-                      {cat.apagableExistencia ? (
-                        <Interruptor
-                          encendido={encendida}
-                          onCambio={(e) => void alCambiarExistencia(cat.codigo, canales, e)}
-                          etiqueta={vozFila(cat.codigo, cat.descripcion)}
-                        />
+                const porque = cat.apagableExistencia ? null : vozPorque(cat.codigo);
+                const ejemplo = vozEjemplo(cat.codigo);
+                const seleccionadas = canales.filter((canal) => {
+                  const efectiva = preferenciaEfectiva({
+                    persistida: persistidas[`${cat.codigo}:${canal}`],
+                    canal,
+                    defaultCategoria: cat.defaultHabilitada,
+                  });
+                  // Push con permiso del SO negado no se pinta encendido:
+                  // no llega, y un chip activo sería la pantalla mintiendo
+                  // sobre algo que puede medir (lámina §5).
+                  if (canal === 'push' && permisoPush === 'negado') return false;
+                  return efectiva;
+                });
+                return (
+                  <Tarjeta key={cat.codigo}>
+                    <View style={{ gap: spacing[3] }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
+                        <Text style={{ flex: 1, fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: theme.text.primary }}>
+                          {vozFila(cat.codigo, cat.descripcion)}
+                        </Text>
+                        {/* Anatomía (b): la no apagable NO dibuja el toggle
+                            que el motor va a rebotar (Ley 23). */}
+                        {cat.apagableExistencia ? (
+                          <Interruptor
+                            encendido={encendida}
+                            onCambio={(e) => void alCambiarExistencia(cat.codigo, canales, e)}
+                            etiqueta={vozFila(cat.codigo, cat.descripcion)}
+                          />
+                        ) : null}
+                      </View>
+
+                      {/* El ejemplo BAJO EL TÍTULO (forma autorizada por el
+                          founder): en las no apagables el ejemplo arriba y
+                          el porqué abajo, cerrando la fila. */}
+                      {ejemplo !== null ? (
+                        <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
+                          {ejemplo}
+                        </Text>
+                      ) : null}
+
+                      {/* Chips de canal — grilla: ENVUELVE, no trunca
+                          (lámina §6; truncar «WhatsApp» es D-576). */}
+                      <SelectorOpcion
+                        acento="control"
+                        etiqueta={t('cuenta.notifPorDonde')}
+                        etiquetaVisible={false}
+                        disposicion="grilla"
+                        multiple
+                        opciones={catalogo.canales.map((c) => ({
+                          codigo: c.codigo,
+                          etiqueta: vozCanal(c.codigo, c.descripcion),
+                          // El piso de una no apagable no se toca; la fila
+                          // apagable apagada deja los chips en reposo.
+                          deshabilitada:
+                            (c.esPiso && !cat.apagableExistencia) ||
+                            (cat.apagableExistencia && !encendida) ||
+                            (c.codigo === 'push' && permisoPush === 'negado'),
+                        }))}
+                        seleccionadas={seleccionadas}
+                        onSelect={(codigo) =>
+                          alTocarCanal(cat.codigo, codigo as CanalNotificacion, cat.defaultHabilitada)
+                        }
+                      />
+
+                      {porque !== null ? (
+                        <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
+                          {porque}
+                        </Text>
                       ) : null}
                     </View>
-
-                    {/* El ejemplo BAJO EL TÍTULO (forma autorizada por el
-                        founder): en las no apagables el ejemplo arriba y
-                        el porqué abajo, cerrando la fila. */}
-                    {ejemplo !== null ? (
-                      <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
-                        {ejemplo}
-                      </Text>
-                    ) : null}
-
-                    {/* Chips de canal — grilla: ENVUELVE, no trunca
-                        (lámina §6; truncar «WhatsApp» es D-576). */}
-                    <SelectorOpcion
-                      acento="control"
-                      etiqueta={t('cuenta.notifPorDonde')}
-                      etiquetaVisible={false}
-                      disposicion="grilla"
-                      multiple
-                      opciones={catalogo.canales.map((c) => ({
-                        codigo: c.codigo,
-                        etiqueta: vozCanal(c.codigo, c.descripcion),
-                        // El piso de una no apagable no se toca; la fila
-                        // apagable apagada deja los chips en reposo.
-                        deshabilitada:
-                          (c.esPiso && !cat.apagableExistencia) ||
-                          (cat.apagableExistencia && !encendida) ||
-                          (c.codigo === 'push' && permisoPush === 'negado'),
-                      }))}
-                      seleccionadas={seleccionadas}
-                      onSelect={(codigo) =>
-                        alTocarCanal(cat.codigo, codigo as CanalNotificacion, cat.defaultHabilitada)
-                      }
-                    />
-
-                    {porque !== null ? (
-                      <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
-                        {porque}
-                      </Text>
-                    ) : null}
-                  </View>
-                </Tarjeta>
-              );
-            })
-          )}
+                  </Tarjeta>
+                );
+              })
+            )}
+          </View>
         </View>
       </HojaContenido>
 

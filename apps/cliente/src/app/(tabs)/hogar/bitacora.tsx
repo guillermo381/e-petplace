@@ -329,62 +329,72 @@ export default function BitacoraFamilia() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: { padding: spacing[4], gap: spacing[4] } }}
+
       >
-        {/* §7 — registrar cuesta segundos, cero gamificación (LOYALTY §5) */}
-        {
-          entradas === 'cargando' ? (
-            <EsqueletoGrupo>
-              <View style={{ gap: spacing[3] }}>
-                <Esqueleto forma="bloque" ancho="100%" alto={64} />
-                <Esqueleto forma="bloque" ancho="100%" alto={64} />
-              </View>
-            </EsqueletoGrupo>
-          ) : entradas === 'error' ? (
-            <EstadoVacio
-              titulo={t('adiestramiento.errorTitulo')}
-              descripcion={t('hogar.errorHistoriaDetalle')}
-              accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={cargar} />}
-            />
-          ) : entradas.length === 0 ? (
-            <EstadoVacio
-              registro="seccion"
-              icono={<Icono nombre="training" tamano={48} />}
-              titulo={t('adiestramiento.bitacoraVacioTitulo')}
-              descripcion={t('adiestramiento.bitacoraVacioDetalle')}
-              accion={
-                <Boton variante="primario" etiqueta={t('adiestramiento.bitacoraAnotar')} onPress={() => setHojaAbierta(true)} />
-              }
-            />
-          ) : (
-            <>
-              <Boton variante="compacto" etiqueta={t('adiestramiento.bitacoraAnotar')} onPress={() => setHojaAbierta(true)} />
-              <Tarjeta relleno="ninguno">
-                {entradas.map((e, i) => (
-                  <View key={e.bitacora_id}>
-                    {i > 0 ? <Separador /> : null}
-                    <View style={{ padding: spacing[3], gap: spacing[2] }}>
-                      <Texto variante="dato" color="tertiary">
-                        {`${nombrePorMascota.get(e.mascota_id)?.toLowerCase() ?? ''} · ${fechaCortaMono(e.created_at.slice(0, 10), idioma)}`}
-                      </Texto>
-                      {e.chips.length > 0 ? (
-                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
-                          {e.chips.map((ch) => (
-                            <Insignia
-                              key={`${ch.tipo}-${ch.codigo}`}
-                              estado="info"
-                              etiqueta={idioma === 'en' ? ch.nombre_familia_en : ch.nombre_familia}
-                            />
-                          ))}
-                        </View>
-                      ) : null}
-                      {e.texto !== null ? <Texto variante="cuerpo">{e.texto}</Texto> : null}
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[4], gap: spacing[4] }}>
+          {/* §7 — registrar cuesta segundos, cero gamificación (LOYALTY §5) */}
+          {
+            entradas === 'cargando' ? (
+              <EsqueletoGrupo>
+                <View style={{ gap: spacing[3] }}>
+                  <Esqueleto forma="bloque" ancho="100%" alto={64} />
+                  <Esqueleto forma="bloque" ancho="100%" alto={64} />
+                </View>
+              </EsqueletoGrupo>
+            ) : entradas === 'error' ? (
+              <EstadoVacio
+                titulo={t('adiestramiento.errorTitulo')}
+                descripcion={t('hogar.errorHistoriaDetalle')}
+                accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={cargar} />}
+              />
+            ) : entradas.length === 0 ? (
+              <EstadoVacio
+                registro="seccion"
+                icono={<Icono nombre="training" tamano={48} />}
+                titulo={t('adiestramiento.bitacoraVacioTitulo')}
+                descripcion={t('adiestramiento.bitacoraVacioDetalle')}
+                accion={
+                  <Boton variante="primario" etiqueta={t('adiestramiento.bitacoraAnotar')} onPress={() => setHojaAbierta(true)} />
+                }
+              />
+            ) : (
+              <>
+                <Boton variante="compacto" etiqueta={t('adiestramiento.bitacoraAnotar')} onPress={() => setHojaAbierta(true)} />
+                <Tarjeta relleno="ninguno">
+                  {entradas.map((e, i) => (
+                    <View key={e.bitacora_id}>
+                      {i > 0 ? <Separador /> : null}
+                      <View style={{ padding: spacing[3], gap: spacing[2] }}>
+                        <Texto variante="dato" color="tertiary">
+                          {`${nombrePorMascota.get(e.mascota_id)?.toLowerCase() ?? ''} · ${fechaCortaMono(e.created_at.slice(0, 10), idioma)}`}
+                        </Texto>
+                        {e.chips.length > 0 ? (
+                          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
+                            {e.chips.map((ch) => (
+                              <Insignia
+                                key={`${ch.tipo}-${ch.codigo}`}
+                                estado="info"
+                                etiqueta={idioma === 'en' ? ch.nombre_familia_en : ch.nombre_familia}
+                              />
+                            ))}
+                          </View>
+                        ) : null}
+                        {e.texto !== null ? <Texto variante="cuerpo">{e.texto}</Texto> : null}
+                      </View>
                     </View>
-                  </View>
-                ))}
-              </Tarjeta>
-            </>
-          )}
+                  ))}
+                </Tarjeta>
+              </>
+            )}
+        </View>
       </HojaContenido>
       <Hoja
         visible={hojaAbierta}

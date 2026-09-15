@@ -827,830 +827,834 @@ export default function DespensaProducto() {
               </>
             ) : undefined
         }
-        scroll={{
-          contentContainerStyle: {
-            paddingTop: spacing[4],
-            // Solo el aire del final de MI contenido: la reserva del PIE la
+
+      >
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ paddingTop: spacing[4], // Solo el aire del final de MI contenido: la reserva del PIE la
             // suma la pieza. Acá vivía `+ 96`.
             // 🔴 S100d-bis · **el disco flotante NO es el pie**, así que su
             // alto no lo reserva nadie: lo suma acá con la constante que la
             // propia pieza exporta. *Un número tecleado que tenga que
             // coincidir con el tamaño de un disco de otro paquete es la
             // clase de deuda que `PantallaConPie` vino a matar.*
-            paddingBottom: spacing[8] + COLA_PRESENCIA_COACH,
-            gap: spacing[5],
-          },
-        }}
-      >
-        {ficha === 'cargando' ? (
-          <EsqueletoGrupo>
-            <View style={{ gap: spacing[3], paddingHorizontal: spacing[5] }}>
-              <Esqueleto forma="bloque" ancho="100%" alto={240} />
-              <Esqueleto forma="bloque" ancho="60%" alto={24} />
-              <Esqueleto forma="bloque" ancho="100%" alto={72} />
-            </View>
-          </EsqueletoGrupo>
-        ) : ficha === 'error' ? (
-          <EstadoVacio
-            titulo={t('despensa.errorFichaTitulo')}
-            descripcion={t('despensa.errorFichaDetalle')}
-            accion={
-              <Boton
-                variante="secundario"
-                etiqueta={t('hogar.reintentar')}
-                onPress={() => setReintento((n) => n + 1)}
-              />
-            }
-          />
-        ) : (
-          <>
-            {/* 1 · LAS FOTOS — portada grande tocable + tira de miniaturas.
-                Sin foto: el fallback digno del lienzo (jamás una imagen
-                que finja ser el producto). */}
-            <View style={{ paddingHorizontal: spacing[5], alignItems: 'center', gap: spacing[3] }}>
-              {fotos.length > 0 ? (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t('despensa.verFotos')}
-                  onPress={() => setVisor(0)}
-                >
-                  <LienzoProducto lado={240} fotoUrl={fotos[0]} />
-                </Pressable>
-              ) : (
-                <LienzoProducto lado={240} />
-              )}
-              {fotos.length > 1 ? (
-                <View style={{ flexDirection: 'row', gap: spacing[2] }}>
-                  {fotos.slice(1, 5).map((f, i) => (
-                    <Pressable
-                      key={f}
-                      accessibilityRole="button"
-                      accessibilityLabel={t('despensa.verFotos')}
-                      onPress={() => setVisor(i + 1)}
-                      style={{ borderRadius: radius.suave, overflow: 'hidden' }}
-                    >
-                      <LienzoProducto lado={56} fotoUrl={f} />
-                    </Pressable>
-                  ))}
-                </View>
-              ) : null}
-            </View>
-
-            {/* ② · QUÉ ES — nombre CURADO + su línea de identidad.
-                🔴 `descripcion` DEJA DE PINTARSE COMO PROSA, y es por medición:
-                no es una descripción. Medido sobre los 470 activos —
-                **promedio 10 caracteres, máximo 29, CERO sobre 200** — y sus
-                literales son sub-líneas del importador: «Linea Dorada»,
-                «Veterinary Diet», «Gatos», «Premium». *Pintar «Linea Dorada»
-                como párrafo de cuerpo le promete al lector una descripción que
-                no existe.* Va donde pertenece: junto a la marca, con el
-                separador de la casa. */}
-            {/* 🔴 S100d-C · **«Brilliant · Brilliant» — LA MARCA DICHA DOS
-                VECES, Y NO LA ENCONTRÓ NINGÚN NÚMERO: LA ENCONTRÓ MIRAR.**
-
-                Corrí cuatro mediciones sobre esta ficha en la vuelta —altos,
-                tipografías, largos de texto, señales del control— y **las
-                cuatro daban verde**, porque ninguna preguntaba *«¿estos dos
-                campos dicen lo mismo?»*. Apareció en la captura, de un
-                vistazo. *Es el mismo modo de falla que S100b registró con la
-                ficha sin precio: lo que la vara no pregunta, la vara no lo
-                contesta.*
-
-                **Medido después de verlo, contra la base viva (18-ago): 106
-                de 470 vendibles —el 22,6 %— tienen `descripcion` IDÉNTICA a
-                `marca`**, y 107 la tienen contenida. ⇒ **en casi una de cada
-                cuatro fichas del catálogo, esta línea repetía la marca.**
-
-                Y refuerza lo que el punto ⑪ concluyó por otro camino:
-                **`descripcion` no es una descripción.** Promedia 10,5
-                caracteres, y una de cada cuatro veces es literalmente el
-                nombre de la marca otra vez.
-
-                **La cura es de la PANTALLA y no del dato:** el catálogo dice
-                lo que dice y no se le reescribe —el importador es su fuente—;
-                lo que estaba mal era juntar dos campos sin preguntar si
-                traían lo mismo. Se compara **normalizado** (`trim` +
-                minúsculas) porque *«Brilliant»* y *«brilliant »* son el mismo
-                dato con distinta suerte de carga. */}
-            <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
-              <Texto variante="titulo">{nombreCurado(ficha.nombre)}</Texto>
-              {(() => {
-                const norm = (x: string) => x.trim().toLowerCase();
-                const partes = [ficha.marca, ficha.descripcion]
-                  .filter((x): x is string => x !== null && x.trim().length > 0)
-                  // El eco se retira, jamás el primero: la MARCA preside.
-                  .filter((x, i, todas) => todas.findIndex((y) => norm(y) === norm(x)) === i);
-                return partes.length > 0 ? (
-                  <Texto variante="apoyo">{partes.join(' · ')}</Texto>
-                ) : null;
-              })()}
-            </View>
-
-            {/* ② bis · LAS PRESENTACIONES COMO CHIPS (N19 ②) — elegir acá y ver
-                el precio abajo, en vez de leer una tabla de filas.
-                Medido: **392 de 470 productos (83 %) tienen UNA sola** ⇒ con una
-                el grupo colapsa y no se dibuja (no se le pide una decisión a
-                quien no tiene alternativa).
-                🔴 Los chips son SOLO de lo comprable, y las presentaciones sin
-                oferta se DICEN abajo en vez de fingirse chips apagados:
-                `SelectorOpcion` no tiene deshabilitado por opción, y **una
-                puerta que se ofrece para rebotar es Ley 23**. El nulo honesto
-                se conserva — la variante existe y no se puede comprar. */}
-            {comprables.length > 1 ? (
-              <View style={{ paddingHorizontal: spacing[5] }}>
-                {/* ═══════════════════════════════════════════════════════
-                    🔴 S100d-bis · **EL CHIP ELEGIDO DEJA DE SER VERDE Y PASA
-                    A MAGENTA — Y LA CURA ERA UNA PROP QUE ESTA PANTALLA
-                    NUNCA DECLARÓ.**
-                    ═══════════════════════════════════════════════════════
-
-                    **Segundo veredicto del founder:** el chip de
-                    presentación *«marca en verde y debe ser magenta»*, con
-                    el principio nuevo: **magenta = marca y SELECCIÓN · ocre
-                    = ACCIÓN.** Un chip elegido es selección.
-
-                    🔴 **DE DÓNDE SALÍA EL VERDE, medido en la pieza y no
-                    supuesto:** `SelectorOpcion` resuelve su acento por el
-                    prop `acento`, y **esta pantalla no lo pasaba** ⇒ caía al
-                    default `'capa'`, que resuelve a `capaText.identidad` /
-                    `capaBg.identidad` — **el verdeVital**. *No era un color
-                    tecleado ni un estado heredado de otra pieza: era un
-                    DEFAULT que nadie declaró.*
-
-                    **Y no es una cura improvisada: es la migración que la
-                    propia pieza tenía escrita.** Su JSDoc dice, desde S58:
-                    *«'capa' (default, verdeVital) MUERE como color de
-                    control — las pantallas construidas migran AL PASO de la
-                    pasada; el default se retira cuando la última migre»*.
-                    ⇒ **esta es esa migración**, y por eso la cura va acá y
-                    no en `packages/ui`: *el default sigue siendo legal
-                    mientras quede una pantalla sin migrar, y arreglarlo en
-                    la pieza rompería a las que todavía lo esperan.*
-
-                    ⚠️ **Lo que `'control'` resuelve, por casa y sin un hex
-                    escrito acá:** cliente → `accent.control` (magentaDark
-                    en claro, violetText en oscuro) · memorial → tinta (*no
-                    celebra*). **Y de paso deja de haber dos vocabularios de
-                    selección en la misma pantalla:** los chips de la hoja
-                    de filtros ya marcaban con `accent.control` desde
-                    S83-B17. *La app decía «elegido» de dos colores
-                    distintos a dos toques de distancia.* */}
-                <SelectorOpcion
-                  etiqueta={t('despensa.presentaciones')}
-                  disposicion="tira"
-                  acento="control"
-                  opciones={comprables.map((v) => ({
-                    codigo: v.variante_id,
-                    /**
-                     * 🔴 S100d-bis · **CUANDO DOS PRESENTACIONES SE LLAMAN
-                     * IGUAL, EL PRECIO LAS DISTINGUE — Y ESTO NO INVENTA UNA
-                     * DIFERENCIA: DEJA DE ESCONDER UNA QUE EXISTE.**
-                     *
-                     * **Lo encontró MIRAR una captura, no medir.** Corrí
-                     * cuatro varas sobre esta ficha y las cuatro dieron
-                     * verde mientras «Adulto Cordero y Arroz» dibujaba
-                     * **dos chips que decían “12.7 kg”** — uno a **$57,19**
-                     * y otro a **$94,50**. *La familia veía dos botones
-                     * idénticos y uno costaba 65 % más.*
-                     *
-                     * **Medido contra la base viva (18-ago): 6 de 470
-                     * productos** tienen la misma presentación en DOS
-                     * variantes distintas. Poco, y el que cae adentro no
-                     * tiene forma de elegir.
-                     *
-                     * ⚖️ **Por qué se cura acá y no en la pieza** (medido con
-                     * B): `SelectorOpcion` recibe `etiqueta` y la dibuja —
-                     * **no sabe que hay otra igual**. *Una pieza no puede
-                     * desambiguar lo que no ve; el que ve el conjunto es
-                     * quien arma la lista.*
-                     *
-                     * ⚠️ **SOLO cuando repite**, y ése es el límite que lo
-                     * vuelve legal: en los 464 productos sanos el chip sigue
-                     * diciendo «2.5 kg» y nada más. *Poner el precio en
-                     * todos sería ruido —el precio ya vive abajo, grande, y
-                     * cambia al elegir—; ponerlo donde el rótulo no alcanza
-                     * es honestidad.*
-                     *
-                     * 🔴 **Y NO ES LA CURA DEL DATO, que sigue abierto con su
-                     * número:** hay **25 variantes con más de una oferta
-                     * publicada** contra la firma *«una oferta por
-                     * producto»* de `MODELO_DESPENSA`. **Eso es motor y
-                     * catálogo, no pantalla** — servido a A. *Esta línea
-                     * hace que el defecto del dato se VEA en vez de
-                     * disfrazarse de dos botones iguales.*
-                     */
-                    etiqueta:
-                      comprables.filter((o) => o.presentacion === v.presentacion).length > 1
-                        ? `${v.presentacion} · ${formatearPrecio(v.precio)}`
-                        : v.presentacion,
-                  }))}
-                  seleccionada={varianteId ?? undefined}
-                  onSelect={setVarianteId}
-                />
+            paddingBottom: spacing[8] + COLA_PRESENCIA_COACH, gap: spacing[5] }}>
+          {ficha === 'cargando' ? (
+            <EsqueletoGrupo>
+              <View style={{ gap: spacing[3], paddingHorizontal: spacing[5] }}>
+                <Esqueleto forma="bloque" ancho="100%" alto={240} />
+                <Esqueleto forma="bloque" ancho="60%" alto={24} />
+                <Esqueleto forma="bloque" ancho="100%" alto={72} />
               </View>
-            ) : null}
-
-            {/* ③ · EL PRECIO, y debajo EL PRECIO POR KILO (N19 ③).
-                🔴 El $/kg es el dato que decide una compra de alimento y que casi
-                ningún catálogo pone — **y solo aparece cuando hay peso**: medido,
-                248 de 563 filas (44 %) lo declaran. Sin peso no hay cuenta, y
-                una cuenta sobre un peso ausente destruiría lo único que le da
-                valor: que sea cierta.
-                El registro es el mensaje (Ley 3): el precio en su voz, el $/kg
-                en mono porque **lo derivó una máquina**. */}
-            {/* 🔴 S100b-C — LA FICHA SIN PRECIO. Este bloque se pintaba SOLO
-                con una presentación elegida, y con más de una **no se elige
-                sola** (la auto-selección es solo para el caso de una). ⇒ en
-                un producto de 3 presentaciones, **la ficha no mostraba
-                NINGÚN precio hasta que la familia tocaba un chip**.
-                *Una ficha sin precio no vende: obliga a adivinar cuánto
-                sale antes de saber si te interesa.*
-                Apareció MIRANDO la captura, no midiéndola — ningún número
-                de los que este archivo produce decía «acá no hay precio».
-
-                La cura NO es preseleccionar: **el primer elemento de una
-                colección sin criterio es una decisión de negocio por
-                accidente** (L-289), y elegirle la presentación a la familia
-                es decidir cuánto va a gastar. Se muestra **«desde» el precio
-                de la más barata**, que es la escalera del precio honesto ya
-                firmada en S82: *lo que varía dice «desde»*. Al elegir un
-                chip, el precio pasa a ser el exacto de esa presentación.
-
-                ⚠️ La palabra va en su propia línea y no pegada al número
-                porque `PrecioText` no tiene forma de prefijo; **se le pidió
-                a B la prop con este caso** — la tipografía del precio es de
-                la pieza, no de esta pantalla. */}
-            {variante !== null && variante.precio !== null ? (
-              <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
-                <PrecioText
-                  valor={variante.precio}
-                  // `ficha` — el registro que la pieza reserva para «el
-                  // protagonista de la ficha, el que decide la compra».
-                  registro="ficha"
-                  porUnidad={
-                    precioPorKg(
-                      variante.precio,
-                      variante.peso_kg,
-                      MONEDA_FALLBACK,
-                      idioma as IdiomaSoportado,
-                    ) ?? undefined
-                  }
+            </EsqueletoGrupo>
+          ) : ficha === 'error' ? (
+            <EstadoVacio
+              titulo={t('despensa.errorFichaTitulo')}
+              descripcion={t('despensa.errorFichaDetalle')}
+              accion={
+                <Boton
+                  variante="secundario"
+                  etiqueta={t('hogar.reintentar')}
+                  onPress={() => setReintento((n) => n + 1)}
                 />
-              </View>
-            ) : masBarata !== null ? (
-              <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
-                <Texto variante="apoyo">{t('despensa.precioDesde')}</Texto>
-                <PrecioText
-                  valor={masBarata.precio}
-                  registro="ficha"
-                  porUnidad={
-                    precioPorKg(
-                      masBarata.precio,
-                      masBarata.peso_kg,
-                      MONEDA_FALLBACK,
-                      idioma as IdiomaSoportado,
-                    ) ?? undefined
-                  }
-                />
-              </View>
-            ) : null}
-
-            {/* 3 · 🔴 LA ADVERTENCIA (§5.4) — la firma. Se monta SIEMPRE que
-                haya alérgeno documentado relevante: la pieza recibe los
-                HECHOS (composición del motor + coincidencia del cruce
-                expandido) y decide ella — los dos silencios legales
-                (verificada · no_aplica, sin cruce) los resuelve la pieza.
-                El paso explícito gatea el CTA en las DOS coincidencias:
-                si puede ser pollo, se decide sabiendo. */}
-            {alergenosMascota.length > 0 ? (
-              <View style={{ paddingHorizontal: spacing[5] }}>
-                <AvisoAlergia
-                  composicion={ficha.composicion_estado}
-                  coincidencia={cruce.coincidencia}
-                  mensaje={
-                    cruce.coincidencia === 'exacta'
-                      ? t('despensa.alergiaContiene', {
-                          nombre: nombreMascota ?? t('despensa.tuMascota'),
-                          // Las voces del AVISO viajan en los vigilados
-                          // (cat_alergenos.nombre_es, del motor).
-                          lista: cruce.exactos.map((e) => e.nombre).join(', '),
-                        })
-                      : cruce.coincidencia === 'imprecisa'
-                        ? t('despensa.alergiaImprecisa', {
-                            nombre: nombreMascota ?? t('despensa.tuMascota'),
-                            lista: cruce.imprecisos
-                              .map((i) =>
-                                t('despensa.imprecisoPar', {
-                                  declarado: i.nombre,
-                                  origen: i.origenNombre,
-                                }),
-                              )
-                              .join('; '),
-                          })
-                        : ficha.composicion_estado === 'ausente'
-                          ? t('despensa.alergiaSinComposicion', {
-                              nombre: nombreMascota ?? t('despensa.tuMascota'),
-                            })
-                          : t('despensa.alergiaSinVerificar', {
-                              nombre: nombreMascota ?? t('despensa.tuMascota'),
-                            })
-                  }
-                  detalle={exigeEntendimiento ? t('despensa.alergiaContieneDetalle') : undefined}
-                  entendido={exigeEntendimiento ? entendido : undefined}
-                  onEntendido={
-                    exigeEntendimiento ? () => void confirmarEntendimiento() : undefined
-                  }
-                  etiquetaEntendido={t('despensa.alergiaEntiendo')}
-                  etiquetaYaEntendido={t('despensa.alergiaEntendida')}
-                />
-              </View>
-            ) : null}
-
-            {/* ④ · LA COMPOSICIÓN (§0.5 de la letra: el detalle al nivel del
-                mejor e-commerce; candado ① de §5.4: sin composición se DICE).
-                Todo en voz de "declarado por el fabricante" — la app
-                transporta, jamás avala.
-
-                ═══════════════════════════════════════════════════════════
-                🔴 S100d-C · PUNTOS ⑩ Y ⑪ — LA SECCIÓN SE PLIEGA ENTERA, CON
-                UNA SOLA SEÑAL, Y **NO SE PLIEGA NADA MÁS EN TODA LA FICHA.**
-                ═══════════════════════════════════════════════════════════
-
-                **Los dos literales del founder que gobiernan esto:**
-                · ⑩ *«hoy flecha + label “6 más” — debería ser solo el más al
-                  costado o la sola flecha»*.
-                · ⑪ *«por ahora solo agregá los más para ver descripción y
-                  características»*, con la orden expresa de **re-medir antes
-                  de plegar: “si sigue siendo aire, decilo con el número y
-                  plegá solo lo que tenga cuerpo”.**
-
-                🔴 **RE-MEDIDO EL 18-AGO CONTRA LA BASE VIVA (470 vendibles)
-                Y CONTRA LA FICHA MONTADA — y la orden se cumple al pie:**
-
-                | qué | medido | qué se hizo |
-                |---|---|---|
-                | `descripcion` | **464/470 la tienen · promedio 10,5 car · máximo 29 · CERO sobre 60** | **NADA.** No es una descripción: son sub-líneas del importador («Perro», «Premium»). *Un «+» sobre diez caracteres promete contenido que no existe.* Se dice con el número, que es lo que el founder pidió |
-                | «características» (`porque`) | en pantalla, **una sola frase de 25 car en 58 dp** · `tallas_aplicables` **0 de 470** | **NADA.** Un encabezado plegable mide ~56 dp ⇒ **plegarla ahorraría 2 dp** y escondería nuestro diferencial. *No es que no valga la pena: es que la aritmética da negativo* |
-                | `composicion_mercado` | **vacía en 470 de 470** | nada que plegar |
-                | **`ingredientes_activos`** | **202/470 · 10,5 ingredientes de promedio, hasta 26 · texto de 194 car de promedio, hasta 517** | 🔴 **SE PLIEGA. Es la única prosa con cuerpo de la ficha** |
-
-                **Y el número que lo vuelve una mejora y no una preferencia:**
-                sobre el producto más largo del catálogo (25 ingredientes, 517
-                car) la ficha medía **704 dp de contenido sobre ~630 útiles ⇒
-                no entraba**. Plegando esta sección baja a **~546 dp: la ficha
-                entera cabe sin deslizar.** *Ése era el «tipo Laika».*
-
-                🔴 **LA SEÑAL ES UNA Y ESTÁ AL COSTADO — y la pieza YA
-                EXISTÍA.** `CeldaNavegacion direccion="abajo"|"arriba"` es el
-                encabezado de sección que despliega de la casa: su propio
-                JSDoc dice que nació para este hueco, y **no tenía un solo
-                consumidor real en `apps`** (medido: solo la galería y el
-                perfil del prestador). Cero componente nuevo (Ley 11), cero
-                trazo copiado (L-175).
-
-                ⚖️ **POR QUÉ LA FLECHA Y NO EL «+», teniendo el founder
-                permitidas las dos** (*«solo el más al costado O la sola
-                flecha»*): **E14 es letra firmada — información DESPLIEGA con
-                chevron · acción LLEVA**. Y hay una razón que no es de esta
-                pantalla: **F-OCRE le acaba de dar al «+» el rol de ACCIÓN DE
-                COMPRA**. Un «+» que pliega prosa sería el mismo signo con dos
-                significados en la misma app, y el que pierde es el que vende.
-                *Reversible en una línea si el founder prefiere el «+»: es un
-                cambio de `direccion` por un glifo, sin tocar la estructura.*
-
-                🔴 **LO QUE **NO** ENTRA AL PLEGADO, y no es decisión de esta
-                pantalla: LA ADVERTENCIA DE ALÉRGENO.** `MODELO_DESPENSA`
-                §6/§10 (*plegar una advertencia de salud la convierte en nota
-                al pie*) y el límite explícito de N22. Queda **hermana del
-                encabezado, no hija**: se ve con la sección cerrada. Lo mismo
-                el `AvisoAlergia` de arriba, que además gatea el CTA.
-
-                ⚠️ **Y SIN INGREDIENTES NO SE DIBUJA EL CONTROL** (268 de 470
-                productos): la sección se queda abierta diciendo su verdad —
-                *«no tenemos los ingredientes»* es honestidad, no prosa, y
-                esconderla detrás de un toque sería justo el candado ① al
-                revés. *Un control que revela nada es peor que el texto que
-                ahorra.*
-
-                ⏸️ **LO QUE NO SE TOCÓ, POR ORDEN: las SUPERFICIES.** N21
-                admitiría que esta sección viva en carta —el perfil del
-                prestador la monta así—, pero **QF-01 (el fondo) está
-                declarada ABIERTA y fuera de esta vuelta por el founder**
-                (*«ese es un cambio más de fondo; por ahora solo agregá los
-                más»*). Agregar una carta acá sería atacar QF-01 de costado. */}
-            {(() => {
-              /** ¿Hay prosa que plegar? El ESTADO manda (letra de A, 12-ago):
-               *  `no_aplica` jamás pide ingredientes —no es un dato que
-               *  falte— y `ausente` DICE que no los tiene aunque la columna
-               *  traiga algo. En los dos casos no hay nada detrás del
-               *  control, así que el control no existe. */
-              const puedePlegar =
-                ficha.composicion_estado !== 'no_aplica' &&
-                ficha.composicion_estado !== 'ausente' &&
-                ficha.ingredientes_activos.length > 0;
-
-              /**
-               * 🔴 `D-876` · QUÉ HAY QUE DECIR SOBRE LA COMPOSICIÓN — **UN
-               * valor, tres consumidores.**
-               *
-               * **El rojo (recorrido de A):** la sección decía, en dos líneas
-               * seguidas, *«No tenemos los ingredientes de este producto. El
-               * fabricante no los declaró.»* y *«Declarada por el fabricante,
-               * todavía sin verificar.»* **Las dos afirmaciones son
-               * contradictorias y las dos estaban bien escritas.**
-               *
-               * 🔴 **La causa NO era la redacción — era la FORMA:** la
-               * ausencia y la fuente vivían en **dos condiciones
-               * independientes** (`estado === 'ausente' || sin datos` para una,
-               * `estado !== 'no_aplica'` para la otra) **que había que
-               * mantener de acuerdo a mano.** Con `ausente` **las dos daban
-               * `true`.** *Dos condiciones que deben excluirse pero no se
-               * miran entre sí no están sincronizadas: están de acuerdo por
-               * casualidad hasta que un estado las separa.*
-               *
-               * **Por qué un valor derivado y no un `&&` más:** agregar la
-               * negación al guard de la fuente arreglaba ESTE caso y dejaba
-               * viva la forma que lo produjo — el próximo estado del
-               * vocabulario volvería a poder encender las dos. **Con el valor
-               * único, «ausente + fuente» es INEXPRESABLE.**
-               *
-               * `sin_lista` = no hay ingredientes **pero sí alérgenos
-               * declarados** ⇒ **sí hay composición que atribuir**, y la
-               * fuente corresponde. *Es el caso que separa «no hay lista» de
-               * «no hay nada».*
-               */
-              const composicion: 'plegable' | 'no_aplica' | 'ausente' | 'sin_lista' = puedePlegar
-                ? 'plegable'
-                : ficha.composicion_estado === 'no_aplica'
-                  ? 'no_aplica'
-                  : ficha.composicion_estado === 'ausente' ||
-                      (ficha.ingredientes_activos.length === 0 && ficha.alergenos.length === 0)
-                    ? 'ausente'
-                    : 'sin_lista';
-
-              /** La advertencia de alérgeno — SIEMPRE a la vista, plegada la
-               *  sección o no. Se compone una vez y se monta en las dos
-               *  ramas: *dos copias de una advertencia de salud es como se
-               *  fabrica el día en que una de las dos deja de pintarse.* */
-              const advertencia =
-                ficha.alergenos.length > 0 ? (
-                  <Texto variante="apoyo">
-                    {t('despensa.composicionAlergenos', {
-                      lista: ficha.alergenos.map((c) => vozAlergeno(c, vocesAlergenos)).join(', '),
-                    })}
-                  </Texto>
-                ) : null;
-
-              return (
-                /* ═══════════════════════════════════════════════════════
-                   🔴 S100d-bis · **LA COMPOSICIÓN GANA SU CAJÓN BLANCO —
-                   N21 EN SU CASO LITERAL.**
-                   ═══════════════════════════════════════════════════════
-
-                   **Literal del founder:** *«no dejarla sobre fondo»*.
-                   Y es exactamente lo que N21 dice: **un grupo de datos con
-                   rótulo propio va EN CARTA; lo que ES la pantalla
-                   (encabezado, pie, CTA) no.** Esta sección tiene rótulo,
-                   tiene contenido plegable y tiene su advertencia: **es un
-                   grupo, no la pantalla.**
-
-                   ⏪ **Y en la vuelta pasada NO la puse, con una razón que
-                   ya venció:** dije que **QF-01 (el fondo) estaba abierta y
-                   fuera del alcance** por orden del founder (*«ese es un
-                   cambio más de fondo; por ahora solo agregá los más»*), y
-                   que agregar una carta sería atacar QF-01 de costado.
-                   **El segundo veredicto la pidió explícitamente**, así que
-                   la razón se cae por firma. *No estaba equivocada: estaba
-                   esperando esta decisión.*
-
-                   **LO QUE CUESTA, MEDIDO ANTES DE PONERLA (RN-web,
-                   384×832):** el bloque cerrado medía **72 dp** sobre fondo
-                   transparente, sin sombra y sin radio. La carta suma
-                   `relleno="amplio"` = **16 arriba y 16 abajo = 32 dp** ⇒
-                   **~104 dp cerrada.** La ficha del producto más largo
-                   estaba en 562 dp sobre ~630 útiles, así que **entra**,
-                   con menos aire. *Se declara el costo en vez de
-                   descubrirlo en el gate.*
-
-                   ⚠️ **`elevacion="reposo"` y no una sombra más fuerte:** la
-                   carta acá separa del fondo, **no celebra**. Y el
-                   `paddingHorizontal` de la sección se va: **el que separa
-                   del borde ahora es el relleno de la carta** — dos aires
-                   apilados serían el mismo error que curé en el punto ③.
-
-                   🔴 **LO QUE NO CAMBIA, Y ES LO QUE MÁS IMPORTA:** la
-                   advertencia de alérgeno **sigue FUERA del plegado**,
-                   dentro de la carta y visible con la sección cerrada
-                   (`MODELO_DESPENSA` §6/§10 · N22). *La carta cambió la
-                   superficie, no qué se esconde.* */
-                <View style={{ paddingHorizontal: spacing[4] }}>
-                  <Tarjeta elevacion="reposo" relleno="amplio">
-                    <View style={{ gap: spacing[2] }}>
-                  {/* ⚖️ **EL RÓTULO NO LLEVA CUENTA, Y ES UNA RENUNCIA
-                      DELIBERADA.** Poner *«25 ingredientes»* al lado
-                      ayudaría a decidir si vale abrirlo —es el trabajo que
-                      hacía el `n` del `PieRevelar`, y la casa lo admite: su
-                      galería monta `titulo="Sus vacunas" detalle="8
-                      aplicadas"`—. **No entra porque el punto ⑩ es
-                      exactamente sobre CONTAR SEÑALES**: el founder objetó
-                      *dos cosas diciendo «hay más»* y pidió *«UNA señal, no
-                      dos»*. Un rótulo con cuenta al lado de un chevron
-                      corre el riesgo de volver a leerse como dos — *y un
-                      punto reportado cerrado que reaparece es rojo de
-                      método, no de pieza.* La cuenta no se pierde: es lo
-                      primero que se ve al abrir. **Vuelve con una línea si
-                      el founder la quiere.** */}
-                  {/* ═══════════════════════════════════════════════════
-                      🔴 S100d-bis · **LA CARTA ENVUELVE LAS DOS RAMAS, Y ESO
-                      ES LA CURA — NO UN REFACTOR.**
-                      ═══════════════════════════════════════════════════
-
-                      **Verificado en APARATO (18-ago, preview `01a0175e`) y
-                      no en web:** abrí una ficha **sin ingredientes**
-                      (`Aceite de Salmon Brilliant`) y **la composición
-                      quedaba SOBRE EL FONDO, sin carta** — que es
-                      exactamente lo que el founder pidió que no pasara.
-
-                      **La causa fue mía y es de forma:** puse la carta
-                      **solo en la rama plegable**, y la rama honesta —la que
-                      dice *«no tenemos los ingredientes»*— se quedó afuera.
-                      *Y el web no lo mostró porque yo medí sobre el producto
-                      con 25 ingredientes: elegí el caso rico para ver el
-                      plegado y con él perdí de vista el caso pobre, que es
-                      **268 de 470 productos** — la mayoría del catálogo.*
-
-                      ⇒ **la carta se sube afuera del `if` y las dos ramas
-                      quedan adentro.** No es prolijidad: con la carta
-                      compartida **«una rama sin superficie» deja de ser
-                      expresable**, que es como esta casa cura las dos
-                      cuentas que tienen que dar igual. *Duplicarla en la
-                      segunda rama habría arreglado el síntoma y dejado viva
-                      la forma que lo produjo.* */}
-                  {puedePlegar ? (
-                    <RotuloPlegable
-                      titulo={t('despensa.composicion')}
-                      abierta={composicionAbierta}
-                      onAlternar={() => setComposicionAbierta((v) => !v)}
-                    />
-                  ) : (
-                    /* Sin ingredientes no hay control: la sección se queda
-                       abierta diciendo su verdad. *Un control que revela
-                       nada es peor que el texto que ahorra*, y esconder la
-                       frase honesta detrás de un toque sería el candado ①
-                       de §5.4 al revés. */
-                    <Texto variante="seccion">{t('despensa.composicion')}</Texto>
-                  )}
-
-                  {composicion === 'no_aplica' ? (
-                    <Texto variante="apoyo">{t('despensa.composicionNoAplica')}</Texto>
-                  ) : composicion === 'ausente' ? (
-                    <Texto variante="apoyo">{t('despensa.composicionAusente')}</Texto>
-                  ) : null}
-
-                  {advertencia}
-
-                  {/* 🔴 `D-876` · LA FUENTE SOLO EXISTE SI HAY ALGO QUE
-                      ATRIBUIR. Con el plegado va adentro; sin él, a la vista.
-                      **`ausente` y `no_aplica` NO la llevan** — *atribuirle a
-                      un fabricante una composición que no declaró es la
-                      contradicción que A midió.* Y ahora sale del MISMO valor
-                      que la voz de arriba, así que las dos no pueden
-                      desacordar. */}
-                  {composicion === 'sin_lista' || (composicion === 'plegable' && composicionAbierta) ? (
-                    <>
-                      {composicion === 'plegable' ? (
-                        <Texto variante="cuerpo">{ficha.ingredientes_activos.join(', ')}</Texto>
-                      ) : null}
-                      <Texto variante="apoyo">
-                        {ficha.composicion_estado === 'verificada'
-                          ? t('despensa.composicionVerificada')
-                          : t('despensa.composicionFuente')}
-                      </Texto>
-                    </>
-                  ) : null}
-                    </View>
-                  </Tarjeta>
-                </View>
-              );
-            })()}
-
-            {/* ⑤ · PARA QUIÉN SIRVE (N19 ⑤ — era la 4 y baja UN puesto: la
-                composición sube a ④ para quedar PEGADA a su advertencia).
-                Nuestro diferencial: no lo tiene ninguno de los referentes.
-
-                🔴 S100d-C · **ESTA SECCIÓN NO SE PLIEGA, Y ES LO QUE EL
-                PUNTO ⑪ LLAMA «características».** Medido en la ficha
-                montada: **una sola frase de 25 caracteres en 58 dp**, y
-                `tallas_aplicables` está en **0 de 470** productos. Un
-                encabezado plegable mide ~56 dp ⇒ **plegarla ahorraría 2 dp**
-                y escondería el único bloque que ningún competidor tiene.
-                *La aritmética da negativo, y el founder pidió el número
-                antes que el control: «plegá solo lo que tenga cuerpo».* */}
-            {porque.length > 0 ? (
-              <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
-                <Texto variante="seccion">
-                  {nombreMascota !== null
-                    ? t('despensa.porqueTituloMascota', { nombre: nombreMascota })
-                    : t('despensa.porqueTitulo')}
-                </Texto>
-                {porque.map((f) => (
-                  <Texto key={f} variante="cuerpo">
-                    {f}
-                  </Texto>
-                ))}
-                {ficha.es_dieta_prescripcion ? (
-                  <Texto variante="apoyo">{t('despensa.porquePrescripcion')}</Texto>
+              }
+            />
+          ) : (
+            <>
+              {/* 1 · LAS FOTOS — portada grande tocable + tira de miniaturas.
+                  Sin foto: el fallback digno del lienzo (jamás una imagen
+                  que finja ser el producto). */}
+              <View style={{ paddingHorizontal: spacing[5], alignItems: 'center', gap: spacing[3] }}>
+                {fotos.length > 0 ? (
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('despensa.verFotos')}
+                    onPress={() => setVisor(0)}
+                  >
+                    <LienzoProducto lado={240} fotoUrl={fotos[0]} />
+                  </Pressable>
+                ) : (
+                  <LienzoProducto lado={240} />
+                )}
+                {fotos.length > 1 ? (
+                  <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+                    {fotos.slice(1, 5).map((f, i) => (
+                      <Pressable
+                        key={f}
+                        accessibilityRole="button"
+                        accessibilityLabel={t('despensa.verFotos')}
+                        onPress={() => setVisor(i + 1)}
+                        style={{ borderRadius: radius.suave, overflow: 'hidden' }}
+                      >
+                        <LienzoProducto lado={56} fotoUrl={f} />
+                      </Pressable>
+                    ))}
+                  </View>
                 ) : null}
               </View>
-            ) : null}
 
-            {/* ⑥ · DISPONIBILIDAD REAL — y las presentaciones que NO se pueden
-                comprar, DICHAS (N19 ⑥).
-                ☠️ Acá vivía la tabla de presentaciones en `Celda`. La reemplazan
-                los chips de ②: **elegir y ver el precio arriba** en vez de leer
-                una tabla de filas con el precio repetido en cada una.
-                🔴 Lo que la tabla SÍ hacía y no se pierde: decir las variantes
-                sin oferta. Se conserva como UNA línea —no como filas tocables—
-                porque **no son una opción: son una ausencia**. El nulo honesto
-                se mantiene; lo que muere es fingir que se pueden elegir. */}
-            {/* ☠️ ACÁ VIVÍA `despensa.fichaSinStock` PARA LA PRESENTACIÓN
-                ELEGIDA, y se MUDÓ al pie — no se borró: `faltaParaAgregar` lo
-                dice ahora pegado al CTA que apaga.
-                🔴 ES UNA CURA DE DOS MITADES Y SE DECLARA: si alguien repone
-                esta línea «porque informa», el mismo texto queda DOS VECES en
-                una pantalla —acá y en el pie, a 400 dp— que es exactamente el
-                defecto que C curó en H-205 con el nombre del producto.
-                Lo que decide dónde va no es el gusto: **el impedimento vive
-                donde se ejerce**. La ley de la casa es que el Confirmar apagado
-                DICE QUÉ FALTA (S73-B), y el que apaga es el pie.
-                ⚠️ Lo que esta mudanza NO resuelve, y queda como límite: el chip
-                de una presentación agotada **se sigue pudiendo elegir**. Elegirla
-                es legal —así se ve su precio y se entiende por qué no se puede—;
-                lo que ya no es legal es AGREGARLA. */}
-            {/* 🔴 D-872 (b) · CUÁNDO LLEGA — la promesa ANTES de comprar.
-                Vive en ⑥ y no en una sección propia porque **es
-                disponibilidad real**: la pregunta que ⑥ contesta es «¿puedo
-                tener esto?», y «no te lo entregan» es tan parte de esa
-                respuesta como «no hay stock».
+              {/* ② · QUÉ ES — nombre CURADO + su línea de identidad.
+                  🔴 `descripcion` DEJA DE PINTARSE COMO PROSA, y es por medición:
+                  no es una descripción. Medido sobre los 470 activos —
+                  **promedio 10 caracteres, máximo 29, CERO sobre 200** — y sus
+                  literales son sub-líneas del importador: «Linea Dorada»,
+                  «Veterinary Diet», «Gatos», «Premium». *Pintar «Linea Dorada»
+                  como párrafo de cuerpo le promete al lector una descripción que
+                  no existe.* Va donde pertenece: junto a la marca, con el
+                  separador de la casa. */}
+              {/* 🔴 S100d-C · **«Brilliant · Brilliant» — LA MARCA DICHA DOS
+                  VECES, Y NO LA ENCONTRÓ NINGÚN NÚMERO: LA ENCONTRÓ MIRAR.**
 
-                ⚠️ **La ley de la firma, y las tres partes se cumplen acá:**
-                dice QUÉ NO SE PUEDE **y QUÉ SÍ** —jamás solo el rechazo— y
-                **termina en pregunta**: la familia decide.
+                  Corrí cuatro mediciones sobre esta ficha en la vuelta —altos,
+                  tipografías, largos de texto, señales del control— y **las
+                  cuatro daban verde**, porque ninguna preguntaba *«¿estos dos
+                  campos dicen lo mismo?»*. Apareció en la captura, de un
+                  vistazo. *Es el mismo modo de falla que S100b registró con la
+                  ficha sin precio: lo que la vara no pregunta, la vara no lo
+                  contesta.*
 
-                🔴 **`saltos_por_cupo > 0` NO decide la voz — `motivoCorrimiento`
-                sí.** Es el rojo del 18-ago escrito en la cabecera de la pieza:
-                prometía con `saltos: 1` y **el cupo VACÍO**, porque era
-                domingo. *Decir «estaba completo» un domingo hace perder una
-                venta por una escasez que no existe.* Con motivo `null` (motor
-                viejo, o valor desconocido) **no se afirma causa**: se dice que
-                corrió y nada más. */}
-            {promesaVisible !== null ? (
+                  **Medido después de verlo, contra la base viva (18-ago): 106
+                  de 470 vendibles —el 22,6 %— tienen `descripcion` IDÉNTICA a
+                  `marca`**, y 107 la tienen contenida. ⇒ **en casi una de cada
+                  cuatro fichas del catálogo, esta línea repetía la marca.**
+
+                  Y refuerza lo que el punto ⑪ concluyó por otro camino:
+                  **`descripcion` no es una descripción.** Promedia 10,5
+                  caracteres, y una de cada cuatro veces es literalmente el
+                  nombre de la marca otra vez.
+
+                  **La cura es de la PANTALLA y no del dato:** el catálogo dice
+                  lo que dice y no se le reescribe —el importador es su fuente—;
+                  lo que estaba mal era juntar dos campos sin preguntar si
+                  traían lo mismo. Se compara **normalizado** (`trim` +
+                  minúsculas) porque *«Brilliant»* y *«brilliant »* son el mismo
+                  dato con distinta suerte de carga. */}
               <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
-                <Texto variante="seccion">{t('despensa.cuandoLlega')}</Texto>
-                {promesaVisible === 'cargando' ? (
-                  <Texto variante="apoyo">{t('despensa.promesaCargando')}</Texto>
-                ) : promesaVisible === 'sin_dato' ? (
-                  <Texto variante="apoyo" color="warning">
-                    {t('despensa.promesaFallo')}
-                  </Texto>
-                ) : promesaVisible.ok &&
-                  promesaVisible.fecha !== null &&
-                  promesaVisible.desde !== null &&
-                  promesaVisible.hasta !== null ? (
-                  <>
-                    <Texto variante="cuerpo">
-                      {t('despensa.promesaVentana', {
-                        dia: fechaDiaSemanaHumana(promesaVisible.fecha, idioma as IdiomaSoportado),
-                        desde: horaLocal(promesaVisible.desde),
-                        hasta: horaLocal(promesaVisible.hasta),
+                <Texto variante="titulo">{nombreCurado(ficha.nombre)}</Texto>
+                {(() => {
+                  const norm = (x: string) => x.trim().toLowerCase();
+                  const partes = [ficha.marca, ficha.descripcion]
+                    .filter((x): x is string => x !== null && x.trim().length > 0)
+                    // El eco se retira, jamás el primero: la MARCA preside.
+                    .filter((x, i, todas) => todas.findIndex((y) => norm(y) === norm(x)) === i);
+                  return partes.length > 0 ? (
+                    <Texto variante="apoyo">{partes.join(' · ')}</Texto>
+                  ) : null;
+                })()}
+              </View>
+
+              {/* ② bis · LAS PRESENTACIONES COMO CHIPS (N19 ②) — elegir acá y ver
+                  el precio abajo, en vez de leer una tabla de filas.
+                  Medido: **392 de 470 productos (83 %) tienen UNA sola** ⇒ con una
+                  el grupo colapsa y no se dibuja (no se le pide una decisión a
+                  quien no tiene alternativa).
+                  🔴 Los chips son SOLO de lo comprable, y las presentaciones sin
+                  oferta se DICEN abajo en vez de fingirse chips apagados:
+                  `SelectorOpcion` no tiene deshabilitado por opción, y **una
+                  puerta que se ofrece para rebotar es Ley 23**. El nulo honesto
+                  se conserva — la variante existe y no se puede comprar. */}
+              {comprables.length > 1 ? (
+                <View style={{ paddingHorizontal: spacing[5] }}>
+                  {/* ═══════════════════════════════════════════════════════
+                      🔴 S100d-bis · **EL CHIP ELEGIDO DEJA DE SER VERDE Y PASA
+                      A MAGENTA — Y LA CURA ERA UNA PROP QUE ESTA PANTALLA
+                      NUNCA DECLARÓ.**
+                      ═══════════════════════════════════════════════════════
+
+                      **Segundo veredicto del founder:** el chip de
+                      presentación *«marca en verde y debe ser magenta»*, con
+                      el principio nuevo: **magenta = marca y SELECCIÓN · ocre
+                      = ACCIÓN.** Un chip elegido es selección.
+
+                      🔴 **DE DÓNDE SALÍA EL VERDE, medido en la pieza y no
+                      supuesto:** `SelectorOpcion` resuelve su acento por el
+                      prop `acento`, y **esta pantalla no lo pasaba** ⇒ caía al
+                      default `'capa'`, que resuelve a `capaText.identidad` /
+                      `capaBg.identidad` — **el verdeVital**. *No era un color
+                      tecleado ni un estado heredado de otra pieza: era un
+                      DEFAULT que nadie declaró.*
+
+                      **Y no es una cura improvisada: es la migración que la
+                      propia pieza tenía escrita.** Su JSDoc dice, desde S58:
+                      *«'capa' (default, verdeVital) MUERE como color de
+                      control — las pantallas construidas migran AL PASO de la
+                      pasada; el default se retira cuando la última migre»*.
+                      ⇒ **esta es esa migración**, y por eso la cura va acá y
+                      no en `packages/ui`: *el default sigue siendo legal
+                      mientras quede una pantalla sin migrar, y arreglarlo en
+                      la pieza rompería a las que todavía lo esperan.*
+
+                      ⚠️ **Lo que `'control'` resuelve, por casa y sin un hex
+                      escrito acá:** cliente → `accent.control` (magentaDark
+                      en claro, violetText en oscuro) · memorial → tinta (*no
+                      celebra*). **Y de paso deja de haber dos vocabularios de
+                      selección en la misma pantalla:** los chips de la hoja
+                      de filtros ya marcaban con `accent.control` desde
+                      S83-B17. *La app decía «elegido» de dos colores
+                      distintos a dos toques de distancia.* */}
+                  <SelectorOpcion
+                    etiqueta={t('despensa.presentaciones')}
+                    disposicion="tira"
+                    acento="control"
+                    opciones={comprables.map((v) => ({
+                      codigo: v.variante_id,
+                      /**
+                       * 🔴 S100d-bis · **CUANDO DOS PRESENTACIONES SE LLAMAN
+                       * IGUAL, EL PRECIO LAS DISTINGUE — Y ESTO NO INVENTA UNA
+                       * DIFERENCIA: DEJA DE ESCONDER UNA QUE EXISTE.**
+                       *
+                       * **Lo encontró MIRAR una captura, no medir.** Corrí
+                       * cuatro varas sobre esta ficha y las cuatro dieron
+                       * verde mientras «Adulto Cordero y Arroz» dibujaba
+                       * **dos chips que decían “12.7 kg”** — uno a **$57,19**
+                       * y otro a **$94,50**. *La familia veía dos botones
+                       * idénticos y uno costaba 65 % más.*
+                       *
+                       * **Medido contra la base viva (18-ago): 6 de 470
+                       * productos** tienen la misma presentación en DOS
+                       * variantes distintas. Poco, y el que cae adentro no
+                       * tiene forma de elegir.
+                       *
+                       * ⚖️ **Por qué se cura acá y no en la pieza** (medido con
+                       * B): `SelectorOpcion` recibe `etiqueta` y la dibuja —
+                       * **no sabe que hay otra igual**. *Una pieza no puede
+                       * desambiguar lo que no ve; el que ve el conjunto es
+                       * quien arma la lista.*
+                       *
+                       * ⚠️ **SOLO cuando repite**, y ése es el límite que lo
+                       * vuelve legal: en los 464 productos sanos el chip sigue
+                       * diciendo «2.5 kg» y nada más. *Poner el precio en
+                       * todos sería ruido —el precio ya vive abajo, grande, y
+                       * cambia al elegir—; ponerlo donde el rótulo no alcanza
+                       * es honestidad.*
+                       *
+                       * 🔴 **Y NO ES LA CURA DEL DATO, que sigue abierto con su
+                       * número:** hay **25 variantes con más de una oferta
+                       * publicada** contra la firma *«una oferta por
+                       * producto»* de `MODELO_DESPENSA`. **Eso es motor y
+                       * catálogo, no pantalla** — servido a A. *Esta línea
+                       * hace que el defecto del dato se VEA en vez de
+                       * disfrazarse de dos botones iguales.*
+                       */
+                      etiqueta:
+                        comprables.filter((o) => o.presentacion === v.presentacion).length > 1
+                          ? `${v.presentacion} · ${formatearPrecio(v.precio)}`
+                          : v.presentacion,
+                    }))}
+                    seleccionada={varianteId ?? undefined}
+                    onSelect={setVarianteId}
+                  />
+                </View>
+              ) : null}
+
+              {/* ③ · EL PRECIO, y debajo EL PRECIO POR KILO (N19 ③).
+                  🔴 El $/kg es el dato que decide una compra de alimento y que casi
+                  ningún catálogo pone — **y solo aparece cuando hay peso**: medido,
+                  248 de 563 filas (44 %) lo declaran. Sin peso no hay cuenta, y
+                  una cuenta sobre un peso ausente destruiría lo único que le da
+                  valor: que sea cierta.
+                  El registro es el mensaje (Ley 3): el precio en su voz, el $/kg
+                  en mono porque **lo derivó una máquina**. */}
+              {/* 🔴 S100b-C — LA FICHA SIN PRECIO. Este bloque se pintaba SOLO
+                  con una presentación elegida, y con más de una **no se elige
+                  sola** (la auto-selección es solo para el caso de una). ⇒ en
+                  un producto de 3 presentaciones, **la ficha no mostraba
+                  NINGÚN precio hasta que la familia tocaba un chip**.
+                  *Una ficha sin precio no vende: obliga a adivinar cuánto
+                  sale antes de saber si te interesa.*
+                  Apareció MIRANDO la captura, no midiéndola — ningún número
+                  de los que este archivo produce decía «acá no hay precio».
+
+                  La cura NO es preseleccionar: **el primer elemento de una
+                  colección sin criterio es una decisión de negocio por
+                  accidente** (L-289), y elegirle la presentación a la familia
+                  es decidir cuánto va a gastar. Se muestra **«desde» el precio
+                  de la más barata**, que es la escalera del precio honesto ya
+                  firmada en S82: *lo que varía dice «desde»*. Al elegir un
+                  chip, el precio pasa a ser el exacto de esa presentación.
+
+                  ⚠️ La palabra va en su propia línea y no pegada al número
+                  porque `PrecioText` no tiene forma de prefijo; **se le pidió
+                  a B la prop con este caso** — la tipografía del precio es de
+                  la pieza, no de esta pantalla. */}
+              {variante !== null && variante.precio !== null ? (
+                <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
+                  <PrecioText
+                    valor={variante.precio}
+                    // `ficha` — el registro que la pieza reserva para «el
+                    // protagonista de la ficha, el que decide la compra».
+                    registro="ficha"
+                    porUnidad={
+                      precioPorKg(
+                        variante.precio,
+                        variante.peso_kg,
+                        MONEDA_FALLBACK,
+                        idioma as IdiomaSoportado,
+                      ) ?? undefined
+                    }
+                  />
+                </View>
+              ) : masBarata !== null ? (
+                <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
+                  <Texto variante="apoyo">{t('despensa.precioDesde')}</Texto>
+                  <PrecioText
+                    valor={masBarata.precio}
+                    registro="ficha"
+                    porUnidad={
+                      precioPorKg(
+                        masBarata.precio,
+                        masBarata.peso_kg,
+                        MONEDA_FALLBACK,
+                        idioma as IdiomaSoportado,
+                      ) ?? undefined
+                    }
+                  />
+                </View>
+              ) : null}
+
+              {/* 3 · 🔴 LA ADVERTENCIA (§5.4) — la firma. Se monta SIEMPRE que
+                  haya alérgeno documentado relevante: la pieza recibe los
+                  HECHOS (composición del motor + coincidencia del cruce
+                  expandido) y decide ella — los dos silencios legales
+                  (verificada · no_aplica, sin cruce) los resuelve la pieza.
+                  El paso explícito gatea el CTA en las DOS coincidencias:
+                  si puede ser pollo, se decide sabiendo. */}
+              {alergenosMascota.length > 0 ? (
+                <View style={{ paddingHorizontal: spacing[5] }}>
+                  <AvisoAlergia
+                    composicion={ficha.composicion_estado}
+                    coincidencia={cruce.coincidencia}
+                    mensaje={
+                      cruce.coincidencia === 'exacta'
+                        ? t('despensa.alergiaContiene', {
+                            nombre: nombreMascota ?? t('despensa.tuMascota'),
+                            // Las voces del AVISO viajan en los vigilados
+                            // (cat_alergenos.nombre_es, del motor).
+                            lista: cruce.exactos.map((e) => e.nombre).join(', '),
+                          })
+                        : cruce.coincidencia === 'imprecisa'
+                          ? t('despensa.alergiaImprecisa', {
+                              nombre: nombreMascota ?? t('despensa.tuMascota'),
+                              lista: cruce.imprecisos
+                                .map((i) =>
+                                  t('despensa.imprecisoPar', {
+                                    declarado: i.nombre,
+                                    origen: i.origenNombre,
+                                  }),
+                                )
+                                .join('; '),
+                            })
+                          : ficha.composicion_estado === 'ausente'
+                            ? t('despensa.alergiaSinComposicion', {
+                                nombre: nombreMascota ?? t('despensa.tuMascota'),
+                              })
+                            : t('despensa.alergiaSinVerificar', {
+                                nombre: nombreMascota ?? t('despensa.tuMascota'),
+                              })
+                    }
+                    detalle={exigeEntendimiento ? t('despensa.alergiaContieneDetalle') : undefined}
+                    entendido={exigeEntendimiento ? entendido : undefined}
+                    onEntendido={
+                      exigeEntendimiento ? () => void confirmarEntendimiento() : undefined
+                    }
+                    etiquetaEntendido={t('despensa.alergiaEntiendo')}
+                    etiquetaYaEntendido={t('despensa.alergiaEntendida')}
+                  />
+                </View>
+              ) : null}
+
+              {/* ④ · LA COMPOSICIÓN (§0.5 de la letra: el detalle al nivel del
+                  mejor e-commerce; candado ① de §5.4: sin composición se DICE).
+                  Todo en voz de "declarado por el fabricante" — la app
+                  transporta, jamás avala.
+
+                  ═══════════════════════════════════════════════════════════
+                  🔴 S100d-C · PUNTOS ⑩ Y ⑪ — LA SECCIÓN SE PLIEGA ENTERA, CON
+                  UNA SOLA SEÑAL, Y **NO SE PLIEGA NADA MÁS EN TODA LA FICHA.**
+                  ═══════════════════════════════════════════════════════════
+
+                  **Los dos literales del founder que gobiernan esto:**
+                  · ⑩ *«hoy flecha + label “6 más” — debería ser solo el más al
+                    costado o la sola flecha»*.
+                  · ⑪ *«por ahora solo agregá los más para ver descripción y
+                    características»*, con la orden expresa de **re-medir antes
+                    de plegar: “si sigue siendo aire, decilo con el número y
+                    plegá solo lo que tenga cuerpo”.**
+
+                  🔴 **RE-MEDIDO EL 18-AGO CONTRA LA BASE VIVA (470 vendibles)
+                  Y CONTRA LA FICHA MONTADA — y la orden se cumple al pie:**
+
+                  | qué | medido | qué se hizo |
+                  |---|---|---|
+                  | `descripcion` | **464/470 la tienen · promedio 10,5 car · máximo 29 · CERO sobre 60** | **NADA.** No es una descripción: son sub-líneas del importador («Perro», «Premium»). *Un «+» sobre diez caracteres promete contenido que no existe.* Se dice con el número, que es lo que el founder pidió |
+                  | «características» (`porque`) | en pantalla, **una sola frase de 25 car en 58 dp** · `tallas_aplicables` **0 de 470** | **NADA.** Un encabezado plegable mide ~56 dp ⇒ **plegarla ahorraría 2 dp** y escondería nuestro diferencial. *No es que no valga la pena: es que la aritmética da negativo* |
+                  | `composicion_mercado` | **vacía en 470 de 470** | nada que plegar |
+                  | **`ingredientes_activos`** | **202/470 · 10,5 ingredientes de promedio, hasta 26 · texto de 194 car de promedio, hasta 517** | 🔴 **SE PLIEGA. Es la única prosa con cuerpo de la ficha** |
+
+                  **Y el número que lo vuelve una mejora y no una preferencia:**
+                  sobre el producto más largo del catálogo (25 ingredientes, 517
+                  car) la ficha medía **704 dp de contenido sobre ~630 útiles ⇒
+                  no entraba**. Plegando esta sección baja a **~546 dp: la ficha
+                  entera cabe sin deslizar.** *Ése era el «tipo Laika».*
+
+                  🔴 **LA SEÑAL ES UNA Y ESTÁ AL COSTADO — y la pieza YA
+                  EXISTÍA.** `CeldaNavegacion direccion="abajo"|"arriba"` es el
+                  encabezado de sección que despliega de la casa: su propio
+                  JSDoc dice que nació para este hueco, y **no tenía un solo
+                  consumidor real en `apps`** (medido: solo la galería y el
+                  perfil del prestador). Cero componente nuevo (Ley 11), cero
+                  trazo copiado (L-175).
+
+                  ⚖️ **POR QUÉ LA FLECHA Y NO EL «+», teniendo el founder
+                  permitidas las dos** (*«solo el más al costado O la sola
+                  flecha»*): **E14 es letra firmada — información DESPLIEGA con
+                  chevron · acción LLEVA**. Y hay una razón que no es de esta
+                  pantalla: **F-OCRE le acaba de dar al «+» el rol de ACCIÓN DE
+                  COMPRA**. Un «+» que pliega prosa sería el mismo signo con dos
+                  significados en la misma app, y el que pierde es el que vende.
+                  *Reversible en una línea si el founder prefiere el «+»: es un
+                  cambio de `direccion` por un glifo, sin tocar la estructura.*
+
+                  🔴 **LO QUE **NO** ENTRA AL PLEGADO, y no es decisión de esta
+                  pantalla: LA ADVERTENCIA DE ALÉRGENO.** `MODELO_DESPENSA`
+                  §6/§10 (*plegar una advertencia de salud la convierte en nota
+                  al pie*) y el límite explícito de N22. Queda **hermana del
+                  encabezado, no hija**: se ve con la sección cerrada. Lo mismo
+                  el `AvisoAlergia` de arriba, que además gatea el CTA.
+
+                  ⚠️ **Y SIN INGREDIENTES NO SE DIBUJA EL CONTROL** (268 de 470
+                  productos): la sección se queda abierta diciendo su verdad —
+                  *«no tenemos los ingredientes»* es honestidad, no prosa, y
+                  esconderla detrás de un toque sería justo el candado ① al
+                  revés. *Un control que revela nada es peor que el texto que
+                  ahorra.*
+
+                  ⏸️ **LO QUE NO SE TOCÓ, POR ORDEN: las SUPERFICIES.** N21
+                  admitiría que esta sección viva en carta —el perfil del
+                  prestador la monta así—, pero **QF-01 (el fondo) está
+                  declarada ABIERTA y fuera de esta vuelta por el founder**
+                  (*«ese es un cambio más de fondo; por ahora solo agregá los
+                  más»*). Agregar una carta acá sería atacar QF-01 de costado. */}
+              {(() => {
+                /** ¿Hay prosa que plegar? El ESTADO manda (letra de A, 12-ago):
+                 *  `no_aplica` jamás pide ingredientes —no es un dato que
+                 *  falte— y `ausente` DICE que no los tiene aunque la columna
+                 *  traiga algo. En los dos casos no hay nada detrás del
+                 *  control, así que el control no existe. */
+                const puedePlegar =
+                  ficha.composicion_estado !== 'no_aplica' &&
+                  ficha.composicion_estado !== 'ausente' &&
+                  ficha.ingredientes_activos.length > 0;
+
+                /**
+                 * 🔴 `D-876` · QUÉ HAY QUE DECIR SOBRE LA COMPOSICIÓN — **UN
+                 * valor, tres consumidores.**
+                 *
+                 * **El rojo (recorrido de A):** la sección decía, en dos líneas
+                 * seguidas, *«No tenemos los ingredientes de este producto. El
+                 * fabricante no los declaró.»* y *«Declarada por el fabricante,
+                 * todavía sin verificar.»* **Las dos afirmaciones son
+                 * contradictorias y las dos estaban bien escritas.**
+                 *
+                 * 🔴 **La causa NO era la redacción — era la FORMA:** la
+                 * ausencia y la fuente vivían en **dos condiciones
+                 * independientes** (`estado === 'ausente' || sin datos` para una,
+                 * `estado !== 'no_aplica'` para la otra) **que había que
+                 * mantener de acuerdo a mano.** Con `ausente` **las dos daban
+                 * `true`.** *Dos condiciones que deben excluirse pero no se
+                 * miran entre sí no están sincronizadas: están de acuerdo por
+                 * casualidad hasta que un estado las separa.*
+                 *
+                 * **Por qué un valor derivado y no un `&&` más:** agregar la
+                 * negación al guard de la fuente arreglaba ESTE caso y dejaba
+                 * viva la forma que lo produjo — el próximo estado del
+                 * vocabulario volvería a poder encender las dos. **Con el valor
+                 * único, «ausente + fuente» es INEXPRESABLE.**
+                 *
+                 * `sin_lista` = no hay ingredientes **pero sí alérgenos
+                 * declarados** ⇒ **sí hay composición que atribuir**, y la
+                 * fuente corresponde. *Es el caso que separa «no hay lista» de
+                 * «no hay nada».*
+                 */
+                const composicion: 'plegable' | 'no_aplica' | 'ausente' | 'sin_lista' = puedePlegar
+                  ? 'plegable'
+                  : ficha.composicion_estado === 'no_aplica'
+                    ? 'no_aplica'
+                    : ficha.composicion_estado === 'ausente' ||
+                        (ficha.ingredientes_activos.length === 0 && ficha.alergenos.length === 0)
+                      ? 'ausente'
+                      : 'sin_lista';
+
+                /** La advertencia de alérgeno — SIEMPRE a la vista, plegada la
+                 *  sección o no. Se compone una vez y se monta en las dos
+                 *  ramas: *dos copias de una advertencia de salud es como se
+                 *  fabrica el día en que una de las dos deja de pintarse.* */
+                const advertencia =
+                  ficha.alergenos.length > 0 ? (
+                    <Texto variante="apoyo">
+                      {t('despensa.composicionAlergenos', {
+                        lista: ficha.alergenos.map((c) => vozAlergeno(c, vocesAlergenos)).join(', '),
                       })}
                     </Texto>
-                    {promesaVisible.saltos_por_cupo > 0 ? (
-                      <Texto variante="apoyo">
-                        {promesaVisible.motivoCorrimiento === 'cupo_lleno'
-                          ? t('despensa.saltoPorCupo')
-                          : promesaVisible.motivoCorrimiento === 'sin_operacion'
-                            ? t('despensa.saltoPorSinOperacion')
-                            : t('despensa.saltoSinCausa')}
-                      </Texto>
+                  ) : null;
+
+                return (
+                  /* ═══════════════════════════════════════════════════════
+                     🔴 S100d-bis · **LA COMPOSICIÓN GANA SU CAJÓN BLANCO —
+                     N21 EN SU CASO LITERAL.**
+                     ═══════════════════════════════════════════════════════
+
+                     **Literal del founder:** *«no dejarla sobre fondo»*.
+                     Y es exactamente lo que N21 dice: **un grupo de datos con
+                     rótulo propio va EN CARTA; lo que ES la pantalla
+                     (encabezado, pie, CTA) no.** Esta sección tiene rótulo,
+                     tiene contenido plegable y tiene su advertencia: **es un
+                     grupo, no la pantalla.**
+
+                     ⏪ **Y en la vuelta pasada NO la puse, con una razón que
+                     ya venció:** dije que **QF-01 (el fondo) estaba abierta y
+                     fuera del alcance** por orden del founder (*«ese es un
+                     cambio más de fondo; por ahora solo agregá los más»*), y
+                     que agregar una carta sería atacar QF-01 de costado.
+                     **El segundo veredicto la pidió explícitamente**, así que
+                     la razón se cae por firma. *No estaba equivocada: estaba
+                     esperando esta decisión.*
+
+                     **LO QUE CUESTA, MEDIDO ANTES DE PONERLA (RN-web,
+                     384×832):** el bloque cerrado medía **72 dp** sobre fondo
+                     transparente, sin sombra y sin radio. La carta suma
+                     `relleno="amplio"` = **16 arriba y 16 abajo = 32 dp** ⇒
+                     **~104 dp cerrada.** La ficha del producto más largo
+                     estaba en 562 dp sobre ~630 útiles, así que **entra**,
+                     con menos aire. *Se declara el costo en vez de
+                     descubrirlo en el gate.*
+
+                     ⚠️ **`elevacion="reposo"` y no una sombra más fuerte:** la
+                     carta acá separa del fondo, **no celebra**. Y el
+                     `paddingHorizontal` de la sección se va: **el que separa
+                     del borde ahora es el relleno de la carta** — dos aires
+                     apilados serían el mismo error que curé en el punto ③.
+
+                     🔴 **LO QUE NO CAMBIA, Y ES LO QUE MÁS IMPORTA:** la
+                     advertencia de alérgeno **sigue FUERA del plegado**,
+                     dentro de la carta y visible con la sección cerrada
+                     (`MODELO_DESPENSA` §6/§10 · N22). *La carta cambió la
+                     superficie, no qué se esconde.* */
+                  <View style={{ paddingHorizontal: spacing[4] }}>
+                    <Tarjeta elevacion="reposo" relleno="amplio">
+                      <View style={{ gap: spacing[2] }}>
+                    {/* ⚖️ **EL RÓTULO NO LLEVA CUENTA, Y ES UNA RENUNCIA
+                        DELIBERADA.** Poner *«25 ingredientes»* al lado
+                        ayudaría a decidir si vale abrirlo —es el trabajo que
+                        hacía el `n` del `PieRevelar`, y la casa lo admite: su
+                        galería monta `titulo="Sus vacunas" detalle="8
+                        aplicadas"`—. **No entra porque el punto ⑩ es
+                        exactamente sobre CONTAR SEÑALES**: el founder objetó
+                        *dos cosas diciendo «hay más»* y pidió *«UNA señal, no
+                        dos»*. Un rótulo con cuenta al lado de un chevron
+                        corre el riesgo de volver a leerse como dos — *y un
+                        punto reportado cerrado que reaparece es rojo de
+                        método, no de pieza.* La cuenta no se pierde: es lo
+                        primero que se ve al abrir. **Vuelve con una línea si
+                        el founder la quiere.** */}
+                    {/* ═══════════════════════════════════════════════════
+                        🔴 S100d-bis · **LA CARTA ENVUELVE LAS DOS RAMAS, Y ESO
+                        ES LA CURA — NO UN REFACTOR.**
+                        ═══════════════════════════════════════════════════
+
+                        **Verificado en APARATO (18-ago, preview `01a0175e`) y
+                        no en web:** abrí una ficha **sin ingredientes**
+                        (`Aceite de Salmon Brilliant`) y **la composición
+                        quedaba SOBRE EL FONDO, sin carta** — que es
+                        exactamente lo que el founder pidió que no pasara.
+
+                        **La causa fue mía y es de forma:** puse la carta
+                        **solo en la rama plegable**, y la rama honesta —la que
+                        dice *«no tenemos los ingredientes»*— se quedó afuera.
+                        *Y el web no lo mostró porque yo medí sobre el producto
+                        con 25 ingredientes: elegí el caso rico para ver el
+                        plegado y con él perdí de vista el caso pobre, que es
+                        **268 de 470 productos** — la mayoría del catálogo.*
+
+                        ⇒ **la carta se sube afuera del `if` y las dos ramas
+                        quedan adentro.** No es prolijidad: con la carta
+                        compartida **«una rama sin superficie» deja de ser
+                        expresable**, que es como esta casa cura las dos
+                        cuentas que tienen que dar igual. *Duplicarla en la
+                        segunda rama habría arreglado el síntoma y dejado viva
+                        la forma que lo produjo.* */}
+                    {puedePlegar ? (
+                      <RotuloPlegable
+                        titulo={t('despensa.composicion')}
+                        abierta={composicionAbierta}
+                        onAlternar={() => setComposicionAbierta((v) => !v)}
+                      />
+                    ) : (
+                      /* Sin ingredientes no hay control: la sección se queda
+                         abierta diciendo su verdad. *Un control que revela
+                         nada es peor que el texto que ahorra*, y esconder la
+                         frase honesta detrás de un toque sería el candado ①
+                         de §5.4 al revés. */
+                      <Texto variante="seccion">{t('despensa.composicion')}</Texto>
+                    )}
+
+                    {composicion === 'no_aplica' ? (
+                      <Texto variante="apoyo">{t('despensa.composicionNoAplica')}</Texto>
+                    ) : composicion === 'ausente' ? (
+                      <Texto variante="apoyo">{t('despensa.composicionAusente')}</Texto>
                     ) : null}
-                  </>
-                ) : (
-                  <Texto variante="apoyo" color="warning">
-                    {promesaVisible.error === 'sin_cupo_ese_dia'
-                      ? t('despensa.sinCupoEseDia')
-                      : t('despensa.promesaFichaSinEntrega')}
+
+                    {advertencia}
+
+                    {/* 🔴 `D-876` · LA FUENTE SOLO EXISTE SI HAY ALGO QUE
+                        ATRIBUIR. Con el plegado va adentro; sin él, a la vista.
+                        **`ausente` y `no_aplica` NO la llevan** — *atribuirle a
+                        un fabricante una composición que no declaró es la
+                        contradicción que A midió.* Y ahora sale del MISMO valor
+                        que la voz de arriba, así que las dos no pueden
+                        desacordar. */}
+                    {composicion === 'sin_lista' || (composicion === 'plegable' && composicionAbierta) ? (
+                      <>
+                        {composicion === 'plegable' ? (
+                          <Texto variante="cuerpo">{ficha.ingredientes_activos.join(', ')}</Texto>
+                        ) : null}
+                        <Texto variante="apoyo">
+                          {ficha.composicion_estado === 'verificada'
+                            ? t('despensa.composicionVerificada')
+                            : t('despensa.composicionFuente')}
+                        </Texto>
+                      </>
+                    ) : null}
+                      </View>
+                    </Tarjeta>
+                  </View>
+                );
+              })()}
+
+              {/* ⑤ · PARA QUIÉN SIRVE (N19 ⑤ — era la 4 y baja UN puesto: la
+                  composición sube a ④ para quedar PEGADA a su advertencia).
+                  Nuestro diferencial: no lo tiene ninguno de los referentes.
+
+                  🔴 S100d-C · **ESTA SECCIÓN NO SE PLIEGA, Y ES LO QUE EL
+                  PUNTO ⑪ LLAMA «características».** Medido en la ficha
+                  montada: **una sola frase de 25 caracteres en 58 dp**, y
+                  `tallas_aplicables` está en **0 de 470** productos. Un
+                  encabezado plegable mide ~56 dp ⇒ **plegarla ahorraría 2 dp**
+                  y escondería el único bloque que ningún competidor tiene.
+                  *La aritmética da negativo, y el founder pidió el número
+                  antes que el control: «plegá solo lo que tenga cuerpo».* */}
+              {porque.length > 0 ? (
+                <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
+                  <Texto variante="seccion">
+                    {nombreMascota !== null
+                      ? t('despensa.porqueTituloMascota', { nombre: nombreMascota })
+                      : t('despensa.porqueTitulo')}
                   </Texto>
-                )}
-              </View>
-            ) : null}
+                  {porque.map((f) => (
+                    <Texto key={f} variante="cuerpo">
+                      {f}
+                    </Texto>
+                  ))}
+                  {ficha.es_dieta_prescripcion ? (
+                    <Texto variante="apoyo">{t('despensa.porquePrescripcion')}</Texto>
+                  ) : null}
+                </View>
+              ) : null}
 
-            {sinOferta.length > 0 ? (
-              <View style={{ paddingHorizontal: spacing[5] }}>
-                <Texto variante="apoyo">
-                  {t('despensa.tambienVieneEn', {
-                    lista: sinOferta.map((v) => v.presentacion).join(', '),
-                  })}
-                </Texto>
-              </View>
-            ) : null}
+              {/* ⑥ · DISPONIBILIDAD REAL — y las presentaciones que NO se pueden
+                  comprar, DICHAS (N19 ⑥).
+                  ☠️ Acá vivía la tabla de presentaciones en `Celda`. La reemplazan
+                  los chips de ②: **elegir y ver el precio arriba** en vez de leer
+                  una tabla de filas con el precio repetido en cada una.
+                  🔴 Lo que la tabla SÍ hacía y no se pierde: decir las variantes
+                  sin oferta. Se conserva como UNA línea —no como filas tocables—
+                  porque **no son una opción: son una ausencia**. El nulo honesto
+                  se mantiene; lo que muere es fingir que se pueden elegir. */}
+              {/* ☠️ ACÁ VIVÍA `despensa.fichaSinStock` PARA LA PRESENTACIÓN
+                  ELEGIDA, y se MUDÓ al pie — no se borró: `faltaParaAgregar` lo
+                  dice ahora pegado al CTA que apaga.
+                  🔴 ES UNA CURA DE DOS MITADES Y SE DECLARA: si alguien repone
+                  esta línea «porque informa», el mismo texto queda DOS VECES en
+                  una pantalla —acá y en el pie, a 400 dp— que es exactamente el
+                  defecto que C curó en H-205 con el nombre del producto.
+                  Lo que decide dónde va no es el gusto: **el impedimento vive
+                  donde se ejerce**. La ley de la casa es que el Confirmar apagado
+                  DICE QUÉ FALTA (S73-B), y el que apaga es el pie.
+                  ⚠️ Lo que esta mudanza NO resuelve, y queda como límite: el chip
+                  de una presentación agotada **se sigue pudiendo elegir**. Elegirla
+                  es legal —así se ve su precio y se entiende por qué no se puede—;
+                  lo que ya no es legal es AGREGARLA. */}
+              {/* 🔴 D-872 (b) · CUÁNDO LLEGA — la promesa ANTES de comprar.
+                  Vive en ⑥ y no en una sección propia porque **es
+                  disponibilidad real**: la pregunta que ⑥ contesta es «¿puedo
+                  tener esto?», y «no te lo entregan» es tan parte de esa
+                  respuesta como «no hay stock».
+
+                  ⚠️ **La ley de la firma, y las tres partes se cumplen acá:**
+                  dice QUÉ NO SE PUEDE **y QUÉ SÍ** —jamás solo el rechazo— y
+                  **termina en pregunta**: la familia decide.
+
+                  🔴 **`saltos_por_cupo > 0` NO decide la voz — `motivoCorrimiento`
+                  sí.** Es el rojo del 18-ago escrito en la cabecera de la pieza:
+                  prometía con `saltos: 1` y **el cupo VACÍO**, porque era
+                  domingo. *Decir «estaba completo» un domingo hace perder una
+                  venta por una escasez que no existe.* Con motivo `null` (motor
+                  viejo, o valor desconocido) **no se afirma causa**: se dice que
+                  corrió y nada más. */}
+              {promesaVisible !== null ? (
+                <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
+                  <Texto variante="seccion">{t('despensa.cuandoLlega')}</Texto>
+                  {promesaVisible === 'cargando' ? (
+                    <Texto variante="apoyo">{t('despensa.promesaCargando')}</Texto>
+                  ) : promesaVisible === 'sin_dato' ? (
+                    <Texto variante="apoyo" color="warning">
+                      {t('despensa.promesaFallo')}
+                    </Texto>
+                  ) : promesaVisible.ok &&
+                    promesaVisible.fecha !== null &&
+                    promesaVisible.desde !== null &&
+                    promesaVisible.hasta !== null ? (
+                    <>
+                      <Texto variante="cuerpo">
+                        {t('despensa.promesaVentana', {
+                          dia: fechaDiaSemanaHumana(promesaVisible.fecha, idioma as IdiomaSoportado),
+                          desde: horaLocal(promesaVisible.desde),
+                          hasta: horaLocal(promesaVisible.hasta),
+                        })}
+                      </Texto>
+                      {promesaVisible.saltos_por_cupo > 0 ? (
+                        <Texto variante="apoyo">
+                          {promesaVisible.motivoCorrimiento === 'cupo_lleno'
+                            ? t('despensa.saltoPorCupo')
+                            : promesaVisible.motivoCorrimiento === 'sin_operacion'
+                              ? t('despensa.saltoPorSinOperacion')
+                              : t('despensa.saltoSinCausa')}
+                        </Texto>
+                      ) : null}
+                    </>
+                  ) : (
+                    <Texto variante="apoyo" color="warning">
+                      {promesaVisible.error === 'sin_cupo_ese_dia'
+                        ? t('despensa.sinCupoEseDia')
+                        : t('despensa.promesaFichaSinEntrega')}
+                    </Texto>
+                  )}
+                </View>
+              ) : null}
+
+              {sinOferta.length > 0 ? (
+                <View style={{ paddingHorizontal: spacing[5] }}>
+                  <Texto variante="apoyo">
+                    {t('despensa.tambienVieneEn', {
+                      lista: sinOferta.map((v) => v.presentacion).join(', '),
+                    })}
+                  </Texto>
+                </View>
+              ) : null}
 
 
-            {/* 7 · LA CANTIDAD */}
-            {comprables.length > 0 ? (
-              <View
-                style={{
-                  paddingHorizontal: spacing[5],
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <Texto variante="cuerpo">{t('despensa.cantidad')}</Texto>
-                {/* 🔴 S100d-bis · `registro="compra"` — el ocre ADENTRO de la
-                    ficha. Literal del founder sobre el estado anterior:
-                    *«afuera en ocre, adentro en magenta»* = **está mal**.
-                    N26 v2 lo ordena sin ambigüedad: **sumar unidades es
-                    ACCIONAR**, y el stepper de la ficha hace el mismo
-                    trabajo que el de la tarjeta. *El mismo gesto no puede
-                    tener dos colores según en qué pantalla se toca.* */}
-                {/* ═══════════════════════════════════════════════════
-                    🔴 S100d-bis · **EL CAMPO SE ENCIENDE, Y SU `onCambio`
-                    PASA POR EL TOPE — LAS DOS COSAS O NINGUNA.**
-                    ═══════════════════════════════════════════════════
+              {/* 7 · LA CANTIDAD */}
+              {comprables.length > 0 ? (
+                <View
+                  style={{
+                    paddingHorizontal: spacing[5],
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Texto variante="cuerpo">{t('despensa.cantidad')}</Texto>
+                  {/* 🔴 S100d-bis · `registro="compra"` — el ocre ADENTRO de la
+                      ficha. Literal del founder sobre el estado anterior:
+                      *«afuera en ocre, adentro en magenta»* = **está mal**.
+                      N26 v2 lo ordena sin ambigüedad: **sumar unidades es
+                      ACCIONAR**, y el stepper de la ficha hace el mismo
+                      trabajo que el de la tarjeta. *El mismo gesto no puede
+                      tener dos colores según en qué pantalla se toca.* */}
+                  {/* ═══════════════════════════════════════════════════
+                      🔴 S100d-bis · **EL CAMPO SE ENCIENDE, Y SU `onCambio`
+                      PASA POR EL TOPE — LAS DOS COSAS O NINGUNA.**
+                      ═══════════════════════════════════════════════════
 
-                    **El caso del founder:** *tipea 50 con 12 en stock, el
-                    número se ajusta a 12 solo y nadie le explica por qué.*
-                    **`editable` sin el tope produce el defecto al revés:**
-                    el campo aceptaría 50, la ficha mostraría 50, y el
-                    recorte llegaría recién al tocar «Agregar». *Un número
-                    que se queda mintiendo hasta el último toque es peor que
-                    uno que se corrige enseguida.*
+                      **El caso del founder:** *tipea 50 con 12 en stock, el
+                      número se ajusta a 12 solo y nadie le explica por qué.*
+                      **`editable` sin el tope produce el defecto al revés:**
+                      el campo aceptaría 50, la ficha mostraría 50, y el
+                      recorte llegaría recién al tocar «Agregar». *Un número
+                      que se queda mintiendo hasta el último toque es peor que
+                      uno que se corrige enseguida.*
 
-                    ⚠️ **Antes de rutearlo medí CUÁNDO emite la pieza**, que
-                    es lo que lo vuelve barato: `onCambio` sale de
-                    `confirmar()`, atado a `onEndEditing`/`onSubmitEditing`
-                    — **al CONFIRMAR, no por tecla.** ⇒ es **un viaje al
-                    motor por número tipeado**, no uno por dígito. *Si
-                    hubiera emitido por tecla, esto habría sido una consulta
-                    por pulsación y la cura sería otra.*
+                      ⚠️ **Antes de rutearlo medí CUÁNDO emite la pieza**, que
+                      es lo que lo vuelve barato: `onCambio` sale de
+                      `confirmar()`, atado a `onEndEditing`/`onSubmitEditing`
+                      — **al CONFIRMAR, no por tecla.** ⇒ es **un viaje al
+                      motor por número tipeado**, no uno por dígito. *Si
+                      hubiera emitido por tecla, esto habría sido una consulta
+                      por pulsación y la cura sería otra.*
 
-                    ⚠️ **Y BAJAR NO CONSULTA**, igual que en la vitrina:
-                    pedirle permiso al motor para llevar MENOS es un viaje
-                    que no decide nada.
+                      ⚠️ **Y BAJAR NO CONSULTA**, igual que en la vitrina:
+                      pedirle permiso al motor para llevar MENOS es un viaje
+                      que no decide nada.
 
-                    🔴 **`sin_medir` NO ES `agotado` (Ley 13).** Si la
-                    consulta falla se aplica lo pedido y el motor sigue
-                    siendo la última palabra. *Un fallo de red no se
-                    disfraza de «no hay stock»: inventar una mala noticia es
-                    peor que darla tarde* — y el instrumento de A lo caza,
-                    su rojo producido es exactamente colapsar las dos
-                    clases.
+                      🔴 **`sin_medir` NO ES `agotado` (Ley 13).** Si la
+                      consulta falla se aplica lo pedido y el motor sigue
+                      siendo la última palabra. *Un fallo de red no se
+                      disfraza de «no hay stock»: inventar una mala noticia es
+                      peor que darla tarde* — y el instrumento de A lo caza,
+                      su rojo producido es exactamente colapsar las dos
+                      clases.
 
-                    ⏪ **El tope de `agregar()` NO se retira**, y no es
-                    redundancia: entre que se tipea el número y se toca el
-                    botón **el stock puede cambiar**. *Son dos momentos, no
-                    dos copias.* */}
-                <StepperCantidad
-                  valor={cantidad}
-                  min={1}
-                  max={99}
-                  editable
-                  onCambio={(n) => {
-                    if (n <= cantidad) {
-                      setCantidad(n);
-                      return;
-                    }
-                    if (variante === null) {
-                      setCantidad(n);
-                      return;
-                    }
-                    void (async () => {
-                      const r = await maximoComprableDeOfertas([
-                        { oferta_id: variante.oferta_id, cantidad: n },
-                      ]);
-                      const maximo = r.ok && r.data.length > 0 ? r.data[0].maximo : null;
-                      const tope = decidirTope(n, maximo);
-                      if (tope.clase === 'agotado') {
-                        mostrar({ texto: t('despensa.fichaSinStock'), variante: 'error' });
+                      ⏪ **El tope de `agregar()` NO se retira**, y no es
+                      redundancia: entre que se tipea el número y se toca el
+                      botón **el stock puede cambiar**. *Son dos momentos, no
+                      dos copias.* */}
+                  <StepperCantidad
+                    valor={cantidad}
+                    min={1}
+                    max={99}
+                    editable
+                    onCambio={(n) => {
+                      if (n <= cantidad) {
+                        setCantidad(n);
                         return;
                       }
-                      if (tope.clase === 'acotado') {
-                        mostrar({
-                          texto: t('despensa.maximoEntregable', { n: tope.cantidad }),
-                          variante: 'neutro',
-                        });
+                      if (variante === null) {
+                        setCantidad(n);
+                        return;
                       }
-                      setCantidad(tope.cantidad);
-                    })();
-                  }}
-                  etiqueta={t('despensa.cantidad')}
-                  registro="compra"
-                />
-              </View>
-            ) : null}
-          </>
-        )}
+                      void (async () => {
+                        const r = await maximoComprableDeOfertas([
+                          { oferta_id: variante.oferta_id, cantidad: n },
+                        ]);
+                        const maximo = r.ok && r.data.length > 0 ? r.data[0].maximo : null;
+                        const tope = decidirTope(n, maximo);
+                        if (tope.clase === 'agotado') {
+                          mostrar({ texto: t('despensa.fichaSinStock'), variante: 'error' });
+                          return;
+                        }
+                        if (tope.clase === 'acotado') {
+                          mostrar({
+                            texto: t('despensa.maximoEntregable', { n: tope.cantidad }),
+                            variante: 'neutro',
+                          });
+                        }
+                        setCantidad(tope.cantidad);
+                      })();
+                    }}
+                    etiqueta={t('despensa.cantidad')}
+                    registro="compra"
+                  />
+                </View>
+              ) : null}
+            </>
+          )}
+        </View>
       </HojaContenido>
 
       {/* ☠️ AQUÍ VIVÍA EL CARRITO FLOTANTE — **murió porque el shell lo monta**

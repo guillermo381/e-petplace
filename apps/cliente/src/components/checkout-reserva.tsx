@@ -509,7 +509,7 @@ export function CheckoutReserva({
           despensa**. */}
       <HojaContenido
         arranque={cabecera.arranque}
-        scroll={{ contentContainerStyle: { padding: spacing[4], gap: spacing[4] } }}
+
         fondo={
           <View onLayout={cabecera.alMedir}>
             <Cabecera
@@ -530,107 +530,117 @@ export function CheckoutReserva({
           />
         }
       >
-        {/* el ítem (forma de carrito: hoy UNO) */}
-        <View style={{ gap: spacing[2] }}>
-          <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.secondary }}>
-            {resumenEtiqueta}
-          </Text>
-          <Tarjeta relleno="ninguno">
-            {/* ── 🔴 CURA ② · QUÉ SE ESTÁ COMPRANDO, Y PRESIDE ────────────────
-                ⏪ El servicio iba de SUBTÍTULO, debajo del nombre de la
-                clínica: **estaba, y no presidía**. *En el momento del pago,
-                lo que preside es lo que se lee* — y por ahí pasó el defecto
-                del servicio preseleccionado sin que nada lo delatara.
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[4], gap: spacing[4] }}>
+          {/* el ítem (forma de carrito: hoy UNO) */}
+          <View style={{ gap: spacing[2] }}>
+            <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.secondary }}>
+              {resumenEtiqueta}
+            </Text>
+            <Tarjeta relleno="ninguno">
+              {/* ── 🔴 CURA ② · QUÉ SE ESTÁ COMPRANDO, Y PRESIDE ────────────────
+                  ⏪ El servicio iba de SUBTÍTULO, debajo del nombre de la
+                  clínica: **estaba, y no presidía**. *En el momento del pago,
+                  lo que preside es lo que se lee* — y por ahí pasó el defecto
+                  del servicio preseleccionado sin que nada lo delatara.
 
-                🔴 **Es CINTURÓN, no cura.** Aunque la preselección nunca
-                volviera a fallar, *una pantalla de pago tiene que decir qué
-                se paga*: el cinturón vale por sí mismo, no por el defecto
-                que lo motivó.
+                  🔴 **Es CINTURÓN, no cura.** Aunque la preselección nunca
+                  volviera a fallar, *una pantalla de pago tiene que decir qué
+                  se paga*: el cinturón vale por sí mismo, no por el defecto
+                  que lo motivó.
 
-                Se invierten los dos: el SERVICIO al título, la clínica al
-                subtítulo con su rótulo —*«con Clínica Aurora» dice quién sin
-                competir por el renglón principal*—. La metadata no se toca. */}
-            {/* ⚠️ **El riesgo que trae invertirlos, cerrado acá.** Los cuatro
-                oficios pasan `servicioNombre` con fallback `''` (medido) —
-                con el prestador en el título eso no importaba; **con el
-                servicio arriba, un vacío dejaría el renglón principal mudo**.
-                *Auditar cuatro caminos para probar que nunca llega vacío es
-                más frágil que hacer que un vacío no pueda dañar:* sin nombre
-                de servicio, el título vuelve a ser la clínica y el subtítulo
-                no se monta. */}
-            <Celda
-              titulo={servicioNombre.trim().length > 0 ? servicioNombre : prestadorNombre}
-              subtitulo={
-                servicioNombre.trim().length > 0
-                  ? t('checkout.conPrestador', { prestador: prestadorNombre })
-                  : undefined
-              }
-              /* 🔴 **`D-1096` · ACÁ SE LEÍA «2026-09-15 · 15:00», que es el
-                 ejemplo literal de lo que la firma prohíbe.** `fecha` llega
-                 como parámetro de URL —ISO crudo— y la hora salía de un
-                 `slice(0,5)` sobre la columna `time`. Las dos pasan por el
-                 riel; los minutos siguen en `metadataMono` porque «60 min» SÍ
-                 es voz de máquina (Ley 3) y la duración no es una fecha. */
-              // ✅ **LA FECHA SALE DE LA FUENTE MONO (lote 3f de B).** La voz
-              // ya estaba curada —`fechaYHoraHumana`— y la FUENTE seguía
-              // equivocada porque `Celda` sólo tenía `metadataMono`. Pedido y
-              // entregado: `metadata` es el hermano en sans, **sin
-              // `toLowerCase()`** —una fecha de familia no se minuscula—.
-              // ⚠️ **Los minutos se van con ella y NO se quedan en mono**, y es
-              // a propósito: partir la línea en dos slots pondría «60 min» en
-              // otro renglón por una diferencia de registro que nadie pidió.
-              // *La línea entera es una frase; el dato de máquina que queda en
-              // la tarjeta es el TOTAL, y ése sigue en `metadataMono`.*
-              metadata={`${fechaYHoraHumana(fecha, hora, idioma)} · ${duracion} min`}
-            />
-            <Separador />
-            {/* lugar hecho para el cupón (B4) — deshabilitado honesto */}
-            <Celda titulo={t('checkout.cupon')} fin={<Insignia estado="info" etiqueta={t('checkout.cuponPronto')} />} />
-            <Separador />
-            <Celda titulo={t('checkout.total')} metadataMono={formatearPrecio(precio)} />
-          </Tarjeta>
-        </View>
-
-        {/* el hold, con voz honesta y el contador en voz de máquina */}
-        <View style={{ gap: 2 }}>
-          <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
-            {t('checkout.holdVoz')}
-          </Text>
-          <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.sm, color: theme.text.tertiary, fontVariant: ['tabular-nums'] }}>
-            {mm}:{ss}
-          </Text>
-        </View>
-
-        {/* la sección propia del servicio (dirección del hogar / el dónde) */}
-        {seccionExtra}
-
-        {/* LOS DATOS PARA LA FACTURA — se pregunta UNA vez y se recuerda.
-            🔴 No se monta mientras el tope no se sepa (`'cargando'` o
-            `'sinTope'`): los dos bordes de la firma —deshabilitar «Consumidor
-            final» sobre el tope, no preguntar nada bajo el tope— son el MISMO
-            `if` contra ese número, y sin él la sección no puede decidir cuál
-            de los dos mostrar. */}
-        {facturacion.props === null ? (
-            facturacion.noCargo || facturacion.reintentando ? (
-              <AvisoNoCargo
-                onReintentar={facturacion.reintentar}
-                reintentando={facturacion.reintentando}
-                motivo={facturacion.motivo}
+                  Se invierten los dos: el SERVICIO al título, la clínica al
+                  subtítulo con su rótulo —*«con Clínica Aurora» dice quién sin
+                  competir por el renglón principal*—. La metadata no se toca. */}
+              {/* ⚠️ **El riesgo que trae invertirlos, cerrado acá.** Los cuatro
+                  oficios pasan `servicioNombre` con fallback `''` (medido) —
+                  con el prestador en el título eso no importaba; **con el
+                  servicio arriba, un vacío dejaría el renglón principal mudo**.
+                  *Auditar cuatro caminos para probar que nunca llega vacío es
+                  más frágil que hacer que un vacío no pueda dañar:* sin nombre
+                  de servicio, el título vuelve a ser la clínica y el subtítulo
+                  no se monta. */}
+              <Celda
+                titulo={servicioNombre.trim().length > 0 ? servicioNombre : prestadorNombre}
+                subtitulo={
+                  servicioNombre.trim().length > 0
+                    ? t('checkout.conPrestador', { prestador: prestadorNombre })
+                    : undefined
+                }
+                /* 🔴 **`D-1096` · ACÁ SE LEÍA «2026-09-15 · 15:00», que es el
+                   ejemplo literal de lo que la firma prohíbe.** `fecha` llega
+                   como parámetro de URL —ISO crudo— y la hora salía de un
+                   `slice(0,5)` sobre la columna `time`. Las dos pasan por el
+                   riel; los minutos siguen en `metadataMono` porque «60 min» SÍ
+                   es voz de máquina (Ley 3) y la duración no es una fecha. */
+                // ✅ **LA FECHA SALE DE LA FUENTE MONO (lote 3f de B).** La voz
+                // ya estaba curada —`fechaYHoraHumana`— y la FUENTE seguía
+                // equivocada porque `Celda` sólo tenía `metadataMono`. Pedido y
+                // entregado: `metadata` es el hermano en sans, **sin
+                // `toLowerCase()`** —una fecha de familia no se minuscula—.
+                // ⚠️ **Los minutos se van con ella y NO se quedan en mono**, y es
+                // a propósito: partir la línea en dos slots pondría «60 min» en
+                // otro renglón por una diferencia de registro que nadie pidió.
+                // *La línea entera es una frase; el dato de máquina que queda en
+                // la tarjeta es el TOTAL, y ése sigue en `metadataMono`.*
+                metadata={`${fechaYHoraHumana(fecha, hora, idioma)} · ${duracion} min`}
               />
-            ) : null
-          ) : (
-          <SeccionFacturacion {...facturacion.props} total={precio} />
-        )}
+              <Separador />
+              {/* lugar hecho para el cupón (B4) — deshabilitado honesto */}
+              <Celda titulo={t('checkout.cupon')} fin={<Insignia estado="info" etiqueta={t('checkout.cuponPronto')} />} />
+              <Separador />
+              <Celda titulo={t('checkout.total')} metadataMono={formatearPrecio(precio)} />
+            </Tarjeta>
+          </View>
 
-        {/* ②③④⑤ LA SECCIÓN DE PAGO — **la misma pieza que monta la despensa**.
-            Ya no es «igual a»: es LA MISMA. */}
-        <SeccionMedioDePago medio={medio} />
+          {/* el hold, con voz honesta y el contador en voz de máquina */}
+          <View style={{ gap: 2 }}>
+            <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+              {t('checkout.holdVoz')}
+            </Text>
+            <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.sm, color: theme.text.tertiary, fontVariant: ['tabular-nums'] }}>
+              {mm}:{ss}
+            </Text>
+          </View>
 
-        {/* ☠️ ACÁ VIVÍA «Fase de pruebas: el pago es simulado» y el simulador
-            `__DEV__` con sus dos pantallas (Ley 37). La banda pasó de honesta a
-            falsa el día del enchufe real; el simulador **fabricaba desenlaces
-            que el motor nunca dijo**. *Un simulador que sobrevive a su motor
-            real no es una herramienta: es una segunda verdad.* */}
+          {/* la sección propia del servicio (dirección del hogar / el dónde) */}
+          {seccionExtra}
+
+          {/* LOS DATOS PARA LA FACTURA — se pregunta UNA vez y se recuerda.
+              🔴 No se monta mientras el tope no se sepa (`'cargando'` o
+              `'sinTope'`): los dos bordes de la firma —deshabilitar «Consumidor
+              final» sobre el tope, no preguntar nada bajo el tope— son el MISMO
+              `if` contra ese número, y sin él la sección no puede decidir cuál
+              de los dos mostrar. */}
+          {facturacion.props === null ? (
+              facturacion.noCargo || facturacion.reintentando ? (
+                <AvisoNoCargo
+                  onReintentar={facturacion.reintentar}
+                  reintentando={facturacion.reintentando}
+                  motivo={facturacion.motivo}
+                />
+              ) : null
+            ) : (
+            <SeccionFacturacion {...facturacion.props} total={precio} />
+          )}
+
+          {/* ②③④⑤ LA SECCIÓN DE PAGO — **la misma pieza que monta la despensa**.
+              Ya no es «igual a»: es LA MISMA. */}
+          <SeccionMedioDePago medio={medio} />
+
+          {/* ☠️ ACÁ VIVÍA «Fase de pruebas: el pago es simulado» y el simulador
+              `__DEV__` con sus dos pantallas (Ley 37). La banda pasó de honesta a
+              falsa el día del enchufe real; el simulador **fabricaba desenlaces
+              que el motor nunca dijo**. *Un simulador que sobrevive a su motor
+              real no es una herramienta: es una segunda verdad.* */}
+        </View>
       </HojaContenido>
 
       {fueraDeScroll}

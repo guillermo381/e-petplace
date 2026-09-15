@@ -168,75 +168,85 @@ export default function VeterinariaDisponibles() {
             />
           </View>
         }
-        scroll={{ contentContainerStyle: { padding: spacing[4], gap: spacing[3] } }}
+
       >
-        {/* la ventana elegida, en voz de máquina — la duración no viaja:
-            es de cada vet (su oferta) */}
-        <Celda
-          titulo={mascota !== null ? t('veterinaria.ventanaPara', { nombre: mascota.nombre }) : t('veterinaria.titulo')}
-          metadataMono={`${fecha} · ${hora}`}
-        />
-        <Separador />
+        {/* 🔴 **EL RELLENO VA ADENTRO DE LA HOJA, NO EN EL SCROLL.** Traduje
+          `contentContainerStyle` del `ScrollView` viejo a su HOMÓNIMO en la
+          hoja, y no son lo mismo: **en la hoja ese estilo envuelve A LA HOJA**,
+          no a su contenido. ⇒ el padding lateral dejaba una franja de ciruela
+          a cada lado, el de arriba pegaba el contenido al borde redondeado
+          —«Tu paseo» salía cortado— y el de abajo separaba la hoja del piso.
+          *Medido en el aparato: hoja de 996 px en pantalla de 1080 = 42 px de
+          ciruela por lado, que es `spacing[4]` exacto.* */}
+        <View style={{ padding: spacing[4], gap: spacing[3] }}>
+          {/* la ventana elegida, en voz de máquina — la duración no viaja:
+              es de cada vet (su oferta) */}
+          <Celda
+            titulo={mascota !== null ? t('veterinaria.ventanaPara', { nombre: mascota.nombre }) : t('veterinaria.titulo')}
+            metadataMono={`${fecha} · ${hora}`}
+          />
+          <Separador />
 
-        {disponibles === 'cargando' ? (
-          <EsqueletoGrupo>
-            <View style={{ gap: spacing[3] }}>
-              <Esqueleto forma="bloque" ancho="100%" alto={64} />
-              <Esqueleto forma="bloque" ancho="100%" alto={64} />
-            </View>
-          </EsqueletoGrupo>
-        ) : disponibles === 'error' ? (
-          <EstadoVacio
-            titulo={t('veterinaria.errorTitulo')}
-            descripcion={t('hogar.errorHistoriaDetalle')}
-            accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={cargarVets} />}
-          />
-        ) : disponibles.length === 0 ? (
-          // Peldaño 0 — nadie puede: vuelta barata al CUÁNDO.
-          <EstadoVacio
-            icono={<Icono nombre="veterinaria" tamano={48} />}
-            titulo={t('explorar.nadiePuede')}
-            descripcion={t('explorar.nadiePuedeDetalle')}
-            accion={<Boton variante="primario" etiqueta={t('explorar.probarOtroHorario')} onPress={() => router.back()} />}
-          />
-        ) : (
-          <Tarjeta relleno="ninguno">
-            {disponibles.map((v, i) => (
-              <View key={v.prestador_servicio_id}>
-                {i > 0 ? <Separador /> : null}
-                <PreviewPrestador
-                    prestadorId={v.prestador_id}
-                  ofertaId={v.prestador_servicio_id}
-                    nombre={v.prestador_nombre}
-                    oficio={t('hogar.railVet')}
-                    contexto={esDomicilio
-                      ? t('veterinaria.vaAlHogar')
-                      : v.direccion !== null
-                        ? [v.direccion, v.ciudad].filter(Boolean).join(' · ')
-                        : t('veterinaria.enSuClinica')}
-                    precio={`${formatearPrecio(v.precio)} · ${v.duracion_minutos} min`}
-                    perfil={perfiles[v.prestador_id]}
-                    /* ⚡ D-730 · la ventana viaja con el tap, para que la ficha reserve. */
-                    contextoReserva={{ oficio: 'veterinaria', fecha, hora, mascotaId, tipoServicio }}
-                />
+          {disponibles === 'cargando' ? (
+            <EsqueletoGrupo>
+              <View style={{ gap: spacing[3] }}>
+                <Esqueleto forma="bloque" ancho="100%" alto={64} />
+                <Esqueleto forma="bloque" ancho="100%" alto={64} />
               </View>
-            ))}
-          </Tarjeta>
-        )}
+            </EsqueletoGrupo>
+          ) : disponibles === 'error' ? (
+            <EstadoVacio
+              titulo={t('veterinaria.errorTitulo')}
+              descripcion={t('hogar.errorHistoriaDetalle')}
+              accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={cargarVets} />}
+            />
+          ) : disponibles.length === 0 ? (
+            // Peldaño 0 — nadie puede: vuelta barata al CUÁNDO.
+            <EstadoVacio
+              icono={<Icono nombre="veterinaria" tamano={48} />}
+              titulo={t('explorar.nadiePuede')}
+              descripcion={t('explorar.nadiePuedeDetalle')}
+              accion={<Boton variante="primario" etiqueta={t('explorar.probarOtroHorario')} onPress={() => router.back()} />}
+            />
+          ) : (
+            <Tarjeta relleno="ninguno">
+              {disponibles.map((v, i) => (
+                <View key={v.prestador_servicio_id}>
+                  {i > 0 ? <Separador /> : null}
+                  <PreviewPrestador
+                      prestadorId={v.prestador_id}
+                    ofertaId={v.prestador_servicio_id}
+                      nombre={v.prestador_nombre}
+                      oficio={t('hogar.railVet')}
+                      contexto={esDomicilio
+                        ? t('veterinaria.vaAlHogar')
+                        : v.direccion !== null
+                          ? [v.direccion, v.ciudad].filter(Boolean).join(' · ')
+                          : t('veterinaria.enSuClinica')}
+                      precio={`${formatearPrecio(v.precio)} · ${v.duracion_minutos} min`}
+                      perfil={perfiles[v.prestador_id]}
+                      /* ⚡ D-730 · la ventana viaja con el tap, para que la ficha reserve. */
+                      contextoReserva={{ oficio: 'veterinaria', fecha, hora, mascotaId, tipoServicio }}
+                  />
+                </View>
+              ))}
+            </Tarjeta>
+          )}
 
-        {Array.isArray(disponibles) && disponibles.length > 0 ? (
-          // el precio es el de cada vet para este servicio — se dice sereno
-          <Text
-            style={{
-              fontFamily: typography.family.sans.regular,
-              fontSize: typography.size.sm,
-              lineHeight: Math.round(typography.size.sm * 1.4),
-              color: theme.text.secondary,
-            }}
-          >
-            {t('veterinaria.precioDeOferta')}
-          </Text>
-        ) : null}
+          {Array.isArray(disponibles) && disponibles.length > 0 ? (
+            // el precio es el de cada vet para este servicio — se dice sereno
+            <Text
+              style={{
+                fontFamily: typography.family.sans.regular,
+                fontSize: typography.size.sm,
+                lineHeight: Math.round(typography.size.sm * 1.4),
+                color: theme.text.secondary,
+              }}
+            >
+              {t('veterinaria.precioDeOferta')}
+            </Text>
+          ) : null}
+        </View>
       </HojaContenido>
 
       <HojaPersonasVet
