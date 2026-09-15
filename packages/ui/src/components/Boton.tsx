@@ -268,7 +268,7 @@ export function Boton({
   onPress,
   superficie = 'clara',
   variante = 'primario',
-  tamaño = 'md',
+  tamaño,
   bloque = false,
   cargando = false,
   deshabilitado = false,
@@ -283,7 +283,7 @@ export function Boton({
   const { handlers, estiloPresionado } = usePresionado(0.97)
   const [enfocado, setEnfocado] = useState(false)
 
-  const t = TAMAÑOS[tamaño]
+  const t = TAMAÑOS[tamaño ?? 'md']
   const inactivo = deshabilitado || cargando
   /* ═══ D-999 · EL BOTÓN DIBUJA SU RAZÓN (S112-B) ═══════════════════════
    * Hasta hoy `razonDeshabilitado` aparecía UNA sola vez en el render, y
@@ -619,7 +619,24 @@ export function Boton({
   const altoV5 = esSecundarioV5 ? medidas.secundarioAlto : medidas.ctaAlto
 
   const cuerpo: ViewStyle = {
-    height: esCompacto ? 44 : pildoraV5 ? altoV5 : t.alto,
+    /* 🔴 **EL TAMAÑO PEDIDO GANA — `D-1124`, y es la cura de un valor que
+       era LETRA MUERTA.**
+
+       ⏪ Decía `esCompacto ? 44 : pildoraV5 ? altoV5 : t.alto`, y en la casa
+       v5 `pildoraV5` es **siempre true** ⇒ **`t.alto` era inalcanzable**: el
+       botón medía el alto del CTA (58) *pidiera el tamaño que pidiera*.
+
+       > **El defecto no se veía porque no fallaba: el botón se dibujaba, con
+       > el alto de otro.** En una celda de rejilla eso es un `xs` de 30
+       > midiendo 58 **adentro de una caja de 30** — se sale por abajo, y ahí
+       > sí se ve. *Lo encontró C mirando la caja, no el botón.*
+
+       ⇒ **`tamaño` pasa a ser OPCIONAL de verdad:** sin pedirlo manda la
+       letra v5 (el CTA de la casa, que es lo que rige y no se toca); pidiéndolo
+       manda lo pedido. *Un default de `'md'` hacía indistinguible «pedí md» de
+       «no pedí nada», y con eso no hay forma de que el tamaño gane sin
+       romperle el alto a los CTA que nunca lo pidieron.* */
+    height: esCompacto ? 44 : tamaño !== undefined ? t.alto : pildoraV5 ? altoV5 : t.alto,
     paddingHorizontal: padX,
     borderRadius: esCompacto ? radius.suave : pildoraV5 ? radius.chipV5 : radius.md,
     alignItems: 'center',
