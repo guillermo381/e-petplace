@@ -73,11 +73,31 @@ console.log(
 );
 
 export default function RootLayout() {
-  // D-305 (S48): el tema lo decide el SISTEMA — el app lo resuelve acá
-  // y lo pasa controlado al provider (packages/ui no importa Appearance).
-  // useColorScheme re-renderiza al cambiar el tema con la app abierta.
-  // El override memorial queda ENCIMA (subtree <ThemeProvider memorial>).
-  const colorScheme = useColorScheme();
+  /* ⏪ D-305 (S48): el tema lo decide el SISTEMA — el app lo resolvía acá y lo
+     pasaba controlado al provider (`packages/ui` no importa `Appearance`).
+     `useColorScheme` re-renderiza al cambiar el tema con la app abierta. El
+     override memorial queda ENCIMA (subtree `<ThemeProvider memorial>`).
+
+     🔴 **FORZADO A CLARO POR FIRMA DE LA MESA (S116, `D-1123`) — recorrido 5.**
+     El founder tiene el teléfono en oscuro y el Hogar se ve mal: barra blanca,
+     acento rosa pálido, tarjeta ciruela sobre ciruela.
+
+     **La causa NO es que falte el tema oscuro: es que el rediseño se calibró
+     sobre el claro.** El oscuro sigue existiendo, isomorfo y completo —lo dice
+     la letra— *pero sin calibrar, y un tema isomorfo sin calibrar no está roto:
+     está sin terminar, que se ve peor porque parece que debería andar.*
+
+     ⚠️ **SE FUERZA ACÁ, EN EL ÚNICO LUGAR DONDE EL TEMA SE RESUELVE**, y con la
+     lectura del sistema INTACTA al lado. *El día que se calibre, esto vuelve
+     quitando una línea — no hay que reconstruir la resolución del tema, que es
+     exactamente lo que un forzado esparcido por las pantallas haría imposible.*
+
+     📅 **REVISIÓN: después de Friends & Family.** El trabajo del día que se
+     calibre es la lista de `D-1123`: los valores del cliente que están fijos al
+     claro en vez de leer el tema. */
+  const colorSchemeDelSistema = useColorScheme();
+  const FORZAR_CLARO = true; // ← se quita esta línea y su uso, y el oscuro vuelve
+  const colorScheme = FORZAR_CLARO ? 'light' : colorSchemeDelSistema;
 
   // Infraestructura S43-B2: DM Sans + JetBrains Mono cargadas antes de
   // renderizar (los nombres coinciden con typography.family de @epetplace/ui)

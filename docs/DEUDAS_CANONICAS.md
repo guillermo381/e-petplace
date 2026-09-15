@@ -35712,3 +35712,65 @@ Y el costo es el de la casa: **`L-223` dice que el peaje está en la PETICIÓN, 
 ☠️ En `_shared/papel.ts`, con los dos que vivieron ahí tachados: ~~el del Manual de Marca~~ (S90 → S116) y ~~el `isotipo-v5`~~ (S116, que duró unas horas). **Y los dos brazos que `verify:isotipo-path` tenía sobre el papel se retiran enteros**, no se dejan en verde: *un brazo que vigila una copia que ya no existe da verde por ausencia y se lee como «están sincronizados».* El gate sigue midiendo la pieza de `packages/ui`, donde el path v5 **sí** está vivo.
 
 **☠️ MUERTE — MUERTA.** Las seis desplegadas y el carnet real de Thor verificado bajando de la edge viva.
+
+---
+
+## `D-1123` 🟠 — EL CLIENTE **FUERZA EL TEMA CLARO** hasta después de F&F, y el censo dice dónde está el trabajo del día que se calibre
+
+**Estado:** el forzado **HECHO** · el oscuro **abierto, con su lista** · **Dueño: B** (los temas son de `packages/ui`) · **📅 revisión: después de Friends & Family.**
+**Origen:** recorrido 5 del founder (14-sep-2026) — teléfono en oscuro, el Hogar **barra blanca, acento rosa pálido, tarjeta ciruela sobre ciruela**.
+
+> **Firma de la mesa:** el cliente fuerza el claro. **El tema oscuro sigue existiendo, isomorfo y sin calibrar, como dice la letra.**
+
+### El forzado: en el ÚNICO lugar donde el tema se resuelve
+
+`apps/cliente/src/app/_layout.tsx` — la lectura del sistema queda **intacta al lado**:
+
+```tsx
+const colorSchemeDelSistema = useColorScheme();
+const FORZAR_CLARO = true; // ← se quita esta línea y su uso, y el oscuro vuelve
+const colorScheme = FORZAR_CLARO ? 'light' : colorSchemeDelSistema;
+```
+
+*El día que se calibre, esto vuelve quitando una línea — no hay que reconstruir la resolución del tema, que es exactamente lo que un forzado esparcido por las pantallas haría imposible.*
+
+### 🔴 EL CENSO — y da vuelta la pregunta
+
+**Lo que la mesa pidió contar: los valores del cliente fijos al claro. Son SIETE, y sólo DOS son de un token que cambia con el tema.**
+
+| archivo:línea | token |
+|---|---|
+| `apps/cliente/src/app/index.tsx:75` | `palette.magentaAccion` (fondo del splash) |
+| `apps/cliente/src/components/logo-franquicia.tsx:47` | `palette.white` (la marca de DeUna) |
+
+**En TODO el cliente hay 12 menciones de `palette.*`, y cinco son el nombre del archivo.** ⇒ **el cliente no es el problema: lee el tema casi en todos lados.**
+
+### ⇒ El problema está en el TEMA OSCURO, y acá está su lista
+
+**`packages/ui/src/themes/dark.ts` contra `light.ts`, slot por slot:**
+
+| | |
+|---|--:|
+| slots en `light` | **69** |
+| slots en `dark` | **44** |
+| **declarados SÓLO en light** | **25** |
+| con valor distinto | 40 |
+| **el claro usa un token v5 y el oscuro NO** | **30** |
+
+**Y explica los tres síntomas del founder, uno por uno:**
+
+- **«acento rosa pálido»** ⇒ `accent.cta` · `brand` · `active` · `hito` · `marcaEleccion` · `atmosfera` · `activoLleno`: **claro `magentaAccion`, oscuro `magentaLuz`.**
+- **«tarjeta ciruela sobre ciruela»** ⇒ `capaBg.identidad` · `cuidado` · `comunidad` · `comunidadAmplia`: **claro `rosaTinte`, oscuro `rosaSobreCiruela`** — *el tinte de la tarjeta y el fondo de la pantalla salen del mismo lado.*
+- **«barra blanca»** ⇒ entre los **25 que el oscuro no declara** están `overlay` · `hundido` · `border` · `secondary` · `apoyada` · `default` · `presente` · `subtle`. *Un slot que el tema no declara no falla: cae a lo que haya, y lo que hay es del claro.*
+
+**Los ocho glifos de oficio son el caso más limpio:** `vet · grooming · walking · boarding · store · insurance · wearable · adoption` — **claro `tintaV5`, oscuro `light0`**. *El rediseño les dio su tinta nueva y el oscuro se quedó con la vieja.*
+
+### Los dos censos quedan como comandos, no como esta lista
+
+`node scripts/censo-tema-claro.cjs` · `node scripts/censo-tema-oscuro.cjs`
+
+*Porque esta lista es derivada y va a envejecer —la casa ya lo pagó cinco veces— y porque el día que alguien calibre necesita el número de ESE día, no el de hoy.*
+
+⚠️ **Y lo que los censos NO miden, declarado:** que un valor que SÍ sale del tema esté **bien elegido**. *Un slot declarado en los dos temas con dos colores que no contrastan pasa los dos censos y se ve mal igual* — eso lo dice `verify:contrast` sobre los pares, y el ojo sobre la pantalla.
+
+**☠️ MUERTE:** cuando el oscuro declare sus 69 slots calibrados contra el v5, `FORZAR_CLARO` se quite, y el founder mire el Hogar en oscuro y lo firme.
