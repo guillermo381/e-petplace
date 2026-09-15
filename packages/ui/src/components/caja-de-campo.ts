@@ -149,6 +149,93 @@ export const ALTO_CAJA_CAMPO = ALTO_LINEA_CAMPO + spacing[3] * 2 // 48
  *  y el estado ya lo dicen el contorno y el pie. */
 export const TAMANO_ETIQUETA = typography.size.sm // 14
 
+/* ═══════════════════════════════════════════════════════════════════
+ * ⭐ **N11″ — LA ETIQUETA VUELVE ADENTRO, AHORA FLOTANDO** (firma del
+ *    founder, S116-B lote 6). **Y es la TERCERA vuelta de esta ley, así
+ *    que el choque se declara entero en vez de resolverse callado**
+ *    (precedente: el magenta S83, la plata S83 y S88, el foco S104).
+ *
+ * **El arco, para que nadie lo vuelva a recorrer a ciegas:**
+ *   · **N11 (S99-B):** la etiqueta ADENTRO.
+ *   · **N11′ (S100-B, firma del founder):** AFUERA Y ARRIBA, *«siempre
+ *     visible y siempre del mismo tamaño»*, con su evidencia.
+ *   · **N11″ (hoy):** adentro otra vez — **pero flotando**: al enfocar
+ *     se achica y sube al borde superior, y el valor queda debajo.
+ *
+ * 🔴 **NO ES UNA REVERSIÓN A CIEGAS: CONTESTA EL ARGUMENTO DE N11′.**
+ * Aquel decía *«la etiqueta adentro tiene que ENCOGERSE PARA DEJAR
+ * ENTRAR EL VALOR, y pierde legibilidad justo cuando el campo está
+ * lleno»* — y el supuesto escondido es **que encogerse significa
+ * desaparecer o volverse ilegible**. Flotando no compite con el valor:
+ * cada uno tiene su renglón, y **el nombre del campo sigue a la vista
+ * siempre**, que es literalmente lo que N11′ quería proteger.
+ *
+ * ⚠️ **LO QUE N11′ DIJO Y ESTA ENMIENDA *NO* CONTESTA — los dos costos
+ * quedan vivos y se declaran para que el founder pueda revisarlos:**
+ *   1. **«En español el rótulo pesa el doble.»** Los ejemplos del
+ *      encargo son cortos («Nombre», «Correo electrónico»,
+ *      «Contraseña») y a 11 px entran. **«Instrucciones de entrega» a
+ *      11 px sigue siendo una nota al pie**, y ese campo existe. *La
+ *      pieza no lo puede resolver: o el rótulo es corto, o la etiqueta
+ *      flotada de ese campo va a leerse chica.*
+ *   2. **«El autofill del sistema tapa el interior de la caja.»**
+ *      Sigue siendo cierto y ahora la etiqueta vive ahí adentro. No
+ *      está medido en este lote.
+ *
+ * ✅ **LO QUE SÍ SE RESOLVIÓ, Y NO POR CASUALIDAD: la regla rectora
+ * QUEDA INTACTA, sin tallarle una excepción.** *«Nada se mueve mientras
+ * alguien tipea»* — y la etiqueta **se mueve AL ENFOCAR**, o sea
+ * ANTES del primer carácter, no en el primero. Con el campo ya lleno se
+ * queda arriba y **no se mueve un píxel mientras se escribe**. *Atarlo
+ * al primer carácter habría sido exactamente lo que la regla prohíbe, y
+ * la diferencia entre las dos formas no se ve leyendo: se ve tipeando.*
+ *
+ * ⚠️ **Y NO SE ANIMA, declarado:** animar el tamaño de la etiqueta es
+ * animar LAYOUT, que la Ley 6 prohíbe desde S43. El cambio viaja junto
+ * al del borde y el halo —que sí se animan— así que se lee como la
+ * respuesta al toque y no como un salto. *Si la mesa quiere el
+ * deslizamiento, es una firma sobre píxeles y una excepción escrita a la
+ * Ley 6, no una decisión de esta pieza.*
+ *
+ * ☠️ **EL PLACEHOLDER DE EJEMPLO MUERE** («ej: ana@correo.com»): la
+ * etiqueta hace ese trabajo. **Con UNA excepción viva y medida: la
+ * búsqueda** (`etiquetaVisible={false}`), donde N11′ firmó *lupa +
+ * placeholder* y no hay etiqueta que flote.
+ * ═══════════════════════════════════════════════════════════════════ */
+
+/** N11″ · el tamaño de la etiqueta cuando FLOTA. `xs` (11) — el único
+ *  registro que deja entrar el valor debajo sin subir la caja más de lo
+ *  que el encargo vino a bajar. ⚠️ **Su contraste tiene piso y se mide:
+ *  `text.secondary` es `tintaTexto65`**, el 65 % que la orden nombra. */
+export const TAMANO_ETIQUETA_FLOTANTE = typography.size.xs // 11
+
+/** N11″ · el alto de la etiqueta flotada. **`snug` y no `normal`**: un
+ *  rótulo de una línea con interlínea de párrafo desperdicia 4 px en una
+ *  caja que este lote vino a achicar. */
+export const ALTO_ETIQUETA_FLOTANTE = Math.round(
+  TAMANO_ETIQUETA_FLOTANTE * typography.leading.snug,
+) // 14
+
+/** N11″ · el alto de la caja con la etiqueta adentro. **DERIVADO**:
+ *  etiqueta flotada + línea de entrada + aire arriba y abajo. Da **54**.
+ *
+ *  🔴 **Es CONSTANTE entre los dos estados, y ésa es la mitad que hace
+ *  que la regla rectora se cumpla.** La caja se dimensiona para el
+ *  estado LLENO, así que enfocar no la mueve: lo único que cambia
+ *  adentro es dónde está la etiqueta. *Una caja que creciera al enfocar
+ *  empujaría todo el formulario hacia abajo — que es el defecto que la
+ *  regla nombra.*
+ *
+ *  ⚠️ **Sube 6 sobre los 48 de N11′ y el lote igual ACHICA**, porque lo
+ *  que se va es la etiqueta de afuera (14 + su gap de 8 = 22). Neto por
+ *  campo: **−16**. */
+export const ALTO_CAJA_CAMPO_V5 = ALTO_ETIQUETA_FLOTANTE + ALTO_LINEA_CAMPO + spacing[2] * 2 // 54
+
+/** N11″ · el disco del glifo a la izquierda. El par `accent.glifo` /
+ *  `accent.glifoBg` ya nombra al CAMPO entre sus cuatro empleos («fila ·
+ *  campo · acceso · paso»), así que el color no se elige acá: se pide. */
+export const DISCO_GLIFO_CAMPO = 32
+
 export interface EstadoCaja {
   /** Pinta `status.danger` y gana prioridad sobre el foco. */
   error?: boolean

@@ -157,6 +157,17 @@ function paresDe(t: Theme, nombre: string): Pair[] {
    *  dos. *Cuando un elemento se muda al vecino más duro y el gate sigue
    *  verde, el verde vale más que antes.* */
   add('text.secondary / bg.base (etiqueta N11′ afuera)', t.text.secondary, t.bg.base)
+  /* ⭐ **S116-B lote 6 · N11″ — LA ETIQUETA VUELVE ADENTRO, y su par cambia
+     de fondo.** El de arriba mide la etiqueta de N11′ contra el LIENZO,
+     porque vivía afuera de la caja. **Flotando vive contra el INTERIOR del
+     campo**, que es otra superficie — `bg.card` en claro, `bg.overlay` en
+     los oscuros (`interiorDeCaja`). *Dejar sólo el par viejo habría dado
+     verde sobre un fondo que la etiqueta ya no pisa.*
+     🔴 **La orden fija el piso: «tinta 65 % mínimo»** — que es literalmente
+     `text.secondary` (`tintaTexto65`). Se mide contra las dos superficies
+     porque el interior cambia por tema. */
+  add('N11″ · etiqueta flotada / interior del campo (claro)', t.text.secondary, t.bg.card)
+  add('N11″ · etiqueta flotada / interior del campo (oscuros)', t.text.secondary, t.bg.overlay)
 
   // Acentos usados como texto (links, labels) sobre base y card
   add('accent.primary / bg.base', t.accent.primary, t.bg.base)
