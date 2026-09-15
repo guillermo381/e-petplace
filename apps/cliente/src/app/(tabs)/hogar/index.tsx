@@ -64,7 +64,6 @@ import {
   Separador,
   Tarjeta,
   Huella,
-  IsotipoV5,
   Texto,
   VisorFoto,
   motion,
@@ -649,15 +648,22 @@ function FilaCampanaTecho({
        discos y **R32 lo cazó con su número** — medido en el árbol, el hueco
        quedaba en 32 px ≈ 11 dp: *dos zonas táctiles a menos de eso se pisan, el
        toque abre lo que no era y la persona cree que se equivocó ella.* */
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[5] }}>
-      <View style={{ flex: 1 }}>
-        {/* ☠️ `Isotipo` → `IsotipoV5` (firma del founder, lote 3d: *«en ningún
-            lado»* incluye los cuatro montajes a la vista).
-            🔴 **QUEDA RARO Y NO LO RESUELVO POR MI CUENTA:** acá había **28 px**
-            y el tamaño más chico de la marca del ilustrador es **`cabecera` =
-            120**. Ver la medición y la captura en el parte del lote 3d. */}
-        <IsotipoV5 sobre="oscuro" tamano="cabecera" />
-      </View>
+    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: spacing[5] }}>
+      {/* ☠️ **LA MARCA SE FUE DEL TECHO (firma del founder, lote 3e).**
+          ⏪ Era el isotipo VIEJO a 28 px; el lote 3d lo pasó a `IsotipoV5` y
+          **medido en pantalla ocupaba 104 dp — el 29 % del ancho**, con los
+          dos discos al lado pareciendo accesorios.
+
+          🔴 **No se achica: se va.** *«La marca aparece donde PRESIDE y en
+          ningún lado donde compita con un texto o un ícono»* — y acá **el
+          techo ya dice quién sos**: lo dicen el saludo y la fila de mascotas.
+          *Una marca que hay que achicar para que entre no está presidiendo:
+          está pidiendo permiso.*
+
+          ⚠️ **Y el `flex: 1` se va con ella:** existía para empujar los discos
+          a la derecha contra el isotipo. Sin marca, `justifyContent` hace ese
+          trabajo — *un espaciador que empuja contra algo que ya no está es
+          aire que nadie puede explicar* (Ley 37). */}
       {/* ⭐ **EL CARRITO Y LA CAMPANA, EN EL DISCO DE B — y con su número.**
 
           ✅ **Lo que el lote 12 de B destrabó:** `DiscoVidrio` salió como pieza
