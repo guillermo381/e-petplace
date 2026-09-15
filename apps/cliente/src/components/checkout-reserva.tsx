@@ -36,6 +36,8 @@ import { Linking, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import {
+  HojaContenido,
+  Cabecera,
   Boton,
   Celda,
   Confirmacion,
@@ -66,6 +68,7 @@ import { topeDeEspera, useEstadoDeUna } from '@/lib/pagos/deuna-estado';
 import { urlWhatsApp } from '@/lib/contacto';
 import { useTraduccion } from '@/i18n';
 import { fechaYHoraHumana, formatearPrecio } from '@epetplace/i18n';
+import { useAltoDeCabecera } from '@/lib/alto-de-cabecera';
 
 /**
  * ☠️ `rechazado` y `timeout` MURIERON como fases (Ley 37).
@@ -139,6 +142,7 @@ export function CheckoutReserva({
 }) {
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
+  const cabecera = useAltoDeCabecera('empujada');
   const { mostrar } = useAviso();
   const insets = useSafeAreaInsets();
 
@@ -489,14 +493,34 @@ export function CheckoutReserva({
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('checkout.titulo')} atras onAtras={() => router.back()} />
-      {/* ① EL PIE FIJO — **el mismo que la despensa**. Antes el botón de pagar
-          vivía suelto en el scroll y era chico; *no hay una razón de producto
-          por la que pagar un paseo tenga menos presencia que pagar comida.*
-          `PantallaConPie` además RESERVA el alto del pie midiéndolo, así que la
-          sección de pago deja de quedar debajo del botón. */}
-      <PantallaConPie
-        contentContainerStyle={{ padding: spacing[4], gap: spacing[4] }}
+      {/* 🔴 **EL ÚLTIMO `Encabezado` DEL CLIENTE, Y LO ENCONTRÉ CAMINANDO.**
+          El lote 3b declaró «cero `Encabezado` vivos» y era cierto **sobre
+          `src/app`** — que es lo que el censo de B recorría y lo que
+          `verify:techos-locales` mide. *Esta máquina vive en `src/components`,
+          así que ningún instrumento la miraba*, y es la pantalla del PAGO: la
+          que el founder abre en cada recorrido. **La vi en una captura, no en
+          un grep** — el grep que la habría encontrado es el que no corrí.
+
+          ⇒ estructura firmada: fondo ciruela + hoja, y ☠️ muere el
+          `PantallaConPie` (su pie pasa al slot de la hoja, que hace la misma
+          reserva medida). Lo que el comentario viejo defendía —*«no hay razón
+          de producto por la que pagar un paseo tenga menos presencia que pagar
+          comida»*— **sigue en pie y ahora lo sostiene la misma pieza que la
+          despensa**. */}
+      <HojaContenido
+        arranque={cabecera.arranque}
+        scroll={{ contentContainerStyle: { padding: spacing[4], gap: spacing[4] } }}
+        fondo={
+          <View onLayout={cabecera.alMedir}>
+            <Cabecera
+              variante="empujada"
+              titulo={t('checkout.titulo')}
+              onVolver={() => router.back()}
+              etiquetaVolver={t('comun.volver')}
+              presentacion="fondo"
+            />
+          </View>
+        }
         pie={
           <BotonPagar
             medio={medio}
@@ -547,7 +571,17 @@ export function CheckoutReserva({
                  `slice(0,5)` sobre la columna `time`. Las dos pasan por el
                  riel; los minutos siguen en `metadataMono` porque «60 min» SÍ
                  es voz de máquina (Ley 3) y la duración no es una fecha. */
-              metadataMono={`${fechaYHoraHumana(fecha, hora, idioma)} · ${duracion} min`}
+              // ✅ **LA FECHA SALE DE LA FUENTE MONO (lote 3f de B).** La voz
+              // ya estaba curada —`fechaYHoraHumana`— y la FUENTE seguía
+              // equivocada porque `Celda` sólo tenía `metadataMono`. Pedido y
+              // entregado: `metadata` es el hermano en sans, **sin
+              // `toLowerCase()`** —una fecha de familia no se minuscula—.
+              // ⚠️ **Los minutos se van con ella y NO se quedan en mono**, y es
+              // a propósito: partir la línea en dos slots pondría «60 min» en
+              // otro renglón por una diferencia de registro que nadie pidió.
+              // *La línea entera es una frase; el dato de máquina que queda en
+              // la tarjeta es el TOTAL, y ése sigue en `metadataMono`.*
+              metadata={`${fechaYHoraHumana(fecha, hora, idioma)} · ${duracion} min`}
             />
             <Separador />
             {/* lugar hecho para el cupón (B4) — deshabilitado honesto */}
@@ -597,7 +631,7 @@ export function CheckoutReserva({
             falsa el día del enchufe real; el simulador **fabricaba desenlaces
             que el motor nunca dijo**. *Un simulador que sobrevive a su motor
             real no es una herramienta: es una segunda verdad.* */}
-      </PantallaConPie>
+      </HojaContenido>
 
       {fueraDeScroll}
     </SafeAreaView>

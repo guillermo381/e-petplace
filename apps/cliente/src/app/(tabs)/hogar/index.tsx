@@ -1772,7 +1772,16 @@ export default function Hogar() {
             <Cabecera
               variante="raiz"
               presentacion="fondo"
+              // ✅ **LA FECHA VUELVE AL MONO (lote 3f de B).** Cuando absorbí
+              // el techo, `antetitulo` sólo sabía hablar como RÓTULO —sans bold
+              // 11 en mayúsculas— y la fecha pasó a leerse «LUNES, 14 DE
+              // SEPTIEMBRE». Lo declaré como lo que costaba y lo pedí; B entregó
+              // la voz. *La pieza no estaba mal: `antetitulo` nació rótulo, y lo
+              // que apareció después fue un segundo uso que no existía cuando se
+              // escribió.* Vuelve la Ley 3 y vuelve la lámina: la fecha en mono,
+              // en minúsculas, SOBRE el saludo.
               antetitulo={fechaConDiaMono(hoy, idioma)}
+              antetituloVoz="dato"
               titulo={`${saludoPorFranja(hoy.getHours(), t)}${nombrePerfil ? `, ${nombrePerfil.trim().split(' ')[0]}` : ''}`}
               carrito={{
                 cantidad: unidadesEnCarrito(carrito),
@@ -2788,18 +2797,22 @@ export default function Hogar() {
           ⇒ hermana posterior, `pointerEvents="none"`: se queda quieta, no toma
           ningún toque, y sobre el ciruela su tinta al 4-6 % es imperceptible
           —que es lo correcto: el agua es del papel—. */}
-      {/* ☠️ **ACÁ VIVÍA LA MARCA DE AGUA, Y MURIÓ (firma del founder, recorrido 5
-          · S116-B lote 3c, `D-1122`).** Era el isotipo VIEJO en tinta al 6 %,
-          con su lámina y su choque contra la Ley 4 declarado.
-
-          🔴 **El automerge de esta tanda la dejó a medias** —B quitó el import
-          y el bloque, y de este lado quedó el montaje huérfano—, así que se
-          retira acá con su lápida. *Un `<Isotipo>` sin import no compila, y por
-          eso se vio; el mismo residuo en una pantalla que no lo usara habría
-          quedado vivo sin que nada fallara.*
-
-          ⚠️ **NO se rellena:** el fondo queda liso. *Nunca pidió una textura —
-          la recibió con una lámina.* */}
+      {/* ☠️ **LA MARCA DE AGUA MURIÓ — firma del founder (recorrido 5, lote 3c
+          de B), y la traigo a mi rama sin discutirla.** Era el isotipo VIEJO en
+          tinta, escalado para salirse por los cuatro lados con su letra al lado
+          (*«una forma completa es una marca; cortada es papel»*).
+          🔴 **Ese argumento es el que cae**: sangrarlo la volvía papel para la
+          Ley 4 **pero seguía siendo el dibujo viejo**, y lo que el founder
+          rechazó es el DIBUJO, no su encuadre.
+          ⚠️ **NO se rellena**: queda el lienzo liso.
+          ⏪ En este lote yo la había MOVIDO —de antes de la hoja a después, para
+          que no se fuera con el scroll—. *Esa cura era correcta para el
+          problema que tenía y se vuelve innecesaria: no hay nada que ubicar.*
+          ⚠️ **Y una del merge, que conviene no perder:** el automerge de esta
+          tanda dejó el montaje HUÉRFANO —B quitó el import y el bloque, y de
+          este lado quedó el `<Isotipo>`—. *Un `<Isotipo>` sin import no compila
+          y por eso se vio; el mismo residuo en una pantalla que no lo usara
+          habría quedado vivo sin que nada fallara.* */}
     </View>
   );
 }

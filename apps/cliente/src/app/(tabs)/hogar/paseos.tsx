@@ -809,6 +809,11 @@ export default function MisPaseos() {
                               ? 'paquete.citaDePaquete'
                               : 'suelto.citaSuelta',
                         )} · ${f.cita.duracion_minutos} min`}
+                        /* ⚠️ **SIGUE EN MONO, y no es olvido: `FilaCita` no tiene `metadata`.**
+                            `Celda` ganó el hermano en sans (lote 3f de B) y esta
+                            pieza no lo pasa — *el pase es de una línea y es de
+                            B*. Queda pedido en el buzón; la VOZ ya está curada
+                            y lo que falta es la fuente. */
                         metadataMono={fechaYHoraHumana(f.cita.fecha, f.cita.hora, idioma)}
                         /* 🔴 S105-C · LA MARCA DE CANCELADA, Y CURA UNA FILA
                            QUE MENTÍA. `cerradaP` manda al historial todo lo

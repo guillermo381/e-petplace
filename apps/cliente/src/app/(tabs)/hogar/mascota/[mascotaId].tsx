@@ -1151,21 +1151,6 @@ export default function PerfilDeMascota() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      {/* ☠️ **LA MARCA DE AGUA MURIÓ (firma del founder, recorrido 5 · lote 3c).**
-          Era el isotipo VIEJO en tinta al 4 %, `size 1000`, escalado para
-          **salirse por los cuatro lados** — y esa escala tenía su letra: *«una
-          forma completa es una marca; cortada es papel — así la Ley 4 no
-          muerde»*.
-
-          🔴 **Ese argumento es justamente el que cae.** Sangrarlo lo volvía
-          papel para la Ley 4, **pero seguía siendo el dibujo viejo**, y lo que
-          el founder rechazó —acá y en las cabeceras del lote 10— **es el
-          dibujo, no su encuadre**. *Recortar una marca que no representa a la
-          casa no la convierte en textura: la convierte en esa misma marca, más
-          difícil de señalar.*
-
-          ⚠️ **NO se rellena.** Queda `bg.base` liso. *El fondo del expediente
-          nunca pidió una textura: la recibió con una lámina.* */}
       {/* r10-1 · EL HUECO BLANCO: había DOS botones de atrás. CORRECCIÓN
           DE DIAGNÓSTICO (medida, no asumida): la banda NO era el header
           nativo — el Stack del hogar YA tiene headerShown:false desde
@@ -2621,10 +2606,22 @@ export default function PerfilDeMascota() {
           ⇒ hermana posterior, `pointerEvents="none"`: se queda quieta, no toma
           ningún toque, y sobre el ciruela su tinta al 4-6 % es imperceptible
           —que es lo correcto: el agua es del papel—. */}
-      {/* @override-s82c — r5 ítem 1: LA MARCA DE AGUA del fondo,
-          escalada a SALIRSE por los cuatro lados al 4% ("una forma
-          completa es una marca; cortada es papel — así la Ley 4 no
-          muerde", letra founder). Fija, detrás de todo. */}
+      {/* ☠️ **LA MARCA DE AGUA MURIÓ — firma del founder (recorrido 5, lote 3c
+          de B), y la traigo a mi rama sin discutirla.** Era el isotipo VIEJO en
+          tinta, escalado para salirse por los cuatro lados con su letra al lado
+          (*«una forma completa es una marca; cortada es papel»*).
+          🔴 **Ese argumento es el que cae**: sangrarlo la volvía papel para la
+          Ley 4 **pero seguía siendo el dibujo viejo**, y lo que el founder
+          rechazó es el DIBUJO, no su encuadre.
+          ⚠️ **NO se rellena**: queda el lienzo liso.
+          ⏪ En este lote yo la había MOVIDO —de antes de la hoja a después, para
+          que no se fuera con el scroll—. *Esa cura era correcta para el
+          problema que tenía y se vuelve innecesaria: no hay nada que ubicar.*
+          ⚠️ **Y una del merge, que conviene no perder:** el automerge de esta
+          tanda dejó el montaje HUÉRFANO —B quitó el import y el bloque, y de
+          este lado quedó el `<Isotipo>`—. *Un `<Isotipo>` sin import no compila
+          y por eso se vio; el mismo residuo en una pantalla que no lo usara
+          habría quedado vivo sin que nada fallara.* */}
 
       {/* ═══ LA HOJA DE «SE PERDIÓ» — la voz es de AYUDA, no de trámite ═════
           Dice qué va a pasar en dos líneas, y la segunda es una promesa que la

@@ -253,3 +253,50 @@ línea. **No entró a ningún commit.**
 2. **El mono del `antetitulo` del Hogar** — la fecha en mayúsculas.
 3. **`scrollRef` y el retiro de `R14`** — los hice yo, en su territorio, con su
    razón escrita. Si prefiere otra forma, se revierten.
+
+
+---
+
+# ⑨ LA VUELTA DE LA DESPENSA (las tres del founder + lo que apareció caminando)
+
+**Capturas:** `p5-despensa-sin-producto-en-carrito.png` ·
+`p5-despensa-con-producto-en-carrito.png` ·
+`p5-despensa-fila-mixta-stepper-y-boton.png` · `p5-hogar-fecha-en-mono.png` ·
+`p5-pago-fecha-en-sans.png`
+
+**① El buscador vive en la banda** — por el slot `contenido` de `Cabecera`, no
+dibujado local: título arriba, y debajo, sobre el ciruela, el campo blanco con
+**su lupa** (que este campo no tenía) y el filtro a la derecha en `DiscoVidrio`
+—el material de la banda, el mismo del carrito—. La hoja empieza después.
+
+**② Los chips bajan a la hoja, y eso da vuelta una decisión de este archivo.**
+Decía *«la barra de mascotas va PRIMERO porque es la firma de la pantalla»*.
+Gana la orden nueva **y su razón es mejor**: son un FILTRO del catálogo.
+
+**③ La alineación, medida dos veces.** Con `center` el disco quedaba 13,5 dp más
+abajo —`Campo` reserva su renglón de ayuda—. Lo curé con `sinPie` y
+**`verify:diseno` lo paró con razón**; se resolvió alineando por el alto de la
+CAJA. Medido después: 1,1 dp.
+
+**④ 🔴 El «Agregar» contra el stepper ES DE LA PIEZA, y lo probé con números.**
+Los dos contenedores miden **exactamente lo mismo** (`1563..1642`): la
+`Mutacion` hace su trabajo. Lo que no coincide es el contenido — el label queda
+pegado al borde inferior. **Causa: `Boton.tsx:622` ignora `tamaño` en la casa v5**
+(`pildoraV5 ? altoV5 : t.alto`), así que el botón mide 58 dp dentro de una caja
+de 30 y **se sale por abajo**. No la curé: la fila la arman `TarjetaProducto` y
+`Mutacion`, las dos de B. Buzón con los números, las dos formas de cura y el
+censo (93 montajes de `tamaño` no-`md` comiendo hoy el alto de un CTA).
+⚠️ **No contradice la medición de B en su lote 3f**: él midió el ANCHO —y tenía
+razón—; esto es VERTICAL.
+
+**⑤ Las dos piezas de B, montadas.** `antetituloVoz="dato"` devuelve la fecha del
+Hogar al mono en minúsculas; `Celda.metadata` saca la del pago de la fuente mono.
+⚠️ El hub de paseos **no**: `FilaCita` no pasa `metadata`. Pedido; declarado en el
+código, no disimulado.
+
+**⑥ 🔴 Y apareció el último `Encabezado` del cliente — en una captura, no en un
+grep.** El lote 3b declaró «cero vivos» y era cierto **sobre `src/app`**, que es
+lo que el censo de B recorría y lo que el gate mide. `checkout-reserva.tsx` vive
+en `src/components`: **ningún instrumento lo miraba**, y es la pantalla del pago.
+Migrado. *El grep que lo habría encontrado es el que no corrí — censar por la
+carpeta de rutas cuando la pieza puede vivir en un componente.*

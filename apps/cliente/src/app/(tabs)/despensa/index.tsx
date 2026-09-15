@@ -45,10 +45,11 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  DiscoVidrio,
   HojaContenido,
   Cabecera,
   AIRE_RAIZ,
@@ -153,6 +154,14 @@ const FILTROS_VITRINA = { limite: 50 } as const;
  * al escalón, no apagando la regla ni bajando su baseline.
  */
 const LUGAR_CONTROL_FILTRO = spacing[12];
+/** ⚠️ **ESPEJO DECLARADO de `ALTO_CAJA_CAMPO`** (`packages/ui/caja-de-campo.ts`:
+ *  `ALTO_LINEA_CAMPO + spacing[3] * 2` = 48). Vive acá porque **la pieza no lo
+ *  exporta desde el índice**, y el disco del filtro tiene que centrarse contra
+ *  la CAJA del campo y no contra su bloque —que incluye el renglón de
+ *  ayuda/error—. *Dos números que deben coincidir saliendo de dos lugares es
+ *  exactamente lo que `L-284` nombra*, así que va pedido a B y este espejo muere
+ *  el día que `ALTO_CAJA_CAMPO` salga por el índice. */
+const ALTO_CAJA_CAMPO_LOCAL = 48;
 
 export default function DespensaDescubrir() {
   const cabecera = useAltoDeCabecera('raiz');
@@ -861,6 +870,97 @@ export default function DespensaDescubrir() {
               etiqueta: t('despensa.abrirCarrito', { count: unidades }),
               }}
               presentacion="fondo"
+              contenido={
+                /* ⭐ **EL BUSCADOR VIVE EN LA BANDA — firma del founder.** Su
+                   literal: *«título «Despensa» arriba, y debajo, todavía sobre el
+                   ciruela, el campo blanco redondeado con su lupa y el filtro a la
+                   derecha. La hoja empieza DESPUÉS del buscador»*. Lo mismo en
+                   Explorar cuando se migre.
+
+                   ⏪ **Vivía en la hoja y se leía como un bloque suelto**, y su
+                   comentario de entonces explicaba por qué NO podía estar adentro
+                   de `listaConFacetas` —una búsqueda sin resultados habría hecho
+                   desaparecer la caja que la escribió—. *Ese razonamiento sigue
+                   siendo cierto y la banda lo cumple mejor que cualquier lugar de
+                   la hoja: acá la caja no depende de ninguna rama.*
+
+                   ⚖️ **Y DA VUELTA EL ORDEN QUE ESTE ARCHIVO HABÍA FIRMADO.**
+                   Decía: *«la barra de mascotas va PRIMERO porque es la firma de
+                   la pantalla; el buscador y el filtro son alcance y viven pegados
+                   a la mercadería que acotan»*. **Gana la orden nueva, y su razón
+                   es mejor que la vieja:** los chips **son un filtro del catálogo,
+                   no un encabezado**, y con el buscador arriba dejan de empujarlo.
+                   *El alcance que define la pantalla entera vive en la banda; el
+                   filtro que acota la lista vive con la lista.*
+
+                   ⚠️ **Sin `paddingHorizontal`**: los lados los paga la cabecera
+                   (`medidas.cabeceraRaiz.lados`). Sumarlos acá los pagaría dos
+                   veces, que es la misma clase que `R53` vigila abajo. */
+                /* 🔴 **`flex-start` Y EL DISCO CON EL ALTO DE LA CAJA — medido.**
+                   Con `alignItems: 'center'` el disco quedaba **13,5 dp más
+                   abajo** que el campo (árbol: campo 309..441, disco 355..466),
+                   y la causa es que **`Campo` reserva su renglón de
+                   ayuda/error**: su nodo mide más que la caja visible, así que
+                   centrar el BLOQUE deja la caja arriba.
+                   ⏪ Lo curé con `sinPie` y **`verify:diseno` lo paró con razón**:
+                   quien apaga el pie tiene que montar el suyo, o un error se
+                   queda sin voz. *La regla no distingue un buscador sin
+                   validación, y está bien que no lo haga: la excepción la
+                   tendría que recordar cada uno.*
+                   ⇒ se alinean **por el alto de la CAJA**, no por el del bloque:
+                   `48` es `ALTO_CAJA_CAMPO` de `caja-de-campo.ts`, que no está
+                   exportado desde el índice. **Va con su origen escrito y
+                   pedido a B** — un número tecleado que tiene que coincidir con
+                   el de otra pieza es deuda, y acá se declara mientras dura. */
+                <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing[2] }}>
+                  <View style={{ flex: 1 }}>
+                    <Campo
+                      label={t('despensa.buscarLabel')}
+                      etiquetaVisible={false}
+                      value={busqueda}
+                      onChangeText={setBusqueda}
+                      placeholder={t('despensa.buscarPlaceholder')}
+                      autoCapitalize="none"
+
+                      /* 🔴 **LA LUPA, que la orden nombra y este campo no tenía.**
+                         Va en el slot `iconoIzq` de la pieza — *un campo sin
+                         rótulo en medio de una banda se lee como cualquier otra
+                         cosa; la lupa es lo que dice que ahí se busca* (la misma
+                         razón por la que la entrada del Hogar la ganó). */
+                      iconoIzq={<Icono nombre="lupa" tamano={20} registro="glifo" montaje="control" />}
+                    />
+                  </View>
+                  {/* 🔴 EL SLOT SE RESERVA SIEMPRE — N24, y acá la regla se paga en
+                      cada apertura de la app, no en un caso raro. `Filtrar` sólo
+                      existe cuando hay algo que filtrar (Ley 23: la puerta no
+                      ofrece lo que va a rechazar). Pero **al abrir la Despensa la
+                      lista SIEMPRE está vacía por un instante** mientras carga, así
+                      que sin reserva el buscador nacería ancho y se encogería solo.
+                      *Un control que salta al llegar los datos se lee como un error
+                      de la app, no como carga.*
+
+                      ⭐ **Y sobre el ciruela el control pasa a `DiscoVidrio`**, que
+                      es lo que la banda ya usa para el carrito y la campana.
+                      *`GlifoConContador` dibuja su `Icono` sin `tinta` y cae a
+                      `registro='capa'`: sobre el ciruela sale apagado.* El disco es
+                      el material de esta superficie — el mismo que las cinco raíces.
+                      **No es una excepción: es la pieza de la banda.** */}
+                  <View style={{ minWidth: LUGAR_CONTROL_FILTRO, alignItems: 'center', justifyContent: 'center', height: ALTO_CAJA_CAMPO_LOCAL }}>
+                    {listaParaFiltrar.length > 0 ? (
+                      <DiscoVidrio
+                        onPress={() => setFiltrosAbiertos(true)}
+                        etiqueta={
+                          filtrosActivos === 0
+                            ? t('despensa.filtrar')
+                            : t('despensa.filtrarCon', { n: filtrosActivos })
+                        }
+                      >
+                        <GlifoConContador nombre="filtro" cuenta={filtrosActivos} dentroDeTocable />
+                      </DiscoVidrio>
+                    ) : null}
+                  </View>
+                </View>
+              }
             />
           </View>
         }
@@ -1026,101 +1126,6 @@ export default function DespensaDescubrir() {
               />
             ) : null}
 
-            {/* ═══════════════════════════════════════════════════════════
-                🔴 S100d-C · punto ② · LA FILA DE ALCANCE — EL BUSCADOR Y
-                «FILTRAR» EN EL MISMO ESCALÓN.
-                ═══════════════════════════════════════════════════════════
-
-                **Literal del founder:** *«buscador en el MISMO escalón que
-                Filtrar, con ícono clásico de filtro»*.
-
-                **Medido antes de tocar (18-ago, 384×832): estaban a 249 dp
-                de distancia vertical** — el buscador en la fila del
-                encabezado (y 32) y «Filtrar» adentro de la lista (y 281).
-                *Dos controles que hacen el mismo trabajo —acotar qué se
-                ve— vivían en dos pisos distintos de la pantalla.*
-
-                🔴 **VIVE ACÁ ARRIBA Y NO ADENTRO DE `listaConFacetas`, Y ES
-                UNA DECISIÓN, NO UN DETALLE DE MONTAJE.** «Filtrar» estaba
-                adentro de esa función, que **NO se llama en las ramas de
-                error ni de vacío**. Si el buscador se mudaba ahí, una
-                búsqueda sin resultados **haría desaparecer la caja de
-                texto que la escribió**: la persona quedaría mirando *«no
-                encontramos nada»* sin forma de corregir el término.
-                *Un callejón que solo aparece cuando la búsqueda falla es
-                justo el que ningún camino feliz muestra.*
-
-                ⚖️ **EL ORDEN — el criterio preside, el alcance sigue.** La
-                barra de mascotas va PRIMERO porque es la firma de la
-                pantalla (§5.1: *el tab da ALCANCE, el expediente da
-                CRITERIO*); el buscador y el filtro son alcance y viven
-                pegados a la mercadería que acotan.
-
-                ✅ **EL ÍCONO CLÁSICO DE FILTRO LLEGÓ Y ESTÁ MONTADO.**
-                Medido al abrir la vuelta: el union de `IconoNombre` **no
-                tenía ningún candidato** — ni embudo, ni barras. Se le pidió
-                a B con su forma (familia de CONTROL, sin huella, como
-                `lapiz`) **en vez de dibujarlo acá** (Ley 12 · L-175), y B
-                lo construyó como **embudo** con su argumento: *el clásico
-                de FILTRAR es el embudo; el de las perillas dice «cambiá
-                valores» donde la pantalla dice «mostrame menos»*.
-                ⚠️ **Su gate por ícono a 21 px sigue PENDIENTE (§2.9)** y B
-                lo declaró: en su entorno no hay rasterizador de SVG, así
-                que **nadie lo vio chico todavía**. Se monta igual porque
-                el gate es del founder en dispositivo, no de la pista.
-
-                🔴 **EL CONTEO PASA DE PALABRA A DISCO.** Antes el control
-                decía *«Filtrar · 2»*; ahora lo lleva `GlifoConContador`,
-                **la misma pieza y el mismo par ya gateado (368/0) del
-                carrito** — cero contraste nuevo. Con `0` no dibuja disco
-                (19.9: un cero sobre un glifo es ruido con forma de dato).
-                Y va `dentroDeTocable` **sin `etiqueta`**: el único nodo
-                nombrado tiene que ser el `Pressable`, o el lector anuncia
-                el control dos veces. */}
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'flex-start',
-                gap: spacing[2],
-                paddingHorizontal: spacing[5],
-              }}
-            >
-              <View style={{ flex: 1 }}>
-                <Campo
-                  label={t('despensa.buscarLabel')}
-                  etiquetaVisible={false}
-                  value={busqueda}
-                  onChangeText={setBusqueda}
-                  placeholder={t('despensa.buscarPlaceholder')}
-                  autoCapitalize="none"
-                />
-              </View>
-              {/* 🔴 EL SLOT SE RESERVA SIEMPRE — N24, y acá la regla se paga
-                  en cada apertura de la app, no en un caso raro. `Filtrar`
-                  solo existe cuando hay algo que filtrar (Ley 23: la puerta
-                  no ofrece lo que va a rechazar — con la lista vacía la hoja
-                  abriría sin un solo eje). Pero **al abrir la Despensa la
-                  lista SIEMPRE está vacía por un instante** mientras carga,
-                  así que sin reserva el buscador nacería ancho y se
-                  encogería solo. *Un control que salta al llegar los datos
-                  se lee como un error de la app, no como carga.* */}
-              <View style={{ minWidth: LUGAR_CONTROL_FILTRO, alignItems: 'center', justifyContent: 'center', minHeight: 44 }}>
-                {listaParaFiltrar.length > 0 ? (
-                  <Pressable
-                    onPress={() => setFiltrosAbiertos(true)}
-                    accessibilityRole="button"
-                    accessibilityLabel={
-                      filtrosActivos === 0
-                        ? t('despensa.filtrar')
-                        : t('despensa.filtrarCon', { n: filtrosActivos })
-                    }
-                    hitSlop={spacing[3]}
-                  >
-                    <GlifoConContador nombre="filtro" cuenta={filtrosActivos} dentroDeTocable />
-                  </Pressable>
-                ) : null}
-              </View>
-            </View>
 
             {/* ☠️ S100d-C · punto ② · **ACÁ VIVÍA «TUS PEDIDOS», Y SE VA.** */}
             {/* 🔴 S100b-D · G-15 · «TUS PEDIDOS» SUBE ACÁ, Y LA CURA NO ERA
